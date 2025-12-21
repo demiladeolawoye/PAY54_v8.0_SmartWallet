@@ -48,6 +48,7 @@
 
     <!-- SIGNUP FORM -->
     <form id="signupForm">
+
       <input
         type="text"
         id="name"
@@ -62,6 +63,7 @@
         required
       />
 
+      <!-- CREATE PIN -->
       <div class="pin-field">
         <input
           type="password"
@@ -70,6 +72,17 @@
           required
         />
         <span class="toggle-pin" id="togglePin">👁</span>
+      </div>
+
+      <!-- CONFIRM PIN -->
+      <div class="pin-field">
+        <input
+          type="password"
+          id="confirmPin"
+          placeholder="Confirm PIN"
+          required
+        />
+        <span class="toggle-pin" id="toggleConfirmPin">👁</span>
       </div>
 
       <div id="error" class="error"></div>
@@ -83,6 +96,19 @@
 
   <script src="assets/js/session.js"></script>
   <script src="assets/js/auth/signup.js"></script>
+
+  <!-- PIN TOGGLE LOGIC -->
+  <script>
+    document.getElementById("togglePin").onclick = () => {
+      const p = document.getElementById("pin");
+      p.type = p.type === "password" ? "text" : "password";
+    };
+
+    document.getElementById("toggleConfirmPin").onclick = () => {
+      const p = document.getElementById("confirmPin");
+      p.type = p.type === "password" ? "text" : "password";
+    };
+  </script>
 
 </body>
 </html>
