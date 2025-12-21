@@ -1,1 +1,28 @@
+<svg width="180" height="60" viewBox="0 0 180 60" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Background transparent -->
+
+  <!-- PAY54 Text -->
+  <text x="90" y="36"
+        text-anchor="middle"
+        font-size="32"
+        font-weight="700"
+        fill="#FFFFFF"
+        font-family="Inter, Arial, sans-serif">
+    PAY54
+  </text>
+
+  <!-- Tagline -->
+  <text x="90" y="54"
+        text-anchor="middle"
+        font-size="10"
+        font-weight="500"
+        fill="#9CA3AF"
+        font-family="Inter, Arial, sans-serif"
+        letter-spacing="1">
+    ONE WALLET – EVERYWHERE
+  </text>
+
+</svg>
 
