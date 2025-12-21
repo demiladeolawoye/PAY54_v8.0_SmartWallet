@@ -1,1 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PAY54 — Login</title>
+  <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
+</head>
+<body class="dark">
+
+  <div class="auth-container">
+    <img src="assets/img/pay54-logo.svg" class="logo" alt="PAY54" />
+
+    <h2>Welcome back</h2>
+    <p class="subtitle">ONE WALLET – EVERYWHERE</p>
+
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email address" required />
+
+      <div class="pin-field">
+        <input type="password" id="pin" placeholder="PIN" required />
+        <span class="toggle-pin" id="togglePin">👁</span>
+      </div>
+
+      <div id="error" class="error"></div>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <div class="auth-links">
+      <a href="forgot-pin.html">Forgot PIN?</a>
+      <a href="signup.html">Create account</a>
+    </div>
+  </div>
+
+  <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth/login.js"></script>
+</body>
+</html>
 
