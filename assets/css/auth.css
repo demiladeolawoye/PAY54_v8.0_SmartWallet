@@ -1,1 +1,103 @@
+/* ========== AUTH BASE ========== */
+body.dark {
+  background: #0b1220;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+}
+
+.auth-container {
+  max-width: 420px;
+  margin: 60px auto;
+  padding: 32px;
+}
+
+.pay54-logo {
+  display: block;
+  margin: 0 auto 24px;
+  width: 120px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  text-align: center;
+  opacity: 0.7;
+  margin-bottom: 24px;
+}
+
+/* ========== WHY PAY54 ========== */
+.why-pay54 {
+  background: #121a2f;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.why-pay54 h4 {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.why-pay54 ul {
+  padding-left: 16px;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* ========== FORM ========== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+input {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+}
+
+button {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 13px;
+}
+
+/* ========== PIN FIELD ========== */
+.pin-field {
+  position: relative;
+}
+
+.pin-field .toggle-pin {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* ========== LINKS ========== */
+.auth-links,
+a {
+  text-align: center;
+  font-size: 13px;
+  color: #93c5fd;
+}
 
