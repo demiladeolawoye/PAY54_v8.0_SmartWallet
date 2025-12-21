@@ -3,31 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <title>PAY54 — Reset PIN</title>
+
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
+
 <body class="dark">
 
   <div class="auth-container">
-    <img 
-  src="assets/img/pay54-logo.svg" 
-  alt="PAY54" 
-  class="pay54-logo"
-/>
+
+    <!-- LOGO -->
+    <img
+      src="assets/img/pay54-logo.svg"
+      alt="PAY54"
+      class="pay54-logo"
+    />
 
     <h2>Reset PIN</h2>
+    <p class="subtitle">Account recovery</p>
 
+    <!-- REASSURANCE BLOCK -->
+    <div class="why-pay54">
+      <h4>Your security matters</h4>
+
+      <div class="why-item">
+        <span class="why-icon">🔐</span>
+        <span>Your account remains fully protected</span>
+      </div>
+
+      <div class="why-item">
+        <span class="why-icon">📧</span>
+        <span>Reset instructions are sent securely by email</span>
+      </div>
+
+      <div class="why-item">
+        <span class="why-icon">⏱</span>
+        <span>The process takes less than a minute</span>
+      </div>
+    </div>
+
+    <!-- RESET FORM -->
     <form id="resetForm">
-      <input type="email" id="email" placeholder="Registered email" required />
+      <input
+        type="email"
+        id="email"
+        placeholder="Registered email"
+        required
+      />
+
       <div id="error" class="error"></div>
+
       <button type="submit">Send reset</button>
     </form>
 
     <a href="login.html">Back to login</a>
+
   </div>
 
   <script src="assets/js/session.js"></script>
   <script src="assets/js/auth/forgot-pin.js"></script>
+
 </body>
 </html>
-
