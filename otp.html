@@ -1,1 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PAY54 — Verify OTP</title>
+  <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
+</head>
+<body class="dark">
+
+  <div class="auth-container">
+    <img src="assets/img/pay54-logo.svg" class="logo" alt="PAY54" />
+
+    <h2>Verify OTP</h2>
+    <p class="subtitle">Enter the 6-digit code</p>
+
+    <form id="otpForm">
+      <input type="text" id="otp" placeholder="123456" maxlength="6" required />
+      <div id="error" class="error"></div>
+      <button type="submit">Verify</button>
+    </form>
+  </div>
+
+  <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth/otp.js"></script>
+</body>
+</html>
 
