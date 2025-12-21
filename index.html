@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PAY54</title>
+
+  <!-- Global styles only -->
+  <link rel="stylesheet" href="assets/css/global.css" />
+
+  <style>
+    body {
+      background: #0b1220;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <img src="assets/img/pay54-logo.svg" alt="PAY54" width="120" />
+    <p style="text-align:center;opacity:0.7;margin-top:12px">
+      ONE WALLET – EVERYWHERE
+    </p>
+  </div>
+
+  <!-- AUTH GUARD -->
+  <script src="assets/js/session.js"></script>
+  <script>
+    // HARD AUTH GATE
+    if (!PAY54Session.isAuthenticated()) {
+      window.location.replace("login.html");
+    }
+  </script>
+
+</body>
+</html>
 
