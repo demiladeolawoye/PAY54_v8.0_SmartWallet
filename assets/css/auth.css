@@ -1,4 +1,7 @@
-/* ========== AUTH BASE ========== */
+/* ==============================
+   AUTH BASE STYLES — PAY54 v7.0
+============================== */
+
 body.dark {
   background: #0b1220;
   color: #ffffff;
@@ -11,12 +14,14 @@ body.dark {
   padding: 32px;
 }
 
+/* LOGO */
 .pay54-logo {
   display: block;
   margin: 0 auto 24px;
   width: 120px;
 }
 
+/* HEADERS */
 h2 {
   text-align: center;
   margin-bottom: 6px;
@@ -28,7 +33,10 @@ h2 {
   margin-bottom: 24px;
 }
 
-/* ========== WHY PAY54 ========== */
+/* ==============================
+   WHY PAY54
+============================== */
+
 .why-pay54 {
   background: #121a2f;
   padding: 16px;
@@ -37,17 +45,28 @@ h2 {
 }
 
 .why-pay54 h4 {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-size: 14px;
 }
 
-.why-pay54 ul {
-  padding-left: 16px;
+.why-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 13px;
-  opacity: 0.85;
+  margin-bottom: 8px;
+  opacity: 0.9;
 }
 
-/* ========== FORM ========== */
+.why-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ==============================
+   FORMS
+============================== */
+
 form {
   display: flex;
   flex-direction: column;
@@ -66,7 +85,7 @@ button {
   border-radius: 10px;
   border: none;
   background: #3b82f6;
-  color: white;
+  color: #ffffff;
   font-weight: 600;
   cursor: pointer;
 }
@@ -80,7 +99,7 @@ button:hover {
   font-size: 13px;
 }
 
-/* ========== PIN FIELD ========== */
+/* PIN FIELD */
 .pin-field {
   position: relative;
 }
@@ -93,11 +112,10 @@ button:hover {
   cursor: pointer;
 }
 
-/* ========== LINKS ========== */
+/* LINKS */
 .auth-links,
 a {
   text-align: center;
   font-size: 13px;
   color: #93c5fd;
 }
-
