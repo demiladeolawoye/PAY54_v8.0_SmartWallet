@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAY54 — Sign Up</title>
+
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
@@ -12,16 +13,10 @@
 
   <div class="auth-container">
 
-    <!-- LOGO -->
-    <img
-      src="assets/img/pay54-logo.svg"
-      alt="PAY54"
-      class="pay54-logo"
-    />
+    <img src="assets/img/pay54-logo.svg" alt="PAY54" class="pay54-logo" />
 
     <h2>Create your PAY54 account</h2>
 
-    <!-- WHY PAY54 -->
     <div class="why-pay54">
       <h4>Why PAY54?</h4>
 
@@ -46,46 +41,20 @@
       </div>
     </div>
 
-    <!-- SIGNUP FORM -->
     <form id="signupForm">
 
-      <input
-        type="text"
-        id="name"
-        placeholder="Full name"
-        required
-      />
+      <input type="text" placeholder="Full name" required />
+      <input type="email" placeholder="Email address" required />
 
-      <input
-        type="email"
-        id="email"
-        placeholder="Email address"
-        required
-      />
-
-      <!-- CREATE PIN -->
-      <div class="pin-field">
-        <input
-          type="password"
-          id="pin"
-          placeholder="Create PIN"
-          required
-        />
-        <span class="toggle-pin" id="togglePin">👁</span>
+      <div class="input-wrapper">
+        <input type="password" id="pin" placeholder="Create PIN" required />
+        <span class="toggle-pin" onclick="togglePin('pin')">👁</span>
       </div>
 
-      <!-- CONFIRM PIN -->
-      <div class="pin-field">
-        <input
-          type="password"
-          id="confirmPin"
-          placeholder="Confirm PIN"
-          required
-        />
-        <span class="toggle-pin" id="toggleConfirmPin">👁</span>
+      <div class="input-wrapper">
+        <input type="password" id="confirmPin" placeholder="Confirm PIN" required />
+        <span class="toggle-pin" onclick="togglePin('confirmPin')">👁</span>
       </div>
-
-      <div id="error" class="error"></div>
 
       <button type="submit">Continue</button>
     </form>
@@ -94,20 +63,11 @@
 
   </div>
 
-  <script src="assets/js/session.js"></script>
-  <script src="assets/js/auth/signup.js"></script>
-
-  <!-- PIN TOGGLE LOGIC -->
   <script>
-    document.getElementById("togglePin").onclick = () => {
-      const p = document.getElementById("pin");
-      p.type = p.type === "password" ? "text" : "password";
-    };
-
-    document.getElementById("toggleConfirmPin").onclick = () => {
-      const p = document.getElementById("confirmPin");
-      p.type = p.type === "password" ? "text" : "password";
-    };
+    function togglePin(id) {
+      const input = document.getElementById(id);
+      input.type = input.type === "password" ? "text" : "password";
+    }
   </script>
 
 </body>
