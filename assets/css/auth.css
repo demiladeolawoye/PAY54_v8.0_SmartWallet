@@ -10,17 +10,25 @@
 }
 
 /* =========================
-   LOGO
+   LOGO (STRONG VISIBILITY)
 ========================= */
 
 .pay54-logo {
-  width: 150px;
-  margin-bottom: 18px;
+  width: 200px;              /* ⬅️ STRONGER ON WEB */
+  max-width: 80%;
+  margin: 0 auto 20px;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .pay54-logo {
+    width: 190px;
+  }
 }
 
 @media (max-width: 480px) {
   .pay54-logo {
-    width: 170px;
+    width: 210px;            /* ⬅️ STRONGER ON MOBILE */
   }
 }
 
@@ -35,7 +43,7 @@ h2 {
 
 .subtitle {
   font-size: 14px;
-  opacity: 0.75;
+  opacity: 0.8;
   margin-bottom: 22px;
 }
 
@@ -75,7 +83,7 @@ h2 {
 
 input {
   width: 100%;
-  height: 48px;               /* 🔒 LOCK HEIGHT */
+  height: 48px;
   padding: 0 14px;
   border-radius: 10px;
   border: none;
@@ -84,7 +92,7 @@ input {
 }
 
 /* =========================
-   PIN FIELD (WITH EYE)
+   PIN FIELD (EYE INSIDE)
 ========================= */
 
 .input-wrapper {
@@ -92,7 +100,7 @@ input {
 }
 
 .input-wrapper input {
-  padding-right: 44px;        /* space for eye */
+  padding-right: 44px;
 }
 
 .toggle-pin {
