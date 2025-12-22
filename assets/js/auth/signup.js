@@ -1,29 +1,20 @@
-PAY54Session.preventAuthPages();
-
-const form = document.getElementById("signupForm");
-const errorBox = document.getElementById("error");
-const togglePin = document.getElementById("togglePin");
-const pinInput = document.getElementById("pin");
-
-togglePin.addEventListener("click", () => {
-  pinInput.type = pinInput.type === "password" ? "text" : "password";
-});
-
-form.addEventListener("submit", (e) => {
+document.getElementById("signupForm").addEventListener("submit", function (e) {
   e.preventDefault();
-  errorBox.textContent = "";
 
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const pin = pinInput.value.trim();
+  const pin = document.getElementById("pin").value;
+  const confirmPin = document.getElementById("confirmPin").value;
 
-  if (!name || !email || !pin) {
-    errorBox.textContent = "All fields are required.";
+  if (pin !== confirmPin) {
+    alert("PINs do not match");
     return;
   }
 
-  // Store temp signup data
-  localStorage.setItem("pay54_pending_signup", JSON.stringify({ name, email }));
+  // Simulate account creation (Phase 1 demo logic)
+  sessionStorage.setItem("pendingUser", "true");
+
+  // Success feedback
+  alert("Account created successfully. Please verify OTP.");
+
+  // Redirect to OTP page
   window.location.href = "otp.html";
 });
-
