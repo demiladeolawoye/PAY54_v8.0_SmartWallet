@@ -1,20 +1,33 @@
-document.getElementById("signupForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("signupForm");
 
-  const pin = document.getElementById("pin").value;
-  const confirmPin = document.getElementById("confirmPin").value;
-
-  if (pin !== confirmPin) {
-    alert("PINs do not match");
+  if (!form) {
+    console.error("Signup form not found");
     return;
   }
 
-  // Simulate account creation (Phase 1 demo logic)
-  sessionStorage.setItem("pendingUser", "true");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-  // Success feedback
-  alert("Account created successfully. Please verify OTP.");
+    const pin = document.getElementById("pin").value;
+    const confirmPin = document.getElementById("confirmPin").value;
 
-  // Redirect to OTP page
-  window.location.href = "otp.html";
+    if (!pin || !confirmPin) {
+      alert("Please enter and confirm your PIN");
+      return;
+    }
+
+    if (pin !== confirmPin) {
+      alert("PINs do not match");
+      return;
+    }
+
+    // Phase 1 demo logic (simulate successful signup)
+    sessionStorage.setItem("pay54_signup_complete", "true");
+
+    alert("Account created successfully. Please verify OTP.");
+
+    // Redirect to OTP page
+    window.location.href = "otp.html";
+  });
 });
