@@ -1,1 +1,25 @@
+/* =========================
+   GLOBAL BASE
+========================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Inter, Arial, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+}
+
+body.dark {
+  background: linear-gradient(180deg, #020617 0%, #020617 100%);
+  color: #ffffff;
+}
+
+/* Links */
+a {
+  text-decoration: none;
+}
 
