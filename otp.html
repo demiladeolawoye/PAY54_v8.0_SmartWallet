@@ -47,7 +47,22 @@
 
   </div>
 
-  <script src="assets/js/auth/otp.js"></script>
+  <!-- INLINE OTP LOGIC (BULLETPROOF) -->
+  <script>
+    document.getElementById("otpForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const otp = document.getElementById("otp").value.trim();
+
+      if (otp === "123456") {
+        alert("OTP verified successfully. Please log in.");
+        window.location.href = "login.html";
+      } else {
+        alert("Invalid OTP. Please try again.");
+      }
+    });
+  </script>
 
 </body>
 </html>
+
