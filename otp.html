@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAY54 — Verify OTP</title>
+
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
@@ -12,33 +13,22 @@
 
   <div class="auth-container">
 
-    <!-- LOGO -->
-    <img
-      src="assets/img/pay54-logo.svg"
-      alt="PAY54"
-      class="pay54-logo"
-    />
+    <img src="assets/img/pay54-logo.svg" alt="PAY54" class="pay54-logo" />
 
     <h2>Verify OTP</h2>
     <p class="subtitle">You’re almost there</p>
 
-    <!-- REASSURANCE BLOCK -->
     <div class="why-pay54">
-      <h4>What happens next?</h4>
+      <h4>Secure verification</h4>
 
       <div class="why-item">
         <span class="why-icon">🔐</span>
-        <span>Secure verification protects your account</span>
+        <span>This step protects your account</span>
       </div>
 
       <div class="why-item">
         <span class="why-icon">⚡</span>
-        <span>Verification takes only a few seconds</span>
-      </div>
-
-      <div class="why-item">
-        <span class="why-icon">🌍</span>
-        <span>One wallet — everywhere you go</span>
+        <span>Takes only a few seconds</span>
       </div>
     </div>
 
@@ -52,14 +42,11 @@
         required
       />
 
-      <div id="error" class="error"></div>
-
       <button type="submit">Verify</button>
     </form>
 
   </div>
 
-  <script src="assets/js/session.js"></script>
   <script src="assets/js/auth/otp.js"></script>
 
 </body>
