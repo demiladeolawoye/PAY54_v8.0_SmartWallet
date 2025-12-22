@@ -1,29 +1,26 @@
-PAY54Session.preventAuthPages();
+// PAY54 – OTP Verification (Phase 1 Demo Flow)
 
-const form = document.getElementById("otpForm");
-const errorBox = document.getElementById("error");
+document.addEventListener("DOMContentLoaded", () => {
+  const otpInput = document.getElementById("otp");
+  const verifyBtn = document.getElementById("verifyBtn");
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  errorBox.textContent = "";
+  if (!otpInput || !verifyBtn) return;
 
-  const otp = document.getElementById("otp").value.trim();
-  const pending = localStorage.getItem("pay54_pending_signup");
+  verifyBtn.addEventListener("click", () => {
+    const otp = otpInput.value.trim();
 
-  if (!otp || otp.length !== 6) {
-    errorBox.textContent = "Invalid OTP.";
-    return;
-  }
+    // Phase 1 demo OTP
+    if (otp === "123456") {
+      alert("OTP verified successfully. Please log in.");
 
-  if (!pending) {
-    errorBox.textContent = "Signup session expired.";
-    return;
-  }
+      // Clear any temporary signup state
+      sessionStorage.removeItem("signupEmail");
+      sessionStorage.removeItem("pendingOTP");
 
-  const user = JSON.parse(pending);
-  localStorage.removeItem("pay54_pending_signup");
-
-  PAY54Session.createSession(user);
-  window.location.href = "index.html";
+      // Redirect to login
+      window.location.href = "login.html";
+    } else {
+      alert("Invalid OTP. Please try again.");
+    }
+  });
 });
-
