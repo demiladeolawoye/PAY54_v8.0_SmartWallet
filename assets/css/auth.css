@@ -1,5 +1,5 @@
 /* =========================
-   AUTH LAYOUT
+   AUTH CONTAINER
 ========================= */
 
 .auth-container {
@@ -15,7 +15,7 @@
 
 .pay54-logo {
   width: 150px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 @media (max-width: 480px) {
@@ -30,17 +30,17 @@
 
 h2 {
   font-size: 26px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .subtitle {
   font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 20px;
+  opacity: 0.75;
+  margin-bottom: 22px;
 }
 
 /* =========================
-   WHY PAY54 BLOCK
+   WHY PAY54
 ========================= */
 
 .why-pay54 {
@@ -70,12 +70,13 @@ h2 {
 }
 
 /* =========================
-   INPUTS
+   INPUTS (LOCKED HEIGHT)
 ========================= */
 
 input {
   width: 100%;
-  padding: 14px;
+  height: 48px;               /* 🔒 LOCK HEIGHT */
+  padding: 0 14px;
   border-radius: 10px;
   border: none;
   margin-bottom: 14px;
@@ -83,7 +84,7 @@ input {
 }
 
 /* =========================
-   PIN FIELD WITH EYE ICON
+   PIN FIELD (WITH EYE)
 ========================= */
 
 .input-wrapper {
@@ -91,7 +92,7 @@ input {
 }
 
 .input-wrapper input {
-  padding-right: 44px;
+  padding-right: 44px;        /* space for eye */
 }
 
 .toggle-pin {
@@ -109,19 +110,23 @@ input {
 }
 
 /* =========================
-   BUTTONS & LINKS
+   BUTTON
 ========================= */
 
 button {
   width: 100%;
-  padding: 14px;
+  height: 48px;
   border-radius: 12px;
   border: none;
   background: #3B82F6;
-  color: #fff;
+  color: #ffffff;
   font-size: 15px;
   cursor: pointer;
 }
+
+/* =========================
+   LINKS
+========================= */
 
 a {
   display: inline-block;
