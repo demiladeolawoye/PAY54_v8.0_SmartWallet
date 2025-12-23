@@ -22,8 +22,8 @@
 }
 
 .dash-logo {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
 }
 
 .brand-text {
@@ -33,14 +33,14 @@
 }
 
 .brand-name {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 .brand-tagline {
-  font-size: 11px;
-  opacity: 0.75;
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 /* =========================
@@ -49,8 +49,7 @@
 
 .currency-row {
   display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 16px;
   justify-content: center;
 }
 
@@ -71,8 +70,13 @@
    HEADER ACTIONS
 ========================= */
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .header-actions button {
-  margin-left: 10px;
   background: none;
   border: none;
   color: #fff;
@@ -91,20 +95,42 @@
 }
 
 /* =========================
-   MOBILE RESPONSIVENESS
+   MOBILE — INTENTIONAL LAYOUT
 ========================= */
 
 @media (max-width: 768px) {
+
   .dashboard-header {
     flex-direction: column;
     align-items: center;
-  }
-
-  .currency-row {
-    gap: 10px;
+    text-align: center;
+    gap: 14px;
   }
 
   .brand {
     justify-content: center;
+  }
+
+  .dash-logo {
+    width: 52px;
+    height: 52px;
+  }
+
+  .brand-name {
+    font-size: 18px;
+  }
+
+  .brand-tagline {
+    font-size: 13px;
+  }
+
+  .currency-row {
+    order: 2;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .header-actions {
+    order: 3;
   }
 }
