@@ -13,11 +13,13 @@
 
   <div class="auth-container">
 
+    <!-- LOGO -->
     <img src="assets/img/pay54-logo.svg" alt="PAY54" class="pay54-logo" />
 
     <h2>Welcome back</h2>
     <p class="subtitle">ONE WALLET – EVERYWHERE</p>
 
+    <!-- WHY PAY54 -->
     <div class="why-pay54">
       <h4>Why PAY54?</h4>
 
@@ -42,29 +44,48 @@
       </div>
     </div>
 
+    <!-- LOGIN FORM -->
     <form id="loginForm">
 
-      <input type="email" placeholder="Email address" required />
+      <input
+        type="email"
+        id="email"
+        placeholder="Email address"
+        required
+      />
 
       <div class="input-wrapper">
-        <input type="password" id="loginPin" placeholder="PIN" required />
-        <span class="toggle-pin" onclick="togglePin('loginPin')">👁</span>
+        <input
+          type="password"
+          id="pin"
+          placeholder="PIN"
+          required
+        />
+        <span class="toggle-pin" onclick="togglePin('pin')">👁</span>
       </div>
 
-      <button type="submit">Login</button>
+      <button type="button" id="loginBtn">Login</button>
+
     </form>
 
-    <a href="forgot-pin.html">Forgot PIN?</a> ·
-    <a href="signup.html">Create account</a>
+    <div class="auth-links">
+      <a href="forgot-pin.html">Forgot PIN?</a> ·
+      <a href="signup.html">Create account</a>
+    </div>
 
   </div>
 
+  <!-- TOGGLE PIN -->
   <script>
     function togglePin(id) {
       const input = document.getElementById(id);
       input.type = input.type === "password" ? "text" : "password";
     }
   </script>
+
+  <!-- SESSION + LOGIN LOGIC -->
+  <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth/login.js"></script>
 
 </body>
 </html>
