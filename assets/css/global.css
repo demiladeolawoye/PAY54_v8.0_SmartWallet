@@ -25,23 +25,35 @@ a {
 }
 
 /* =========================
-   BRAND / LOGO
+   BRAND / LOGO (FIXED)
 ========================= */
 
 .brand {
   display: flex;
   align-items: center;
+  min-height: 64px; /* prevents logo squeeze */
 }
 
 .dash-logo {
-  height: 44px;          /* Desktop */
+  height: 64px;      /* ⬅ BIGGER & CLEAR */
   width: auto;
   display: block;
 }
 
-/* Mobile logo sizing */
-@media (max-width: 768px) {
+/* Tablet */
+@media (max-width: 1024px) {
   .dash-logo {
-    height: 36px;
+    height: 56px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .brand {
+    min-height: 56px;
+  }
+
+  .dash-logo {
+    height: 48px;
   }
 }
