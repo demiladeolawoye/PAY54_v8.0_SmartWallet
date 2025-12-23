@@ -6,12 +6,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: 16px 20px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  gap: 16px;
+}
+
+/* =========================
+   BRANDING
+========================= */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .dash-logo {
-  width: 140px;
+  width: 42px;
+  height: 42px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.brand-tagline {
+  font-size: 11px;
+  opacity: 0.75;
 }
 
 /* =========================
@@ -21,26 +50,28 @@
 .currency-row {
   display: flex;
   gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .currency {
   font-size: 13px;
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: pointer;
+  padding-bottom: 4px;
 }
 
 .currency.active {
   opacity: 1;
   font-weight: 600;
   border-bottom: 2px solid #3B82F6;
-  padding-bottom: 4px;
 }
 
 /* =========================
    HEADER ACTIONS
 ========================= */
 
-header .right button {
+.header-actions button {
   margin-left: 10px;
   background: none;
   border: none;
@@ -54,8 +85,26 @@ header .right button {
 ========================= */
 
 .dashboard-placeholder {
-  padding: 40px;
+  padding: 48px 20px;
   text-align: center;
   opacity: 0.7;
 }
 
+/* =========================
+   MOBILE RESPONSIVENESS
+========================= */
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .currency-row {
+    gap: 10px;
+  }
+
+  .brand {
+    justify-content: center;
+  }
+}
