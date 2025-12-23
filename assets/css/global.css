@@ -14,70 +14,112 @@ body {
 }
 
 /* =========================
-   THEMES
+   THEME VARIABLES
 ========================= */
 
 body.dark {
-  background: linear-gradient(180deg, #020617 0%, #020617 100%);
-  color: #ffffff;
+  --bg-main: #020617;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --header-border: rgba(255,255,255,0.08);
 }
 
 body.light {
-  background: #ffffff;
-  color: #020617;
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --header-border: rgba(0,0,0,0.08);
 }
 
-/* =========================
-   LINKS
-========================= */
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+}
 
+/* Links */
 a {
   text-decoration: none;
   color: inherit;
 }
 
 /* =========================
-   DASHBOARD BRAND LOGO (FIX)
+   DASHBOARD HEADER
 ========================= */
 
+.dashboard-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--header-border);
+}
+
+/* Top row: Logo + Actions */
+.dashboard-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo wrapper */
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
 }
 
 .dash-logo {
-  height: 42px;          /* DESKTOP SIZE */
+  height: 36px;       /* TEMP — safe size */
   width: auto;
-  max-width: none;
-  opacity: 1;
-  display: block;
-  flex-shrink: 0;
 }
 
-/* Mobile override */
-@media (max-width: 768px) {
+/* Header actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-actions button {
+  background: none;
+  border: none;
+  color: var(--text-main);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* =========================
+   CURRENCY ROW
+========================= */
+
+.currency-row {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  font-size: 14px;
+}
+
+.currency {
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.currency.active {
+  color: var(--text-main);
+  border-bottom: 2px solid #3b82f6;
+  padding-bottom: 4px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 640px) {
   .dash-logo {
-    height: 36px;        /* MOBILE SIZE */
+    height: 32px;
   }
-}
 
-/* =========================
-   LIGHT MODE VISIBILITY FIX
-========================= */
-
-body.light .dash-logo {
-  filter: none;
-  opacity: 1;
-}
-
-/* =========================
-   HEADER ACTIONS VISIBILITY
-========================= */
-
-body.light .header-actions,
-body.light .header-actions button,
-body.light .header-actions span {
-  color: #020617;
+  .currency-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 }
