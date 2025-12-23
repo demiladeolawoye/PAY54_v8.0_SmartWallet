@@ -22,18 +22,16 @@
   <!-- HEADER -->
   <header class="dashboard-header">
 
-<!-- BRAND -->
-<div class="brand">
-  <img
-    src="assets/img/pay54-logo.svg"
-    alt="PAY54"
-    class="dash-logo"
-  />
-</div>
+    <!-- LEFT: BRAND -->
+    <div class="brand">
+      <img
+        src="assets/img/pay54-logo.svg"
+        alt="PAY54"
+        class="dash-logo"
+      />
+    </div>
 
-
-
-    <!-- CURRENCY ROW -->
+    <!-- CENTER: CURRENCY ROW -->
     <div class="currency-row">
       <span class="currency active">NGN</span>
       <span class="currency">USD</span>
@@ -44,7 +42,7 @@
       <span class="currency">AUD</span>
     </div>
 
-    <!-- ACTIONS -->
+    <!-- RIGHT: ACTIONS -->
     <div class="header-actions">
       <button id="themeToggle" title="Toggle theme">🌙</button>
       <button id="profileBtn" title="Profile">👤</button>
@@ -53,7 +51,7 @@
 
   </header>
 
-  <!-- PLACEHOLDER -->
+  <!-- MAIN -->
   <main class="dashboard-placeholder">
     <h2>Dashboard loading…</h2>
     <p>Wallet & services will appear here.</p>
@@ -68,7 +66,9 @@
 
     document.querySelectorAll(".currency").forEach(el => {
       el.onclick = () => {
-        document.querySelectorAll(".currency").forEach(c => c.classList.remove("active"));
+        document
+          .querySelectorAll(".currency")
+          .forEach(c => c.classList.remove("active"));
         el.classList.add("active");
       };
     });
