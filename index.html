@@ -2,41 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>PAY54</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PAY54 — Dashboard</title>
 
-  <!-- Global styles only -->
   <link rel="stylesheet" href="assets/css/global.css" />
-
-  <style>
-    body {
-      background: #0b1220;
-      color: #ffffff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
 </head>
-<body>
 
-  <div>
-    <img src="assets/img/pay54-logo.svg" alt="PAY54" width="120" />
-    <p style="text-align:center;opacity:0.7;margin-top:12px">
-      ONE WALLET – EVERYWHERE
-    </p>
-  </div>
+<body class="dark">
 
   <!-- AUTH GUARD -->
   <script src="assets/js/session.js"></script>
   <script>
-    // HARD AUTH GATE
-    if (!PAY54Session.isAuthenticated()) {
+    if (!PAY54Session || !PAY54Session.isAuthenticated()) {
       window.location.replace("login.html");
     }
   </script>
 
+  <!-- HEADER -->
+  <header class="dashboard-header">
+    <div class="left">
+      <img src="assets/img/pay54-logo.svg" alt="PAY54" class="dash-logo" />
+    </div>
+
+    <div class="center currency-row">
+      <span class="currency active">NGN</span>
+      <span class="currency">USD</span>
+      <span class="currency">GBP</span>
+      <span class="currency">EUR</span>
+    </div>
+
+    <div class="right">
+      <button id="themeToggle">🌙</button>
+      <button id="profileBtn">👤</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <!-- PLACEHOLDER BODY -->
+  <main class="dashboard-placeholder">
+    <h2>Dashboard loading…</h2>
+    <p>Wallet & services will appear here.</p>
+  </main>
+
+  <!-- SCRIPTS -->
+  <script src="assets/js/theme.js"></script>
+  <script>
+    // Logout
+    document.getElementById("logoutBtn").onclick = () => {
+      PAY54Session.destroySession();
+    };
+
+    // Currency switch (UI state only)
+    document.querySelectorAll(".currency").forEach(el => {
+      el.onclick = () => {
+        document.querySelectorAll(".currency").forEach(c => c.classList.remove("active"));
+        el.classList.add("active");
+      };
+    });
+  </script>
+
 </body>
 </html>
-
