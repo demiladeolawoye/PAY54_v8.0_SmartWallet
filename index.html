@@ -21,25 +21,37 @@
 
   <!-- HEADER -->
   <header class="dashboard-header">
-    <div class="left">
+
+    <!-- BRAND -->
+    <div class="brand">
       <img src="assets/img/pay54-logo.svg" alt="PAY54" class="dash-logo" />
+      <div class="brand-text">
+        <span class="brand-name">PAY54</span>
+        <span class="brand-tagline">ONE WALLET – EVERYWHERE</span>
+      </div>
     </div>
 
-    <div class="center currency-row">
+    <!-- CURRENCY ROW -->
+    <div class="currency-row">
       <span class="currency active">NGN</span>
       <span class="currency">USD</span>
       <span class="currency">GBP</span>
       <span class="currency">EUR</span>
+      <span class="currency">CAD</span>
+      <span class="currency">AED</span>
+      <span class="currency">AUD</span>
     </div>
 
-    <div class="right">
-      <button id="themeToggle">🌙</button>
-      <button id="profileBtn">👤</button>
+    <!-- ACTIONS -->
+    <div class="header-actions">
+      <button id="themeToggle" title="Toggle theme">🌙</button>
+      <button id="profileBtn" title="Profile">👤</button>
       <button id="logoutBtn">Logout</button>
     </div>
+
   </header>
 
-  <!-- PLACEHOLDER BODY -->
+  <!-- PLACEHOLDER -->
   <main class="dashboard-placeholder">
     <h2>Dashboard loading…</h2>
     <p>Wallet & services will appear here.</p>
@@ -48,12 +60,10 @@
   <!-- SCRIPTS -->
   <script src="assets/js/theme.js"></script>
   <script>
-    // Logout
     document.getElementById("logoutBtn").onclick = () => {
       PAY54Session.destroySession();
     };
 
-    // Currency switch (UI state only)
     document.querySelectorAll(".currency").forEach(el => {
       el.onclick = () => {
         document.querySelectorAll(".currency").forEach(c => c.classList.remove("active"));
