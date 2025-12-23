@@ -5,33 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAY54 — Dashboard</title>
 
+  <!-- STYLES -->
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/dashboard.css" />
 </head>
 
 <body class="dark">
 
-  <!-- AUTH GUARD -->
+  <!-- =========================
+       AUTH GUARD
+  ========================== -->
   <script src="assets/js/session.js"></script>
   <script>
-    if (!PAY54Session || !PAY54Session.isAuthenticated()) {
+    if (!window.PAY54Session || !PAY54Session.isAuthenticated()) {
       window.location.replace("login.html");
     }
   </script>
 
-  <!-- HEADER -->
+  <!-- =========================
+       HEADER
+  ========================== -->
   <header class="dashboard-header">
 
-   <!-- BRAND -->
-<div class="brand">
-  <img
-    src="assets/img/pay54-logo.svg"
-    alt="PAY54"
-    class="dash-logo"
-  />
-</div>
+    <!-- TOP ROW: BRAND + ACTIONS -->
+    <div class="dashboard-header-top">
 
-    <!-- CENTER: CURRENCY ROW -->
+      <!-- BRAND -->
+      <div class="brand">
+        <img
+          src="assets/img/pay54-logo.svg"
+          alt="PAY54"
+          class="dash-logo"
+        />
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="header-actions">
+        <button id="themeToggle" title="Toggle theme">🌙</button>
+        <button id="profileBtn" title="Profile">👤</button>
+        <button id="logoutBtn">Logout</button>
+      </div>
+
+    </div>
+
+    <!-- CURRENCY ROW -->
     <div class="currency-row">
       <span class="currency active">NGN</span>
       <span class="currency">USD</span>
@@ -42,28 +59,28 @@
       <span class="currency">AUD</span>
     </div>
 
-    <!-- RIGHT: ACTIONS -->
-    <div class="header-actions">
-      <button id="themeToggle" title="Toggle theme">🌙</button>
-      <button id="profileBtn" title="Profile">👤</button>
-      <button id="logoutBtn">Logout</button>
-    </div>
-
   </header>
 
-  <!-- MAIN -->
+  <!-- =========================
+       MAIN PLACEHOLDER
+  ========================== -->
   <main class="dashboard-placeholder">
     <h2>Dashboard loading…</h2>
     <p>Wallet & services will appear here.</p>
   </main>
 
-  <!-- SCRIPTS -->
+  <!-- =========================
+       SCRIPTS
+  ========================== -->
   <script src="assets/js/theme.js"></script>
+
   <script>
+    // Logout
     document.getElementById("logoutBtn").onclick = () => {
       PAY54Session.destroySession();
     };
 
+    // Currency switch (UI only – Phase 2 safe)
     document.querySelectorAll(".currency").forEach(el => {
       el.onclick = () => {
         document
