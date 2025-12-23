@@ -11,7 +11,6 @@
 
 body {
   min-height: 100vh;
-  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* =========================
@@ -29,100 +28,56 @@ body.light {
 }
 
 /* =========================
-   DASHBOARD HEADER
+   LINKS
 ========================= */
 
-.dashboard-header {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* =========================
-   BRAND / LOGO (FIXED)
+   DASHBOARD BRAND LOGO (FIX)
 ========================= */
 
-.header-left {
+.brand {
   display: flex;
   align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .dash-logo {
-  height: 52px;        /* BIG & VISIBLE */
+  height: 42px;          /* DESKTOP SIZE */
   width: auto;
-  display: block;
-}
-
-/* =========================
-   CURRENCY SWITCH
-========================= */
-
-.currency-switch {
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  font-size: 14px;
-}
-
-.currency-switch span {
-  opacity: 0.6;
-  cursor: pointer;
-}
-
-.currency-switch span.active {
+  max-width: none;
   opacity: 1;
-  border-bottom: 2px solid #3b82f6;
-  padding-bottom: 4px;
+  display: block;
+  flex-shrink: 0;
 }
 
-/* =========================
-   HEADER ACTIONS (RIGHT)
-========================= */
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.header-actions span {
-  cursor: pointer;
-  font-size: 14px;
+/* Mobile override */
+@media (max-width: 768px) {
+  .dash-logo {
+    height: 36px;        /* MOBILE SIZE */
+  }
 }
 
 /* =========================
    LIGHT MODE VISIBILITY FIX
 ========================= */
 
-body.light .currency-switch span,
-body.light .logout,
-body.light .header-actions span {
-  color: #020617;
-}
-
-body.dark .currency-switch span,
-body.dark .logout,
-body.dark .header-actions span {
-  color: #ffffff;
+body.light .dash-logo {
+  filter: none;
+  opacity: 1;
 }
 
 /* =========================
-   MOBILE RESPONSIVE
+   HEADER ACTIONS VISIBILITY
 ========================= */
 
-@media (max-width: 768px) {
-  .dashboard-header {
-    grid-template-columns: auto 1fr auto;
-  }
-
-  .dash-logo {
-    height: 42px;      /* Still clearly visible */
-  }
-
-  .currency-switch {
-    gap: 12px;
-    font-size: 13px;
-  }
+body.light .header-actions,
+body.light .header-actions button,
+body.light .header-actions span {
+  color: #020617;
 }
