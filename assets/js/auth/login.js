@@ -1,28 +1,28 @@
-PAY54Session.preventAuthPages();
+// PAY54 Login Logic (Phase 1 Demo)
 
-const form = document.getElementById("loginForm");
-const errorBox = document.getElementById("error");
-const togglePin = document.getElementById("togglePin");
-const pinInput = document.getElementById("pin");
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn");
+  const emailInput = document.getElementById("email");
+  const pinInput = document.getElementById("pin");
 
-togglePin.addEventListener("click", () => {
-  pinInput.type = pinInput.type === "password" ? "text" : "password";
+  if (!loginBtn) return;
+
+  loginBtn.addEventListener("click", () => {
+    const email = emailInput.value.trim();
+    const pin = pinInput.value.trim();
+
+    if (!email || !pin) {
+      alert("Please enter email and PIN");
+      return;
+    }
+
+    // Phase 1 demo authentication (no backend)
+    PAY54Session.createSession({
+      email,
+      loggedInAt: new Date().toISOString()
+    });
+
+    // Redirect to dashboard
+    window.location.href = "index.html";
+  });
 });
-
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  errorBox.textContent = "";
-
-  const email = document.getElementById("email").value.trim();
-  const pin = pinInput.value.trim();
-
-  if (!email || !pin) {
-    errorBox.textContent = "All fields are required.";
-    return;
-  }
-
-  // Demo auth (MVP)
-  PAY54Session.createSession({ email });
-  window.location.href = "index.html";
-});
-
