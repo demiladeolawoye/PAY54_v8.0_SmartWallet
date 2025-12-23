@@ -11,49 +11,72 @@
 
 body {
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
 }
+
+/* =========================
+   THEMES
+========================= */
 
 body.dark {
   background: linear-gradient(180deg, #020617 0%, #020617 100%);
   color: #ffffff;
 }
 
-/* Links */
+body.light {
+  background: #ffffff;
+  color: #020617;
+}
+
+/* =========================
+   LINKS
+========================= */
+
 a {
   text-decoration: none;
   color: inherit;
 }
 
 /* =========================
-   BRAND / LOGO (FIXED)
+   DASHBOARD HEADER BRANDING
 ========================= */
 
 .brand {
   display: flex;
   align-items: center;
-  min-height: 64px; /* prevents logo squeeze */
 }
 
+/* MAIN FIX: LOGO VISIBILITY */
 .dash-logo {
-  height: 64px;      /* ⬅ BIGGER & CLEAR */
+  height: 44px;          /* Desktop */
   width: auto;
   display: block;
 }
 
-/* Tablet */
-@media (max-width: 1024px) {
-  .dash-logo {
-    height: 56px;
-  }
+/* =========================
+   LIGHT MODE VISIBILITY FIX
+========================= */
+
+body.light .dash-logo {
+  filter: none;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  .brand {
-    min-height: 56px;
-  }
+body.light .logout,
+body.light .currency-switch span {
+  color: #020617;
+}
 
+body.dark .logout,
+body.dark .currency-switch span {
+  color: #ffffff;
+}
+
+/* =========================
+   RESPONSIVE (MOBILE)
+========================= */
+
+@media (max-width: 768px) {
   .dash-logo {
-    height: 48px;
+    height: 36px;        /* Mobile – still visible */
   }
 }
