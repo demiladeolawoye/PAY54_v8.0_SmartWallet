@@ -85,7 +85,21 @@
 
   <!-- SESSION + LOGIN LOGIC -->
   <script src="assets/js/session.js"></script>
-  <script src="assets/js/auth/login.js"></script>
+ <script>
+  const loginForm = document.getElementById("loginForm");
+
+  loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    // Mock login (Phase 1)
+    PAY54Session.createSession({
+      email: document.querySelector('input[type="email"]').value
+    });
+
+    // Redirect to dashboard
+    window.location.replace("index.html");
+  });
+</script>
 
 </body>
 </html>
