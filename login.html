@@ -13,35 +13,25 @@
 
   <div class="auth-container">
 
-    <!-- LOGO -->
-    <img src="assets/img/pay54-logo.svg" alt="PAY54" class="pay54-logo" />
+    <!-- BRAND -->
+    <div class="auth-brand">
+      <img src="assets/img/pay54-logo.svg" alt="PAY54" class="auth-logo" />
+      <div class="auth-brand-text">
+        <strong>PAY54</strong>
+        <span>ONE WALLET – EVERYWHERE</span>
+      </div>
+    </div>
 
     <h2>Welcome back</h2>
     <p class="subtitle">ONE WALLET – EVERYWHERE</p>
 
-    <!-- WHY PAY54 -->
+    <!-- WHY -->
     <div class="why-pay54">
       <h4>Why PAY54?</h4>
-
-      <div class="why-item">
-        <span class="why-icon">🌍</span>
-        <span>One wallet for NGN, USD, GBP & EUR</span>
-      </div>
-
-      <div class="why-item">
-        <span class="why-icon">⚡</span>
-        <span>Send, receive & convert instantly</span>
-      </div>
-
-      <div class="why-item">
-        <span class="why-icon">🔐</span>
-        <span>Secure by design with session & PIN protection</span>
-      </div>
-
-      <div class="why-item">
-        <span class="why-icon">🚀</span>
-        <span>Built for Africa — ready for the world</span>
-      </div>
+      <p>🌍 One wallet for NGN, USD, GBP & EUR</p>
+      <p>⚡ Send, receive & convert instantly</p>
+      <p>🔐 Secure by design with PIN protection</p>
+      <p>🚀 Built for Africa — ready for the world</p>
     </div>
 
     <!-- LOGIN FORM -->
@@ -49,7 +39,7 @@
 
       <input
         type="email"
-        id="email"
+        id="loginEmail"
         placeholder="Email address"
         required
       />
@@ -57,15 +47,16 @@
       <div class="input-wrapper">
         <input
           type="password"
-          id="pin"
+          id="loginPin"
           placeholder="PIN"
           required
         />
-        <span class="toggle-pin" onclick="togglePin('pin')">👁</span>
+        <span class="toggle-pin" onclick="togglePin()">👁</span>
       </div>
 
-      <button type="button" id="loginBtn">Login</button>
+      <button type="submit">Login</button>
 
+      <p id="loginMessage" class="form-message"></p>
     </form>
 
     <div class="auth-links">
@@ -75,31 +66,52 @@
 
   </div>
 
-  <!-- TOGGLE PIN -->
-  <script>
-    function togglePin(id) {
-      const input = document.getElementById(id);
-      input.type = input.type === "password" ? "text" : "password";
-    }
-  </script>
-
-  <!-- SESSION + LOGIN LOGIC -->
+  <!-- SESSION -->
   <script src="assets/js/session.js"></script>
- <script>
-  const loginForm = document.getElementById("loginForm");
 
-  loginForm.addEventListener("submit", function (e) {
-    e.preventDefault();
+  <!-- LOGIN LOGIC (FIXED) -->
+  <script>
+    function togglePin() {
+      const pin = document.getElementById("loginPin");
+      pin.type = pin.type === "password" ? "text" : "password";
+    }
 
-    // Mock login (Phase 1)
-    PAY54Session.createSession({
-      email: document.querySelector('input[type="email"]').value
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("loginMessage");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById("loginEmail").value.trim();
+      const pin = document.getElementById("loginPin").value.trim();
+
+      if (!email || !pin) {
+        message.textContent = "Please enter email and PIN";
+        message.style.color = "#ff6b6b";
+        return;
+      }
+
+      // MOCK VALIDATION (Phase 1)
+      if (pin.length < 4) {
+        message.textContent = "Invalid PIN";
+        message.style.color = "#ff6b6b";
+        return;
+      }
+
+      // CREATE SESSION
+      PAY54Session.createSession({
+        email: email,
+        verified: true
+      });
+
+      message.textContent = "Login successful. Redirecting…";
+      message.style.color = "#4ade80";
+
+      setTimeout(() => {
+        window.location.replace("index.html");
+      }, 800);
     });
-
-    // Redirect to dashboard
-    window.location.replace("index.html");
-  });
-</script>
+  </script>
 
 </body>
 </html>
