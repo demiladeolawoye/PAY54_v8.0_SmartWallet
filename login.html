@@ -16,47 +16,46 @@
     <!-- BRAND -->
     <div class="auth-brand">
       <img src="assets/img/pay54-logo.svg" alt="PAY54" class="auth-logo" />
-      <div class="auth-brand-text">
-        <strong>PAY54</strong>
-        <span>ONE WALLET – EVERYWHERE</span>
-      </div>
     </div>
 
-    <h2>Welcome back</h2>
-    <p class="subtitle">ONE WALLET – EVERYWHERE</p>
+    <!-- TITLE -->
+    <h2 class="auth-title">Welcome back</h2>
 
-    <!-- WHY -->
+    <!-- WHY PAY54 -->
     <div class="why-pay54">
       <h4>Why PAY54?</h4>
-      <p>🌍 One wallet for NGN, USD, GBP & EUR</p>
-      <p>⚡ Send, receive & convert instantly</p>
-      <p>🔐 Secure by design with PIN protection</p>
-      <p>🚀 Built for Africa — ready for the world</p>
+
+      <div class="why-item">
+        <span>🌍</span>
+        <span>One wallet for NGN, USD, GBP & EUR</span>
+      </div>
+
+      <div class="why-item">
+        <span>⚡</span>
+        <span>Send, receive & convert instantly</span>
+      </div>
+
+      <div class="why-item">
+        <span>🔐</span>
+        <span>Secure by design with session & PIN protection</span>
+      </div>
+
+      <div class="why-item">
+        <span>🚀</span>
+        <span>Built for Africa — ready for the world</span>
+      </div>
     </div>
 
     <!-- LOGIN FORM -->
     <form id="loginForm">
-
-      <input
-        type="email"
-        id="loginEmail"
-        placeholder="Email address"
-        required
-      />
+      <input type="email" id="loginEmail" placeholder="Email address" required />
 
       <div class="input-wrapper">
-        <input
-          type="password"
-          id="loginPin"
-          placeholder="PIN"
-          required
-        />
-        <span class="toggle-pin" onclick="togglePin()">👁</span>
+        <input type="password" id="loginPin" placeholder="PIN" required />
+        <span class="toggle-pin" onclick="togglePin('loginPin')">👁</span>
       </div>
 
       <button type="submit">Login</button>
-
-      <p id="loginMessage" class="form-message"></p>
     </form>
 
     <div class="auth-links">
@@ -66,51 +65,15 @@
 
   </div>
 
-  <!-- SESSION -->
+  <!-- SESSION + LOGIN LOGIC -->
   <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth/login.js"></script>
 
-  <!-- LOGIN LOGIC (FIXED) -->
   <script>
-    function togglePin() {
-      const pin = document.getElementById("loginPin");
-      pin.type = pin.type === "password" ? "text" : "password";
+    function togglePin(id) {
+      const input = document.getElementById(id);
+      input.type = input.type === "password" ? "text" : "password";
     }
-
-    const form = document.getElementById("loginForm");
-    const message = document.getElementById("loginMessage");
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const email = document.getElementById("loginEmail").value.trim();
-      const pin = document.getElementById("loginPin").value.trim();
-
-      if (!email || !pin) {
-        message.textContent = "Please enter email and PIN";
-        message.style.color = "#ff6b6b";
-        return;
-      }
-
-      // MOCK VALIDATION (Phase 1)
-      if (pin.length < 4) {
-        message.textContent = "Invalid PIN";
-        message.style.color = "#ff6b6b";
-        return;
-      }
-
-      // CREATE SESSION
-      PAY54Session.createSession({
-        email: email,
-        verified: true
-      });
-
-      message.textContent = "Login successful. Redirecting…";
-      message.style.color = "#4ade80";
-
-      setTimeout(() => {
-        window.location.replace("index.html");
-      }, 800);
-    });
   </script>
 
 </body>
