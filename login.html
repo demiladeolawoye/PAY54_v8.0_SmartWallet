@@ -13,68 +13,45 @@
 
   <div class="auth-container">
 
-    <!-- BRAND -->
-    <div class="auth-brand">
-      <img src="assets/img/pay54-logo.svg" alt="PAY54" class="auth-logo" />
-    </div>
-
-    <!-- TITLE -->
-    <h2 class="auth-title">Welcome back</h2>
-
-    <!-- WHY PAY54 -->
-    <div class="why-pay54">
-      <h4>Why PAY54?</h4>
-
-      <div class="why-item">
-        <span>🌍</span>
-        <span>One wallet for NGN, USD, GBP & EUR</span>
-      </div>
-
-      <div class="why-item">
-        <span>⚡</span>
-        <span>Send, receive & convert instantly</span>
-      </div>
-
-      <div class="why-item">
-        <span>🔐</span>
-        <span>Secure by design with session & PIN protection</span>
-      </div>
-
-      <div class="why-item">
-        <span>🚀</span>
-        <span>Built for Africa — ready for the world</span>
+    <!-- LOGO (CONSISTENT WITH OTHER PAGES) -->
+    <div class="auth-logo">
+      <img src="assets/img/pay54-logo.svg" alt="PAY54" />
+      <div class="brand-text">
+        <div class="brand-name">PAY54</div>
+        <div class="brand-tagline">ONE WALLET – EVERYWHERE</div>
       </div>
     </div>
 
-    <!-- LOGIN FORM -->
+    <h2>Welcome back</h2>
+
+    <div class="info-card">
+      <strong>Why PAY54?</strong><br /><br />
+      🌍 One wallet for NGN, USD, GBP & EUR<br />
+      ⚡ Send, receive & convert instantly<br />
+      🔐 Secure by design with session & PIN protection<br />
+      🚀 Built for Africa — ready for the world
+    </div>
+
     <form id="loginForm">
       <input type="email" id="loginEmail" placeholder="Email address" required />
 
-      <div class="input-wrapper">
-        <input type="password" id="loginPin" placeholder="PIN" required />
-        <span class="toggle-pin" onclick="togglePin('loginPin')">👁</span>
-      </div>
+      <input type="password" id="loginPin" placeholder="PIN" required />
 
       <button type="submit">Login</button>
+
+      <div id="loginMessage" class="form-message"></div>
     </form>
 
-    <div class="auth-links">
+    <p style="margin-top:16px;">
       <a href="forgot-pin.html">Forgot PIN?</a> ·
       <a href="signup.html">Create account</a>
-    </div>
+    </p>
 
   </div>
 
-  <!-- SESSION + LOGIN LOGIC -->
+  <!-- SESSION + LOGIN LOGIC (DO NOT MOVE) -->
   <script src="assets/js/session.js"></script>
   <script src="assets/js/auth/login.js"></script>
-
-  <script>
-    function togglePin(id) {
-      const input = document.getElementById(id);
-      input.type = input.type === "password" ? "text" : "password";
-    }
-  </script>
 
 </body>
 </html>
