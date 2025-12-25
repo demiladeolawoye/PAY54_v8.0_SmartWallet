@@ -2,75 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAY54 — Reset PIN</title>
-
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
 <body class="dark">
-
   <div class="auth-container">
 
-    <!-- LOGO (CONSISTENT WITH LOGIN / SIGNUP / OTP) -->
-    <div class="auth-logo">
+    <div class="auth-brand">
       <img src="assets/img/pay54-logo.svg" alt="PAY54" />
-      <div class="brand-text">
+      <div class="auth-brand-text">
         <div class="brand-name">PAY54</div>
         <div class="brand-tagline">ONE WALLET – EVERYWHERE</div>
       </div>
     </div>
 
-    <h2>Reset PIN</h2>
-    <p class="subtitle">Account recovery</p>
+    <h2 class="auth-title">Reset PIN</h2>
 
-    <!-- REASSURANCE BLOCK -->
-    <div class="info-card">
-      <strong>Your security matters</strong><br /><br />
-      🔐 Your account remains fully protected<br />
-      📧 Reset instructions are sent securely by email<br />
-      ⏱ The process takes less than a minute
-    </div>
-
-    <!-- RESET FORM -->
     <form id="resetForm">
-      <input
-        type="email"
-        id="email"
-        placeholder="Registered email"
-        required
-      />
-
-      <!-- FEEDBACK MESSAGE -->
-      <div id="resetMessage" class="form-message"></div>
-
+      <input type="email" placeholder="Registered email" required />
       <button type="submit">Send reset</button>
+      <div id="resetMessage" class="form-message"></div>
     </form>
 
-    <p style="margin-top:16px;">
+    <div class="auth-links">
       <a href="login.html">Back to login</a>
-    </p>
-
+    </div>
   </div>
 
-  <!-- EXISTING SCRIPTS (DO NOT REMOVE) -->
-  <script src="assets/js/session.js"></script>
-  <script src="assets/js/auth/forgot-pin.js"></script>
-
-  <!-- UI FEEDBACK PATCH (SAFE / PHASE 1) -->
   <script>
-    const resetForm = document.getElementById("resetForm");
-    const resetMessage = document.getElementById("resetMessage");
-
-    resetForm.addEventListener("submit", function (e) {
+    document.getElementById("resetForm").addEventListener("submit", (e) => {
       e.preventDefault();
-
-      // UI-only confirmation (backend-ready)
-      resetMessage.textContent = "Reset instructions have been sent to your email.";
-      resetMessage.className = "form-message success";
+      const m = document.getElementById("resetMessage");
+      m.textContent = "Reset instructions sent to your email.";
+      m.className = "form-message success";
     });
   </script>
-
 </body>
 </html>
