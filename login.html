@@ -6,50 +6,45 @@
   <title>PAY54 — Login</title>
 
   <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth.css" />
+  <link rel="stylesheet" href="assets/css/auth-baseline.css" />
 </head>
 
 <body class="dark">
 
   <div class="auth-container">
 
-    <!-- LOGO (CONSISTENT WITH OTHER PAGES) -->
-    <div class="auth-logo">
+    <!-- BRAND (LOCKED BASELINE) -->
+    <div class="auth-brand">
       <img src="assets/img/pay54-logo.svg" alt="PAY54" />
-      <div class="brand-text">
+      <div class="auth-brand-text">
         <div class="brand-name">PAY54</div>
         <div class="brand-tagline">ONE WALLET – EVERYWHERE</div>
       </div>
     </div>
 
-    <h2>Welcome back</h2>
+    <h2 class="auth-title">Welcome back</h2>
 
-    <div class="info-card">
-      <strong>Why PAY54?</strong><br /><br />
+    <div class="auth-info">
       🌍 One wallet for NGN, USD, GBP & EUR<br />
       ⚡ Send, receive & convert instantly<br />
-      🔐 Secure by design with session & PIN protection<br />
-      🚀 Built for Africa — ready for the world
+      🔐 Secure by design with session & PIN protection
     </div>
 
     <form id="loginForm">
       <input type="email" id="loginEmail" placeholder="Email address" required />
-
       <input type="password" id="loginPin" placeholder="PIN" required />
-
       <button type="submit">Login</button>
-
       <div id="loginMessage" class="form-message"></div>
     </form>
 
-    <p style="margin-top:16px;">
+    <div class="auth-links">
       <a href="forgot-pin.html">Forgot PIN?</a> ·
       <a href="signup.html">Create account</a>
-    </p>
+    </div>
 
   </div>
 
-  <!-- SESSION + LOGIN LOGIC (DO NOT MOVE) -->
+  <!-- LOGIC (SINGLE RESPONSIBILITY) -->
   <script src="assets/js/session.js"></script>
   <script src="assets/js/auth/login.js"></script>
 
