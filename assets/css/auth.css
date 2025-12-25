@@ -1,16 +1,26 @@
 /* =========================
-   AUTH PAGES (LOGIN / SIGNUP / OTP / FORGOT PIN)
+   PAY54 AUTH BASELINE
+   Premium • Consistent • Responsive
 ========================= */
 
+:root {
+  --auth-max-width: 420px;
+  --brand-name-size: 22px;
+  --brand-tagline-size: 12px;
+  --title-size: 26px;
+  --body-size: 14px;
+  --button-size: 16px;
+}
+
 .auth-container {
-  max-width: 420px;
+  max-width: var(--auth-max-width);
   margin: 0 auto;
-  padding: 60px 20px;
+  padding: 56px 20px;
   text-align: center;
 }
 
-/* LOGO BLOCK — SINGLE SOURCE OF TRUTH */
-.auth-logo {
+/* ---------- BRAND (ONE UNIT) ---------- */
+.auth-brand {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -18,79 +28,80 @@
   margin-bottom: 28px;
 }
 
-.auth-logo img {
-  width: 56px;       /* 🔥 CONSISTENT SIZE */
+.auth-brand img {
+  width: 56px;
   height: 56px;
+  flex-shrink: 0;
 }
 
-.auth-logo .brand-text {
+.auth-brand-text {
   text-align: left;
 }
 
-.auth-logo .brand-text .brand-name {
-  font-size: 22px;
+.brand-name {
+  font-size: var(--brand-name-size);
   font-weight: 700;
   letter-spacing: 0.4px;
 }
 
-.auth-logo .brand-text .brand-tagline {
-  font-size: 12px;
+.brand-tagline {
+  font-size: var(--brand-tagline-size);
   opacity: 0.7;
   margin-top: 2px;
 }
 
-/* HEADINGS */
-h1, h2 {
-  margin-bottom: 8px;
+/* ---------- TITLES ---------- */
+.auth-title {
+  font-size: var(--title-size);
+  margin-bottom: 18px;
 }
 
-.subtitle {
-  font-size: 13px;
-  opacity: 0.65;
+/* ---------- INFO CARD ---------- */
+.auth-info {
+  background: rgba(255,255,255,0.04);
+  padding: 16px;
+  border-radius: 14px;
+  font-size: var(--body-size);
+  text-align: left;
   margin-bottom: 24px;
 }
 
-/* INPUTS */
-input {
+/* ---------- FORM ---------- */
+form input {
   width: 100%;
   padding: 14px;
   border-radius: 10px;
   border: none;
   margin-bottom: 14px;
-  font-size: 14px;
+  font-size: var(--body-size);
 }
 
-/* BUTTON */
-button {
+form button {
   width: 100%;
   padding: 14px;
   border-radius: 12px;
   border: none;
-  font-size: 15px;
+  font-size: var(--button-size);
   font-weight: 600;
   cursor: pointer;
 }
 
-/* INFO CARD */
-.info-card {
-  background: rgba(255,255,255,0.04);
-  padding: 16px;
-  border-radius: 14px;
-  margin-bottom: 22px;
-  text-align: left;
-  font-size: 13px;
-}
-
-/* FEEDBACK MESSAGES */
 .form-message {
   margin-top: 12px;
   font-size: 13px;
 }
+.form-message.success { color: #4ade80; }
+.form-message.error { color: #f87171; }
 
-.form-message.success {
-  color: #4ade80;
+/* ---------- LINKS ---------- */
+.auth-links {
+  margin-top: 16px;
+  font-size: 13px;
 }
 
-.form-message.error {
-  color: #f87171;
+/* ---------- MOBILE ---------- */
+@media (max-width: 480px) {
+  .auth-container { padding: 44px 16px; }
+  .auth-brand img { width: 52px; height: 52px; }
+  .auth-title { font-size: 24px; }
 }
