@@ -3,72 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PAY54 — Sign Up</title>
-
+  <title>PAY54 — Sign up</title>
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
 <body class="dark">
-
   <div class="auth-container">
 
-    <img src="assets/img/pay54-logo.svg" alt="PAY54" class="pay54-logo" />
-
-    <h2>Create your PAY54 account</h2>
-
-    <div class="why-pay54">
-      <h4>Why PAY54?</h4>
-
-      <div class="why-item">
-        <span class="why-icon">🌍</span>
-        <span>One wallet for NGN, USD, GBP & EUR</span>
-      </div>
-
-      <div class="why-item">
-        <span class="why-icon">⚡</span>
-        <span>Send, receive & convert instantly</span>
-      </div>
-
-      <div class="why-item">
-        <span class="why-icon">🔐</span>
-        <span>Secure by design with session & PIN protection</span>
-      </div>
-
-      <div class="why-item">
-        <span class="why-icon">🚀</span>
-        <span>Built for Africa — ready for the world</span>
+    <div class="auth-brand">
+      <img src="assets/img/pay54-logo.svg" alt="PAY54" />
+      <div class="auth-brand-text">
+        <div class="brand-name">PAY54</div>
+        <div class="brand-tagline">ONE WALLET – EVERYWHERE</div>
       </div>
     </div>
 
-    <form id="signupForm">
+    <h2 class="auth-title">Create your account</h2>
 
+    <form id="signupForm">
       <input type="text" placeholder="Full name" required />
       <input type="email" placeholder="Email address" required />
-
-      <div class="input-wrapper">
-        <input type="password" id="pin" placeholder="Create PIN" required />
-        <span class="toggle-pin" onclick="togglePin('pin')">👁</span>
-      </div>
-
-      <div class="input-wrapper">
-        <input type="password" id="confirmPin" placeholder="Confirm PIN" required />
-        <span class="toggle-pin" onclick="togglePin('confirmPin')">👁</span>
-      </div>
-
-      <button type="submit">Continue</button>
+      <input type="password" placeholder="Create PIN" required />
+      <input type="password" placeholder="Confirm PIN" required />
+      <button type="submit">Create account</button>
+      <div id="signupMessage" class="form-message"></div>
     </form>
 
-    <a href="login.html">Already have an account?</a>
-
+    <div class="auth-links">
+      <a href="login.html">Back to login</a>
+    </div>
   </div>
 
   <script>
-    function togglePin(id) {
-      const input = document.getElementById(id);
-      input.type = input.type === "password" ? "text" : "password";
-    }
+    document.getElementById("signupForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      document.getElementById("signupMessage").textContent = "Account created. Verify OTP.";
+      document.getElementById("signupMessage").className = "form-message success";
+      setTimeout(() => window.location.replace("otp.html"), 600);
+    });
   </script>
-<script src="assets/js/auth/signup.js"></script>
 </body>
 </html>
