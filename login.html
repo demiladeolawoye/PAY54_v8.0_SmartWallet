@@ -4,16 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAY54 — Login</title>
-
   <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth-baseline.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
 <body class="dark">
-
   <div class="auth-container">
 
-    <!-- BRAND (LOCKED BASELINE) -->
     <div class="auth-brand">
       <img src="assets/img/pay54-logo.svg" alt="PAY54" />
       <div class="auth-brand-text">
@@ -25,9 +22,9 @@
     <h2 class="auth-title">Welcome back</h2>
 
     <div class="auth-info">
-      🌍 One wallet for NGN, USD, GBP & EUR<br />
-      ⚡ Send, receive & convert instantly<br />
-      🔐 Secure by design with session & PIN protection
+      🌍 One wallet for NGN, USD, GBP & EUR<br/>
+      ⚡ Send, receive & convert instantly<br/>
+      🔐 Secure by design with PIN protection
     </div>
 
     <form id="loginForm">
@@ -41,12 +38,17 @@
       <a href="forgot-pin.html">Forgot PIN?</a> ·
       <a href="signup.html">Create account</a>
     </div>
-
   </div>
 
-  <!-- LOGIC (SINGLE RESPONSIBILITY) -->
   <script src="assets/js/session.js"></script>
-  <script src="assets/js/auth/login.js"></script>
-
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      PAY54Session.createSession({ email: loginEmail.value });
+      document.getElementById("loginMessage").textContent = "Login successful. Redirecting…";
+      document.getElementById("loginMessage").className = "form-message success";
+      setTimeout(() => window.location.replace("index.html"), 600);
+    });
+  </script>
 </body>
 </html>
