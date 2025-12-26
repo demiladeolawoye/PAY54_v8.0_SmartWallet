@@ -3,77 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PAY54 — Create Account</title>
+  <title>PAY54 — Sign up</title>
 
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
-<body class="dark">
+<body>
 
   <div class="auth-container">
 
-    <!-- LOGO ONLY (P54 BLUE CIRCLE) -->
-    <div class="auth-logo-only">
-      <img src="assets/img/pay54-logo.svg" alt="PAY54" />
-    </div>
+    <img src="assets/img/p54-logo.svg" class="auth-logo" />
 
     <h2>Create your account</h2>
-    <p class="subtitle">Get started in minutes</p>
 
-    <!-- REASSURANCE -->
-    <div class="why-pay54">
-      <div class="why-item">🌍 One wallet for NGN, USD, GBP & EUR</div>
-      <div class="why-item">⚡ Fast, secure onboarding</div>
-      <div class="why-item">🔐 Protected by PIN & session security</div>
-    </div>
+    <p class="info-text">
+      🌍 One wallet for global currencies — built for Africa, ready for the world
+    </p>
 
-    <!-- SIGNUP FORM -->
     <form id="signupForm">
-
-      <input
-        type="text"
-        id="fullName"
-        placeholder="Full name"
-        required
-      />
-
-      <input
-        type="email"
-        id="email"
-        placeholder="Email address"
-        required
-      />
-
-      <input
-        type="password"
-        id="pin"
-        placeholder="Create PIN"
-        required
-      />
-
-      <input
-        type="password"
-        id="confirmPin"
-        placeholder="Confirm PIN"
-        required
-      />
+      <input type="text" id="name" placeholder="Full name" required />
+      <input type="email" id="email" placeholder="Email address" required />
+      <input type="password" id="pin" placeholder="Create PIN" required />
+      <input type="password" id="confirmPin" placeholder="Confirm PIN" required />
 
       <div id="error" class="error"></div>
 
-      <button type="submit">Continue</button>
+      <button type="submit" class="primary">Continue</button>
     </form>
 
-    <div class="auth-footer">
-      Already have an account?
-      <a href="login.html">Login</a>
-    </div>
+    <p style="margin-top:14px;">
+      <a href="login.html">Already have an account? Login</a>
+    </p>
 
   </div>
 
-  <!-- SCRIPTS -->
   <script src="assets/js/session.js"></script>
   <script src="assets/js/auth/signup.js"></script>
-
 </body>
 </html>
