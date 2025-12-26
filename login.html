@@ -4,34 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAY54 — Login</title>
-
   <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
 <body>
 
   <div class="auth-container">
 
-    <!-- LOGO -->
-    <img
-      src="assets/img/p54-logo.svg"
-      alt="P54"
-      class="auth-logo"
-    />
+    <!-- P54 LOGO ONLY -->
+    <img src="assets/img/pay54-logo.svg" alt="P54" class="auth-logo" />
 
     <h2>Welcome back</h2>
 
-    <p class="info-text">
-      🌍 One wallet for global currencies — built for Africa, ready for the world
-    </p>
+    <!-- INFO TEXT (LOCKED) -->
+    <div class="info-text">🌍 One wallet for global currencies. Ready for the world.</div>
+    <div class="info-text">⚡ Send, receive, and convert instantly</div>
+    <div class="info-text">🔐 Secure by design with PIN and session protection</div>
 
     <form id="loginForm">
       <input type="email" id="email" placeholder="Email address" required />
       <input type="password" id="pin" placeholder="PIN" required />
-
       <div id="error" class="error"></div>
-
       <button type="submit" class="primary">Login</button>
     </form>
 
@@ -43,6 +36,12 @@
   </div>
 
   <script src="assets/js/session.js"></script>
-  <script src="assets/js/auth/login.js"></script>
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      PAY54Session.createSession({ email: email.value });
+      window.location.replace("index.html");
+    });
+  </script>
 </body>
 </html>
