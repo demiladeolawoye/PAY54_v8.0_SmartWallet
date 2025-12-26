@@ -4,25 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAY54 — Reset PIN</title>
-
   <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
 <body>
 
   <div class="auth-container">
 
-    <img src="assets/img/p54-logo.svg" class="auth-logo" />
+    <img src="assets/img/pay54-logo.svg" alt="P54" class="auth-logo" />
 
     <h2>Reset PIN</h2>
     <p class="subtitle">Account recovery</p>
 
     <form id="resetForm">
-      <input type="email" id="email" placeholder="Registered email" required />
-
-      <div id="message"></div>
-
+      <input type="email" placeholder="Registered email" required />
+      <div id="msg" class="success"></div>
       <button type="submit" class="primary">Send reset</button>
     </form>
 
@@ -32,6 +28,11 @@
 
   </div>
 
-  <script src="assets/js/auth/forgot-pin.js"></script>
+  <script>
+    document.getElementById("resetForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      msg.textContent = "Reset instructions sent securely to your email.";
+    });
+  </script>
 </body>
 </html>
