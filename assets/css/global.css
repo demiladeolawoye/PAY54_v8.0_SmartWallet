@@ -1,30 +1,34 @@
 /* =========================
-   GLOBAL BASE (LOCKED)
+   GLOBAL BASE (FINAL)
 ========================= */
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
   min-height: 100vh;
-  background: linear-gradient(180deg, #020617 0%, #020617 100%);
+  background: #020617;
   color: #ffffff;
 }
 
-/* =========================
-   AUTH BRANDING
-========================= */
+/* Links */
+a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+a:hover { opacity: 0.85; }
 
+/* Auth logo — single source of truth */
 .auth-logo {
   width: 72px;
   height: 72px;
-  margin: 0 auto 18px;
   display: block;
+  margin: 0 auto 24px;
 }
 
 @media (max-width: 640px) {
@@ -34,19 +38,10 @@ body {
   }
 }
 
-/* =========================
-   TYPOGRAPHY
-========================= */
-
-h1,
-h2 {
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-
+/* Typography helpers */
 .subtitle {
-  color: #9ca3af;
   font-size: 0.95rem;
+  opacity: 0.75;
   margin-bottom: 18px;
   text-align: center;
 }
@@ -54,13 +49,17 @@ h2 {
 .info-text {
   font-size: 0.9rem;
   color: #c7d2fe;
-  margin-bottom: 16px;
-  text-align: center;
+  margin-bottom: 10px;
+  text-align: left;
 }
 
-/* =========================
-   FORMS
-========================= */
+/* Forms */
+.auth-container {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 64px 20px 40px;
+  text-align: center;
+}
 
 input {
   width: 100%;
@@ -69,49 +68,28 @@ input {
   border: none;
   background: #f1f5f9;
   font-size: 0.95rem;
+  margin-bottom: 14px;
 }
 
-button {
+button.primary {
   width: 100%;
   padding: 14px;
   border-radius: 12px;
   border: none;
+  background: #3b82f6;
+  color: #ffffff;
   font-weight: 600;
   cursor: pointer;
 }
-
-button.primary {
-  background: #3b82f6;
-  color: white;
-}
-
-button.primary:hover {
-  background: #2563eb;
-}
+button.primary:hover { background: #2563eb; }
 
 .error {
   color: #fca5a5;
   font-size: 0.85rem;
   margin-top: 10px;
 }
-
 .success {
   color: #86efac;
   font-size: 0.85rem;
   margin-top: 10px;
 }
-
-/* =========================
-   LINKS
-========================= */
-
-a {
-  color: #60a5fa;
-  text-decoration: none;
-  font-size: 0.85rem;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
