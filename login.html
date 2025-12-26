@@ -11,13 +11,11 @@
 
   <div class="auth-container">
 
-    <!-- P54 LOGO ONLY -->
     <img src="assets/img/pay54-logo.svg" alt="P54" class="auth-logo" />
 
     <h2>Welcome back</h2>
 
-    <!-- INFO TEXT (LOCKED) -->
-    <div class="info-text">🌍 One wallet for global currencies. Ready for the world.</div>
+    <div class="info-text">🌍 One wallet for Africa and global currencies.</div>
     <div class="info-text">⚡ Send, receive, and convert instantly</div>
     <div class="info-text">🔐 Secure by design with PIN and session protection</div>
 
@@ -35,9 +33,15 @@
 
   </div>
 
+  <div class="auth-banner">
+    <span>🔐 Bank-grade security</span>
+    <span>🛡 Session & PIN protected</span>
+    <span>🌍 Built for Africa, ready for the world</span>
+  </div>
+
   <script src="assets/js/session.js"></script>
   <script>
-    document.getElementById("loginForm").addEventListener("submit", (e) => {
+    document.getElementById("loginForm").addEventListener("submit", e => {
       e.preventDefault();
       PAY54Session.createSession({ email: email.value });
       window.location.replace("index.html");
