@@ -4,31 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAY54 — Sign up</title>
-
   <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
 <body>
 
   <div class="auth-container">
 
-    <img src="assets/img/p54-logo.svg" class="auth-logo" />
+    <img src="assets/img/pay54-logo.svg" alt="P54" class="auth-logo" />
 
     <h2>Create your account</h2>
 
-    <p class="info-text">
-      🌍 One wallet for global currencies — built for Africa, ready for the world
-    </p>
+    <!-- INFO TEXT (LOCKED) -->
+    <div class="info-text">🌍 One wallet for global currencies. Ready for the world.</div>
+    <div class="info-text">🚀 Fast, secure onboarding in minutes</div>
+    <div class="info-text">🔐 Protected by PIN & session security</div>
 
     <form id="signupForm">
-      <input type="text" id="name" placeholder="Full name" required />
-      <input type="email" id="email" placeholder="Email address" required />
-      <input type="password" id="pin" placeholder="Create PIN" required />
-      <input type="password" id="confirmPin" placeholder="Confirm PIN" required />
-
-      <div id="error" class="error"></div>
-
+      <input type="text" placeholder="Full name" required />
+      <input type="email" placeholder="Email address" required />
+      <input type="password" placeholder="Create PIN" required />
+      <input type="password" placeholder="Confirm PIN" required />
       <button type="submit" class="primary">Continue</button>
     </form>
 
@@ -38,7 +34,11 @@
 
   </div>
 
-  <script src="assets/js/session.js"></script>
-  <script src="assets/js/auth/signup.js"></script>
+  <script>
+    document.getElementById("signupForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      window.location.replace("otp.html");
+    });
+  </script>
 </body>
 </html>
