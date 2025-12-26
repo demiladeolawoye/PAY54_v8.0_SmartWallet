@@ -9,22 +9,22 @@
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
-<body class="dark">
+<body>
 
   <div class="auth-container">
 
-    <!-- LOGO ONLY -->
-    <div class="auth-logo-only">
-      <img src="assets/img/pay54-logo.svg" alt="PAY54" />
-    </div>
+    <!-- LOGO -->
+    <img
+      src="assets/img/p54-logo.svg"
+      alt="P54"
+      class="auth-logo"
+    />
 
     <h2>Welcome back</h2>
 
-    <div class="why-pay54">
-      <div class="why-item">🌍 One wallet for NGN, USD, GBP & EUR</div>
-      <div class="why-item">⚡ Send, receive & convert instantly</div>
-      <div class="why-item">🔐 Secure by design with PIN protection</div>
-    </div>
+    <p class="info-text">
+      🌍 One wallet for global currencies — built for Africa, ready for the world
+    </p>
 
     <form id="loginForm">
       <input type="email" id="email" placeholder="Email address" required />
@@ -32,18 +32,17 @@
 
       <div id="error" class="error"></div>
 
-      <button type="submit">Login</button>
+      <button type="submit" class="primary">Login</button>
     </form>
 
-    <div class="auth-footer">
+    <p style="margin-top:14px;">
       <a href="forgot-pin.html">Forgot PIN?</a> ·
       <a href="signup.html">Create account</a>
-    </div>
+    </p>
 
   </div>
 
   <script src="assets/js/session.js"></script>
   <script src="assets/js/auth/login.js"></script>
-
 </body>
 </html>
