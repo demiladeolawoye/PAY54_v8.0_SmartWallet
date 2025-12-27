@@ -1,46 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PAY54 — Sign Up</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create account – PAY54</title>
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
 <body class="dark">
-
   <div class="auth-container">
 
-    <div class="auth-logo">
-      <img src="assets/img/p54-logo.svg" alt="P54" />
-    </div>
+    <img src="assets/img/pay54-logo.svg" class="auth-logo" />
 
     <h1>Create your account</h1>
 
-    <div class="auth-info">
-      <p>🌍 One wallet for Africa and global currencies.</p>
-      <p>🚀 Fast, secure onboarding in minutes</p>
-      <p>🔐 Protected by PIN & session security</p>
+    <div class="info-box">
+      <div class="info-item">🌍 One wallet for Africa and global currencies.</div>
+      <div class="info-item">🚀 Fast, secure onboarding in minutes</div>
+      <div class="info-item">🔐 Protected by PIN & session security</div>
     </div>
 
-    <input type="text" placeholder="Full name" required />
-    <input type="email" placeholder="Email address" required />
-    <input type="password" placeholder="Create PIN" required />
-    <input type="password" placeholder="Confirm PIN" required />
+    <div id="msg" class="message"></div>
 
-    <button>Create account</button>
+    <form id="signupForm">
+      <input placeholder="Full name" required />
+      <input type="email" placeholder="Email" required />
+      <input type="password" placeholder="Create PIN" required />
+      <input type="password" placeholder="Confirm PIN" required />
+      <button>Create account</button>
+    </form>
 
-    <a href="login.html">Already have an account? Login</a>
+    <a class="link" href="login.html">Already have an account? Login</a>
+
+    <div class="security-banner">
+      🔒 Bank-grade security · Session & PIN protected
+    </div>
 
   </div>
 
-  <div class="auth-footer">
-    <span>🔐 Bank-grade security</span>
-    <span>🛡 Session & PIN protected</span>
-    <span>🌍 Built for Africa</span>
-  </div>
-
+  <script src="assets/js/auth/signup.js"></script>
 </body>
 </html>
