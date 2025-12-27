@@ -1,29 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Reset PIN</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="assets/css/auth.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reset PIN – PAY54</title>
+  <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
 <body class="dark">
   <div class="auth-container">
 
-    <img src="assets/img/pay54-logo.svg" class="auth-logo">
+    <img src="assets/img/pay54-logo.svg" class="auth-logo" />
 
-    <h2>Reset PIN</h2>
+    <h1>Reset PIN</h1>
     <p class="subtitle">Account recovery</p>
 
-    <div id="message" class="message"></div>
-
-    <input type="email" id="email" placeholder="Registered email">
-
-    <button id="resetBtn">Send reset</button>
-
-    <div class="auth-links">
-      <a href="login.html">Back to login</a>
+    <div class="info-box">
+      <div class="info-item">🔐 Your account remains fully protected</div>
+      <div class="info-item">📧 Recovery instructions sent securely</div>
+      <div class="info-item">⏱ Takes less than a minute</div>
     </div>
+
+    <div id="msg" class="message"></div>
+
+    <form id="forgotForm">
+      <input type="email" placeholder="Registered email" required />
+      <button>Send reset</button>
+    </form>
+
+    <a class="link" href="login.html">Back to login</a>
+
+    <div class="security-banner">
+      🔒 Bank-grade protection
+    </div>
+
   </div>
 
   <script src="assets/js/auth/forgot-pin.js"></script>
