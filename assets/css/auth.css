@@ -1,108 +1,142 @@
 /* =========================
-   AUTH LAYOUT (FINAL)
+   AUTH BASE
 ========================= */
 
 .auth-container {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: 64px 20px 40px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #020617 0%, #020617 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px 80px;
+  color: #ffffff;
   text-align: center;
 }
 
-/* LOGO — SINGLE SOURCE OF TRUTH */
-.auth-logo-only {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
+/* =========================
+   AUTH LOGO (FINAL FIX)
+========================= */
 
-.auth-logo-only img {
-  width: 64px;
-  height: 64px;
-}
-
-/* HEADINGS */
-.auth-container h1,
-.auth-container h2 {
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.subtitle {
-  font-size: 14px;
-  opacity: 0.7;
+.auth-logo {
+  width: 72px;
+  height: 72px;
   margin-bottom: 28px;
 }
 
-/* INFO CARD */
-.why-pay54 {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 14px;
-  padding: 18px;
-  text-align: left;
-  margin-bottom: 26px;
+.auth-logo img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.why-pay54 h4 {
+/* =========================
+   HEADINGS
+========================= */
+
+.auth-container h1,
+.auth-container h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.auth-container .subtitle {
   font-size: 15px;
-  margin-bottom: 10px;
+  color: #9ca3af;
+  margin-bottom: 22px;
 }
 
-.why-item {
+/* =========================
+   INFO LIST
+========================= */
+
+.auth-info {
+  background: rgba(255,255,255,0.04);
+  border-radius: 14px;
+  padding: 16px 18px;
+  max-width: 420px;
+  width: 100%;
+  margin-bottom: 22px;
+  text-align: left;
+}
+
+.auth-info p {
+  font-size: 14px;
+  margin-bottom: 10px;
   display: flex;
   gap: 10px;
-  font-size: 14px;
-  opacity: 0.9;
-  margin-top: 8px;
+  line-height: 1.4;
 }
 
-/* INPUTS */
-input {
+/* force single-line where required */
+.auth-info .single-line {
+  white-space: nowrap;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.auth-container input {
   width: 100%;
+  max-width: 420px;
   padding: 14px 16px;
   border-radius: 12px;
   border: none;
   margin-bottom: 14px;
-  font-size: 14px;
+  font-size: 15px;
 }
 
-input:focus {
-  outline: 2px solid #3b82f6;
-}
-
-/* BUTTONS */
-button {
+.auth-container button {
   width: 100%;
+  max-width: 420px;
   padding: 14px;
-  border-radius: 12px;
+  border-radius: 14px;
+  background: #3b82f6;
+  color: #ffffff;
   border: none;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  background: #3b82f6;
-  color: #fff;
 }
 
-button:hover {
-  opacity: 0.95;
+.auth-container a {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #60a5fa;
+  text-decoration: none;
 }
 
-/* MESSAGES */
-.error {
-  color: #f87171;
-  font-size: 13px;
-  margin-bottom: 10px;
-}
+/* =========================
+   TRUST FOOTER
+========================= */
 
-.success {
-  color: #4ade80;
-  font-size: 13px;
-  margin-bottom: 10px;
-}
-
-/* FOOT LINKS */
 .auth-footer {
-  margin-top: 18px;
+  position: fixed;
+  bottom: 18px;
+  display: flex;
+  gap: 20px;
   font-size: 13px;
+  color: #9ca3af;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 480px) {
+  .auth-logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .auth-container h1,
+  .auth-container h2 {
+    font-size: 24px;
+  }
+
+  .auth-info {
+    font-size: 13px;
+  }
 }
