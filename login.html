@@ -2,50 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PAY54 — Login</title>
+
   <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
-<body>
+<body class="dark">
 
   <div class="auth-container">
 
-    <img src="assets/img/pay54-logo.svg" alt="P54" class="auth-logo" />
+    <!-- LOGO -->
+    <div class="auth-logo">
+      <img src="assets/img/p54-logo.svg" alt="P54" />
+    </div>
 
-    <h2>Welcome back</h2>
+    <h1>Welcome back</h1>
 
-    <div class="info-text">🌍 One wallet for Africa and global currencies.</div>
-    <div class="info-text">⚡ Send, receive, and convert instantly</div>
-    <div class="info-text">🔐 Secure by design with PIN and session protection</div>
+    <div class="auth-info">
+      <p>🌍 One wallet for Africa and global currencies.</p>
+      <p>⚡ Send, receive, and convert instantly</p>
+      <p class="single-line">🔐 Secure by design with PIN and session protection</p>
+    </div>
 
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Email address" required />
-      <input type="password" id="pin" placeholder="PIN" required />
-      <div id="error" class="error"></div>
-      <button type="submit" class="primary">Login</button>
-    </form>
+    <input type="email" id="email" placeholder="Email address" required />
+    <input type="password" id="pin" placeholder="PIN" required />
 
-    <p style="margin-top:14px;">
-      <a href="forgot-pin.html">Forgot PIN?</a> ·
-      <a href="signup.html">Create account</a>
-    </p>
+    <button id="loginBtn">Login</button>
+
+    <a href="forgot-pin.html">Forgot PIN?</a>
+    <a href="signup.html">Create account</a>
 
   </div>
 
-  <div class="auth-banner">
+  <div class="auth-footer">
     <span>🔐 Bank-grade security</span>
     <span>🛡 Session & PIN protected</span>
-    <span>🌍 Built for Africa, ready for the world</span>
+    <span>🌍 Built for Africa</span>
   </div>
 
   <script src="assets/js/session.js"></script>
-  <script>
-    document.getElementById("loginForm").addEventListener("submit", e => {
-      e.preventDefault();
-      PAY54Session.createSession({ email: email.value });
-      window.location.replace("index.html");
-    });
-  </script>
+  <script src="assets/js/auth/login.js"></script>
+
 </body>
 </html>
