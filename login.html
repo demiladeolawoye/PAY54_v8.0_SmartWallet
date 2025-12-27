@@ -2,48 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PAY54 — Login</title>
-
-  <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
 <body class="dark">
-
   <div class="auth-container">
 
-    <!-- LOGO -->
-    <div class="auth-logo">
-      <img src="assets/img/p54-logo.svg" alt="P54" />
-    </div>
+    <img src="assets/img/pay54-logo.svg" class="auth-logo" alt="P54">
 
-    <h1>Welcome back</h1>
+    <h2>Welcome back</h2>
 
-    <div class="auth-info">
+    <div class="info-box">
       <p>🌍 One wallet for Africa and global currencies.</p>
       <p>⚡ Send, receive, and convert instantly</p>
-      <p class="single-line">🔐 Secure by design with PIN and session protection</p>
+      <p>🔐 Secure by design with PIN and session protection</p>
     </div>
 
-    <input type="email" id="email" placeholder="Email address" required />
-    <input type="password" id="pin" placeholder="PIN" required />
+    <div id="message" class="message"></div>
+
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="pin" placeholder="PIN" required>
 
     <button id="loginBtn">Login</button>
 
-    <a href="forgot-pin.html">Forgot PIN?</a>
-    <a href="signup.html">Create account</a>
+    <div class="auth-links">
+      <a href="forgot-pin.html">Forgot PIN?</a> ·
+      <a href="signup.html">Create account</a>
+    </div>
 
+    <div class="auth-footer">
+      🔒 Bank-grade security · Session & PIN protected
+    </div>
   </div>
 
-  <div class="auth-footer">
-    <span>🔐 Bank-grade security</span>
-    <span>🛡 Session & PIN protected</span>
-    <span>🌍 Built for Africa</span>
-  </div>
-
-  <script src="assets/js/session.js"></script>
   <script src="assets/js/auth/login.js"></script>
-
 </body>
 </html>
