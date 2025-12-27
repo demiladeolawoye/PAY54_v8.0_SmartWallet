@@ -2,37 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PAY54 — Reset PIN</title>
+
   <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
-<body>
+<body class="dark">
 
   <div class="auth-container">
 
-    <img src="assets/img/pay54-logo.svg" alt="P54" class="auth-logo" />
+    <div class="auth-logo">
+      <img src="assets/img/p54-logo.svg" alt="P54" />
+    </div>
 
-    <h2>Reset PIN</h2>
+    <h1>Reset PIN</h1>
     <p class="subtitle">Account recovery</p>
 
-    <form id="resetForm">
-      <input type="email" placeholder="Registered email" required />
-      <div id="msg" class="success"></div>
-      <button type="submit" class="primary">Send reset</button>
-    </form>
+    <input type="email" placeholder="Registered email" required />
 
-    <p style="margin-top:14px;">
-      <a href="login.html">Back to login</a>
-    </p>
+    <button>Send reset</button>
+
+    <a href="login.html">Back to login</a>
 
   </div>
 
-  <script>
-    document.getElementById("resetForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      msg.textContent = "Reset instructions sent securely to your email.";
-    });
-  </script>
+  <div class="auth-footer">
+    <span>🔐 Bank-grade security</span>
+    <span>🛡 Session & PIN protected</span>
+  </div>
+
 </body>
 </html>
