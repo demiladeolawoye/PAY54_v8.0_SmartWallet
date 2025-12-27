@@ -2,32 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PAY54 — Verify OTP</title>
+
   <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 
-<body>
+<body class="dark">
 
   <div class="auth-container">
 
-    <img src="assets/img/pay54-logo.svg" alt="P54" class="auth-logo" />
+    <div class="auth-logo">
+      <img src="assets/img/p54-logo.svg" alt="P54" />
+    </div>
 
-    <h2>Verify OTP</h2>
+    <h1>Verify OTP</h1>
     <p class="subtitle">You’re almost there</p>
 
-    <form id="otpForm">
-      <input type="text" placeholder="Enter 6-digit code" required />
-      <button type="submit" class="primary">Verify</button>
-    </form>
+    <input type="text" placeholder="Enter 6-digit code" required />
+
+    <button>Verify</button>
 
   </div>
 
-  <script>
-    document.getElementById("otpForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      window.location.replace("login.html");
-    });
-  </script>
+  <div class="auth-footer">
+    <span>🔐 Secure verification</span>
+    <span>⚡ Takes seconds</span>
+  </div>
+
 </body>
 </html>
