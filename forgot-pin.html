@@ -1,37 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <title>Reset PIN</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PAY54 — Reset PIN</title>
-
-  <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth.css" />
+  <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
 <body class="dark">
-
   <div class="auth-container">
 
-    <div class="auth-logo">
-      <img src="assets/img/p54-logo.svg" alt="P54" />
-    </div>
+    <img src="assets/img/pay54-logo.svg" class="auth-logo">
 
-    <h1>Reset PIN</h1>
+    <h2>Reset PIN</h2>
     <p class="subtitle">Account recovery</p>
 
-    <input type="email" placeholder="Registered email" required />
+    <div id="message" class="message"></div>
 
-    <button>Send reset</button>
+    <input type="email" id="email" placeholder="Registered email">
 
-    <a href="login.html">Back to login</a>
+    <button id="resetBtn">Send reset</button>
 
+    <div class="auth-links">
+      <a href="login.html">Back to login</a>
+    </div>
   </div>
 
-  <div class="auth-footer">
-    <span>🔐 Bank-grade security</span>
-    <span>🛡 Session & PIN protected</span>
-  </div>
-
+  <script src="assets/js/auth/forgot-pin.js"></script>
 </body>
 </html>
