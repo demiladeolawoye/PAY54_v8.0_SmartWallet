@@ -1,28 +1,18 @@
-// PAY54 Login Logic (Phase 1 Demo)
+document.getElementById("loginBtn").onclick = () => {
+  const email = document.getElementById("email").value;
+  const pin = document.getElementById("pin").value;
+  const msg = document.getElementById("message");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const loginBtn = document.getElementById("loginBtn");
-  const emailInput = document.getElementById("email");
-  const pinInput = document.getElementById("pin");
+  if (!email || !pin) {
+    msg.textContent = "Please enter email and PIN";
+    msg.className = "message error";
+    return;
+  }
 
-  if (!loginBtn) return;
+  msg.textContent = "Login successful. Redirecting…";
+  msg.className = "message success";
 
-  loginBtn.addEventListener("click", () => {
-    const email = emailInput.value.trim();
-    const pin = pinInput.value.trim();
-
-    if (!email || !pin) {
-      alert("Please enter email and PIN");
-      return;
-    }
-
-    // Phase 1 demo authentication (no backend)
-    PAY54Session.createSession({
-      email,
-      loggedInAt: new Date().toISOString()
-    });
-
-    // Redirect to dashboard
+  setTimeout(() => {
     window.location.href = "index.html";
-  });
-});
+  }, 1000);
+};
