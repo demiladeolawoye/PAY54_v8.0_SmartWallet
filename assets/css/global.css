@@ -57,3 +57,22 @@ body.dark {
   opacity: 1 !important;
   filter: none !important;
 }
+/* ==============================
+   PAY54 AUTH LOGO — FINAL FIX
+============================== */
+
+.pay54-auth-brand {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.pay54-auth-brand img {
+  width: 180px;
+  height: auto;
+  display: block;
+  opacity: 1;
+  filter: none;
+}
