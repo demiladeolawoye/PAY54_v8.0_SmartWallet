@@ -5,39 +5,40 @@
   <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 <body>
-  <!-- PAY54 AUTH BRAND (OUTSIDE BASELINE FLOW) -->
+
 <div class="pay54-auth-brand">
   <img src="assets/img/pay54-logo.svg" alt="PAY54" />
 </div>
 
 <div class="auth-wrapper">
 
-    <h1>Welcome back</h1>
+  <h1>Welcome back</h1>
 
-    <div class="info-box">
-      <p>🌍 One wallet for Africa and global currencies</p>
-      <p>⚡ Send, receive, and convert instantly</p>
-      <p>🔐 Secure by design with PIN protection</p>
-    </div>
-
-    <div id="msg" class="message"></div>
-
-    <form onsubmit="login(event)">
-      <input type="email" placeholder="Email" required>
-      <input type="password" placeholder="PIN" required>
-      <button type="submit">Login</button>
-    </form>
-
-    <div class="links">
-      <a href="forgot-pin.html">Forgot PIN?</a>
-      <a href="signup.html">Create account</a>
-    </div>
-
-    <div class="security-banner">
-      🔐 Bank-grade security • Session & PIN protected • Built for Africa
-    </div>
-
+  <div class="info-box">
+    <p>🌍 One wallet for Africa and global currencies</p>
+    <p>⚡ Send, receive, and convert instantly</p>
+    <p>🔐 Secure by design with PIN protection</p>
   </div>
-  <script src="assets/js/auth.js"></script>
+
+  <div id="msg" class="message"></div>
+
+  <form onsubmit="login(event)">
+    <input id="login-email" type="email" placeholder="Email" required>
+    <input id="login-pin" type="password" placeholder="PIN" required>
+    <button type="submit">Login</button>
+  </form>
+
+  <div class="links">
+    <a href="forgot-pin.html">Forgot PIN?</a>
+    <a href="signup.html">Create account</a>
+  </div>
+
+  <div class="security-banner">
+    🔐 Bank-grade security • Session & PIN protected • Built for Africa
+  </div>
+
+</div>
+
+<script src="assets/js/auth.js"></script>
 </body>
 </html>
