@@ -1,93 +1,130 @@
-.auth-container {
+/* ================================
+   PAY54 AUTH — SINGLE SOURCE CSS
+   ================================ */
+
+:root {
+  --bg: radial-gradient(circle at top, #0b1226, #050814);
+  --card: rgba(255,255,255,0.06);
+  --text: #ffffff;
+  --muted: #aab0c6;
+  --blue: #3b82f6;
+  --success: #22c55e;
+  --error: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* === MAIN WRAPPER === */
+.auth-wrapper {
+  width: 100%;
   max-width: 420px;
-  margin: auto;
-  padding: 48px 20px 60px;
+  padding: 32px 20px;
   text-align: center;
 }
 
-/* LOGO — FINAL FIX */
+/* === LOGO (FORCED SIZE — NO FAILURES) === */
 .auth-logo {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 24px;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+}
+
+.auth-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
 
-/* HEADINGS */
-h1, h2 {
-  margin: 0 0 12px;
+/* === HEADINGS === */
+h1 {
   font-size: 28px;
-  font-weight: 700;
+  margin: 0 0 16px;
 }
 
 .subtitle {
-  color: var(--text-muted);
-  margin-bottom: 24px;
+  color: var(--muted);
+  margin-bottom: 18px;
 }
 
-/* INFO BULLETS — UNIFORM ACROSS ALL PAGES */
+/* === INFO BULLETS (UNIFORM ACROSS ALL PAGES) === */
 .info-box {
-  background: rgba(255,255,255,0.04);
+  background: var(--card);
   border-radius: 14px;
-  padding: 16px 18px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
   text-align: left;
-  margin-bottom: 26px;
 }
 
-.info-item {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+.info-box p {
+  margin: 8px 0;
   font-size: 14px;
-  line-height: 1.4;
-  margin-bottom: 10px;
+  color: #e6e9f2;
 }
 
-.info-item:last-child {
-  margin-bottom: 0;
+/* === FORM === */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-/* FORM */
-form input {
-  width: 100%;
-  padding: 14px 16px;
+input {
+  height: 48px;
   border-radius: 12px;
   border: none;
-  margin-bottom: 14px;
+  padding: 0 14px;
   font-size: 15px;
 }
 
 button {
-  width: 100%;
-  padding: 14px;
+  height: 48px;
   border-radius: 14px;
   border: none;
+  background: var(--blue);
+  color: #fff;
   font-size: 16px;
   font-weight: 600;
-  background: var(--primary);
-  color: white;
   cursor: pointer;
 }
 
-.link {
-  display: block;
-  margin-top: 16px;
-  color: var(--primary);
+/* === LINKS === */
+.links {
+  margin-top: 14px;
+}
+
+.links a {
+  color: var(--blue);
   text-decoration: none;
+  display: block;
+  margin-top: 6px;
 }
 
-/* SECURITY FOOTER */
-.security-banner {
-  margin-top: 28px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-/* MESSAGE */
+/* === FEEDBACK === */
 .message {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   font-size: 14px;
 }
 
-.success { color: #22c55e; }
-.error { color: #ef4444; }
+.message.success { color: var(--success); }
+.message.error { color: var(--error); }
+
+/* === BOTTOM SECURITY BANNER === */
+.security-banner {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--muted);
+}
