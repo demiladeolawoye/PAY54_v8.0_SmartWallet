@@ -1,44 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Create account – PAY54</title>
-  <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth.css" />
+  <title>PAY54 — Sign Up</title>
+  <link rel="stylesheet" href="assets/css/auth.css">
 </head>
+<body>
+<div class="auth-wrapper">
 
-<body class="dark">
-  <div class="auth-container">
-
-    <img src="assets/img/pay54-logo.svg" class="auth-logo" />
-
-    <h1>Create your account</h1>
-
-    <div class="info-box">
-      <div class="info-item">🌍 One wallet for Africa and global currencies.</div>
-      <div class="info-item">🚀 Fast, secure onboarding in minutes</div>
-      <div class="info-item">🔐 Protected by PIN & session security</div>
-    </div>
-
-    <div id="msg" class="message"></div>
-
-    <form id="signupForm">
-      <input placeholder="Full name" required />
-      <input type="email" placeholder="Email" required />
-      <input type="password" placeholder="Create PIN" required />
-      <input type="password" placeholder="Confirm PIN" required />
-      <button>Create account</button>
-    </form>
-
-    <a class="link" href="login.html">Already have an account? Login</a>
-
-    <div class="security-banner">
-      🔒 Bank-grade security · Session & PIN protected
-    </div>
-
+  <div class="auth-logo">
+    <img src="assets/img/pay54-logo.svg" alt="P54">
   </div>
 
-  <script src="assets/js/auth/signup.js"></script>
+  <h1>Create your account</h1>
+
+  <div class="info-box">
+    <p>🌍 One wallet for Africa and global currencies</p>
+    <p>🚀 Fast, secure onboarding in minutes</p>
+    <p>🔐 Protected by PIN & session security</p>
+  </div>
+
+  <div id="msg" class="message"></div>
+
+  <form onsubmit="signup(event)">
+    <input type="text" placeholder="Full name" required>
+    <input type="email" placeholder="Email" required>
+    <input type="password" placeholder="Create PIN" required>
+    <input type="password" placeholder="Confirm PIN" required>
+    <button type="submit">Create account</button>
+  </form>
+
+  <div class="links">
+    <a href="login.html">Already have an account? Login</a>
+  </div>
+
+  <div class="security-banner">
+    🔐 Bank-grade security • Session & PIN protected • Built for Africa
+  </div>
+
+</div>
+<script src="assets/js/auth.js"></script>
 </body>
 </html>
