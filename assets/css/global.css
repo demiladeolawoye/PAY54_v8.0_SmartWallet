@@ -17,3 +17,27 @@ body.dark {
   color: var(--text-main);
   min-height: 100vh;
 }
+/* ===== PAY54 AUTH LOGO VISIBILITY FIX ===== */
+
+.auth-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.auth-logo img {
+  width: 140px;          /* Premium desktop size */
+  max-width: 70vw;       /* Mobile-safe */
+  height: auto;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* Mobile optimisation */
+@media (max-width: 480px) {
+  .auth-logo img {
+    width: 120px;
+  }
+}
