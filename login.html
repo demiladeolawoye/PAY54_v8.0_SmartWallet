@@ -1,43 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login – PAY54</title>
-  <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/auth.css" />
+  <title>PAY54 — Login</title>
+  <link rel="stylesheet" href="assets/css/auth.css">
 </head>
+<body>
+  <div class="auth-wrapper">
 
-<body class="dark">
-  <div class="auth-container">
-
-    <img src="assets/img/pay54-logo.svg" class="auth-logo" alt="P54" />
+    <div class="auth-logo">
+      <img src="assets/img/pay54-logo.svg" alt="P54">
+    </div>
 
     <h1>Welcome back</h1>
 
     <div class="info-box">
-      <div class="info-item">🌍 One wallet for Africa and global currencies.</div>
-      <div class="info-item">⚡ Send, receive, and convert instantly</div>
-      <div class="info-item">🔐 Secure by design with PIN and session protection</div>
+      <p>🌍 One wallet for Africa and global currencies</p>
+      <p>⚡ Send, receive, and convert instantly</p>
+      <p>🔐 Secure by design with PIN and session protection</p>
     </div>
 
     <div id="msg" class="message"></div>
 
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="pin" placeholder="PIN" required />
+    <form onsubmit="login(event)">
+      <input type="email" placeholder="Email" required>
+      <input type="password" placeholder="PIN" required>
       <button type="submit">Login</button>
     </form>
 
-    <a class="link" href="forgot-pin.html">Forgot PIN?</a>
-    <a class="link" href="signup.html">Create account</a>
+    <div class="links">
+      <a href="forgot-pin.html">Forgot PIN?</a>
+      <a href="signup.html">Create account</a>
+    </div>
 
     <div class="security-banner">
-      🔒 Bank-grade security · Session & PIN protected
+      🔐 Bank-grade security • Session & PIN protected • Built for Africa
     </div>
 
   </div>
-
-  <script src="assets/js/auth/login.js"></script>
+  <script src="assets/js/auth.js"></script>
 </body>
 </html>
