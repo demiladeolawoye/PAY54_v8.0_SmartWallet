@@ -128,3 +128,16 @@ button {
   font-size: 13px;
   color: var(--muted);
 }
+.pay54-auth-brand {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.pay54-auth-brand img {
+  width: 180px;
+  height: auto;
+  display: block;
+}
