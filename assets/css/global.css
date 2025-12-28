@@ -41,3 +41,19 @@ body.dark {
     width: 120px;
   }
 }
+/* === PAY54 AUTH LOGO FINAL FIX === */
+
+.auth-logo-fixed {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.auth-logo-fixed img {
+  width: 180px;
+  height: auto;
+  opacity: 1 !important;
+  filter: none !important;
+}
