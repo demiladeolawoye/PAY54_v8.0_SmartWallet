@@ -5,13 +5,12 @@
   <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 <body>
-<!-- PAY54 AUTH BRAND (OUTSIDE BASELINE FLOW) -->
+
 <div class="pay54-auth-brand">
   <img src="assets/img/pay54-logo.svg" alt="PAY54" />
 </div>
 
 <div class="auth-wrapper">
-
 
   <h1>Create new PIN</h1>
 
@@ -24,9 +23,9 @@
   <div id="msg" class="message"></div>
 
   <form onsubmit="savePin(event)">
-    <input type="email" placeholder="Email" required>
-    <input type="password" placeholder="Create PIN" required>
-    <input type="password" placeholder="Confirm PIN" required>
+    <input id="reset-email" type="email" placeholder="Email" required>
+    <input id="reset-pin" type="password" placeholder="Create PIN" required>
+    <input id="reset-confirm-pin" type="password" placeholder="Confirm PIN" required>
     <button type="submit">Save & Login</button>
   </form>
 
@@ -35,6 +34,7 @@
   </div>
 
 </div>
+
 <script src="assets/js/auth.js"></script>
 </body>
 </html>
