@@ -44,16 +44,20 @@ function signup(e) {
     return showMessage("PINs do not match");
   }
 
+  // Store account details (mock)
   localStorage.setItem("pay54_email", email);
   localStorage.setItem("pay54_pin", pin);
 
+  // Mark account as pending OTP verification
+  localStorage.setItem("pay54_pending_verification", "true");
+
   showMessage("Account created successfully", "success");
 
-setTimeout(() => {
-  window.location.href = "verify-otp.html";
-}, 1200);
-
+  setTimeout(() => {
+    window.location.href = "verify-otp.html";
+  }, 1200);
 }
+
 
 // ---------- LOGIN ----------
 function login(e) {
