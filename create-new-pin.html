@@ -22,12 +22,41 @@
 
   <div id="msg" class="message"></div>
 
-  <form onsubmit="savePin(event)">
-    <input id="reset-email" type="email" placeholder="Email" required>
-    <input id="reset-pin" type="password" placeholder="Create PIN" required>
-    <input id="reset-confirm-pin" type="password" placeholder="Confirm PIN" required>
-    <button type="submit">Save & Login</button>
-  </form>
+<form onsubmit="savePin(event)" autocomplete="off">
+  <input
+    id="reset-email"
+    type="email"
+    placeholder="Email"
+    required
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    spellcheck="false"
+  >
+
+  <input
+    id="reset-pin"
+    type="password"
+    placeholder="Create PIN"
+    required
+    inputmode="numeric"
+    pattern="[0-9]*"
+    autocomplete="new-password"
+  >
+
+  <input
+    id="reset-confirm-pin"
+    type="password"
+    placeholder="Confirm PIN"
+    required
+    inputmode="numeric"
+    pattern="[0-9]*"
+    autocomplete="new-password"
+  >
+
+  <button type="submit">Save & Login</button>
+</form>
+
 
   <div class="security-banner">
     🔐 Security enforced at every step
