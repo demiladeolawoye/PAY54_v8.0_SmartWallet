@@ -141,3 +141,7 @@ button {
   height: auto;
   display: block;
 }
+/* Add breathing room below logo on auth pages */
+.auth-wrapper h1 {
+  margin-top: 72px;
+}
