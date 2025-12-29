@@ -1,136 +1,162 @@
 /* =========================
-   DASHBOARD HEADER
+   PAY54 DASHBOARD (ISOLATED)
 ========================= */
 
-.dashboard-header {
+:root {
+  --bg-dark: #0b1226;
+  --bg-light: #f6f7fb;
+  --card-dark: rgba(255,255,255,0.06);
+  --card-light: #ffffff;
+  --text-dark: #ffffff;
+  --text-light: #0b1226;
+  --muted: #aab0c6;
+  --blue: #3b82f6;
+}
+
+body.theme-dark {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+body.theme-light {
+  background: var(--bg-light);
+  color: var(--text-light);
+}
+
+/* Header */
+.dash-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  gap: 16px;
-}
-
-/* =========================
-   BRANDING
-========================= */
-
-.brand {
-  display: flex;
   align-items: center;
-  gap: 12px;
+  padding: 16px 20px;
 }
 
-.dash-logo {
-  width: 48px;
-  height: 48px;
+.brand img {
+  height: 28px;
 }
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.brand-name {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-}
-
-.brand-tagline {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-/* =========================
-   CURRENCY ROW
-========================= */
-
-.currency-row {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-}
-
-.currency {
-  font-size: 13px;
-  opacity: 0.55;
-  cursor: pointer;
-  padding-bottom: 4px;
-}
-
-.currency.active {
-  opacity: 1;
-  font-weight: 600;
-  border-bottom: 2px solid #3B82F6;
-}
-
-/* =========================
-   HEADER ACTIONS
-========================= */
 
 .header-actions {
   display: flex;
+  gap: 10px;
   align-items: center;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Profile */
+.profile { position: relative; }
+
+.profile-menu {
+  position: absolute;
+  right: 0;
+  top: 36px;
+  background: var(--card-dark);
+  border-radius: 12px;
+  padding: 10px;
+  display: none;
+  min-width: 180px;
+}
+
+body.theme-light .profile-menu {
+  background: var(--card-light);
+}
+
+.profile-menu .menu-item {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-menu .danger { color: #ef4444; }
+
+/* Main */
+.dash-main {
+  padding: 0 20px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--card-dark);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+body.theme-light .card {
+  background: var(--card-light);
+}
+
+/* Balance */
+.balance-amount {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+/* Currencies */
+.currency-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.currency {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.currency.active {
+  background: var(--blue);
+}
+
+/* FX */
+.fx-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-.header-actions button {
-  background: none;
+.fx-field label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.fx-field input,
+.fx-field select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 12px;
   border: none;
+}
+
+.primary-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  background: var(--blue);
   color: #fff;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 14px;
 }
 
-/* =========================
-   PLACEHOLDER
-========================= */
-
-.dashboard-placeholder {
-  padding: 48px 20px;
+/* Empty */
+.empty {
+  color: var(--muted);
   text-align: center;
-  opacity: 0.7;
-}
-
-/* =========================
-   MOBILE — INTENTIONAL LAYOUT
-========================= */
-
-@media (max-width: 768px) {
-
-  .dashboard-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 14px;
-  }
-
-  .brand {
-    justify-content: center;
-  }
-
-  .dash-logo {
-    width: 52px;
-    height: 52px;
-  }
-
-  .brand-name {
-    font-size: 18px;
-  }
-
-  .brand-tagline {
-    font-size: 13px;
-  }
-
-  .currency-row {
-    order: 2;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .header-actions {
-    order: 3;
-  }
+  padding: 20px 0;
 }
