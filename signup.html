@@ -23,13 +23,52 @@
 
   <div id="msg" class="message"></div>
 
-  <form onsubmit="signup(event)">
-    <input id="signup-name" type="text" placeholder="Full name" required>
-    <input id="signup-email" type="email" placeholder="Email" required>
-    <input id="signup-pin" type="password" placeholder="Create PIN" required>
-    <input id="signup-confirm-pin" type="password" placeholder="Confirm PIN" required>
-    <button type="submit">Create account</button>
-  </form>
+ <form onsubmit="signup(event)" autocomplete="off">
+  <input
+    id="signup-name"
+    type="text"
+    placeholder="Full name"
+    required
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="words"
+    spellcheck="false"
+  >
+
+  <input
+    id="signup-email"
+    type="email"
+    placeholder="Email"
+    required
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    spellcheck="false"
+  >
+
+  <input
+    id="signup-pin"
+    type="password"
+    placeholder="Create PIN"
+    required
+    inputmode="numeric"
+    pattern="[0-9]*"
+    autocomplete="new-password"
+  >
+
+  <input
+    id="signup-confirm-pin"
+    type="password"
+    placeholder="Confirm PIN"
+    required
+    inputmode="numeric"
+    pattern="[0-9]*"
+    autocomplete="new-password"
+  >
+
+  <button type="submit">Create account</button>
+</form>
+
 
   <div class="links">
     <a href="login.html">Already have an account? Login</a>
