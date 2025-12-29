@@ -5,35 +5,49 @@
   <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 <body>
-<!-- PAY54 AUTH BRAND (OUTSIDE BASELINE FLOW) -->
+
+<!-- PAY54 AUTH BRAND -->
 <div class="pay54-auth-brand">
   <img src="assets/img/pay54-logo.svg" alt="PAY54" />
 </div>
 
 <div class="auth-wrapper">
 
-
-  <h1>Verify OTP</h1>
-  <p class="subtitle">You're almost there</p>
+  <h1>Verify your account</h1>
 
   <div class="info-box">
-    <p>🔐 Secure verification</p>
-    <p>⚡ Takes seconds</p>
-    <p>🛡 Bank-grade protection</p>
+    <p>📩 Enter the 6-digit code sent to your email</p>
+    <p>⏱  Code expires shortly</p>
+    <p>🔐 This keeps your account secure</p>
   </div>
 
   <div id="msg" class="message"></div>
 
-  <form onsubmit="verifyOTP(event)">
-    <input type="text" placeholder="Enter 6-digit code" required>
-    <button type="submit">Verify</button>
+  <form onsubmit="verifyOtp(event)" autocomplete="off">
+    <input
+      id="otp"
+      type="text"
+      placeholder="Enter 6-digit OTP"
+      required
+      inputmode="numeric"
+      pattern="[0-9]*"
+      maxlength="6"
+      autocomplete="off"
+    >
+
+    <button type="submit">Verify & Continue</button>
   </form>
 
+  <div class="links">
+    <a href="#">Resend code</a>
+  </div>
+
   <div class="security-banner">
-    🔐 Secure verification • Bank-grade protection
+    🔐 Secure verification • One-time use code
   </div>
 
 </div>
+
 <script src="assets/js/auth.js"></script>
 </body>
 </html>
