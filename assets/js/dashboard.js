@@ -10,13 +10,13 @@ let activeCurrency = "NGN";
 
 /* Mock balances (demo only) */
 const balances = {
-  NGN: 0.00,
-  GBP: 0.00,
-  USD: 0.00,
-  EUR: 0.00,
-  GHS: 0.00,
-  KES: 0.00,
-  ZAR: 0.00
+  NGN: 1250000.50,
+  GBP: 8420.75,
+  USD: 15320.40,
+  EUR: 11890.20,
+  GHS: 9650.00,
+  KES: 132450.00,
+  ZAR: 27890.60
 };
 
 /* Currency symbols */
