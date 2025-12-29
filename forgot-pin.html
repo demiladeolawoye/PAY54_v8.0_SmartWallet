@@ -22,10 +22,21 @@
 
   <div id="msg" class="message"></div>
 
-  <form onsubmit="sendReset(event)">
-    <input type="email" placeholder="Registered email" required>
-    <button type="submit">Send reset</button>
-  </form>
+  <form onsubmit="sendReset(event)" autocomplete="off">
+  <input
+    id="forgot-email"
+    type="email"
+    placeholder="Registered email"
+    required
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    spellcheck="false"
+  >
+
+  <button type="submit">Send reset</button>
+</form>
+
 
   <div class="links">
     <a href="login.html">Back to login</a>
