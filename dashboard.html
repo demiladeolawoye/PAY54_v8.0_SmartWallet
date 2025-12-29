@@ -2,74 +2,135 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>PAY54 — Dashboard</title>
+  <title>PAY54 — Smart Wallet Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="assets/css/global.css">
-  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <!-- Global + Dashboard styles -->
+  <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
 </head>
-<body class="theme-dark">
+<body>
 
+<!-- ================= HEADER ================= -->
 <header class="dash-header">
-  <div class="brand">
-    <img src="assets/img/pay54-logo.svg" alt="PAY54">
+  <div class="header-left">
+    <img src="assets/img/pay54-logo.svg" alt="PAY54" class="logo" />
+    <span class="brand-tagline">One Wallet • Everywhere</span>
+  </div>
+
+  <div class="header-currencies" id="currencyRow">
+    <button class="currency active" data-cur="NGN">NGN</button>
+    <button class="currency" data-cur="GBP">GBP</button>
+    <button class="currency" data-cur="USD">USD</button>
+    <button class="currency" data-cur="EUR">EUR</button>
+    <button class="currency" data-cur="GHS">GHS</button>
+    <button class="currency" data-cur="KES">KES</button>
+    <button class="currency" data-cur="ZAR">ZAR</button>
   </div>
 
   <div class="header-actions">
-    <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
+    <button id="themeToggle" class="icon-btn" title="Toggle theme">🌙</button>
 
     <div class="profile">
-      <button id="profileBtn" class="icon-btn" aria-label="Profile">👤</button>
+      <button id="profileBtn" class="icon-btn">👤</button>
       <div id="profileMenu" class="profile-menu">
         <div class="profile-meta">
-          <div class="name">User</div>
-          <div class="email" id="profileEmail">—</div>
+          <strong>Demi</strong>
+          <small>PAY54 demo profile</small>
         </div>
         <button class="menu-item">Profile</button>
         <button class="menu-item">Settings</button>
         <hr />
-        <button id="logoutBtn" class="menu-item danger">Logout</button>
+        <button class="menu-item danger">Logout</button>
       </div>
     </div>
   </div>
 </header>
 
-<main class="dash-main">
+<!-- ================= MAIN ================= -->
+<main class="dashboard">
 
   <!-- BALANCE -->
   <section class="card balance-card">
-    <div class="balance-top">
-      <span class="balance-label">Available balance</span>
-      <span class="kyc">KYC: Level 2</span>
+    <div class="balance-header">
+      <span class="label">Total balance</span>
+      <div class="balance-actions">
+        <button class="ghost-btn">Add money</button>
+        <button class="ghost-btn">Withdraw</button>
+      </div>
     </div>
 
-    <div class="balance-amount" id="balanceAmount">₦ 0.00</div>
+    <div id="balanceAmount" class="balance-amount">₦ 0.00</div>
 
-    <div class="balance-meta">
-      <span>Acct: <strong>3001234567</strong></span>
-      <span>PAY54 Tag: <strong>@pay54-user</strong></span>
-    </div>
-
-    <div class="compliance">
-      🔐 Bank-grade security • Regulated rails • Session & PIN protected
+    <div class="balance-footnote">
+      FX wallets enabled • Device + PIN secured
     </div>
   </section>
 
-  <!-- CURRENCIES ROW -->
-  <section class="card currencies">
-    <h3>Wallets</h3>
-    <div class="currency-row" id="currencyRow">
-      <button class="currency active" data-cur="NGN">NGN</button>
-      <button class="currency" data-cur="GBP">GBP</button>
-      <button class="currency" data-cur="USD">USD</button>
-      <button class="currency" data-cur="EUR">EUR</button>
-      <button class="currency" data-cur="GHS">GHS</button>
-      <button class="currency" data-cur="KES">KES</button>
-      <button class="currency" data-cur="ZAR">ZAR</button>
-    </div>
-  </section>
+  <!-- GRID -->
+  <section class="dashboard-grid">
 
+    <!-- MONEY MOVES -->
+    <div class="card">
+      <h3>Money moves</h3>
+      <div class="action-grid">
+        <button>Send PAY54 → PAY54</button>
+        <button>Receive</button>
+        <button>Add money</button>
+        <button>Withdraw</button>
+        <button>Bank transfer</button>
+        <button>Request money</button>
+      </div>
+    </div>
+
+    <!-- SERVICES -->
+    <div class="card">
+      <h3>Services</h3>
+      <div class="action-grid">
+        <button>Cross-border FX</button>
+        <button>Savings</button>
+        <button>Pay bills</button>
+        <button>Virtual & linked cards</button>
+        <button>Shop on the Fly</button>
+        <button>Investments & stocks</button>
+        <button>Bet funding</button>
+        <button>Become an Agent</button>
+      </div>
+    </div>
+
+    <!-- REQUESTS -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Requests & alerts</h3>
+        <button class="ghost-btn">Clear all</button>
+      </div>
+      <p class="muted">No requests yet</p>
+    </div>
+
+    <!-- SHORTCUTS -->
+    <div class="card">
+      <h3>Quick shortcuts</h3>
+      <div class="action-grid">
+        <button>Open savings pot</button>
+        <button>Shop on the Fly</button>
+        <button>Invest & stocks</button>
+        <button>Become an Agent</button>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Recent transactions</h3>
+        <button class="ghost-btn">View all</button>
+      </div>
+      <p class="muted">No transactions yet</p>
+    </div>
+
+  </section>
 </main>
 
+<!-- Dashboard logic -->
 <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
