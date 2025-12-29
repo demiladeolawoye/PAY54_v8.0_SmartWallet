@@ -1,10 +1,10 @@
 /* ==========================
-   PAY54 AUTH LOGIC (OPTION 2)
+   PAY54 AUTH LOGIC (OPTION 2 — STABLE)
 ========================== */
 
 const PIN_REGEX = /^\d{4}$/;
 
-// Utility
+// ---------- Utilities ----------
 function showMessage(text, type = "error") {
   const msg = document.getElementById("msg");
   if (!msg) return;
@@ -12,17 +12,18 @@ function showMessage(text, type = "error") {
   msg.className = "message " + type;
 }
 
-// Clear sensitive autofill on load (signup & reset)
+// ---------- Force clean auth state on load ----------
 window.addEventListener("load", () => {
-  const page = window.location.pathname;
+  // Never auto-fill PINs
+  localStorage.removeItem("pay54_pin");
 
-  if (page.includes("signup") || page.includes("create-new-pin")) {
-    localStorage.removeItem("pay54_email");
-    localStorage.removeItem("pay54_pin");
-  }
+  // Force-clear all inputs (beats browser autofill)
+  document.querySelectorAll("input").forEach(input => {
+    input.value = "";
+  });
 });
 
-/* ---------- SIGN UP ---------- */
+// ---------- SIGN UP ----------
 function signup(e) {
   e.preventDefault();
 
@@ -53,7 +54,7 @@ function signup(e) {
   }, 1200);
 }
 
-/* ---------- LOGIN ---------- */
+// ---------- LOGIN ----------
 function login(e) {
   e.preventDefault();
 
@@ -82,7 +83,30 @@ function login(e) {
   }, 1000);
 }
 
-/* ---------- RESET PIN ---------- */
+// ---------- FORGOT PIN ----------
+function sendReset(e) {
+  e.preventDefault();
+
+  const emailInput = document.querySelector("input[type='email']");
+  const email = emailInput.value.trim();
+  const storedEmail = localStorage.getItem("pay54_email");
+
+  if (!email) {
+    return showMessage("Please enter your registered email");
+  }
+
+  if (email !== storedEmail) {
+    return showMessage("Email not recognised");
+  }
+
+  showMessage("Reset verified. Create a new PIN", "success");
+
+  setTimeout(() => {
+    window.location.href = "create-new-pin.html";
+  }, 1200);
+}
+
+// ---------- CREATE NEW PIN ----------
 function savePin(e) {
   e.preventDefault();
 
