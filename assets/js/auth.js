@@ -137,3 +137,22 @@ function savePin(e) {
     window.location.href = "login.html";
   }, 1200);
 }
+/* ---------- VERIFY OTP ---------- */
+function verifyOtp(e) {
+  e.preventDefault();
+
+  const otp = document.getElementById("otp").value.trim();
+
+  if (!/^\d{6}$/.test(otp)) {
+    return showMessage("OTP must be 6 digits");
+  }
+
+  // Mock verification success
+  localStorage.removeItem("pay54_pending_verification");
+
+  showMessage("Verification successful", "success");
+
+  setTimeout(() => {
+    window.location.href = "login.html";
+  }, 1200);
+}
