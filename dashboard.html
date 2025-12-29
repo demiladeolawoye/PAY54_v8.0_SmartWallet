@@ -1,1 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PAY54 — Dashboard</title>
 
+  <!-- Global + Dashboard only (NO auth.css) -->
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body class="theme-dark">
+
+  <!-- HEADER -->
+  <header class="dash-header">
+    <div class="brand">
+      <img src="assets/img/pay54-logo.svg" alt="PAY54" />
+    </div>
+
+    <div class="header-actions">
+      <!-- Theme toggle (always visible) -->
+      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
+
+      <!-- Profile -->
+      <div class="profile">
+        <button id="profileBtn" class="icon-btn" aria-label="Profile">👤</button>
+        <div id="profileMenu" class="profile-menu">
+          <div class="profile-meta">
+            <div class="name">User</div>
+            <div class="email" id="profileEmail">—</div>
+          </div>
+          <button class="menu-item">Profile</button>
+          <button class="menu-item">Settings</button>
+          <hr />
+          <button id="logoutBtn" class="menu-item danger">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+
+    <!-- BALANCE CARD -->
+    <section class="card balance-card">
+      <div class="balance-label">Total balance</div>
+      <div class="balance-amount">₦ 0.00</div>
+      <div class="balance-sub">Mock values • Demo</div>
+    </section>
+
+    <!-- CURRENCIES ROW (WALLET) -->
+    <section class="card currencies">
+      <h3>Wallets</h3>
+      <div class="currency-row">
+        <div class="currency active">NGN</div>
+        <div class="currency">GBP</div>
+        <div class="currency">USD</div>
+        <div class="currency">EUR</div>
+        <div class="currency">GHS</div>
+        <div class="currency">KES</div>
+      </div>
+    </section>
+
+    <!-- FX MODULE -->
+    <section class="card fx">
+      <h3>Cross-border FX</h3>
+
+      <div class="fx-grid">
+        <div class="fx-field">
+          <label>You send</label>
+          <select id="fxSend">
+            <option>USD</option>
+            <option>GBP</option>
+            <option>EUR</option>
+            <option>CAD</option>
+            <option>AED</option>
+            <option>AUD</option>
+          </select>
+          <input type="number" placeholder="Amount" />
+        </div>
+
+        <div class="fx-field">
+          <label>They receive</label>
+          <select id="fxReceive">
+            <option>NGN</option>
+            <option>GHS</option>
+            <option>KES</option>
+            <option>USD</option>
+            <option>EUR</option>
+          </select>
+          <input type="text" placeholder="Estimated amount" disabled />
+        </div>
+      </div>
+
+      <div class="fx-meta">
+        <span>Rate: Mock</span>
+        <span>Fee: Mock</span>
+      </div>
+
+      <button class="primary-btn">Convert</button>
+    </section>
+
+    <!-- TRANSACTIONS (EMPTY STATE) -->
+    <section class="card tx">
+      <h3>Recent activity</h3>
+      <div class="empty">No transactions yet</div>
+    </section>
+
+  </main>
+
+  <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
