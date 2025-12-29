@@ -14,10 +14,7 @@ function showMessage(text, type = "error") {
 
 // ---------- Force clean auth state on load ----------
 window.addEventListener("load", () => {
-  // Never auto-fill PINs
-  localStorage.removeItem("pay54_pin");
-
-  // Force-clear all inputs (beats browser autofill)
+  // Force-clear input fields only (prevents browser autofill)
   document.querySelectorAll("input").forEach(input => {
     input.value = "";
   });
