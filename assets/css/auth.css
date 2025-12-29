@@ -161,3 +161,24 @@ button {
   width: 20px;
   flex-shrink: 0;
 }
+/* === FIX: BULLET ICON ALIGNMENT (ALL AUTH PAGES) === */
+.info-box p {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+/* Force emoji/icon column to fixed width */
+.info-box p::before {
+  content: attr(data-icon);
+  display: inline-block;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Remove emoji spacing inconsistencies */
+.info-box p {
+  white-space: normal;
+}
