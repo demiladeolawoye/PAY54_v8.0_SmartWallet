@@ -49,9 +49,10 @@ function signup(e) {
 
   showMessage("Account created successfully", "success");
 
-  setTimeout(() => {
-    window.location.href = "login.html";
-  }, 1200);
+setTimeout(() => {
+  window.location.href = "verify-otp.html";
+}, 1200);
+
 }
 
 // ---------- LOGIN ----------
