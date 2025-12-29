@@ -4,109 +4,72 @@
   <meta charset="UTF-8" />
   <title>PAY54 — Dashboard</title>
 
-  <!-- Global + Dashboard only (NO auth.css) -->
   <link rel="stylesheet" href="assets/css/global.css">
   <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 <body class="theme-dark">
 
-  <!-- HEADER -->
-  <header class="dash-header">
-    <div class="brand">
-      <img src="assets/img/pay54-logo.svg" alt="PAY54" />
-    </div>
+<header class="dash-header">
+  <div class="brand">
+    <img src="assets/img/pay54-logo.svg" alt="PAY54">
+  </div>
 
-    <div class="header-actions">
-      <!-- Theme toggle (always visible) -->
-      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
+  <div class="header-actions">
+    <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
 
-      <!-- Profile -->
-      <div class="profile">
-        <button id="profileBtn" class="icon-btn" aria-label="Profile">👤</button>
-        <div id="profileMenu" class="profile-menu">
-          <div class="profile-meta">
-            <div class="name">User</div>
-            <div class="email" id="profileEmail">—</div>
-          </div>
-          <button class="menu-item">Profile</button>
-          <button class="menu-item">Settings</button>
-          <hr />
-          <button id="logoutBtn" class="menu-item danger">Logout</button>
+    <div class="profile">
+      <button id="profileBtn" class="icon-btn" aria-label="Profile">👤</button>
+      <div id="profileMenu" class="profile-menu">
+        <div class="profile-meta">
+          <div class="name">User</div>
+          <div class="email" id="profileEmail">—</div>
         </div>
+        <button class="menu-item">Profile</button>
+        <button class="menu-item">Settings</button>
+        <hr />
+        <button id="logoutBtn" class="menu-item danger">Logout</button>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <!-- MAIN -->
-  <main class="dash-main">
+<main class="dash-main">
 
-    <!-- BALANCE CARD -->
-    <section class="card balance-card">
-      <div class="balance-label">Total balance</div>
-      <div class="balance-amount">₦ 0.00</div>
-      <div class="balance-sub">Mock values • Demo</div>
-    </section>
+  <!-- BALANCE -->
+  <section class="card balance-card">
+    <div class="balance-top">
+      <span class="balance-label">Available balance</span>
+      <span class="kyc">KYC: Level 2</span>
+    </div>
 
-    <!-- CURRENCIES ROW (WALLET) -->
-    <section class="card currencies">
-      <h3>Wallets</h3>
-      <div class="currency-row">
-        <div class="currency active">NGN</div>
-        <div class="currency">GBP</div>
-        <div class="currency">USD</div>
-        <div class="currency">EUR</div>
-        <div class="currency">GHS</div>
-        <div class="currency">KES</div>
-      </div>
-    </section>
+    <div class="balance-amount" id="balanceAmount">₦ 0.00</div>
 
-    <!-- FX MODULE -->
-    <section class="card fx">
-      <h3>Cross-border FX</h3>
+    <div class="balance-meta">
+      <span>Acct: <strong>3001234567</strong></span>
+      <span>PAY54 Tag: <strong>@pay54-user</strong></span>
+    </div>
 
-      <div class="fx-grid">
-        <div class="fx-field">
-          <label>You send</label>
-          <select id="fxSend">
-            <option>USD</option>
-            <option>GBP</option>
-            <option>EUR</option>
-            <option>CAD</option>
-            <option>AED</option>
-            <option>AUD</option>
-          </select>
-          <input type="number" placeholder="Amount" />
-        </div>
+    <div class="compliance">
+      🔐 Bank-grade security • Regulated rails • Session & PIN protected
+    </div>
+  </section>
 
-        <div class="fx-field">
-          <label>They receive</label>
-          <select id="fxReceive">
-            <option>NGN</option>
-            <option>GHS</option>
-            <option>KES</option>
-            <option>USD</option>
-            <option>EUR</option>
-          </select>
-          <input type="text" placeholder="Estimated amount" disabled />
-        </div>
-      </div>
+  <!-- CURRENCIES ROW -->
+  <section class="card currencies">
+    <h3>Wallets</h3>
+    <div class="currency-row" id="currencyRow">
+      <button class="currency active" data-cur="NGN">NGN</button>
+      <button class="currency" data-cur="GBP">GBP</button>
+      <button class="currency" data-cur="USD">USD</button>
+      <button class="currency" data-cur="EUR">EUR</button>
+      <button class="currency" data-cur="GHS">GHS</button>
+      <button class="currency" data-cur="KES">KES</button>
+      <button class="currency" data-cur="ZAR">ZAR</button>
+    </div>
+  </section>
 
-      <div class="fx-meta">
-        <span>Rate: Mock</span>
-        <span>Fee: Mock</span>
-      </div>
+</main>
 
-      <button class="primary-btn">Convert</button>
-    </section>
-
-    <!-- TRANSACTIONS (EMPTY STATE) -->
-    <section class="card tx">
-      <h3>Recent activity</h3>
-      <div class="empty">No transactions yet</div>
-    </section>
-
-  </main>
-
-  <script src="assets/js/dashboard.js"></script>
+<script src="assets/js/dashboard.js"></script>
 </body>
 </html>
