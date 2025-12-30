@@ -1,145 +1,59 @@
-:root {
-  --bg: radial-gradient(circle at top, #0b1226, #050814);
-  --card: rgba(255,255,255,0.06);
-  --border: rgba(255,255,255,0.08);
-  --text: #ffffff;
-  --muted: #aab0c6;
-  --blue: #3b82f6;
-}
+/* =============================
+   DASHBOARD BODY STYLES
+   ============================= */
 
-* {
-  box-sizing: border-box;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* ================= HEADER ================= */
-.dash-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 24px;
-  border-bottom: 1px solid var(--border);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo {
-  height: 36px;
-}
-
-.brand-tagline {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.header-currencies {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.currency {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: none;
-  color: var(--text);
-  cursor: pointer;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.currency.active {
-  background: var(--blue);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.icon-btn {
-  background: rgba(255,255,255,0.08);
-  border: none;
-  border-radius: 999px;
-  padding: 8px 10px;
-  cursor: pointer;
-  color: var(--text);
-}
-
-/* Profile */
-.profile {
-  position: relative;
-}
-
-.profile-menu {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: 48px;
-  background: #0b1226;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  width: 180px;
-}
-
-.profile:hover .profile-menu {
-  display: block;
-}
-
-.profile-meta {
-  margin-bottom: 10px;
-}
-
-.menu-item {
-  width: 100%;
-  background: none;
-  border: none;
-  color: var(--text);
-  text-align: left;
-  padding: 6px 0;
-  cursor: pointer;
-}
-
-.menu-item.danger {
-  color: #ef4444;
-}
-
-/* ================= MAIN ================= */
 .dashboard {
   padding: 24px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+/* Columns */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 /* Cards */
 .card {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   padding: 18px;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Section headers */
+.section-header h3 {
+  margin: 0;
+  font-size: 18px;
 }
 
-.balance-card {
-  margin-bottom: 24px;
+.section-header p {
+  margin: 4px 0 12px;
+  color: #aab0c6;
+  font-size: 13px;
 }
 
+.section-label {
+  font-size: 12px;
+  color: #aab0c6;
+  letter-spacing: 0.08em;
+}
+
+/* Balance card */
 .balance-header {
   display: flex;
   justify-content: space-between;
@@ -149,49 +63,101 @@ body {
 .balance-amount {
   font-size: 36px;
   font-weight: 700;
-  margin: 12px 0;
+  margin: 10px 0;
 }
 
-.balance-footnote {
+.balance-subtext {
   font-size: 13px;
-  color: var(--muted);
+  color: #aab0c6;
 }
 
+.balance-meta {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.balance-footer {
+  font-size: 12px;
+  color: #aab0c6;
+}
+
+/* Buttons */
 .ghost-btn {
   background: rgba(255,255,255,0.08);
   border: none;
   border-radius: 999px;
   padding: 6px 12px;
-  color: var(--text);
+  color: #fff;
   cursor: pointer;
   font-size: 13px;
 }
 
-/* Grid */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
+.ghost-btn.small {
+  padding: 4px 10px;
+  font-size: 12px;
 }
 
-.action-grid {
+/* Pill grids */
+.pill-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 12px;
+}
+
+.pill {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: left;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+}
+
+.pill small {
+  display: block;
+  margin-top: 4px;
+  color: #aab0c6;
+  font-size: 12px;
+}
+
+/* Right column */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.empty-state {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #aab0c6;
+}
+
+/* Quick shortcuts */
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   margin-top: 12px;
 }
 
-.action-grid button {
-  background: rgba(255,255,255,0.08);
-  border: none;
-  border-radius: 12px;
-  padding: 10px;
-  color: var(--text);
+.shortcut {
+  border: 1px dashed rgba(255,255,255,0.25);
+  background: transparent;
+  border-radius: 14px;
+  padding: 14px;
+  color: #fff;
   cursor: pointer;
   font-size: 14px;
 }
 
-.muted {
-  color: var(--muted);
-  font-size: 14px;
+/* Responsive */
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }
