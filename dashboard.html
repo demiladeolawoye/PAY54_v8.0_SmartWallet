@@ -4,81 +4,72 @@
   <meta charset="UTF-8" />
   <title>PAY54 — Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/dashboard.css" />
 </head>
-<body>
+<body class="dashboard">
 
-<!-- ================= HEADER (UNCHANGED) ================= -->
-<header class="dash-header">
-  <div class="header-left">
-    <img src="assets/img/pay54-logo.svg" alt="PAY54" class="logo" />
-    <span class="brand-tagline">One Wallet • Everywhere</span>
-  </div>
-
-  <div class="header-currencies" id="currencyRow">
-    <button class="currency active" data-cur="NGN">NGN</button>
-    <button class="currency" data-cur="GBP">GBP</button>
-    <button class="currency" data-cur="USD">USD</button>
-    <button class="currency" data-cur="EUR">EUR</button>
-    <button class="currency" data-cur="GHS">GHS</button>
-    <button class="currency" data-cur="KES">KES</button>
-    <button class="currency" data-cur="ZAR">ZAR</button>
-  </div>
-
-  <div class="header-actions">
-    <button id="themeToggle" class="icon-btn" title="Toggle theme">🌙</button>
-
-    <div class="profile">
-      <button id="profileBtn" class="icon-btn">👤</button>
-      <div id="profileMenu" class="profile-menu">
-        <div class="profile-meta">
-          <strong>User</strong>
-          <small id="profileEmail">—</small>
-        </div>
-        <button class="menu-item">Profile</button>
-        <button class="menu-item">Settings</button>
-        <hr />
-        <button class="menu-item danger">Logout</button>
+  <!-- ================= HEADER (UNCHANGED STRUCTURE) ================= -->
+  <header class="dashboard-header">
+    <div class="brand">
+      <img src="assets/img/pay54-logo.svg" alt="PAY54" />
+      <div class="brand-text">
+        <strong>PAY54</strong>
+        <span>ONE WALLET • EVERYWHERE</span>
       </div>
     </div>
-  </div>
-</header>
 
-<!-- ================= DASHBOARD BODY ================= -->
-<main class="dashboard">
+    <div class="currency-switch">
+      <button class="active">NGN</button>
+      <button>GBP</button>
+      <button>USD</button>
+      <button>EUR</button>
+      <button>GHS</button>
+      <button>KES</button>
+      <button>ZAR</button>
+    </div>
 
-  <div class="dashboard-grid">
+    <div class="user-area">
+      <div class="profile">
+        <span class="avatar">D</span>
+        <div>
+          <strong>Demi</strong>
+          <small>PAY54 demo</small>
+        </div>
+      </div>
+      <button class="ghost">Logout</button>
+    </div>
+  </header>
 
-    <!-- ========== LEFT COLUMN (PRIMARY) ========== -->
+  <!-- ================= MAIN GRID ================= -->
+  <main class="dashboard-grid">
+
+    <!-- ===== LEFT COLUMN ===== -->
     <section class="left-column">
 
-      <!-- TOTAL BALANCE (HERO) -->
-      <div class="card balance-card">
-        <div class="balance-header">
-          <span class="section-label">TOTAL BALANCE</span>
-
-          <div class="balance-actions">
-            <button class="ghost-btn">Add money</button>
-            <button class="ghost-btn">Withdraw</button>
+      <!-- TOTAL BALANCE (HERO CARD) -->
+      <div class="card hero-balance">
+        <div class="hero-header">
+          <span class="label">TOTAL BALANCE</span>
+          <div class="hero-actions">
+            <button class="primary">Add money</button>
+            <button class="secondary">Withdraw</button>
           </div>
         </div>
 
-        <div id="balanceAmount" class="balance-amount">₦ 0.00</div>
-
-        <div class="balance-subtext">
-          FX wallets enabled · Device + PIN secured
-        </div>
+        <div class="balance-amount">₦ 1,250,000.50</div>
 
         <div class="balance-meta">
+          FX wallets enabled • Device + PIN secured
+        </div>
+
+        <div class="identity-row">
           <span>Acct: <strong>3001234567</strong></span>
           <span>Tag: <strong>@pay54-user</strong></span>
           <span>KYC: <strong>Level 2</strong></span>
         </div>
 
-        <div class="balance-footer">
-          🔐 Security & Financial compliance active
+        <div class="compliance">
+          🔒 Security & financial compliance active
         </div>
       </div>
 
@@ -89,15 +80,31 @@
           <p>Instant P2P + banks + QR requests</p>
         </div>
 
-        <div class="pill-grid">
-          <button class="pill">Send PAY54 → PAY54<br><small>Instant P2P transfers</small></button>
-          <button class="pill">Receive<br><small>Account, tag & QR</small></button>
-
-          <button class="pill">Add money<br><small>Card · Bank · Agents</small></button>
-          <button class="pill">Withdraw<br><small>Bank · Agents</small></button>
-
-          <button class="pill">Bank transfer<br><small>To NG banks & wallets</small></button>
-          <button class="pill">Request money<br><small>With notifications</small></button>
+        <div class="tile-grid">
+          <div class="tile">
+            <strong>Send PAY54 → PAY54</strong>
+            <span>Instant P2P transfers</span>
+          </div>
+          <div class="tile">
+            <strong>Receive</strong>
+            <span>Account, tag & QR</span>
+          </div>
+          <div class="tile">
+            <strong>Add money</strong>
+            <span>Card · Bank · Agents</span>
+          </div>
+          <div class="tile">
+            <strong>Withdraw</strong>
+            <span>Bank · Agents</span>
+          </div>
+          <div class="tile">
+            <strong>Bank transfer</strong>
+            <span>To NG banks & wallets</span>
+          </div>
+          <div class="tile">
+            <strong>Request money</strong>
+            <span>With notification list</span>
+          </div>
         </div>
       </div>
 
@@ -108,63 +115,74 @@
           <p>FX, bills, cards, checkout, agents & more</p>
         </div>
 
-        <div class="pill-grid">
-          <button class="pill">Cross-border FX</button>
-          <button class="pill">Savings<br><small>Goals & pots</small></button>
-
-          <button class="pill">Pay bills<br><small>Airtime · Data · Power · TV</small></button>
-          <button class="pill">Virtual & linked cards</button>
-
-          <button class="pill">PAY54 Smart Checkout<br><small>Approve e-commerce payments</small></button>
-          <button class="pill">Shop on the Fly<br><small>Food · Tickets · Transfers</small></button>
-
-          <button class="pill">Investments & stocks<br><small>Local & global assets</small></button>
-          <button class="pill">Bet funding<br><small>18+ verification</small></button>
-
-          <button class="pill">AI Risk Watch<br><small>Suspicious activity alerts</small></button>
-          <button class="pill">Become an Agent<br><small>Onboard & earn</small></button>
+        <div class="tile-grid">
+          <div class="tile">Cross-border FX</div>
+          <div class="tile">Savings</div>
+          <div class="tile">Pay bills</div>
+          <div class="tile">Virtual & linked cards</div>
+          <div class="tile">PAY54 Smart Checkout</div>
+          <div class="tile">Shop on the Fly</div>
+          <div class="tile">Investments & stocks</div>
+          <div class="tile">Bet funding</div>
+          <div class="tile">AI Risk Watch</div>
+          <div class="tile">Become an Agent</div>
         </div>
       </div>
 
     </section>
 
-    <!-- ========== RIGHT COLUMN ========== -->
+    <!-- ===== RIGHT COLUMN ===== -->
     <aside class="right-column">
 
-      <!-- REQUESTS & ALERTS -->
+      <!-- REQUESTS -->
       <div class="card">
-        <div class="card-header">
+        <div class="section-header row">
           <h3>Requests & alerts</h3>
-          <button class="ghost-btn small">Clear all</button>
+          <button class="ghost">Clear all</button>
         </div>
         <div class="empty-state">No requests or alerts</div>
       </div>
 
       <!-- QUICK SHORTCUTS -->
       <div class="card">
-        <h3>Quick shortcuts</h3>
+        <div class="section-header">
+          <h3>Quick shortcuts</h3>
+        </div>
+
         <div class="shortcut-grid">
-          <button class="shortcut">Become an Agent</button>
-          <button class="shortcut">Shop on the Fly</button>
-          <button class="shortcut">Open Savings Pot</button>
-          <button class="shortcut">Invest & Stocks</button>
+          <div class="shortcut">Become an Agent</div>
+          <div class="shortcut">Shop on the Fly</div>
+          <div class="shortcut">Open Savings Pot</div>
+          <div class="shortcut">Invest & Stocks</div>
         </div>
       </div>
 
       <!-- RECENT TRANSACTIONS -->
       <div class="card">
-        <div class="card-header">
+        <div class="section-header row">
           <h3>Recent transactions</h3>
-          <button class="ghost-btn small">View all</button>
+          <button class="ghost">View all</button>
         </div>
-        <div class="empty-state">No transactions yet</div>
+
+        <div class="transactions">
+          <div class="tx">
+            <span>Wallet funding</span>
+            <strong class="positive">+ ₦250,000</strong>
+          </div>
+          <div class="tx">
+            <span>Transfer to John</span>
+            <strong class="negative">− ₦45,000</strong>
+          </div>
+          <div class="tx">
+            <span>Airtime purchase</span>
+            <strong class="negative">− ₦2,500</strong>
+          </div>
+        </div>
       </div>
 
     </aside>
 
-  </div>
-</main>
+  </main>
 
-<script src="assets/js/dashboard.js"></script>
 </body>
 </html>
