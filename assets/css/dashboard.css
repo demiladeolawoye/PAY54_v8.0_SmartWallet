@@ -1,162 +1,195 @@
-/* =============================
-   DASHBOARD BODY STYLES
-   ============================= */
+/* =====================================================
+   PAY54 DASHBOARD CSS — v8.0
+   Fix 1 + Fix 2 + Fix 3 (FINAL, SAFE)
+   ===================================================== */
 
-.dashboard {
-  padding: 24px;
-  max-width: 1320px;
-  margin: 0 auto;
+/* ---------- GLOBAL RESET FOR DASHBOARD ONLY ---------- */
+/* This overrides auth/global flex-centering safely */
+body {
+  display: block !important;
+  justify-content: unset !important;
+  align-items: unset !important;
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0b1226, #050814);
+  color: #ffffff;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* ---------- HEADER (UNCHANGED STRUCTURE, FIXED LAYOUT) ---------- */
+.dash-header {
+  width: 100%;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 15, 30, 0.95),
+    rgba(5, 8, 20, 0.95)
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+/* Left side of header */
+.dash-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Brand */
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-brand img {
+  width: 36px;
+  height: 36px;
+}
+
+.dash-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-brand-text strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dash-brand-text span {
+  font-size: 11px;
+  color: #9aa4c7;
+}
+
+/* Currency pills */
+.currency-switch {
+  display: flex;
+  gap: 6px;
+  margin-left: 20px;
+}
+
+.currency-pill {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.currency-pill.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Right side of header */
+.dash-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+}
+
+.logout-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+/* ---------- DASHBOARD CONTAINER ---------- */
+.dashboard {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* ---------- GRID LAYOUT ---------- */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 20px;
 }
 
-/* Columns */
-.left-column {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.right-column {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* Cards */
+/* ---------- CARD BASE ---------- */
 .card {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Section headers */
-.section-header h3 {
-  margin: 0;
-  font-size: 18px;
+/* ---------- SECTION HEADERS ---------- */
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
-.section-header p {
-  margin: 4px 0 12px;
-  color: #aab0c6;
-  font-size: 13px;
-}
-
-.section-label {
+.section-subtitle {
   font-size: 12px;
-  color: #aab0c6;
-  letter-spacing: 0.08em;
+  color: #9aa4c7;
+  margin-bottom: 14px;
 }
 
-/* Balance card */
-.balance-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ---------- TOTAL BALANCE ---------- */
+.balance-label {
+  font-size: 12px;
+  color: #9aa4c7;
+  letter-spacing: 0.6px;
 }
 
 .balance-amount {
-  font-size: 36px;
+  font-size: 34px;
   font-weight: 700;
-  margin: 10px 0;
-}
-
-.balance-subtext {
-  font-size: 13px;
-  color: #aab0c6;
+  margin: 8px 0;
 }
 
 .balance-meta {
-  display: flex;
-  gap: 16px;
-  margin: 12px 0;
-  font-size: 13px;
-}
-
-.balance-footer {
   font-size: 12px;
-  color: #aab0c6;
+  color: #9aa4c7;
 }
 
-/* Buttons */
-.ghost-btn {
-  background: rgba(255,255,255,0.08);
+/* ---------- BUTTONS ---------- */
+.btn {
+  padding: 10px 16px;
+  border-radius: 12px;
   border: none;
-  border-radius: 999px;
-  padding: 6px 12px;
-  color: #fff;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 13px;
 }
 
-.ghost-btn.small {
-  padding: 4px 10px;
-  font-size: 12px;
+.btn-primary {
+  background: #3b82f6;
+  color: #ffffff;
 }
 
-/* Pill grids */
-.pill-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.pill {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 14px;
-  text-align: left;
-  cursor: pointer;
-  color: #fff;
-  font-size: 14px;
-}
-
-.pill small {
-  display: block;
-  margin-top: 4px;
-  color: #aab0c6;
-  font-size: 12px;
-}
-
-/* Right column */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.empty-state {
-  margin-top: 12px;
-  font-size: 14px;
-  color: #aab0c6;
-}
-
-/* Quick shortcuts */
-.shortcut-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.shortcut {
-  border: 1px dashed rgba(255,255,255,0.25);
-  background: transparent;
-  border-radius: 14px;
-  padding: 14px;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 980px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
