@@ -1,26 +1,14 @@
-/* ================================
-   PAY54 DASHBOARD LOGIC v2
-   Phase A — Header + Balance
-   ================================ */
-
-/* ------------------------------
-   STATE
--------------------------------- */
-let activeCurrency = "NGN";
-
-/* Mock balances (demo only) */
 const balances = {
-  NGN: 1250000.50,
+  NGN: 1250000.5,
   GBP: 8420.75,
-  USD: 15320.40,
-  EUR: 11890.20,
-  GHS: 9650.00,
-  KES: 132450.00,
-  ZAR: 27890.60
+  USD: 15320.4,
+  EUR: 11890.2,
+  GHS: 9650,
+  KES: 132450,
+  ZAR: 27890.6
 };
 
-/* Currency symbols */
-const currencySymbols = {
+const symbols = {
   NGN: "₦",
   GBP: "£",
   USD: "$",
@@ -30,88 +18,31 @@ const currencySymbols = {
   ZAR: "R"
 };
 
-/* ------------------------------
-   ELEMENTS
--------------------------------- */
-const currencyButtons = document.querySelectorAll(".currency");
-const balanceAmountEl = document.getElementById("balanceAmount");
-const themeToggleBtn = document.getElementById("themeToggle");
+const balanceEl = document.getElementById("balanceAmount");
+const currencyBtns = document.querySelectorAll(".currency");
 
-/* ------------------------------
-   INIT
--------------------------------- */
-document.addEventListener("DOMContentLoaded", () => {
-  setActiveCurrency(activeCurrency);
-  updateBalance();
-  restoreTheme();
-});
-
-/* ------------------------------
-   CURRENCY SWITCHING
--------------------------------- */
-currencyButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const selected = btn.dataset.cur;
-    if (!selected) return;
-
-    setActiveCurrency(selected);
-    updateBalance();
-  });
-});
-
-function setActiveCurrency(currency) {
-  activeCurrency = currency;
-
-  currencyButtons.forEach(btn => {
-    btn.classList.toggle(
-      "active",
-      btn.dataset.cur === currency
-    );
-  });
-}
-
-/* ------------------------------
-   BALANCE DISPLAY
--------------------------------- */
-function updateBalance() {
-  const symbol = currencySymbols[activeCurrency] || "";
-  const amount = balances[activeCurrency] ?? 0;
-
-  balanceAmountEl.textContent =
-    `${symbol} ${amount.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}`;
-}
-
-/* ------------------------------
-   THEME TOGGLE (UI ONLY)
--------------------------------- */
-function restoreTheme() {
-  const savedTheme = localStorage.getItem("pay54_theme");
-  if (savedTheme === "light") {
-    document.body.classList.add("light");
-    themeToggleBtn.textContent = "🌞";
-  } else {
-    document.body.classList.remove("light");
-    themeToggleBtn.textContent = "🌙";
+currencyBtns.forEach(btn=>{
+  btn.onclick=()=>{
+    currencyBtns.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const c=btn.dataset.cur;
+    balanceEl.textContent =
+      `${symbols[c]} ${balances[c].toLocaleString()}`;
   }
-}
-
-themeToggleBtn.addEventListener("click", () => {
-  document.body.classList.toggle("light");
-
-  const isLight = document.body.classList.contains("light");
-  localStorage.setItem("pay54_theme", isLight ? "light" : "dark");
-  themeToggleBtn.textContent = isLight ? "🌞" : "🌙";
 });
 
-/* ------------------------------
-   PLACEHOLDERS (NEXT PHASES)
--------------------------------- */
-/*
-  - FX conversion logic (Phase C)
-  - Wallet-specific balances
-  - API-backed balances
-  - Transaction history
-*/
+// Profile
+document.getElementById("profileName").textContent =
+  localStorage.getItem("pay54_name") || "Pese";
+document.getElementById("profileEmail").textContent =
+  localStorage.getItem("pay54_email") || "";
+
+// Logout
+document.getElementById("logoutBtn").onclick=()=>{
+  window.location.href="login.html";
+};
+
+// Alerts clear
+document.getElementById("clearAlerts").onclick=()=>{
+  document.getElementById("alerts").innerHTML="<li>No alerts</li>";
+};
