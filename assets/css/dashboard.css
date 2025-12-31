@@ -1,67 +1,265 @@
-:root{
---bg:radial-gradient(circle at top,#0b122c,#040816);
---card:rgba(255,255,255,.06);
---border:rgba(255,255,255,.12);
---blue:#3b82f6;
---muted:#aab0c3;
---green:#22c55e;
---red:#ef4444;
+/* ======================================================
+   PAY54 DASHBOARD — LAYER 1 VISUAL ELEVATION PASS
+   (Premium hierarchy, depth, clarity — NO layout change)
+====================================================== */
+
+:root {
+  --bg: radial-gradient(circle at top, #0b122c, #040816 70%);
+  --card: rgba(255,255,255,0.06);
+  --card-strong: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.14);
+  --text: #ffffff;
+  --muted: #aab0c3;
+  --blue: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
 }
 
-*{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
-
-body.dashboard{margin:0;background:var(--bg);color:#fff}
-
-/* HEADER */
-.dash-header{
-display:flex;align-items:center;gap:12px;
-padding:16px;border-bottom:1px solid var(--border)
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
 }
-.logo{height:44px}
-.currency-pills button,
-.currency-dropdown{background:none;color:#fff;border:1px solid var(--border);padding:6px 10px;border-radius:10px}
-.currency-pills .active{background:var(--blue)}
-.header-actions{margin-left:auto;display:flex;gap:10px}
-.profile-wrap{position:relative}
-.profile-menu{
-display:none;position:absolute;right:0;top:36px;
-background:#0b122c;border:1px solid var(--border);
-padding:12px;border-radius:12px
+
+body.dashboard {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
 }
-.profile-wrap:hover .profile-menu{display:block}
-.profile-menu span{display:block;margin-top:8px}
-.profile-menu .danger{color:var(--red)}
 
-/* GRID */
-.dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;padding:20px}
-.left,.right{display:flex;flex-direction:column;gap:20px}
+/* ================= HEADER (VISUAL POLISH ONLY) ================= */
+.dash-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(6px);
+}
 
-/* CARDS */
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px}
+.logo {
+  height: 48px;
+  opacity: 1;
+}
 
-/* BALANCE */
-.balance-top{display:flex;justify-content:space-between;align-items:center}
-.balance-amount{font-size:48px;font-weight:800}
-.balance-meta{color:var(--muted);font-size:13px}
-.identity{display:flex;gap:12px;font-size:13px;margin-top:6px}
-.trust-chip{text-align:center;margin-top:12px;font-size:12px;color:var(--muted)}
+/* ================= GRID ================= */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
 
-/* BUTTONS */
-button{cursor:pointer}
-.primary{background:var(--blue);color:#fff;border:none;border-radius:12px;padding:8px 14px}
-.secondary{background:none;border:1px solid var(--border);color:#fff;border-radius:12px;padding:8px 14px}
+.left,
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
 
-/* TILES */
-.tile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.tile-grid button{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:left}
+/* ================= CARD SYSTEM ================= */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+}
 
-/* SHORTCUTS */
-.shortcut-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+/* Hero depth */
+.card.hero,
+.balance-card {
+  background: var(--card-strong);
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.15),
+              0 12px 40px rgba(0,0,0,0.35);
+}
 
-/* MOBILE */
-.mobile-only{display:none}
-@media(max-width:900px){
-.dash-grid{grid-template-columns:1fr}
-.desktop-only{display:none}
-.mobile-only{display:block}
+/* Secondary cards */
+.right .card {
+  background: rgba(255,255,255,0.05);
+}
+
+/* ================= SECTION HEADERS ================= */
+.section-header h3,
+.card > h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.section-header p,
+.card > .sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Divider feel */
+.section-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ================= BALANCE ================= */
+.balance-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+.balance-amount {
+  font-size: 52px;
+  font-weight: 800;
+  margin: 14px 0 10px;
+  line-height: 1.05;
+}
+
+.balance-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.identity {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.trust-chip {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+}
+
+/* ================= BUTTONS ================= */
+button {
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.primary {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 16px;
+  box-shadow: 0 6px 18px rgba(59,130,246,0.35);
+}
+
+.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 10px 16px;
+}
+
+/* ================= TILES ================= */
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.tile,
+.tile-grid button {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: left;
+}
+
+.tile:hover,
+.tile-grid button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+}
+
+.tile small {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ================= RECENT TRANSACTIONS (FIX) ================= */
+.tx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+}
+
+.tx-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tx-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(59,130,246,0.15);
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.tx-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tx-time {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tx-amount.pos { color: var(--green); font-weight: 600; }
+.tx-amount.neg { color: var(--red); font-weight: 600; }
+
+/* ================= NEWS / INSIGHTS ================= */
+.news-list li {
+  font-size: 14px;
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .balance-amount {
+    font-size: 44px;
+  }
 }
