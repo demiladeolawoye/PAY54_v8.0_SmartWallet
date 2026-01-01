@@ -1,64 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>PAY54 — Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="assets/css/dashboard.css" />
+  <meta charset="UTF-8" />
+  <title>PAY54 — Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
 </head>
 
-<body class="dashboard">
+<body class="dashboard dark">
 
+<!-- ================= HEADER ================= -->
 <header class="dash-header">
-  <img src="assets/img/pay54-logo.svg" class="logo" alt="PAY54" />
-
-  <!-- WEB currency pills -->
-  <div class="currency-pills desktop-only">
-    <button class="active">NGN</button>
-    <button>GBP</button>
-    <button>USD</button>
-    <button>EUR</button>
-    <button>GHS</button>
-    <button>KES</button>
+  <div class="brand">
+    <img src="assets/img/pay54-logo.svg" class="logo" alt="PAY54" />
   </div>
 
-  <!-- MOBILE dropdown -->
-  <select class="currency-dropdown mobile-only">
-    <option>NGN</option>
-    <option>GBP</option>
-    <option>USD</option>
-    <option>EUR</option>
-    <option>GHS</option>
-    <option>KES</option>
+  <!-- Currency pills (WEB) -->
+  <div class="currency-pills desktop-only">
+    <button class="currency active" data-cur="NGN">NGN</button>
+    <button class="currency" data-cur="GBP">GBP</button>
+    <button class="currency" data-cur="USD">USD</button>
+    <button class="currency" data-cur="EUR">EUR</button>
+    <button class="currency" data-cur="GHS">GHS</button>
+    <button class="currency" data-cur="KES">KES</button>
+  </div>
+
+  <!-- Currency dropdown (MOBILE) -->
+  <select class="currency-dropdown mobile-only" id="currencySelect">
+    <option value="NGN">NGN</option>
+    <option value="GBP">GBP</option>
+    <option value="USD">USD</option>
+    <option value="EUR">EUR</option>
+    <option value="GHS">GHS</option>
+    <option value="KES">KES</option>
   </select>
 
   <div class="header-actions">
-    <button id="themeToggle">🌙</button>
+    <button id="themeToggle" class="icon-btn">🌙</button>
 
     <div class="profile-wrap">
-      <button id="profileBtn">👤</button>
+      <button id="profileBtn" class="icon-btn">👤</button>
       <div id="profileMenu" class="profile-menu">
-        <strong>Pese</strong>
-        <span>Profile</span>
-        <span>Help & Support</span>
-        <span>Contact Support</span>
-        <span class="danger" id="logoutBtn">Logout</span>
+        <strong id="profileName">User</strong>
+        <span id="profileEmail"></span>
+        <span class="menu-item">Profile</span>
+        <span class="menu-item">Help & Support</span>
+        <span class="menu-item">Contact Support</span>
+        <span class="menu-item danger" id="logoutBtn">Logout</span>
       </div>
     </div>
   </div>
 </header>
 
+<!-- ================= MAIN ================= -->
 <main class="dash-grid">
 
+<!-- ========== LEFT COLUMN ========== -->
 <section class="left">
 
   <!-- BALANCE -->
   <div class="card balance-card">
     <div class="balance-top">
       <span class="label">TOTAL BALANCE</span>
-      <div>
-        <button class="primary">Add money</button>
-        <button class="secondary">Withdraw</button>
+      <div class="balance-actions">
+        <button id="addMoneyBtn" class="primary">Add money</button>
+        <button id="withdrawBtn" class="secondary">Withdraw</button>
       </div>
     </div>
 
@@ -70,108 +76,129 @@
 
     <div class="identity">
       Acct: <strong>3001234567</strong>
-      Tag: <strong>@pay54-user</strong>
-      KYC: <strong>Level 2</strong>
+      <span>Tag: <strong>@pay54-user</strong></span>
+      <span>KYC: <strong>Level 2</strong></span>
     </div>
 
-    <div class="trust-chip">
+    <div class="trust-chip center">
       🔒 Security & Financial compliance active
-    </div>
-  </div>
-
-  <!-- QUICK SHORTCUTS -->
-  <div class="card">
-    <h3>Quick Shortcuts</h3>
-    <div class="shortcut-grid">
-      <button>Become an Agent</button>
-      <button>Shop on the Fly</button>
-      <button>Open Savings Pot</button>
-      <button>Invest & Stocks</button>
     </div>
   </div>
 
   <!-- MONEY MOVES -->
   <div class="card">
     <h3>Money Moves</h3>
+    <p class="subtitle">Instant P2P + banks + QR requests</p>
+
     <div class="tile-grid">
-      <button>Send<br><small>Instant PAY54 → PAY54</small></button>
-      <button>Receive<br><small>Account, tag & QR</small></button>
-      <button>Add Money<br><small>Card · Bank · Agents</small></button>
-      <button>Withdraw<br><small>Bank · Agents</small></button>
-      <button>Bank Transfer<br><small>To NG banks</small></button>
-      <button>Request Money<br><small>With notifications</small></button>
+      <button class="tile">Send<br><small>Instant PAY54 → PAY54</small></button>
+      <button class="tile">Receive<br><small>Account, tag & QR</small></button>
+      <button class="tile">Add Money<br><small>Card · Bank · Agents</small></button>
+      <button class="tile">Withdraw<br><small>Bank · Agents</small></button>
+      <button class="tile">Bank Transfer<br><small>To NG banks</small></button>
+      <button class="tile">Request Money<br><small>With notifications</small></button>
     </div>
   </div>
 
   <!-- SERVICES -->
   <div class="card">
     <h3>Services</h3>
-    <p class="sub">FX, bills, cards, checkout, agents & more</p>
+    <p class="subtitle">FX, bills, cards, checkout, agents & more</p>
+
     <div class="tile-grid">
-      <button>Cross-border FX</button>
-      <button>Pay Bills</button>
-      <button>Cards</button>
-      <button>Savings</button>
-      <button>Shop on the Fly</button>
-      <button>Investments</button>
+      <button class="tile">Cross-border FX</button>
+      <button class="tile">Pay Bills</button>
+      <button class="tile">Cards</button>
+      <button class="tile">Savings</button>
+      <button class="tile">Shop on the Fly</button>
+      <button class="tile">Investments</button>
+    </div>
+  </div>
+
+  <!-- QUICK SHORTCUTS -->
+  <div class="card">
+    <h3>Quick Shortcuts</h3>
+    <p class="subtitle">Fast access to frequent actions</p>
+
+    <div class="shortcut-grid">
+      <button class="tile">Become an Agent</button>
+      <button class="tile">Shop on the Fly</button>
+      <button class="tile">Open Savings Pot</button>
+      <button class="tile">Invest & Stocks</button>
     </div>
   </div>
 
 </section>
 
+<!-- ========== RIGHT COLUMN ========== -->
 <section class="right">
 
-  <!-- ✅ UPDATED: RECENT TRANSACTIONS -->
+  <!-- RECENT TRANSACTIONS -->
   <div class="card">
     <h3>Recent Transactions</h3>
 
-    <div class="tx-list">
-
-      <div class="tx-row">
-        <div class="tx-left">
-          <div class="tx-icon">💳</div>
-          <div>
-            <div class="tx-title">Wallet funding</div>
-            <div class="tx-time">2 mins ago</div>
-          </div>
-        </div>
-        <div class="tx-amount pos">+ ₦250,000</div>
+    <div class="feed-item">
+      <div class="feed-icon">💳</div>
+      <div class="feed-body">
+        <strong>Wallet funding</strong>
+        <span>2 mins ago</span>
       </div>
+      <div class="feed-amount pos">+₦250,000</div>
+    </div>
 
-      <div class="tx-row">
-        <div class="tx-left">
-          <div class="tx-icon">↗</div>
-          <div>
-            <div class="tx-title">Transfer to John</div>
-            <div class="tx-time">Yesterday</div>
-          </div>
-        </div>
-        <div class="tx-amount neg">− ₦45,000</div>
+    <div class="feed-item">
+      <div class="feed-icon">↗️</div>
+      <div class="feed-body">
+        <strong>Transfer to John</strong>
+        <span>Yesterday</span>
       </div>
-
+      <div class="feed-amount neg">−₦45,000</div>
     </div>
   </div>
 
   <!-- REQUESTS & ALERTS -->
   <div class="card">
     <h3>Requests & Alerts</h3>
-    <ul>
-      <li>Payment request • 2 mins ago</li>
-      <li>FX alert • 1 hr ago</li>
-    </ul>
+
+    <div class="feed-item">
+      <div class="feed-icon">🔔</div>
+      <div class="feed-body">
+        <strong>Payment request</strong>
+        <span>2 mins ago</span>
+      </div>
+    </div>
+
+    <div class="feed-item">
+      <div class="feed-icon">⚠️</div>
+      <div class="feed-body">
+        <strong>FX alert</strong>
+        <span>1 hr ago</span>
+      </div>
+    </div>
   </div>
 
-  <!-- NEWS & INSIGHTS -->
+  <!-- NEWS -->
   <div class="card">
     <h3>News & Insights</h3>
-    <ul>
-      <li>💡 USD–NGN volatility rising</li>
-      <li>🔐 Keep your account secure</li>
-    </ul>
+
+    <div class="feed-item">
+      <div class="feed-icon">💡</div>
+      <div class="feed-body">
+        <strong>USD–NGN volatility rising</strong>
+        <span>Market insight</span>
+      </div>
+    </div>
+
+    <div class="feed-item">
+      <div class="feed-icon">🔐</div>
+      <div class="feed-body">
+        <strong>Keep your account secure</strong>
+        <span>Security update</span>
+      </div>
+    </div>
   </div>
 
 </section>
-
 </main>
 
 <script src="assets/js/dashboard.js"></script>
