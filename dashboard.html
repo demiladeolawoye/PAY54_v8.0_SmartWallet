@@ -9,12 +9,13 @@
 
 <body class="dashboard">
 
+<!-- ================= HEADER ================= -->
 <header class="dash-header">
-  <div class="brand">
+  <div class="header-left">
     <img src="assets/img/pay54-logo.svg" class="logo" alt="PAY54" />
   </div>
 
-  <!-- Currency (desktop) -->
+  <!-- Currency pills (WEB) -->
   <div class="currency-pills desktop-only">
     <button class="currency active" data-cur="NGN">NGN</button>
     <button class="currency" data-cur="GBP">GBP</button>
@@ -24,8 +25,8 @@
     <button class="currency" data-cur="KES">KES</button>
   </div>
 
-  <!-- Currency (mobile) -->
-  <select class="currency-dropdown mobile-only" id="currencyDropdown">
+  <!-- Currency dropdown (MOBILE) -->
+  <select class="currency-dropdown mobile-only" id="currencySelect">
     <option value="NGN">NGN</option>
     <option value="GBP">GBP</option>
     <option value="USD">USD</option>
@@ -42,25 +43,27 @@
       <div id="profileMenu" class="profile-menu">
         <strong id="profileName">User</strong>
         <small id="profileEmail"></small>
-        <span data-action="profile">Profile</span>
-        <span data-action="help">Help & Support</span>
-        <span data-action="contact">Contact Support</span>
+        <span>Profile</span>
+        <span>Help & Support</span>
+        <span>Contact Support</span>
         <span class="danger" id="logoutBtn">Logout</span>
       </div>
     </div>
   </div>
 </header>
 
+<!-- ================= MAIN ================= -->
 <main class="dash-grid">
 
-<!-- ================= LEFT ================= -->
+<!-- ========== LEFT COLUMN ========== -->
 <section class="left">
 
   <!-- BALANCE -->
   <div class="card balance-card">
-    <div class="balance-head">
+    <div class="balance-header">
       <span class="label">TOTAL BALANCE</span>
-      <div class="actions">
+
+      <div class="balance-actions">
         <button id="addMoneyBtn" class="primary">Add money</button>
         <button id="withdrawBtn" class="secondary">Withdraw</button>
       </div>
@@ -68,48 +71,19 @@
 
     <div id="balanceAmount" class="balance-amount">₦ 1,250,000.50</div>
 
-    <div class="balance-meta">
-      FX wallets enabled • Device + PIN secured
-    </div>
-
-    <div class="identity">
-      Acct: <strong>3001234567</strong>
-      Tag: <strong>@pay54-user</strong>
-      KYC: <strong>Level 2</strong>
+    <div class="balance-info">
+      <div>FX wallets enabled • Device + PIN secured</div>
+      <div>
+        Acct: <strong>3001234567</strong>
+        <span class="sep">|</span>
+        Tag: <strong>@pay54-user</strong>
+        <span class="sep">|</span>
+        KYC: <strong>Level 2</strong>
+      </div>
     </div>
 
     <div class="trust-chip center">
       🔒 Security & Financial compliance active
-    </div>
-  </div>
-
-  <!-- MONEY MOVES -->
-  <div class="card">
-    <h3>Money Moves</h3>
-    <p class="sub">Instant P2P + banks + QR requests</p>
-
-    <div class="tile-grid">
-      <button data-route="send">Send<small>Instant PAY54 → PAY54</small></button>
-      <button data-route="receive">Receive<small>Account, tag & QR</small></button>
-      <button data-route="add">Add Money<small>Card · Bank · Agents</small></button>
-      <button data-route="withdraw">Withdraw<small>Bank · Agents</small></button>
-      <button data-route="bank">Bank Transfer<small>To NG banks</small></button>
-      <button data-route="request">Request Money<small>With notifications</small></button>
-    </div>
-  </div>
-
-  <!-- SERVICES -->
-  <div class="card">
-    <h3>Services</h3>
-    <p class="sub">FX, bills, cards, checkout, agents & more</p>
-
-    <div class="tile-grid">
-      <button data-route="fx">Cross-border FX</button>
-      <button data-route="bills">Pay Bills</button>
-      <button data-route="cards">Virtual & Linked Cards</button>
-      <button data-route="savings">Savings</button>
-      <button data-route="shop">Shop on the Fly</button>
-      <button data-route="invest">Investments & Stocks</button>
     </div>
   </div>
 
@@ -119,79 +93,131 @@
     <p class="sub">Fast access to key actions</p>
 
     <div class="shortcut-grid">
-      <button data-route="agent">Become an Agent</button>
-      <button data-route="shop">Shop on the Fly</button>
-      <button data-route="savings">Open Savings Pot</button>
-      <button data-route="invest">Invest & Stocks</button>
+      <button>Become an Agent</button>
+      <button>Shop on the Fly</button>
+      <button>Open Savings Pot</button>
+      <button>Investments & Stocks</button>
+    </div>
+  </div>
+
+  <!-- MONEY MOVES -->
+  <div class="card">
+    <h3>Money Moves</h3>
+    <p class="sub">Instant P2P + banks + QR requests</p>
+
+    <div class="tile-grid">
+      <button>Send<br><small>Instant PAY54 → PAY54</small></button>
+      <button>Receive<br><small>Account, tag & QR</small></button>
+      <button>Add Money<br><small>Card · Bank · Agents</small></button>
+      <button>Withdraw<br><small>Bank · Agents</small></button>
+      <button>Bank Transfer<br><small>To NG banks</small></button>
+      <button>Request Money<br><small>With notifications</small></button>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <div class="card">
+    <h3>Services</h3>
+    <p class="sub">FX, bills, cards, checkout, agents & more</p>
+
+    <div class="tile-grid">
+      <button>Cross-border FX</button>
+      <button>Pay Bills & Top</button>
+      <button>Savings & Goals</button>
+      <button>Cards</button>
+      <button>PAY54 Smart Checkout</button>
+      <button>Shop on the Fly</button>
+      <button>Investments & Stocks</button>
+      <button>Bet Funding</button>
+      <button>Become an Agent</button>
+      <button>AI Risk Watch</button>
     </div>
   </div>
 
 </section>
 
-<!-- ================= RIGHT ================= -->
+<!-- ========== RIGHT COLUMN ========== -->
 <section class="right">
 
   <!-- RECENT TRANSACTIONS -->
-  <div class="card feed">
+  <div class="card">
     <h3>Recent Transactions</h3>
 
-    <div class="feed-item pos">
-      <div class="icon">💳</div>
-      <div>
-        <strong>Wallet funding</strong>
-        <small>2 mins ago</small>
+    <div class="feed">
+      <div class="feed-item">
+        <div class="feed-left">
+          <span class="icon">💳</span>
+          <div>
+            <strong>Wallet funding</strong>
+            <small>2 mins ago</small>
+          </div>
+        </div>
+        <span class="pos">+₦250,000</span>
       </div>
-      <span>+₦250,000</span>
-    </div>
 
-    <div class="feed-item neg">
-      <div class="icon">↗</div>
-      <div>
-        <strong>Transfer to John</strong>
-        <small>Yesterday</small>
+      <div class="feed-item">
+        <div class="feed-left">
+          <span class="icon">↗️</span>
+          <div>
+            <strong>Transfer to John</strong>
+            <small>Yesterday</small>
+          </div>
+        </div>
+        <span class="neg">−₦45,000</span>
       </div>
-      <span>-₦45,000</span>
     </div>
   </div>
 
-  <!-- REQUESTS -->
-  <div class="card feed">
+  <!-- REQUESTS & ALERTS -->
+  <div class="card">
     <h3>Requests & Alerts</h3>
 
-    <div class="feed-item">
-      <div class="icon">🔔</div>
-      <div>
-        <strong>Payment request</strong>
-        <small>2 mins ago</small>
+    <div class="feed">
+      <div class="feed-item">
+        <div class="feed-left">
+          <span class="icon">🔔</span>
+          <div>
+            <strong>Payment request</strong>
+            <small>2 mins ago</small>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="feed-item">
-      <div class="icon">⚠️</div>
-      <div>
-        <strong>FX alert</strong>
-        <small>1 hr ago</small>
+      <div class="feed-item">
+        <div class="feed-left">
+          <span class="icon">⚠️</span>
+          <div>
+            <strong>FX alert</strong>
+            <small>1 hr ago</small>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- NEWS -->
-  <div class="card feed">
+  <div class="card">
     <h3>News & Insights</h3>
 
-    <div class="feed-item">
-      <div class="icon">💡</div>
-      <div>
-        <strong>USD–NGN volatility rising</strong>
-        <small>Market insight</small>
+    <div class="feed">
+      <div class="feed-item">
+        <div class="feed-left">
+          <span class="icon">💡</span>
+          <div>
+            <strong>USD–NGN volatility rising</strong>
+            <small>Market insight</small>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="feed-item">
-      <div class="icon">🔐</div>
-      <div>
-        <strong>Keep your account secure</strong>
-        <small>Security tip</small>
+      <div class="feed-item">
+        <div class="feed-left">
+          <span class="icon">🔐</span>
+          <div>
+            <strong>Keep your account secure</strong>
+            <small>Security tip</small>
+          </div>
+        </div>
       </div>
     </div>
   </div>
