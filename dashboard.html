@@ -8,14 +8,17 @@
 </head>
 
 <body class="dashboard">
-  <!-- HEADER (logo only, no PAY54 ONE WALLET text) -->
+  <!-- HEADER -->
   <header class="dash-header">
     <div class="brand">
       <img src="assets/img/pay54-logo.svg" class="logo" alt="PAY54" />
+      <div class="brand-text">
+        <div class="brand-name">PAY54</div>
+      </div>
     </div>
 
-    <!-- WEB currency pills -->
-    <div class="currency-pills desktop-only" aria-label="Currency selector">
+    <!-- Desktop currency pills -->
+    <div class="currency-pills desktop-only" aria-label="Currency">
       <button class="currency active" data-cur="NGN" type="button">NGN</button>
       <button class="currency" data-cur="GBP" type="button">GBP</button>
       <button class="currency" data-cur="USD" type="button">USD</button>
@@ -25,9 +28,9 @@
       <button class="currency" data-cur="ZAR" type="button">ZAR</button>
     </div>
 
-    <!-- MOBILE dropdown -->
-    <div class="currency-select mobile-only">
-      <select id="currencyDropdown" class="currency-dropdown" aria-label="Select currency">
+    <!-- Mobile currency dropdown (NO horizontal scroll) -->
+    <div class="mobile-only currency-select-wrap">
+      <select id="currencySelect" class="currency-select" aria-label="Select currency">
         <option value="NGN">NGN</option>
         <option value="GBP">GBP</option>
         <option value="USD">USD</option>
@@ -44,23 +47,19 @@
       </button>
 
       <div class="profile-wrap">
-        <button id="profileBtn" class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false">
-          <span class="avatar" id="profileAvatar">D</span>
+        <button id="profileBtn" class="icon-btn profile-btn" type="button" aria-label="Profile menu" title="Profile">
+          <span class="avatar">P</span>
         </button>
 
-        <div id="profileMenu" class="profile-menu" role="menu" aria-label="Profile menu">
-          <div class="profile-head">
-            <div class="profile-name" id="profileName">Pese</div>
-            <div class="profile-email" id="profileEmail"></div>
+        <div id="profileMenu" class="profile-menu" role="menu" aria-hidden="true">
+          <div class="pm-head">
+            <div class="pm-name" id="profileName">Pese</div>
+            <div class="pm-email" id="profileEmail">pese@gmail.com</div>
           </div>
-
-          <button class="menu-item" type="button" data-action="profile">Profile</button>
-          <button class="menu-item" type="button" data-action="help">Help & Support</button>
-          <button class="menu-item" type="button" data-action="contact">Contact Support</button>
-
-          <div class="menu-sep"></div>
-
-          <button class="menu-item danger" type="button" id="logoutBtn" data-action="logout">Logout</button>
+          <button class="pm-item" type="button" data-action="profile">Profile</button>
+          <button class="pm-item" type="button" data-action="help">Help &amp; Support</button>
+          <button class="pm-item" type="button" data-action="contact">Contact Support</button>
+          <button class="pm-item danger" id="logoutBtn" type="button">Logout</button>
         </div>
       </div>
     </div>
@@ -68,39 +67,38 @@
 
   <!-- MAIN GRID -->
   <main class="dash-grid">
-    <!-- LEFT COLUMN (web order you requested) -->
+
+    <!-- LEFT / MAIN -->
     <section class="left">
+
       <!-- BALANCE -->
       <div class="card balance-card">
-        <div class="balance-top">
-          <div class="balance-title">
-            <span class="label">TOTAL BALANCE</span>
+        <div class="balance-head">
+          <div>
+            <div class="kicker">TOTAL BALANCE</div>
           </div>
 
           <div class="balance-actions">
-            <button class="btn primary" type="button" data-action="add_money">Add money</button>
-            <button class="btn ghost" type="button" data-action="withdraw">Withdraw</button>
+            <button class="btn primary" id="addMoneyBtn" type="button">Add money</button>
+            <button class="btn ghost" id="withdrawBtn" type="button">Withdraw</button>
           </div>
         </div>
 
         <div class="balance-amount" id="balanceAmount">₦ 1,250,000.50</div>
 
-        <div class="balance-meta">
-          <div class="meta-line">FX wallets enabled • Device + PIN secured</div>
-
-          <div class="identity">
-            <span>Acct: <strong>3001234567</strong></span>
-            <span>Tag: <strong>@pay54-user</strong></span>
-            <span>KYC: <strong>Level 2</strong></span>
-          </div>
+        <div class="balance-sub">
+          FX wallets enabled • Device + PIN secured
         </div>
 
-        <!-- REQUIRED: bottom-center chip -->
+        <div class="identity-row">
+          <div>Acct: <strong>3001234567</strong></div>
+          <div>Tag: <strong>@pay54-user</strong></div>
+          <div>KYC: <strong>Level 2</strong></div>
+        </div>
+
+        <!-- REQUIRED: bottom-center inside balance -->
         <div class="trust-row">
-          <div class="trust-chip">
-            <span class="chip-icon">🔒</span>
-            <span>Security & Financial compliance active</span>
-          </div>
+          <span class="trust-chip">🔒 Security &amp; Financial compliance active</span>
         </div>
       </div>
 
@@ -111,36 +109,35 @@
           <p class="sub">Instant P2P + banks + QR requests</p>
         </div>
 
-        <!-- 6 items => 3×2 desktop -->
-        <div class="tile-grid money-grid">
-          <button class="tile" type="button" data-action="send_pay54">
-            <span class="tile-title">Send</span>
-            <span class="tile-sub">Instant PAY54 → PAY54</span>
+        <div class="tile-grid six">
+          <button class="tile" type="button" data-route="send">
+            <div class="tile-title">Send</div>
+            <div class="tile-sub">Instant PAY54 → PAY54</div>
           </button>
 
-          <button class="tile" type="button" data-action="receive">
-            <span class="tile-title">Receive</span>
-            <span class="tile-sub">Account, tag & QR</span>
+          <button class="tile" type="button" data-route="receive">
+            <div class="tile-title">Receive</div>
+            <div class="tile-sub">Account, tag &amp; QR</div>
           </button>
 
-          <button class="tile" type="button" data-action="add_money">
-            <span class="tile-title">Add Money</span>
-            <span class="tile-sub">Card · Bank · Agents</span>
+          <button class="tile" type="button" data-route="add-money">
+            <div class="tile-title">Add Money</div>
+            <div class="tile-sub">Card · Bank · Agents</div>
           </button>
 
-          <button class="tile" type="button" data-action="withdraw">
-            <span class="tile-title">Withdraw</span>
-            <span class="tile-sub">Bank · Agents</span>
+          <button class="tile" type="button" data-route="withdraw">
+            <div class="tile-title">Withdraw</div>
+            <div class="tile-sub">Bank · Agents</div>
           </button>
 
-          <button class="tile" type="button" data-action="bank_transfer">
-            <span class="tile-title">Bank Transfer</span>
-            <span class="tile-sub">To NG banks</span>
+          <button class="tile" type="button" data-route="bank-transfer">
+            <div class="tile-title">Bank Transfer</div>
+            <div class="tile-sub">To NG banks</div>
           </button>
 
-          <button class="tile" type="button" data-action="request_money">
-            <span class="tile-title">Request Money</span>
-            <span class="tile-sub">With notifications</span>
+          <button class="tile" type="button" data-route="request-money">
+            <div class="tile-title">Request Money</div>
+            <div class="tile-sub">With notifications</div>
           </button>
         </div>
       </div>
@@ -149,64 +146,64 @@
       <div class="card">
         <div class="section-head">
           <h3>Services</h3>
-          <p class="sub">FX, bills, cards, checkout, agents & more</p>
+          <p class="sub">FX, bills, cards, checkout, agents &amp; more</p>
         </div>
 
-        <!-- 10 items => 5×2 on wide desktop -->
-        <div class="tile-grid services-grid">
-          <button class="tile" type="button" data-action="cross_border_fx">
-            <span class="tile-title">Cross-border FX</span>
-            <span class="tile-sub">Send global instantly</span>
+        <!-- includes missing features + renames -->
+        <div class="tile-grid ten">
+          <button class="tile" type="button" data-route="fx">
+            <div class="tile-title">Cross-border FX</div>
+            <div class="tile-sub">Send global instantly</div>
           </button>
 
-          <button class="tile" type="button" data-action="pay_bills">
-            <span class="tile-title">Pay Bills & Top</span>
-            <span class="tile-sub">Airtime · Data · Power · TV</span>
+          <button class="tile" type="button" data-route="bills">
+            <div class="tile-title">Pay Bills &amp; Top</div>
+            <div class="tile-sub">Airtime · Data · Power · TV</div>
           </button>
 
-          <button class="tile" type="button" data-action="savings_goals">
-            <span class="tile-title">Savings & Goals</span>
-            <span class="tile-sub">Pots · targets · streaks</span>
+          <button class="tile" type="button" data-route="savings">
+            <div class="tile-title">Savings &amp; Goals</div>
+            <div class="tile-sub">Pots · targets · streaks</div>
           </button>
 
-          <button class="tile" type="button" data-action="virtual_cards">
-            <span class="tile-title">Virtual cards</span>
-            <span class="tile-sub">Control & spend</span>
+          <button class="tile" type="button" data-route="virtual-cards">
+            <div class="tile-title">Virtual cards</div>
+            <div class="tile-sub">Control &amp; spend</div>
           </button>
 
-          <button class="tile" type="button" data-action="smart_checkout">
-            <span class="tile-title">PAY54 Smart Checkout</span>
-            <span class="tile-sub">Approve e-commerce</span>
+          <button class="tile" type="button" data-route="checkout">
+            <div class="tile-title">PAY54 Smart Checkout</div>
+            <div class="tile-sub">Approve e-commerce</div>
           </button>
 
-          <button class="tile" type="button" data-action="shop_on_fly">
-            <span class="tile-title">Shop on the Fly</span>
-            <span class="tile-sub">Food · Tickets · Transfers</span>
+          <button class="tile" type="button" data-route="shop">
+            <div class="tile-title">Shop on the Fly</div>
+            <div class="tile-sub">Food · Tickets · Transfers</div>
           </button>
 
-          <button class="tile" type="button" data-action="investments">
-            <span class="tile-title">Investments & Stocks</span>
-            <span class="tile-sub">Local & global assets</span>
+          <button class="tile" type="button" data-route="invest">
+            <div class="tile-title">Investments &amp; Stocks</div>
+            <div class="tile-sub">Local &amp; global assets</div>
           </button>
 
-          <button class="tile" type="button" data-action="bet_funding">
-            <span class="tile-title">Bet Funding</span>
-            <span class="tile-sub">18+ verification</span>
+          <button class="tile" type="button" data-route="bet">
+            <div class="tile-title">Bet Funding</div>
+            <div class="tile-sub">18+ verification</div>
           </button>
 
-          <button class="tile" type="button" data-action="become_agent">
-            <span class="tile-title">Become an Agent</span>
-            <span class="tile-sub">Onboard & earn</span>
+          <button class="tile" type="button" data-route="agent">
+            <div class="tile-title">Become an Agent</div>
+            <div class="tile-sub">Onboard &amp; earn</div>
           </button>
 
-          <button class="tile" type="button" data-action="ai_risk_watch">
-            <span class="tile-title">AI Risk Watch</span>
-            <span class="tile-sub">Suspicious activity</span>
+          <button class="tile" type="button" data-route="risk">
+            <div class="tile-title">AI Risk Watch</div>
+            <div class="tile-sub">Suspicious activity</div>
           </button>
         </div>
       </div>
 
-      <!-- QUICK SHORTCUTS (must be after Balance section / and after Services on web order) -->
+      <!-- QUICK SHORTCUTS (directly after Balance section per your rule) -->
       <div class="card">
         <div class="section-head">
           <h3>Quick Shortcuts</h3>
@@ -214,124 +211,126 @@
         </div>
 
         <div class="shortcut-grid">
-          <button class="shortcut" type="button" data-action="become_agent">Become an Agent</button>
-          <button class="shortcut" type="button" data-action="shop_on_fly">Shop on the Fly</button>
-          <button class="shortcut" type="button" data-action="open_savings">Open Savings Pot</button>
-          <button class="shortcut" type="button" data-action="investments">Investments & Stocks</button>
+          <button class="shortcut" type="button" data-route="agent">Become an Agent</button>
+          <button class="shortcut" type="button" data-route="shop">Shop on the Fly</button>
+          <button class="shortcut" type="button" data-route="savings">Open Savings Pot</button>
+          <button class="shortcut" type="button" data-route="invest">Investments &amp; Stocks</button>
         </div>
       </div>
     </section>
 
-    <!-- RIGHT COLUMN -->
+    <!-- RIGHT -->
     <section class="right">
+
       <!-- RECENT TRANSACTIONS -->
-      <div class="card">
-        <div class="section-head row-between">
+      <div class="card feed-card">
+        <div class="feed-head">
           <h3>Recent Transactions</h3>
-          <button class="link-btn" type="button" data-action="view_all_tx">View all</button>
+          <button class="btn link" type="button" data-route="tx-all">View all</button>
         </div>
 
-        <div class="feed" id="txFeed">
-          <div class="feed-item tx">
-            <div class="feed-icon">💳</div>
-            <div class="feed-body">
+        <div class="feed">
+          <div class="feed-item" data-route="tx-1">
+            <div class="feed-ico">💳</div>
+            <div class="feed-main">
               <div class="feed-title">Wallet funding</div>
               <div class="feed-sub">2 mins ago</div>
             </div>
-            <div class="feed-right pos">+ ₦250,000</div>
+            <div class="feed-amt pos" id="tx1Amt">+ ₦250,000</div>
           </div>
 
-          <div class="feed-item tx">
-            <div class="feed-icon">↗️</div>
-            <div class="feed-body">
+          <div class="feed-item" data-route="tx-2">
+            <div class="feed-ico">↗️</div>
+            <div class="feed-main">
               <div class="feed-title">Transfer to John</div>
               <div class="feed-sub">Yesterday</div>
             </div>
-            <div class="feed-right neg">− ₦45,000</div>
+            <div class="feed-amt neg" id="tx2Amt">− ₦45,000</div>
           </div>
 
-          <div class="feed-item tx">
-            <div class="feed-icon">📶</div>
-            <div class="feed-body">
+          <div class="feed-item" data-route="tx-3">
+            <div class="feed-ico">📶</div>
+            <div class="feed-main">
               <div class="feed-title">Airtime purchase</div>
               <div class="feed-sub">3 days ago</div>
             </div>
-            <div class="feed-right neg">− ₦2,500</div>
+            <div class="feed-amt neg" id="tx3Amt">− ₦2,500</div>
           </div>
         </div>
       </div>
 
-      <!-- REQUESTS & ALERTS (feed style) -->
-      <div class="card">
-        <div class="section-head row-between">
-          <h3>Requests & Alerts</h3>
-          <button class="link-btn" id="clearAlerts" type="button">Clear all</button>
+      <!-- REQUESTS & ALERTS (same feed style, not bullets) -->
+      <div class="card feed-card">
+        <div class="feed-head">
+          <h3>Requests &amp; Alerts</h3>
+          <button class="btn ghost small" id="clearAlerts" type="button">Clear all</button>
         </div>
 
-        <div class="feed" id="alertsFeed">
-          <div class="feed-item">
-            <div class="feed-icon">🔔</div>
-            <div class="feed-body">
+        <div class="feed" id="alerts">
+          <div class="feed-item" data-route="alert-1">
+            <div class="feed-ico">🔔</div>
+            <div class="feed-main">
               <div class="feed-title">Payment request</div>
               <div class="feed-sub">2 mins ago</div>
             </div>
+            <div class="feed-pill">Open</div>
           </div>
 
-          <div class="feed-item">
-            <div class="feed-icon">⚠️</div>
-            <div class="feed-body">
+          <div class="feed-item" data-route="alert-2">
+            <div class="feed-ico">⚠️</div>
+            <div class="feed-main">
               <div class="feed-title">FX alert</div>
               <div class="feed-sub">1 hr ago</div>
             </div>
+            <div class="feed-pill warn">Review</div>
           </div>
 
-          <div class="feed-item">
-            <div class="feed-icon">🛡️</div>
-            <div class="feed-body">
+          <div class="feed-item" data-route="alert-3">
+            <div class="feed-ico">🛡️</div>
+            <div class="feed-main">
               <div class="feed-title">Security check</div>
               <div class="feed-sub">Device verified</div>
             </div>
+            <div class="feed-pill ok">OK</div>
           </div>
         </div>
       </div>
 
-      <!-- NEWS & INSIGHTS (exact 2-line hierarchy) -->
-      <div class="card">
-        <div class="section-head">
-          <h3>News & Insights</h3>
+      <!-- NEWS & INSIGHTS (two-line hierarchy exactly like your example) -->
+      <div class="card feed-card">
+        <div class="feed-head">
+          <h3>News &amp; Insights</h3>
         </div>
 
-        <div class="feed" id="newsFeed">
-          <div class="feed-item">
-            <div class="feed-icon">💡</div>
-            <div class="feed-body">
+        <div class="feed" id="news">
+          <div class="feed-item" data-route="news-1">
+            <div class="feed-ico">💡</div>
+            <div class="feed-main">
               <div class="feed-title">USD–NGN volatility rising</div>
               <div class="feed-sub">Market insight</div>
             </div>
           </div>
 
-          <div class="feed-item">
-            <div class="feed-icon">🔐</div>
-            <div class="feed-body">
+          <div class="feed-item" data-route="news-2">
+            <div class="feed-ico">🔐</div>
+            <div class="feed-main">
               <div class="feed-title">Keep your account secure</div>
               <div class="feed-sub">Security tip</div>
             </div>
           </div>
 
-          <div class="feed-item">
-            <div class="feed-icon">🏆</div>
-            <div class="feed-body">
+          <div class="feed-item" data-route="news-3">
+            <div class="feed-ico">🏆</div>
+            <div class="feed-main">
               <div class="feed-title">Complete 3 transfers today</div>
               <div class="feed-sub">Earn a streak badge</div>
             </div>
           </div>
         </div>
       </div>
+
     </section>
   </main>
-
-  <!-- Toast -->
-  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
   <script src="assets/js/dashboard.js"></script>
 </body>
