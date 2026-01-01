@@ -1,18 +1,11 @@
-/* ======================================
-   PAY54 DASHBOARD — LAYER 1 (OPTION A+)
-   UI Interactions & Mobile UX Polish
-   NO backend / NO functional wiring yet
-====================================== */
-
-/* ---------- MOCK BALANCES ---------- */
+// ================= BALANCES =================
 const balances = {
-  NGN: 1250000.5,
+  NGN: 1250000.50,
   GBP: 8420.75,
-  USD: 15320.4,
-  EUR: 11890.2,
+  USD: 15320.40,
+  EUR: 11890.20,
   GHS: 9650,
-  KES: 132450,
-  ZAR: 27890.6
+  KES: 132450
 };
 
 const symbols = {
@@ -21,128 +14,58 @@ const symbols = {
   USD: "$",
   EUR: "€",
   GHS: "₵",
-  KES: "KSh",
-  ZAR: "R"
+  KES: "KSh"
 };
 
-/* ---------- ELEMENT REFERENCES ---------- */
 const balanceEl = document.getElementById("balanceAmount");
-const currencyBtns = document.querySelectorAll(".currency");
-const currencyDropdown = document.querySelector(".currency-dropdown");
 
-const profileBtn = document.getElementById("profileBtn");
-const profileMenu = document.getElementById("profileMenu");
-const logoutBtn = document.getElementById("logoutBtn");
-const themeToggle = document.getElementById("themeToggle");
-
-const clearAlertsBtn = document.getElementById("clearAlerts");
-const alertsList = document.getElementById("alerts");
-
-/* ---------- BALANCE UPDATE ---------- */
-function updateBalance(currency) {
-  if (!balances[currency]) return;
-
-  const amount = balances[currency].toLocaleString();
-  balanceEl.textContent = `${symbols[currency]} ${amount}`;
-
-  // Font scaling to keep currency inline
-  const len = amount.replace(/,/g, "").length;
-  if (len <= 6) balanceEl.style.fontSize = "52px";
-  else if (len <= 9) balanceEl.style.fontSize = "44px";
-  else balanceEl.style.fontSize = "38px";
-}
-
-/* ---------- WEB: CURRENCY PILLS ---------- */
-currencyBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    currencyBtns.forEach(b => b.classList.remove("active"));
+// Currency buttons
+document.querySelectorAll(".currency").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".currency").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-
     const cur = btn.dataset.cur;
-    updateBalance(cur);
-
-    // Sync mobile dropdown
-    if (currencyDropdown) {
-      currencyDropdown.value = cur;
-    }
-  });
+    balanceEl.textContent = `${symbols[cur]} ${balances[cur].toLocaleString()}`;
+  };
 });
 
-/* ---------- MOBILE: CURRENCY DROPDOWN ---------- */
-if (currencyDropdown) {
-  currencyDropdown.addEventListener("change", e => {
-    const cur = e.target.value;
-    updateBalance(cur);
-
-    currencyBtns.forEach(b => {
-      b.classList.toggle("active", b.dataset.cur === cur);
-    });
-  });
+// Mobile dropdown
+const select = document.getElementById("currencySelect");
+if (select) {
+  select.onchange = () => {
+    const cur = select.value;
+    balanceEl.textContent = `${symbols[cur]} ${balances[cur].toLocaleString()}`;
+  };
 }
 
-/* ---------- PROFILE MENU (CLICK, NOT HOVER) ---------- */
-if (profileBtn && profileMenu) {
-  profileBtn.addEventListener("click", e => {
-    e.stopPropagation();
-    profileMenu.classList.toggle("show");
-  });
+// Profile
+document.getElementById("profileName").textContent =
+  localStorage.getItem("pay54_name") || "Pese";
 
-  document.addEventListener("click", () => {
-    profileMenu.classList.remove("show");
-  });
-}
+document.getElementById("profileEmail").textContent =
+  localStorage.getItem("pay54_email") || "";
 
-/* ---------- PROFILE DATA ---------- */
-const profileName = document.getElementById("profileName");
-const profileEmail = document.getElementById("profileEmail");
+// Profile menu toggle
+document.getElementById("profileBtn").onclick = () => {
+  document.getElementById("profileMenu").classList.toggle("open");
+};
 
-if (profileName) {
-  profileName.textContent =
-    localStorage.getItem("pay54_name") || "Pese";
-}
-if (profileEmail) {
-  profileEmail.textContent =
-    localStorage.getItem("pay54_email") || "";
-}
+// Logout
+document.getElementById("logoutBtn").onclick = () => {
+  alert("Logging out");
+  window.location.href = "login.html";
+};
 
-/* ---------- LOGOUT (UI LEVEL) ---------- */
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    window.location.href = "login.html";
-  });
-}
+// Theme toggle
+document.getElementById("themeToggle").onclick = () => {
+  document.body.classList.toggle("light");
+};
 
-/* ---------- THEME TOGGLE (UI ONLY) ---------- */
-if (themeToggle) {
-  themeToggle.addEventListener("click", () => {
-    document.body.classList.toggle("light");
-
-    themeToggle.textContent =
-      document.body.classList.contains("light") ? "☀️" : "🌙";
-  });
-}
-
-/* ---------- ALERTS: CLEAR ALL ---------- */
-if (clearAlertsBtn && alertsList) {
-  clearAlertsBtn.addEventListener("click", () => {
-    alertsList.innerHTML = "<li>No alerts</li>";
-  });
-}
-
-/* ---------- BUTTON FEEDBACK (NO DEAD CLICKS) ---------- */
+// Stub interactions
 document.querySelectorAll("button").forEach(btn => {
-  if (
-    btn === profileBtn ||
-    btn === logoutBtn ||
-    btn === themeToggle ||
-    btn.classList.contains("currency")
-  ) return;
-
-  btn.addEventListener("click", () => {
-    // Layer 1 behaviour only
-    console.log("Action queued for Layer 2:", btn.textContent.trim());
-  });
+  if (!btn.id && !btn.classList.contains("currency")) {
+    btn.addEventListener("click", () => {
+      console.log("Action:", btn.innerText);
+    });
+  }
 });
-
-/* ---------- INIT DEFAULT ---------- */
-updateBalance("NGN");
