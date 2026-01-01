@@ -1,4 +1,3 @@
-// BALANCES
 const balances = {
   NGN: 1250000.5,
   GBP: 8420.75,
@@ -9,51 +8,52 @@ const balances = {
 };
 
 const symbols = {
-  NGN: "₦", GBP: "£", USD: "$", EUR: "€", GHS: "₵", KES: "KSh"
+  NGN: "₦",
+  GBP: "£",
+  USD: "$",
+  EUR: "€",
+  GHS: "₵",
+  KES: "KSh"
 };
 
 const balanceEl = document.getElementById("balanceAmount");
+const currencyBtns = document.querySelectorAll(".currency");
+const currencySelect = document.getElementById("currencySelect");
 
-// Currency buttons
-document.querySelectorAll(".currency").forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll(".currency").forEach(b=>b.classList.remove("active"));
+function updateBalance(cur) {
+  balanceEl.textContent =
+    `${symbols[cur]} ${balances[cur].toLocaleString()}`;
+}
+
+currencyBtns.forEach(btn => {
+  btn.onclick = () => {
+    currencyBtns.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     updateBalance(btn.dataset.cur);
   };
 });
 
-document.getElementById("currencyDropdown")?.addEventListener("change",e=>{
-  updateBalance(e.target.value);
-});
-
-function updateBalance(cur){
-  balanceEl.textContent = `${symbols[cur]} ${balances[cur].toLocaleString()}`;
+if (currencySelect) {
+  currencySelect.onchange = () => {
+    updateBalance(currencySelect.value);
+  };
 }
 
-// PROFILE
+// Profile
 document.getElementById("profileName").textContent =
   localStorage.getItem("pay54_name") || "Pese";
+
 document.getElementById("profileEmail").textContent =
   localStorage.getItem("pay54_email") || "pese@gmail.com";
 
-document.getElementById("profileBtn").onclick=()=>{
-  document.querySelector(".profile-wrap").classList.toggle("open");
+// Logout
+document.getElementById("logoutBtn").onclick = () => {
+  window.location.href = "login.html";
 };
 
-document.getElementById("logoutBtn").onclick=()=>{
-  window.location.href="login.html";
-};
-
-// BUTTON ROUTING (Layer 1 stubs)
-document.querySelectorAll("[data-route]").forEach(btn=>{
-  btn.onclick=()=>alert(`Route: ${btn.dataset.route} (Layer 2 wiring next)`);
+// Placeholder interactions
+document.querySelectorAll("button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    console.log("Clicked:", btn.textContent.trim());
+  });
 });
-
-document.getElementById("addMoneyBtn").onclick=()=>alert("Add money flow");
-document.getElementById("withdrawBtn").onclick=()=>alert("Withdraw flow");
-
-// THEME
-document.getElementById("themeToggle").onclick=()=>{
-  document.body.classList.toggle("light");
-};
