@@ -1,4 +1,11 @@
-// PAY54 Dashboard v8 — Layer 1 interactions + UI behaviour
+// =========================
+// PAY54 Dashboard Interactions (Layer 1)
+// Fixes:
+// - Mobile currency dropdown (sync with pills)
+// - Theme toggle (light mode borders remain visible via CSS vars)
+// - Profile menu open/close + menu clickability
+// - Clear alerts
+// =========================
 
 const balances = {
   NGN: 1250000.5,
@@ -20,213 +27,163 @@ const symbols = {
   ZAR: "R"
 };
 
-const els = {
-  balanceAmount: document.getElementById("balanceAmount"),
-  currencyBtns: document.querySelectorAll(".currency"),
-  currencyDropdown: document.getElementById("currencyDropdown"),
-  themeToggle: document.getElementById("themeToggle"),
-  profileBtn: document.getElementById("profileBtn"),
-  profileMenu: document.getElementById("profileMenu"),
-  profileName: document.getElementById("profileName"),
-  profileEmail: document.getElementById("profileEmail"),
-  profileAvatar: document.getElementById("profileAvatar"),
-  logoutBtn: document.getElementById("logoutBtn"),
-  clearAlerts: document.getElementById("clearAlerts"),
-  alertsFeed: document.getElementById("alertsFeed"),
-  toast: document.getElementById("toast")
-};
+const balanceEl = document.getElementById("balanceAmount");
+const pillBtns = document.querySelectorAll(".currency");
+const currencySelect = document.getElementById("currencySelect");
 
-// ---------- Toast ----------
-let toastTimer = null;
-function toast(msg){
-  if(!els.toast) return;
-  els.toast.textContent = msg;
-  els.toast.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>els.toast.classList.remove("show"), 1600);
+// ----- helpers
+function formatMoney(cur) {
+  const n = balances[cur] ?? 0;
+  const s = symbols[cur] ?? "";
+  return `${s} ${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-// ---------- Profile identity ----------
-function getStoredName(){
-  return (localStorage.getItem("pay54_name") || "").trim();
-}
-function getStoredEmail(){
-  return (localStorage.getItem("pay54_email") || "").trim();
-}
-
-const name = getStoredName() || "Pese";
-const email = getStoredEmail() || "pese@gmail.com";
-
-if (els.profileName) els.profileName.textContent = name;
-if (els.profileEmail) els.profileEmail.textContent = email;
-
-if (els.profileAvatar){
-  const initial = (name[0] || "P").toUpperCase();
-  els.profileAvatar.textContent = initial;
-}
-
-// ---------- Theme ----------
-function applyTheme(theme){
-  document.body.classList.toggle("light", theme === "light");
-  if (els.themeToggle){
-    els.themeToggle.querySelector(".icon").textContent = theme === "light" ? "🌙" : "☀️";
-    els.themeToggle.title = theme === "light" ? "Switch to dark" : "Switch to light";
-  }
-  localStorage.setItem("pay54_theme", theme);
-}
-
-applyTheme(localStorage.getItem("pay54_theme") || "dark");
-
-if (els.themeToggle){
-  els.themeToggle.addEventListener("click", () => {
-    const isLight = document.body.classList.contains("light");
-    applyTheme(isLight ? "dark" : "light");
-    toast(isLight ? "Dark mode enabled" : "Light mode enabled");
-  });
-}
-
-// ---------- Currency logic ----------
-function formatMoney(cur, amount){
-  // Keep premium formatting and avoid long decimals
-  const safe = Number(amount || 0);
-  const formatted = safe.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-  return `${symbols[cur] || ""} ${formatted}`.trim();
-}
-
-function setCurrency(cur){
+function setActiveCurrency(cur) {
   // Update pills
-  els.currencyBtns.forEach(b => {
-    b.classList.toggle("active", b.dataset.cur === cur);
+  pillBtns.forEach(b => {
+    const isActive = b.dataset.cur === cur;
+    b.classList.toggle("active", isActive);
+    b.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
 
-  // Update dropdown (mobile)
-  if (els.currencyDropdown && els.currencyDropdown.value !== cur){
-    els.currencyDropdown.value = cur;
-  }
+  // Update dropdown (if exists)
+  if (currencySelect) currencySelect.value = cur;
 
-  // Update balance
-  if (els.balanceAmount){
-    els.balanceAmount.textContent = formatMoney(cur, balances[cur]);
-  }
+  // Update balance display
+  if (balanceEl) balanceEl.textContent = formatMoney(cur);
 
-  localStorage.setItem("pay54_active_currency", cur);
+  // Persist
+  localStorage.setItem("pay54_currency", cur);
 }
 
-const initialCur = localStorage.getItem("pay54_active_currency") || "NGN";
-setCurrency(initialCur);
-
-// Pills click
-els.currencyBtns.forEach(btn => {
+// ----- Currency pills click
+pillBtns.forEach(btn => {
   btn.addEventListener("click", () => {
     const cur = btn.dataset.cur;
-    setCurrency(cur);
-    toast(`Currency switched: ${cur}`);
+    setActiveCurrency(cur);
   });
 });
 
-// Dropdown change
-if (els.currencyDropdown){
-  els.currencyDropdown.addEventListener("change", (e) => {
-    setCurrency(e.target.value);
-    toast(`Currency switched: ${e.target.value}`);
+// ----- Mobile dropdown change
+if (currencySelect) {
+  currencySelect.addEventListener("change", (e) => {
+    setActiveCurrency(e.target.value);
   });
 }
 
-// ---------- Profile menu ----------
-function openProfileMenu(open){
-  if (!els.profileMenu || !els.profileBtn) return;
-  els.profileMenu.classList.toggle("open", open);
-  els.profileBtn.setAttribute("aria-expanded", String(open));
+// Init currency
+setActiveCurrency(localStorage.getItem("pay54_currency") || "NGN");
+
+// ----- Theme toggle
+const themeToggle = document.getElementById("themeToggle");
+function applyTheme(theme) {
+  document.body.classList.toggle("light", theme === "light");
+  localStorage.setItem("pay54_theme", theme);
+  if (themeToggle) themeToggle.querySelector(".icon").textContent = (theme === "light") ? "🌙" : "☀️";
+}
+applyTheme(localStorage.getItem("pay54_theme") || "dark");
+
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    const isLight = document.body.classList.contains("light");
+    applyTheme(isLight ? "dark" : "light");
+  });
 }
 
-if (els.profileBtn && els.profileMenu){
-  els.profileBtn.addEventListener("click", (e) => {
+// ----- Profile name/email
+const profileNameEl = document.getElementById("profileName");
+const profileEmailEl = document.getElementById("profileEmail");
+const storedName = localStorage.getItem("pay54_name") || "Pese";
+const storedEmail = localStorage.getItem("pay54_email") || "pese@gmail.com";
+if (profileNameEl) profileNameEl.textContent = storedName;
+if (profileEmailEl) profileEmailEl.textContent = storedEmail;
+
+// Avatar initial
+const avatar = document.querySelector(".profile-btn .avatar");
+if (avatar && storedName) avatar.textContent = storedName.trim().charAt(0).toUpperCase();
+
+// ----- Profile dropdown open/close (fix: menu items must be clickable)
+const profileBtn = document.getElementById("profileBtn");
+const profileMenu = document.getElementById("profileMenu");
+
+function closeProfileMenu() {
+  if (!profileMenu) return;
+  profileMenu.classList.remove("open");
+  profileMenu.setAttribute("aria-hidden", "true");
+}
+function openProfileMenu() {
+  if (!profileMenu) return;
+  profileMenu.classList.add("open");
+  profileMenu.setAttribute("aria-hidden", "false");
+}
+
+if (profileBtn && profileMenu) {
+  profileBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    openProfileMenu(!els.profileMenu.classList.contains("open"));
+    const isOpen = profileMenu.classList.contains("open");
+    if (isOpen) closeProfileMenu();
+    else openProfileMenu();
   });
 
-  // Close on outside click
-  document.addEventListener("click", () => openProfileMenu(false));
-  els.profileMenu.addEventListener("click", (e) => e.stopPropagation());
+  // prevent click inside menu from closing immediately
+  profileMenu.addEventListener("click", (e) => e.stopPropagation());
+
+  // click outside closes
+  document.addEventListener("click", closeProfileMenu);
+
+  // Esc closes
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeProfileMenu();
+  });
 }
 
-// Menu actions
-document.querySelectorAll(".menu-item[data-action]").forEach(item => {
+// Menu actions (Layer 1: simple routing placeholders)
+document.querySelectorAll(".pm-item[data-action]").forEach(item => {
   item.addEventListener("click", () => {
     const action = item.dataset.action;
-    openProfileMenu(false);
-
-    if (action === "logout"){
-      // keep consistent with your current demo flow
-      window.location.href = "login.html";
-      return;
-    }
-
-    toast(`${action.replace(/_/g," ")} (Layer 2 wiring)`);
+    // For now: safe placeholders (Layer 2 will wire spec-accurate flows)
+    alert(`Coming soon: ${action}`);
+    closeProfileMenu();
   });
 });
 
-// Explicit logout button (in case you keep id)
-if (els.logoutBtn){
-  els.logoutBtn.addEventListener("click", () => {
+// Logout
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
     window.location.href = "login.html";
   });
 }
 
-// ---------- Clear alerts ----------
-if (els.clearAlerts && els.alertsFeed){
-  els.clearAlerts.addEventListener("click", () => {
-    els.alertsFeed.innerHTML = `
+// Alerts clear
+const clearAlerts = document.getElementById("clearAlerts");
+if (clearAlerts) {
+  clearAlerts.addEventListener("click", () => {
+    const alerts = document.getElementById("alerts");
+    if (!alerts) return;
+    alerts.innerHTML = `
       <div class="feed-item">
-        <div class="feed-icon">✅</div>
-        <div class="feed-body">
-          <div class="feed-title">All caught up</div>
+        <div class="feed-ico">✅</div>
+        <div class="feed-main">
+          <div class="feed-title">All clear</div>
           <div class="feed-sub">No requests or alerts</div>
         </div>
+        <div class="feed-pill ok">OK</div>
       </div>
     `;
-    toast("Alerts cleared");
   });
 }
 
-// ---------- Make ALL tiles/buttons respond (Layer 1) ----------
-function bindActionButtons(){
-  document.querySelectorAll("[data-action]").forEach(el => {
-    // Avoid double-binding for profile menu items already bound above
-    if (el.classList.contains("menu-item")) return;
-
-    el.addEventListener("click", () => {
-      const action = el.dataset.action;
-
-      // Layer 1: responsive + premium feedback
-      // Layer 2: you will replace these with spec-accurate routing/flows
-      const map = {
-        add_money: "Add money",
-        withdraw: "Withdraw",
-        send_pay54: "Send PAY54 → PAY54",
-        receive: "Receive details (tag & QR)",
-        bank_transfer: "Bank transfer",
-        request_money: "Request money",
-        cross_border_fx: "Cross-border FX",
-        pay_bills: "Pay Bills & Top",
-        savings_goals: "Savings & Goals",
-        virtual_cards: "Virtual cards",
-        smart_checkout: "PAY54 Smart Checkout",
-        shop_on_fly: "Shop on the Fly",
-        investments: "Investments & Stocks",
-        bet_funding: "Bet Funding",
-        become_agent: "Become an Agent",
-        ai_risk_watch: "AI Risk Watch",
-        open_savings: "Open Savings Pot",
-        view_all_tx: "View all transactions"
-      };
-
-      toast(`${map[action] || "Action"} — Layer 2 wiring next`);
-    });
+// Layer 1: Make buttons feel responsive (no spec wiring yet)
+document.querySelectorAll("[data-route], .tile, .shortcut, .btn.link").forEach(el => {
+  el.addEventListener("click", () => {
+    // Remove if you don’t want feedback
+    // console.log("Route:", el.getAttribute("data-route"));
   });
-}
+});
 
-bindActionButtons();
+// Balance CTAs (Layer 1 placeholder)
+const addMoneyBtn = document.getElementById("addMoneyBtn");
+const withdrawBtn = document.getElementById("withdrawBtn");
+if (addMoneyBtn) addMoneyBtn.addEventListener("click", () => alert("Add money flow (Layer 2 wiring next)"));
+if (withdrawBtn) withdrawBtn.addEventListener("click", () => alert("Withdraw flow (Layer 2 wiring next)"));
