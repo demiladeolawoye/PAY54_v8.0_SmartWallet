@@ -1,516 +1,101 @@
-/* =========================
-   PAY54 Dashboard — Approved Layout
-   Visual Fix Pass (no layout change)
-   ========================= */
+/* ======================================================
+   PAY54 — FINAL CSS-ONLY POLISH (APPROVED)
+   Scope:
+   - Logo visibility & size (Web + Mobile)
+   - Currency row centered (Web)
+   - Dark-mode text visibility for Money Moves & Services
+   - Web-only section spacing refinement
+   - Theme toggle visual depth (remove flat feel)
+   ====================================================== */
 
-:root{
-  --bg: #070b14;
-  --bg2:#060a12;
-  --card: rgba(255,255,255,0.06);
-  --card2: rgba(255,255,255,0.04);
-  --stroke: rgba(255,255,255,0.10);
-  --stroke2: rgba(255,255,255,0.14);
-  --text: rgba(255,255,255,0.92);
-  --muted: rgba(255,255,255,0.68);
-  --muted2: rgba(255,255,255,0.52);
-  --brand: #3b82f6;
-  --brand2:#2563eb;
-
-  --pos:#22c55e;
-  --neg:#ef4444;
-
-  --shadow: 0 18px 42px rgba(0,0,0,0.40);
-  --radius: 18px;
-  --radius2: 22px;
-
-  --gap: 18px; /* MOBILE already ok; WEB spacing fixed via grid gaps + card spacing */
-}
-
-body.light{
-  --bg: #eef5ff;
-  --bg2:#f7fbff;
-  --card: rgba(255,255,255,0.88);
-  --card2: rgba(255,255,255,0.78);
-  --stroke: rgba(10,20,40,0.12);
-  --stroke2: rgba(10,20,40,0.16);
-  --text: rgba(10,20,40,0.92);
-  --muted: rgba(10,20,40,0.62);
-  --muted2: rgba(10,20,40,0.48);
-  --shadow: 0 18px 42px rgba(20,40,80,0.12);
-}
-
-/* Base */
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
-body{
-  margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,0.22), transparent 60%),
-    radial-gradient(900px 500px at 80% 20%, rgba(34,197,94,0.12), transparent 55%),
-    linear-gradient(180deg, var(--bg), var(--bg2));
-}
-
-/* Header */
-.dash-header{
-  position: sticky;
-  top:0;
-  z-index: 50;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 14px;
-
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--stroke);
-  backdrop-filter: blur(12px);
-  background: linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.06));
-}
-body.light .dash-header{
-  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.62));
-}
-
-/* Logo (icon only) — bigger + visible */
-.brand{ display:flex; align-items:center; gap:10px; min-width: 56px; }
+/* -----------------------------
+   1) LOGO — size + visibility
+   ----------------------------- */
 .logo{
-  width: 40px;
-  height: 40px;
-  display:block;
-  object-fit: contain;
-  opacity: 0.98;
+  width: 44px;              /* desktop */
+  height: 44px;
+  margin-right: 14px;       /* breathing room from currency pills */
 }
-/* Light mode: make white parts visible without changing logo file */
-body.light .logo{
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.20)) drop-shadow(0 0 1px rgba(0,0,0,0.25));
-}
-
-/* Currency */
-.currency-pills{
-  display:flex;
-  gap: 10px;
-  align-items:center;
-  flex-wrap: nowrap;
-}
-.currency-pills .currency{
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  cursor:pointer;
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
-}
-.currency-pills .currency:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.45);
-}
-.currency-pills .currency.active{
-  background: rgba(59,130,246,0.22);
-  border-color: rgba(59,130,246,0.55);
-}
-
-/* Mobile dropdown wrapper */
-.currency-dd-wrap{
-  display:flex;
-  align-items:center;
-}
-.currency-dropdown{
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  padding: 8px 12px;
-  border-radius: 999px;
-  font-weight: 700;
-  outline:none;
-}
-
-/* Header actions */
-.header-actions{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  margin-left:auto;
-}
-
-/* Theme toggle — remove flat white box feel */
-.icon-btn{
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  cursor:pointer;
-  display:grid;
-  place-items:center;
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
-}
-.icon-btn:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.45);
-}
-
-/* Avatar / profile */
-.profile-wrap{ position: relative; }
-.avatar-btn{
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  cursor:pointer;
-  display:grid;
-  place-items:center;
-}
-.avatar{
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  display:grid;
-  place-items:center;
-  background: rgba(59,130,246,0.20);
-  color: var(--text);
-  font-weight: 800;
-}
-
-.profile-menu{
-  position:absolute;
-  right:0;
-  top: 48px;
-  width: 240px;
-  padding: 10px;
-  border-radius: 14px;
-  border: 1px solid var(--stroke);
-  background: rgba(10,14,24,0.92);
-  box-shadow: var(--shadow);
-  display:none;
-}
-body.light .profile-menu{
-  background: rgba(255,255,255,0.92);
-}
-.profile-menu.open{ display:block; }
-
-.pm-head{
-  padding: 6px 6px 10px 6px;
-  border-bottom: 1px solid var(--stroke);
-  margin-bottom: 8px;
-}
-.pm-name{ font-weight: 800; }
-.pm-email{ font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-.pm-item{
-  width: 100%;
-  text-align:left;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text);
-  padding: 10px 10px;
-  border-radius: 12px;
-  cursor:pointer;
-  font-weight: 650;
-}
-.pm-item:hover{
-  background: rgba(255,255,255,0.06);
-  border-color: var(--stroke);
-}
-.pm-item.danger{ color: #ff6b6b; }
-
-/* MAIN GRID */
-.dash-grid{
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 18px;
-  display:grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 18px; /* WEB spacing between columns */
-}
-
-/* WEB ONLY: section spacing fix */
-.left, .right{
-  display:flex;
-  flex-direction: column;
-  gap: 18px; /* ✅ fixes “no space between sections” on web */
-}
-
-/* Cards */
-.card{
-  background: linear-gradient(180deg, var(--card), var(--card2));
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius2);
-  box-shadow: var(--shadow);
-  padding: 16px;
-}
-.card h3{
-  margin:0;
-  font-size: 18px;
-  letter-spacing: 0.2px;
-}
-.card-head{ margin-bottom: 10px; }
-.sub{
-  margin: 6px 0 0 0;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Balance */
-.balance-card{
-  padding: 18px;
-}
-.balance-top{
-  display:flex;
-  align-items:flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.label{
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--muted);
-}
-.balance-actions{
-  display:flex;
-  gap: 10px;
-  align-items:center;
-}
-
-.balance-amount{
-  font-size: 54px;
-  font-weight: 900;
-  letter-spacing: -0.8px;
-  margin: 10px 0 12px 0;
-  line-height: 1.05;
-}
-.balance-meta{
-  color: var(--muted);
-  font-weight: 650;
-  margin-bottom: 10px;
-}
-.identity{
-  display:flex;
-  flex-wrap: wrap;
-  gap: 14px 16px;
-  color: var(--muted);
-  font-weight: 650;
-  margin-bottom: 14px;
-}
-.identity strong{ color: var(--text); }
-
-/* Trust chip centered low */
-.trust-chip{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  font-weight: 750;
-  color: var(--text);
-  width: fit-content;
-  margin: 6px auto 0 auto; /* ✅ bottom-center feel */
-}
-
-/* Buttons */
-.btn{
-  border-radius: 999px;
-  padding: 9px 14px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  font-weight: 800;
-  cursor:pointer;
-  transition: transform .12s ease, border-color .12s ease, background .12s ease;
-}
-.btn:hover{ transform: translateY(-1px); border-color: rgba(59,130,246,0.45); }
-.btn.primary{
-  background: linear-gradient(180deg, rgba(59,130,246,0.95), rgba(37,99,235,0.95));
-  border-color: rgba(59,130,246,0.70);
-  color: #fff;
-}
-.btn.ghost{
-  background: rgba(255,255,255,0.03);
-}
-.btn.sm{ padding: 7px 12px; font-size: 12px; }
-.btn.ok{ border-color: rgba(34,197,94,0.35); }
-.btn.warn{ border-color: rgba(245,158,11,0.40); }
-
-/* Card topline (Right column) */
-.card-topline{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.link-btn{
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--muted);
-  font-weight: 800;
-  cursor:pointer;
-}
-.link-btn:hover{ color: var(--text); }
-
-/* Tiles */
-.tile-grid{
-  display:grid;
-  gap: 12px;
-}
-.tile-grid.cols-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
-.tile-grid.cols-4{ grid-template-columns: repeat(4, minmax(0,1fr)); }
-
-.tile-btn{
-  text-align:left;
-  padding: 14px 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
-  cursor:pointer;
-  transition: transform .12s ease, border-color .12s ease, background .12s ease;
-}
-
-/* ✅ CRITICAL FIX:
-   Dark mode: Money Moves + Services button title/subtitle MUST be white/visible.
-   Light mode stays as-is via variables. */
-.tile-btn .t-title{
-  display:block;
-  font-weight: 900;
-  font-size: 14px;
-  color: var(--text);
-}
-.tile-btn .t-sub{
-  display:block;
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 650;
-  color: var(--muted);
-}
-.tile-btn:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.45);
-  background: rgba(59,130,246,0.08);
-}
-
-/* Quick shortcuts */
-.shortcut-grid{
-  display:grid;
-  grid-template-columns: repeat(4, minmax(0,1fr));
-  gap: 12px;
-}
-.shortcut-btn{
-  text-align:left;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
-  color: var(--text);
-  font-weight: 850;
-  cursor:pointer;
-}
-.shortcut-btn:hover{
-  border-color: rgba(59,130,246,0.45);
-  background: rgba(59,130,246,0.08);
-}
-
-/* Feed (Recent, Alerts, News) */
-.feed{ display:flex; flex-direction: column; gap: 12px; }
-
-.feed-item{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 16px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
-}
-
-.feed-icon{
-  width: 36px;
-  height: 36px;
-  border-radius: 14px;
-  border: 1px solid var(--stroke2);
-  display:grid;
-  place-items:center;
-  background: rgba(255,255,255,0.03);
-  flex: 0 0 auto;
-}
-
-.feed-main{
-  display:flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-.feed-title{
-  font-weight: 900;
-  color: var(--text);
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.feed-sub{
-  margin-top: 3px;
-  color: var(--muted);
-  font-weight: 700;
-  font-size: 12px;
-}
-
-.feed-amt{
-  font-weight: 900;
-  white-space: nowrap;
-  margin-left: 10px;
-}
-.feed-amt.pos{ color: var(--pos); }
-.feed-amt.neg{ color: var(--neg); }
-
-/* Responsiveness */
-.desktop-only{ display:block; }
-.mobile-only{ display:none; }
 
 @media (max-width: 980px){
-  .dash-grid{ grid-template-columns: 1fr; }
-
-  /* keep approved mobile order handled by HTML; spacing remains good */
-  .currency-pills.desktop-only{ display:none; }
-  .mobile-only{ display:block; }
-  .desktop-only{ display:none; }
-
-  .dash-header{
-    gap: 10px;
-    padding: 12px 12px;
+  .logo{
+    width: 40px;            /* mobile */
+    height: 40px;
+    margin-right: 10px;
   }
-
-  .logo{ width: 36px; height: 36px; }
-
-  .balance-amount{
-    font-size: 42px;
-    letter-spacing: -0.6px;
-  }
-
-  /* Mobile: keep actions top-right like reference */
-  .balance-top{
-    align-items:flex-start;
-  }
-  .balance-actions{
-    gap: 8px;
-  }
-  .btn{ padding: 9px 12px; }
-
-  /* Grids */
-  .tile-grid.cols-3{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .tile-grid.cols-4{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .shortcut-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 
-@media (max-width: 420px){
-  .balance-amount{ font-size: 38px; }
+/* Light mode: ensure white parts of SVG remain visible */
+body.light .logo{
+  filter:
+    drop-shadow(0 2px 3px rgba(0,0,0,0.28))
+    drop-shadow(0 0 1px rgba(0,0,0,0.35));
+}
+
+/* ----------------------------------------
+   2) CURRENCY ROW — center on Web only
+   ---------------------------------------- */
+.currency-pills{
+  margin-left: auto;
+  margin-right: auto;      /* true visual centering */
+}
+
+/* Keep mobile behaviour unchanged */
+@media (max-width: 980px){
+  .currency-pills{
+    margin: 0;
+  }
+}
+
+/* ----------------------------------------------------
+   3) DARK MODE — Money Moves & Services readability
+   (Light mode untouched)
+   ---------------------------------------------------- */
+body:not(.light) .tile-btn .t-title,
+body:not(.light) .tile-btn .t-sub{
+  color: rgba(255,255,255,0.96);
+}
+
+body:not(.light) .tile-btn .t-sub{
+  color: rgba(255,255,255,0.70);
+}
+
+/* Slightly strengthen borders in dark mode for clarity */
+body:not(.light) .tile-btn{
+  border-color: rgba(255,255,255,0.18);
+}
+
+/* ----------------------------------------------------
+   4) WEB ONLY — section spacing refinement
+   (Mobile already perfect)
+   ---------------------------------------------------- */
+@media (min-width: 981px){
+  .left, .right{
+    gap: 22px;              /* subtle premium breathing room */
+  }
+}
+
+/* ----------------------------------------------------
+   5) THEME TOGGLE — remove flat white-box feel
+   ---------------------------------------------------- */
+.icon-btn,
+.avatar-btn{
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.02)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 8px 20px rgba(0,0,0,0.25);
+}
+
+.icon-btn:hover,
+.avatar-btn:hover{
+  background: linear-gradient(
+    180deg,
+    rgba(59,130,246,0.22),
+    rgba(59,130,246,0.10)
+  );
+  border-color: rgba(59,130,246,0.55);
 }
