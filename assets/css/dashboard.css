@@ -1,101 +1,326 @@
 /* ======================================================
-   PAY54 — FINAL CSS-ONLY POLISH (APPROVED)
-   Scope:
-   - Logo visibility & size (Web + Mobile)
-   - Currency row centered (Web)
-   - Dark-mode text visibility for Money Moves & Services
-   - Web-only section spacing refinement
-   - Theme toggle visual depth (remove flat feel)
+   PAY54 DASHBOARD — FINAL APPROVED CSS
+   FULL REPLACEMENT (SAFE)
    ====================================================== */
 
-/* -----------------------------
-   1) LOGO — size + visibility
-   ----------------------------- */
+/* ---------- CSS VARIABLES ---------- */
+:root{
+  --bg:#070b14;
+  --bg2:#060a12;
+
+  --card:rgba(255,255,255,0.06);
+  --card2:rgba(255,255,255,0.04);
+
+  --stroke:rgba(255,255,255,0.12);
+  --stroke2:rgba(255,255,255,0.18);
+
+  --text:rgba(255,255,255,0.92);
+  --muted:rgba(255,255,255,0.65);
+
+  --brand:#3b82f6;
+  --brand2:#2563eb;
+
+  --pos:#22c55e;
+  --neg:#ef4444;
+
+  --radius:18px;
+  --radius2:22px;
+
+  --shadow:0 18px 42px rgba(0,0,0,0.45);
+}
+
+/* ---------- LIGHT MODE ---------- */
+body.dashboard.light{
+  --bg:#eef5ff;
+  --bg2:#f7fbff;
+
+  --card:rgba(255,255,255,0.92);
+  --card2:rgba(255,255,255,0.82);
+
+  --stroke:rgba(10,20,40,0.14);
+  --stroke2:rgba(10,20,40,0.20);
+
+  --text:rgba(10,20,40,0.92);
+  --muted:rgba(10,20,40,0.60);
+
+  --shadow:0 18px 42px rgba(20,40,80,0.12);
+}
+
+/* ---------- BASE ---------- */
+*{ box-sizing:border-box; }
+
+html,body{ height:100%; }
+
+body.dashboard{
+  margin:0;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(1000px 500px at 20% 10%, rgba(59,130,246,.18), transparent 60%),
+    radial-gradient(900px 500px at 80% 20%, rgba(34,197,94,.12), transparent 60%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+  color:var(--text);
+}
+
+/* ---------- HEADER ---------- */
+.dash-header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:14px 18px;
+  border-bottom:1px solid var(--stroke);
+  backdrop-filter:blur(14px);
+}
+
+/* LOGO */
+.brand{ display:flex; align-items:center; }
 .logo{
-  width: 44px;              /* desktop */
-  height: 44px;
-  margin-right: 14px;       /* breathing room from currency pills */
+  width:44px;
+  height:44px;
+  display:block;
 }
 
-@media (max-width: 980px){
-  .logo{
-    width: 40px;            /* mobile */
-    height: 40px;
-    margin-right: 10px;
-  }
+/* Light mode logo visibility */
+body.dashboard.light .logo{
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));
 }
 
-/* Light mode: ensure white parts of SVG remain visible */
-body.light .logo{
-  filter:
-    drop-shadow(0 2px 3px rgba(0,0,0,0.28))
-    drop-shadow(0 0 1px rgba(0,0,0,0.35));
-}
-
-/* ----------------------------------------
-   2) CURRENCY ROW — center on Web only
-   ---------------------------------------- */
+/* ---------- CURRENCY ---------- */
 .currency-pills{
-  margin-left: auto;
-  margin-right: auto;      /* true visual centering */
+  display:flex;
+  gap:10px;
+  margin-left:auto;
+  margin-right:auto;
 }
 
-/* Keep mobile behaviour unchanged */
-@media (max-width: 980px){
-  .currency-pills{
-    margin: 0;
-  }
+.currency{
+  padding:7px 14px;
+  border-radius:999px;
+  border:1px solid var(--stroke2);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  font-weight:800;
+  cursor:pointer;
+}
+.currency.active{
+  background:rgba(59,130,246,.25);
+  border-color:rgba(59,130,246,.6);
 }
 
-/* ----------------------------------------------------
-   3) DARK MODE — Money Moves & Services readability
-   (Light mode untouched)
-   ---------------------------------------------------- */
-body:not(.light) .tile-btn .t-title,
-body:not(.light) .tile-btn .t-sub{
-  color: rgba(255,255,255,0.96);
+/* MOBILE DROPDOWN */
+.currency-dd-wrap{ display:none; }
+.currency-dropdown{
+  border-radius:999px;
+  padding:8px 14px;
+  border:1px solid var(--stroke2);
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  font-weight:800;
 }
 
-body:not(.light) .tile-btn .t-sub{
-  color: rgba(255,255,255,0.70);
+/* ---------- HEADER ACTIONS ---------- */
+.header-actions{
+  display:flex;
+  gap:10px;
 }
 
-/* Slightly strengthen borders in dark mode for clarity */
-body:not(.light) .tile-btn{
-  border-color: rgba(255,255,255,0.18);
-}
-
-/* ----------------------------------------------------
-   4) WEB ONLY — section spacing refinement
-   (Mobile already perfect)
-   ---------------------------------------------------- */
-@media (min-width: 981px){
-  .left, .right{
-    gap: 22px;              /* subtle premium breathing room */
-  }
-}
-
-/* ----------------------------------------------------
-   5) THEME TOGGLE — remove flat white-box feel
-   ---------------------------------------------------- */
 .icon-btn,
 .avatar-btn{
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.08),
-    rgba(255,255,255,0.02)
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    0 8px 20px rgba(0,0,0,0.25);
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  border:1px solid var(--stroke2);
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
+  color:var(--text);
+  cursor:pointer;
 }
 
-.icon-btn:hover,
-.avatar-btn:hover{
-  background: linear-gradient(
-    180deg,
-    rgba(59,130,246,0.22),
-    rgba(59,130,246,0.10)
-  );
-  border-color: rgba(59,130,246,0.55);
+.avatar{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background:rgba(59,130,246,.25);
+  display:grid;
+  place-items:center;
+  font-weight:900;
+}
+
+/* ---------- PROFILE MENU ---------- */
+.profile-wrap{ position:relative; }
+
+.profile-menu{
+  position:absolute;
+  right:0;
+  top:48px;
+  width:240px;
+  background:var(--card);
+  border:1px solid var(--stroke);
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  padding:10px;
+  display:none;
+}
+.profile-menu.open{ display:block; }
+
+.pm-head{
+  border-bottom:1px solid var(--stroke);
+  padding-bottom:8px;
+  margin-bottom:8px;
+}
+.pm-name{ font-weight:900; }
+.pm-email{ font-size:12px; color:var(--muted); }
+
+.pm-item{
+  width:100%;
+  padding:10px;
+  border-radius:12px;
+  background:none;
+  border:none;
+  text-align:left;
+  color:var(--text);
+  font-weight:700;
+  cursor:pointer;
+}
+.pm-item.danger{ color:#ff6b6b; }
+
+/* ---------- GRID ---------- */
+.dash-grid{
+  max-width:1280px;
+  margin:auto;
+  padding:18px;
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:22px;
+}
+
+.left,.right{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+/* ---------- CARD ---------- */
+.card{
+  background:linear-gradient(180deg,var(--card),var(--card2));
+  border:1px solid var(--stroke);
+  border-radius:var(--radius2);
+  box-shadow:var(--shadow);
+  padding:16px;
+}
+
+.card-head{ margin-bottom:12px; }
+.card h3{ margin:0; }
+.sub{ color:var(--muted); font-size:13px; margin-top:6px; }
+
+/* ---------- BALANCE ---------- */
+.balance-top{
+  display:flex;
+  justify-content:space-between;
+}
+.balance-actions{ display:flex; gap:10px; }
+
+.balance-amount{
+  font-size:54px;
+  font-weight:900;
+  margin:12px 0;
+}
+
+.balance-meta{ color:var(--muted); margin-bottom:8px; }
+
+.identity{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  color:var(--muted);
+}
+
+.trust-chip{
+  margin:12px auto 0;
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid var(--stroke2);
+}
+
+/* ---------- BUTTONS ---------- */
+.btn{
+  padding:9px 14px;
+  border-radius:999px;
+  border:1px solid var(--stroke2);
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  font-weight:800;
+  cursor:pointer;
+}
+.btn.primary{
+  background:linear-gradient(180deg,var(--brand),var(--brand2));
+  color:#fff;
+}
+
+/* ---------- TILES ---------- */
+.tile-grid{ display:grid; gap:12px; }
+.cols-3{ grid-template-columns:repeat(3,1fr); }
+.cols-4{ grid-template-columns:repeat(4,1fr); }
+
+.tile-btn{
+  padding:14px;
+  border-radius:var(--radius);
+  border:1px solid var(--stroke2);
+  background:rgba(255,255,255,.04);
+  text-align:left;
+}
+.tile-btn .t-title{ font-weight:900; color:var(--text); }
+.tile-btn .t-sub{ font-size:12px; color:var(--muted); }
+
+/* ---------- SHORTCUTS ---------- */
+.shortcut-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.shortcut-btn{
+  padding:14px;
+  border-radius:var(--radius);
+  border:1px solid var(--stroke2);
+  background:rgba(255,255,255,.04);
+  font-weight:900;
+}
+
+/* ---------- FEEDS ---------- */
+.feed{ display:flex; flex-direction:column; gap:12px; }
+
+.feed-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid var(--stroke2);
+}
+.feed-icon{
+  width:36px;
+  height:36px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.08);
+}
+.feed-main{ flex:1; }
+.feed-title{ font-weight:900; }
+.feed-sub{ font-size:12px; color:var(--muted); }
+.feed-amt.pos{ color:var(--pos); }
+.feed-amt.neg{ color:var(--neg); }
+
+/* ---------- RESPONSIVE ---------- */
+.desktop-only{ display:block; }
+.mobile-only{ display:none; }
+
+@media(max-width:980px){
+  .dash-grid{ grid-template-columns:1fr; }
+  .currency-pills{ display:none; }
+  .currency-dd-wrap{ display:block; }
+  .shortcut-grid{ grid-template-columns:repeat(2,1fr); }
+  .cols-3,.cols-4{ grid-template-columns:repeat(2,1fr); }
+  .balance-amount{ font-size:40px; }
 }
