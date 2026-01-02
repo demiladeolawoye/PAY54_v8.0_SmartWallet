@@ -10,7 +10,7 @@
 <body class="dashboard">
   <!-- HEADER (Approved layout) -->
   <header class="dash-header">
-    <!-- Logo icon only (PAY54 text removed as requested) -->
+    <!-- Logo icon only (auth pages keep using pay54-logo.svg wordmark) -->
     <div class="brand">
       <img src="assets/img/pay54-logo-icon.svg" class="logo" alt="PAY54" />
     </div>
@@ -26,7 +26,7 @@
       <button class="currency" data-cur="ZAR" type="button">ZAR</button>
     </div>
 
-    <!-- MOBILE dropdown (already agreed) -->
+    <!-- MOBILE dropdown -->
     <div class="mobile-only currency-dd-wrap">
       <select id="currencySelect" class="currency-dropdown" aria-label="Currency dropdown">
         <option value="NGN">NGN</option>
@@ -40,7 +40,7 @@
     </div>
 
     <div class="header-actions">
-      <!-- Theme toggle (no flat white box) -->
+      <!-- Theme toggle -->
       <button id="themeToggle" class="icon-btn" type="button" aria-label="Toggle light/dark">
         <span class="icon">🌙</span>
       </button>
@@ -66,9 +66,12 @@
     </div>
   </header>
 
-  <!-- MAIN GRID (Approved layout) -->
+  <!-- MAIN GRID -->
   <main class="dash-grid">
+
+    <!-- LEFT COLUMN -->
     <section class="left">
+
       <!-- BALANCE -->
       <div class="card balance-card">
         <div class="balance-top">
@@ -90,8 +93,39 @@
           <span>KYC: <strong>Level 2</strong></span>
         </div>
 
-        <!-- stays inside balance, centered lower -->
         <div class="trust-chip">🔒 Security &amp; Financial compliance active</div>
+      </div>
+
+      <!-- ✅ MOBILE REQUIREMENT: Quick Shortcuts directly after Balance -->
+      <!-- ✅ WEB SWAP: Quick Shortcuts moved to RIGHT column via HTML (see right column) -->
+      <!-- So: Quick Shortcuts appears here ONLY on mobile -->
+      <div class="card mobile-only">
+        <div class="card-head">
+          <h3>Quick Shortcuts</h3>
+          <p class="sub">Fast access to key actions</p>
+        </div>
+
+        <div class="shortcut-grid">
+          <button class="shortcut-btn" type="button" data-shortcut="agent">
+            <span class="t-title">Become an Agent</span>
+            <span class="t-sub">Onboard &amp; earn</span>
+          </button>
+
+          <button class="shortcut-btn" type="button" data-shortcut="shop">
+            <span class="t-title">Shop on the Fly</span>
+            <span class="t-sub">Food • Tickets • Transfers</span>
+          </button>
+
+          <button class="shortcut-btn" type="button" data-shortcut="savings">
+            <span class="t-title">Open Savings Pot</span>
+            <span class="t-sub">Start a goal today</span>
+          </button>
+
+          <button class="shortcut-btn" type="button" data-shortcut="invest">
+            <span class="t-title">Investments &amp; Stocks</span>
+            <span class="t-sub">Local &amp; global assets</span>
+          </button>
+        </div>
       </div>
 
       <!-- MONEY MOVES -->
@@ -194,28 +228,83 @@
         </div>
       </div>
 
-      <!-- QUICK SHORTCUTS -->
-      <div class="card">
+      <!-- ✅ WEB SWAP: Recent Transactions now lives on LEFT (web) -->
+      <div class="card desktop-only">
+        <div class="card-topline">
+          <h3>Recent Transactions</h3>
+          <button class="pill-link" type="button" id="viewAllTx">View all</button>
+        </div>
+
+        <div class="feed">
+          <div class="feed-item">
+            <div class="feed-icon">💳</div>
+            <div class="feed-main">
+              <div class="feed-title">Wallet funding</div>
+              <div class="feed-sub">2 mins ago</div>
+            </div>
+            <div class="feed-amt pos">+ ₦250,000</div>
+          </div>
+
+          <div class="feed-item">
+            <div class="feed-icon">↗️</div>
+            <div class="feed-main">
+              <div class="feed-title">Transfer to John</div>
+              <div class="feed-sub">Yesterday</div>
+            </div>
+            <div class="feed-amt neg">− ₦45,000</div>
+          </div>
+
+          <div class="feed-item">
+            <div class="feed-icon">📶</div>
+            <div class="feed-main">
+              <div class="feed-title">Airtime purchase</div>
+              <div class="feed-sub">3 days ago</div>
+            </div>
+            <div class="feed-amt neg">− ₦2,500</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN -->
+    <section class="right">
+
+      <!-- ✅ WEB SWAP: Quick Shortcuts now on RIGHT (web) -->
+      <div class="card desktop-only">
         <div class="card-head">
           <h3>Quick Shortcuts</h3>
           <p class="sub">Fast access to key actions</p>
         </div>
 
         <div class="shortcut-grid">
-          <button class="shortcut-btn" type="button" data-shortcut="agent">Become an Agent</button>
-          <button class="shortcut-btn" type="button" data-shortcut="shop">Shop on the Fly</button>
-          <button class="shortcut-btn" type="button" data-shortcut="savings">Open Savings Pot</button>
-          <button class="shortcut-btn" type="button" data-shortcut="invest">Investments &amp; Stocks</button>
+          <button class="shortcut-btn" type="button" data-shortcut="agent">
+            <span class="t-title">Become an Agent</span>
+            <span class="t-sub">Onboard &amp; earn</span>
+          </button>
+
+          <button class="shortcut-btn" type="button" data-shortcut="shop">
+            <span class="t-title">Shop on the Fly</span>
+            <span class="t-sub">Food • Tickets • Transfers</span>
+          </button>
+
+          <button class="shortcut-btn" type="button" data-shortcut="savings">
+            <span class="t-title">Open Savings Pot</span>
+            <span class="t-sub">Start a goal today</span>
+          </button>
+
+          <button class="shortcut-btn" type="button" data-shortcut="invest">
+            <span class="t-title">Investments &amp; Stocks</span>
+            <span class="t-sub">Local &amp; global assets</span>
+          </button>
         </div>
       </div>
-    </section>
 
-    <section class="right">
-      <!-- RECENT TRANSACTIONS -->
-      <div class="card">
+      <!-- ✅ MOBILE: Recent Transactions stays on RIGHT stack (mobile) -->
+      <div class="card mobile-only">
         <div class="card-topline">
           <h3>Recent Transactions</h3>
-          <button class="link-btn" type="button" id="viewAllTx">View all</button>
+          <button class="pill-link" type="button">View all</button>
         </div>
 
         <div class="feed">
@@ -285,7 +374,7 @@
         </div>
       </div>
 
-      <!-- NEWS & INSIGHTS (two-line hierarchy, feed style) -->
+      <!-- NEWS & INSIGHTS -->
       <div class="card">
         <div class="card-topline">
           <h3>News &amp; Insights</h3>
@@ -317,6 +406,7 @@
           </div>
         </div>
       </div>
+
     </section>
   </main>
 
