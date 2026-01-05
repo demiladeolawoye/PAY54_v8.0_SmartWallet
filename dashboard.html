@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>PAY54 — Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="assets/css/dashboard.css?v=801" />
+  <link rel="stylesheet" href="assets/css/dashboard.css?v=802" />
 </head>
 
 <body class="dashboard">
@@ -96,9 +96,7 @@
         <div class="trust-chip">🔒 Security &amp; Financial compliance active</div>
       </div>
 
-      <!-- ✅ MOBILE REQUIREMENT: Quick Shortcuts directly after Balance -->
-      <!-- ✅ WEB SWAP: Quick Shortcuts moved to RIGHT column via HTML (see right column) -->
-      <!-- So: Quick Shortcuts appears here ONLY on mobile -->
+      <!-- MOBILE: Quick Shortcuts directly after Balance -->
       <div class="card mobile-only">
         <div class="card-head">
           <h3>Quick Shortcuts</h3>
@@ -113,7 +111,7 @@
 
           <button class="shortcut-btn" type="button" data-shortcut="shop">
             <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food • Tickets • Transfers</span>
+            <span class="t-sub">Food • Tickets • Taxi</span>
           </button>
 
           <button class="shortcut-btn" type="button" data-shortcut="savings">
@@ -182,7 +180,7 @@
           </button>
 
           <button class="tile-btn" type="button" data-service="bills">
-            <span class="t-title">Pay Bills &amp; Top</span>
+            <span class="t-title">Pay Bills &amp; Top Up</span>
             <span class="t-sub">Airtime · Data · Power · TV</span>
           </button>
 
@@ -192,7 +190,7 @@
           </button>
 
           <button class="tile-btn" type="button" data-service="cards">
-            <span class="t-title">Virtual cards</span>
+            <span class="t-title">Virtual &amp; Linked Cards</span>
             <span class="t-sub">Control &amp; spend</span>
           </button>
 
@@ -203,7 +201,7 @@
 
           <button class="tile-btn" type="button" data-service="shop">
             <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food · Tickets · Transfers</span>
+            <span class="t-sub">Food · Tickets · Taxi</span>
           </button>
 
           <button class="tile-btn" type="button" data-service="invest">
@@ -228,14 +226,14 @@
         </div>
       </div>
 
-      <!-- ✅ WEB SWAP: Recent Transactions now lives on LEFT (web) -->
+      <!-- WEB: Recent Transactions on LEFT -->
       <div class="card desktop-only">
         <div class="card-topline">
           <h3>Recent Transactions</h3>
-          <button class="pill-link" type="button" id="viewAllTx">View all</button>
+          <button class="pill-link" type="button" data-viewalltx>View all</button>
         </div>
 
-        <div class="feed">
+        <div class="feed" data-role="recentTxFeed">
           <div class="feed-item">
             <div class="feed-icon">💳</div>
             <div class="feed-main">
@@ -270,7 +268,7 @@
     <!-- RIGHT COLUMN -->
     <section class="right">
 
-      <!-- ✅ WEB SWAP: Quick Shortcuts now on RIGHT (web) -->
+      <!-- WEB: Quick Shortcuts on RIGHT -->
       <div class="card desktop-only">
         <div class="card-head">
           <h3>Quick Shortcuts</h3>
@@ -285,7 +283,7 @@
 
           <button class="shortcut-btn" type="button" data-shortcut="shop">
             <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food • Tickets • Transfers</span>
+            <span class="t-sub">Food • Tickets • Taxi</span>
           </button>
 
           <button class="shortcut-btn" type="button" data-shortcut="savings">
@@ -300,14 +298,14 @@
         </div>
       </div>
 
-      <!-- ✅ MOBILE: Recent Transactions stays on RIGHT stack (mobile) -->
+      <!-- MOBILE: Recent Transactions on RIGHT stack -->
       <div class="card mobile-only">
         <div class="card-topline">
           <h3>Recent Transactions</h3>
-          <button class="pill-link" type="button">View all</button>
+          <button class="pill-link" type="button" data-viewalltx>View all</button>
         </div>
 
-        <div class="feed">
+        <div class="feed" data-role="recentTxFeed">
           <div class="feed-item">
             <div class="feed-icon">💳</div>
             <div class="feed-main">
@@ -410,6 +408,6 @@
     </section>
   </main>
 
-  <script src="assets/js/dashboard.js?v=801"></script>
+  <script src="assets/js/dashboard.js?v=802"></script>
 </body>
 </html>
