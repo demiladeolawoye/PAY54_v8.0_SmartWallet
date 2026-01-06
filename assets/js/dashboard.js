@@ -1,13 +1,12 @@
 /* =========================
-   PAY54 Dashboard — Layer 2 Wiring (v8.0 aligned) — v803
+   PAY54 Dashboard — Layer 2 Wiring (v8.0 aligned) — v804
    Full replacement for assets/js/dashboard.js
 
-   Fixes:
-   - Prevents "dead buttons" by hardening localStorage + null checks
-   - Currency switching always works (even if storage is corrupted)
-   - Add money / Withdraw / Money Moves / Services / Shortcuts wired
-   - Alerts render + Clear all works
-   - View all opens ledger (desktop + mobile if id added)
+   Fixes v804:
+   ✅ Mobile Recent Transactions updates correctly (targets visible feed)
+   ✅ “View all” ledger wiring fixed (viewAllTx + viewAllTxMobile)
+   ✅ Currency stored value validated (fallback to NGN)
+   ✅ Light mode default (can be changed)
 ========================= */
 
 (() => {
@@ -53,7 +52,6 @@
   const fxSendCurrencies = ["USD", "GBP", "EUR", "CAD", "AED", "AUD"];
 
   function safeJSONParse(v, fallback) {
-    // Handle null, "null", "undefined", empty string, corrupted JSON
     if (v === null || v === "" || v === "null" || v === "undefined") return fallback;
     try {
       return JSON.parse(v);
@@ -73,11 +71,8 @@
 
   function getBalances() {
     const stored = safeJSONParse(localStorage.getItem(LS.BALANCES), null);
-
-    // If corrupted or not an object -> reset
     if (!isPlainObject(stored)) return resetBalances();
 
-    // Ensure required currencies exist + are numbers
     const cleaned = { ...defaultBalances };
     for (const k of Object.keys(cleaned)) {
       const v = stored[k];
@@ -129,6 +124,12 @@
     return `${prefix}-${Math.random().toString(16).slice(2, 8).toUpperCase()}-${Date.now().toString().slice(-6)}`;
   }
 
+  function normalizeCurrency(cur) {
+    const balances = getBalances();
+    if (cur && Object.prototype.hasOwnProperty.call(balances, cur)) return cur;
+    return "NGN";
+  }
+
   /* ---------------------------
      1) DOM Hooks
   --------------------------- */
@@ -151,8 +152,9 @@
   const clearAlertsBtn = document.getElementById("clearAlerts");
   const alertsContainer = document.getElementById("alerts");
 
+  // ✅ Fixed by HTML v804
   const viewAllTxBtn = document.getElementById("viewAllTx"); // desktop
-  const viewAllTxMobileBtn = document.getElementById("viewAllTxMobile"); // add in HTML (recommended)
+  const viewAllTxMobileBtn = document.getElementById("viewAllTxMobile"); // mobile
 
   /* ---------------------------
      2) Modal System (injected)
@@ -324,22 +326,23 @@
   --------------------------- */
 
   function setActiveCurrency(cur) {
-    const balances = getBalances(); // SAFE
+    const balances = getBalances();
+    const safeCur = normalizeCurrency(cur);
 
     pillBtns.forEach((b) => {
-      const isActive = b.dataset.cur === cur;
+      const isActive = b.dataset.cur === safeCur;
       b.classList.toggle("active", isActive);
       b.setAttribute("aria-pressed", isActive ? "true" : "false");
     });
 
-    if (currencySelect) currencySelect.value = cur;
+    if (currencySelect) currencySelect.value = safeCur;
 
     if (balanceEl) {
-      const amt = Number(balances[cur] ?? 0);
-      balanceEl.textContent = moneyFmt(cur, amt);
+      const amt = Number(balances[safeCur] ?? 0);
+      balanceEl.textContent = moneyFmt(safeCur, amt);
     }
 
-    localStorage.setItem(LS.CURRENCY, cur);
+    localStorage.setItem(LS.CURRENCY, safeCur);
   }
 
   pillBtns.forEach((btn) => {
@@ -362,7 +365,9 @@
       if (icon) icon.textContent = theme === "light" ? "🌙" : "☀️";
     }
   }
-  applyTheme(localStorage.getItem(LS.THEME) || "dark");
+
+  // ✅ Default LIGHT (as discussed)
+  applyTheme(localStorage.getItem(LS.THEME) || "light");
 
   if (themeToggle) {
     themeToggle.addEventListener("click", () => {
@@ -486,23 +491,11 @@
     });
   }
 
+  // ✅ FIX v804: always target the visible Recent Transactions feed
   function recentTxFeedEl() {
-    // Desktop: use viewAllTx button to locate the correct card/feed
-    if (viewAllTxBtn) {
-      const card = viewAllTxBtn.closest(".card");
-      const feed = card ? card.querySelector(".feed") : null;
-      if (feed) return feed;
-    }
-    // Mobile fallback: pick the first "Recent Transactions" feed in DOM order (best-effort)
-    const cards = Array.from(document.querySelectorAll(".card"));
-    for (const c of cards) {
-      const h3 = c.querySelector("h3");
-      if (h3 && h3.textContent.trim() === "Recent Transactions") {
-        const feed = c.querySelector(".feed");
-        if (feed) return feed;
-      }
-    }
-    return null;
+    const feeds = Array.from(document.querySelectorAll('[data-role="recentTxFeed"]'));
+    const visible = feeds.find(el => el && el.offsetParent !== null);
+    return visible || feeds[0] || null;
   }
 
   function prependTxToDOM(tx) {
@@ -657,7 +650,7 @@
   --------------------------- */
 
   function openSendPay54() {
-    const cur = localStorage.getItem(LS.CURRENCY) || "NGN";
+    const cur = normalizeCurrency(localStorage.getItem(LS.CURRENCY) || "NGN");
     openModal({
       title: "Send PAY54 → PAY54",
       bodyHTML: `
@@ -789,7 +782,7 @@
   }
 
   function openAddMoney() {
-    const cur = localStorage.getItem(LS.CURRENCY) || "NGN";
+    const cur = normalizeCurrency(localStorage.getItem(LS.CURRENCY) || "NGN");
     openModal({
       title: "Add money",
       bodyHTML: `
@@ -862,7 +855,7 @@
   }
 
   function openWithdraw() {
-    const cur = localStorage.getItem(LS.CURRENCY) || "NGN";
+    const cur = normalizeCurrency(localStorage.getItem(LS.CURRENCY) || "NGN");
     openModal({
       title: "Withdraw",
       bodyHTML: `
@@ -1309,7 +1302,7 @@
 
           const tx = addTransaction({
             title: "Agent application",
-            currency: localStorage.getItem(LS.CURRENCY) || "NGN",
+            currency: normalizeCurrency(localStorage.getItem(LS.CURRENCY) || "NGN"),
             amount: 0,
             icon: "🧾",
             meta: "Submitted"
