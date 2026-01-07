@@ -558,3 +558,25 @@ body:not(.light) .shortcut-btn .t-sub{ color: rgba(255,255,255,0.72); }
     justify-content: center;
   }
 }
+/* =========================
+   PAY54 v805 — FINAL FIXES
+========================= */
+
+/* Ensure primary buttons visible in LIGHT mode */
+body.light .p54-btn.primary{
+  background: linear-gradient(180deg,#3b82f6,#2563eb);
+  color:#fff !important;
+}
+
+/* Receipt branding emphasis */
+.p54-receipt b{
+  font-weight:900;
+}
+
+/* ATM button (long CTA) */
+.atm-btn{
+  width:100%;
+  padding:14px;
+  border-radius:18px;
+  font-weight:900;
+}
