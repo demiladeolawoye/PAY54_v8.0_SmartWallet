@@ -4,412 +4,108 @@
   <meta charset="UTF-8" />
   <title>PAY54 — Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="assets/css/dashboard.css?v=805" />
+  <link rel="stylesheet" href="assets/css/dashboard.css?v=8051" />
 </head>
 
 <body class="dashboard">
-  <!-- HEADER (Approved layout) -->
   <header class="dash-header">
-    <!-- Logo icon only (auth pages keep using pay54-logo.svg wordmark) -->
     <div class="brand">
       <img src="assets/img/pay54-logo-icon.svg" class="logo" alt="PAY54" />
     </div>
 
-    <!-- WEB currency pills -->
-    <div class="currency-pills desktop-only" aria-label="Currency selector">
-      <button class="currency active" data-cur="NGN" type="button">NGN</button>
-      <button class="currency" data-cur="GBP" type="button">GBP</button>
-      <button class="currency" data-cur="USD" type="button">USD</button>
-      <button class="currency" data-cur="EUR" type="button">EUR</button>
-      <button class="currency" data-cur="GHS" type="button">GHS</button>
-      <button class="currency" data-cur="KES" type="button">KES</button>
-      <button class="currency" data-cur="ZAR" type="button">ZAR</button>
+    <div class="currency-pills desktop-only">
+      <button class="currency active" data-cur="NGN">NGN</button>
+      <button class="currency" data-cur="GBP">GBP</button>
+      <button class="currency" data-cur="USD">USD</button>
+      <button class="currency" data-cur="EUR">EUR</button>
+      <button class="currency" data-cur="GHS">GHS</button>
+      <button class="currency" data-cur="KES">KES</button>
+      <button class="currency" data-cur="ZAR">ZAR</button>
     </div>
 
-    <!-- MOBILE dropdown -->
     <div class="mobile-only currency-dd-wrap">
-      <select id="currencySelect" class="currency-dropdown" aria-label="Currency dropdown">
-        <option value="NGN">NGN</option>
-        <option value="GBP">GBP</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GHS">GHS</option>
-        <option value="KES">KES</option>
-        <option value="ZAR">ZAR</option>
+      <select id="currencySelect" class="currency-dropdown">
+        <option>NGN</option><option>GBP</option><option>USD</option>
+        <option>EUR</option><option>GHS</option><option>KES</option><option>ZAR</option>
       </select>
     </div>
 
     <div class="header-actions">
-      <!-- Theme toggle -->
-      <button id="themeToggle" class="icon-btn" type="button" aria-label="Toggle light/dark">
-        <span class="icon">🌙</span>
-      </button>
+      <button id="themeToggle" class="icon-btn"><span class="icon">🌙</span></button>
 
-      <!-- Profile -->
       <div class="profile-wrap">
-        <button id="profileBtn" class="avatar-btn" type="button" aria-label="Open profile menu">
-          <span class="avatar">P</span>
-        </button>
-
-        <div id="profileMenu" class="profile-menu" role="menu" aria-hidden="true">
+        <button id="profileBtn" class="avatar-btn"><span class="avatar">P</span></button>
+        <div id="profileMenu" class="profile-menu">
           <div class="pm-head">
             <div class="pm-name" id="profileName">Pese</div>
             <div class="pm-email" id="profileEmail"></div>
           </div>
-
-          <button class="pm-item" type="button" data-nav="profile">Profile</button>
-          <button class="pm-item" type="button" data-nav="help">Help &amp; Support</button>
-          <button class="pm-item" type="button" data-nav="contact">Contact Support</button>
-          <button class="pm-item danger" id="logoutBtn" type="button">Logout</button>
+          <button class="pm-item">Profile</button>
+          <button class="pm-item">Help</button>
+          <button class="pm-item danger" id="logoutBtn">Logout</button>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- MAIN GRID -->
   <main class="dash-grid">
-
-    <!-- LEFT COLUMN -->
     <section class="left">
 
-      <!-- BALANCE -->
       <div class="card balance-card">
         <div class="balance-top">
           <div class="label">TOTAL BALANCE</div>
-
           <div class="balance-actions">
-            <button class="btn primary" id="addMoneyBtn" type="button">Add money</button>
-            <button class="btn ghost" id="withdrawBtn" type="button">Withdraw</button>
+            <button class="btn primary" id="addMoneyBtn">Add money</button>
+            <button class="btn ghost" id="withdrawBtn">Withdraw</button>
           </div>
         </div>
-
         <div id="balanceAmount" class="balance-amount">₦ 1,250,000.50</div>
-
-        <div class="balance-meta">FX wallets enabled • Device + PIN secured</div>
-
-        <div class="identity">
-          <span>Acct: <strong>3001234567</strong></span>
-          <span>Tag: <strong>@pay54-user</strong></span>
-          <span>KYC: <strong>Level 2</strong></span>
-        </div>
-
-        <div class="trust-chip">🔒 Security &amp; Financial compliance active</div>
+        <div class="balance-meta">FX wallets enabled</div>
       </div>
 
-      <!-- MOBILE: Quick Shortcuts directly after Balance -->
-      <div class="card mobile-only">
-        <div class="card-head">
-          <h3>Quick Shortcuts</h3>
-          <p class="sub">Fast access to key actions</p>
-        </div>
-
-        <div class="shortcut-grid">
-          <button class="shortcut-btn" type="button" data-shortcut="agent">
-            <span class="t-title">Become an Agent</span>
-            <span class="t-sub">Onboard &amp; earn</span>
-          </button>
-
-          <button class="shortcut-btn" type="button" data-shortcut="shop">
-            <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food • Tickets • Taxi</span>
-          </button>
-
-          <button class="shortcut-btn" type="button" data-shortcut="savings">
-            <span class="t-title">Open Savings Pot</span>
-            <span class="t-sub">Start a goal today</span>
-          </button>
-
-          <button class="shortcut-btn" type="button" data-shortcut="invest">
-            <span class="t-title">Investments &amp; Stocks</span>
-            <span class="t-sub">Local &amp; global assets</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- MONEY MOVES -->
       <div class="card">
         <div class="card-head">
           <h3>Money Moves</h3>
-          <p class="sub">Instant P2P + banks + QR requests</p>
+          <p class="sub">Instant transfers</p>
         </div>
-
         <div class="tile-grid cols-3">
-          <button class="tile-btn" type="button" data-action="send">
-            <span class="t-title">Send</span>
-            <span class="t-sub">Instant PAY54 → PAY54</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-action="receive">
-            <span class="t-title">Receive</span>
-            <span class="t-sub">Account, tag &amp; QR</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-action="add">
-            <span class="t-title">Add Money</span>
-            <span class="t-sub">Card · Bank · Agents</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-action="withdraw">
-            <span class="t-title">Withdraw</span>
-            <span class="t-sub">Bank · Agents</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-action="banktransfer">
-            <span class="t-title">Bank Transfer</span>
-            <span class="t-sub">To NG banks</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-action="request">
-            <span class="t-title">Request Money</span>
-            <span class="t-sub">With notifications</span>
-          </button>
+          <button class="tile-btn" data-action="send"><span class="t-title">Send</span></button>
+          <button class="tile-btn" data-action="receive"><span class="t-title">Receive</span></button>
+          <button class="tile-btn" data-action="add"><span class="t-title">Add Money</span></button>
+          <button class="tile-btn" data-action="withdraw"><span class="t-title">Withdraw</span></button>
+          <button class="tile-btn" data-action="banktransfer"><span class="t-title">Bank Transfer</span></button>
+          <button class="tile-btn" data-action="request"><span class="t-title">Request</span></button>
         </div>
       </div>
 
-      <!-- SERVICES -->
-      <div class="card">
-        <div class="card-head">
-          <h3>Services</h3>
-          <p class="sub">FX, bills, cards, checkout, agents &amp; more</p>
-        </div>
-
-        <div class="tile-grid cols-4 services-grid">
-          <button class="tile-btn" type="button" data-service="fx">
-            <span class="t-title">Cross-border FX</span>
-            <span class="t-sub">Send global instantly</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="bills">
-            <span class="t-title">Pay Bills &amp; Top Up</span>
-            <span class="t-sub">Airtime · Data · Power · TV</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="savings">
-            <span class="t-title">Savings &amp; Goals</span>
-            <span class="t-sub">Pots · targets · streaks</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="cards">
-            <span class="t-title">Virtual &amp; Linked Cards</span>
-            <span class="t-sub">Control &amp; spend</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="checkout">
-            <span class="t-title">PAY54 Smart Checkout</span>
-            <span class="t-sub">Approve e-commerce</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="shop">
-            <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food · Tickets · Taxi</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="invest">
-            <span class="t-title">Investments &amp; Stocks</span>
-            <span class="t-sub">Local &amp; global assets</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="bet">
-            <span class="t-title">Bet Funding</span>
-            <span class="t-sub">18+ verification</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="agent">
-            <span class="t-title">Become an Agent</span>
-            <span class="t-sub">Onboard &amp; earn</span>
-          </button>
-
-          <button class="tile-btn" type="button" data-service="risk">
-            <span class="t-title">AI Risk Watch</span>
-            <span class="t-sub">Suspicious activity</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- WEB: Recent Transactions on LEFT -->
       <div class="card desktop-only">
         <div class="card-topline">
           <h3>Recent Transactions</h3>
-          <!-- ✅ FIX: Correct ID for desktop -->
-          <button class="pill-link" type="button" id="viewAllTx">View all</button>
+          <button class="pill-link" id="viewAllTx">View all</button>
         </div>
-
-        <div class="feed" data-role="recentTxFeed">
-          <div class="feed-item">
-            <div class="feed-icon">💳</div>
-            <div class="feed-main">
-              <div class="feed-title">Wallet funding</div>
-              <div class="feed-sub">2 mins ago</div>
-            </div>
-            <div class="feed-amt pos">+ ₦250,000</div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">↗️</div>
-            <div class="feed-main">
-              <div class="feed-title">Transfer to John</div>
-              <div class="feed-sub">Yesterday</div>
-            </div>
-            <div class="feed-amt neg">− ₦45,000</div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">📶</div>
-            <div class="feed-main">
-              <div class="feed-title">Airtime purchase</div>
-              <div class="feed-sub">3 days ago</div>
-            </div>
-            <div class="feed-amt neg">− ₦2,500</div>
-          </div>
-        </div>
+        <div class="feed" data-role="recentTxFeed"></div>
       </div>
-
     </section>
 
-    <!-- RIGHT COLUMN -->
     <section class="right">
-
-      <!-- WEB: Quick Shortcuts on RIGHT -->
-      <div class="card desktop-only">
-        <div class="card-head">
-          <h3>Quick Shortcuts</h3>
-          <p class="sub">Fast access to key actions</p>
-        </div>
-
-        <div class="shortcut-grid">
-          <button class="shortcut-btn" type="button" data-shortcut="agent">
-            <span class="t-title">Become an Agent</span>
-            <span class="t-sub">Onboard &amp; earn</span>
-          </button>
-
-          <button class="shortcut-btn" type="button" data-shortcut="shop">
-            <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food • Tickets • Taxi</span>
-          </button>
-
-          <button class="shortcut-btn" type="button" data-shortcut="savings">
-            <span class="t-title">Open Savings Pot</span>
-            <span class="t-sub">Start a goal today</span>
-          </button>
-
-          <button class="shortcut-btn" type="button" data-shortcut="invest">
-            <span class="t-title">Investments &amp; Stocks</span>
-            <span class="t-sub">Local &amp; global assets</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- MOBILE: Recent Transactions on RIGHT stack -->
       <div class="card mobile-only">
         <div class="card-topline">
           <h3>Recent Transactions</h3>
-          <!-- ✅ FIX: Correct ID for mobile -->
-          <button class="pill-link" type="button" id="viewAllTxMobile">View all</button>
+          <button class="pill-link" id="viewAllTxMobile">View all</button>
         </div>
-
-        <div class="feed" data-role="recentTxFeed">
-          <div class="feed-item">
-            <div class="feed-icon">💳</div>
-            <div class="feed-main">
-              <div class="feed-title">Wallet funding</div>
-              <div class="feed-sub">2 mins ago</div>
-            </div>
-            <div class="feed-amt pos">+ ₦250,000</div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">↗️</div>
-            <div class="feed-main">
-              <div class="feed-title">Transfer to John</div>
-              <div class="feed-sub">Yesterday</div>
-            </div>
-            <div class="feed-amt neg">− ₦45,000</div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">📶</div>
-            <div class="feed-main">
-              <div class="feed-title">Airtime purchase</div>
-              <div class="feed-sub">3 days ago</div>
-            </div>
-            <div class="feed-amt neg">− ₦2,500</div>
-          </div>
-        </div>
+        <div class="feed" data-role="recentTxFeed"></div>
       </div>
 
-      <!-- REQUESTS & ALERTS -->
       <div class="card">
         <div class="card-topline">
-          <h3>Requests &amp; Alerts</h3>
-          <button class="btn ghost sm" type="button" id="clearAlerts">Clear all</button>
+          <h3>Requests & Alerts</h3>
+          <button class="btn ghost sm" id="clearAlerts">Clear all</button>
         </div>
-
-        <div class="feed" id="alerts">
-          <div class="feed-item">
-            <div class="feed-icon">🔔</div>
-            <div class="feed-main">
-              <div class="feed-title">Payment request</div>
-              <div class="feed-sub">2 mins ago</div>
-            </div>
-            <button class="btn ghost sm" type="button">Open</button>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">⚠️</div>
-            <div class="feed-main">
-              <div class="feed-title">FX alert</div>
-              <div class="feed-sub">1 hr ago</div>
-            </div>
-            <button class="btn ghost sm warn" type="button">Review</button>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">🛡️</div>
-            <div class="feed-main">
-              <div class="feed-title">Security check</div>
-              <div class="feed-sub">Device verified</div>
-            </div>
-            <button class="btn ghost sm ok" type="button">OK</button>
-          </div>
-        </div>
+        <div class="feed" id="alerts"></div>
       </div>
-
-      <!-- NEWS & INSIGHTS -->
-      <div class="card">
-        <div class="card-topline">
-          <h3>News &amp; Insights</h3>
-        </div>
-
-        <div class="feed">
-          <div class="feed-item">
-            <div class="feed-icon">💡</div>
-            <div class="feed-main">
-              <div class="feed-title">USD–NGN volatility rising</div>
-              <div class="feed-sub">Market insight</div>
-            </div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">🔐</div>
-            <div class="feed-main">
-              <div class="feed-title">Keep your account secure</div>
-              <div class="feed-sub">Security tip</div>
-            </div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">🏆</div>
-            <div class="feed-main">
-              <div class="feed-title">Complete 3 transfers today</div>
-              <div class="feed-sub">Earn a streak badge</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </section>
   </main>
 
-  <script src="assets/js/dashboard.js?v=805"></script>
+  <script src="assets/js/dashboard.js?v=8051"></script>
 </body>
 </html>
