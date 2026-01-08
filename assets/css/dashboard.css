@@ -1,582 +1,175 @@
-/* =========================
-   PAY54 Dashboard — FINAL UI FIX PACK v8.0.1
-   - Full base styles + final polish
-   ========================= */
+/* ======================================================
+   PAY54 Dashboard — v805.1 SAFE BUILD
+   Purpose: Stability + JS compatibility
+====================================================== */
 
 :root{
-  --bg: #070b14;
+  --bg:#070b14;
   --bg2:#060a12;
-  --card: rgba(255,255,255,0.06);
-  --card2: rgba(255,255,255,0.04);
-  --stroke: rgba(255,255,255,0.10);
-  --stroke2: rgba(255,255,255,0.14);
-  --text: rgba(255,255,255,0.92);
-  --muted: rgba(255,255,255,0.68);
-  --muted2: rgba(255,255,255,0.52);
-  --brand: #3b82f6;
-  --brand2:#2563eb;
-
+  --card:rgba(255,255,255,0.06);
+  --card2:rgba(255,255,255,0.04);
+  --stroke:rgba(255,255,255,0.10);
+  --stroke2:rgba(255,255,255,0.14);
+  --text:rgba(255,255,255,0.92);
+  --muted:rgba(255,255,255,0.68);
+  --brand:#3b82f6;
   --pos:#22c55e;
   --neg:#ef4444;
-
-  --shadow: 0 18px 42px rgba(0,0,0,0.40);
-  --radius: 18px;
-  --radius2: 22px;
+  --shadow:0 18px 42px rgba(0,0,0,.4);
 }
 
 body.light{
-  --bg: #eef5ff;
+  --bg:#eef5ff;
   --bg2:#f7fbff;
-  --card: rgba(255,255,255,0.88);
-  --card2: rgba(255,255,255,0.78);
-  --stroke: rgba(10,20,40,0.12);
-  --stroke2: rgba(10,20,40,0.16);
-  --text: rgba(10,20,40,0.92);
-  --muted: rgba(10,20,40,0.62);
-  --muted2: rgba(10,20,40,0.48);
-  --shadow: 0 18px 42px rgba(20,40,80,0.12);
+  --card:rgba(255,255,255,0.92);
+  --card2:rgba(255,255,255,0.85);
+  --stroke:rgba(10,20,40,.12);
+  --stroke2:rgba(10,20,40,.18);
+  --text:rgba(10,20,40,.92);
+  --muted:rgba(10,20,40,.62);
 }
 
 /* Base */
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
+*{box-sizing:border-box}
+html,body{height:100%}
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,0.22), transparent 60%),
-    radial-gradient(900px 500px at 80% 20%, rgba(34,197,94,0.12), transparent 55%),
-    linear-gradient(180deg, var(--bg), var(--bg2));
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  color:var(--text);
+  background:linear-gradient(180deg,var(--bg),var(--bg2));
 }
 
 /* Header */
 .dash-header{
-  position: sticky;
+  position:sticky;
   top:0;
-  z-index: 50;
+  z-index:50;
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap: 14px;
-
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--stroke);
-  backdrop-filter: blur(12px);
-  background: linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.06));
-}
-body.light .dash-header{
-  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.62));
+  gap:12px;
+  padding:14px 18px;
+  border-bottom:1px solid var(--stroke);
+  backdrop-filter:blur(10px);
 }
 
 /* Logo */
-.brand{ display:flex; align-items:center; gap:10px; min-width: 56px; }
-.logo{
-  width: 44px;
-  height: 44px;
-  display:block;
-  object-fit: contain;
-  opacity: 0.98;
-}
-@media (max-width: 980px){
-  .logo{ width: 40px; height: 40px; }
-}
-/* Light mode: keep icon readable */
-body.light .logo{
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.20)) drop-shadow(0 0 1px rgba(0,0,0,0.25));
-}
+.logo{width:44px;height:44px;display:block}
 
-/* Currency pills */
-.currency-pills{
-  display:flex;
-  gap: 10px;
-  align-items:center;
-  flex-wrap: nowrap;
-
-  /* center on web */
-  margin-left:auto;
-  margin-right:auto;
-}
-.currency-pills .currency{
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
+/* Currency */
+.currency-pills{display:flex;gap:8px;margin:auto}
+.currency{
+  border:1px solid var(--stroke2);
+  background:transparent;
+  color:var(--text);
+  padding:7px 12px;
+  border-radius:999px;
+  font-weight:700;
   cursor:pointer;
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
 }
-.currency-pills .currency:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.45);
-}
-.currency-pills .currency.active{
-  background: rgba(59,130,246,0.22);
-  border-color: rgba(59,130,246,0.55);
-}
-
-/* Mobile dropdown */
-.currency-dd-wrap{ display:flex; align-items:center; }
-.currency-dropdown{
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  padding: 8px 12px;
-  border-radius: 999px;
-  font-weight: 700;
-  outline:none;
-}
-
-/* Header actions */
-.header-actions{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  margin-left:auto; /* keeps far right */
-}
-
-/* Icon buttons */
-.icon-btn, .avatar-btn{
-  border: 1px solid var(--stroke2);
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-  color: var(--text);
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  cursor:pointer;
-  display:grid;
-  place-items:center;
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    0 8px 20px rgba(0,0,0,0.25);
-}
-.icon-btn:hover, .avatar-btn:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.55);
-  background: linear-gradient(180deg, rgba(59,130,246,0.22), rgba(59,130,246,0.10));
-}
-
-/* Avatar content */
-.avatar{
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  display:grid;
-  place-items:center;
-  background: rgba(59,130,246,0.20);
-  color: var(--text);
-  font-weight: 800;
-}
-
-/* Profile menu — FIX: dark mode solid background + readable */
-.profile-wrap{ position: relative; }
-.profile-menu{
-  position:absolute;
-  right:0;
-  top: 48px;
-  width: 240px;
-  padding: 10px;
-  border-radius: 14px;
-  border: 1px solid var(--stroke);
-  background: rgba(8,10,14,0.96);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
-  display:none;
-}
-body.light .profile-menu{
-  background: rgba(255,255,255,0.92);
-}
-.profile-menu.open{ display:block; }
-
-.pm-head{
-  padding: 6px 6px 10px 6px;
-  border-bottom: 1px solid var(--stroke);
-  margin-bottom: 8px;
-}
-.pm-name{ font-weight: 800; }
-.pm-email{ font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-.pm-item{
-  width: 100%;
-  text-align:left;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text);
-  padding: 10px 10px;
-  border-radius: 12px;
-  cursor:pointer;
-  font-weight: 650;
-}
-.pm-item:hover{
-  background: rgba(255,255,255,0.06);
-  border-color: var(--stroke);
-}
-.pm-item.danger{ color: #ff6b6b; }
-
-/* Main grid */
-.dash-grid{
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 18px;
-  display:grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 18px;
-}
-
-/* Web spacing between sections */
-.left, .right{
-  display:flex;
-  flex-direction: column;
-  gap: 22px;
-}
-
-/* Cards */
-.card{
-  background: linear-gradient(180deg, var(--card), var(--card2));
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius2);
-  box-shadow: var(--shadow);
-  padding: 16px;
-}
-.card h3{
-  margin:0;
-  font-size: 18px;
-  letter-spacing: 0.2px;
-}
-.card-head{ margin-bottom: 10px; }
-.sub{
-  margin: 6px 0 0 0;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Balance */
-.balance-card{ padding: 18px; }
-.balance-top{
-  display:flex;
-  align-items:flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.label{
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--muted);
-}
-.balance-actions{
-  display:flex;
-  gap: 10px;
-  align-items:center;
-}
-.balance-amount{
-  font-size: 54px;
-  font-weight: 900;
-  letter-spacing: -0.8px;
-  margin: 10px 0 12px 0;
-  line-height: 1.05;
-}
-.balance-meta{
-  color: var(--muted);
-  font-weight: 650;
-  margin-bottom: 10px;
-}
-.identity{
-  display:flex;
-  flex-wrap: wrap;
-  gap: 14px 16px;
-  color: var(--muted);
-  font-weight: 650;
-  margin-bottom: 14px;
-}
-.identity strong{ color: var(--text); }
-.trust-chip{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  font-weight: 750;
-  color: var(--text);
-  width: fit-content;
-  margin: 6px auto 0 auto;
+.currency.active{
+  background:rgba(59,130,246,.2);
+  border-color:rgba(59,130,246,.6);
 }
 
 /* Buttons */
 .btn{
-  border-radius: 999px;
-  padding: 9px 14px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  font-weight: 800;
+  border-radius:999px;
+  padding:9px 14px;
+  border:1px solid var(--stroke2);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  font-weight:800;
   cursor:pointer;
-  transition: transform .12s ease, border-color .12s ease, background .12s ease;
 }
-.btn:hover{ transform: translateY(-1px); border-color: rgba(59,130,246,0.45); }
 .btn.primary{
-  background: linear-gradient(180deg, rgba(59,130,246,0.95), rgba(37,99,235,0.95));
-  border-color: rgba(59,130,246,0.70);
-  color: #fff;
+  background:linear-gradient(180deg,#3b82f6,#2563eb);
+  color:#fff;
+  border-color:#3b82f6;
 }
-.btn.ghost{ background: rgba(255,255,255,0.03); }
-.btn.sm{ padding: 7px 12px; font-size: 12px; }
-.btn.ok{ border-color: rgba(34,197,94,0.35); }
-.btn.warn{ border-color: rgba(245,158,11,0.40); }
+.btn.ghost{background:transparent}
 
-/* Card topline */
-.card-topline{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+/* Layout */
+.dash-grid{
+  max-width:1280px;
+  margin:0 auto;
+  padding:18px;
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:18px;
+}
+.left,.right{display:flex;flex-direction:column;gap:18px}
+
+/* Cards */
+.card{
+  background:linear-gradient(180deg,var(--card),var(--card2));
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:var(--shadow);
 }
 
-/* ✅ View all — premium pill */
-.pill-link{
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
-  color: var(--text);
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-weight: 850;
-  cursor:pointer;
-  transition: transform .12s ease, border-color .12s ease, background .12s ease;
-}
-.pill-link:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.55);
-  background: rgba(59,130,246,0.10);
+/* Balance */
+.balance-amount{
+  font-size:52px;
+  font-weight:900;
+  margin:12px 0;
 }
 
 /* Tiles */
-.tile-grid{
-  display:grid;
-  gap: 12px;
-}
-.tile-grid.cols-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
-.tile-grid.cols-4{ grid-template-columns: repeat(5, minmax(0,1fr)); }
+.tile-grid{display:grid;gap:12px}
+.tile-grid.cols-3{grid-template-columns:repeat(3,1fr)}
+.tile-grid.cols-4{grid-template-columns:repeat(4,1fr)}
 
 .tile-btn{
-  text-align:left;
-  padding: 14px 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
+  border:1px solid var(--stroke2);
+  background:rgba(255,255,255,.03);
+  border-radius:16px;
+  padding:14px;
   cursor:pointer;
-  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
-.tile-btn .t-title{
-  display:block;
-  font-weight: 900;
-  font-size: 14px;
-  color: var(--text);
-}
-.tile-btn .t-sub{
-  display:block;
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 650;
-  color: var(--muted);
-}
-.tile-btn:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.45);
-  background: rgba(59,130,246,0.08);
-}
-
-/* ✅ Dark-mode safety: tile titles/subtitles always readable */
-body:not(.light) .tile-btn .t-title{ color: rgba(255,255,255,0.96); }
-body:not(.light) .tile-btn .t-sub{ color: rgba(255,255,255,0.70); }
-
-/* Quick shortcuts */
-.shortcut-grid{
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 12px;
-}
-@media (min-width: 981px){
-  .shortcut-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-}
-.shortcut-btn{
-  text-align:left;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
-  cursor:pointer;
-  transition: transform .12s ease, border-color .12s ease, background .12s ease;
-}
-.shortcut-btn:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.45);
-  background: rgba(59,130,246,0.08);
-}
-
-/* ✅ Fix requested: dark mode Quick Shortcuts visible (title white + subtitle muted white) */
-.shortcut-btn .t-title{
-  display:block;
-  font-weight: 900;
-  font-size: 14px;
-  color: var(--text);
-}
-.shortcut-btn .t-sub{
-  display:block;
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 650;
-  color: var(--muted);
-}
-body:not(.light) .shortcut-btn .t-title{ color: rgba(255,255,255,0.96); }
-body:not(.light) .shortcut-btn .t-sub{ color: rgba(255,255,255,0.72); }
+.tile-btn .t-title{font-weight:900}
+.tile-btn .t-sub{font-size:12px;color:var(--muted)}
 
 /* Feed */
-.feed{ display:flex; flex-direction: column; gap: 12px; }
-
+.feed{display:flex;flex-direction:column;gap:12px}
 .feed-item{
   display:flex;
   align-items:center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 16px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
+  gap:12px;
+  padding:12px;
+  border:1px solid var(--stroke2);
+  border-radius:14px;
 }
+.feed-amt.pos{color:var(--pos)}
+.feed-amt.neg{color:var(--neg)}
 
-.feed-icon{
-  width: 36px;
-  height: 36px;
-  border-radius: 14px;
-  border: 1px solid var(--stroke2);
-  display:grid;
-  place-items:center;
-  background: rgba(255,255,255,0.03);
-  flex: 0 0 auto;
-}
+/* Shortcuts */
+.shortcut-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 
-.feed-main{
-  display:flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1 1 auto;
+/* Profile menu */
+.profile-menu{
+  position:absolute;
+  right:0;
+  top:48px;
+  width:240px;
+  border:1px solid var(--stroke);
+  border-radius:14px;
+  background:var(--card);
+  display:none;
 }
-.feed-title{
-  font-weight: 900;
-  color: var(--text);
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.feed-sub{
-  margin-top: 3px;
-  color: var(--muted);
-  font-weight: 700;
-  font-size: 12px;
-}
-
-.feed-amt{
-  font-weight: 900;
-  white-space: nowrap;
-  margin-left: 10px;
-}
-.feed-amt.pos{ color: var(--pos); }
-.feed-amt.neg{ color: var(--neg); }
+.profile-menu.open{display:block}
 
 /* Responsive */
-.desktop-only{ display:block; }
-.mobile-only{ display:none; }
+.desktop-only{display:block}
+.mobile-only{display:none}
 
-@media (max-width: 980px){
-  .dash-grid{ grid-template-columns: 1fr; }
-
-  .currency-pills.desktop-only{ display:none; }
-  .mobile-only{ display:block; }
-  .desktop-only{ display:none; }
-
-  .dash-header{ gap: 10px; padding: 12px 12px; }
-  .balance-amount{ font-size: 42px; letter-spacing: -0.6px; }
-
-  .tile-grid.cols-3{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .tile-grid.cols-4{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .shortcut-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-}
-
-@media (max-width: 420px){
-  .balance-amount{ font-size: 38px; }
-}
-/* ======================================================
-   PAY54 v8.0.1 — FINAL MICRO FIXES (APPROVED)
-   Scope:
-   - Services tile alignment (title + subtitle)
-   - Mobile Add money / Withdraw equal sizing
-   ====================================================== */
-
-/* ------------------------------------
-   1️⃣ SERVICES — PERFECT ALIGNMENT
-   ------------------------------------ */
-
-/* Force consistent vertical structure */
-.tile-btn{
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  min-height: 96px; /* ensures uniform height */
-}
-
-/* Title always at top */
-.tile-btn .t-title{
-  margin: 0;
-  line-height: 1.25;
-}
-
-/* Subtitle aligned consistently */
-.tile-btn .t-sub{
-  margin-top: auto; /* pushes subtitle to same baseline */
-  line-height: 1.25;
-}
-
-/* ------------------------------------
-   2️⃣ MOBILE — BALANCE CTA EQUAL SIZE
-   ------------------------------------ */
-@media (max-width: 980px){
-  .balance-actions .btn{
-    min-width: 120px;   /* equal visual weight */
-    height: 42px;       /* consistent height */
-    padding: 0 16px;    /* horizontal balance */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-/* =========================
-   PAY54 v805 — FINAL FIXES
-========================= */
-
-/* Ensure primary buttons visible in LIGHT mode */
-body.light .p54-btn.primary{
-  background: linear-gradient(180deg,#3b82f6,#2563eb);
-  color:#fff !important;
-}
-
-/* Receipt branding emphasis */
-.p54-receipt b{
-  font-weight:900;
-}
-
-/* ATM button (long CTA) */
-.atm-btn{
-  width:100%;
-  padding:14px;
-  border-radius:18px;
-  font-weight:900;
+@media(max-width:980px){
+  .dash-grid{grid-template-columns:1fr}
+  .desktop-only{display:none}
+  .mobile-only{display:block}
+  .tile-grid.cols-3,
+  .tile-grid.cols-4{grid-template-columns:repeat(2,1fr)}
 }
