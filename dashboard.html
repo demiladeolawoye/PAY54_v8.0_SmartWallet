@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <title>PAY54 — Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="assets/css/dashboard.css?v=805.1" />
+  <link rel="stylesheet" href="assets/css/dashboard.css?v=805.2" />
 </head>
 
-<body class="dashboard">
+<body class="dashboard light">
   <!-- HEADER (Approved layout) -->
   <header class="dash-header">
     <!-- Logo icon only (auth pages keep using pay54-logo.svg wordmark) -->
@@ -40,7 +40,7 @@
     </div>
 
     <div class="header-actions">
-      <!-- Theme toggle -->
+      <!-- Theme toggle (DEFAULT LIGHT MODE) -->
       <button id="themeToggle" class="icon-btn" type="button" aria-label="Toggle light/dark">
         <span class="icon">🌙</span>
       </button>
@@ -114,14 +114,15 @@
             <span class="t-sub">Food • Tickets • Taxi</span>
           </button>
 
-          <button class="shortcut-btn" type="button" data-shortcut="savings">
-            <span class="t-title">Open Savings Pot</span>
-            <span class="t-sub">Start a goal today</span>
+          <!-- ✅ Option A Approved: Replace Open Savings Pot with Refer & Earn -->
+          <button class="shortcut-btn" type="button" data-shortcut="referral">
+            <span class="t-title">Refer &amp; Earn</span>
+            <span class="t-sub">Invite friends, earn rewards</span>
           </button>
 
-          <button class="shortcut-btn" type="button" data-shortcut="invest">
-            <span class="t-title">Investments &amp; Stocks</span>
-            <span class="t-sub">Local &amp; global assets</span>
+          <button class="shortcut-btn" type="button" data-shortcut="trading">
+            <span class="t-title">Trading</span>
+            <span class="t-sub">Shares · Stocks · Crypto</span>
           </button>
         </div>
       </div>
@@ -204,9 +205,10 @@
             <span class="t-sub">Food · Tickets · Taxi</span>
           </button>
 
-          <button class="tile-btn" type="button" data-service="invest">
-            <span class="t-title">Investments &amp; Stocks</span>
-            <span class="t-sub">Local &amp; global assets</span>
+          <!-- ✅ Rename: Investments & Stocks -> Trading -->
+          <button class="tile-btn" type="button" data-service="trading">
+            <span class="t-title">Trading</span>
+            <span class="t-sub">Shares · Stocks · Crypto</span>
           </button>
 
           <button class="tile-btn" type="button" data-service="bet">
@@ -230,37 +232,11 @@
       <div class="card desktop-only">
         <div class="card-topline">
           <h3>Recent Transactions</h3>
-          <!-- ✅ Correct ID for desktop -->
           <button class="pill-link" type="button" id="viewAllTx">View all</button>
         </div>
 
         <div class="feed" data-role="recentTxFeed">
-          <div class="feed-item">
-            <div class="feed-icon">💳</div>
-            <div class="feed-main">
-              <div class="feed-title">Wallet funding</div>
-              <div class="feed-sub">2 mins ago</div>
-            </div>
-            <div class="feed-amt pos">+ ₦250,000</div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">↗️</div>
-            <div class="feed-main">
-              <div class="feed-title">Transfer to John</div>
-              <div class="feed-sub">Yesterday</div>
-            </div>
-            <div class="feed-amt neg">− ₦45,000</div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">📶</div>
-            <div class="feed-main">
-              <div class="feed-title">Airtime purchase</div>
-              <div class="feed-sub">3 days ago</div>
-            </div>
-            <div class="feed-amt neg">− ₦2,500</div>
-          </div>
+          <!-- JS will render -->
         </div>
       </div>
 
@@ -287,14 +263,15 @@
             <span class="t-sub">Food • Tickets • Taxi</span>
           </button>
 
-          <button class="shortcut-btn" type="button" data-shortcut="savings">
-            <span class="t-title">Open Savings Pot</span>
-            <span class="t-sub">Start a goal today</span>
+          <!-- ✅ Option A Approved -->
+          <button class="shortcut-btn" type="button" data-shortcut="referral">
+            <span class="t-title">Refer &amp; Earn</span>
+            <span class="t-sub">Invite friends, earn rewards</span>
           </button>
 
-          <button class="shortcut-btn" type="button" data-shortcut="invest">
-            <span class="t-title">Investments &amp; Stocks</span>
-            <span class="t-sub">Local &amp; global assets</span>
+          <button class="shortcut-btn" type="button" data-shortcut="trading">
+            <span class="t-title">Trading</span>
+            <span class="t-sub">Shares · Stocks · Crypto</span>
           </button>
         </div>
       </div>
@@ -303,37 +280,11 @@
       <div class="card mobile-only">
         <div class="card-topline">
           <h3>Recent Transactions</h3>
-          <!-- ✅ Correct ID for mobile -->
           <button class="pill-link" type="button" id="viewAllTxMobile">View all</button>
         </div>
 
         <div class="feed" data-role="recentTxFeed">
-          <div class="feed-item">
-            <div class="feed-icon">💳</div>
-            <div class="feed-main">
-              <div class="feed-title">Wallet funding</div>
-              <div class="feed-sub">2 mins ago</div>
-            </div>
-            <div class="feed-amt pos">+ ₦250,000</div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">↗️</div>
-            <div class="feed-main">
-              <div class="feed-title">Transfer to John</div>
-              <div class="feed-sub">Yesterday</div>
-            </div>
-            <div class="feed-amt neg">− ₦45,000</div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">📶</div>
-            <div class="feed-main">
-              <div class="feed-title">Airtime purchase</div>
-              <div class="feed-sub">3 days ago</div>
-            </div>
-            <div class="feed-amt neg">− ₦2,500</div>
-          </div>
+          <!-- JS will render -->
         </div>
       </div>
 
@@ -345,33 +296,17 @@
         </div>
 
         <div class="feed" id="alerts">
-          <div class="feed-item">
-            <div class="feed-icon">🔔</div>
-            <div class="feed-main">
-              <div class="feed-title">Payment request</div>
-              <div class="feed-sub">2 mins ago</div>
-            </div>
-            <button class="btn ghost sm" type="button">Open</button>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">⚠️</div>
-            <div class="feed-main">
-              <div class="feed-title">FX alert</div>
-              <div class="feed-sub">1 hr ago</div>
-            </div>
-            <button class="btn ghost sm warn" type="button">Review</button>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">🛡️</div>
-            <div class="feed-main">
-              <div class="feed-title">Security check</div>
-              <div class="feed-sub">Device verified</div>
-            </div>
-            <button class="btn ghost sm ok" type="button">OK</button>
-          </div>
+          <!-- JS will render -->
         </div>
+      </div>
+
+      <!-- ✅ Utility Card: ATM/POS Finder (Standalone) -->
+      <div class="card">
+        <div class="card-topline">
+          <h3>ATM &amp; POS Finder</h3>
+          <button class="btn primary sm" type="button" id="atmFinderBtn">Open</button>
+        </div>
+        <p class="sub">Find nearby ATMs, agents &amp; POS terminals</p>
       </div>
 
       <!-- NEWS & INSIGHTS -->
@@ -380,36 +315,14 @@
           <h3>News &amp; Insights</h3>
         </div>
 
-        <div class="feed">
-          <div class="feed-item">
-            <div class="feed-icon">💡</div>
-            <div class="feed-main">
-              <div class="feed-title">USD–NGN volatility rising</div>
-              <div class="feed-sub">Market insight</div>
-            </div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">🔐</div>
-            <div class="feed-main">
-              <div class="feed-title">Keep your account secure</div>
-              <div class="feed-sub">Security tip</div>
-            </div>
-          </div>
-
-          <div class="feed-item">
-            <div class="feed-icon">🏆</div>
-            <div class="feed-main">
-              <div class="feed-title">Complete 3 transfers today</div>
-              <div class="feed-sub">Earn a streak badge</div>
-            </div>
-          </div>
+        <div class="feed" id="newsFeed">
+          <!-- JS will render -->
         </div>
       </div>
 
     </section>
   </main>
 
-  <script src="assets/js/dashboard.js?v=805.1"></script>
+  <script src="assets/js/dashboard.js?v=805.2"></script>
 </body>
 </html>
