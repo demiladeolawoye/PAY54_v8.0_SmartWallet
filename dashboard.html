@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <title>PAY54 — Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <link rel="stylesheet" href="assets/css/dashboard.css?v=805.2" />
 </head>
 
-<body class="dashboard light">
+<body class="dashboard">
   <!-- HEADER (Approved layout) -->
   <header class="dash-header">
-    <!-- Logo icon only (auth pages keep using pay54-logo.svg wordmark) -->
+    <!-- Logo icon only -->
     <div class="brand">
       <img src="assets/img/pay54-logo-icon.svg" class="logo" alt="PAY54" />
     </div>
@@ -40,7 +40,7 @@
     </div>
 
     <div class="header-actions">
-      <!-- Theme toggle (DEFAULT LIGHT MODE) -->
+      <!-- Theme toggle -->
       <button id="themeToggle" class="icon-btn" type="button" aria-label="Toggle light/dark">
         <span class="icon">🌙</span>
       </button>
@@ -83,9 +83,8 @@
           </div>
         </div>
 
-        <div id="balanceAmount" class="balance-amount">₦ 1,250,000.50</div>
-
-        <div class="balance-meta">FX wallets enabled • Device + PIN secured</div>
+        <div id="balanceAmount" class="balance-amount">₦ 0.00</div>
+        <div class="balance-meta">Across wallets (converted) • FX wallets enabled • Device + PIN secured</div>
 
         <div class="identity">
           <span>Acct: <strong>3001234567</strong></span>
@@ -114,7 +113,7 @@
             <span class="t-sub">Food • Tickets • Taxi</span>
           </button>
 
-          <!-- ✅ Option A Approved: Replace Open Savings Pot with Refer & Earn -->
+          <!-- ✅ Option A: Replace Open Savings Pot with Refer & Earn -->
           <button class="shortcut-btn" type="button" data-shortcut="referral">
             <span class="t-title">Refer &amp; Earn</span>
             <span class="t-sub">Invite friends, earn rewards</span>
@@ -122,7 +121,7 @@
 
           <button class="shortcut-btn" type="button" data-shortcut="trading">
             <span class="t-title">Trading</span>
-            <span class="t-sub">Shares · Stocks · Crypto</span>
+            <span class="t-sub">Shares • Stocks • Crypto</span>
           </button>
         </div>
       </div>
@@ -152,7 +151,7 @@
 
           <button class="tile-btn" type="button" data-action="withdraw">
             <span class="t-title">Withdraw</span>
-            <span class="t-sub">Bank · Agents</span>
+            <span class="t-sub">Card · Agents</span>
           </button>
 
           <button class="tile-btn" type="button" data-action="banktransfer">
@@ -205,7 +204,6 @@
             <span class="t-sub">Food · Tickets · Taxi</span>
           </button>
 
-          <!-- ✅ Rename: Investments & Stocks -> Trading -->
           <button class="tile-btn" type="button" data-service="trading">
             <span class="t-title">Trading</span>
             <span class="t-sub">Shares · Stocks · Crypto</span>
@@ -235,9 +233,7 @@
           <button class="pill-link" type="button" id="viewAllTx">View all</button>
         </div>
 
-        <div class="feed" data-role="recentTxFeed">
-          <!-- JS will render -->
-        </div>
+        <div class="feed" data-role="recentTxFeed"></div>
       </div>
 
     </section>
@@ -263,7 +259,7 @@
             <span class="t-sub">Food • Tickets • Taxi</span>
           </button>
 
-          <!-- ✅ Option A Approved -->
+          <!-- ✅ Option A: Replace Open Savings Pot with Refer & Earn -->
           <button class="shortcut-btn" type="button" data-shortcut="referral">
             <span class="t-title">Refer &amp; Earn</span>
             <span class="t-sub">Invite friends, earn rewards</span>
@@ -271,7 +267,27 @@
 
           <button class="shortcut-btn" type="button" data-shortcut="trading">
             <span class="t-title">Trading</span>
-            <span class="t-sub">Shares · Stocks · Crypto</span>
+            <span class="t-sub">Shares • Stocks • Crypto</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ✅ Standalone Utility Card: ATM/POS Finder -->
+      <div class="card utility-card">
+        <div class="card-head">
+          <h3>Utilities</h3>
+          <p class="sub">Find nearby ATMs and POS agents</p>
+        </div>
+
+        <div class="utility-grid">
+          <button class="utility-btn" type="button" id="atmFinderBtn">
+            <span class="t-title">ATM Finder</span>
+            <span class="t-sub">Nearby cash points</span>
+          </button>
+
+          <button class="utility-btn" type="button" id="posFinderBtn">
+            <span class="t-title">POS / Agent Finder</span>
+            <span class="t-sub">Collect cash from agents</span>
           </button>
         </div>
       </div>
@@ -283,9 +299,7 @@
           <button class="pill-link" type="button" id="viewAllTxMobile">View all</button>
         </div>
 
-        <div class="feed" data-role="recentTxFeed">
-          <!-- JS will render -->
-        </div>
+        <div class="feed" data-role="recentTxFeed"></div>
       </div>
 
       <!-- REQUESTS & ALERTS -->
@@ -295,18 +309,7 @@
           <button class="btn ghost sm" type="button" id="clearAlerts">Clear all</button>
         </div>
 
-        <div class="feed" id="alerts">
-          <!-- JS will render -->
-        </div>
-      </div>
-
-      <!-- ✅ Utility Card: ATM/POS Finder (Standalone) -->
-      <div class="card">
-        <div class="card-topline">
-          <h3>ATM &amp; POS Finder</h3>
-          <button class="btn primary sm" type="button" id="atmFinderBtn">Open</button>
-        </div>
-        <p class="sub">Find nearby ATMs, agents &amp; POS terminals</p>
+        <div class="feed" id="alerts"></div>
       </div>
 
       <!-- NEWS & INSIGHTS -->
@@ -315,9 +318,7 @@
           <h3>News &amp; Insights</h3>
         </div>
 
-        <div class="feed" id="newsFeed">
-          <!-- JS will render -->
-        </div>
+        <div class="feed" id="newsFeed"></div>
       </div>
 
     </section>
