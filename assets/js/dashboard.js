@@ -2,21 +2,24 @@
    PAY54 Dashboard — Layer 2 Wiring — v805.2
    Full replacement for assets/js/dashboard.js
 
-   Fixes included (approved):
-   ✅ Default Light mode (web + mobile)
-   ✅ Action buttons readable in light mode
-   ✅ Currency switching hardened (storage validation + fallback)
-   ✅ All actions update correct wallet balance (mobile + web consistent)
-   ✅ Non-default currency transactions show FX equivalent line (based on selected currency at time)
-   ✅ Bank Transfer: recipient name + reference + reason dropdown
-   ✅ Cross-border FX: recipient details + reference + reason + enhanced receipt
-   ✅ Virtual & Linked Cards: card UI, default card select, delete card, add card
-   ✅ Shop on the Fly: affiliate params appended to URLs
-   ✅ Investments -> Trading rename (Shares · Stocks · Crypto)
-   ✅ Ledger: View all + Search
-   ✅ Requests & Alerts seeded with 6 demo items + Clear all
-   ✅ Quick Shortcuts: Option A (Replace Savings with Refer & Earn)
-   ✅ Utility Card: ATM/POS Finder modal
+   v805.2 Fix Pack:
+   ✅ Default theme = LIGHT (mobile + web)
+   ✅ Mobile header + spacing handled via CSS (viewport-fit + safe padding)
+   ✅ No invisible modal buttons in light mode (modal system updated)
+   ✅ Dark-mode dropdown/options readable (modal + global select CSS)
+   ✅ TOTAL BALANCE is truly total: sums all wallets converted into active currency
+   ✅ Cross-currency actions always affect TOTAL BALANCE (because totals are converted)
+   ✅ Recent Transactions show FX equivalent + FX rate when tx currency differs from display currency
+   ✅ View all ledger includes Search + Date range filters
+   ✅ Withdraw route = Card / Agent, with card selection + Agent ID/tag
+   ✅ Bank Transfer adds recipient name + reference + reason
+   ✅ Cross-border FX adds recipient name + account number + reference + reason + receipt details
+   ✅ Cards: display contactless, set default, delete card, add card
+   ✅ Receipts: PAY54 brand heading + referral CTA hyperlink (top & bottom)
+   ✅ Requests & Alerts seeded to 5–6 lines if empty
+   ✅ Quick Shortcuts: Open Savings Pot replaced with Refer & Earn
+   ✅ Utilities: ATM Finder + POS/Agent Finder
+   ✅ Shop on the Fly adds PAY54 affiliate tags to URLs
 ========================= */
 
 (() => {
@@ -35,11 +38,8 @@
     TX: "pay54_transactions",
     ALERTS: "pay54_alerts",
     CARDS: "pay54_cards",
-    DEFAULT_CARD: "pay54_default_card",
-    SEEDED: "pay54_seeded_v8052"
+    DEFAULT_CARD: "pay54_default_card"
   };
-
-  const supportedCurrencies = ["NGN", "GBP", "USD", "EUR", "GHS", "KES", "ZAR", "CAD", "AED", "AUD"];
 
   const defaultBalances = {
     NGN: 1250000.5,
@@ -48,10 +48,7 @@
     EUR: 11890.2,
     GHS: 9650.0,
     KES: 132450.0,
-    ZAR: 27890.6,
-    CAD: 0,
-    AED: 0,
-    AUD: 0
+    ZAR: 27890.6
   };
 
   const symbols = {
@@ -65,6 +62,21 @@
     CAD: "C$",
     AED: "د.إ",
     AUD: "A$"
+  };
+
+  // FX table: anchor against NGN for simple bridging (mock Layer 2 rates)
+  // rateToNGN[x] = 1 unit of currency x equals how many NGN
+  const rateToNGN = {
+    NGN: 1,
+    USD: 1650,
+    GBP: 2050,
+    EUR: 1800,
+    CAD: 1200,
+    AED: 450,
+    AUD: 1100,
+    GHS: 130,   // approx demo
+    KES: 12.5,  // approx demo
+    ZAR: 90     // approx demo
   };
 
   const fxSendCurrencies = ["USD", "GBP", "EUR", "CAD", "AED", "AUD"];
@@ -86,19 +98,29 @@
     };
   }
 
+  function uid(prefix = "ID") {
+    return `${prefix}-${Math.random().toString(16).slice(2, 8).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+  }
+
   function moneyFmt(cur, amt) {
     const s = symbols[cur] ?? "";
     const n = Number(amt || 0);
     return `${s} ${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  function uid(prefix = "TX") {
-    return `${prefix}-${Math.random().toString(16).slice(2, 8).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+  function getFxRate(from, to) {
+    if (!from || !to) return 1;
+    if (from === to) return 1;
+    const a = rateToNGN[from] ?? 1;
+    const b = rateToNGN[to] ?? 1;
+    // convert: from -> NGN -> to
+    // (from * a NGN) / b = to amount
+    return a / b;
   }
 
-  function normalizeCurrency(cur) {
-    const c = String(cur || "").toUpperCase().trim();
-    return supportedCurrencies.includes(c) ? c : "NGN";
+  function convert(from, to, amount) {
+    const r = getFxRate(from, to);
+    return Number(amount || 0) * r;
   }
 
   function resetBalances() {
@@ -115,7 +137,6 @@
       const v = stored[k];
       cleaned[k] = Number.isFinite(Number(v)) ? Number(v) : cleaned[k];
     }
-
     localStorage.setItem(LS.BALANCES, JSON.stringify(cleaned));
     return cleaned;
   }
@@ -152,52 +173,100 @@
     localStorage.setItem(LS.CARDS, JSON.stringify(Array.isArray(list) ? list : []));
   }
 
+  function getDefaultCardId() {
+    return localStorage.getItem(LS.DEFAULT_CARD) || "";
+  }
+
+  function setDefaultCardId(id) {
+    localStorage.setItem(LS.DEFAULT_CARD, id || "");
+  }
+
+  function activeDisplayCurrency() {
+    const cur = localStorage.getItem(LS.CURRENCY);
+    const valid = Object.keys(defaultBalances);
+    return valid.includes(cur) ? cur : "NGN";
+  }
+
+  function computeTotalIn(displayCur) {
+    const bal = getBalances();
+    const keys = Object.keys(bal);
+    let total = 0;
+    for (const k of keys) {
+      total += convert(k, displayCur, bal[k] ?? 0);
+    }
+    return total;
+  }
+
   /* ---------------------------
-     FX Rate Engine (mock, snapshot per transaction)
-     - Used for "equivalent line" when tx currency != selected currency at the time
+     1) Seed demo data (alerts/tx/cards) if empty
   --------------------------- */
 
-  function mockRate(from, to) {
-    const f = normalizeCurrency(from);
-    const t = normalizeCurrency(to);
-    if (f === t) return 1;
+  function seedIfEmpty() {
+    // balances
+    getBalances();
 
-    // Core table: major -> local
-    const table = {
-      USD: { NGN: 1650, GHS: 12.8, KES: 130, ZAR: 18.5 },
-      GBP: { NGN: 2050, GHS: 16.1, KES: 165, ZAR: 23.0 },
-      EUR: { NGN: 1800, GHS: 14.2, KES: 150, ZAR: 20.0 },
-      CAD: { NGN: 1200, GHS: 9.5,  KES: 96,  ZAR: 13.0 },
-      AED: { NGN: 450,  GHS: 3.6,  KES: 37,  ZAR: 5.0 },
-      AUD: { NGN: 1100, GHS: 8.7,  KES: 90,  ZAR: 12.0 }
-    };
+    // tx
+    const tx = getTx();
+    if (!tx.length) {
+      const stamp1 = nowStamp();
+      const stamp2 = nowStamp();
+      const stamp3 = nowStamp();
+      stamp2.label = "Yesterday";
+      stamp3.label = "3 days ago";
 
-    if (table[f] && table[f][t]) return table[f][t];
-    if (table[t] && table[t][f]) return 1 / table[t][f];
+      const displayCur = activeDisplayCurrency();
+      const makeTx = (title, currency, amount, icon, timeLabel) => {
+        const fxRate = currency === displayCur ? 1 : getFxRate(currency, displayCur);
+        const eq = currency === displayCur ? null : Math.abs(amount) * fxRate;
+        return {
+          id: uid("TX"),
+          title,
+          currency,
+          amount: Number(amount),
+          icon,
+          meta: "",
+          timeISO: new Date().toISOString(),
+          timeLabel,
+          displayCurrency: displayCur,
+          fxRateToDisplay: fxRate,
+          equivAmountDisplay: eq
+        };
+      };
 
-    // If neither direct, fall back to 1 (demo-safe)
-    return 1;
-  }
+      setTx([
+        makeTx("Wallet funding", "NGN", +250000, "💳", "2 mins ago"),
+        makeTx("Transfer to John", "NGN", -45000, "↗️", stamp2.label),
+        makeTx("Airtime purchase", "NGN", -2500, "📶", stamp3.label)
+      ]);
+    }
 
-  function buildEquivalent(currency, amount, baseCurrency) {
-    const c = normalizeCurrency(currency);
-    const base = normalizeCurrency(baseCurrency);
-    if (c === base) return null;
+    // alerts (need 5–6 lines)
+    const alerts = getAlerts();
+    if (!alerts.length) {
+      setAlerts([
+        { id: uid("AL"), title: "All clear", sub: "No requests or alerts", body: "You're up to date.", icon: "✅" },
+        { id: uid("AL"), title: "Payment request", sub: "@mike • ₦25,000", body: "Pending request (Layer 3 will confirm).", icon: "🔔" },
+        { id: uid("AL"), title: "FX alert", sub: "USD–NGN volatility rising", body: "Watch rates before converting.", icon: "⚠️" },
+        { id: uid("AL"), title: "Security check", sub: "Device verified", body: "Your device verification is active.", icon: "🛡️" },
+        { id: uid("AL"), title: "KYC reminder", sub: "Upload document to reach Level 3", body: "Higher limits unlock with KYC Level 3.", icon: "🧾" },
+        { id: uid("AL"), title: "Promo", sub: "Refer 3 friends → earn rewards", body: "Invite friends and earn on first transactions.", icon: "🎁" }
+      ]);
+    }
 
-    const rate = mockRate(c, base);
-    const eq = Number(amount || 0) * rate;
-    const pair = `${c}→${base}`;
-
-    return {
-      eqCurrency: base,
-      eqAmount: eq,
-      fxRate: rate,
-      fxPair: pair
-    };
+    // cards
+    const cards = getCards();
+    if (!cards.length) {
+      const demo = [
+        { id: uid("CARD"), issuer: "VISA", last4: "4832", expiry: "08/28", cvv: "***", contactless: true },
+        { id: uid("CARD"), issuer: "MASTERCARD", last4: "1029", expiry: "11/27", cvv: "***", contactless: true }
+      ];
+      setCards(demo);
+      if (!getDefaultCardId()) setDefaultCardId(demo[0].id);
+    }
   }
 
   /* ---------------------------
-     1) DOM Hooks
+     2) DOM Hooks
   --------------------------- */
 
   const balanceEl = document.getElementById("balanceAmount");
@@ -218,14 +287,16 @@
   const clearAlertsBtn = document.getElementById("clearAlerts");
   const alertsContainer = document.getElementById("alerts");
 
-  const viewAllTxBtn = document.getElementById("viewAllTx"); // desktop
+  const viewAllTxBtn = document.getElementById("viewAllTx");         // desktop
   const viewAllTxMobileBtn = document.getElementById("viewAllTxMobile"); // mobile
 
   const atmFinderBtn = document.getElementById("atmFinderBtn");
+  const posFinderBtn = document.getElementById("posFinderBtn");
+
   const newsFeed = document.getElementById("newsFeed");
 
   /* ---------------------------
-     2) Modal System (injected)
+     3) Modal System (injected)
   --------------------------- */
 
   function ensureModalStyles() {
@@ -252,9 +323,9 @@
         overflow: hidden;
       }
       body.light .p54-modal{
-        background: rgba(255,255,255,0.95);
+        background: rgba(255,255,255,0.97);
         color: rgba(10,20,40,0.92);
-        border: 1px solid rgba(10,20,40,0.12);
+        border: 1px solid rgba(10,20,40,0.14);
         box-shadow: 0 18px 50px rgba(20,40,80,0.18);
       }
 
@@ -265,7 +336,8 @@
       }
       body.light .p54-modal-head{ border-bottom: 1px solid rgba(10,20,40,0.10); }
 
-      .p54-modal-title{ font-weight: 950; font-size: 15px; letter-spacing: .2px; }
+      .p54-modal-title{ font-weight: 950; font-size: 15px; letter-spacing: .2px; display:flex; gap:10px; align-items:center; }
+      .p54-brand{ font-weight: 950; color: rgba(59,130,246,0.95); letter-spacing:.2px; }
       .p54-x{
         border: 1px solid rgba(255,255,255,0.16);
         background: rgba(255,255,255,0.04);
@@ -293,6 +365,21 @@
       body.light .p54-input, body.light .p54-select{
         border-color: rgba(10,20,40,0.14);
         background: rgba(10,20,40,0.04);
+        color: rgba(10,20,40,0.92);
+      }
+
+      /* ✅ Dark mode select/options readable */
+      body:not(.light) .p54-select{
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.92);
+      }
+      body:not(.light) .p54-select option{
+        background: #0b1020;
+        color: rgba(255,255,255,0.92);
+      }
+      body.light .p54-select option{
+        background: #ffffff;
+        color: rgba(10,20,40,0.92);
       }
 
       .p54-actions{
@@ -310,7 +397,13 @@
         font-weight: 950;
         cursor:pointer;
       }
-      body.light .p54-btn{ border-color: rgba(10,20,40,0.14); background: rgba(10,20,40,0.04); }
+      /* ✅ Light mode: always readable (fix "white on white") */
+      body.light .p54-btn{
+        border-color: rgba(10,20,40,0.16);
+        background: rgba(10,20,40,0.06);
+        color: rgba(10,20,40,0.95);
+      }
+
       .p54-btn.primary{
         border-color: rgba(59,130,246,0.65);
         background: rgba(59,130,246,0.92);
@@ -341,40 +434,67 @@
         padding: 12px;
       }
       body.light .p54-ledger-item{ border-color: rgba(10,20,40,0.12); background: rgba(10,20,40,0.03); }
-
       .p54-ledger-left{ min-width:0; }
       .p54-ledger-title{ font-weight: 950; }
       .p54-ledger-sub{ opacity:.75; font-size:12px; margin-top:3px; }
-      .p54-ledger-sub2{ opacity:.65; font-size:12px; margin-top:3px; }
-      .p54-ledger-amt{ font-weight: 950; white-space:nowrap; }
+      .p54-ledger-amt{ font-weight: 950; white-space:nowrap; text-align:right; }
       .p54-pos{ color: #22c55e; }
       .p54-neg{ color: #ef4444; }
 
-      .p54-card-ui{
-        border-radius: 18px;
-        padding: 16px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(255,255,255,0.06));
-      }
-      body.light .p54-card-ui{
-        border-color: rgba(10,20,40,0.12);
-        background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(10,20,40,0.03));
-      }
-      .p54-card-row{ display:flex; justify-content:space-between; align-items:center; }
-      .p54-card-num{ font-weight: 950; letter-spacing: 1px; margin-top: 10px; }
-      .p54-card-meta{ opacity:.78; font-size: 12px; margin-top: 8px; display:flex; justify-content:space-between; gap:10px; }
-      .p54-badge{
-        font-size: 12px; font-weight: 950;
-        border: 1px solid rgba(255,255,255,0.16);
-        background: rgba(255,255,255,0.05);
-        padding: 6px 10px; border-radius: 999px;
-      }
-      body.light .p54-badge{
-        border-color: rgba(10,20,40,0.14);
-        background: rgba(10,20,40,0.04);
+      .p54-eq{
+        font-size: 11px;
+        opacity: .8;
+        margin-top: 3px;
+        display:block;
       }
 
-      .p54-small{ font-size: 12px; opacity: .82; }
+      .p54-link{
+        color: rgba(59,130,246,0.95);
+        text-decoration: none;
+        font-weight: 900;
+      }
+      .p54-link:hover{ text-decoration: underline; }
+
+      .p54-chip{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        padding:8px 10px;
+        border-radius:999px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.03);
+        font-size:12px;
+        font-weight:900;
+      }
+      body.light .p54-chip{
+        border-color: rgba(10,20,40,0.12);
+        background: rgba(10,20,40,0.03);
+      }
+
+      .p54-card{
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.03);
+        border-radius: 18px;
+        padding: 14px;
+        display:flex;
+        justify-content:space-between;
+        gap: 12px;
+        align-items:center;
+      }
+      body.light .p54-card{
+        border-color: rgba(10,20,40,0.12);
+        background: rgba(10,20,40,0.03);
+      }
+      .p54-card-left{ min-width:0; }
+      .p54-card-issuer{ font-weight: 950; }
+      .p54-card-meta{ opacity:.8; font-size:12px; margin-top:4px; }
+      .p54-card-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+      .p54-mini{
+        height: 34px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 950;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -387,7 +507,7 @@
     backdrop.innerHTML = `
       <div class="p54-modal" role="dialog" aria-modal="true">
         <div class="p54-modal-head">
-          <div class="p54-modal-title">${title || "PAY54"}</div>
+          <div class="p54-modal-title"><span class="p54-brand">PAY54</span> <span>${title || ""}</span></div>
           <button class="p54-x" type="button" aria-label="Close">✕</button>
         </div>
         <div class="p54-modal-body">${bodyHTML || ""}</div>
@@ -400,7 +520,6 @@
       backdrop.remove();
       document.removeEventListener("keydown", escClose);
     }
-
     function escClose(e) {
       if (e.key === "Escape") close();
     }
@@ -417,23 +536,60 @@
     return { close };
   }
 
+  function referralFooterHTML() {
+    return `
+      <div class="p54-divider"></div>
+      <div class="p54-note">
+        New to PAY54? <a class="p54-link" href="register.html" target="_blank" rel="noopener">Join PAY54</a> to send and receive money faster —
+        <a class="p54-link" href="register.html" target="_blank" rel="noopener">Click to join & earn rewards</a>.
+      </div>
+    `;
+  }
+
   /* ---------------------------
-     3) Theme (DEFAULT LIGHT) + Profile
+     4) Header: Currency, Theme, Profile
   --------------------------- */
 
-  function applyTheme(theme) {
-    const t = theme === "dark" ? "dark" : "light";
-    document.body.classList.toggle("light", t === "light");
-    localStorage.setItem(LS.THEME, t);
+  function setActiveCurrency(cur) {
+    const valid = Object.keys(defaultBalances);
+    const safeCur = valid.includes(cur) ? cur : "NGN";
 
+    pillBtns.forEach((b) => {
+      const isActive = b.dataset.cur === safeCur;
+      b.classList.toggle("active", isActive);
+      b.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+
+    if (currencySelect) currencySelect.value = safeCur;
+
+    // TOTAL BALANCE (converted)
+    if (balanceEl) {
+      const total = computeTotalIn(safeCur);
+      balanceEl.textContent = moneyFmt(safeCur, total);
+    }
+
+    localStorage.setItem(LS.CURRENCY, safeCur);
+  }
+
+  pillBtns.forEach((btn) => {
+    btn.addEventListener("click", () => setActiveCurrency(btn.dataset.cur));
+  });
+
+  if (currencySelect) {
+    currencySelect.addEventListener("change", (e) => setActiveCurrency(e.target.value));
+  }
+
+  // Theme (Default = LIGHT)
+  function applyTheme(theme) {
+    document.body.classList.toggle("light", theme === "light");
+    localStorage.setItem(LS.THEME, theme);
     if (themeToggle) {
       const icon = themeToggle.querySelector(".icon");
-      // light mode shows moon (switch to dark), dark mode shows sun (switch to light)
-      if (icon) icon.textContent = t === "light" ? "🌙" : "☀️";
+      if (icon) icon.textContent = theme === "light" ? "🌙" : "☀️";
     }
   }
 
-  // ✅ Default Light mode if nothing saved
+  // Init theme: default light unless explicitly stored
   applyTheme(localStorage.getItem(LS.THEME) || "light");
 
   if (themeToggle) {
@@ -470,7 +626,6 @@
       const isOpen = profileMenu.classList.contains("open");
       isOpen ? closeProfileMenu() : openProfileMenu();
     });
-
     profileMenu.addEventListener("click", (e) => e.stopPropagation());
     document.addEventListener("click", closeProfileMenu);
     document.addEventListener("keydown", (e) => {
@@ -486,6 +641,7 @@
         title: "Coming soon",
         bodyHTML: `
           <div class="p54-note"><b>${nav}</b> is ready for Layer 3 / backend. For now, dashboard wiring is complete.</div>
+          ${referralFooterHTML()}
           <div class="p54-actions"><button class="p54-btn primary" type="button" id="okBtn">OK</button></div>
         `,
         onMount: ({ modal, close }) => modal.querySelector("#okBtn").addEventListener("click", close)
@@ -496,162 +652,50 @@
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
       localStorage.removeItem(LS.CURRENCY);
-      // Keep theme preference
+      localStorage.removeItem(LS.THEME);
       window.location.href = "login.html";
     });
   }
 
   /* ---------------------------
-     4) Currency Switching (hardened)
+     5) News feed (static)
   --------------------------- */
 
-  function setActiveCurrency(cur) {
-    const balances = getBalances();
-    const c = normalizeCurrency(cur);
-
-    pillBtns.forEach((b) => {
-      const isActive = b.dataset.cur === c;
-      b.classList.toggle("active", isActive);
-      b.setAttribute("aria-pressed", isActive ? "true" : "false");
-    });
-
-    if (currencySelect) currencySelect.value = c;
-
-    if (balanceEl) {
-      const amt = Number(balances[c] ?? 0);
-      balanceEl.textContent = moneyFmt(c, amt);
-    }
-
-    localStorage.setItem(LS.CURRENCY, c);
+  function renderNews() {
+    if (!newsFeed) return;
+    newsFeed.innerHTML = `
+      <div class="feed-item">
+        <div class="feed-icon">💡</div>
+        <div class="feed-main">
+          <div class="feed-title">USD–NGN volatility rising</div>
+          <div class="feed-sub">Market insight</div>
+        </div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-icon">🔐</div>
+        <div class="feed-main">
+          <div class="feed-title">Keep your account secure</div>
+          <div class="feed-sub">Security tip</div>
+        </div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-icon">🏆</div>
+        <div class="feed-main">
+          <div class="feed-title">Complete 3 transfers today</div>
+          <div class="feed-sub">Earn a streak badge</div>
+        </div>
+      </div>
+    `;
   }
-
-  pillBtns.forEach((btn) => {
-    btn.addEventListener("click", () => setActiveCurrency(btn.dataset.cur));
-  });
-
-  if (currencySelect) {
-    currencySelect.addEventListener("change", (e) => setActiveCurrency(e.target.value));
-  }
-
-  // Init currency (validated)
-  setActiveCurrency(normalizeCurrency(localStorage.getItem(LS.CURRENCY)));
 
   /* ---------------------------
-     5) Seed Demo Data (once)
-  --------------------------- */
-
-  function seedIfNeeded() {
-    if (localStorage.getItem(LS.SEEDED) === "1") return;
-
-    // Seed alerts (5–6 lines)
-    const demoAlerts = [
-      {
-        id: uid("AL"),
-        title: "All clear",
-        sub: "No requests or alerts",
-        body: "You're good to go. No pending items.",
-        icon: "✅"
-      },
-      {
-        id: uid("AL"),
-        title: "Payment request",
-        sub: "@john • ₦ 45,000.00",
-        body: "John requested a payment. Review and approve in Layer 3.",
-        icon: "🔔"
-      },
-      {
-        id: uid("AL"),
-        title: "FX rate alert",
-        sub: "GBP→NGN volatility rising",
-        body: "Consider converting when rates stabilise (demo insight).",
-        icon: "⚠️"
-      },
-      {
-        id: uid("AL"),
-        title: "Security check",
-        sub: "Device verified",
-        body: "New device verification completed successfully.",
-        icon: "🛡️"
-      },
-      {
-        id: uid("AL"),
-        title: "Referral reward",
-        sub: "You earned ₦ 1,000.00",
-        body: "A friend signed up using your referral code.",
-        icon: "🎁"
-      },
-      {
-        id: uid("AL"),
-        title: "Agent update",
-        sub: "Verification pending",
-        body: "Your agent verification is in progress (demo).",
-        icon: "🧾"
-      }
-    ];
-    setAlerts(demoAlerts);
-
-    // Seed transactions (so Recent Tx + ledger search works immediately)
-    const stamp = nowStamp();
-    const demoTx = [
-      {
-        id: uid("TX"),
-        title: "Wallet funding",
-        currency: "NGN",
-        amount: 250000,
-        icon: "💳",
-        meta: "Via Card",
-        timeISO: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-        timeLabel: "2 mins ago"
-      },
-      {
-        id: uid("TX"),
-        title: "Transfer to John",
-        currency: "NGN",
-        amount: -45000,
-        icon: "↗️",
-        meta: "To @john",
-        timeISO: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        timeLabel: "Yesterday"
-      },
-      {
-        id: uid("TX"),
-        title: "Airtime purchase",
-        currency: "NGN",
-        amount: -2500,
-        icon: "📶",
-        meta: "MTN top-up",
-        timeISO: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        timeLabel: "3 days ago"
-      }
-    ];
-
-    setTx(demoTx);
-    localStorage.setItem(LS.SEEDED, "1");
-  }
-
-  seedIfNeeded();
-
-  /* ---------------------------
-     6) Render: Alerts, News, Recent Transactions
+     6) Alerts rendering
   --------------------------- */
 
   function renderAlerts() {
     if (!alertsContainer) return;
 
     const alerts = getAlerts();
-    if (!alerts.length) {
-      alertsContainer.innerHTML = `
-        <div class="feed-item">
-          <div class="feed-icon">✅</div>
-          <div class="feed-main">
-            <div class="feed-title">All clear</div>
-            <div class="feed-sub">No requests or alerts</div>
-          </div>
-        </div>
-      `;
-      return;
-    }
-
     alertsContainer.innerHTML = alerts.slice(0, 6).map(a => `
       <div class="feed-item">
         <div class="feed-icon">${a.icon || "🔔"}</div>
@@ -674,10 +718,11 @@
           bodyHTML: `
             <div class="p54-receipt">
               <b>${item.title}</b>
-              <div class="muted">${item.sub || ""}</div>
+              <div class="p54-note">${item.sub || ""}</div>
               <div class="p54-divider"></div>
               <div>${item.body || "Details will be expanded in Layer 3."}</div>
             </div>
+            ${referralFooterHTML()}
             <div class="p54-actions">
               <button class="p54-btn primary" type="button" id="closeA">Close</button>
             </div>
@@ -688,121 +733,111 @@
     });
   }
 
-  function renderNews() {
-    if (!newsFeed) return;
-    const items = [
-      { icon: "💡", title: "USD–NGN volatility rising", sub: "Market insight" },
-      { icon: "🔐", title: "Keep your account secure", sub: "Security tip" },
-      { icon: "🏆", title: "Complete 3 transfers today", sub: "Earn a streak badge" }
-    ];
-    newsFeed.innerHTML = items.map(n => `
-      <div class="feed-item">
-        <div class="feed-icon">${n.icon}</div>
-        <div class="feed-main">
-          <div class="feed-title">${n.title}</div>
-          <div class="feed-sub">${n.sub}</div>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function recentTxFeeds() {
-    return Array.from(document.querySelectorAll('[data-role="recentTxFeed"]'));
-  }
-
-  function renderRecentTx() {
-    const feeds = recentTxFeeds();
-    if (!feeds.length) return;
-
-    const list = getTx().slice(0, 5);
-
-    const html = (list.length ? list : []).map(tx => {
-      const amtClass = tx.amount >= 0 ? "pos" : "neg";
-      const sign = tx.amount >= 0 ? "+" : "−";
-      const eqLine = tx.eqCurrency
-        ? `<div class="feed-sub2">≈ ${moneyFmt(tx.eqCurrency, Math.abs(tx.eqAmount))} • FX ${tx.fxPair} @ ${tx.fxRate}</div>`
-        : "";
-
-      return `
-        <div class="feed-item">
-          <div class="feed-icon">${tx.icon || "💳"}</div>
-          <div class="feed-main">
-            <div class="feed-title">${tx.title}</div>
-            <div class="feed-sub">${tx.timeLabel || ""}${tx.meta ? ` • ${tx.meta}` : ""}</div>
-            ${eqLine}
-          </div>
-          <div class="feed-amt ${amtClass}">${sign} ${moneyFmt(tx.currency, Math.abs(tx.amount))}</div>
-        </div>
-      `;
-    }).join("") || `
-      <div class="feed-item">
-        <div class="feed-icon">🧾</div>
-        <div class="feed-main">
-          <div class="feed-title">No transactions yet</div>
-          <div class="feed-sub">Start by adding money or sending a transfer</div>
-        </div>
-      </div>
-    `;
-
-    feeds.forEach(f => f.innerHTML = html);
-  }
-
-  // Init renders
-  renderAlerts();
-  renderNews();
-  renderRecentTx();
-
   if (clearAlertsBtn) {
     clearAlertsBtn.addEventListener("click", () => {
       setAlerts([]);
+      // Immediately reseed "All clear" line so UI doesn't feel empty
+      setAlerts([{ id: uid("AL"), title: "All clear", sub: "No requests or alerts", body: "You're up to date.", icon: "✅" }]);
       renderAlerts();
     });
   }
 
   /* ---------------------------
-     7) Transactions + Alerts helpers
+     7) Recent Tx feed (render BOTH desktop + mobile feeds)
   --------------------------- */
+
+  function txAmountHTML(tx) {
+    const isPos = tx.amount >= 0;
+    const cls = isPos ? "pos" : "neg";
+    const sign = isPos ? "+" : "−";
+    const main = `${sign} ${moneyFmt(tx.currency, Math.abs(tx.amount))}`;
+
+    const displayCur = tx.displayCurrency || activeDisplayCurrency();
+    if (tx.currency === displayCur || !tx.fxRateToDisplay || !tx.equivAmountDisplay) {
+      return `<div class="feed-amt ${cls}"><span class="main">${main}</span></div>`;
+    }
+
+    const eq = moneyFmt(displayCur, Math.abs(tx.equivAmountDisplay));
+    const rate = Number(tx.fxRateToDisplay || 1).toLocaleString(undefined, { maximumFractionDigits: 4 });
+    return `
+      <div class="feed-amt ${cls}">
+        <span class="main">${main}</span>
+        <span class="eq">≈ ${eq} (FX ${rate})</span>
+      </div>
+    `;
+  }
+
+  function renderRecentTxFeeds() {
+    const feeds = Array.from(document.querySelectorAll('[data-role="recentTxFeed"]'));
+    if (!feeds.length) return;
+
+    const list = getTx().slice(0, 5);
+
+    const html = list.length ? list.map(tx => `
+      <div class="feed-item">
+        <div class="feed-icon">${tx.icon || "💳"}</div>
+        <div class="feed-main">
+          <div class="feed-title">${tx.title}</div>
+          <div class="feed-sub">${tx.timeLabel || ""}</div>
+        </div>
+        ${txAmountHTML(tx)}
+      </div>
+    `).join("") : `
+      <div class="feed-item">
+        <div class="feed-icon">✅</div>
+        <div class="feed-main">
+          <div class="feed-title">No transactions yet</div>
+          <div class="feed-sub">Your latest activity will show here</div>
+        </div>
+      </div>
+    `;
+
+    feeds.forEach(f => { f.innerHTML = html; });
+  }
+
+  /* ---------------------------
+     8) Transactions + Alerts + Receipts
+  --------------------------- */
+
+  function addAlert({ title, sub, body, icon }) {
+    const a = { id: uid("AL"), title, sub, body, icon: icon || "🔔" };
+    const list = getAlerts();
+    list.unshift(a);
+    setAlerts(list);
+    renderAlerts();
+    return a;
+  }
 
   function addTransaction({ title, currency, amount, icon, meta }) {
     const stamp = nowStamp();
-    const active = normalizeCurrency(localStorage.getItem(LS.CURRENCY));
-    const c = normalizeCurrency(currency);
+    const displayCur = activeDisplayCurrency();
 
-    const eq = buildEquivalent(c, Number(amount), active);
+    const fxRate = currency === displayCur ? 1 : getFxRate(currency, displayCur);
+    const eq = currency === displayCur ? null : Math.abs(Number(amount || 0)) * fxRate;
 
     const tx = {
       id: uid("TX"),
       title,
-      currency: c,
+      currency,
       amount: Number(amount),
       icon: icon || "💳",
       meta: meta || "",
       timeISO: stamp.iso,
       timeLabel: stamp.label,
-      ...(eq || {})
+      displayCurrency: displayCur,
+      fxRateToDisplay: fxRate,
+      equivAmountDisplay: eq
     };
 
     const list = getTx();
     list.unshift(tx);
     setTx(list);
 
-    renderRecentTx();
-    return tx;
-  }
+    renderRecentTxFeeds();
+    // total balance may change due to wallet change
+    setActiveCurrency(activeDisplayCurrency());
 
-  function addAlert({ title, sub, body, icon }) {
-    const a = {
-      id: uid("AL"),
-      title,
-      sub,
-      body,
-      icon: icon || "🔔"
-    };
-    const list = getAlerts();
-    list.unshift(a);
-    setAlerts(list);
-    renderAlerts();
-    return a;
+    return tx;
   }
 
   function openReceipt({ title, lines, txId }) {
@@ -811,11 +846,15 @@
       title: "Receipt",
       bodyHTML: `
         <div class="p54-receipt">
-          <b>${title}</b>
-          <div class="muted">Transaction ID: ${txId}</div>
+          <div class="p54-chip">PAY54 • Official Receipt</div>
+          <div style="margin-top:10px;"><b>${title}</b></div>
+          <div class="p54-note">Transaction ID: ${txId}</div>
           <div class="p54-divider"></div>
           <pre style="margin:0; white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;">${text}</pre>
         </div>
+
+        ${referralFooterHTML()}
+
         <div class="p54-actions">
           <button class="p54-btn" type="button" id="copyRcpt">Copy</button>
           <button class="p54-btn" type="button" id="waRcpt">WhatsApp</button>
@@ -841,64 +880,115 @@
   }
 
   /* ---------------------------
-     8) Ledger (View all) + Search
+     9) Ledger (View all) with search + date range
   --------------------------- */
 
-  function renderLedgerList(ledgerEl, list, query) {
-    const q = String(query || "").trim().toLowerCase();
-
-    const filtered = !q ? list : list.filter(tx => {
-      const hay = [
-        tx.id, tx.title, tx.currency, tx.meta,
-        tx.eqCurrency, tx.fxPair
-      ].filter(Boolean).join(" ").toLowerCase();
-      return hay.includes(q);
-    });
-
-    ledgerEl.innerHTML = (filtered.length ? filtered : []).slice(0, 80).map(tx => {
-      const cls = tx.amount >= 0 ? "p54-pos" : "p54-neg";
-      const sign = tx.amount >= 0 ? "+" : "−";
-      const eqLine = tx.eqCurrency
-        ? `<div class="p54-ledger-sub2">≈ ${moneyFmt(tx.eqCurrency, Math.abs(tx.eqAmount))} • FX ${tx.fxPair} @ ${tx.fxRate}</div>`
-        : "";
-      return `
-        <div class="p54-ledger-item">
-          <div class="p54-ledger-left">
-            <div class="p54-ledger-title">${tx.icon || "💳"} ${tx.title}</div>
-            <div class="p54-ledger-sub">${new Date(tx.timeISO).toLocaleString()}${tx.meta ? ` • ${tx.meta}` : ""}</div>
-            ${eqLine}
-          </div>
-          <div class="p54-ledger-amt ${cls}">
-            ${sign} ${moneyFmt(tx.currency, Math.abs(tx.amount))}
-          </div>
-        </div>
-      `;
-    }).join("") || `<div class="p54-note">No transactions found.</div>`;
-  }
-
   function openLedger() {
-    const list = getTx();
+    const list = getTx().slice(0, 200);
+
     openModal({
       title: "Transaction History",
       bodyHTML: `
-        <div class="p54-note">Search by title, currency, amount, meta, or ID.</div>
+        <div class="p54-note">Search + filter your transactions (Layer 2 demo).</div>
+
         <div class="p54-divider"></div>
-        <input class="p54-ledger-search" id="ledgerSearch" placeholder="Search transactions..." />
+
+        <div class="p54-row">
+          <div>
+            <div class="p54-label">Search</div>
+            <input class="p54-input" id="q" placeholder="e.g. funding, transfer, John, FX..." />
+          </div>
+          <div>
+            <div class="p54-label">Currency</div>
+            <select class="p54-select" id="cur">
+              <option value="">All</option>
+              ${Object.keys(defaultBalances).map(c => `<option value="${c}">${c}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+
+        <div class="p54-row">
+          <div>
+            <div class="p54-label">From (date)</div>
+            <input class="p54-input" id="from" type="date" />
+          </div>
+          <div>
+            <div class="p54-label">To (date)</div>
+            <input class="p54-input" id="to" type="date" />
+          </div>
+        </div>
+
         <div class="p54-divider"></div>
+
         <div class="p54-ledger" id="ledgerList"></div>
+
+        ${referralFooterHTML()}
+
         <div class="p54-actions">
           <button class="p54-btn primary" type="button" id="closeLedger">Close</button>
         </div>
       `,
       onMount: ({ modal, close }) => {
         const ledger = modal.querySelector("#ledgerList");
-        const search = modal.querySelector("#ledgerSearch");
+        const q = modal.querySelector("#q");
+        const cur = modal.querySelector("#cur");
+        const from = modal.querySelector("#from");
+        const to = modal.querySelector("#to");
 
-        renderLedgerList(ledger, list, "");
+        function inDateRange(txISO) {
+          const d = new Date(txISO);
+          const f = from.value ? new Date(from.value + "T00:00:00") : null;
+          const t = to.value ? new Date(to.value + "T23:59:59") : null;
+          if (f && d < f) return false;
+          if (t && d > t) return false;
+          return true;
+        }
 
-        search.addEventListener("input", () => {
-          renderLedgerList(ledger, list, search.value);
-        });
+        function render() {
+          const query = (q.value || "").trim().toLowerCase();
+          const c = cur.value;
+
+          const filtered = list.filter(tx => {
+            if (c && tx.currency !== c) return false;
+            if (!inDateRange(tx.timeISO)) return false;
+
+            if (!query) return true;
+            const blob = `${tx.title} ${tx.meta || ""} ${tx.currency} ${tx.amount}`.toLowerCase();
+            return blob.includes(query);
+          });
+
+          ledger.innerHTML = filtered.length ? filtered.map(tx => {
+            const cls = tx.amount >= 0 ? "p54-pos" : "p54-neg";
+            const sign = tx.amount >= 0 ? "+" : "−";
+            const main = `${sign} ${moneyFmt(tx.currency, Math.abs(tx.amount))}`;
+
+            const displayCur = tx.displayCurrency || activeDisplayCurrency();
+            const eq = (tx.currency !== displayCur && tx.equivAmountDisplay)
+              ? `<span class="p54-eq">≈ ${moneyFmt(displayCur, tx.equivAmountDisplay)} (FX ${Number(tx.fxRateToDisplay||1).toLocaleString(undefined,{maximumFractionDigits:4})})</span>`
+              : "";
+
+            return `
+              <div class="p54-ledger-item">
+                <div class="p54-ledger-left">
+                  <div class="p54-ledger-title">${tx.icon || "💳"} ${tx.title}</div>
+                  <div class="p54-ledger-sub">${new Date(tx.timeISO).toLocaleString()}</div>
+                  ${tx.meta ? `<div class="p54-ledger-sub">${tx.meta}</div>` : ""}
+                </div>
+                <div class="p54-ledger-amt ${cls}">
+                  ${main}
+                  ${eq}
+                </div>
+              </div>
+            `;
+          }).join("") : `<div class="p54-note">No matches found.</div>`;
+        }
+
+        q.addEventListener("input", render);
+        cur.addEventListener("change", render);
+        from.addEventListener("change", render);
+        to.addEventListener("change", render);
+
+        render();
 
         modal.querySelector("#closeLedger").addEventListener("click", close);
       }
@@ -909,11 +999,11 @@
   if (viewAllTxMobileBtn) viewAllTxMobileBtn.addEventListener("click", openLedger);
 
   /* ---------------------------
-     9) Money Moves Actions
+     10) Money Moves + Services Actions
   --------------------------- */
 
   function openSendPay54() {
-    const cur = normalizeCurrency(localStorage.getItem(LS.CURRENCY));
+    const cur = activeDisplayCurrency();
     openModal({
       title: "Send PAY54 → PAY54",
       bodyHTML: `
@@ -938,6 +1028,8 @@
 
           <div class="p54-note" id="feeNote">Fee preview: —</div>
 
+          ${referralFooterHTML()}
+
           <div class="p54-actions">
             <button class="p54-btn" type="button" id="cancelSend">Cancel</button>
             <button class="p54-btn primary" type="submit">Send</button>
@@ -954,7 +1046,6 @@
           const n = Number(a || 0);
           return Math.min(n * 0.008, 50);
         }
-
         function updateFee() {
           const fee = calcFee(amt.value);
           feeNote.textContent = `Fee preview: ${moneyFmt(curSel.value, fee)}`;
@@ -968,40 +1059,40 @@
           e.preventDefault();
 
           const balances = getBalances();
-          const c = normalizeCurrency(curSel.value);
+          const c = curSel.value;
           const a = Number(amt.value || 0);
           const fee = calcFee(a);
           const total = a + fee;
 
           if (total <= 0) return alert("Enter a valid amount.");
-          if ((balances[c] ?? 0) < total) return alert("Insufficient balance.");
+          if ((balances[c] ?? 0) < total) return alert(`Insufficient ${c} wallet balance.`);
 
           balances[c] = (balances[c] ?? 0) - total;
           setBalances(balances);
-
-          // keep selected currency display, but update actual balances correctly
-          setActiveCurrency(normalizeCurrency(localStorage.getItem(LS.CURRENCY)));
-
-          const toTag = modal.querySelector("#toTag").value.trim();
 
           const tx = addTransaction({
             title: "PAY54 transfer sent",
             currency: c,
             amount: -total,
             icon: "↗️",
-            meta: `To ${toTag}`
+            meta: `To ${modal.querySelector("#toTag").value}`
           });
+
+          const displayCur = tx.displayCurrency;
+          const eqLine = (c !== displayCur)
+            ? `Equivalent: ${moneyFmt(displayCur, tx.equivAmountDisplay)} (FX ${Number(tx.fxRateToDisplay||1).toLocaleString(undefined,{maximumFractionDigits:4})})`
+            : "";
 
           openReceipt({
             title: "PAY54 → PAY54 Transfer",
             txId: tx.id,
             lines: [
               `Action: Send PAY54 → PAY54`,
-              `To: ${toTag}`,
+              `To: ${modal.querySelector("#toTag").value}`,
               `Amount: ${moneyFmt(c, a)}`,
               `Fee: ${moneyFmt(c, fee)}`,
               `Total: ${moneyFmt(c, total)}`,
-              tx.eqCurrency ? `Equivalent: ≈ ${moneyFmt(tx.eqCurrency, Math.abs(tx.eqAmount))} (FX ${tx.fxPair} @ ${tx.fxRate})` : "",
+              eqLine,
               `Time: ${new Date(tx.timeISO).toLocaleString()}`
             ].filter(Boolean)
           });
@@ -1017,8 +1108,8 @@
       title: "Receive",
       bodyHTML: `
         <div class="p54-receipt">
-          <b>Receive money</b>
-          <div class="muted">Share your account and PAY54 tag.</div>
+          <div class="p54-chip">PAY54 • Receive</div>
+          <div style="margin-top:10px;"><b>Share your account and PAY54 tag</b></div>
           <div class="p54-divider"></div>
           <div><b>Acct:</b> 3001234567</div>
           <div><b>Tag:</b> @pay54-user</div>
@@ -1028,6 +1119,9 @@
             <button class="p54-btn" type="button" id="shareWA">Share WhatsApp</button>
           </div>
         </div>
+
+        ${referralFooterHTML()}
+
         <div class="p54-actions">
           <button class="p54-btn primary" type="button" id="doneRecv">Done</button>
         </div>
@@ -1051,7 +1145,7 @@
   }
 
   function openAddMoney() {
-    const cur = normalizeCurrency(localStorage.getItem(LS.CURRENCY));
+    const cur = activeDisplayCurrency();
     openModal({
       title: "Add money",
       bodyHTML: `
@@ -1078,6 +1172,8 @@
             <input class="p54-input" id="addAmt" type="number" step="0.01" min="0" required />
           </div>
 
+          ${referralFooterHTML()}
+
           <div class="p54-actions">
             <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
             <button class="p54-btn primary" type="submit">Add</button>
@@ -1091,31 +1187,36 @@
         form.addEventListener("submit", (e) => {
           e.preventDefault();
           const balances = getBalances();
-          const c = normalizeCurrency(modal.querySelector("#addCur").value);
+          const c = modal.querySelector("#addCur").value;
           const a = Number(modal.querySelector("#addAmt").value || 0);
+          const m = modal.querySelector("#method").value;
+
           if (a <= 0) return alert("Enter a valid amount.");
 
           balances[c] = (balances[c] ?? 0) + a;
           setBalances(balances);
-          setActiveCurrency(normalizeCurrency(localStorage.getItem(LS.CURRENCY)));
 
           const tx = addTransaction({
             title: "Wallet funding",
             currency: c,
             amount: +a,
             icon: "💳",
-            meta: `Via ${modal.querySelector("#method").value}`
+            meta: `Via ${m}`
           });
+
+          const displayCur = tx.displayCurrency;
+          const eqLine = (c !== displayCur)
+            ? `Equivalent: ${moneyFmt(displayCur, tx.equivAmountDisplay)} (FX ${Number(tx.fxRateToDisplay||1).toLocaleString(undefined,{maximumFractionDigits:4})})`
+            : "";
 
           openReceipt({
             title: "Add money",
             txId: tx.id,
             lines: [
               `Action: Add money`,
-              `Method: ${modal.querySelector("#method").value}`,
-              `Currency: ${c}`,
+              `Method: ${m}`,
               `Amount: ${moneyFmt(c, a)}`,
-              tx.eqCurrency ? `Equivalent: ≈ ${moneyFmt(tx.eqCurrency, Math.abs(tx.eqAmount))} (FX ${tx.fxPair} @ ${tx.fxRate})` : "",
+              eqLine,
               `Time: ${new Date(tx.timeISO).toLocaleString()}`
             ].filter(Boolean)
           });
@@ -1127,7 +1228,10 @@
   }
 
   function openWithdraw() {
-    const cur = normalizeCurrency(localStorage.getItem(LS.CURRENCY));
+    const cur = activeDisplayCurrency();
+    const cards = getCards();
+    const defaultCard = getDefaultCardId() || (cards[0] ? cards[0].id : "");
+
     openModal({
       title: "Withdraw",
       bodyHTML: `
@@ -1136,7 +1240,7 @@
             <div>
               <div class="p54-label">Route</div>
               <select class="p54-select" id="wdRoute">
-                <option value="Bank">Bank</option>
+                <option value="Card">Card</option>
                 <option value="Agent">Agent</option>
               </select>
             </div>
@@ -1147,10 +1251,44 @@
               </select>
             </div>
           </div>
+
+          <div class="p54-row" id="cardRow">
+            <div>
+              <div class="p54-label">Select card</div>
+              <select class="p54-select" id="wdCard">
+                ${cards.map(cd => `<option value="${cd.id}" ${cd.id===defaultCard?"selected":""}>${cd.issuer} •••• ${cd.last4}</option>`).join("") || `<option value="">No cards (add one)</option>`}
+              </select>
+            </div>
+            <div>
+              <div class="p54-label">Reference</div>
+              <input class="p54-input" id="wdRef" placeholder="e.g. cash withdrawal" />
+            </div>
+          </div>
+
+          <div class="p54-row" id="agentRow" style="display:none;">
+            <div>
+              <div class="p54-label">Agent ID / Tag</div>
+              <input class="p54-input" id="agentId" placeholder="e.g. AGT-30291 or @agent" />
+            </div>
+            <div>
+              <div class="p54-label">Reason</div>
+              <select class="p54-select" id="wdReason">
+                <option value="Cash withdrawal">Cash withdrawal</option>
+                <option value="Family support">Family support</option>
+                <option value="Business">Business</option>
+                <option value="Transport">Transport</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <div class="p54-label">Amount</div>
             <input class="p54-input" id="wdAmt" type="number" step="0.01" min="0" required />
           </div>
+
+          ${referralFooterHTML()}
+
           <div class="p54-actions">
             <button class="p54-btn" type="button" id="cancelWd">Cancel</button>
             <button class="p54-btn primary" type="submit">Withdraw</button>
@@ -1158,38 +1296,67 @@
         </form>
       `,
       onMount: ({ modal, close }) => {
-        const form = modal.querySelector("#wdForm");
+        const route = modal.querySelector("#wdRoute");
+        const cardRow = modal.querySelector("#cardRow");
+        const agentRow = modal.querySelector("#agentRow");
+
+        function toggleRows() {
+          const v = route.value;
+          if (v === "Card") { cardRow.style.display = ""; agentRow.style.display = "none"; }
+          else { cardRow.style.display = "none"; agentRow.style.display = ""; }
+        }
+        route.addEventListener("change", toggleRows);
+        toggleRows();
+
         modal.querySelector("#cancelWd").addEventListener("click", close);
 
-        form.addEventListener("submit", (e) => {
+        modal.querySelector("#wdForm").addEventListener("submit", (e) => {
           e.preventDefault();
           const balances = getBalances();
-          const c = normalizeCurrency(modal.querySelector("#wdCur").value);
+
+          const c = modal.querySelector("#wdCur").value;
           const a = Number(modal.querySelector("#wdAmt").value || 0);
+          const r = route.value;
+
           if (a <= 0) return alert("Enter a valid amount.");
-          if ((balances[c] ?? 0) < a) return alert("Insufficient balance.");
+          if ((balances[c] ?? 0) < a) return alert(`Insufficient ${c} wallet balance.`);
+
+          let meta = "";
+          if (r === "Card") {
+            const cardId = modal.querySelector("#wdCard").value;
+            const card = getCards().find(x => x.id === cardId);
+            if (!cardId || !card) return alert("No card selected. Please add/select a card.");
+            meta = `Route: Card • ${card.issuer} •••• ${card.last4} • Ref: ${modal.querySelector("#wdRef").value || "—"}`;
+          } else {
+            const agentId = (modal.querySelector("#agentId").value || "").trim();
+            if (!agentId) return alert("Enter Agent ID / Tag.");
+            meta = `Route: Agent • ${agentId} • Reason: ${modal.querySelector("#wdReason").value}`;
+          }
 
           balances[c] = (balances[c] ?? 0) - a;
           setBalances(balances);
-          setActiveCurrency(normalizeCurrency(localStorage.getItem(LS.CURRENCY)));
 
           const tx = addTransaction({
             title: "Withdrawal",
             currency: c,
             amount: -a,
             icon: "🏧",
-            meta: `Via ${modal.querySelector("#wdRoute").value}`
+            meta
           });
+
+          const displayCur = tx.displayCurrency;
+          const eqLine = (c !== displayCur)
+            ? `Equivalent: ${moneyFmt(displayCur, tx.equivAmountDisplay)} (FX ${Number(tx.fxRateToDisplay||1).toLocaleString(undefined,{maximumFractionDigits:4})})`
+            : "";
 
           openReceipt({
             title: "Withdraw",
             txId: tx.id,
             lines: [
               `Action: Withdraw`,
-              `Route: ${modal.querySelector("#wdRoute").value}`,
-              `Currency: ${c}`,
+              meta,
               `Amount: ${moneyFmt(c, a)}`,
-              tx.eqCurrency ? `Equivalent: ≈ ${moneyFmt(tx.eqCurrency, Math.abs(tx.eqAmount))} (FX ${tx.fxPair} @ ${tx.fxRate})` : "",
+              eqLine,
               `Time: ${new Date(tx.timeISO).toLocaleString()}`
             ].filter(Boolean)
           });
@@ -1205,55 +1372,49 @@
       title: "Bank Transfer",
       bodyHTML: `
         <form class="p54-form" id="btForm">
-          <div>
-            <div class="p54-label">Bank</div>
-            <select class="p54-select" id="bank">
-              <option>GTBank</option>
-              <option>Access Bank</option>
-              <option>Zenith</option>
-              <option>UBA</option>
-              <option>FirstBank</option>
-            </select>
-          </div>
-
           <div class="p54-row">
             <div>
-              <div class="p54-label">Recipient Account Number</div>
-              <input class="p54-input" id="acct" maxlength="10" placeholder="10 digits" required />
+              <div class="p54-label">Recipient name</div>
+              <input class="p54-input" id="btName" placeholder="Full name" required />
             </div>
             <div>
-              <div class="p54-label">Recipient Account Name</div>
-              <input class="p54-input" id="acctName" placeholder="Full name" required />
-            </div>
-          </div>
-
-          <div class="p54-row">
-            <div>
-              <div class="p54-label">Reason</div>
-              <select class="p54-select" id="reason">
-                <option value="Family support">Family support</option>
-                <option value="School fees">School fees</option>
-                <option value="Business">Business</option>
-                <option value="Rent">Rent</option>
-                <option value="Other">Other</option>
+              <div class="p54-label">Bank</div>
+              <select class="p54-select" id="bank">
+                <option>GTBank</option><option>Access Bank</option><option>Zenith</option><option>UBA</option><option>FirstBank</option>
               </select>
             </div>
-            <div>
-              <div class="p54-label">Reference</div>
-              <input class="p54-input" id="ref" placeholder="e.g. January support" required />
-            </div>
           </div>
 
           <div class="p54-row">
+            <div>
+              <div class="p54-label">Account Number</div>
+              <input class="p54-input" id="acct" maxlength="10" placeholder="10 digits" required />
+            </div>
             <div>
               <div class="p54-label">Amount (NGN)</div>
               <input class="p54-input" id="amt" type="number" step="0.01" min="0" required />
             </div>
+          </div>
+
+          <div class="p54-row">
             <div>
-              <div class="p54-label">Fee (demo)</div>
-              <input class="p54-input" id="fee" disabled />
+              <div class="p54-label">Reference</div>
+              <input class="p54-input" id="btRef" placeholder="e.g. rent, fees, support" />
+            </div>
+            <div>
+              <div class="p54-label">Reason</div>
+              <select class="p54-select" id="btReason">
+                <option value="Family support">Family support</option>
+                <option value="Bills">Bills</option>
+                <option value="Rent">Rent</option>
+                <option value="Education">Education</option>
+                <option value="Business">Business</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
           </div>
+
+          ${referralFooterHTML()}
 
           <div class="p54-actions">
             <button class="p54-btn" type="button" id="cancelBT">Cancel</button>
@@ -1262,54 +1423,34 @@
         </form>
       `,
       onMount: ({ modal, close }) => {
-        const acct = modal.querySelector("#acct");
-        const amt = modal.querySelector("#amt");
-        const fee = modal.querySelector("#fee");
-
-        function calcFee(a) {
-          const n = Number(a || 0);
-          return Math.min(n * 0.005, 200);
-        }
-        function updateFee() {
-          fee.value = amt.value ? moneyFmt("NGN", calcFee(amt.value)) : "";
-        }
-
-        amt.addEventListener("input", updateFee);
-
         modal.querySelector("#cancelBT").addEventListener("click", close);
 
         modal.querySelector("#btForm").addEventListener("submit", (e) => {
           e.preventDefault();
-          const acctVal = acct.value.trim();
-          if (!/^\d{10}$/.test(acctVal)) return alert("Account number must be 10 digits.");
+          const acct = modal.querySelector("#acct").value.trim();
+          if (!/^\d{10}$/.test(acct)) return alert("Account number must be 10 digits.");
 
-          const acctName = modal.querySelector("#acctName").value.trim();
-          const ref = modal.querySelector("#ref").value.trim();
-          const reason = modal.querySelector("#reason").value;
-
-          if (!acctName) return alert("Enter recipient account name.");
-          if (!ref) return alert("Enter a reference.");
+          const name = modal.querySelector("#btName").value.trim();
+          if (!name) return alert("Enter recipient name.");
 
           const balances = getBalances();
-          const a = Number(amt.value || 0);
-          const f = calcFee(a);
-          const total = a + f;
-
+          const a = Number(modal.querySelector("#amt").value || 0);
           if (a <= 0) return alert("Enter a valid amount.");
-          if ((balances.NGN ?? 0) < total) return alert("Insufficient NGN balance.");
+          if ((balances.NGN ?? 0) < a) return alert("Insufficient NGN wallet balance.");
 
-          balances.NGN -= total;
+          balances.NGN -= a;
           setBalances(balances);
-          setActiveCurrency(normalizeCurrency(localStorage.getItem(LS.CURRENCY)));
 
           const bank = modal.querySelector("#bank").value;
+          const reason = modal.querySelector("#btReason").value;
+          const ref = modal.querySelector("#btRef").value || "—";
 
           const tx = addTransaction({
             title: "Bank transfer",
             currency: "NGN",
-            amount: -total,
+            amount: -a,
             icon: "🏦",
-            meta: `${bank} • ${acctName} • ${acctVal} • Ref: ${ref}`
+            meta: `To ${name} • ${bank} • ${acct} • Ref: ${ref} • Reason: ${reason}`
           });
 
           openReceipt({
@@ -1317,14 +1458,12 @@
             txId: tx.id,
             lines: [
               `Action: Bank transfer`,
+              `Recipient: ${name}`,
               `Bank: ${bank}`,
-              `Recipient: ${acctName}`,
-              `Account: ${acctVal}`,
-              `Reason: ${reason}`,
+              `Acct: ${acct}`,
               `Reference: ${ref}`,
+              `Reason: ${reason}`,
               `Amount: ${moneyFmt("NGN", a)}`,
-              `Fee: ${moneyFmt("NGN", f)}`,
-              `Total: ${moneyFmt("NGN", total)}`,
               `Time: ${new Date(tx.timeISO).toLocaleString()}`
             ]
           });
@@ -1336,7 +1475,6 @@
   }
 
   function openRequestMoney() {
-    const cur = normalizeCurrency(localStorage.getItem(LS.CURRENCY));
     openModal({
       title: "Request money",
       bodyHTML: `
@@ -1350,7 +1488,7 @@
             <div>
               <div class="p54-label">Currency</div>
               <select class="p54-select" id="rqCur">
-                ${Object.keys(getBalances()).map(c => `<option value="${c}" ${c===cur?"selected":""}>${c}</option>`).join("")}
+                ${Object.keys(getBalances()).map(c => `<option value="${c}">${c}</option>`).join("")}
               </select>
             </div>
             <div>
@@ -1358,6 +1496,26 @@
               <input class="p54-input" id="rqAmt" type="number" step="0.01" min="0" required />
             </div>
           </div>
+
+          <div class="p54-row">
+            <div>
+              <div class="p54-label">Reason</div>
+              <select class="p54-select" id="rqReason">
+                <option value="Family support">Family support</option>
+                <option value="Bills">Bills</option>
+                <option value="Rent">Rent</option>
+                <option value="Education">Education</option>
+                <option value="Business">Business</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <div class="p54-label">Reference</div>
+              <input class="p54-input" id="rqRef" placeholder="Optional reference" />
+            </div>
+          </div>
+
+          ${referralFooterHTML()}
 
           <div class="p54-actions">
             <button class="p54-btn" type="button" id="cancelRQ">Cancel</button>
@@ -1371,16 +1529,18 @@
           e.preventDefault();
 
           const tag = modal.querySelector("#fromTag").value.trim();
-          const c = normalizeCurrency(modal.querySelector("#rqCur").value);
+          const c = modal.querySelector("#rqCur").value;
           const a = Number(modal.querySelector("#rqAmt").value || 0);
+          const reason = modal.querySelector("#rqReason").value;
+          const ref = modal.querySelector("#rqRef").value || "—";
 
           if (!tag) return alert("Enter a tag.");
           if (a <= 0) return alert("Enter an amount.");
 
           addAlert({
-            title: "Payment request",
+            title: "Payment request created",
             sub: `${tag} • ${moneyFmt(c, a)}`,
-            body: `Request created for ${tag}. In Layer 3 this will notify the payer.`,
+            body: `Reason: ${reason}\nReference: ${ref}\nLayer 3 will notify the payer.`,
             icon: "🔔"
           });
 
@@ -1391,7 +1551,7 @@
   }
 
   /* ---------------------------
-     10) Services
+     11) Services
   --------------------------- */
 
   function openCrossBorderFX() {
@@ -1399,14 +1559,15 @@
       title: "Cross-border FX",
       bodyHTML: `
         <form class="p54-form" id="fxForm">
+
           <div class="p54-row">
             <div>
-              <div class="p54-label">Recipient Name</div>
+              <div class="p54-label">Recipient name</div>
               <input class="p54-input" id="fxName" placeholder="Full name" required />
             </div>
             <div>
-              <div class="p54-label">Recipient Account Number</div>
-              <input class="p54-input" id="fxAcct" placeholder="Account number" required />
+              <div class="p54-label">Account number</div>
+              <input class="p54-input" id="fxAcct" placeholder="e.g. 3001234567" required />
             </div>
           </div>
 
@@ -1415,15 +1576,15 @@
               <div class="p54-label">Reason</div>
               <select class="p54-select" id="fxReason">
                 <option value="Family support">Family support</option>
-                <option value="School fees">School fees</option>
+                <option value="Bills">Bills</option>
+                <option value="Education">Education</option>
                 <option value="Business">Business</option>
-                <option value="Rent">Rent</option>
                 <option value="Other">Other</option>
               </select>
             </div>
             <div>
               <div class="p54-label">Reference</div>
-              <input class="p54-input" id="fxRef" placeholder="e.g. Tuition support" required />
+              <input class="p54-input" id="fxRef" placeholder="e.g. school fees" />
             </div>
           </div>
 
@@ -1447,7 +1608,6 @@
                 <option value="NGN">NGN</option>
                 <option value="GHS">GHS</option>
                 <option value="KES">KES</option>
-                <option value="ZAR">ZAR</option>
               </select>
             </div>
             <div>
@@ -1456,7 +1616,9 @@
             </div>
           </div>
 
-          <div class="p54-note" id="fxNote">Mock rate applied (Layer 3 will use live rates).</div>
+          <div class="p54-note">Mock rates applied (Layer 3 will use live rates).</div>
+
+          ${referralFooterHTML()}
 
           <div class="p54-actions">
             <button class="p54-btn" type="button" id="cancelFX">Cancel</button>
@@ -1469,13 +1631,11 @@
         const recvCur = modal.querySelector("#fxRecvCur");
         const amt = modal.querySelector("#fxAmt");
         const recvAmt = modal.querySelector("#fxRecvAmt");
-        const fxNote = modal.querySelector("#fxNote");
 
         function updateEstimate() {
           const a = Number(amt.value || 0);
-          const rate = mockRate(sendCur.value, recvCur.value);
+          const rate = getFxRate(sendCur.value, recvCur.value);
           recvAmt.value = a ? (a * rate).toLocaleString(undefined, { maximumFractionDigits: 2 }) : "";
-          fxNote.textContent = `Rate snapshot: 1 ${sendCur.value} = ${rate} ${recvCur.value} (demo)`;
         }
 
         amt.addEventListener("input", updateEstimate);
@@ -1485,45 +1645,47 @@
 
         modal.querySelector("#fxForm").addEventListener("submit", (e) => {
           e.preventDefault();
+          const balances = getBalances();
 
           const name = modal.querySelector("#fxName").value.trim();
           const acct = modal.querySelector("#fxAcct").value.trim();
-          const reason = modal.querySelector("#fxReason").value;
-          const ref = modal.querySelector("#fxRef").value.trim();
-
           if (!name) return alert("Enter recipient name.");
           if (!acct) return alert("Enter recipient account number.");
-          if (!ref) return alert("Enter a reference.");
 
-          const balances = getBalances();
-          const s = normalizeCurrency(sendCur.value);
-          const r = normalizeCurrency(recvCur.value);
+          const s = sendCur.value;
+          const r = recvCur.value;
           const a = Number(amt.value || 0);
+
           if (a <= 0) return alert("Enter an amount.");
 
           balances[s] = balances[s] ?? 0;
-          if (balances[s] < a) return alert(`Insufficient ${s} balance.`);
+          balances[r] = balances[r] ?? 0;
 
-          const rate = mockRate(s, r);
+          if (balances[s] < a) return alert(`Insufficient ${s} wallet balance.`);
+
+          const rate = getFxRate(s, r);
           const out = a * rate;
 
-          // Cross-border FX is an outbound send (debit only) in demo
           balances[s] -= a;
+          balances[r] += out;
+
           setBalances(balances);
-          setActiveCurrency(normalizeCurrency(localStorage.getItem(LS.CURRENCY)));
+
+          const reason = modal.querySelector("#fxReason").value;
+          const ref = modal.querySelector("#fxRef").value || "—";
 
           const tx = addTransaction({
-            title: "Cross-border FX sent",
+            title: "Cross-border FX",
             currency: s,
             amount: -a,
             icon: "💱",
-            meta: `${name} • ${r} receive • Ref: ${ref}`
+            meta: `To ${name} • ${acct} • ${s}→${r} • Ref: ${ref} • Reason: ${reason}`
           });
 
           addAlert({
-            title: "FX sent",
-            sub: `${moneyFmt(s, a)} → ≈ ${moneyFmt(r, out)}`,
-            body: `Recipient: ${name} (${acct}) • Reason: ${reason} • Ref: ${ref}`,
+            title: "FX completed",
+            sub: `${moneyFmt(s, a)} → ${moneyFmt(r, out)}`,
+            body: `Recipient: ${name} (${acct})\nReference: ${ref}\nReason: ${reason}`,
             icon: "💱"
           });
 
@@ -1536,40 +1698,45 @@
               `Account: ${acct}`,
               `Reason: ${reason}`,
               `Reference: ${ref}`,
-              `You sent: ${moneyFmt(s, a)}`,
-              `They receive (est): ${moneyFmt(r, out)}`,
-              `Rate snapshot: 1 ${s} = ${rate} ${r}`,
-              tx.eqCurrency ? `Equivalent: ≈ ${moneyFmt(tx.eqCurrency, Math.abs(tx.eqAmount))} (FX ${tx.fxPair} @ ${tx.fxRate})` : "",
+              `You send: ${moneyFmt(s, a)}`,
+              `They receive: ${moneyFmt(r, out)}`,
+              `FX rate used: ${rate.toLocaleString(undefined, { maximumFractionDigits: 6 })}`,
               `Time: ${new Date(tx.timeISO).toLocaleString()}`
-            ].filter(Boolean)
+            ]
           });
 
           close();
         });
-
-        updateEstimate();
       }
     });
   }
 
   function openShopOnTheFly() {
-    const aff = "utm_source=pay54&utm_medium=app&utm_campaign=shop_on_the_fly&aff=PAY54";
-    const links = [
-      { label: "Taxi / Ride-hailing", url: `https://www.uber.com/gb/en/?${aff}` },
-      { label: "Food delivery", url: `https://www.just-eat.co.uk/?${aff}` },
-      { label: "Flights", url: `https://www.skyscanner.net/?${aff}` },
-      { label: "Hotels", url: `https://www.booking.com/?${aff}` },
-      { label: "Tickets", url: `https://www.ticketmaster.co.uk/?${aff}` }
-    ];
+    const tag = "utm_source=pay54&utm_medium=affiliate&utm_campaign=shoponthefly";
+    const urls = {
+      taxi: `https://www.uber.com/gb/en/?${tag}`,
+      food: `https://www.just-eat.co.uk/?${tag}`,
+      flights: `https://www.skyscanner.net/?${tag}`,
+      hotels: `https://www.booking.com/?${tag}`,
+      tickets: `https://www.ticketmaster.co.uk/?${tag}`
+    };
 
     openModal({
       title: "Shop on the Fly",
       bodyHTML: `
-        <div class="p54-note"><b>Partner tiles</b> open in a new tab (demo). Affiliate tracking is appended.</div>
+        <div class="p54-note"><b>Partner tiles</b> open in a new tab (demo). PAY54 affiliate tags included.</div>
         <div class="p54-divider"></div>
+
         <div class="p54-actions" style="justify-content:flex-start;">
-          ${links.map(l => `<button class="p54-btn" type="button" data-open="${l.url}">${l.label}</button>`).join("")}
+          <button class="p54-btn" type="button" data-open="${urls.taxi}">Taxi / Ride-hailing</button>
+          <button class="p54-btn" type="button" data-open="${urls.food}">Food delivery</button>
+          <button class="p54-btn" type="button" data-open="${urls.flights}">Flights</button>
+          <button class="p54-btn" type="button" data-open="${urls.hotels}">Hotels</button>
+          <button class="p54-btn" type="button" data-open="${urls.tickets}">Tickets</button>
         </div>
+
+        ${referralFooterHTML()}
+
         <div class="p54-actions">
           <button class="p54-btn primary" type="button" id="closeShop">Done</button>
         </div>
@@ -1584,68 +1751,24 @@
   }
 
   function openCards() {
-    function mask(num) {
-      const s = String(num || "").replace(/\s+/g, "");
-      if (s.length < 8) return "**** **** **** 0000";
-      return `**** **** **** ${s.slice(-4)}`;
-    }
-
-    function renderCardsUI(modal) {
+    function cardListHTML() {
       const cards = getCards();
-      const defId = localStorage.getItem(LS.DEFAULT_CARD) || "";
-      const listEl = modal.querySelector("#cardsList");
+      const def = getDefaultCardId();
+      if (!cards.length) return `<div class="p54-note">No cards yet. Add a card to continue.</div>`;
 
-      if (!cards.length) {
-        listEl.innerHTML = `<div class="p54-note">No cards yet. Add a card to enable POS/ePOS payments.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = cards.map(c => {
-        const isDef = c.id === defId;
-        return `
-          <div class="p54-receipt" style="margin-bottom:10px;">
-            <div class="p54-card-ui">
-              <div class="p54-card-row">
-                <div class="p54-badge">${isDef ? "Default" : "Linked"}</div>
-                <div style="font-size:18px;">📶</div>
-              </div>
-              <div class="p54-card-num">${mask(c.number)}</div>
-              <div class="p54-card-meta">
-                <span>${c.name || "PAY54 User"}</span>
-                <span>EXP ${c.exp || "--/--"}</span>
-              </div>
-            </div>
-
-            <div class="p54-actions" style="justify-content:flex-start; margin-top:10px;">
-              <button class="p54-btn" type="button" data-set-default="${c.id}">${isDef ? "Default selected" : "Set default"}</button>
-              <button class="p54-btn" type="button" data-delete-card="${c.id}">Delete</button>
-            </div>
-
-            <div class="p54-small">Default card will be used for POS/ePOS approvals (Layer 3).</div>
+      return cards.map(cd => `
+        <div class="p54-card">
+          <div class="p54-card-left">
+            <div class="p54-card-issuer">${cd.contactless ? "📶 " : ""}${cd.issuer} •••• ${cd.last4}</div>
+            <div class="p54-card-meta">Expiry ${cd.expiry} • CVV ${cd.cvv} • Issuer: ${cd.issuer}</div>
+            <div class="p54-card-meta"><b>Default:</b> ${cd.id === def ? "Yes" : "No"}</div>
           </div>
-        `;
-      }).join("");
-
-      listEl.querySelectorAll("[data-set-default]").forEach(b => {
-        b.addEventListener("click", () => {
-          localStorage.setItem(LS.DEFAULT_CARD, b.getAttribute("data-set-default"));
-          renderCardsUI(modal);
-          alert("Default card updated ✅");
-        });
-      });
-
-      listEl.querySelectorAll("[data-delete-card]").forEach(b => {
-        b.addEventListener("click", () => {
-          const id = b.getAttribute("data-delete-card");
-          const next = getCards().filter(x => x.id !== id);
-          setCards(next);
-          if ((localStorage.getItem(LS.DEFAULT_CARD) || "") === id) {
-            localStorage.removeItem(LS.DEFAULT_CARD);
-          }
-          renderCardsUI(modal);
-          alert("Card deleted ✅");
-        });
-      });
+          <div class="p54-card-actions">
+            <button class="p54-btn p54-mini" type="button" data-set-default="${cd.id}">Set default</button>
+            <button class="p54-btn p54-mini" type="button" data-del-card="${cd.id}">Delete</button>
+          </div>
+        </div>
+      `).join("");
     }
 
     openModal({
@@ -1653,88 +1776,116 @@
       bodyHTML: `
         <div class="p54-note">
           Layer 2 demo:
-          - View card display (contactless)
-          - Set default card for POS/ePOS approvals
+          - Card display (contactless)
+          - Set default card for ePOS spend
           - Delete card
-          <br><br>
-          <b>Camera scan (approved):</b> Layer 3 will use device APIs.
+          - Add card (manual + scan placeholder)
         </div>
 
         <div class="p54-divider"></div>
 
-        <div id="cardsList"></div>
+        <div id="cardList">${cardListHTML()}</div>
 
         <div class="p54-divider"></div>
 
         <form class="p54-form" id="addCardForm">
           <div class="p54-row">
             <div>
-              <div class="p54-label">Cardholder name</div>
-              <input class="p54-input" id="cardName" placeholder="Name on card" required />
+              <div class="p54-label">Issuer</div>
+              <select class="p54-select" id="cIssuer">
+                <option>VISA</option>
+                <option>MASTERCARD</option>
+                <option>AMEX</option>
+              </select>
             </div>
             <div>
-              <div class="p54-label">Expiry (MM/YY)</div>
-              <input class="p54-input" id="cardExp" placeholder="08/28" required />
+              <div class="p54-label">Last 4 digits</div>
+              <input class="p54-input" id="cLast4" maxlength="4" placeholder="1234" required />
             </div>
           </div>
-          <div>
-            <div class="p54-label">Card number</div>
-            <input class="p54-input" id="cardNum" placeholder="16 digits" required />
+
+          <div class="p54-row">
+            <div>
+              <div class="p54-label">Expiry (MM/YY)</div>
+              <input class="p54-input" id="cExp" placeholder="08/28" required />
+            </div>
+            <div>
+              <div class="p54-label">CVV (demo)</div>
+              <input class="p54-input" id="cCvv" placeholder="***" required />
+            </div>
           </div>
+
+          <div class="p54-actions" style="justify-content:flex-start;">
+            <button class="p54-btn" type="button" id="scanBtn">Scan card (camera)</button>
+          </div>
+
+          ${referralFooterHTML()}
 
           <div class="p54-actions">
-            <button class="p54-btn" type="button" id="scanBtn">Scan card (camera)</button>
             <button class="p54-btn primary" type="submit">Add card</button>
+            <button class="p54-btn" type="button" id="closeCards">Done</button>
           </div>
         </form>
-
-        <div class="p54-actions">
-          <button class="p54-btn primary" type="button" id="closeCards">Done</button>
-        </div>
       `,
       onMount: ({ modal, close }) => {
-        // seed one demo card if none
-        if (!getCards().length) {
-          const demo = [{
-            id: uid("CARD"),
-            name: storedName || "PAY54 User",
-            number: "4111111111114832",
-            exp: "08/28"
-          }];
-          setCards(demo);
-          localStorage.setItem(LS.DEFAULT_CARD, demo[0].id);
+        const list = modal.querySelector("#cardList");
+
+        function bindCardActions() {
+          modal.querySelectorAll("[data-set-default]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              setDefaultCardId(btn.getAttribute("data-set-default"));
+              list.innerHTML = cardListHTML();
+              bindCardActions();
+              alert("Default card updated ✅");
+            });
+          });
+
+          modal.querySelectorAll("[data-del-card]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const id = btn.getAttribute("data-del-card");
+              const cards = getCards().filter(x => x.id !== id);
+              setCards(cards);
+              if (getDefaultCardId() === id) setDefaultCardId(cards[0] ? cards[0].id : "");
+              list.innerHTML = cardListHTML();
+              bindCardActions();
+              alert("Card deleted ✅");
+            });
+          });
         }
 
-        renderCardsUI(modal);
+        bindCardActions();
 
         modal.querySelector("#scanBtn").addEventListener("click", () => {
           alert("Camera scan approved — Layer 3 will use device camera APIs.");
         });
 
+        modal.querySelector("#closeCards").addEventListener("click", close);
+
         modal.querySelector("#addCardForm").addEventListener("submit", (e) => {
           e.preventDefault();
-          const name = modal.querySelector("#cardName").value.trim();
-          const exp = modal.querySelector("#cardExp").value.trim();
-          const num = modal.querySelector("#cardNum").value.replace(/\s+/g, "");
-
-          if (!/^\d{16}$/.test(num)) return alert("Card number must be 16 digits (demo validation).");
-          if (!/^\d{2}\/\d{2}$/.test(exp)) return alert("Expiry must be MM/YY.");
+          const issuer = modal.querySelector("#cIssuer").value;
+          const last4 = modal.querySelector("#cLast4").value.trim();
+          const exp = modal.querySelector("#cExp").value.trim();
+          const cvv = modal.querySelector("#cCvv").value.trim();
+          if (!/^\d{4}$/.test(last4)) return alert("Last 4 digits must be 4 numbers.");
 
           const cards = getCards();
-          const newCard = { id: uid("CARD"), name, number: num, exp };
+          const newCard = {
+            id: uid("CARD"),
+            issuer,
+            last4,
+            expiry: exp || "—",
+            cvv: cvv || "***",
+            contactless: true
+          };
           cards.unshift(newCard);
           setCards(cards);
+          if (!getDefaultCardId()) setDefaultCardId(newCard.id);
 
-          if (!localStorage.getItem(LS.DEFAULT_CARD)) {
-            localStorage.setItem(LS.DEFAULT_CARD, newCard.id);
-          }
-
-          renderCardsUI(modal);
+          list.innerHTML = cardListHTML();
+          bindCardActions();
           alert("Card added ✅");
-          e.target.reset();
         });
-
-        modal.querySelector("#closeCards").addEventListener("click", close);
       }
     });
   }
@@ -1744,7 +1895,7 @@
       title: "Become an Agent",
       bodyHTML: `
         <form class="p54-form" id="agentForm">
-          <div class="p54-note">Agent application requires <b>NIN</b> + <b>Selfie (camera)</b> + ID documents (approved).</div>
+          <div class="p54-note">Agent application requires <b>NIN</b> and a <b>selfie (real-time camera)</b> (demo UI).</div>
 
           <div>
             <div class="p54-label">Full name</div>
@@ -1762,21 +1913,23 @@
             </div>
           </div>
 
+          <div>
+            <div class="p54-label">NIN</div>
+            <input class="p54-input" id="agentNin" placeholder="11 digits" maxlength="11" required />
+          </div>
+
           <div class="p54-row">
             <div>
-              <div class="p54-label">NIN</div>
-              <input class="p54-input" id="agentNIN" placeholder="National ID Number" required />
+              <div class="p54-label">Selfie (camera)</div>
+              <input class="p54-input" id="agentSelfieCam" type="file" accept="image/*" capture="user" />
             </div>
             <div>
-              <div class="p54-label">Selfie (camera)</div>
-              <input class="p54-input" id="agentSelfie" type="file" accept="image/*" capture="user" required />
+              <div class="p54-label">Upload ID / Proof</div>
+              <input class="p54-input" type="file" accept="image/*,.pdf" />
             </div>
           </div>
 
-          <div>
-            <div class="p54-label">Upload ID documents (license / proof)</div>
-            <input class="p54-input" type="file" accept="image/*,.pdf" multiple />
-          </div>
+          ${referralFooterHTML()}
 
           <div class="p54-actions">
             <button class="p54-btn" type="button" id="cancelAgent">Cancel</button>
@@ -1790,11 +1943,8 @@
         modal.querySelector("#agentForm").addEventListener("submit", (e) => {
           e.preventDefault();
 
-          const nin = modal.querySelector("#agentNIN").value.trim();
-          const selfie = modal.querySelector("#agentSelfie").files?.[0];
-
-          if (!nin) return alert("NIN is required.");
-          if (!selfie) return alert("Please take a selfie (camera).");
+          const nin = (modal.querySelector("#agentNin").value || "").trim();
+          if (!/^\d{11}$/.test(nin)) return alert("NIN must be 11 digits.");
 
           addAlert({
             title: "Agent application submitted",
@@ -1805,7 +1955,7 @@
 
           const tx = addTransaction({
             title: "Agent application",
-            currency: normalizeCurrency(localStorage.getItem(LS.CURRENCY)),
+            currency: activeDisplayCurrency(),
             amount: 0,
             icon: "🧾",
             meta: "Submitted"
@@ -1834,6 +1984,7 @@
         <div class="p54-note">
           This is wired (no dead buttons). Full flow + receipts will be expanded next (Layer 3).
         </div>
+        ${referralFooterHTML()}
         <div class="p54-actions">
           <button class="p54-btn primary" type="button" id="okSvc">OK</button>
         </div>
@@ -1843,97 +1994,51 @@
   }
 
   /* ---------------------------
-     11) Quick Shortcuts: Refer & Earn + Trading
+     12) Utilities: ATM/POS Finder
   --------------------------- */
 
-  function openReferEarn() {
-    const base = (storedName || "PAY54").replace(/\s+/g, "").slice(0, 5).toUpperCase();
-    const code = `PAY54-${base}-${String(Date.now()).slice(-4)}`;
+  function openFinder(kind) {
+    const title = kind === "atm" ? "ATM Finder" : "POS / Agent Finder";
+    const placeholder = kind === "atm" ? "e.g. Thamesmead, Greenwich" : "e.g. Thamesmead, SE28";
+    const queryDefault = kind === "atm" ? "ATM near " : "POS agent near ";
 
     openModal({
-      title: "Refer & Earn",
+      title,
       bodyHTML: `
-        <div class="p54-receipt">
-          <b>Your referral code</b>
-          <div class="p54-divider"></div>
-          <div style="font-weight:950; font-size:18px; letter-spacing:1px;">${code}</div>
-          <div class="p54-divider"></div>
-          <div class="p54-note">Invite friends. Earn rewards when they verify and transact (Layer 3 rules).</div>
-        </div>
-
-        <div class="p54-actions">
-          <button class="p54-btn" type="button" id="copyRef">Copy</button>
-          <button class="p54-btn" type="button" id="shareRef">WhatsApp</button>
-          <button class="p54-btn primary" type="button" id="doneRef">Done</button>
-        </div>
-      `,
-      onMount: ({ modal, close }) => {
-        modal.querySelector("#doneRef").addEventListener("click", close);
-        modal.querySelector("#copyRef").addEventListener("click", async () => {
-          try {
-            await navigator.clipboard.writeText(code);
-            alert("Copied ✅");
-          } catch {
-            alert("Copy failed.");
-          }
-        });
-        modal.querySelector("#shareRef").addEventListener("click", () => {
-          const msg = `Join PAY54 using my referral code: ${code}`;
-          window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
-        });
-      }
-    });
-  }
-
-  function openATMPOSFinder() {
-    openModal({
-      title: "ATM & POS Finder",
-      bodyHTML: `
-        <div class="p54-note">
-          Layer 2 demo utility. Layer 3 will use GPS + map providers + agent network.
-        </div>
+        <div class="p54-note">Opens your map app in a new tab (demo).</div>
         <div class="p54-divider"></div>
 
-        <div class="p54-receipt">
-          <b>Quick actions</b>
-          <div class="p54-divider"></div>
-          <div class="p54-actions" style="justify-content:flex-start;">
-            <button class="p54-btn" type="button" data-map="ATM near me">ATM near me</button>
-            <button class="p54-btn" type="button" data-map="POS terminal near me">POS terminals</button>
-            <button class="p54-btn" type="button" data-map="Money agent near me">Agents</button>
+        <div class="p54-form">
+          <div>
+            <div class="p54-label">Location</div>
+            <input class="p54-input" id="loc" placeholder="${placeholder}" />
+          </div>
+
+          ${referralFooterHTML()}
+
+          <div class="p54-actions">
+            <button class="p54-btn" type="button" id="cancelF">Cancel</button>
+            <button class="p54-btn primary" type="button" id="openF">Open Maps</button>
           </div>
         </div>
-
-        <div class="p54-divider"></div>
-
-        <div class="p54-receipt">
-          <b>Suggested nearby (demo)</b>
-          <div class="p54-divider"></div>
-          <div class="p54-small">• PAY54 Agent Hub — Thamesmead</div>
-          <div class="p54-small">• GTBank ATM — Central</div>
-          <div class="p54-small">• Access POS Cluster — High Street</div>
-        </div>
-
-        <div class="p54-actions">
-          <button class="p54-btn primary" type="button" id="closeATM">Done</button>
-        </div>
       `,
       onMount: ({ modal, close }) => {
-        modal.querySelectorAll("[data-map]").forEach(b => {
-          b.addEventListener("click", () => {
-            const q = encodeURIComponent(b.getAttribute("data-map"));
-            window.open(`https://www.google.com/maps/search/${q}`, "_blank");
-          });
+        const loc = modal.querySelector("#loc");
+        modal.querySelector("#cancelF").addEventListener("click", close);
+        modal.querySelector("#openF").addEventListener("click", () => {
+          const q = encodeURIComponent(`${queryDefault}${loc.value || "me"}`);
+          window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
+          close();
         });
-        modal.querySelector("#closeATM").addEventListener("click", close);
       }
     });
   }
 
-  if (atmFinderBtn) atmFinderBtn.addEventListener("click", openATMPOSFinder);
+  if (atmFinderBtn) atmFinderBtn.addEventListener("click", () => openFinder("atm"));
+  if (posFinderBtn) posFinderBtn.addEventListener("click", () => openFinder("pos"));
 
   /* ---------------------------
-     12) Wiring Buttons in dashboard.html
+     13) Wiring Buttons in dashboard.html
   --------------------------- */
 
   // Top CTAs
@@ -1961,7 +2066,7 @@
       if (s === "shop") return openShopOnTheFly();
       if (s === "cards") return openCards();
       if (s === "agent") return openBecomeAgent();
-      if (s === "trading") return placeholderService("Trading — Shares · Stocks · Crypto");
+      if (s === "trading") return placeholderService("Trading — Shares • Stocks • Crypto");
 
       const names = {
         bills: "Pay Bills & Top-Up",
@@ -1980,9 +2085,24 @@
       const s = btn.dataset.shortcut;
       if (s === "agent") return openBecomeAgent();
       if (s === "shop") return openShopOnTheFly();
-      if (s === "referral") return openReferEarn();
-      if (s === "trading") return placeholderService("Trading — Shares · Stocks · Crypto");
+      if (s === "referral") return placeholderService("Refer & Earn");
+      if (s === "trading") return placeholderService("Trading — Shares • Stocks • Crypto");
     });
   });
+
+  /* ---------------------------
+     14) Init
+  --------------------------- */
+
+  // Seed data
+  seedIfEmpty();
+
+  // Init currency safely
+  setActiveCurrency(localStorage.getItem(LS.CURRENCY) || "NGN");
+
+  // Render panels
+  renderRecentTxFeeds();
+  renderAlerts();
+  renderNews();
 
 })();
