@@ -1061,6 +1061,138 @@
       }
     });
   }
+function openScanAndPay() {
+  const curView = getSelectedCurrency();
+  const balances = LEDGER.getBalances();
+
+  openModal({
+    title: "Scan & Pay",
+    bodyHTML: `
+      <form class="p54-form" id="scanForm">
+
+        <div>
+          <div class="p54-label">Scan result (QR)</div>
+          <input class="p54-input" id="qrInput"
+            placeholder="Paste QR payload e.g. pay54:@john or pay54-agent:@agent01"
+            required />
+        </div>
+
+        <div class="p54-note" id="qrResolved"></div>
+
+        <div class="p54-row">
+          <div>
+            <div class="p54-label">Wallet currency</div>
+            <select class="p54-select" id="scanCur">
+              ${Object.keys(balances).map(
+                c => `<option value="${c}" ${c===curView?"selected":""}>${c}</option>`
+              ).join("")}
+            </select>
+          </div>
+
+          <div>
+            <div class="p54-label">Amount</div>
+            <input class="p54-input" id="scanAmt" type="number" step="0.01" min="0" required />
+          </div>
+        </div>
+
+        <div>
+          <div class="p54-label">Reference</div>
+          <input class="p54-input" id="scanRef" placeholder="Optional" />
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelScan">Cancel</button>
+          <button class="p54-btn primary" type="submit">Pay</button>
+        </div>
+      </form>
+    `,
+    onMount: ({ modal, close }) => {
+      const qrInput = modal.querySelector("#qrInput");
+      const qrResolved = modal.querySelector("#qrResolved");
+
+      let recipient = null;
+
+      function resolveQR(val) {
+        val = val.trim();
+
+        if (val.startsWith("pay54:@")) {
+          recipient = { type: "pay54", tag: val.replace("pay54:", "") };
+          qrResolved.textContent = `PAY54 user detected: ${recipient.tag}`;
+          return;
+        }
+
+        if (val.startsWith("pay54-agent:@")) {
+          recipient = { type: "agent", tag: val.replace("pay54-agent:", "") };
+          qrResolved.textContent = `Agent detected: ${recipient.tag}`;
+          return;
+        }
+
+        if (val.startsWith("pay54-merchant:")) {
+          recipient = { type: "merchant", id: val.replace("pay54-merchant:", "") };
+          qrResolved.textContent = `Merchant detected: ${recipient.id}`;
+          return;
+        }
+
+        recipient = null;
+        qrResolved.textContent = "Unrecognised QR format";
+      }
+
+      qrInput.addEventListener("input", () => resolveQR(qrInput.value));
+
+      modal.querySelector("#cancelScan").addEventListener("click", close);
+
+      modal.querySelector("#scanForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        if (!recipient) return alert("Invalid or unsupported QR code.");
+
+        const c = modal.querySelector("#scanCur").value;
+        const a = Number(modal.querySelector("#scanAmt").value || 0);
+        const ref = modal.querySelector("#scanRef").value || "";
+
+        if (a <= 0) return alert("Enter a valid amount.");
+        if ((LEDGER.getBalances()[c] ?? 0) < a) {
+          return alert(`Insufficient ${c} balance.`);
+        }
+
+        const entry = LEDGER.createEntry({
+          type: "scan_pay",
+          title: "Scan & Pay",
+          currency: c,
+          amount: -a,
+          icon: "📷",
+          meta: {
+            recipient,
+            reference: ref,
+            source: "qr"
+          }
+        });
+
+        const tx = addEntryAndRefresh(entry);
+
+        const who =
+          recipient.type === "pay54" ? `To: ${recipient.tag}` :
+          recipient.type === "agent" ? `Agent: ${recipient.tag}` :
+          `Merchant: ${recipient.id}`;
+
+        RCPT.openReceiptModal({
+          openModal,
+          title: "Scan & Pay",
+          tx,
+          lines: [
+            `Action: Scan & Pay`,
+            who,
+            `Wallet: ${c}`,
+            `Amount: ${LEDGER.moneyFmt(c, a)}`,
+            ...(ref ? [`Reference: ${ref}`] : [])
+          ]
+        });
+
+        close();
+      });
+    }
+  });
+}
 
   function openCrossBorderFXUnified() {
     const sendCurDefault = "GBP";
