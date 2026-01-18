@@ -1581,9 +1581,8 @@ function openScanAndPay() {
       if (action === "banktransfer") return openBankTransfer();
 
       // Request Money is being replaced later by Scan & Pay (Layer 3B)
-      if (action === "request") {
-        return openModal({
-          title: "Scan & Pay (Layer 3B)",
+     if (action === "request") return openScanAndPay();
+
           bodyHTML: `
             <div class="p54-note">
               Request Money is being replaced by <b>Scan & Pay</b> as approved.
