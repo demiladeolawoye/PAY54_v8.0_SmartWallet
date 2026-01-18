@@ -586,97 +586,154 @@
   --------------------------- */
 
   function openAddMoney() {
-    const curView = getSelectedCurrency();
-    const balances = LEDGER.getBalances();
+  const curView = getSelectedCurrency();
+  const balances = LEDGER.getBalances();
 
-    openModal({
-      title: "Add money",
-      bodyHTML: `
-        <form class="p54-form" id="addForm">
-          <div class="p54-row">
-            <div>
-              <div class="p54-label">Method</div>
-              <select class="p54-select" id="method">
-                <option value="Card">Card</option>
-                <option value="Bank">Bank</option>
-                <option value="Agent">Agent</option>
-              </select>
-            </div>
-            <div>
-              <div class="p54-label">Wallet currency</div>
-              <select class="p54-select" id="addCur">
-                ${Object.keys(balances).map(c => `<option value="${c}" ${c===curView?"selected":""}>${c}</option>`).join("")}
-              </select>
-            </div>
+  openModal({
+    title: "Add money",
+    bodyHTML: `
+      <form class="p54-form" id="addForm">
+
+        <div class="p54-row">
+          <div>
+            <div class="p54-label">Method</div>
+            <select class="p54-select" id="method">
+              <option value="Card">Card</option>
+              <option value="Agent">Agent</option>
+            </select>
           </div>
 
           <div>
-            <div class="p54-label">Amount</div>
-            <input class="p54-input" id="addAmt" type="number" step="0.01" min="0" required />
+            <div class="p54-label">Wallet currency</div>
+            <select class="p54-select" id="addCur">
+              ${Object.keys(balances).map(
+                c => `<option value="${c}" ${c===curView?"selected":""}>${c}</option>`
+              ).join("")}
+            </select>
           </div>
+        </div>
 
-          <div class="p54-note" id="fxInfo"></div>
+        <div id="methodFields"></div>
 
-          <div class="p54-actions">
-            <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
-            <button class="p54-btn primary" type="submit">Add</button>
-          </div>
-        </form>
-      `,
-      onMount: ({ modal, close }) => {
-        const form = modal.querySelector("#addForm");
-        const addCur = modal.querySelector("#addCur");
-        const fxInfo = modal.querySelector("#fxInfo");
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="addAmt" type="number" step="0.01" min="0" required />
+        </div>
 
-        function updateFXInfo() {
-          const base = getSelectedCurrency();
-          const c = addCur.value;
-          if (c !== base) {
-            fxInfo.textContent = `You are viewing ${base}. This will top up your ${c} wallet. Converted total updates instantly.`;
-          } else {
-            fxInfo.textContent = "";
-          }
+        <div>
+          <div class="p54-label">Reference</div>
+          <input class="p54-input" id="reference" placeholder="Optional" />
+        </div>
+
+        <div class="p54-note" id="fxInfo"></div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
+          <button class="p54-btn primary" type="submit">Add</button>
+        </div>
+      </form>
+    `,
+    onMount: ({ modal, close }) => {
+      const form = modal.querySelector("#addForm");
+      const methodEl = modal.querySelector("#method");
+      const addCur = modal.querySelector("#addCur");
+      const fxInfo = modal.querySelector("#fxInfo");
+      const methodFields = modal.querySelector("#methodFields");
+
+      function renderMethodFields() {
+        const method = methodEl.value;
+
+        if (method === "Card") {
+          methodFields.innerHTML = `
+            <div class="p54-row">
+              <div>
+                <div class="p54-label">Select card</div>
+                <select class="p54-select" id="cardSel">
+                  <option value="Visa •••• 4832">Visa •••• 4832</option>
+                  <option value="Mastercard •••• 1441">Mastercard •••• 1441</option>
+                </select>
+              </div>
+            </div>
+          `;
+          return;
         }
-        updateFXInfo();
-        addCur.addEventListener("change", updateFXInfo);
 
-        modal.querySelector("#cancelAdd").addEventListener("click", close);
-
-        form.addEventListener("submit", (e) => {
-          e.preventDefault();
-          const method = modal.querySelector("#method").value;
-          const c = addCur.value;
-          const a = Number(modal.querySelector("#addAmt").value || 0);
-          if (a <= 0) return alert("Enter a valid amount.");
-
-          const entry = LEDGER.createEntry({
-            type: "add_money",
-            title: "Wallet funding",
-            currency: c,
-            amount: +a,
-            icon: "💳",
-            meta: { method }
-          });
-
-          const tx = addEntryAndRefresh(entry);
-
-          RCPT.openReceiptModal({
-            openModal,
-            title: "Add money",
-            tx,
-            lines: [
-              `Action: Add money`,
-              `Method: ${method}`,
-              `Wallet: ${c}`,
-              `Amount: ${LEDGER.moneyFmt(c, a)}`
-            ]
-          });
-
-          close();
-        });
+        // Agent
+        methodFields.innerHTML = `
+          <div>
+            <div class="p54-label">Agent PAY54 Tag or Account No</div>
+            <input class="p54-input" id="agentRef" placeholder="@agent-tag or 3001234567" required />
+          </div>
+        `;
       }
-    });
-  }
+
+      function updateFXInfo() {
+        const base = getSelectedCurrency();
+        const c = addCur.value;
+        fxInfo.textContent =
+          c !== base
+            ? `You are viewing ${base}. This will fund your ${c} wallet. Converted total updates instantly.`
+            : "";
+      }
+
+      renderMethodFields();
+      updateFXInfo();
+
+      methodEl.addEventListener("change", renderMethodFields);
+      addCur.addEventListener("change", updateFXInfo);
+
+      modal.querySelector("#cancelAdd").addEventListener("click", close);
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const method = methodEl.value;
+        const c = addCur.value;
+        const a = Number(modal.querySelector("#addAmt").value || 0);
+        const reference = modal.querySelector("#reference").value || "";
+
+        if (a <= 0) return alert("Enter a valid amount.");
+
+        const meta = { method, reference };
+
+        if (method === "Card") {
+          meta.card = modal.querySelector("#cardSel")?.value || "";
+        } else {
+          meta.agent = modal.querySelector("#agentRef")?.value || "";
+          if (!meta.agent) return alert("Enter Agent PAY54 tag or account number.");
+        }
+
+        const entry = LEDGER.createEntry({
+          type: "add_money",
+          title: "Wallet funding",
+          currency: c,
+          amount: +a,
+          icon: "💳",
+          meta
+        });
+
+        const tx = addEntryAndRefresh(entry);
+
+        RCPT.openReceiptModal({
+          openModal,
+          title: "Add money",
+          tx,
+          lines: [
+            `Action: Add money`,
+            `Method: ${method}`,
+            ...(meta.card ? [`Card: ${meta.card}`] : []),
+            ...(meta.agent ? [`Agent: ${meta.agent}`] : []),
+            `Wallet: ${c}`,
+            `Amount: ${LEDGER.moneyFmt(c, a)}`,
+            ...(reference ? [`Reference: ${reference}`] : [])
+          ]
+        });
+
+        close();
+      });
+    }
+  });
+}
 
   function openWithdraw() {
     const curView = getSelectedCurrency();
