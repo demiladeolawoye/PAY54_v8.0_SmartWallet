@@ -11,7 +11,7 @@
   "use strict";
 
   const LEDGER = window.PAY54_LEDGER;
-  const RECIP  = window.PAY54_RECIPIENT;
+  const RECIP  = window.PAY54_RECIPIENTS;
   const RCPT   = window.PAY54_RECEIPTS;
 
   if (!LEDGER || !RECIP || !RCPT) {
