@@ -1434,77 +1434,35 @@
   }
 
   /* ---------------------------
-     11) Wiring (stable)
-  --------------------------- */
+   11) Wiring (UI FIX PATCH)
+--------------------------- */
 
-  if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
-  if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
+// Action tiles (Money Moves)
+document.querySelectorAll(".action-tile").forEach((tile) => {
+  const label = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
 
-  document.querySelectorAll(".tile-btn[data-action]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const action = btn.dataset.action;
-      if (action === "send") return openSendUnified();
-      if (action === "receive") return openReceive();
-      if (action === "add") return openAddMoney();
-      if (action === "withdraw") return openWithdraw();
-      if (action === "banktransfer") return openBankTransfer();
-
-      // Request Money is being replaced later by Scan & Pay (Layer 3B)
-      if (action === "request") {
-        return openModal({
-          title: "Scan & Pay (Layer 3B)",
-          bodyHTML: `
-            <div class="p54-note">
-              Request Money is being replaced by <b>Scan & Pay</b> as approved.
-              Layer 3A focuses on ledger + wallets + recipient logic first.
-            </div>
-            <div class="p54-actions">
-              <button class="p54-btn primary" type="button" id="ok">OK</button>
-            </div>
-          `,
-          onMount: ({ modal, close }) => modal.querySelector("#ok").addEventListener("click", close)
-        });
-      }
-    });
+  tile.addEventListener("click", () => {
+    if (label.includes("send")) return openSendUnified();
+    if (label.includes("receive")) return openReceive();
+    if (label.includes("add")) return openAddMoney();
+    if (label.includes("withdraw")) return openWithdraw();
+    if (label.includes("bank")) return openBankTransfer();
+    if (label.includes("request")) return openScanAndPay(); // Scan & Pay
   });
+});
 
-  document.querySelectorAll(".tile-btn[data-service]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const s = btn.dataset.service;
-      if (s === "fx") return openCrossBorderFXUnified();
+// Service tiles
+document.querySelectorAll(".service-tile").forEach((tile) => {
+  const label = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
 
-      return openModal({
-        title: "Coming soon",
-        bodyHTML: `
-          <div class="p54-note">
-            <b>${s}</b> is included in Layer 3 tiered rollout.
-          </div>
-          <div class="p54-actions">
-            <button class="p54-btn primary" type="button" id="okSvc">OK</button>
-          </div>
-        `,
-        onMount: ({ modal, close }) => modal.querySelector("#okSvc").addEventListener("click", close)
-      });
-    });
-  });
+  tile.addEventListener("click", () => {
+    if (label.includes("cross")) return openCrossBorderFXUnified();
 
-  document.querySelectorAll("[data-shortcut]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const s = btn.dataset.shortcut;
-      if (s === "shop") return window.open("https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=shop_on_the_fly", "_blank");
+    return openModal({
+      title: "Coming soon",
+      bodyHTML: `
+        <div class="p54-note"><b>${label}</b> is part of Layer 3 rollout.</div>
+        <div class="p54-actions">
+          <button class="p54-btn primary" type="button" id="okSvc">OK</button>
+        </div
 
-      return openModal({
-        title: "Coming soon",
-        bodyHTML: `
-          <div class="p54-note"><b>${s}</b> is ready for Layer 3 rollout.</div>
-          <div class="p54-actions"><button class="p54-btn primary" type="button" id="okS">OK</button></div>
-        `,
-        onMount: ({ modal, close }) => modal.querySelector("#okS").addEventListener("click", close)
-      });
-    });
-  });
-
-  // Initial UI refresh
-  refreshUI();
-
-})();
