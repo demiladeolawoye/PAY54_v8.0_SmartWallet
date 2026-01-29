@@ -1434,35 +1434,123 @@
   }
 
   /* ---------------------------
-   11) Wiring (UI FIX PATCH)
+   11) Wiring — FULL UI FIX
 --------------------------- */
 
-// Action tiles (Money Moves)
-document.querySelectorAll(".action-tile").forEach((tile) => {
-  const label = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
+function bindActionTiles() {
+  document.querySelectorAll(".action-tile").forEach((tile) => {
+    const title = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
 
-  tile.addEventListener("click", () => {
-    if (label.includes("send")) return openSendUnified();
-    if (label.includes("receive")) return openReceive();
-    if (label.includes("add")) return openAddMoney();
-    if (label.includes("withdraw")) return openWithdraw();
-    if (label.includes("bank")) return openBankTransfer();
-    if (label.includes("request")) return openScanAndPay(); // Scan & Pay
+    tile.style.cursor = "pointer";
+
+    tile.addEventListener("click", () => {
+      if (title.includes("send")) return openSendUnified();
+      if (title.includes("receive")) return openReceive();
+      if (title.includes("add")) return openAddMoney();
+      if (title.includes("withdraw")) return openWithdraw();
+      if (title.includes("bank")) return openBankTransfer();
+      if (title.includes("request")) return openScanAndPay();
+    });
   });
-});
+}
 
-// Service tiles
-document.querySelectorAll(".service-tile").forEach((tile) => {
-  const label = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
+function bindServiceTiles() {
+  document.querySelectorAll(".service-tile").forEach((tile) => {
+    const title = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
 
-  tile.addEventListener("click", () => {
-    if (label.includes("cross")) return openCrossBorderFXUnified();
+    tile.style.cursor = "pointer";
 
-    return openModal({
-      title: "Coming soon",
-      bodyHTML: `
-        <div class="p54-note"><b>${label}</b> is part of Layer 3 rollout.</div>
-        <div class="p54-actions">
-          <button class="p54-btn primary" type="button" id="okSvc">OK</button>
-        </div
+    tile.addEventListener("click", () => {
+      if (title.includes("cross")) return openCrossBorderFXUnified();
 
+      openModal({
+        title: "Coming soon",
+        bodyHTML: `
+          <div class="p54-note"><b>${title}</b> is part of Layer 3 rollout.</div>
+          <div class="p54-actions">
+            <button class="p54-btn primary" type="button" id="okSvc">OK</button>
+          </div>
+        `,
+        onMount: ({ modal, close }) => modal.querySelector("#okSvc").addEventListener("click", close)
+      });
+    });
+  });
+}
+
+function bindShortcutTiles() {
+  document.querySelectorAll(".shortcut-tile").forEach((tile) => {
+    const title = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
+
+    tile.style.cursor = "pointer";
+
+    tile.addEventListener("click", () => {
+      if (title.includes("pay")) {
+        return window.open("https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=pay_and_go", "_blank");
+      }
+
+      openModal({
+        title: "Coming soon",
+        bodyHTML: `
+          <div class="p54-note"><b>${title}</b> is part of Layer 3 rollout.</div>
+          <div class="p54-actions">
+            <button class="p54-btn primary" type="button" id="okSh">OK</button>
+          </div>
+        `,
+        onMount: ({ modal, close }) => modal.querySelector("#okSh").addEventListener("click", close)
+      });
+    });
+  });
+}
+
+function renameDashboardTiles() {
+  document.querySelectorAll(".tile-title").forEach(el => {
+    if (el.textContent.trim() === "Request Money") {
+      el.textContent = "Scan & Pay";
+    }
+    if (el.textContent.trim() === "Shop on the Fly") {
+      el.textContent = "Pay & Go";
+    }
+  });
+}
+
+/* ---------------------------
+   12) Recent Transactions Auto Feed
+--------------------------- */
+
+function renderRecentTransactions() {
+  const txFeed = recentTxFeedEl();
+  if (!txFeed) return;
+
+  const txs = LEDGER.getTx().slice(0, 5);
+
+  if (!txs.length) {
+    txFeed.innerHTML = `
+      <div class="feed-item">
+        <div class="feed-icon">📭</div>
+        <div class="feed-main">
+          <div class="feed-title">No transactions yet</div>
+          <div class="feed-sub">Your activity will appear here</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  txFeed.innerHTML = "";
+
+  txs.forEach(tx => {
+    prependTxToDOM(tx);
+  });
+}
+
+/* ---------------------------
+   13) FINAL INITIALISATION
+--------------------------- */
+
+renameDashboardTiles();
+bindActionTiles();
+bindServiceTiles();
+bindShortcutTiles();
+renderRecentTransactions();
+
+refreshUI();
