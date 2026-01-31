@@ -796,4 +796,12 @@
 
   // Initial UI refresh
   refreshUI();
+   // 🔓 Expose core actions globally (FIX dead buttons)
+window.openAddMoney = openAddMoney;
+window.openWithdraw = openWithdraw;
+window.openSendUnified = openSendUnified;
+window.openReceive = openReceive;
+window.openBankTransfer = openBankTransfer;
+window.openCrossBorderFXUnified = openCrossBorderFXUnified;
+
 })();
