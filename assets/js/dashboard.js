@@ -612,7 +612,7 @@ function openScanAndPay() {
 
         <div>
           <div class="p54-label">Amount</div>
-          <input class="p54-input" id="scanAmt" type="number" min="1" required />
+          <input class="p54-input" id="scanAmt" type="number" step="0.01" min="0" required />
         </div>
 
         <div class="p54-actions">
