@@ -1535,7 +1535,7 @@ function bindActionTiles() {
       if (title.includes("add")) return openAddMoney();
       if (title.includes("withdraw")) return openWithdraw();
       if (title.includes("bank")) return openBankTransfer();
-      if (title.includes("request")) return openScanAndPay();
+      if (title.includes("scan") || title.includes("qr")) return openScanAndPay();
     });
   });
 }
