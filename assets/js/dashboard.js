@@ -1,5 +1,5 @@
 /* =========================
-   PAY54 Dashboard — Layer 3A Wiring (v805.2-hotfix2)
+   PAY54 Dashboard — Layer 3A Wiring (v805.2-hotfix3)
    File: assets/js/dashboard.js
 
    Fixes included:
@@ -10,6 +10,7 @@
    ✅ Ledger "View all" includes SEARCH + DATE RANGE filters (restored)
    ✅ FX equivalents in feed + ledger + receipts retained
    ✅ Unified recipient logic for Send + Cross-border FX retained
+   ✅ Scan & Pay (Layer 3B)
    ✅ No dead buttons (safe init + delegated handlers)
 ========================= */
 
@@ -568,7 +569,6 @@
   --------------------------- */
 
   function refreshUI() {
-    // refresh total in current currency
     setActiveCurrency(getSelectedCurrency());
   }
 
@@ -582,245 +582,241 @@
   }
 
   /* ---------------------------
-     10) Core Modals (Add / Withdraw / Send / FX / Receive / Bank)
+     10) Core Modals (Add / Withdraw / Send / FX / Receive / Bank / Scan)
   --------------------------- */
-/* ---------------------------
-   Scan & Pay (Layer 3B)
---------------------------- */
-function openScanAndPay() {
-  const curView = getSelectedCurrency();
-  const balances = LEDGER.getBalances();
 
-  openModal({
-    title: "Scan & Pay",
-    bodyHTML: `
-      <form class="p54-form" id="scanPayForm">
+  function openScanAndPay() {
+    const curView = getSelectedCurrency();
+    const balances = LEDGER.getBalances();
 
-        <div>
-          <div class="p54-label">Merchant Tag / QR Ref</div>
-          <input class="p54-input" id="merchantRef" placeholder="@merchant or QR123" required />
-        </div>
+    openModal({
+      title: "Scan & Pay",
+      bodyHTML: `
+        <form class="p54-form" id="scanPayForm">
 
-        <div>
-          <div class="p54-label">Wallet currency</div>
-          <select class="p54-select" id="scanCur">
-            ${Object.keys(balances).map(c =>
-              `<option value="${c}" ${c===curView?"selected":""}>${c}</option>`
-            ).join("")}
-          </select>
-        </div>
+          <div>
+            <div class="p54-label">Merchant Tag / QR Ref</div>
+            <input class="p54-input" id="merchantRef" placeholder="@merchant or QR123" required />
+          </div>
 
-        <div>
-          <div class="p54-label">Amount</div>
-          <input class="p54-input" id="scanAmt" type="number" step="0.01" min="0" required />
-        </div>
+          <div>
+            <div class="p54-label">Wallet currency</div>
+            <select class="p54-select" id="scanCur">
+              ${Object.keys(balances).map(c =>
+                `<option value="${c}" ${c===curView?"selected":""}>${c}</option>`
+              ).join("")}
+            </select>
+          </div>
 
-        <div class="p54-actions">
-          <button class="p54-btn" type="button" id="cancelScan">Cancel</button>
-          <button class="p54-btn primary" type="submit">Pay</button>
-        </div>
+          <div>
+            <div class="p54-label">Amount</div>
+            <input class="p54-input" id="scanAmt" type="number" step="0.01" min="0" required />
+          </div>
 
-      </form>
-    `,
-    onMount: ({ modal, close }) => {
+          <div class="p54-actions">
+            <button class="p54-btn" type="button" id="cancelScan">Cancel</button>
+            <button class="p54-btn primary" type="submit">Pay</button>
+          </div>
 
-      modal.querySelector("#cancelScan")
-        .addEventListener("click", close);
+        </form>
+      `,
+      onMount: ({ modal, close }) => {
 
-      modal.querySelector("#scanPayForm")
-        .addEventListener("submit", (e) => {
+        modal.querySelector("#cancelScan")
+          .addEventListener("click", close);
+
+        modal.querySelector("#scanPayForm")
+          .addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const ref = modal.querySelector("#merchantRef").value.trim();
+            const cur = modal.querySelector("#scanCur").value;
+            const amt = Number(modal.querySelector("#scanAmt").value);
+
+            if (!ref) return alert("Enter merchant tag or QR ref.");
+            if (amt <= 0) return alert("Enter valid amount.");
+
+            const balancesNow = LEDGER.getBalances();
+            if ((balancesNow[cur] ?? 0) < amt)
+              return alert(`Insufficient ${cur} balance.`);
+
+            const entry = LEDGER.createEntry({
+              type: "scan_pay",
+              title: "Scan & Pay",
+              currency: cur,
+              amount: -amt,
+              icon: "📱",
+              meta: { merchant: ref }
+            });
+
+            const tx = addEntryAndRefresh(entry);
+
+            RCPT.openReceiptModal({
+              openModal,
+              title: "Scan & Pay",
+              tx,
+              lines: [
+                `Merchant: ${ref}`,
+                `Wallet: ${cur}`,
+                `Amount: ${LEDGER.moneyFmt(cur, amt)}`
+              ]
+            });
+
+            close();
+          });
+
+      }
+    });
+  }
+
+  function openAddMoney() {
+    const curView = getSelectedCurrency();
+    const balances = LEDGER.getBalances();
+
+    openModal({
+      title: "Add money",
+      bodyHTML: `
+        <form class="p54-form" id="addForm">
+
+          <div class="p54-row">
+            <div>
+              <div class="p54-label">Method</div>
+              <select class="p54-select" id="method">
+                <option value="Card">Card</option>
+                <option value="Agent">Agent</option>
+              </select>
+            </div>
+
+            <div>
+              <div class="p54-label">Wallet currency</div>
+              <select class="p54-select" id="addCur">
+                ${Object.keys(balances).map(
+                  c => `<option value="${c}" ${c===curView?"selected":""}>${c}</option>`
+                ).join("")}
+              </select>
+            </div>
+          </div>
+
+          <div id="methodFields"></div>
+
+          <div>
+            <div class="p54-label">Amount</div>
+            <input class="p54-input" id="addAmt" type="number" step="0.01" min="0" required />
+          </div>
+
+          <div>
+            <div class="p54-label">Reference</div>
+            <input class="p54-input" id="reference" placeholder="Optional" />
+          </div>
+
+          <div class="p54-note" id="fxInfo"></div>
+
+          <div class="p54-actions">
+            <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
+            <button class="p54-btn primary" type="submit">Add</button>
+          </div>
+        </form>
+      `,
+      onMount: ({ modal, close }) => {
+        const form = modal.querySelector("#addForm");
+        const methodEl = modal.querySelector("#method");
+        const addCur = modal.querySelector("#addCur");
+        const fxInfo = modal.querySelector("#fxInfo");
+        const methodFields = modal.querySelector("#methodFields");
+
+        function renderMethodFields() {
+          const method = methodEl.value;
+
+          if (method === "Card") {
+            methodFields.innerHTML = `
+              <div class="p54-row">
+                <div>
+                  <div class="p54-label">Select card</div>
+                  <select class="p54-select" id="cardSel">
+                    <option value="Visa •••• 4832">Visa •••• 4832</option>
+                    <option value="Mastercard •••• 1441">Mastercard •••• 1441</option>
+                  </select>
+                </div>
+              </div>
+            `;
+            return;
+          }
+
+          methodFields.innerHTML = `
+            <div>
+              <div class="p54-label">Agent PAY54 Tag or Account No</div>
+              <input class="p54-input" id="agentRef" placeholder="@agent-tag or 3001234567" required />
+            </div>
+          `;
+        }
+
+        function updateFXInfo() {
+          const base = getSelectedCurrency();
+          const c = addCur.value;
+          fxInfo.textContent =
+            c !== base
+              ? `You are viewing ${base}. This will fund your ${c} wallet. Converted total updates instantly.`
+              : "";
+        }
+
+        renderMethodFields();
+        updateFXInfo();
+
+        methodEl.addEventListener("change", renderMethodFields);
+        addCur.addEventListener("change", updateFXInfo);
+
+        modal.querySelector("#cancelAdd").addEventListener("click", close);
+
+        form.addEventListener("submit", (e) => {
           e.preventDefault();
 
-          const ref = modal.querySelector("#merchantRef").value.trim();
-          const cur = modal.querySelector("#scanCur").value;
-          const amt = Number(modal.querySelector("#scanAmt").value);
+          const method = methodEl.value;
+          const c = addCur.value;
+          const a = Number(modal.querySelector("#addAmt").value || 0);
+          const reference = modal.querySelector("#reference").value || "";
 
-          if (!ref) return alert("Enter merchant tag or QR ref.");
-          if (amt <= 0) return alert("Enter valid amount.");
+          if (a <= 0) return alert("Enter a valid amount.");
 
-          const balancesNow = LEDGER.getBalances();
-          if ((balancesNow[cur] ?? 0) < amt)
-            return alert(`Insufficient ${cur} balance.`);
+          const meta = { method, reference };
+
+          if (method === "Card") {
+            meta.card = modal.querySelector("#cardSel")?.value || "";
+          } else {
+            meta.agent = modal.querySelector("#agentRef")?.value || "";
+            if (!meta.agent) return alert("Enter Agent PAY54 tag or account number.");
+          }
 
           const entry = LEDGER.createEntry({
-            type: "scan_pay",
-            title: "Scan & Pay",
-            currency: cur,
-            amount: -amt,
-            icon: "📱",
-            meta: { merchant: ref }
+            type: "add_money",
+            title: "Wallet funding",
+            currency: c,
+            amount: +a,
+            icon: "💳",
+            meta
           });
 
           const tx = addEntryAndRefresh(entry);
 
           RCPT.openReceiptModal({
             openModal,
-            title: "Scan & Pay",
+            title: "Add money",
             tx,
             lines: [
-              `Merchant: ${ref}`,
-              `Wallet: ${cur}`,
-              `Amount: ${LEDGER.moneyFmt(cur, amt)}`
+              `Action: Add money`,
+              `Method: ${method}`,
+              ...(meta.card ? [`Card: ${meta.card}`] : []),
+              ...(meta.agent ? [`Agent: ${meta.agent}`] : []),
+              `Wallet: ${c}`,
+              `Amount: ${LEDGER.moneyFmt(c, a)}`,
+              ...(reference ? [`Reference: ${reference}`] : [])
             ]
           });
 
           close();
         });
-
-    }
-  });
-}
-
- function openAddMoney() {
-  const curView = getSelectedCurrency();
-  const balances = LEDGER.getBalances();
-
-  openModal({
-    title: "Add money",
-    bodyHTML: `
-      <form class="p54-form" id="addForm">
-
-        <div class="p54-row">
-          <div>
-            <div class="p54-label">Method</div>
-            <select class="p54-select" id="method">
-              <option value="Card">Card</option>
-              <option value="Agent">Agent</option>
-            </select>
-          </div>
-
-          <div>
-            <div class="p54-label">Wallet currency</div>
-            <select class="p54-select" id="addCur">
-              ${Object.keys(balances).map(
-                c => `<option value="${c}" ${c===curView?"selected":""}>${c}</option>`
-              ).join("")}
-            </select>
-          </div>
-        </div>
-
-        <div id="methodFields"></div>
-
-        <div>
-          <div class="p54-label">Amount</div>
-          <input class="p54-input" id="addAmt" type="number" step="0.01" min="0" required />
-        </div>
-
-        <div>
-          <div class="p54-label">Reference</div>
-          <input class="p54-input" id="reference" placeholder="Optional" />
-        </div>
-
-        <div class="p54-note" id="fxInfo"></div>
-
-        <div class="p54-actions">
-          <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
-          <button class="p54-btn primary" type="submit">Add</button>
-        </div>
-      </form>
-    `,
-    onMount: ({ modal, close }) => {
-      const form = modal.querySelector("#addForm");
-      const methodEl = modal.querySelector("#method");
-      const addCur = modal.querySelector("#addCur");
-      const fxInfo = modal.querySelector("#fxInfo");
-      const methodFields = modal.querySelector("#methodFields");
-
-      function renderMethodFields() {
-        const method = methodEl.value;
-
-        if (method === "Card") {
-          methodFields.innerHTML = `
-            <div class="p54-row">
-              <div>
-                <div class="p54-label">Select card</div>
-                <select class="p54-select" id="cardSel">
-                  <option value="Visa •••• 4832">Visa •••• 4832</option>
-                  <option value="Mastercard •••• 1441">Mastercard •••• 1441</option>
-                </select>
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        // Agent
-        methodFields.innerHTML = `
-          <div>
-            <div class="p54-label">Agent PAY54 Tag or Account No</div>
-            <input class="p54-input" id="agentRef" placeholder="@agent-tag or 3001234567" required />
-          </div>
-        `;
       }
-
-      function updateFXInfo() {
-        const base = getSelectedCurrency();
-        const c = addCur.value;
-        fxInfo.textContent =
-          c !== base
-            ? `You are viewing ${base}. This will fund your ${c} wallet. Converted total updates instantly.`
-            : "";
-      }
-
-      renderMethodFields();
-      updateFXInfo();
-
-      methodEl.addEventListener("change", renderMethodFields);
-      addCur.addEventListener("change", updateFXInfo);
-
-      modal.querySelector("#cancelAdd").addEventListener("click", close);
-
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const method = methodEl.value;
-        const c = addCur.value;
-        const a = Number(modal.querySelector("#addAmt").value || 0);
-        const reference = modal.querySelector("#reference").value || "";
-
-        if (a <= 0) return alert("Enter a valid amount.");
-
-        const meta = { method, reference };
-
-        if (method === "Card") {
-          meta.card = modal.querySelector("#cardSel")?.value || "";
-        } else {
-          meta.agent = modal.querySelector("#agentRef")?.value || "";
-          if (!meta.agent) return alert("Enter Agent PAY54 tag or account number.");
-        }
-
-        const entry = LEDGER.createEntry({
-          type: "add_money",
-          title: "Wallet funding",
-          currency: c,
-          amount: +a,
-          icon: "💳",
-          meta
-        });
-
-        const tx = addEntryAndRefresh(entry);
-
-        RCPT.openReceiptModal({
-          openModal,
-          title: "Add money",
-          tx,
-          lines: [
-            `Action: Add money`,
-            `Method: ${method}`,
-            ...(meta.card ? [`Card: ${meta.card}`] : []),
-            ...(meta.agent ? [`Agent: ${meta.agent}`] : []),
-            `Wallet: ${c}`,
-            `Amount: ${LEDGER.moneyFmt(c, a)}`,
-            ...(reference ? [`Reference: ${reference}`] : [])
-          ]
-        });
-
-        close();
-      });
-    }
-  });
-}
-
+    });
+  }
 
   function openWithdraw() {
     const curView = getSelectedCurrency();
@@ -906,11 +902,10 @@ function openScanAndPay() {
         function updateInfo() {
           const base = getSelectedCurrency();
           const c = wdCur.value;
-          if (c !== base) {
-            wdInfo.textContent = `You are viewing ${base}. This will withdraw from your ${c} wallet. Converted total updates instantly.`;
-          } else {
-            wdInfo.textContent = "";
-          }
+          wdInfo.textContent =
+            c !== base
+              ? `You are viewing ${base}. This will withdraw from your ${c} wallet. Converted total updates instantly.`
+              : "";
         }
 
         renderRouteExtra();
@@ -1520,123 +1515,106 @@ function openScanAndPay() {
   }
 
   /* ---------------------------
-   11) Wiring — FULL UI FIX
---------------------------- */
+     11) Tile naming (safe)
+  --------------------------- */
 
-function bindActionTiles() {
-  document.querySelectorAll(".action-tile").forEach((tile) => {
-    const title = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
+  function renameDashboardTiles() {
+    document.querySelectorAll(".tile-title").forEach(el => {
+      const t = (el.textContent || "").trim();
+      if (t === "Request Money") el.textContent = "Scan & Pay";
+      if (t === "Shop on the Fly") el.textContent = "Pay & Go";
+    });
+  }
 
-    tile.style.cursor = "pointer";
+  /* ---------------------------
+     12) Recent Transactions Auto Feed
+  --------------------------- */
 
-    tile.addEventListener("click", () => {
+  function renderRecentTransactions() {
+    const txFeed = recentTxFeedEl();
+    if (!txFeed) return;
+
+    const txs = (LEDGER.getTx() || []).slice(0, 5);
+
+    if (!txs.length) {
+      txFeed.innerHTML = `
+        <div class="feed-item">
+          <div class="feed-icon">📭</div>
+          <div class="feed-main">
+            <div class="feed-title">No transactions yet</div>
+            <div class="feed-sub">Your activity will appear here</div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    txFeed.innerHTML = "";
+    txs.forEach(tx => prependTxToDOM(tx));
+  }
+
+  /* ---------------------------
+     13) FINAL INITIALISATION (no regressions)
+  --------------------------- */
+
+  function initPAY54Dashboard() {
+    // Prevent double init if scripts reload / cache weirdness
+    if (window.__PAY54_DASH_INIT_DONE__) return;
+    window.__PAY54_DASH_INIT_DONE__ = true;
+
+    renameDashboardTiles();
+
+    // Top header buttons
+    if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
+    if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
+
+    // Delegated click handler for ALL tiles (more stable than binding per element)
+    document.addEventListener("click", (e) => {
+      const tile = e.target.closest(".action-tile, .service-tile, .shortcut-tile");
+      if (!tile) return;
+
+      const title = (tile.querySelector(".tile-title")?.textContent || "").toLowerCase();
+
+      // Action tiles
       if (title.includes("send")) return openSendUnified();
       if (title.includes("receive")) return openReceive();
       if (title.includes("add")) return openAddMoney();
       if (title.includes("withdraw")) return openWithdraw();
       if (title.includes("bank")) return openBankTransfer();
       if (title.includes("scan") || title.includes("qr")) return openScanAndPay();
-    });
-  });
-}
 
-function bindServiceTiles() {
-  document.querySelectorAll(".service-tile").forEach((tile) => {
-    const title = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
+      // Service tiles
+      if (title.includes("cross") || title.includes("fx")) return openCrossBorderFXUnified();
 
-    tile.style.cursor = "pointer";
-
-    tile.addEventListener("click", () => {
-      if (title.includes("cross")) return openCrossBorderFXUnified();
-
-      openModal({
-        title: "Coming soon",
-        bodyHTML: `
-          <div class="p54-note"><b>${title}</b> is part of Layer 3 rollout.</div>
-          <div class="p54-actions">
-            <button class="p54-btn primary" type="button" id="okSvc">OK</button>
-          </div>
-        `,
-        onMount: ({ modal, close }) => modal.querySelector("#okSvc").addEventListener("click", close)
-      });
-    });
-  });
-}
-
-function bindShortcutTiles() {
-  document.querySelectorAll(".shortcut-tile").forEach((tile) => {
-    const title = tile.querySelector(".tile-title")?.textContent?.toLowerCase() || "";
-
-    tile.style.cursor = "pointer";
-
-    tile.addEventListener("click", () => {
+      // Shortcut tiles
       if (title.includes("pay")) {
-        return window.open("https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=pay_and_go", "_blank");
+        return window.open(
+          "https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=pay_and_go",
+          "_blank"
+        );
       }
 
+      // Fallback
       openModal({
         title: "Coming soon",
         bodyHTML: `
-          <div class="p54-note"><b>${title}</b> is part of Layer 3 rollout.</div>
+          <div class="p54-note"><b>${title || "This feature"}</b> is part of Layer 3 rollout.</div>
           <div class="p54-actions">
-            <button class="p54-btn primary" type="button" id="okSh">OK</button>
+            <button class="p54-btn primary" type="button" id="okSoon">OK</button>
           </div>
         `,
-        onMount: ({ modal, close }) => modal.querySelector("#okSh").addEventListener("click", close)
+        onMount: ({ modal, close }) => modal.querySelector("#okSoon").addEventListener("click", close)
       });
     });
-  });
-}
 
-function renameDashboardTiles() {
-  document.querySelectorAll(".tile-title").forEach(el => {
-    if (el.textContent.trim() === "Request Money") {
-      el.textContent = "Scan & Pay";
-    }
-    if (el.textContent.trim() === "Shop on the Fly") {
-      el.textContent = "Pay & Go";
-    }
-  });
-}
-
-/* ---------------------------
-   12) Recent Transactions Auto Feed
---------------------------- */
-
-function renderRecentTransactions() {
-  const txFeed = recentTxFeedEl();
-  if (!txFeed) return;
-
-  const txs = LEDGER.getTx().slice(0, 5);
-
-  if (!txs.length) {
-    txFeed.innerHTML = `
-      <div class="feed-item">
-        <div class="feed-icon">📭</div>
-        <div class="feed-main">
-          <div class="feed-title">No transactions yet</div>
-          <div class="feed-sub">Your activity will appear here</div>
-        </div>
-      </div>
-    `;
-    return;
+    renderRecentTransactions();
+    refreshUI();
   }
 
-  txFeed.innerHTML = "";
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPAY54Dashboard);
+  } else {
+    initPAY54Dashboard();
+  }
 
-  txs.forEach(tx => {
-    prependTxToDOM(tx);
-  });
-}
-
-/* ---------------------------
-   13) FINAL INITIALISATION
---------------------------- */
-
-renameDashboardTiles();
-bindActionTiles();
-bindServiceTiles();
-bindShortcutTiles();
-renderRecentTransactions();
-
-refreshUI();
+})(); // ✅ CRITICAL: closes the IIFE (without this, the whole file breaks)
