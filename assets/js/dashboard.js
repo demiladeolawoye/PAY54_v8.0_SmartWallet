@@ -1616,5 +1616,54 @@
   } else {
     initPAY54Dashboard();
   }
+/* =====================================================
+   PAY54 v805.2-hotfix4
+   UNIVERSAL TILE WIRING PATCH
+   (Append before final })();
+===================================================== */
+
+(function(){
+
+/* -----------------------------
+ 1) MONEY MOVES (data-action)
+------------------------------*/
+document.querySelectorAll("[data-action]").forEach(btn=>{
+  btn.style.cursor="pointer";
+  btn.addEventListener("click",()=>{
+    const a = btn.dataset.action;
+
+    if(a==="send") return openSendUnified();
+    if(a==="receive") return openReceive();
+    if(a==="add") return openAddMoney();
+    if(a==="withdraw") return openWithdraw();
+    if(a==="banktransfer") return openBankTransfer();
+    if(a==="request") return openScanAndPay();
+  });
+});
+
+
+/* -----------------------------
+ 2) SERVICES (data-service)
+------------------------------*/
+document.querySelectorAll("[data-service]").forEach(btn=>{
+  btn.style.cursor="pointer";
+  btn.addEventListener("click",()=>{
+    const s = btn.dataset.service;
+
+    if(s==="fx") return openCrossBorderFXUnified();
+
+    openModal({
+      title:"Coming soon",
+      bodyHTML:`
+        <div class="p54-note">
+          <b>${s}</b> will be available in Layer 3 rollout.
+        </div>
+        <div class="p54-actions">
+          <button class="p54-btn primary" id="okSvc">OK</button>
+        </div>
+      `,
+      onMount:({modal,close})=>{
+        modal.querySelector("#okSvc").addEventListener("click",close);
+      }
 
 })(); // ✅ CRITICAL: closes the IIFE (without this, the whole file breaks)
