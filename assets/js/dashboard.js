@@ -1617,47 +1617,38 @@
     initPAY54Dashboard();
   }
 /* =====================================================
-   PAY54 v805.2-hotfix4
-   UNIVERSAL TILE WIRING PATCH
-   (Append before final })();
+   PAY54 v805.2-hotfix5
+   CLASS-BASED TILE WIRING (FINAL)
 ===================================================== */
 
-(function(){
+/* ---------- MONEY MOVES ---------- */
+document.querySelectorAll(".action-tile").forEach(tile=>{
+  tile.style.cursor="pointer";
+  tile.addEventListener("click",()=>{
+    const t = tile.querySelector(".tile-title")?.textContent.toLowerCase() || "";
 
-/* -----------------------------
- 1) MONEY MOVES (data-action)
-------------------------------*/
-document.querySelectorAll("[data-action]").forEach(btn=>{
-  btn.style.cursor="pointer";
-  btn.addEventListener("click",()=>{
-    const a = btn.dataset.action;
-
-    if(a==="send") return openSendUnified();
-    if(a==="receive") return openReceive();
-    if(a==="add") return openAddMoney();
-    if(a==="withdraw") return openWithdraw();
-    if(a==="banktransfer") return openBankTransfer();
-    if(a==="request") return openScanAndPay();
+    if(t.includes("send")) return openSendUnified();
+    if(t.includes("receive")) return openReceive();
+    if(t.includes("add")) return openAddMoney();
+    if(t.includes("withdraw")) return openWithdraw();
+    if(t.includes("bank")) return openBankTransfer();
+    if(t.includes("request")) return openScanAndPay();
   });
 });
 
 
-/* -----------------------------
- 2) SERVICES (data-service)
-------------------------------*/
-document.querySelectorAll("[data-service]").forEach(btn=>{
-  btn.style.cursor="pointer";
-  btn.addEventListener("click",()=>{
-    const s = btn.dataset.service;
+/* ---------- SERVICES ---------- */
+document.querySelectorAll(".service-tile").forEach(tile=>{
+  tile.style.cursor="pointer";
+  tile.addEventListener("click",()=>{
+    const t = tile.querySelector(".tile-title")?.textContent.toLowerCase() || "";
 
-    if(s==="fx") return openCrossBorderFXUnified();
+    if(t.includes("cross")) return openCrossBorderFXUnified();
 
     openModal({
       title:"Coming soon",
       bodyHTML:`
-        <div class="p54-note">
-          <b>${s}</b> will be available in Layer 3 rollout.
-        </div>
+        <div class="p54-note"><b>${t}</b> is part of Layer 3 rollout.</div>
         <div class="p54-actions">
           <button class="p54-btn primary" id="okSvc">OK</button>
         </div>
@@ -1665,5 +1656,69 @@ document.querySelectorAll("[data-service]").forEach(btn=>{
       onMount:({modal,close})=>{
         modal.querySelector("#okSvc").addEventListener("click",close);
       }
+    });
+  });
+});
+
+
+/* ---------- QUICK SHORTCUTS ---------- */
+document.querySelectorAll(".shortcut-tile").forEach(tile=>{
+  tile.style.cursor="pointer";
+  tile.addEventListener("click",()=>{
+    const t = tile.querySelector(".tile-title")?.textContent.toLowerCase() || "";
+
+    if(t.includes("shop")) {
+      return window.open("https://www.booking.com","_blank");
+    }
+
+    openModal({
+      title:"Coming soon",
+      bodyHTML:`
+        <div class="p54-note"><b>${t}</b> is coming soon.</div>
+        <div class="p54-actions">
+          <button class="p54-btn primary" id="okSh">OK</button>
+        </div>
+      `,
+      onMount:({modal,close})=>{
+        modal.querySelector("#okSh").addEventListener("click",close);
+      }
+    });
+  });
+});
+
+
+/* ---------- UTILITIES ---------- */
+document.querySelectorAll(".utility-tile").forEach(tile=>{
+  tile.style.cursor="pointer";
+  tile.addEventListener("click",()=>{
+    const t = tile.querySelector(".tile-title")?.textContent.toLowerCase() || "";
+
+    openModal({
+      title:"Utility",
+      bodyHTML:`
+        <div class="p54-note"><b>${t}</b> feature coming soon.</div>
+        <div class="p54-actions">
+          <button class="p54-btn primary" id="okUt">OK</button>
+        </div>
+      `,
+      onMount:({modal,close})=>{
+        modal.querySelector("#okUt").addEventListener("click",close);
+      }
+    });
+  });
+});
+
+
+/* ---------- RENAME TILES ---------- */
+document.querySelectorAll(".tile-title").forEach(el=>{
+  if(el.textContent.trim()==="Request Money"){
+    el.textContent="Scan & Pay";
+  }
+  if(el.textContent.trim()==="Shop on the Fly"){
+    el.textContent="Shop & Go";
+  }
+});
+
+console.log("PAY54 v805.2-hotfix5 loaded");
 
 })(); // ✅ CRITICAL: closes the IIFE (without this, the whole file breaks)
