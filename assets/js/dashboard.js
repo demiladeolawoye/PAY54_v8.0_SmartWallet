@@ -1608,6 +1608,62 @@
     });
 
     renderRecentTransactions();
+     /* ================================
+   HOTFIX 6 — INTERNAL WIRING
+================================ */
+
+function wireTilesInternal(){
+
+  // MONEY MOVES
+  document.querySelectorAll(".action-tile").forEach(tile=>{
+    tile.onclick=()=>{
+      const t=tile.innerText.toLowerCase();
+      if(t.includes("send")) openSendUnified();
+      else if(t.includes("receive")) openReceive();
+      else if(t.includes("add")) openAddMoney();
+      else if(t.includes("withdraw")) openWithdraw();
+      else if(t.includes("bank")) openBankTransfer();
+      else if(t.includes("request")) openScanAndPay();
+    };
+  });
+
+  // SERVICES
+  document.querySelectorAll(".service-tile").forEach(tile=>{
+    tile.onclick=()=>{
+      const t=tile.innerText.toLowerCase();
+      if(t.includes("cross")) openCrossBorderFXUnified();
+      else alert("Coming soon");
+    };
+  });
+
+  // QUICK SHORTCUTS
+  document.querySelectorAll(".shortcut-tile").forEach(tile=>{
+    tile.onclick=()=>{
+      const t=tile.innerText.toLowerCase();
+      if(t.includes("shop")){
+        window.open("https://www.booking.com","_blank");
+      } else {
+        alert("Coming soon");
+      }
+    };
+  });
+
+  // UTILITIES
+  document.querySelectorAll(".utility-tile").forEach(tile=>{
+    tile.onclick=()=>alert("Coming soon");
+  });
+
+  // RENAME
+  document.querySelectorAll(".tile-title").forEach(el=>{
+    if(el.textContent==="Request Money") el.textContent="Scan & Pay";
+    if(el.textContent==="Shop on the Fly") el.textContent="Shop & Go";
+  });
+
+  console.log("HOTFIX6 WIRED");
+}
+
+wireTilesInternal();
+
     refreshUI();
   }
 
