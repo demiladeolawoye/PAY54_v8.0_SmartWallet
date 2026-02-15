@@ -1570,9 +1570,9 @@
 
     // Delegated click handler for ALL tiles (more stable than binding per element)
     document.addEventListener("click", (e) => {
-      const tile = e.target.closest(".action-tile, .service-tile, .shortcut-tile");
-      if (!tile) return;
-
+      const tile = e.target.closest(
+  ".action-tile, .service-tile, .shortcut-tile, .utility-tile"
+);
       const title = (tile.querySelector(".tile-title")?.textContent || "").toLowerCase();
 
       // Action tiles
