@@ -1606,6 +1606,13 @@
         onMount: ({ modal, close }) => modal.querySelector("#okSoon").addEventListener("click", close)
       });
     });
+     renderRecentTransactions();
+refreshUI();
+}
 
-    renderRecentTransactions();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initPAY54Dashboard);
+} else {
+  initPAY54Dashboard();
+}
 })(); // ✅ CRITICAL: closes the IIFE (without this, the whole file breaks)
