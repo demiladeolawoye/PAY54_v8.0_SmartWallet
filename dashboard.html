@@ -8,328 +8,306 @@
 </head>
 
 <body class="dashboard">
-  <!-- HEADER (Approved layout) -->
-  <header class="dash-header">
-    <!-- Logo icon only -->
-    <div class="brand">
-      <img src="assets/img/pay54-logo-icon.svg" class="logo" alt="PAY54" />
-    </div>
 
-    <!-- WEB currency pills -->
-    <div class="currency-pills desktop-only" aria-label="Currency selector">
-      <button class="currency active" data-cur="NGN" type="button">NGN</button>
-      <button class="currency" data-cur="GBP" type="button">GBP</button>
-      <button class="currency" data-cur="USD" type="button">USD</button>
-      <button class="currency" data-cur="EUR" type="button">EUR</button>
-      <button class="currency" data-cur="GHS" type="button">GHS</button>
-      <button class="currency" data-cur="KES" type="button">KES</button>
-      <button class="currency" data-cur="ZAR" type="button">ZAR</button>
-    </div>
+<header class="dash-header">
 
-    <!-- MOBILE dropdown -->
-    <div class="mobile-only currency-dd-wrap">
-      <select id="currencySelect" class="currency-dropdown" aria-label="Currency dropdown">
-        <option value="NGN">NGN</option>
-        <option value="GBP">GBP</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GHS">GHS</option>
-        <option value="KES">KES</option>
-        <option value="ZAR">ZAR</option>
-      </select>
-    </div>
+  <div class="brand">
+    <img src="assets/img/pay54-logo-icon.svg" class="logo" alt="PAY54" />
+  </div>
 
-    <div class="header-actions">
-      <!-- Theme toggle -->
-      <button id="themeToggle" class="icon-btn" type="button" aria-label="Toggle light/dark">
-        <span class="icon">🌙</span>
+  <!-- Desktop Currency Pills -->
+  <div class="currency-pills desktop-only">
+    <button class="currency active" data-cur="NGN">NGN</button>
+    <button class="currency" data-cur="GBP">GBP</button>
+    <button class="currency" data-cur="USD">USD</button>
+    <button class="currency" data-cur="EUR">EUR</button>
+    <button class="currency" data-cur="GHS">GHS</button>
+    <button class="currency" data-cur="KES">KES</button>
+    <button class="currency" data-cur="ZAR">ZAR</button>
+  </div>
+
+  <!-- Mobile Currency -->
+  <div class="mobile-only currency-dd-wrap">
+    <select id="currencySelect" class="currency-dropdown">
+      <option value="NGN">NGN</option>
+      <option value="GBP">GBP</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GHS">GHS</option>
+      <option value="KES">KES</option>
+      <option value="ZAR">ZAR</option>
+    </select>
+  </div>
+
+  <div class="header-actions">
+
+    <button id="themeToggle" class="icon-btn">
+      <span class="icon">🌙</span>
+    </button>
+
+    <div class="profile-wrap">
+      <button id="profileBtn" class="avatar-btn">
+        <span class="avatar">P</span>
       </button>
 
-      <!-- Profile -->
-      <div class="profile-wrap">
-        <button id="profileBtn" class="avatar-btn" type="button" aria-label="Open profile menu">
-          <span class="avatar">P</span>
-        </button>
-
-        <div id="profileMenu" class="profile-menu" role="menu" aria-hidden="true">
-          <div class="pm-head">
-            <div class="pm-name" id="profileName">Pese</div>
-            <div class="pm-email" id="profileEmail"></div>
-          </div>
-
-          <button class="pm-item" type="button" data-nav="profile">Profile</button>
-          <button class="pm-item" type="button" data-nav="help">Help &amp; Support</button>
-          <button class="pm-item" type="button" data-nav="contact">Contact Support</button>
-          <button class="pm-item danger" id="logoutBtn" type="button">Logout</button>
+      <div id="profileMenu" class="profile-menu">
+        <div class="pm-head">
+          <div id="profileName">Pese</div>
+          <div id="profileEmail"></div>
         </div>
+
+        <button class="pm-item">Profile</button>
+        <button class="pm-item">Help & Support</button>
+        <button class="pm-item">Contact Support</button>
+        <button id="logoutBtn" class="pm-item danger">Logout</button>
       </div>
     </div>
-  </header>
 
-  <!-- MAIN GRID -->
-  <main class="dash-grid">
+  </div>
 
-    <!-- LEFT COLUMN -->
-    <section class="left">
+</header>
 
-      <!-- BALANCE -->
-      <div class="card balance-card">
-        <div class="balance-top">
-          <div class="label">TOTAL BALANCE</div>
+<main class="dash-grid">
 
-          <div class="balance-actions">
-            <button class="btn primary" id="addMoneyBtn" type="button">Add money</button>
-            <button class="btn ghost" id="withdrawBtn" type="button">Withdraw</button>
-          </div>
-        </div>
+<!-- ================= LEFT COLUMN ================= -->
 
-        <div id="balanceAmount" class="balance-amount">₦ 0.00</div>
-        <div class="balance-meta">Across wallets (converted) • FX wallets enabled • Device + PIN secured</div>
+<section class="left">
 
-        <div class="identity">
-          <span>Acct: <strong>3001234567</strong></span>
-          <span>Tag: <strong>@pay54-user</strong></span>
-          <span>KYC: <strong>Level 2</strong></span>
-        </div>
+<!-- BALANCE -->
+<div class="card balance-card">
 
-        <div class="trust-chip">🔒 Security &amp; Financial compliance active</div>
-      </div>
+  <div class="balance-top">
+    <div class="label">TOTAL BALANCE</div>
 
-      <!-- MOBILE: Quick Shortcuts directly after Balance -->
-      <div class="card mobile-only">
-        <div class="card-head">
-          <h3>Quick Shortcuts</h3>
-          <p class="sub">Fast access to key actions</p>
-        </div>
+    <div class="balance-actions">
+      <button id="addMoneyBtn" class="btn primary">Add money</button>
+      <button id="withdrawBtn" class="btn ghost">Withdraw</button>
+    </div>
+  </div>
 
-        <div class="shortcut-grid">
-          <button class="shortcut-btn" type="button" data-shortcut="agent">
-            <span class="t-title">Become an Agent</span>
-            <span class="t-sub">Onboard &amp; earn</span>
-          </button>
+  <div id="balanceAmount" class="balance-amount">₦ 0.00</div>
 
-          <button class="shortcut-btn" type="button" data-shortcut="shop">
-            <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food • Tickets • Taxi</span>
-          </button>
+  <div class="balance-meta">
+    Across wallets (converted) • FX wallets enabled • Device + PIN secured
+  </div>
 
-          <!-- ✅ Option A: Replace Open Savings Pot with Refer & Earn -->
-          <button class="shortcut-btn" type="button" data-shortcut="referral">
-            <span class="t-title">Refer &amp; Earn</span>
-            <span class="t-sub">Invite friends, earn rewards</span>
-          </button>
+  <div class="identity">
+    <span>Acct: <b>3001234567</b></span>
+    <span>Tag: <b>@pay54-user</b></span>
+    <span>KYC: <b>Level 2</b></span>
+  </div>
 
-          <button class="shortcut-btn" type="button" data-shortcut="trading">
-            <span class="t-title">Trading</span>
-            <span class="t-sub">Shares • Stocks • Crypto</span>
-          </button>
-        </div>
-      </div>
+  <div class="trust-chip">🔒 Security & Financial compliance active</div>
 
-      <!-- MONEY MOVES -->
-      <div class="card">
-        <div class="card-head">
-          <h3>Money Moves</h3>
-          <p class="sub">Instant P2P + banks + QR requests</p>
-        </div>
+</div>
 
-        <div class="tile-grid cols-3">
-          <button class="tile-btn" type="button" data-action="send">
-            <span class="t-title">Send</span>
-            <span class="t-sub">Instant PAY54 → PAY54</span>
-          </button>
+<!-- QUICK SHORTCUTS (MOBILE) -->
+<div class="card mobile-only">
 
-          <button class="tile-btn" type="button" data-action="receive">
-            <span class="t-title">Receive</span>
-            <span class="t-sub">Account, tag &amp; QR</span>
-          </button>
+  <div class="card-head">
+    <h3>Quick Shortcuts</h3>
+    <p class="sub">Fast access to key actions</p>
+  </div>
 
-          <button class="tile-btn" type="button" data-action="add">
-            <span class="t-title">Add Money</span>
-            <span class="t-sub">Card · Bank · Agents</span>
-          </button>
+  <div class="shortcut-grid">
 
-          <button class="tile-btn" type="button" data-action="withdraw">
-            <span class="t-title">Withdraw</span>
-            <span class="t-sub">Card · Agents</span>
-          </button>
+    <button class="shortcut-btn p54-tile" data-shortcut="agent">
+      <span class="t-title">Become an Agent</span>
+      <span class="t-sub">Onboard & earn</span>
+    </button>
 
-          <button class="tile-btn" type="button" data-action="banktransfer">
-            <span class="t-title">Bank Transfer</span>
-            <span class="t-sub">To NG banks</span>
-          </button>
+    <button class="shortcut-btn p54-tile" data-shortcut="shop">
+      <span class="t-title">Shop & Go</span>
+      <span class="t-sub">Food • Tickets • Taxi</span>
+    </button>
 
-          <button class="tile-btn" type="button" data-action="request">
-            <span class="t-title">Request Money</span>
-            <span class="t-sub">With notifications</span>
-          </button>
-        </div>
-      </div>
+    <button class="shortcut-btn p54-tile" data-shortcut="referral">
+      <span class="t-title">Refer & Earn</span>
+      <span class="t-sub">Invite friends</span>
+    </button>
 
-      <!-- SERVICES -->
-      <div class="card">
-        <div class="card-head">
-          <h3>Services</h3>
-          <p class="sub">FX, bills, cards, checkout, agents &amp; more</p>
-        </div>
+    <button class="shortcut-btn p54-tile" data-shortcut="trading">
+      <span class="t-title">Trading</span>
+      <span class="t-sub">Stocks • Crypto</span>
+    </button>
 
-        <div class="tile-grid cols-4 services-grid">
-          <button class="tile-btn" type="button" data-service="fx">
-            <span class="t-title">Cross-border FX</span>
-            <span class="t-sub">Send global instantly</span>
-          </button>
+  </div>
 
-          <button class="tile-btn" type="button" data-service="bills">
-            <span class="t-title">Pay Bills &amp; Top Up</span>
-            <span class="t-sub">Airtime · Data · Power · TV</span>
-          </button>
+</div>
 
-          <button class="tile-btn" type="button" data-service="savings">
-            <span class="t-title">Savings &amp; Goals</span>
-            <span class="t-sub">Pots · targets · streaks</span>
-          </button>
+<!-- MONEY MOVES -->
+<div class="card">
 
-          <button class="tile-btn" type="button" data-service="cards">
-            <span class="t-title">Virtual &amp; Linked Cards</span>
-            <span class="t-sub">Control &amp; spend</span>
-          </button>
+  <div class="card-head">
+    <h3>Money Moves</h3>
+    <p class="sub">Instant P2P + banks + QR requests</p>
+  </div>
 
-          <button class="tile-btn" type="button" data-service="checkout">
-            <span class="t-title">PAY54 Smart Checkout</span>
-            <span class="t-sub">Approve e-commerce</span>
-          </button>
+  <div class="tile-grid cols-3">
 
-          <button class="tile-btn" type="button" data-service="shop">
-            <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food · Tickets · Taxi</span>
-          </button>
+    <button class="tile-btn p54-tile" data-action="send">
+      <span class="t-title">Send</span>
+      <span class="t-sub">PAY54 → PAY54</span>
+    </button>
 
-          <button class="tile-btn" type="button" data-service="trading">
-            <span class="t-title">Trading</span>
-            <span class="t-sub">Shares · Stocks · Crypto</span>
-          </button>
+    <button class="tile-btn p54-tile" data-action="receive">
+      <span class="t-title">Receive</span>
+      <span class="t-sub">Account & QR</span>
+    </button>
 
-          <button class="tile-btn" type="button" data-service="bet">
-            <span class="t-title">Bet Funding</span>
-            <span class="t-sub">18+ verification</span>
-          </button>
+    <button class="tile-btn p54-tile" data-action="scan">
+      <span class="t-title">Scan & Pay</span>
+      <span class="t-sub">Merchant QR</span>
+    </button>
 
-          <button class="tile-btn" type="button" data-service="agent">
-            <span class="t-title">Become an Agent</span>
-            <span class="t-sub">Onboard &amp; earn</span>
-          </button>
+    <button class="tile-btn p54-tile" data-action="add">
+      <span class="t-title">Add Money</span>
+      <span class="t-sub">Card · Agent</span>
+    </button>
 
-          <button class="tile-btn" type="button" data-service="risk">
-            <span class="t-title">AI Risk Watch</span>
-            <span class="t-sub">Suspicious activity</span>
-          </button>
-        </div>
-      </div>
+    <button class="tile-btn p54-tile" data-action="withdraw">
+      <span class="t-title">Withdraw</span>
+      <span class="t-sub">Card · Agent</span>
+    </button>
 
-      <!-- WEB: Recent Transactions on LEFT -->
-      <div class="card desktop-only">
-        <div class="card-topline">
-          <h3>Recent Transactions</h3>
-          <button class="pill-link" type="button" id="viewAllTx">View all</button>
-        </div>
+    <button class="tile-btn p54-tile" data-action="banktransfer">
+      <span class="t-title">Bank Transfer</span>
+      <span class="t-sub">To banks</span>
+    </button>
 
-        <div class="feed" data-role="recentTxFeed"></div>
-      </div>
+  </div>
 
-    </section>
+</div>
 
-    <!-- RIGHT COLUMN -->
-    <section class="right">
+<!-- SERVICES -->
+<div class="card">
 
-      <!-- WEB: Quick Shortcuts on RIGHT -->
-      <div class="card desktop-only">
-        <div class="card-head">
-          <h3>Quick Shortcuts</h3>
-          <p class="sub">Fast access to key actions</p>
-        </div>
+  <div class="card-head">
+    <h3>Services</h3>
+  </div>
 
-        <div class="shortcut-grid">
-          <button class="shortcut-btn" type="button" data-shortcut="agent">
-            <span class="t-title">Become an Agent</span>
-            <span class="t-sub">Onboard &amp; earn</span>
-          </button>
+  <div class="tile-grid cols-4 services-grid">
 
-          <button class="shortcut-btn" type="button" data-shortcut="shop">
-            <span class="t-title">Shop on the Fly</span>
-            <span class="t-sub">Food • Tickets • Taxi</span>
-          </button>
+    <button class="tile-btn p54-tile" data-service="fx">
+      <span class="t-title">Cross-border FX</span>
+    </button>
 
-          <!-- ✅ Option A: Replace Open Savings Pot with Refer & Earn -->
-          <button class="shortcut-btn" type="button" data-shortcut="referral">
-            <span class="t-title">Refer &amp; Earn</span>
-            <span class="t-sub">Invite friends, earn rewards</span>
-          </button>
+    <button class="tile-btn p54-tile" data-service="bills">
+      <span class="t-title">Pay Bills</span>
+    </button>
 
-          <button class="shortcut-btn" type="button" data-shortcut="trading">
-            <span class="t-title">Trading</span>
-            <span class="t-sub">Shares • Stocks • Crypto</span>
-          </button>
-        </div>
-      </div>
+    <button class="tile-btn p54-tile" data-service="savings">
+      <span class="t-title">Savings & Goals</span>
+    </button>
 
-      <!-- ✅ Standalone Utility Card: ATM/POS Finder -->
-      <div class="card utility-card">
-        <div class="card-head">
-          <h3>Utilities</h3>
-          <p class="sub">Find nearby ATMs and POS agents</p>
-        </div>
+    <button class="tile-btn p54-tile" data-service="cards">
+      <span class="t-title">Virtual Cards</span>
+    </button>
 
-        <div class="utility-grid">
-          <button class="utility-btn" type="button" id="atmFinderBtn">
-            <span class="t-title">ATM Finder</span>
-            <span class="t-sub">Nearby cash points</span>
-          </button>
+    <button class="tile-btn p54-tile" data-service="checkout">
+      <span class="t-title">Smart Checkout</span>
+    </button>
 
-          <button class="utility-btn" type="button" id="posFinderBtn">
-            <span class="t-title">POS / Agent Finder</span>
-            <span class="t-sub">Collect cash from agents</span>
-          </button>
-        </div>
-      </div>
+    <button class="tile-btn p54-tile" data-service="shop">
+      <span class="t-title">Shop & Go</span>
+    </button>
 
-      <!-- MOBILE: Recent Transactions on RIGHT stack -->
-      <div class="card mobile-only">
-        <div class="card-topline">
-          <h3>Recent Transactions</h3>
-          <button class="pill-link" type="button" id="viewAllTxMobile">View all</button>
-        </div>
+    <button class="tile-btn p54-tile" data-service="agent">
+      <span class="t-title">Become Agent</span>
+    </button>
 
-        <div class="feed" data-role="recentTxFeed"></div>
-      </div>
+    <button class="tile-btn p54-tile" data-service="risk">
+      <span class="t-title">AI Risk Watch</span>
+    </button>
 
-      <!-- REQUESTS & ALERTS -->
-      <div class="card">
-        <div class="card-topline">
-          <h3>Requests &amp; Alerts</h3>
-          <button class="btn ghost sm" type="button" id="clearAlerts">Clear all</button>
-        </div>
+  </div>
 
-        <div class="feed" id="alerts"></div>
-      </div>
+</div>
 
-      <!-- NEWS & INSIGHTS -->
-      <div class="card">
-        <div class="card-topline">
-          <h3>News &amp; Insights</h3>
-        </div>
+<!-- RECENT TX -->
+<div class="card desktop-only">
 
-        <div class="feed" id="newsFeed"></div>
-      </div>
+  <div class="card-topline">
+    <h3>Recent Transactions</h3>
+    <button id="viewAllTx" class="pill-link">View all</button>
+  </div>
 
-    </section>
-  </main>
+  <div class="feed" data-role="recentTxFeed"></div>
 
-    <!-- Layer 3A core modules (MUST load in this order) -->
+</div>
+
+</section>
+
+<!-- ================= RIGHT COLUMN ================= -->
+
+<section class="right">
+
+<!-- QUICK SHORTCUTS -->
+<div class="card desktop-only">
+
+  <div class="card-head">
+    <h3>Quick Shortcuts</h3>
+  </div>
+
+  <div class="shortcut-grid">
+
+    <button class="shortcut-btn p54-tile" data-shortcut="agent">Become Agent</button>
+    <button class="shortcut-btn p54-tile" data-shortcut="shop">Shop & Go</button>
+    <button class="shortcut-btn p54-tile" data-shortcut="referral">Refer & Earn</button>
+    <button class="shortcut-btn p54-tile" data-shortcut="trading">Trading</button>
+
+  </div>
+
+</div>
+
+<!-- UTILITIES -->
+<div class="card utility-card">
+
+  <div class="card-head">
+    <h3>Utilities</h3>
+  </div>
+
+  <div class="utility-grid">
+
+    <button id="atmFinderBtn" class="utility-btn p54-tile">ATM Finder</button>
+    <button id="posFinderBtn" class="utility-btn p54-tile">POS / Agent Finder</button>
+
+  </div>
+
+</div>
+
+<!-- REQUESTS -->
+<div class="card">
+
+  <div class="card-topline">
+    <h3>Requests & Alerts</h3>
+    <button id="clearAlerts" class="btn ghost sm">Clear all</button>
+  </div>
+
+  <div id="alerts" class="feed"></div>
+
+</div>
+
+<!-- NEWS -->
+<div class="card">
+
+  <div class="card-topline">
+    <h3>News & Insights</h3>
+  </div>
+
+  <div id="newsFeed" class="feed"></div>
+
+</div>
+
+</section>
+
+</main>
+
+<!-- CORE SCRIPTS -->
 <script src="assets/js/ledger.js?v=8052"></script>
 <script src="assets/js/recipient.js?v=8052"></script>
 <script src="assets/js/receipts.js?v=8052"></script>
 <script src="assets/js/dashboard.js?v=8054"></script>
-
 
 </body>
 </html>
