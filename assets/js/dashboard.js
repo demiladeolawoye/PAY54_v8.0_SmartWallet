@@ -1554,60 +1554,87 @@
   }
 
   /* ---------------------------
-     13) FINAL INITIALISATION (no regressions)
-  --------------------------- */
+   13) FINAL INITIALISATION (v805.2-hotfix4)
+--------------------------- */
 
-  function initPAY54Dashboard() {
-    // Prevent double init if scripts reload / cache weirdness
-    if (window.__PAY54_DASH_INIT_DONE__) return;
-    window.__PAY54_DASH_INIT_DONE__ = true;
+function initPAY54Dashboard() {
 
-    renameDashboardTiles();
+  if (window.__PAY54_DASH_INIT_DONE__) return;
+  window.__PAY54_DASH_INIT_DONE__ = true;
 
-    // Top header buttons
-    if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
-    if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
+  renameDashboardTiles();
 
-    // Delegated click handler for ALL tiles (more stable than binding per element)
-    document.addEventListener("click", (e) => {
-      const tile = e.target.closest(
-  ".action-tile, .service-tile, .shortcut-tile, .utility-tile"
-);
-      const title = (tile.querySelector(".tile-title")?.textContent || "").toLowerCase();
+  // Header buttons
+  if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
+  if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
 
-      // Action tiles
-      if (title.includes("send")) return openSendUnified();
-      if (title.includes("receive")) return openReceive();
-      if (title.includes("add")) return openAddMoney();
-      if (title.includes("withdraw")) return openWithdraw();
-      if (title.includes("bank")) return openBankTransfer();
-      if (title.includes("scan") || title.includes("qr")) return openScanAndPay();
+  // MONEY MOVES
+  document.querySelectorAll('[data-action="send"]')
+    .forEach(b => b.addEventListener("click", openSendUnified));
 
-      // Service tiles
-      if (title.includes("cross") || title.includes("fx")) return openCrossBorderFXUnified();
+  document.querySelectorAll('[data-action="receive"]')
+    .forEach(b => b.addEventListener("click", openReceive));
 
-      // Shortcut tiles
-      if (title.includes("pay")) {
-        return window.open(
-          "https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=pay_and_go",
-          "_blank"
-        );
-      }
+  document.querySelectorAll('[data-action="add"]')
+    .forEach(b => b.addEventListener("click", openAddMoney));
 
-      // Fallback
-      openModal({
-        title: "Coming soon",
-        bodyHTML: `
-          <div class="p54-note"><b>${title || "This feature"}</b> is part of Layer 3 rollout.</div>
-          <div class="p54-actions">
-            <button class="p54-btn primary" type="button" id="okSoon">OK</button>
-          </div>
-        `,
-        onMount: ({ modal, close }) => modal.querySelector("#okSoon").addEventListener("click", close)
-      });
-    });
-     renderRecentTransactions();
-refreshUI();
+  document.querySelectorAll('[data-action="withdraw"]')
+    .forEach(b => b.addEventListener("click", openWithdraw));
+
+  document.querySelectorAll('[data-action="banktransfer"]')
+    .forEach(b => b.addEventListener("click", openBankTransfer));
+
+  document.querySelectorAll('[data-action="request"]')
+    .forEach(b => b.addEventListener("click", openScanAndPay));
+
+
+  // SERVICES
+  document.querySelectorAll('[data-service="fx"]')
+    .forEach(b => b.addEventListener("click", openCrossBorderFXUnified));
+
+  document.querySelectorAll('[data-service="shop"]')
+    .forEach(b => b.addEventListener("click", () => {
+      window.open(
+        "https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=pay_and_go",
+        "_blank"
+      );
+    }));
+
+
+  // QUICK SHORTCUTS
+  document.querySelectorAll('[data-shortcut="agent"]')
+    .forEach(b => b.addEventListener("click", () => alert("Agent onboarding – coming soon")));
+
+  document.querySelectorAll('[data-shortcut="shop"]')
+    .forEach(b => b.addEventListener("click", () => {
+      window.open(
+        "https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=pay_and_go",
+        "_blank"
+      );
+    }));
+
+  document.querySelectorAll('[data-shortcut="referral"]')
+    .forEach(b => b.addEventListener("click", () => alert("Refer & Earn – coming soon")));
+
+  document.querySelectorAll('[data-shortcut="trading"]')
+    .forEach(b => b.addEventListener("click", () => alert("Trading – coming soon")));
+
+
+  // UTILITIES
+  const atmBtn = document.getElementById("atmFinderBtn");
+  if (atmBtn) atmBtn.addEventListener("click", () => {
+    window.open("https://www.google.com/maps/search/atm+near+me", "_blank");
+  });
+
+  const posBtn = document.getElementById("posFinderBtn");
+  if (posBtn) posBtn.addEventListener("click", () => {
+    window.open("https://www.google.com/maps/search/pos+agent+near+me", "_blank");
+  });
+
+
+  // Final refresh
+  renderRecentTransactions();
+  refreshUI();
 }
 
 if (document.readyState === "loading") {
@@ -1615,4 +1642,3 @@ if (document.readyState === "loading") {
 } else {
   initPAY54Dashboard();
 }
-})(); // ✅ CRITICAL: closes the IIFE (without this, the whole file breaks)
