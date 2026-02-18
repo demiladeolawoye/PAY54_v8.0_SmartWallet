@@ -1554,91 +1554,11 @@
   }
 
   /* ---------------------------
-   13) FINAL INITIALISATION (v805.2-hotfix4)
+   13) FINAL INITIALISATION (FIXED & HARDENED)
 --------------------------- */
 
 function initPAY54Dashboard() {
-
   if (window.__PAY54_DASH_INIT_DONE__) return;
   window.__PAY54_DASH_INIT_DONE__ = true;
 
-  renameDashboardTiles();
-
-  // Header buttons
-  if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
-  if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
-
-  // MONEY MOVES
-  document.querySelectorAll('[data-action="send"]')
-    .forEach(b => b.addEventListener("click", openSendUnified));
-
-  document.querySelectorAll('[data-action="receive"]')
-    .forEach(b => b.addEventListener("click", openReceive));
-
-  document.querySelectorAll('[data-action="add"]')
-    .forEach(b => b.addEventListener("click", openAddMoney));
-
-  document.querySelectorAll('[data-action="withdraw"]')
-    .forEach(b => b.addEventListener("click", openWithdraw));
-
-  document.querySelectorAll('[data-action="banktransfer"]')
-    .forEach(b => b.addEventListener("click", openBankTransfer));
-
-  document.querySelectorAll('[data-action="request"]')
-    .forEach(b => b.addEventListener("click", openScanAndPay));
-
-
-  // SERVICES
-  document.querySelectorAll('[data-service="fx"]')
-    .forEach(b => b.addEventListener("click", openCrossBorderFXUnified));
-
-  document.querySelectorAll('[data-service="shop"]')
-    .forEach(b => b.addEventListener("click", () => {
-      window.open(
-        "https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=pay_and_go",
-        "_blank"
-      );
-    }));
-
-
-  // QUICK SHORTCUTS
-  document.querySelectorAll('[data-shortcut="agent"]')
-    .forEach(b => b.addEventListener("click", () => alert("Agent onboarding – coming soon")));
-
-  document.querySelectorAll('[data-shortcut="shop"]')
-    .forEach(b => b.addEventListener("click", () => {
-      window.open(
-        "https://www.booking.com/?utm_source=pay54&utm_medium=app&utm_campaign=pay_and_go",
-        "_blank"
-      );
-    }));
-
-  document.querySelectorAll('[data-shortcut="referral"]')
-    .forEach(b => b.addEventListener("click", () => alert("Refer & Earn – coming soon")));
-
-  document.querySelectorAll('[data-shortcut="trading"]')
-    .forEach(b => b.addEventListener("click", () => alert("Trading – coming soon")));
-
-
-  // UTILITIES
-  const atmBtn = document.getElementById("atmFinderBtn");
-  if (atmBtn) atmBtn.addEventListener("click", () => {
-    window.open("https://www.google.com/maps/search/atm+near+me", "_blank");
-  });
-
-  const posBtn = document.getElementById("posFinderBtn");
-  if (posBtn) posBtn.addEventListener("click", () => {
-    window.open("https://www.google.com/maps/search/pos+agent+near+me", "_blank");
-  });
-
-
-  // Final refresh
-  renderRecentTransactions();
-  refreshUI();
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initPAY54Dashboard);
-} else {
-  initPAY54Dashboard();
-}
+  // Enforce LIGHT mode
