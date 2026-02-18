@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>PAY54 — Login</title>
   <link rel="stylesheet" href="assets/css/auth.css">
 </head>
+
 <body>
 
 <div class="pay54-auth-brand">
@@ -23,30 +27,31 @@
   <div id="msg" class="message"></div>
 
   <form onsubmit="login(event)" autocomplete="off">
-  <input
-    id="login-email"
-    type="email"
-    placeholder="Email"
-    required
-    autocomplete="off"
-    autocorrect="off"
-    autocapitalize="off"
-    spellcheck="false"
-  >
 
-  <input
-    id="login-pin"
-    type="password"
-    placeholder="PIN"
-    required
-    inputmode="numeric"
-    pattern="[0-9]*"
-    autocomplete="new-password"
-  >
+    <input
+      id="login-email"
+      type="email"
+      placeholder="Email"
+      required
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+    >
 
-  <button type="submit">Login</button>
-</form>
+    <input
+      id="login-pin"
+      type="password"
+      placeholder="PIN"
+      required
+      inputmode="numeric"
+      pattern="[0-9]*"
+      autocomplete="new-password"
+    >
 
+    <button type="submit">Login</button>
+
+  </form>
 
   <div class="links">
     <a href="forgot-pin.html">Forgot PIN?</a>
@@ -59,6 +64,6 @@
 
 </div>
 
-<script src="assets/js/auth.js"></script>
+<script src="assets/js/auth.js?v=8101"></script>
 </body>
 </html>
