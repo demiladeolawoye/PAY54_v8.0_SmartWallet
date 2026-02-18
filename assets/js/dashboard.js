@@ -190,8 +190,8 @@
   }
 
   // Force light if nothing stored
-  const storedTheme = localStorage.getItem(LS.THEME);
-  applyTheme(storedTheme || "light");
+ applyTheme("light");
+
 
   if (themeToggle) {
     themeToggle.addEventListener("click", () => {
