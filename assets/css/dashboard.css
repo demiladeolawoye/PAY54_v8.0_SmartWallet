@@ -608,3 +608,24 @@ body:not(.light) select option{
   color: rgba(255,255,255,0.92);
   background: #0b1020;
 }
+/* Dropdown visual fix */
+.p54-select-wrap{
+  position:relative;
+}
+
+.p54-arrow{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+  font-size:14px;
+  opacity:0.7;
+}
+
+.p54-select{
+  appearance:none;
+  -webkit-appearance:none;
+  padding-right:36px;
+  cursor:pointer;
+}
