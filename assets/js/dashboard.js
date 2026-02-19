@@ -575,11 +575,15 @@ function openWithdraw() {
       <form class="p54-form" id="wdForm">
 
         <div>
-          <div class="p54-label">Route</div>
-          <select class="p54-select" id="wdMethod">
-            <option value="card">Card</option>
-            <option value="agent">Agent</option>
-          </select>
+        <div class="p54-select-wrap">
+  <select class="p54-select" id="wdRoute">
+    <option value="" disabled selected>Select route</option>
+    <option value="Card">Card</option>
+    <option value="Agent">Agent</option>
+  </select>
+  <span class="p54-arrow">▾</span>
+</div>
+
         </div>
 
         <div id="wdExtra"></div>
