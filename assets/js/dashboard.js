@@ -475,8 +475,178 @@
   }
 
   function openScanAndPay() { comingSoon("Scan & Pay"); }
-  function openAddMoney() { comingSoon("Add money"); }
-  function openWithdraw() { comingSoon("Withdraw"); }
+  /* =========================
+   v8.2 — Add Money (Card / Agent)
+========================= */
+
+function openAddMoney() {
+  openModal({
+    title: "Add Money",
+    bodyHTML: `
+      <form class="p54-form" id="addForm">
+
+        <div>
+          <div class="p54-label">Method</div>
+          <select class="p54-select" id="addMethod">
+            <option value="card">Card</option>
+            <option value="agent">Agent</option>
+          </select>
+        </div>
+
+        <div id="addExtra"></div>
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="addAmt" type="number" min="1" required>
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
+          <button class="p54-btn primary" type="submit">Add</button>
+        </div>
+
+      </form>
+    `,
+    onMount: ({ modal, close }) => {
+
+      const methodEl = modal.querySelector("#addMethod");
+      const extra = modal.querySelector("#addExtra");
+
+      function renderExtra() {
+        if (methodEl.value === "card") {
+          extra.innerHTML = `
+            <div>
+              <div class="p54-label">Select Card</div>
+              <select class="p54-select">
+                <option>Visa •••• 4832</option>
+                <option>Mastercard •••• 1441</option>
+              </select>
+            </div>
+          `;
+        } else {
+          extra.innerHTML = `
+            <div>
+              <div class="p54-label">Agent Tag / ID</div>
+              <input class="p54-input" placeholder="@agent123">
+            </div>
+          `;
+        }
+      }
+
+      renderExtra();
+      methodEl.addEventListener("change", renderExtra);
+
+      modal.querySelector("#cancelAdd").addEventListener("click", close);
+
+      modal.querySelector("#addForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const amt = Number(modal.querySelector("#addAmt").value);
+        if (amt <= 0) return alert("Enter valid amount");
+
+        const entry = LEDGER.createEntry({
+          type: "add_money",
+          title: "Wallet Funding",
+          currency: getSelectedCurrency(),
+          amount: amt,
+          icon: "💳"
+        });
+
+        LEDGER.applyEntry(entry);
+        refreshUI();
+        close();
+      });
+
+    }
+  });
+}
+
+/* =========================
+   v8.2 — Withdraw (Card / Agent)
+========================= */
+
+function openWithdraw() {
+  openModal({
+    title: "Withdraw",
+    bodyHTML: `
+      <form class="p54-form" id="wdForm">
+
+        <div>
+          <div class="p54-label">Route</div>
+          <select class="p54-select" id="wdMethod">
+            <option value="card">Card</option>
+            <option value="agent">Agent</option>
+          </select>
+        </div>
+
+        <div id="wdExtra"></div>
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="wdAmt" type="number" min="1" required>
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelWd">Cancel</button>
+          <button class="p54-btn primary" type="submit">Withdraw</button>
+        </div>
+
+      </form>
+    `,
+    onMount: ({ modal, close }) => {
+
+      const methodEl = modal.querySelector("#wdMethod");
+      const extra = modal.querySelector("#wdExtra");
+
+      function renderExtra() {
+        if (methodEl.value === "card") {
+          extra.innerHTML = `
+            <div>
+              <div class="p54-label">Select Card</div>
+              <select class="p54-select">
+                <option>Visa •••• 4832</option>
+                <option>Mastercard •••• 1441</option>
+              </select>
+            </div>
+          `;
+        } else {
+          extra.innerHTML = `
+            <div>
+              <div class="p54-label">Agent Tag / ID</div>
+              <input class="p54-input" placeholder="@agent123">
+            </div>
+          `;
+        }
+      }
+
+      renderExtra();
+      methodEl.addEventListener("change", renderExtra);
+
+      modal.querySelector("#cancelWd").addEventListener("click", close);
+
+      modal.querySelector("#wdForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const amt = Number(modal.querySelector("#wdAmt").value);
+        if (amt <= 0) return alert("Enter valid amount");
+
+        const entry = LEDGER.createEntry({
+          type: "withdraw",
+          title: "Withdrawal",
+          currency: getSelectedCurrency(),
+          amount: -amt,
+          icon: "🏧"
+        });
+
+        LEDGER.applyEntry(entry);
+        refreshUI();
+        close();
+      });
+
+    }
+  });
+}
+
   function openSendUnified() { comingSoon("Send"); }
   function openReceive() { comingSoon("Receive"); }
   function openBankTransfer() { comingSoon("Bank Transfer"); }
