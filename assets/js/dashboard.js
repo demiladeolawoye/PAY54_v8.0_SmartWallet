@@ -476,9 +476,8 @@
 
   function openScanAndPay() { comingSoon("Scan & Pay"); }
   /* =========================
-   v8.2 — Add Money (Card / Agent)
+   Add Money (Card vs Agent)
 ========================= */
-
 function openAddMoney() {
   openModal({
     title: "Add Money",
@@ -486,21 +485,18 @@ function openAddMoney() {
       <form class="p54-form" id="addForm">
 
         <div>
-         <div class="p54-select-wrap">
-  <select class="p54-select" id="method">
-    <option value="" disabled selected>Select method</option>
-    <option value="Card">Card</option>
-    <option value="Agent">Agent</option>
-  </select>
-  <span class="p54-arrow">▾</span>
-</div>
+          <div class="p54-label">Method</div>
+          <select class="p54-select" id="addMethod">
+            <option value="card">Card</option>
+            <option value="agent">Agent</option>
+          </select>
+        </div>
 
-
-        <div id="addExtra"></div>
+        <div id="addDynamic"></div>
 
         <div>
           <div class="p54-label">Amount</div>
-          <input class="p54-input" id="addAmt" type="number" min="1" required>
+          <input class="p54-input" id="addAmt" type="number" min="0" required />
         </div>
 
         <div class="p54-actions">
@@ -512,62 +508,47 @@ function openAddMoney() {
     `,
     onMount: ({ modal, close }) => {
 
-      const methodEl = modal.querySelector("#addMethod");
-      const extra = modal.querySelector("#addExtra");
+      const methodSel = modal.querySelector("#addMethod");
+      const dyn = modal.querySelector("#addDynamic");
 
-      function renderExtra() {
-        if (methodEl.value === "card") {
-          extra.innerHTML = `
+      function renderDynamic() {
+        if (methodSel.value === "card") {
+          dyn.innerHTML = `
             <div>
               <div class="p54-label">Select Card</div>
-              <select class="p54-select">
+              <select class="p54-select" id="cardSel">
                 <option>Visa •••• 4832</option>
                 <option>Mastercard •••• 1441</option>
               </select>
             </div>
           `;
         } else {
-          extra.innerHTML = `
+          dyn.innerHTML = `
             <div>
               <div class="p54-label">Agent Tag / ID</div>
-              <input class="p54-input" placeholder="@agent123">
+              <input class="p54-input" id="agentId" placeholder="@agent123" required />
             </div>
           `;
         }
       }
 
-      renderExtra();
-      methodEl.addEventListener("change", renderExtra);
+      renderDynamic();
+      methodSel.addEventListener("change", renderDynamic);
 
       modal.querySelector("#cancelAdd").addEventListener("click", close);
 
-      modal.querySelector("#addForm").addEventListener("submit", (e) => {
+      modal.querySelector("#addForm").addEventListener("submit", e => {
         e.preventDefault();
-
-        const amt = Number(modal.querySelector("#addAmt").value);
-        if (amt <= 0) return alert("Enter valid amount");
-
-        const entry = LEDGER.createEntry({
-          type: "add_money",
-          title: "Wallet Funding",
-          currency: getSelectedCurrency(),
-          amount: amt,
-          icon: "💳"
-        });
-
-        LEDGER.applyEntry(entry);
-        refreshUI();
+        alert("Add Money captured (wired in v8.2)");
         close();
       });
-
     }
   });
 }
 
 /* =========================
-   v8.2 — Withdraw (Card / Agent)
+   Withdraw (Card vs Agent)
 ========================= */
-
 function openWithdraw() {
   openModal({
     title: "Withdraw",
@@ -575,22 +556,18 @@ function openWithdraw() {
       <form class="p54-form" id="wdForm">
 
         <div>
-        <div class="p54-select-wrap">
-  <select class="p54-select" id="wdRoute">
-    <option value="" disabled selected>Select route</option>
-    <option value="Card">Card</option>
-    <option value="Agent">Agent</option>
-  </select>
-  <span class="p54-arrow">▾</span>
-</div>
-
+          <div class="p54-label">Route</div>
+          <select class="p54-select" id="wdRoute">
+            <option value="card">Card</option>
+            <option value="agent">Agent</option>
+          </select>
         </div>
 
-        <div id="wdExtra"></div>
+        <div id="wdDynamic"></div>
 
         <div>
           <div class="p54-label">Amount</div>
-          <input class="p54-input" id="wdAmt" type="number" min="1" required>
+          <input class="p54-input" id="wdAmt" type="number" min="0" required />
         </div>
 
         <div class="p54-actions">
@@ -602,54 +579,40 @@ function openWithdraw() {
     `,
     onMount: ({ modal, close }) => {
 
-      const methodEl = modal.querySelector("#wdMethod");
-      const extra = modal.querySelector("#wdExtra");
+      const routeSel = modal.querySelector("#wdRoute");
+      const dyn = modal.querySelector("#wdDynamic");
 
-      function renderExtra() {
-        if (methodEl.value === "card") {
-          extra.innerHTML = `
+      function renderDynamic() {
+        if (routeSel.value === "card") {
+          dyn.innerHTML = `
             <div>
               <div class="p54-label">Select Card</div>
-              <select class="p54-select">
+              <select class="p54-select" id="cardSel">
                 <option>Visa •••• 4832</option>
                 <option>Mastercard •••• 1441</option>
               </select>
             </div>
           `;
         } else {
-          extra.innerHTML = `
+          dyn.innerHTML = `
             <div>
               <div class="p54-label">Agent Tag / ID</div>
-              <input class="p54-input" placeholder="@agent123">
+              <input class="p54-input" id="agentId" placeholder="@agent123" required />
             </div>
           `;
         }
       }
 
-      renderExtra();
-      methodEl.addEventListener("change", renderExtra);
+      renderDynamic();
+      routeSel.addEventListener("change", renderDynamic);
 
       modal.querySelector("#cancelWd").addEventListener("click", close);
 
-      modal.querySelector("#wdForm").addEventListener("submit", (e) => {
+      modal.querySelector("#wdForm").addEventListener("submit", e => {
         e.preventDefault();
-
-        const amt = Number(modal.querySelector("#wdAmt").value);
-        if (amt <= 0) return alert("Enter valid amount");
-
-        const entry = LEDGER.createEntry({
-          type: "withdraw",
-          title: "Withdrawal",
-          currency: getSelectedCurrency(),
-          amount: -amt,
-          icon: "🏧"
-        });
-
-        LEDGER.applyEntry(entry);
-        refreshUI();
+        alert("Withdraw captured (wired in v8.2)");
         close();
       });
-
     }
   });
 }
