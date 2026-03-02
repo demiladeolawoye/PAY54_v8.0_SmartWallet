@@ -553,11 +553,12 @@ function openWithdraw() {
   openModal({
     title: "Withdraw",
     bodyHTML: `
-      <form class="p54-form" id="wdForm">
+      <form class="p54-form" id="withdrawForm">
 
         <div>
           <div class="p54-label">Route</div>
           <select class="p54-select" id="wdRoute">
+            <option value="" disabled selected>Select ▾</option>
             <option value="card">Card</option>
             <option value="agent">Agent</option>
           </select>
@@ -567,7 +568,12 @@ function openWithdraw() {
 
         <div>
           <div class="p54-label">Amount</div>
-          <input class="p54-input" id="wdAmt" type="number" min="0" required />
+          <input class="p54-input" id="wdAmount" type="number" placeholder="0.00" required />
+        </div>
+
+        <div>
+          <div class="p54-label">Reference (optional)</div>
+          <input class="p54-input" id="wdRef" placeholder="Optional" />
         </div>
 
         <div class="p54-actions">
@@ -579,40 +585,42 @@ function openWithdraw() {
     `,
     onMount: ({ modal, close }) => {
 
-      const routeSel = modal.querySelector("#wdRoute");
-      const dyn = modal.querySelector("#wdDynamic");
+      const route = modal.querySelector("#wdRoute");
+      const dynamic = modal.querySelector("#wdDynamic");
 
-      function renderDynamic() {
-        if (routeSel.value === "card") {
-          dyn.innerHTML = `
+      route.addEventListener("change", () => {
+
+        if (route.value === "card") {
+          dynamic.innerHTML = `
             <div>
               <div class="p54-label">Select Card</div>
-              <select class="p54-select" id="cardSel">
+              <select class="p54-select">
                 <option>Visa •••• 4832</option>
                 <option>Mastercard •••• 1441</option>
               </select>
             </div>
           `;
-        } else {
-          dyn.innerHTML = `
+        }
+
+        if (route.value === "agent") {
+          dynamic.innerHTML = `
             <div>
               <div class="p54-label">Agent Tag / ID</div>
-              <input class="p54-input" id="agentId" placeholder="@agent123" required />
+              <input class="p54-input" placeholder="@agent-tag or ID" required />
             </div>
           `;
         }
-      }
 
-      renderDynamic();
-      routeSel.addEventListener("change", renderDynamic);
+      });
 
       modal.querySelector("#cancelWd").addEventListener("click", close);
 
-      modal.querySelector("#wdForm").addEventListener("submit", e => {
+      modal.querySelector("#withdrawForm").addEventListener("submit", (e) => {
         e.preventDefault();
-        alert("Withdraw captured (wired in v8.2)");
+        alert("Withdraw submitted (v8.1 UI only)");
         close();
       });
+
     }
   });
 }
