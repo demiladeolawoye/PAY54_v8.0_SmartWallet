@@ -474,7 +474,82 @@
     });
   }
 
-  function openScanAndPay() { comingSoon("Scan & Pay"); }
+function openScanAndPay() {
+  openModal({
+    title: "Scan & Pay",
+    bodyHTML: `
+      <form class="p54-form" id="scanPayForm">
+
+        <div>
+          <div class="p54-label">Merchant Name</div>
+          <input class="p54-input" id="spMerchant" placeholder="Merchant name" required />
+        </div>
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="spAmount" type="number" min="0" placeholder="0.00" required />
+        </div>
+
+        <div>
+          <div class="p54-label">Reference (optional)</div>
+          <input class="p54-input" id="spRef" placeholder="Optional note" />
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelSP">Cancel</button>
+          <button class="p54-btn primary" type="submit">Pay</button>
+        </div>
+
+      </form>
+    `,
+    onMount: ({ modal, close }) => {
+
+      const merchantEl = modal.querySelector("#spMerchant");
+      const amountEl = modal.querySelector("#spAmount");
+
+      modal.querySelector("#cancelSP").addEventListener("click", close);
+
+      modal.querySelector("#scanPayForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const merchant = merchantEl.value.trim();
+        const amount = Number(amountEl.value);
+        const currency = getSelectedCurrency();
+
+        if (!merchant) {
+          alert("Enter merchant name");
+          return;
+        }
+
+        if (!amount || amount <= 0) {
+          alert("Enter valid amount");
+          return;
+        }
+
+        // Create ledger entry
+        const entry = LEDGER.createEntry({
+          type: "scan_pay",
+          title: `Payment to ${merchant}`,
+          currency: currency,
+          amount: -amount,
+          icon: "📲",
+          meta: {
+            merchant: merchant,
+            channel: "QR"
+          }
+        });
+
+        LEDGER.applyEntry(entry);
+
+        // Update UI
+        refreshUI();
+
+        close();
+      });
+
+    }
+  });
+}
   /* =========================
    Add Money (Card vs Agent)
 ========================= */
