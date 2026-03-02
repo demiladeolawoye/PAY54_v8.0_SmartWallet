@@ -486,7 +486,8 @@ function openAddMoney() {
 
         <div>
           <div class="p54-label">Method</div>
-          <select class="p54-select" id="addMethod">
+          <select class="p54-select" id="addMethod" required>
+            <option value="" disabled selected>Select ▾</option>
             <option value="card">Card</option>
             <option value="agent">Agent</option>
           </select>
@@ -496,7 +497,23 @@ function openAddMoney() {
 
         <div>
           <div class="p54-label">Amount</div>
-          <input class="p54-input" id="addAmt" type="number" min="0" required />
+          <input 
+            class="p54-input" 
+            id="addAmount" 
+            type="number" 
+            placeholder="0.00" 
+            min="0" 
+            required 
+          />
+        </div>
+
+        <div>
+          <div class="p54-label">Reference (optional)</div>
+          <input 
+            class="p54-input" 
+            id="addReference" 
+            placeholder="Optional reference"
+          />
         </div>
 
         <div class="p54-actions">
@@ -508,44 +525,60 @@ function openAddMoney() {
     `,
     onMount: ({ modal, close }) => {
 
-      const methodSel = modal.querySelector("#addMethod");
-      const dyn = modal.querySelector("#addDynamic");
+      const methodSelect = modal.querySelector("#addMethod");
+      const dynamicContainer = modal.querySelector("#addDynamic");
 
-      function renderDynamic() {
-        if (methodSel.value === "card") {
-          dyn.innerHTML = `
+      // Render dynamic field only AFTER selection
+      methodSelect.addEventListener("change", () => {
+
+        if (methodSelect.value === "card") {
+          dynamicContainer.innerHTML = `
             <div>
               <div class="p54-label">Select Card</div>
-              <select class="p54-select" id="cardSel">
+              <select class="p54-select" required>
+                <option value="" disabled selected>Select card ▾</option>
+                <option>Virtual Card •••• 9921</option>
                 <option>Visa •••• 4832</option>
                 <option>Mastercard •••• 1441</option>
               </select>
             </div>
           `;
-        } else {
-          dyn.innerHTML = `
+        }
+
+        if (methodSelect.value === "agent") {
+          dynamicContainer.innerHTML = `
             <div>
-              <div class="p54-label">Agent Tag / ID</div>
-              <input class="p54-input" id="agentId" placeholder="@agent123" required />
+              <div class="p54-label">Agent Username / Tag</div>
+              <input 
+                class="p54-input" 
+                placeholder="@agent-tag or ID"
+                required
+              />
             </div>
           `;
         }
-      }
 
-      renderDynamic();
-      methodSel.addEventListener("change", renderDynamic);
+      });
 
       modal.querySelector("#cancelAdd").addEventListener("click", close);
 
-      modal.querySelector("#addForm").addEventListener("submit", e => {
+      modal.querySelector("#addForm").addEventListener("submit", (e) => {
         e.preventDefault();
-        alert("Add Money captured (wired in v8.2)");
+
+        const amount = Number(modal.querySelector("#addAmount").value);
+
+        if (!amount || amount <= 0) {
+          alert("Enter a valid amount");
+          return;
+        }
+
+        alert("Add Money captured (logic wiring next phase)");
         close();
       });
+
     }
   });
 }
-
 /* =========================
    Withdraw (Card vs Agent)
 ========================= */
