@@ -475,14 +475,17 @@
   }
 
 function openScanAndPay() {
+
   openModal({
     title: "Scan & Pay",
     bodyHTML: `
+      <div id="qr-reader" style="width:100%; margin-bottom:15px;"></div>
+
       <form class="p54-form" id="scanPayForm">
 
         <div>
-          <div class="p54-label">Merchant Name</div>
-          <input class="p54-input" id="spMerchant" placeholder="Merchant name" required />
+          <div class="p54-label">Merchant</div>
+          <input class="p54-input" id="spMerchant" placeholder="Scan QR to autofill" required />
         </div>
 
         <div>
@@ -506,18 +509,83 @@ function openScanAndPay() {
 
       const merchantEl = modal.querySelector("#spMerchant");
       const amountEl = modal.querySelector("#spAmount");
+      const form = modal.querySelector("#scanPayForm");
+      const cancelBtn = modal.querySelector("#cancelSP");
 
-      modal.querySelector("#cancelSP").addEventListener("click", close);
+      let html5QrCode;
+      const qrRegionId = "qr-reader";
 
-      modal.querySelector("#scanPayForm").addEventListener("submit", (e) => {
+      function stopCamera() {
+        if (html5QrCode) {
+          html5QrCode.stop().catch(() => {});
+        }
+      }
+
+      function onScanSuccess(decodedText) {
+
+        try {
+          /*
+            Expected QR format:
+
+            PAY54|MerchantName|Amount(optional)
+
+            Examples:
+            PAY54|KFC Victoria Island|3500
+            PAY54|Uber Ride|
+          */
+
+          const parts = decodedText.split("|");
+
+          if (parts[0] === "PAY54") {
+            merchantEl.value = parts[1] || "";
+            if (parts[2]) {
+              amountEl.value = parts[2];
+            }
+          } else {
+            merchantEl.value = decodedText;
+          }
+
+        } catch {
+          merchantEl.value = decodedText;
+        }
+
+        stopCamera();
+      }
+
+      if (window.Html5Qrcode) {
+        html5QrCode = new Html5Qrcode(qrRegionId);
+
+        Html5Qrcode.getCameras()
+          .then(devices => {
+            if (devices && devices.length) {
+              html5QrCode.start(
+                devices[0].id,
+                { fps: 10, qrbox: 250 },
+                onScanSuccess
+              );
+            }
+          })
+          .catch(err => {
+            console.warn("Camera error:", err);
+          });
+      }
+
+      cancelBtn.addEventListener("click", () => {
+        stopCamera();
+        close();
+      });
+
+      form.addEventListener("submit", (e) => {
         e.preventDefault();
 
         const merchant = merchantEl.value.trim();
         const amount = Number(amountEl.value);
         const currency = getSelectedCurrency();
+        const balances = LEDGER.getBalances();
+        const currentBalance = balances[currency] || 0;
 
         if (!merchant) {
-          alert("Enter merchant name");
+          alert("Merchant required");
           return;
         }
 
@@ -526,7 +594,11 @@ function openScanAndPay() {
           return;
         }
 
-        // Create ledger entry
+        if (amount > currentBalance) {
+          alert("Insufficient balance");
+          return;
+        }
+
         const entry = LEDGER.createEntry({
           type: "scan_pay",
           title: `Payment to ${merchant}`,
@@ -540,10 +612,9 @@ function openScanAndPay() {
         });
 
         LEDGER.applyEntry(entry);
-
-        // Update UI
         refreshUI();
 
+        stopCamera();
         close();
       });
 
