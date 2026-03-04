@@ -101,7 +101,8 @@
       .p54-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
       @media (max-width:520px){ .p54-row{ grid-template-columns:1fr; } }
       .p54-label{ font-size:12px; font-weight:800; opacity:.85; }
-      .p54-input,.p54-select{
+      .p54-input,
+.p54-select{
   height:44px;
   font-size:16px;
   border-radius:12px;
