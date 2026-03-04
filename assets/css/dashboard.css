@@ -411,11 +411,18 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   background: rgba(59,130,246,0.08);
 }
 
-/* Quick shortcuts */
+/* Quick Shortcuts Grid */
 .shortcut-grid{
   display:grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 12px;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+/* Desktop layout */
+@media (min-width:768px){
+  .shortcut-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
 }
 .shortcut-btn{
   text-align:left;
