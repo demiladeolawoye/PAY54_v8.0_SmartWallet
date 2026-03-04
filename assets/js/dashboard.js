@@ -633,15 +633,15 @@ form.addEventListener("submit", (e) => {
 
   const tx = LEDGER.applyEntry(entry);
 
-  refreshUI();
+refreshUI();
 
-  stopCamera();
+stopCamera();
 
 close();
 
 setTimeout(() => {
   showPaymentReceipt(tx, merchant, amount, currency);
-}, 120);
+}, 200);
 
 });
 
