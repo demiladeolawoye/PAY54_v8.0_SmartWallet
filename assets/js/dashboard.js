@@ -631,8 +631,58 @@ function openScanAndPay() {
   stopCamera();
   close();
 
-  showPaymentReceipt(tx, merchant, amount, currency);
+showPaymentReceipt(tx, merchant, amount, currency);
+
 });
+
+    }
+
+  });
+
+}
+       function showPaymentReceipt(tx, merchant, amount, currency) {
+
+  const receiptId = tx.id || ("P54-" + Date.now());
+
+  openModal({
+    title: "Payment Successful",
+    bodyHTML: `
+      <div style="text-align:center">
+
+        <div style="font-size:42px">✅</div>
+
+        <div style="font-weight:900;font-size:18px;margin-top:8px">
+          Payment Completed
+        </div>
+
+        <div class="p54-divider"></div>
+
+        <div class="p54-note"><b>Merchant</b></div>
+        <div>${merchant}</div>
+
+        <div class="p54-note" style="margin-top:10px"><b>Amount</b></div>
+        <div style="font-size:18px;font-weight:900">
+          ${LEDGER.moneyFmt(currency, amount)}
+        </div>
+
+        <div class="p54-note" style="margin-top:10px"><b>Receipt ID</b></div>
+        <div>${receiptId}</div>
+
+        <div class="p54-note" style="margin-top:10px">
+          ${new Date().toLocaleString()}
+        </div>
+
+        <div class="p54-actions" style="margin-top:16px">
+          <button class="p54-btn primary" id="doneBtn">Done</button>
+        </div>
+
+      </div>
+    `,
+    onMount: ({ modal, close }) => {
+      modal.querySelector("#doneBtn").addEventListener("click", close);
+    }
+  });
+
 }
   /* =========================
    Add Money (Card vs Agent)
