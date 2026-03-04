@@ -629,10 +629,10 @@ function openScanAndPay() {
   refreshUI();
 
   stopCamera();
-  close();
-
+  
 showPaymentReceipt(tx, merchant, amount, currency);
 
+close();
 });
 
     }
