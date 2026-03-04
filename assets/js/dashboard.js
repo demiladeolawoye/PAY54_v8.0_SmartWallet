@@ -578,7 +578,8 @@ function openScanAndPay() {
         close();
       });
 
- form.addEventListener("submit", (e) => {
+form.addEventListener("submit", (e) => {
+
   e.preventDefault();
 
   const payBtn = form.querySelector("button[type='submit']");
@@ -588,6 +589,7 @@ function openScanAndPay() {
   const merchant = merchantEl.value.trim();
   const amount = Number(amountEl.value);
   const currency = getSelectedCurrency();
+
   const balances = LEDGER.getBalances();
   const currentBalance = balances[currency] || 0;
 
@@ -629,10 +631,11 @@ function openScanAndPay() {
   refreshUI();
 
   stopCamera();
-  
-showPaymentReceipt(tx, merchant, amount, currency);
 
-close();
+  showPaymentReceipt(tx, merchant, amount, currency);
+
+  close();
+
 });
 
     }
