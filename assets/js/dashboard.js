@@ -632,9 +632,11 @@ form.addEventListener("submit", (e) => {
 
   stopCamera();
 
-  showPaymentReceipt(tx, merchant, amount, currency);
+close();
 
-  close();
+setTimeout(() => {
+  showPaymentReceipt(tx, merchant, amount, currency);
+}, 120);
 
 });
 
