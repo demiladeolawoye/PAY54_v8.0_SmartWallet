@@ -578,51 +578,61 @@ function openScanAndPay() {
         close();
       });
 
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
+ form.addEventListener("submit", (e) => {
+  e.preventDefault();
 
-        const merchant = merchantEl.value.trim();
-        const amount = Number(amountEl.value);
-        const currency = getSelectedCurrency();
-        const balances = LEDGER.getBalances();
-        const currentBalance = balances[currency] || 0;
+  const payBtn = form.querySelector("button[type='submit']");
+  payBtn.disabled = true;
+  payBtn.textContent = "Processing...";
 
-        if (!merchant) {
-          alert("Merchant required");
-          return;
-        }
+  const merchant = merchantEl.value.trim();
+  const amount = Number(amountEl.value);
+  const currency = getSelectedCurrency();
+  const balances = LEDGER.getBalances();
+  const currentBalance = balances[currency] || 0;
 
-        if (!amount || amount <= 0) {
-          alert("Enter valid amount");
-          return;
-        }
+  if (!merchant) {
+    alert("Merchant required");
+    payBtn.disabled = false;
+    payBtn.textContent = "Pay";
+    return;
+  }
 
-        if (amount > currentBalance) {
-          alert("Insufficient balance");
-          return;
-        }
+  if (!amount || amount <= 0) {
+    alert("Enter valid amount");
+    payBtn.disabled = false;
+    payBtn.textContent = "Pay";
+    return;
+  }
 
-        const entry = LEDGER.createEntry({
-          type: "scan_pay",
-          title: `Payment to ${merchant}`,
-          currency: currency,
-          amount: -amount,
-          icon: "📲",
-          meta: {
-            merchant: merchant,
-            channel: "QR"
-          }
-        });
+  if (amount > currentBalance) {
+    alert("Insufficient balance");
+    payBtn.disabled = false;
+    payBtn.textContent = "Pay";
+    return;
+  }
 
-        LEDGER.applyEntry(entry);
-        refreshUI();
-
-        stopCamera();
-        close();
-      });
-
+  const entry = LEDGER.createEntry({
+    type: "scan_pay",
+    title: `Payment to ${merchant}`,
+    currency: currency,
+    amount: -amount,
+    icon: "📲",
+    meta: {
+      merchant: merchant,
+      channel: "QR"
     }
   });
+
+  const tx = LEDGER.applyEntry(entry);
+
+  refreshUI();
+
+  stopCamera();
+  close();
+
+  showPaymentReceipt(tx, merchant, amount, currency);
+});
 }
   /* =========================
    Add Money (Card vs Agent)
