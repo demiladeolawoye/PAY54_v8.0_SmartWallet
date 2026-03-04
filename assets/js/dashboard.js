@@ -101,8 +101,7 @@
       .p54-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
       @media (max-width:520px){ .p54-row{ grid-template-columns:1fr; } }
       .p54-label{ font-size:12px; font-weight:800; opacity:.85; }
-      .p54-input,
-.p54-select{
+      .p54-input,.p54-select{
   height:44px;
   font-size:16px;
   border-radius:12px;
@@ -111,6 +110,8 @@
   color:inherit;
   padding:0 12px;
   outline:none;
+  -webkit-appearance:none;
+  appearance:none;
 }
       body.light .p54-input, body.light .p54-select{ border-color:rgba(10,20,40,.14); background:rgba(10,20,40,.04); }
       .p54-select option{ color:#0a1428; background:#ffffff; }
