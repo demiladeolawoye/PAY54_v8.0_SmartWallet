@@ -102,10 +102,15 @@
       @media (max-width:520px){ .p54-row{ grid-template-columns:1fr; } }
       .p54-label{ font-size:12px; font-weight:800; opacity:.85; }
       .p54-input,.p54-select{
-        height:44px; border-radius:12px; border:1px solid rgba(255,255,255,.14);
-        background:rgba(255,255,255,.04); color:inherit; padding:0 12px; outline:none;
-        -webkit-appearance:none; appearance:none;
-      }
+  height:44px;
+  font-size:16px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04);
+  color:inherit;
+  padding:0 12px;
+  outline:none;
+}
       body.light .p54-input, body.light .p54-select{ border-color:rgba(10,20,40,.14); background:rgba(10,20,40,.04); }
       .p54-select option{ color:#0a1428; background:#ffffff; }
       .p54-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap; }
