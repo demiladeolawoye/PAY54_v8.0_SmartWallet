@@ -639,11 +639,17 @@ refreshUI();
 
 stopCamera();
 
+/* Reset button state before closing */
+payBtn.disabled = false;
+payBtn.textContent = "Pay";
+
+/* Close Scan modal */
 close();
 
+/* Open receipt after modal closes */
 setTimeout(() => {
   showPaymentReceipt(tx, merchant, amount, currency);
-}, 200);
+}, 250);
 
 });
 
