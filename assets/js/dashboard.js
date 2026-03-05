@@ -600,6 +600,8 @@ form.addEventListener("submit", (e) => {
   const amount = Number(amountEl.value);
   const currency = getSelectedCurrency();
 
+  console.log("PAY54 scan pay:", merchant, amount, currency);
+
   const balances = LEDGER.getBalances();
   const currentBalance = balances[currency] || 0;
 
