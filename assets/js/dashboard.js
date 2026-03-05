@@ -667,10 +667,6 @@ form.addEventListener("submit", (e) => {
 
 });
       
-    }
-  });
-
-}
   /* =========================
    Add Money (Card vs Agent)
 ========================= */
