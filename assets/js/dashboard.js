@@ -521,54 +521,72 @@ function openScanAndPay() {
 
       let html5QrCode;
 
+      const qrRegionId = "qr-reader";
+
       function stopCamera() {
         if (html5QrCode) {
           html5QrCode.stop().catch(()=>{});
         }
       }
 
-      function showPaymentReceipt(tx, merchant, amount, currency) {
+      /* ---------------------------
+         QR SCAN SUCCESS
+      --------------------------- */
 
-        const receiptId = tx.id || ("P54-" + Date.now());
+      function onScanSuccess(decodedText) {
 
-        openModal({
-          title: "Payment Successful",
-          bodyHTML: `
-            <div style="text-align:center">
+        try {
 
-              <div style="font-size:42px">✅</div>
+          const parts = decodedText.split("|");
 
-              <div style="font-weight:900;font-size:18px;margin-top:8px">
-                Payment Completed
-              </div>
+          if (parts[0] === "PAY54") {
 
-              <div class="p54-divider"></div>
+            merchantEl.value = parts[1] || "";
 
-              <div class="p54-note"><b>Merchant</b></div>
-              <div>${merchant}</div>
+            if (parts[2]) {
+              amountEl.value = parts[2];
+            }
 
-              <div class="p54-note" style="margin-top:10px"><b>Amount</b></div>
-              <div style="font-size:18px;font-weight:900">
-                ${LEDGER.moneyFmt(currency, amount)}
-              </div>
-
-              <div class="p54-note" style="margin-top:10px"><b>Receipt ID</b></div>
-              <div>${receiptId}</div>
-
-              <div class="p54-note" style="margin-top:10px">
-                ${new Date().toLocaleString()}
-              </div>
-
-              <div class="p54-actions" style="margin-top:16px">
-                <button class="p54-btn primary" id="doneBtn">Done</button>
-              </div>
-
-            </div>
-          `,
-          onMount: ({ modal, close }) => {
-            modal.querySelector("#doneBtn").addEventListener("click", close);
+          } else {
+            merchantEl.value = decodedText;
           }
-        });
+
+        } catch {
+          merchantEl.value = decodedText;
+        }
+
+        stopCamera();
+      }
+
+      /* ---------------------------
+         START CAMERA
+      --------------------------- */
+
+      if (window.Html5Qrcode) {
+
+        html5QrCode = new Html5Qrcode(qrRegionId);
+
+        Html5Qrcode.getCameras()
+          .then(devices => {
+
+            if (!devices || !devices.length) {
+              console.warn("No camera detected");
+              return;
+            }
+
+            html5QrCode.start(
+              { facingMode: "environment" },
+              {
+                fps: 10,
+                qrbox: { width: 250, height: 250 }
+              },
+              onScanSuccess
+            );
+
+          })
+          .catch(err => {
+            console.warn("Camera error:", err);
+          });
 
       }
 
@@ -577,7 +595,9 @@ function openScanAndPay() {
         close();
       });
 
-      /* -------- SUBMIT HANDLER -------- */
+      /* ---------------------------
+         SUBMIT PAYMENT
+      --------------------------- */
 
       form.addEventListener("submit", (e) => {
 
@@ -642,52 +662,6 @@ function openScanAndPay() {
 
       });
 
-    }
-  });
-
-}
-
-/* ---------- RECEIPT MODAL ---------- */
-
-function showPaymentReceipt(tx, merchant, amount, currency) {
-  const receiptId = tx.id || ("P54-" + Date.now());
-
-  openModal({
-    title: "Payment Successful",
-    bodyHTML: `
-      <div style="text-align:center">
-
-        <div style="font-size:42px">✅</div>
-
-        <div style="font-weight:900;font-size:18px;margin-top:8px">
-          Payment Completed
-        </div>
-
-        <div class="p54-divider"></div>
-
-        <div class="p54-note"><b>Merchant</b></div>
-        <div>${merchant}</div>
-
-        <div class="p54-note" style="margin-top:10px"><b>Amount</b></div>
-        <div style="font-size:18px;font-weight:900">
-          ${LEDGER.moneyFmt(currency, amount)}
-        </div>
-
-        <div class="p54-note" style="margin-top:10px"><b>Receipt ID</b></div>
-        <div>${receiptId}</div>
-
-        <div class="p54-note" style="margin-top:10px">
-          ${new Date().toLocaleString()}
-        </div>
-
-        <div class="p54-actions" style="margin-top:16px">
-          <button class="p54-btn primary" id="doneBtn">Done</button>
-        </div>
-
-      </div>
-    `,
-    onMount: ({ modal, close }) => {
-      modal.querySelector("#doneBtn").addEventListener("click", close);
     }
   });
 
