@@ -598,79 +598,75 @@ function openScanAndPay() {
       /* ---------------------------
          SUBMIT PAYMENT
       --------------------------- */
+form.addEventListener("submit", (e) => {
 
-      form.addEventListener("submit", (e) => {
+  e.preventDefault();
 
-        e.preventDefault();
+  const payBtn = form.querySelector("button[type='submit']");
 
-        if (form.dataset.locked === "1") return;
-        form.dataset.locked = "1";
+  if (payBtn.dataset.busy === "1") return;
+  payBtn.dataset.busy = "1";
 
-        const payBtn = form.querySelector("button[type='submit']");
-        payBtn.disabled = true;
-        payBtn.textContent = "Processing...";
+  payBtn.disabled = true;
+  payBtn.textContent = "Processing...";
 
-        const merchant = merchantEl.value.trim();
-        const amount = Number(amountEl.value);
-        const currency = getSelectedCurrency();
+  try {
 
-        console.log("PAY54 scan pay:", merchant, amount, currency);
+    const merchant = merchantEl.value.trim();
+    const amount = Number(amountEl.value);
+    const currency = getSelectedCurrency();
 
-        const balances = LEDGER.getBalances();
-        const currentBalance = balances[currency] || 0;
+    const balances = LEDGER.getBalances();
+    const currentBalance = balances[currency] || 0;
 
-        if (!merchant || !amount || amount <= 0) {
+    if (!merchant || !amount || amount <= 0) {
+      alert("Enter valid merchant and amount");
+      throw "invalid_input";
+    }
 
-          alert("Enter valid merchant and amount");
+    if (amount > currentBalance) {
+      alert("Insufficient balance");
+      throw "insufficient_balance";
+    }
 
-          payBtn.disabled = false;
-          payBtn.textContent = "Pay";
-          form.dataset.locked = "0";
-          return;
-        }
+    const entry = LEDGER.createEntry({
+      type: "scan_pay",
+      title: `Payment to ${merchant}`,
+      currency: currency,
+      amount: -amount,
+      icon: "📲",
+      meta: { merchant, channel: "QR" }
+    });
 
-        if (amount > currentBalance) {
+    const tx = LEDGER.applyEntry(entry);
 
-          alert("Insufficient balance");
+    refreshUI();
 
-          payBtn.disabled = false;
-          payBtn.textContent = "Pay";
-          form.dataset.locked = "0";
-          return;
-        }
+    stopCamera();
 
-        const entry = LEDGER.createEntry({
-          type: "scan_pay",
-          title: `Payment to ${merchant}`,
-          currency: currency,
-          amount: -amount,
-          icon: "📲",
-          meta: { merchant, channel:"QR" }
-        });
+    /* close modal first */
+    close();
 
-        const tx = LEDGER.applyEntry(entry);
+    /* show receipt AFTER close */
+    setTimeout(() => {
+      showPaymentReceipt(tx, merchant, amount, currency);
+    }, 150);
 
-        refreshUI();
+  } catch (err) {
 
-        stopCamera();
+    console.warn("ScanPay error:", err);
 
-/* reset button */
-payBtn.disabled = false;
-payBtn.textContent = "Pay";
+  } finally {
 
-/* unlock form */
-form.dataset.locked = "0";
+    /* always reset button */
+    payBtn.disabled = false;
+    payBtn.textContent = "Pay";
+    payBtn.dataset.busy = "0";
 
-/* close scan modal */
-close();
+  }
 
-/* show receipt AFTER modal closes */
-setTimeout(() => {
-  showPaymentReceipt(tx, merchant, amount, currency);
-}, 200);
-
-      });
-
+});
+      
     }
   });
 
