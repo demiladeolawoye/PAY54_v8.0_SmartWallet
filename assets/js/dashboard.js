@@ -633,9 +633,7 @@ form.addEventListener("submit", (e) => {
     }
   });
 
-  const tx = LEDGER.applyEntry(entry);
-
-refreshUI();
+  const tx = addEntryAndRefresh(entry);
 
 stopCamera();
 
