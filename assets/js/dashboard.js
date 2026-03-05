@@ -589,6 +589,9 @@ form.addEventListener("submit", (e) => {
 
   e.preventDefault();
 
+  if (form.dataset.locked === "1") return;
+  form.dataset.locked = "1";
+
   const payBtn = form.querySelector("button[type='submit']");
   payBtn.disabled = true;
   payBtn.textContent = "Processing...";
