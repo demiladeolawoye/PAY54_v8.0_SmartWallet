@@ -654,11 +654,20 @@ function openScanAndPay() {
 
         stopCamera();
 
-        close();
+/* reset button */
+payBtn.disabled = false;
+payBtn.textContent = "Pay";
 
-        setTimeout(()=>{
-          showPaymentReceipt(tx, merchant, amount, currency);
-        },150);
+/* unlock form */
+form.dataset.locked = "0";
+
+/* close scan modal */
+close();
+
+/* show receipt AFTER modal closes */
+setTimeout(() => {
+  showPaymentReceipt(tx, merchant, amount, currency);
+}, 200);
 
       });
 
