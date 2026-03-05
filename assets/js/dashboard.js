@@ -639,25 +639,25 @@ refreshUI();
 
 stopCamera();
 
-/* close scan modal first */
-setTimeout(() => {
+/* reset button state */
+payBtn.disabled = false;
+payBtn.textContent = "Pay";
 
-  close();
+/* close scan modal */
+close();
 
-  /* open receipt modal AFTER close */
+/* safely open receipt */
+try {
+
   setTimeout(() => {
-
     showPaymentReceipt(tx, merchant, amount, currency);
+  }, 200);
 
-  }, 150);
+} catch (err) {
 
-}, 50);
+  console.error("Receipt error:", err);
 
-});
-
-    }
-
-  });
+  alert("Payment successful");
 
 }
        function showPaymentReceipt(tx, merchant, amount, currency) {
