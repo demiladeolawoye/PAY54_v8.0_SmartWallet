@@ -647,13 +647,13 @@ form.dataset.locked = "0";
 payBtn.disabled = false;
 payBtn.textContent = "Pay";
 
-/* close scan modal */
-close();
+/* show receipt FIRST */
+showPaymentReceipt(tx, merchant, amount, currency);
 
-/* show receipt */
+/* then close scan modal */
 setTimeout(() => {
-  showPaymentReceipt(tx, merchant, amount, currency);
-}, 200);
+  close();
+}, 50);
 
 });
 }
