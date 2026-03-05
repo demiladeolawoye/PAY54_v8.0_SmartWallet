@@ -646,22 +646,19 @@ payBtn.textContent = "Pay";
 /* close scan modal */
 close();
 
-/* safely open receipt */
-try {
+/* show receipt */
+setTimeout(() => {
+  showPaymentReceipt(tx, merchant, amount, currency);
+}, 200);
 
-  setTimeout(() => {
-    showPaymentReceipt(tx, merchant, amount, currency);
-  }, 200);
-
-} catch (err) {
-
-  console.error("Receipt error:", err);
-
-  alert("Payment successful");
-
+});
 }
-       function showPaymentReceipt(tx, merchant, amount, currency) {
 
+});
+
+/* ---------- RECEIPT MODAL ---------- */
+
+function showPaymentReceipt(tx, merchant, amount, currency) {
   const receiptId = tx.id || ("P54-" + Date.now());
 
   openModal({
