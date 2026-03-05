@@ -636,9 +636,12 @@ form.addEventListener("submit", (e) => {
     }
   });
 
-  const tx = addEntryAndRefresh(entry);
+const tx = addEntryAndRefresh(entry);
 
 stopCamera();
+
+/* unlock form */
+form.dataset.locked = "0";
 
 /* reset button state */
 payBtn.disabled = false;
