@@ -520,64 +520,56 @@ function openScanAndPay() {
       const cancelBtn = modal.querySelector("#cancelSP");
 
       let html5QrCode;
-      const qrRegionId = "qr-reader";
 
       function stopCamera() {
         if (html5QrCode) {
-          html5QrCode.stop().catch(() => {});
+          html5QrCode.stop().catch(()=>{});
         }
       }
 
-      function onScanSuccess(decodedText) {
+      function showPaymentReceipt(tx, merchant, amount, currency) {
 
-        try {
-          /*
-            Expected QR format:
+        const receiptId = tx.id || ("P54-" + Date.now());
 
-            PAY54|MerchantName|Amount(optional)
+        openModal({
+          title: "Payment Successful",
+          bodyHTML: `
+            <div style="text-align:center">
 
-            Examples:
-            PAY54|KFC Victoria Island|3500
-            PAY54|Uber Ride|
-          */
+              <div style="font-size:42px">✅</div>
 
-          const parts = decodedText.split("|");
+              <div style="font-weight:900;font-size:18px;margin-top:8px">
+                Payment Completed
+              </div>
 
-          if (parts[0] === "PAY54") {
-            merchantEl.value = parts[1] || "";
-            if (parts[2]) {
-              amountEl.value = parts[2];
-            }
-          } else {
-            merchantEl.value = decodedText;
+              <div class="p54-divider"></div>
+
+              <div class="p54-note"><b>Merchant</b></div>
+              <div>${merchant}</div>
+
+              <div class="p54-note" style="margin-top:10px"><b>Amount</b></div>
+              <div style="font-size:18px;font-weight:900">
+                ${LEDGER.moneyFmt(currency, amount)}
+              </div>
+
+              <div class="p54-note" style="margin-top:10px"><b>Receipt ID</b></div>
+              <div>${receiptId}</div>
+
+              <div class="p54-note" style="margin-top:10px">
+                ${new Date().toLocaleString()}
+              </div>
+
+              <div class="p54-actions" style="margin-top:16px">
+                <button class="p54-btn primary" id="doneBtn">Done</button>
+              </div>
+
+            </div>
+          `,
+          onMount: ({ modal, close }) => {
+            modal.querySelector("#doneBtn").addEventListener("click", close);
           }
+        });
 
-        } catch {
-          merchantEl.value = decodedText;
-        }
-
-        stopCamera();
-      }
-
-      if (window.Html5Qrcode) {
-        html5QrCode = new Html5Qrcode(qrRegionId);
-
-        Html5Qrcode.getCameras()
-          .then(devices => {
-            if (devices && devices.length) {
-            html5QrCode.start(
-  { facingMode: "environment" },
-  {
-    fps: 10,
-    qrbox: { width: 250, height: 250 }
-  },
-  onScanSuccess
-);
-            }
-          })
-          .catch(err => {
-            console.warn("Camera error:", err);
-          });
       }
 
       cancelBtn.addEventListener("click", () => {
@@ -585,82 +577,75 @@ function openScanAndPay() {
         close();
       });
 
-form.addEventListener("submit", (e) => {
+      /* -------- SUBMIT HANDLER -------- */
 
-  e.preventDefault();
+      form.addEventListener("submit", (e) => {
 
-  if (form.dataset.locked === "1") return;
-  form.dataset.locked = "1";
+        e.preventDefault();
 
-  const payBtn = form.querySelector("button[type='submit']");
-  payBtn.disabled = true;
-  payBtn.textContent = "Processing...";
+        if (form.dataset.locked === "1") return;
+        form.dataset.locked = "1";
 
-  const merchant = merchantEl.value.trim();
-  const amount = Number(amountEl.value);
-  const currency = getSelectedCurrency();
+        const payBtn = form.querySelector("button[type='submit']");
+        payBtn.disabled = true;
+        payBtn.textContent = "Processing...";
 
-  console.log("PAY54 scan pay:", merchant, amount, currency);
+        const merchant = merchantEl.value.trim();
+        const amount = Number(amountEl.value);
+        const currency = getSelectedCurrency();
 
-  const balances = LEDGER.getBalances();
-  const currentBalance = balances[currency] || 0;
+        console.log("PAY54 scan pay:", merchant, amount, currency);
 
-  if (!merchant) {
-    alert("Merchant required");
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-    return;
-  }
+        const balances = LEDGER.getBalances();
+        const currentBalance = balances[currency] || 0;
 
-  if (!amount || amount <= 0) {
-    alert("Enter valid amount");
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-    return;
-  }
+        if (!merchant || !amount || amount <= 0) {
 
-  if (amount > currentBalance) {
-    alert("Insufficient balance");
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-    return;
-  }
+          alert("Enter valid merchant and amount");
 
-  const entry = LEDGER.createEntry({
-    type: "scan_pay",
-    title: `Payment to ${merchant}`,
-    currency: currency,
-    amount: -amount,
-    icon: "📲",
-    meta: {
-      merchant: merchant,
-      channel: "QR"
+          payBtn.disabled = false;
+          payBtn.textContent = "Pay";
+          form.dataset.locked = "0";
+          return;
+        }
+
+        if (amount > currentBalance) {
+
+          alert("Insufficient balance");
+
+          payBtn.disabled = false;
+          payBtn.textContent = "Pay";
+          form.dataset.locked = "0";
+          return;
+        }
+
+        const entry = LEDGER.createEntry({
+          type: "scan_pay",
+          title: `Payment to ${merchant}`,
+          currency: currency,
+          amount: -amount,
+          icon: "📲",
+          meta: { merchant, channel:"QR" }
+        });
+
+        const tx = LEDGER.applyEntry(entry);
+
+        refreshUI();
+
+        stopCamera();
+
+        close();
+
+        setTimeout(()=>{
+          showPaymentReceipt(tx, merchant, amount, currency);
+        },150);
+
+      });
+
     }
   });
 
-const tx = addEntryAndRefresh(entry);
-
-stopCamera();
-
-/* unlock form */
-form.dataset.locked = "0";
-
-/* reset button state */
-payBtn.disabled = false;
-payBtn.textContent = "Pay";
-
-/* show receipt FIRST */
-showPaymentReceipt(tx, merchant, amount, currency);
-
-/* then close scan modal */
-setTimeout(() => {
-  close();
-}, 50);
-
-});
 }
-
-});
 
 /* ---------- RECEIPT MODAL ---------- */
 
