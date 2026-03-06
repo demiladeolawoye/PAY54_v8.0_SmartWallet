@@ -512,6 +512,7 @@ function openScanAndPay() {
 
       </form>
     `,
+
     onMount: ({ modal, close }) => {
 
       const merchantEl = modal.querySelector("#spMerchant");
@@ -520,7 +521,6 @@ function openScanAndPay() {
       const cancelBtn = modal.querySelector("#cancelSP");
 
       let html5QrCode;
-
       const qrRegionId = "qr-reader";
 
       function stopCamera() {
@@ -529,10 +529,7 @@ function openScanAndPay() {
         }
       }
 
-      /* ---------------------------
-         QR SCAN SUCCESS
-      --------------------------- */
-
+      /* QR Scan Success */
       function onScanSuccess(decodedText) {
 
         try {
@@ -558,9 +555,7 @@ function openScanAndPay() {
         stopCamera();
       }
 
-      /* ---------------------------
-         START CAMERA
-      --------------------------- */
+      /* Start Camera */
 
       if (window.Html5Qrcode) {
 
@@ -576,18 +571,12 @@ function openScanAndPay() {
 
             html5QrCode.start(
               { facingMode: "environment" },
-              {
-                fps: 10,
-                qrbox: { width: 250, height: 250 }
-              },
+              { fps: 10, qrbox: { width: 250, height: 250 } },
               onScanSuccess
             );
 
           })
-          .catch(err => {
-            console.warn("Camera error:", err);
-          });
-
+          .catch(err => console.warn("Camera error:", err));
       }
 
       cancelBtn.addEventListener("click", () => {
@@ -595,77 +584,79 @@ function openScanAndPay() {
         close();
       });
 
-      /* ---------------------------
-         SUBMIT PAYMENT
-      --------------------------- */
-form.addEventListener("submit", (e) => {
+      /* SUBMIT PAYMENT */
 
-  e.preventDefault();
+      form.addEventListener("submit", (e) => {
 
-  const payBtn = form.querySelector("button[type='submit']");
+        e.preventDefault();
 
-  if (payBtn.dataset.busy === "1") return;
-  payBtn.dataset.busy = "1";
+        const payBtn = form.querySelector("button[type='submit']");
 
-  payBtn.disabled = true;
-  payBtn.textContent = "Processing...";
+        if (payBtn.dataset.busy === "1") return;
 
-  try {
+        payBtn.dataset.busy = "1";
+        payBtn.disabled = true;
+        payBtn.textContent = "Processing...";
 
-    const merchant = merchantEl.value.trim();
-    const amount = Number(amountEl.value);
-    const currency = getSelectedCurrency();
+        try {
 
-    const balances = LEDGER.getBalances();
-    const currentBalance = balances[currency] || 0;
+          const merchant = merchantEl.value.trim();
+          const amount = Number(amountEl.value);
+          const currency = getSelectedCurrency();
 
-    if (!merchant || !amount || amount <= 0) {
-      alert("Enter valid merchant and amount");
-      throw "invalid_input";
+          const balances = LEDGER.getBalances();
+          const currentBalance = balances[currency] || 0;
+
+          if (!merchant || !amount || amount <= 0) {
+            alert("Enter valid merchant and amount");
+            throw "invalid_input";
+          }
+
+          if (amount > currentBalance) {
+            alert("Insufficient balance");
+            throw "insufficient_balance";
+          }
+
+          const entry = LEDGER.createEntry({
+            type: "scan_pay",
+            title: `Payment to ${merchant}`,
+            currency: currency,
+            amount: -amount,
+            icon: "📲",
+            meta: { merchant, channel: "QR" }
+          });
+
+          const tx = LEDGER.applyEntry(entry);
+
+          refreshUI();
+
+          stopCamera();
+
+          close();
+
+          setTimeout(() => {
+            showPaymentReceipt(tx, merchant, amount, currency);
+          }, 150);
+
+        } catch (err) {
+
+          console.warn("ScanPay error:", err);
+
+        } finally {
+
+          payBtn.disabled = false;
+          payBtn.textContent = "Pay";
+          payBtn.dataset.busy = "0";
+
+        }
+
+      });
+
     }
 
-    if (amount > currentBalance) {
-      alert("Insufficient balance");
-      throw "insufficient_balance";
-    }
+  });
 
-    const entry = LEDGER.createEntry({
-      type: "scan_pay",
-      title: `Payment to ${merchant}`,
-      currency: currency,
-      amount: -amount,
-      icon: "📲",
-      meta: { merchant, channel: "QR" }
-    });
-
-    const tx = LEDGER.applyEntry(entry);
-
-    refreshUI();
-
-    stopCamera();
-
-    /* close modal first */
-    close();
-
-    /* show receipt AFTER close */
-    setTimeout(() => {
-      showPaymentReceipt(tx, merchant, amount, currency);
-    }, 150);
-
-  } catch (err) {
-
-    console.warn("ScanPay error:", err);
-
-  } finally {
-
-    /* always reset button */
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-    payBtn.dataset.busy = "0";
-
-  }
-
-});
+}
       
   /* =========================
    Add Money (Card vs Agent)
