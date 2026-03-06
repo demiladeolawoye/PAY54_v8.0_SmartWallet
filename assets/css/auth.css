@@ -27,6 +27,21 @@ body {
   align-items: center;
 }
 
+.auth-wrapper{
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+/* Prevent mobile zoom on inputs */
+input,
+select,
+textarea{
+  font-size:16px;
+}
+
 /* === MAIN WRAPPER === */
 .auth-wrapper {
   width: 100%;
