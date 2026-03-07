@@ -628,19 +628,23 @@ function openScanAndPay() {
 
           const tx = LEDGER.applyEntry(entry);
 
-          stopCamera();
+     stopCamera();
 
-/* close modal first */
+/* close scan modal */
 close();
 
-/* refresh UI after modal closed */
+/* wait for modal animation to finish */
 setTimeout(() => {
 
-  refreshUI();
+  requestAnimationFrame(() => {
 
-  showPaymentReceipt(tx, merchant, amount, currency);
+    refreshUI();
 
-},200);
+    showPaymentReceipt(tx, merchant, amount, currency);
+
+  });
+
+}, 220);
 
         } catch (err) {
 
