@@ -628,7 +628,7 @@ function openScanAndPay() {
 
           const tx = LEDGER.applyEntry(entry);
 
-     stopCamera();
+stopCamera();
 
 /* close scan modal */
 close();
