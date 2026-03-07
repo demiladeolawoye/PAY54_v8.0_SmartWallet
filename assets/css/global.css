@@ -76,3 +76,8 @@ body.dark {
   opacity: 1;
   filter: none;
 }
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
