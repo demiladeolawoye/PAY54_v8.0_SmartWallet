@@ -24,7 +24,8 @@ body {
   color: var(--text);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 60px;
 }
 
 /* wrapper controlling layout */
