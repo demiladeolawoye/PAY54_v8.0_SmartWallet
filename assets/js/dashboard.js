@@ -646,20 +646,24 @@ form.addEventListener("submit", (e) => {
 
     const tx = LEDGER.applyEntry(entry);
 
-    stopCamera();
-    close();
+/* stop camera */
+stopCamera();
 
-    setTimeout(() => {
+/* update dashboard FIRST */
+refreshUI();
 
-      requestAnimationFrame(() => {
+/* close modal */
+close();
 
-        refreshUI();
+/* show receipt slightly after UI update */
+setTimeout(() => {
+  showPaymentReceipt(tx, merchant, amount, currency);
+},120);
 
-        showPaymentReceipt(tx, merchant, amount, currency);
-
-        payBtn.disabled = false;
-        payBtn.textContent = "Pay";
-        payBtn.dataset.busy = "0";
+/* reset button */
+payBtn.disabled = false;
+payBtn.textContent = "Pay";
+payBtn.dataset.busy = "0";
 
       });
 
