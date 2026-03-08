@@ -727,7 +727,10 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
       </div>
     `,
     onMount: ({ modal, close }) => {
-      modal.querySelector("#doneBtn").addEventListener("click", close);
+    modal.querySelector("#doneBtn").addEventListener("click", () => {
+  close();
+  refreshUI();
+});
     }
   });
 
