@@ -651,13 +651,13 @@ form.addEventListener("submit", (e) => {
 /* stop camera */
 stopCamera();
 
-/* update dashboard FIRST */
+/* update dashboard */
 refreshUI();
 
-/* close modal */
+/* close scan modal */
 close();
 
-/* show receipt slightly after UI update */
+/* show receipt */
 setTimeout(() => {
   showPaymentReceipt(tx, merchant, amount, currency);
 },120);
@@ -667,17 +667,13 @@ payBtn.disabled = false;
 payBtn.textContent = "Pay";
 payBtn.dataset.busy = "0";
 
-      });
+} catch (err) {
 
-    }, 220);
+  payBtn.disabled = false;
+  payBtn.textContent = "Pay";
+  payBtn.dataset.busy = "0";
 
-  } catch (err) {
-
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-    payBtn.dataset.busy = "0";
-
-  }
+}
 
 });
 
