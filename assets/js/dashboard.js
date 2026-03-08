@@ -651,17 +651,14 @@ form.addEventListener("submit", (e) => {
 /* stop camera */
 stopCamera();
 
+/* show receipt FIRST */
+showPaymentReceipt(tx, merchant, amount, currency);
+
 /* update dashboard */
 refreshUI();
 
 /* close scan modal */
 close();
-
-/* show receipt */
-setTimeout(() => {
-  showPaymentReceipt(tx, merchant, amount, currency);
-},120);
-
 /* reset button */
 payBtn.disabled = false;
 payBtn.textContent = "Pay";
