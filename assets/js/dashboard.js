@@ -1025,9 +1025,12 @@ function openWithdraw() {
     refreshUI();
   }
 
+waitForModules(() => {
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }
-})();
+
+});
