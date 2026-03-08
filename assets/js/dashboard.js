@@ -585,72 +585,77 @@ function openScanAndPay() {
       });
 
       /* SUBMIT PAYMENT */
+form.addEventListener("submit", (e) => {
 
-      form.addEventListener("submit", (e) => {
+  e.preventDefault();
 
-        e.preventDefault();
+  const payBtn = form.querySelector("button[type='submit']");
 
-        const payBtn = form.querySelector("button[type='submit']");
+  if (payBtn.dataset.busy === "1") return;
 
-        if (payBtn.dataset.busy === "1") return;
+  payBtn.dataset.busy = "1";
+  payBtn.disabled = true;
+  payBtn.textContent = "Processing...";
 
-        payBtn.dataset.busy = "1";
-        payBtn.disabled = true;
-        payBtn.textContent = "Processing...";
+  try {
 
-        try {
+    const merchant = merchantEl.value.trim();
+    const amount = Number(amountEl.value);
+    const currency = getSelectedCurrency();
 
-          const merchant = merchantEl.value.trim();
-          const amount = Number(amountEl.value);
-          const currency = getSelectedCurrency();
+    const balances = LEDGER.getBalances();
+    const currentBalance = balances[currency] || 0;
 
-          const balances = LEDGER.getBalances();
-          const currentBalance = balances[currency] || 0;
+    if (!merchant || !amount || amount <= 0) {
+      alert("Enter valid merchant and amount");
+      throw new Error("invalid_input");
+    }
 
-          if (!merchant || !amount || amount <= 0) {
-            alert("Enter valid merchant and amount");
-            throw "invalid_input";
-          }
+    if (amount > currentBalance) {
+      alert("Insufficient balance");
+      throw new Error("insufficient_balance");
+    }
 
-          if (amount > currentBalance) {
-            alert("Insufficient balance");
-            throw "insufficient_balance";
-          }
+    const entry = LEDGER.createEntry({
+      type: "scan_pay",
+      title: `Payment to ${merchant}`,
+      currency: currency,
+      amount: -amount,
+      icon: "📲",
+      meta: { merchant, channel: "QR" }
+    });
 
-          const entry = LEDGER.createEntry({
-            type: "scan_pay",
-            title: `Payment to ${merchant}`,
-            currency: currency,
-            amount: -amount,
-            icon: "📲",
-            meta: { merchant, channel: "QR" }
-          });
+    const tx = LEDGER.applyEntry(entry);
 
-          const tx = LEDGER.applyEntry(entry);
+    stopCamera();
+    close();
 
-setTimeout(() => {
+    setTimeout(() => {
 
-  requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
 
-    refreshUI();
+        refreshUI();
 
-    showPaymentReceipt(tx, merchant, amount, currency);
+        showPaymentReceipt(tx, merchant, amount, currency);
+
+        payBtn.disabled = false;
+        payBtn.textContent = "Pay";
+        payBtn.dataset.busy = "0";
+
+      });
+
+    }, 220);
+
+  } catch (err) {
 
     payBtn.disabled = false;
     payBtn.textContent = "Pay";
     payBtn.dataset.busy = "0";
 
-  });
+  }
 
-}, 220);
-
-      });
-
-    }
-
-  });
-
-}
+});
+      
   /* =========================
    PAYMENT RECEIPT
 ========================= */
