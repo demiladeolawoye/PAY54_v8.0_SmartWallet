@@ -15,14 +15,33 @@
 (() => {
   "use strict";
 
-  const LEDGER = window.PAY54_LEDGER;
-  const RECIP = window.PAY54_RECIPIENT;
-  const RCPT = window.PAY54_RECEIPTS;
+ let LEDGER;
+let RECIP;
+let RCPT;
 
-  if (!LEDGER || !RECIP || !RCPT) {
-    console.error("PAY54 modules missing. Check script order in dashboard.html.");
-    return;
-  }
+function waitForModules(callback){
+
+  const check = () => {
+
+    if (
+      window.PAY54_LEDGER &&
+      window.PAY54_RECIPIENT &&
+      window.PAY54_RECEIPTS
+    ){
+
+      LEDGER = window.PAY54_LEDGER;
+      RECIP = window.PAY54_RECIPIENT;
+      RCPT = window.PAY54_RECEIPTS;
+
+      callback();
+      return;
+    }
+
+    setTimeout(check,50);
+  };
+
+  check();
+}
 
   const LS = {
     THEME: "pay54_theme",
