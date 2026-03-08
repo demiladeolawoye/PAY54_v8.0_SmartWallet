@@ -628,12 +628,6 @@ function openScanAndPay() {
 
           const tx = LEDGER.applyEntry(entry);
 
-stopCamera();
-
-/* close scan modal */
-close();
-
-/* wait for modal animation to finish */
 setTimeout(() => {
 
   requestAnimationFrame(() => {
@@ -642,21 +636,13 @@ setTimeout(() => {
 
     showPaymentReceipt(tx, merchant, amount, currency);
 
+    payBtn.disabled = false;
+    payBtn.textContent = "Pay";
+    payBtn.dataset.busy = "0";
+
   });
 
 }, 220);
-
-        } catch (err) {
-
-          console.warn("ScanPay error:", err);
-
-        } finally {
-
-          payBtn.disabled = false;
-          payBtn.textContent = "Pay";
-          payBtn.dataset.busy = "0";
-
-        }
 
       });
 
