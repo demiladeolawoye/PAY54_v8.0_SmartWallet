@@ -674,6 +674,16 @@ form.addEventListener("submit", (e) => {
   }
 
 });
+
+    }   // closes onMount
+  });   // closes openModal
+
+}       // closes openScanAndPay
+
+
+/* =========================
+   PAYMENT RECEIPT
+========================= */
       
   /* =========================
    PAYMENT RECEIPT
