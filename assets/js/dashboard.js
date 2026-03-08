@@ -437,7 +437,7 @@
     const txFeed = recentTxFeedEl();
     if (!txFeed) return;
 
-    const txs = (LEDGER.getTx() || []).slice(0, 5);
+    const txs = (LEDGER.getTx() || []).slice(-5).reverse();
     if (!txs.length) {
       txFeed.innerHTML = `
         <div class="feed-item">
