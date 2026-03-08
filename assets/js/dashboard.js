@@ -479,9 +479,11 @@ function waitForModules(callback){
   --------------------------- */
 
   function refreshUI() {
+  requestAnimationFrame(() => {
     setActiveCurrency(getSelectedCurrency());
     renderRecentTransactions();
-  }
+  });
+}
 
   function addEntryAndRefresh(entry) {
     const tx = LEDGER.applyEntry(entry);
