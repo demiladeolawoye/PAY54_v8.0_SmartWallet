@@ -651,24 +651,22 @@ form.addEventListener("submit", (e) => {
 /* stop camera */
 stopCamera();
 
-/* show receipt FIRST */
-showPaymentReceipt(tx, merchant, amount, currency);
-
-/* update dashboard */
-refreshUI();
-
-/* close scan modal */
+/* close scan modal first */
 close();
+
+/* small delay so modal engine resets */
+setTimeout(() => {
+
+  showPaymentReceipt(tx, merchant, amount, currency);
+
+  refreshUI();
+
+}, 120);
+
 /* reset button */
 payBtn.disabled = false;
 payBtn.textContent = "Pay";
 payBtn.dataset.busy = "0";
-
-} catch (err) {
-
-  payBtn.disabled = false;
-  payBtn.textContent = "Pay";
-  payBtn.dataset.busy = "0";
 
 }
 
