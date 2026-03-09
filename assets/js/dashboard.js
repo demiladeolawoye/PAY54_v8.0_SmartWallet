@@ -648,34 +648,29 @@ form.addEventListener("submit", (e) => {
 
     const tx = LEDGER.applyEntry(entry);
 
-/* stop camera */
-stopCamera();
+    stopCamera();
+    close();
 
-/* close scan modal first */
-close();
+    setTimeout(() => {
 
-/* small delay so modal engine resets */
-setTimeout(() => {
+      showPaymentReceipt(tx, merchant, amount, currency);
+      refreshUI();
 
-  showPaymentReceipt(tx, merchant, amount, currency);
+    },120);
 
-  refreshUI();
+  } catch (err) {
 
-}, 120);
+    console.warn("ScanPay error:", err);
 
-/* reset button */
-payBtn.disabled = false;
-payBtn.textContent = "Pay";
-payBtn.dataset.busy = "0";
+  } finally {
 
-}
+    payBtn.disabled = false;
+    payBtn.textContent = "Pay";
+    payBtn.dataset.busy = "0";
+
+  }
 
 });
-
-    }   // closes onMount
-  });   // closes openModal
-
-}       // closes openScanAndPay
 
 
 /* =========================
