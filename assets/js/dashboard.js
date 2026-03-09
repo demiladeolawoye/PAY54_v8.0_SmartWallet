@@ -649,14 +649,15 @@ form.addEventListener("submit", (e) => {
     const tx = LEDGER.applyEntry(entry);
 
     stopCamera();
-    close();
 
-    setTimeout(() => {
+/* show receipt first */
+showPaymentReceipt(tx, merchant, amount, currency);
 
-      showPaymentReceipt(tx, merchant, amount, currency);
-      refreshUI();
+/* close scan modal */
+close();
 
-    },120);
+/* refresh dashboard */
+refreshUI();
 
   } catch (err) {
 
