@@ -653,16 +653,17 @@ form.addEventListener("submit", (e) => {
 
     const tx = addEntryAndRefresh(entry);
 
-    stopCamera();
+   stopCamera();
 
-/* show receipt first */
-showPaymentReceipt(tx, merchant, amount, currency);
-
-/* close scan modal */
+/* close scan modal FIRST */
 close();
 
-/* refresh dashboard */
-refreshUI();
+/* then open receipt */
+setTimeout(() => {
+
+  showPaymentReceipt(tx, merchant, amount, currency);
+
+},150);
 
   } catch (err) {
 
