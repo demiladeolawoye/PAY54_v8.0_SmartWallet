@@ -485,11 +485,16 @@ function waitForModules(callback){
   });
 }
 
-  function addEntryAndRefresh(entry) {
-    const tx = LEDGER.applyEntry(entry);
-    refreshUI();
-    return tx;
-  }
+function addEntryAndRefresh(entry) {
+
+  const tx = LEDGER.applyEntry(entry);
+
+  prependTxToDOM(tx);   // instantly add to dashboard
+
+  refreshUI();
+
+  return tx;
+}
 
   function comingSoon(title) {
     openModal({
