@@ -651,7 +651,7 @@ form.addEventListener("submit", (e) => {
       meta: { merchant, channel: "QR" }
     });
 
-    const tx = LEDGER.applyEntry(entry);
+    const tx = addEntryAndRefresh(entry);
 
     stopCamera();
 
