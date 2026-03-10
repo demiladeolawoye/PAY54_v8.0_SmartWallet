@@ -654,15 +654,12 @@ form.addEventListener("submit", (e) => {
     const tx = addEntryAndRefresh(entry);
 
     /* stop camera immediately */
-    stopCamera();
+stopCamera();
 
-    /* close scan modal */
-    close();
+refreshUI();
 
-    /* open receipt AFTER modal closes */
-    setTimeout(() => {
-
-      PAY54_RECEIPTS.openReceiptModal({
+/* show receipt */
+PAY54_RECEIPTS.openReceiptModal({
   openModal,
   title: `Payment to ${merchant}`,
   tx,
@@ -673,9 +670,8 @@ form.addEventListener("submit", (e) => {
   ]
 });
 
-      refreshUI();
-
-    }, 200);
+/* close scan modal */
+close();
 
   } catch (err) {
 
