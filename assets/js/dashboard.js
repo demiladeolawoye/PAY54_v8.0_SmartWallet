@@ -662,7 +662,16 @@ form.addEventListener("submit", (e) => {
     /* open receipt AFTER modal closes */
     setTimeout(() => {
 
-      showPaymentReceipt(tx, merchant, amount, currency);
+      PAY54_RECEIPTS.openReceiptModal({
+  openModal,
+  title: `Payment to ${merchant}`,
+  tx,
+  lines: [
+    `Merchant: ${merchant}`,
+    `Amount: ${currency} ${amount.toLocaleString()}`,
+    `Channel: Scan & Pay`
+  ]
+});
 
       refreshUI();
 
