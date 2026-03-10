@@ -634,12 +634,12 @@ form.addEventListener("submit", (e) => {
 
     if (!merchant || !amount || amount <= 0) {
       alert("Enter valid merchant and amount");
-      throw new Error("invalid_input");
+      throw "invalid_input";
     }
 
     if (amount > currentBalance) {
       alert("Insufficient balance");
-      throw new Error("insufficient_balance");
+      throw "insufficient_balance";
     }
 
     const entry = LEDGER.createEntry({
@@ -653,17 +653,20 @@ form.addEventListener("submit", (e) => {
 
     const tx = addEntryAndRefresh(entry);
 
-   stopCamera();
+    /* stop camera immediately */
+    stopCamera();
 
-/* close scan modal FIRST */
-close();
+    /* close scan modal */
+    close();
 
-/* then open receipt */
-setTimeout(() => {
+    /* open receipt AFTER modal closes */
+    setTimeout(() => {
 
-  showPaymentReceipt(tx, merchant, amount, currency);
+      showPaymentReceipt(tx, merchant, amount, currency);
 
-},150);
+      refreshUI();
+
+    }, 200);
 
   } catch (err) {
 
