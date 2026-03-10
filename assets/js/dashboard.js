@@ -658,19 +658,21 @@ stopCamera();
 
 refreshUI();
 
-/* show receipt */
-PAY54_RECEIPTS.openReceiptModal({
-  openModal,
-  title: `Payment to ${merchant}`,
-  tx,
-  lines: [
-    `Merchant: ${merchant}`,
-    `Amount: ${currency} ${amount.toLocaleString()}`,
-    `Channel: Scan & Pay`
-  ]
-});
+setTimeout(() => {
 
-/* close scan modal */
+  PAY54_RECEIPTS.openReceiptModal({
+    openModal,
+    title: `Payment to ${merchant}`,
+    tx,
+    lines: [
+      `Merchant: ${merchant}`,
+      `Amount: ${currency} ${amount.toLocaleString()}`,
+      `Channel: Scan & Pay`
+    ]
+  });
+
+},150);
+
 close();
 
   } catch (err) {
