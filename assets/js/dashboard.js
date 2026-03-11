@@ -185,7 +185,8 @@ function waitForModules(callback){
     backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
     document.addEventListener("keydown", escClose);
 
-    document.body.appendChild(backdrop);
+   document.body.style.overflow = "hidden";
+   document.body.appendChild(backdrop);
     if (typeof onMount === "function") onMount({ modal: backdrop.querySelector(".p54-modal"), close });
     return { close };
   }
