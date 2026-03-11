@@ -27,19 +27,14 @@ function signup(e) {
 
   const name = document.getElementById("signup-name").value.trim();
   const email = document.getElementById("signup-email").value.trim();
+  const country = document.getElementById("signup-country").value;
   const phone = document.getElementById("signup-phone").value.trim();
+
   const pin = document.getElementById("signup-pin").value.trim();
   const confirmPin = document.getElementById("signup-confirm-pin").value.trim();
 
   if (!name || !email || !phone) {
     return showMessage("Please complete all fields");
-  }
-
-  // Basic phone validation (must start with + and numbers)
-  const phoneRegex = /^\+[0-9]{8,15}$/;
-
-  if (!phoneRegex.test(phone)) {
-    return showMessage("Enter phone number with country code (e.g. +447123456789)");
   }
 
   if (!PIN_REGEX.test(pin)) {
@@ -50,13 +45,13 @@ function signup(e) {
     return showMessage("PINs do not match");
   }
 
-  // Store account details (mock)
+  const fullPhone = country + phone;
+
   localStorage.setItem("pay54_name", name);
   localStorage.setItem("pay54_email", email);
-  localStorage.setItem("pay54_phone", phone);
+  localStorage.setItem("pay54_phone", fullPhone);
   localStorage.setItem("pay54_pin", pin);
 
-  // Mark account as pending OTP verification
   localStorage.setItem("pay54_pending_verification", "true");
 
   showMessage("Account created successfully", "success");
@@ -64,7 +59,6 @@ function signup(e) {
   setTimeout(() => {
     window.location.href = "verify-otp.html";
   }, 1200);
-
 }
 
 
