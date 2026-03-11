@@ -455,10 +455,11 @@ function waitForModules(callback){
   }
 
   function renderRecentTransactions() {
-    const txFeed = recentTxFeedEl();
-    if (!txFeed) return;
 
-    const txs = (LEDGER.getTx() || []).slice(-5).reverse();
+  const txFeed = recentTxFeedEl();
+  if (!txFeed) return;
+
+  const txs = LEDGER.getTx().slice(-5).reverse();
     if (!txs.length) {
       txFeed.innerHTML = `
         <div class="feed-item">
