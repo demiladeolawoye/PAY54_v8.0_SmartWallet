@@ -175,9 +175,10 @@ function waitForModules(callback){
     `;
 
     function close() {
-      backdrop.remove();
-      document.removeEventListener("keydown", escClose);
-    }
+  backdrop.remove();
+  document.body.style.overflow = "";
+  document.removeEventListener("keydown", escClose);
+}
     function escClose(e) { if (e.key === "Escape") close(); }
 
     backdrop.querySelector(".p54-x").addEventListener("click", close);
