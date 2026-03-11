@@ -673,8 +673,6 @@ setTimeout(() => {
     ]
   });
 
-  close();
-
 },150);
 
   } catch (err) {
