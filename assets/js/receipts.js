@@ -83,7 +83,8 @@
         <div class="p54-actions">
           <button class="p54-btn" type="button" id="copyRcpt">Copy</button>
           <button class="p54-btn" type="button" id="waRcpt">WhatsApp</button>
-          <button class="p54-btn primary" type="button" id="doneRcpt">Done</button>
+         <button class="p54-btn" id="againRcpt">Make Another Payment</button>
+         <button class="p54-btn primary" id="doneRcpt">Close</button>
         </div>
       `,
       onMount: ({ modal, close }) => {
