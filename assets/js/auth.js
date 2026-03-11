@@ -22,15 +22,24 @@ window.addEventListener("load", () => {
 
 // ---------- SIGN UP ----------
 function signup(e) {
+
   e.preventDefault();
 
   const name = document.getElementById("signup-name").value.trim();
   const email = document.getElementById("signup-email").value.trim();
+  const phone = document.getElementById("signup-phone").value.trim();
   const pin = document.getElementById("signup-pin").value.trim();
   const confirmPin = document.getElementById("signup-confirm-pin").value.trim();
 
-  if (!name || !email) {
+  if (!name || !email || !phone) {
     return showMessage("Please complete all fields");
+  }
+
+  // Basic phone validation (must start with + and numbers)
+  const phoneRegex = /^\+[0-9]{8,15}$/;
+
+  if (!phoneRegex.test(phone)) {
+    return showMessage("Enter phone number with country code (e.g. +447123456789)");
   }
 
   if (!PIN_REGEX.test(pin)) {
@@ -42,7 +51,9 @@ function signup(e) {
   }
 
   // Store account details (mock)
+  localStorage.setItem("pay54_name", name);
   localStorage.setItem("pay54_email", email);
+  localStorage.setItem("pay54_phone", phone);
   localStorage.setItem("pay54_pin", pin);
 
   // Mark account as pending OTP verification
@@ -53,6 +64,7 @@ function signup(e) {
   setTimeout(() => {
     window.location.href = "verify-otp.html";
   }, 1200);
+
 }
 
 
