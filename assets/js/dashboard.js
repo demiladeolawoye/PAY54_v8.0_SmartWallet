@@ -660,7 +660,7 @@ refreshUI();
 
 setTimeout(() => {
 
-  PAY54_RECEIPTS.openReceiptModal({
+  RCPT.openReceiptModal({
     openModal,
     title: `Payment to ${merchant}`,
     tx,
