@@ -1015,10 +1015,13 @@ function openWithdraw() {
       if (service === "cards") return comingSoon("Virtual & Linked Cards");
       if (service === "checkout") return comingSoon("PAY54 Smart Checkout");
       if (service === "shop") return comingSoon("Shop & Go");
+      if(service === "merchantqr") return openMerchantQR();
       if (service === "trading") return comingSoon("Trading");
       if (service === "bet") return comingSoon("Bet Funding");
       if (service === "agent") return comingSoon("Become an Agent");
+      if(service === "locator") return comingSoon("ATM / Agent Locator");
       if (service === "risk") return comingSoon("AI Risk Watch");
+      
 
       // Shortcuts
       if (shortcut === "shop") return comingSoon("Shop & Go");
