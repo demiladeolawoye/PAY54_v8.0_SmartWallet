@@ -375,15 +375,15 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 }
 
 /* Tiles */
-.tile-grid{ display:grid; gap: 12px; }
+.tile-grid{ display:grid; gap:12px; }
 
 .tile-grid.cols-3{
   grid-template-columns: repeat(3, minmax(0,1fr));
 }
 
-/* Services uses 5 across on desktop (matches your screenshot layout) */
+/* Services grid */
 .tile-grid.cols-4{
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .tile-btn{
