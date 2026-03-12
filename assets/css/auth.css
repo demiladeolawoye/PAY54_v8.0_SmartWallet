@@ -215,10 +215,10 @@ textarea{
 .phone-field{
 display:flex;
 align-items:center;
-border:1px solid rgba(255,255,255,.15);
+border:1px solid #d9d9d9;
 border-radius:12px;
 overflow:hidden;
-background:rgba(255,255,255,.04);
+background:#ffffff;
 }
 
 .phone-field select{
