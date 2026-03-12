@@ -665,18 +665,20 @@ refreshUI();
 
 setTimeout(() => {
 
-  RCPT.openReceiptModal({
-    openModal,
-    title: `Payment to ${merchant}`,
-    tx,
-    lines: [
-      `Merchant: ${merchant}`,
-      `Amount: ${currency} ${amount.toLocaleString()}`,
-      `Channel: Scan & Pay`
-    ]
-  });
+requestAnimationFrame(()=>{
 
-},150);
+RCPT.openReceiptModal({
+openModal,
+title:`Payment to ${merchant}`,
+tx,
+lines:[
+`Merchant: ${merchant}`,
+`Amount: ${currency} ${amount.toLocaleString()}`,
+`Channel: Scan & Pay`
+]
+});
+
+});
 
   } catch (err) {
 
