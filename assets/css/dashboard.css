@@ -375,15 +375,24 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 }
 
 /* Tiles */
-.tile-grid{ display:grid; gap:12px; }
+/* =========================
+   PAY54 Smart Tile Grid
+   Fintech-grade responsive layout
+========================= */
 
-.tile-grid.cols-3{
-  grid-template-columns: repeat(3, minmax(0,1fr));
+.tile-grid{
+  display:grid;
+  gap:14px;
 }
 
-/* Services grid */
+/* Money Moves */
+.tile-grid.cols-3{
+  grid-template-columns: repeat(auto-fit, minmax(170px,1fr));
+}
+
+/* Services */
 .tile-grid.cols-4{
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
 }
 
 .tile-btn{
