@@ -397,18 +397,24 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 
 .tile-btn{
   text-align:left;
-  padding: 14px 14px;
+  padding:16px;
   border-radius: var(--radius);
-  border: 1px solid var(--stroke2);
+  border:1px solid var(--stroke2);
   background: rgba(255,255,255,0.03);
-  cursor:pointer;
-  transition: transform .12s ease, border-color .12s ease, background .12s ease;
 
-  /* Services alignment fix */
   display:flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  min-height: 96px;
+  flex-direction:column;
+  justify-content:space-between;
+
+  min-height:110px;
+
+  cursor:pointer;
+
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    background .15s ease,
+    box-shadow .15s ease;
 }
 .tile-btn .t-title{
   display:block;
