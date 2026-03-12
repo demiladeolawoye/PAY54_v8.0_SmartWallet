@@ -941,6 +941,124 @@ function openWithdraw() {
 
   function openSendUnified() { comingSoon("Send"); }
   function openReceive() { comingSoon("Receive"); }
+  function openRequestMoney(){
+
+openModal({
+
+title:"Request Money",
+
+bodyHTML:`
+
+<form class="p54-form" id="reqForm">
+
+<div>
+<div class="p54-label">Request From</div>
+<input class="p54-input" id="reqUser" placeholder="@username" required>
+</div>
+
+<div>
+<div class="p54-label">Amount</div>
+<input class="p54-input" id="reqAmount" type="number" placeholder="0.00" required>
+</div>
+
+<div>
+<div class="p54-label">Note</div>
+<input class="p54-input" id="reqNote" placeholder="Optional note">
+</div>
+
+<div class="p54-actions">
+<button class="p54-btn" type="button" id="cancelReq">Cancel</button>
+<button class="p54-btn primary" type="submit">Send Request</button>
+</div>
+
+</form>
+
+`,
+
+onMount:({modal,close})=>{
+
+modal.querySelector("#cancelReq").addEventListener("click",close);
+
+modal.querySelector("#reqForm").addEventListener("submit",(e)=>{
+
+e.preventDefault();
+
+const user = modal.querySelector("#reqUser").value;
+const amount = modal.querySelector("#reqAmount").value;
+
+alert(`Payment request sent to ${user}`);
+
+close();
+
+});
+
+}
+
+});
+
+}
+   function openMerchantQR(){
+
+openModal({
+
+title:"Merchant QR Generator",
+
+bodyHTML:`
+
+<form class="p54-form" id="qrForm">
+
+<div>
+<div class="p54-label">Merchant Name</div>
+<input class="p54-input" id="qrMerchant" required>
+</div>
+
+<div>
+<div class="p54-label">Amount (optional)</div>
+<input class="p54-input" id="qrAmount" type="number" placeholder="0.00">
+</div>
+
+<div id="qrOutput" style="text-align:center;margin-top:16px"></div>
+
+<div class="p54-actions">
+<button class="p54-btn" type="button" id="cancelQR">Close</button>
+<button class="p54-btn primary" type="submit">Generate QR</button>
+</div>
+
+</form>
+
+`,
+
+onMount:({modal,close})=>{
+
+const form = modal.querySelector("#qrForm");
+const output = modal.querySelector("#qrOutput");
+
+form.addEventListener("submit",(e)=>{
+
+e.preventDefault();
+
+const merchant = modal.querySelector("#qrMerchant").value;
+const amount = modal.querySelector("#qrAmount").value;
+
+const payload = `PAY54|${merchant}|${amount}`;
+
+output.innerHTML="";
+
+new QRCode(output,{
+text:payload,
+width:220,
+height:220
+});
+
+});
+
+modal.querySelector("#cancelQR").addEventListener("click",close);
+
+}
+
+});
+
+}
   function openBankTransfer() { comingSoon("Bank Transfer"); }
   function openCrossBorderFXUnified() { comingSoon("Cross-border FX"); }
 
