@@ -1019,7 +1019,7 @@ function openWithdraw() {
       if (service === "trading") return comingSoon("Trading");
       if (service === "bet") return comingSoon("Bet Funding");
       if (service === "agent") return comingSoon("Become an Agent");
-      if(service === "locator") return comingSoon("ATM / Agent Locator");
+      if(service === "request") return openRequestMoney();
       if (service === "risk") return comingSoon("AI Risk Watch");
       
 
