@@ -88,14 +88,19 @@
         </div>
       `,
       onMount: ({ modal, close }) => {
-        modal.querySelector("#doneRcpt").addEventListener("click", close);
-        modal.querySelector("#copyRcpt").addEventListener("click", () => copyToClipboard(receiptText));
-        modal.querySelector("#waRcpt").addEventListener("click", () => shareWhatsApp(receiptText));
-        modal.querySelector("#againRcpt").addEventListener("click", () => {
-  close();
-  setTimeout(()=> openScanAndPay(),200);
-    });
-  }
+  modal.querySelector("#doneRcpt").addEventListener("click", close);
+  modal.querySelector("#copyRcpt").addEventListener("click", () => copyToClipboard(receiptText));
+  modal.querySelector("#waRcpt").addEventListener("click", () => shareWhatsApp(receiptText));
+  modal.querySelector("#againRcpt").addEventListener("click", () => {
+    close();
+    setTimeout(()=> openScanAndPay(),200);
+  });
+}
 
-  window.PAY54_RECEIPTS = { openReceiptModal };
+});   // closes openModal
+
+}
+
+window.PAY54_RECEIPTS = { openReceiptModal };
+
 })();
