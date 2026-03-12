@@ -1037,10 +1037,15 @@ function openWithdraw() {
     window.__PAY54_DASH_V81_INIT__ = true;
 
     seedDemoIfEmpty();
-    seedDemoAlertsIfEmpty();
+seedDemoAlertsIfEmpty();
 
-    // Ensure currency + totals correct
-    setActiveCurrency(getSelectedCurrency());
+/* refresh ledger before rendering UI */
+setTimeout(()=>{
+
+setActiveCurrency(getSelectedCurrency());
+renderRecentTransactions();
+
+},100);
 
     renderAlerts();
     renderNews();
