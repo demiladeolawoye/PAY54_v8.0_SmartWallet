@@ -208,3 +208,31 @@ select,
 textarea{
   font-size:16px;
 }
+/* =========================
+   PHONE INPUT FIELD
+========================= */
+
+.phone-field{
+display:flex;
+align-items:center;
+border:1px solid rgba(255,255,255,.15);
+border-radius:12px;
+overflow:hidden;
+background:rgba(255,255,255,.04);
+}
+
+.phone-field select{
+border:none;
+background:transparent;
+padding:12px;
+font-size:16px;
+}
+
+.phone-field input{
+flex:1;
+border:none;
+padding:12px;
+font-size:16px;
+background:transparent;
+outline:none;
+}
