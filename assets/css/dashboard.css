@@ -334,6 +334,22 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   margin: 10px 0 10px 0;
   line-height: 1.05;
 }
+.balance-delta{
+
+ font-size:14px;
+ font-weight:800;
+
+ margin-top:-6px;
+
+}
+
+.balance-delta.pos{
+ color:var(--pos);
+}
+
+.balance-delta.neg{
+ color:var(--neg);
+}
 /* =========================
    PAY54 Multi-Currency Wallet Strip
 ========================= */
