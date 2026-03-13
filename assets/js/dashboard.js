@@ -532,14 +532,26 @@ function showToast(message){
   },3000);
 
 }
- function refreshUI() {
+function refreshUI() {
+
   requestAnimationFrame(() => {
 
-    setActiveCurrency(getSelectedCurrency());
-    renderRecentTransactions();
-    renderWalletStrip();
+    try {
+
+      setActiveCurrency(getSelectedCurrency());
+
+      renderRecentTransactions();
+
+      if (typeof renderWalletStrip === "function") {
+        renderWalletStrip();
+      }
+
+    } catch (err) {
+      console.error("UI refresh failed:", err);
+    }
 
   });
+
 }
 
 function addEntryAndRefresh(entry) {
