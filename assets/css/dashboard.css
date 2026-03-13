@@ -271,13 +271,43 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 }
 
 /* Balance */
-.balance-card{ padding: 18px; }
-.balance-top{
-  display:flex;
-  align-items:flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+.balance-card{
+
+  padding:18px;
+
+  position:relative;
+
+  background:linear-gradient(
+    135deg,
+    rgba(59,130,246,0.12),
+    rgba(59,130,246,0.02)
+  );
+
+  border:1px solid rgba(59,130,246,0.25);
+
+  backdrop-filter: blur(6px);
+
+}
+.balance-card::before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:-2px;
+
+  border-radius:inherit;
+
+  background:radial-gradient(
+    circle at top left,
+    rgba(59,130,246,0.35),
+    transparent 60%
+  );
+
+  opacity:.35;
+
+  z-index:-1;
+
 }
 .label{
   font-size: 12px;
