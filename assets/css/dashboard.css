@@ -732,3 +732,23 @@ body:not(.light) select option{
 .fab-label{
   font-size:14px;
 }
+/* =========================
+   PAY54 Premium Balance Lift
+========================= */
+
+.balance-card{
+  transition:
+    transform .35s ease,
+    box-shadow .35s ease;
+}
+
+/* lifted state */
+
+.balance-card.lifted{
+
+  transform: translateY(-6px);
+
+  box-shadow:
+    0 28px 60px rgba(0,0,0,0.45),
+    0 0 0 1px rgba(59,130,246,.15);
+}
