@@ -480,7 +480,25 @@ function waitForModules(callback){
   /* ---------------------------
      Core Modals (minimal stable)
   --------------------------- */
+function showToast(message){
 
+  const container = document.getElementById("toastContainer");
+
+  if(!container) return;
+
+  const toast = document.createElement("div");
+
+  toast.className = "p54-toast";
+
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  setTimeout(()=>{
+    toast.remove();
+  },3000);
+
+}
   function refreshUI() {
   requestAnimationFrame(() => {
     setActiveCurrency(getSelectedCurrency());
