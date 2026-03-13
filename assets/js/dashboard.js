@@ -1177,11 +1177,20 @@ renderRecentTransactions();
     renderRecentTransactions();
 
     // Header buttons
-    if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
-    if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
+if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
+if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
 
-    bindStableClickRouting();
-    refreshUI();
+/* Floating Scan Pay Button */
+const scanFab = document.getElementById("scanPayFab");
+
+if(scanFab){
+  scanFab.addEventListener("click", () => {
+    openScanAndPay();
+  });
+}
+
+bindStableClickRouting();
+refreshUI();
   }
 
 waitForModules(() => {
