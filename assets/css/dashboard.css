@@ -278,23 +278,20 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 /* Balance */
 .balance-card{
 
-  padding:18px;
+ padding:18px;
+ margin-bottom:24px;
 
-  position:relative;
+ position:relative;
 
-  background:linear-gradient(
-    135deg,
-    rgba(59,130,246,0.12),
-    rgba(59,130,246,0.02)
-  );
+ background:linear-gradient(
+   135deg,
+   rgba(59,130,246,0.12),
+   rgba(59,130,246,0.02)
+ );
 
-  border:1px solid rgba(59,130,246,0.25);
+ border:1px solid rgba(59,130,246,0.25);
+ backdrop-filter:blur(6px);
 
-  backdrop-filter: blur(6px);
-
-}
-.balance-card{
-margin-bottom:24px;
 }
 .balance-card::before{
 
