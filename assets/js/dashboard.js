@@ -472,7 +472,40 @@ function waitForModules(callback){
       `;
       return;
     }
+function renderWalletStrip(){
 
+  const strip = document.getElementById("walletStrip");
+
+  if(!strip) return;
+
+  const balances = LEDGER.getBalances();
+
+  const selected = getSelectedCurrency();
+
+  strip.innerHTML = "";
+
+  Object.keys(balances).forEach(cur=>{
+
+    const amt = balances[cur];
+
+    if(!amt) return;
+
+    const chip = document.createElement("div");
+
+    chip.className = "wallet-chip" + (cur === selected ? " active" : "");
+
+    chip.innerHTML = `
+      <div class="wc-cur">${cur}</div>
+      <div class="wc-amt">${LEDGER.moneyFmt(cur, amt)}</div>
+    `;
+
+    chip.addEventListener("click",()=>setActiveCurrency(cur));
+
+    strip.appendChild(chip);
+
+  });
+
+}
     txFeed.innerHTML = "";
     txs.forEach(tx => prependTxToDOM(tx));
   }
@@ -503,6 +536,7 @@ function showToast(message){
   requestAnimationFrame(() => {
     setActiveCurrency(getSelectedCurrency());
     renderRecentTransactions();
+    renderWalletStrip();
   });
 }
 
