@@ -672,9 +672,13 @@ form.addEventListener("submit", (e) => {
       meta: { merchant, channel: "QR" }
     });
 
-    const tx = LEDGER.applyEntry(entry);
+  const tx = LEDGER.applyEntry(entry);
+
 prependTxToDOM(tx);
+
 refreshUI();
+
+showToast(`💸 ${LEDGER.moneyFmt(currency, amount)} paid to ${merchant}`);
 
     /* stop camera immediately */
 stopCamera();
