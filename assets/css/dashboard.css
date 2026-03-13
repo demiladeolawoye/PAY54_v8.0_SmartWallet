@@ -256,10 +256,12 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 
 .card{
   background: linear-gradient(180deg, var(--card), var(--card2));
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius2);
-  box-shadow: var(--shadow);
-  padding: 16px;
+  border:1px solid var(--stroke);
+  border-radius:var(--radius2);
+  box-shadow:var(--shadow);
+
+  padding:16px;
+  margin-bottom:18px;
 }
 
 .card h3{
