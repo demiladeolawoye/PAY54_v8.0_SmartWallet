@@ -1179,7 +1179,27 @@ renderRecentTransactions();
     // Header buttons
 if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
 if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
+/* Premium balance lift on scroll */
 
+const balanceCard = document.getElementById("balanceCard");
+
+if(balanceCard){
+
+  window.addEventListener("scroll", () => {
+
+    if(window.scrollY > 40){
+
+      balanceCard.classList.add("lifted");
+
+    }else{
+
+      balanceCard.classList.remove("lifted");
+
+    }
+
+  });
+
+}
 /* Floating Scan Pay Button */
 const scanFab = document.getElementById("scanPayFab");
 
