@@ -752,3 +752,24 @@ body:not(.light) select option{
     0 28px 60px rgba(0,0,0,0.45),
     0 0 0 1px rgba(59,130,246,.15);
 }
+/* =========================
+   PAY54 Animated Transactions
+========================= */
+
+.feed-item{
+
+  animation: txSlideIn .45s ease, txGlow 1.2s ease;
+
+}
+
+@keyframes txGlow{
+
+  0%{
+    background:rgba(59,130,246,.18);
+  }
+
+  100%{
+    background:rgba(255,255,255,0.03);
+  }
+
+}
