@@ -70,11 +70,17 @@
       <div class="card balance-card">
         <div class="balance-top">
           <div class="label">TOTAL BALANCE</div>
-          <div class="balance-actions">
-            <button class="btn primary" id="addMoneyBtn" type="button">Add money</button>
-            <button class="btn ghost" id="withdrawBtn" type="button">Withdraw</button>
-          </div>
-        </div>
+         <div class="balance-actions">
+
+<button class="btn primary" id="addMoneyBtn" type="button">
+➕ Add money
+</button>
+
+<button class="btn ghost" id="withdrawBtn" type="button">
+💵 Withdraw
+</button>
+
+</div>
 
         <div id="balanceAmount" class="balance-amount">₦ 0.00</div>
         <div class="balance-meta">Across wallets (converted) • FX wallets enabled • Device + PIN secured</div>
@@ -97,31 +103,37 @@
 
         <div class="tile-grid cols-3">
           <button class="tile-btn" type="button" data-action="send">
+            <span class="t-icon">📤</span>
             <span class="t-title">Send</span>
             <span class="t-sub">Instant PAY54 → PAY54</span>
           </button>
 
           <button class="tile-btn" type="button" data-action="receive">
+            <span class="t-icon">📥</span>
             <span class="t-title">Receive</span>
             <span class="t-sub">Account, tag &amp; QR</span>
           </button>
 
           <button class="tile-btn" type="button" data-action="scanpay">
+            <span class="t-icon">📲</span>
             <span class="t-title">Scan &amp; Pay</span>
             <span class="t-sub">Merchant QR</span>
           </button>
 
           <button class="tile-btn" type="button" data-action="add">
+            <span class="t-icon">➕</span>
             <span class="t-title">Add Money</span>
             <span class="t-sub">Card · Agents</span>
           </button>
 
           <button class="tile-btn" type="button" data-action="withdraw">
+            <span class="t-icon">💵</span>
             <span class="t-title">Withdraw</span>
             <span class="t-sub">Card · Agents</span>
           </button>
 
           <button class="tile-btn" type="button" data-action="banktransfer">
+            <span class="t-icon">🏦</span>
             <span class="t-title">Bank Transfer</span>
             <span class="t-sub">To NG banks</span>
           </button>
@@ -231,21 +243,25 @@
 
         <div class="shortcut-grid">
           <button class="shortcut-btn" type="button" data-shortcut="agent">
+            <span class="t-icon">🤝</span>
             <span class="t-title">Become an Agent</span>
             <span class="t-sub">Onboard &amp; earn</span>
           </button>
 
           <button class="shortcut-btn" type="button" data-shortcut="shop">
+            <span class="t-icon">🛒</span>
             <span class="t-title">Shop &amp; Go</span>
             <span class="t-sub">Food • Tickets • Taxi</span>
           </button>
 
           <button class="shortcut-btn" type="button" data-shortcut="referral">
+            <span class="t-icon">🎁</span>
             <span class="t-title">Refer &amp; Earn</span>
             <span class="t-sub">Invite friends, earn rewards</span>
           </button>
 
           <button class="shortcut-btn" type="button" data-shortcut="trading">
+            <span class="t-icon">📈</span>
             <span class="t-title">Trading</span>
             <span class="t-sub">Shares • Stocks • Crypto</span>
           </button>
@@ -261,11 +277,13 @@
 
         <div class="utility-grid">
           <button class="utility-btn" type="button" id="atmFinderBtn">
+            <span class="t-icon">🏧</span>
             <span class="t-title">ATM Finder</span>
             <span class="t-sub">Nearby cash points</span>
           </button>
 
           <button class="utility-btn" type="button" id="posFinderBtn">
+            <span class="t-icon">📍</span>
             <span class="t-title">POS / Agent Finder</span>
             <span class="t-sub">Collect cash from agents</span>
           </button>
