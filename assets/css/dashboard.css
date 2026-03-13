@@ -237,10 +237,15 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
    MAIN GRID + CARDS
 --------------------------- */
 .dash-grid{
-  max-width: 1280px;
-  margin: 0 auto;
-  padding-left: 16px;
-  padding-right: 16px;
+  max-width:1280px;
+  margin:0 auto;
+
+  display:grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap:20px;
+
+  padding-left:16px;
+  padding-right:16px;
 }
 
 .left, .right{
