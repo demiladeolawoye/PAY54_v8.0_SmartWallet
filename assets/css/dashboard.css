@@ -293,6 +293,9 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   backdrop-filter: blur(6px);
 
 }
+.balance-card{
+margin-bottom:24px;
+}
 .balance-card::before{
 
   content:"";
