@@ -327,6 +327,70 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   margin: 10px 0 10px 0;
   line-height: 1.05;
 }
+/* =========================
+   PAY54 Multi-Currency Wallet Strip
+========================= */
+
+.wallet-strip{
+
+  display:flex;
+  gap:10px;
+
+  overflow-x:auto;
+
+  padding-top:6px;
+  padding-bottom:6px;
+
+  scrollbar-width:none;
+
+}
+
+.wallet-strip::-webkit-scrollbar{
+  display:none;
+}
+
+.wallet-chip{
+
+  min-width:110px;
+
+  padding:10px 12px;
+
+  border-radius:12px;
+
+  border:1px solid var(--stroke2);
+
+  background:rgba(255,255,255,0.05);
+
+  display:flex;
+  flex-direction:column;
+
+  font-weight:800;
+
+}
+
+.wallet-chip .wc-cur{
+
+  font-size:11px;
+
+  color:var(--muted);
+
+}
+
+.wallet-chip .wc-amt{
+
+  font-size:14px;
+
+  margin-top:2px;
+
+}
+
+.wallet-chip.active{
+
+  border-color:rgba(59,130,246,.6);
+
+  background:rgba(59,130,246,.12);
+
+}
 .balance-meta{
   color: var(--muted);
   font-weight: 650;
