@@ -338,8 +338,8 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   transition: transform .12s ease, border-color .12s ease, background .12s ease;
 }
 .btn-icon{
-  margin-right:6px;
-  font-size:14px;
+  margin-right:8px;
+  font-size:16px;
 }
 .btn:hover{ transform: translateY(-1px); border-color: rgba(59,130,246,0.45); }
 .btn.primary{
