@@ -246,7 +246,7 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 .left, .right{
   display:flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 14px;
 }
 
 .card{
