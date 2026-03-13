@@ -532,11 +532,13 @@ function showToast(message){
   },3000);
 
 }
-  function refreshUI() {
+ function refreshUI() {
   requestAnimationFrame(() => {
+
     setActiveCurrency(getSelectedCurrency());
     renderRecentTransactions();
     renderWalletStrip();
+
   });
 }
 
