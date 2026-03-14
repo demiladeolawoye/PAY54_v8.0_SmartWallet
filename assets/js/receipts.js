@@ -93,7 +93,7 @@
   modal.querySelector("#waRcpt").addEventListener("click", () => shareWhatsApp(receiptText));
   modal.querySelector("#againRcpt").addEventListener("click", () => {
     close();
-    setTimeout(()=> openScanAndPay(),200);
+    setTimeout(()=> window.PAY54_OPEN_SCAN(),200);
   });
 }
 
