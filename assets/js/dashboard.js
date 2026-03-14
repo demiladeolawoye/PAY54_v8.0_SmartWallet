@@ -472,6 +472,10 @@ function waitForModules(callback){
       `;
       return;
     }
+
+    txFeed.innerHTML = "";
+    txs.forEach(tx => prependTxToDOM(tx));
+  }
 function renderWalletStrip(){
 
   const strip = document.getElementById("walletStrip");
@@ -506,10 +510,6 @@ function renderWalletStrip(){
   });
 
 }
-    txFeed.innerHTML = "";
-    txs.forEach(tx => prependTxToDOM(tx));
-  }
-
   /* ---------------------------
      Core Modals (minimal stable)
   --------------------------- */
