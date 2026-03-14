@@ -233,21 +233,29 @@ function waitForModules(callback){
     return total;
   }
 
-  function setActiveCurrency(cur) {
-    pillBtns.forEach((b) => {
-      const isActive = b.dataset.cur === cur;
-      b.classList.toggle("active", isActive);
-      b.setAttribute("aria-pressed", isActive ? "true" : "false");
-    });
-    if (currencySelect) currencySelect.value = cur;
-    localStorage.setItem(LS.CURRENCY, cur);
-    LEDGER.setBaseCurrency(cur);
+function getConvertedTotal(targetCur){
 
-    if (balanceEl) {
-      const total = getConvertedTotal(cur);
-      balanceEl.textContent = LEDGER.moneyFmt(cur, total);
+  const balances = LEDGER.getBalances() || {};
+
+  let total = 0;
+
+  Object.keys(balances).forEach((c)=>{
+
+    const amt = Number(balances[c] ?? 0);
+
+    if(!amt) return;
+
+    if(c === targetCur){
+      total += amt;
+    }else{
+      total += Number(LEDGER.convert(c,targetCur,amt) || 0);
     }
-  }
+
+  });
+
+  return total;
+}
+
 
   pillBtns.forEach((btn) => btn.addEventListener("click", () => setActiveCurrency(btn.dataset.cur)));
   if (currencySelect) currencySelect.addEventListener("change", (e) => setActiveCurrency(e.target.value));
