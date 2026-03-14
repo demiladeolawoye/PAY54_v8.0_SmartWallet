@@ -432,17 +432,9 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
-  font-weight: 800;
-  color: var(--text);
-  width: fit-content;
-  margin: 6px auto 0 auto;
-}
 
+  margin-bottom:18px;
+}
 /* Buttons */
 .btn{
   border-radius: 999px;
