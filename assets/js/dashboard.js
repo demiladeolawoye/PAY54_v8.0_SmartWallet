@@ -797,10 +797,8 @@ lines:[
   });     // closes openModal
 
 }         // closes openScanAndPay
+window.PAY54_OPEN_SCAN = openScanAndPay;
 
-/* =========================
-   PAYMENT RECEIPT
-========================= */
       
   /* =========================
    PAYMENT RECEIPT
