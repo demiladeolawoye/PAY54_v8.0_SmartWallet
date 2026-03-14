@@ -37,7 +37,7 @@ function waitForModules(callback){
       return;
     }
 
-    setTimeout(check,50);
+    setTimeout(check,100);
   };
 
   check();
