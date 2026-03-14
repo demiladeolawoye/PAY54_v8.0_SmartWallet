@@ -295,6 +295,22 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
  backdrop-filter:blur(6px);
 
 }
+
+/* Balance header layout */
+.balance-top{
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+margin-bottom:10px;
+
+}
+
+.balance-actions{
+display:flex;
+gap:10px;
+}
 .balance-card::before{
 
   content:"";
