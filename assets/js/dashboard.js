@@ -259,6 +259,28 @@ function getConvertedTotal(targetCur){
 
   pillBtns.forEach((btn) => btn.addEventListener("click", () => setActiveCurrency(btn.dataset.cur)));
   if (currencySelect) currencySelect.addEventListener("change", (e) => setActiveCurrency(e.target.value));
+function setActiveCurrency(cur){
+
+  localStorage.setItem(LS.CURRENCY, cur);
+
+  /* update currency pills */
+  pillBtns.forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.cur === cur);
+  });
+
+  /* update mobile dropdown */
+  if(currencySelect){
+    currencySelect.value = cur;
+  }
+
+  /* calculate converted balance */
+  const total = getConvertedTotal(cur);
+
+  if(balanceEl){
+    balanceEl.textContent = LEDGER.moneyFmt(cur,total);
+  }
+
+}
 
   /* ---------------------------
      Profile / logout
