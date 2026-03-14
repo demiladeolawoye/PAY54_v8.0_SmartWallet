@@ -1184,50 +1184,74 @@ modal.querySelector("#cancelQR").addEventListener("click",close);
      STABLE CLICK WIRING (FIXES Step 4)
   --------------------------- */
 
-  function bindStableClickRouting() {
-    document.addEventListener("click", (e) => {
-      const tile = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
-      if (!tile) return;
+ function bindStableClickRouting(){
 
-      const action = tile.getAttribute("data-action");
-      const service = tile.getAttribute("data-service");
-      const shortcut = tile.getAttribute("data-shortcut");
-      const id = tile.id || "";
+document.addEventListener("click",(e)=>{
 
-      // Money Moves
-      if (action === "send") return openSendUnified();
-      if (action === "receive") return openReceive();
-      if (action === "add") return openAddMoney();
-      if (action === "withdraw") return openWithdraw();
-      if (action === "banktransfer") return openBankTransfer();
-      if (action === "scanpay") return openScanAndPay();
+let el = e.target;
 
-      // Services
-      if (service === "fx") return openCrossBorderFXUnified();
-      if (service === "bills") return comingSoon("Pay Bills & Top Up");
-      if (service === "savings") return comingSoon("Savings & Goals");
-      if (service === "cards") return comingSoon("Virtual & Linked Cards");
-      if (service === "checkout") return comingSoon("PAY54 Smart Checkout");
-      if (service === "shop") return comingSoon("Shop & Go");
-      if(service === "merchantqr") return openMerchantQR();
-      if (service === "trading") return comingSoon("Trading");
-      if (service === "bet") return comingSoon("Bet Funding");
-      if (service === "agent") return comingSoon("Become an Agent");
-      if(service === "request") return openRequestMoney();
-      if (service === "risk") return comingSoon("AI Risk Watch");
-      
+while(el && el !== document){
 
-      // Shortcuts
-      if (shortcut === "shop") return comingSoon("Shop & Go");
-      if (shortcut === "agent") return comingSoon("Become an Agent");
-      if (shortcut === "referral") return comingSoon("Refer & Earn");
-      if (shortcut === "trading") return comingSoon("Trading");
+if(
+el.classList &&
+(
+el.classList.contains("tile-btn") ||
+el.classList.contains("shortcut-btn") ||
+el.classList.contains("utility-btn")
+)
+){
 
-      // Utilities
-      if (id === "atmFinderBtn") return comingSoon("ATM Finder");
-      if (id === "posFinderBtn") return comingSoon("POS / Agent Finder");
-    });
-  }
+const action = el.dataset.action;
+const service = el.dataset.service;
+const shortcut = el.dataset.shortcut;
+const id = el.id;
+
+/* MONEY MOVES */
+
+if(action === "send") return openSendUnified();
+if(action === "receive") return openReceive();
+if(action === "add") return openAddMoney();
+if(action === "withdraw") return openWithdraw();
+if(action === "banktransfer") return openBankTransfer();
+if(action === "scanpay") return openScanAndPay();
+
+/* SERVICES */
+
+if(service === "fx") return openCrossBorderFXUnified();
+if(service === "bills") return comingSoon("Pay Bills & Top Up");
+if(service === "savings") return comingSoon("Savings & Goals");
+if(service === "cards") return comingSoon("Virtual & Linked Cards");
+if(service === "checkout") return comingSoon("PAY54 Smart Checkout");
+if(service === "shop") return comingSoon("Shop & Go");
+if(service === "merchantqr") return openMerchantQR();
+if(service === "trading") return comingSoon("Trading");
+if(service === "bet") return comingSoon("Bet Funding");
+if(service === "agent") return comingSoon("Become an Agent");
+if(service === "request") return openRequestMoney();
+if(service === "risk") return comingSoon("AI Risk Watch");
+
+/* SHORTCUTS */
+
+if(shortcut === "shop") return comingSoon("Shop & Go");
+if(shortcut === "agent") return comingSoon("Become an Agent");
+if(shortcut === "referral") return comingSoon("Refer & Earn");
+if(shortcut === "trading") return comingSoon("Trading");
+
+/* UTILITIES */
+
+if(id === "atmFinderBtn") return comingSoon("ATM Finder");
+if(id === "posFinderBtn") return comingSoon("POS / Agent Finder");
+
+}
+
+el = el.parentNode;
+
+}
+
+});
+
+}
+
 
   /* ---------------------------
      INIT
