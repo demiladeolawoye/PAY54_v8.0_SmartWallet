@@ -542,9 +542,7 @@ function refreshUI() {
 
       renderRecentTransactions();
 
-      if (typeof renderWalletStrip === "function") {
-        renderWalletStrip();
-      }
+      renderWalletStrip();
 
     } catch (err) {
       console.error("UI refresh failed:", err);
