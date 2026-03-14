@@ -1235,12 +1235,9 @@ modal.querySelector("#cancelQR").addEventListener("click",close);
 seedDemoAlertsIfEmpty();
 
 /* refresh ledger before rendering UI */
-setTimeout(()=>{
-
 setActiveCurrency(getSelectedCurrency());
 renderRecentTransactions();
-
-},100);
+renderWalletStrip();
 
     renderAlerts();
     renderNews();
