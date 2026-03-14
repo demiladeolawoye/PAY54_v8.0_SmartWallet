@@ -217,21 +217,12 @@ function waitForModules(callback){
   /* ---------------------------
      Currency + converted total
   --------------------------- */
-
-  function getSelectedCurrency() {
-    return localStorage.getItem(LS.CURRENCY) || "NGN";
-  }
-
-  function getConvertedTotal(targetCur) {
-    const balances = LEDGER.getBalances();
-    let total = 0;
-    Object.keys(balances).forEach((c) => {
-      const amt = Number(balances[c] ?? 0);
-      if (!amt) return;
-      total += (c === targetCur) ? amt : Number(LEDGER.convert(c, targetCur, amt) || 0);
-    });
-    return total;
-  }
+/* ---------------------------
+   Currency + converted total
+--------------------------- */
+function getSelectedCurrency() {
+  return localStorage.getItem(LS.CURRENCY) || "NGN";
+}
 
 function getConvertedTotal(targetCur){
 
@@ -256,9 +247,19 @@ function getConvertedTotal(targetCur){
   return total;
 }
 
+/* Currency selectors */
+pillBtns.forEach(btn =>
+  btn.addEventListener("click", () => setActiveCurrency(btn.dataset.cur))
+);
 
-  pillBtns.forEach((btn) => btn.addEventListener("click", () => setActiveCurrency(btn.dataset.cur)));
-  if (currencySelect) currencySelect.addEventListener("change", (e) => setActiveCurrency(e.target.value));
+if (currencySelect) {
+  currencySelect.addEventListener("change", (e) =>
+    setActiveCurrency(e.target.value)
+  );
+}
+
+/* Activate currency + render balance */
+
 function setActiveCurrency(cur){
 
   localStorage.setItem(LS.CURRENCY, cur);
@@ -281,6 +282,7 @@ function setActiveCurrency(cur){
   }
 
 }
+
 
   /* ---------------------------
      Profile / logout
