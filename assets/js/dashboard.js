@@ -1281,21 +1281,30 @@ el = el.parentNode;
      INIT
   --------------------------- */
 
-  function init() {
-    if (window.__PAY54_DASH_V81_INIT__) return;
-    window.__PAY54_DASH_V81_INIT__ = true;
+function init() {
 
-    seedDemoIfEmpty();
+if (window.__PAY54_DASH_V81_INIT__) return;
+window.__PAY54_DASH_V81_INIT__ = true;
+
+/* Ensure FX base currency exists */
+
+const currentCur = getSelectedCurrency();
+LEDGER.setBaseCurrency(currentCur);
+
+seedDemoIfEmpty();
 seedDemoAlertsIfEmpty();
 
-/* refresh ledger before rendering UI */
-setActiveCurrency(getSelectedCurrency());
+/* Render UI */
+
+setActiveCurrency(currentCur);
 renderRecentTransactions();
 renderWalletStrip();
 
-    renderAlerts();
-    renderNews();
-    renderRecentTransactions();
+renderAlerts();
+renderNews();
+
+}
+
 
     // Header buttons
 if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
