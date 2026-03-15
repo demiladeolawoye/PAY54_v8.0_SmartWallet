@@ -1272,29 +1272,11 @@ el = el.parentNode;
   /* ---------------------------
      INIT
   --------------------------- */
-
 function init() {
 
-if (window.__PAY54_DASH_V81_INIT__) return;
-window.__PAY54_DASH_V81_INIT__ = true;
-
-/* Ensure FX base currency exists */
-
-const currentCur = getSelectedCurrency();
-LEDGER.setBaseCurrency(currentCur);
-
-seedDemoIfEmpty();
-seedDemoAlertsIfEmpty();
-
-/* Render UI */
-
-setActiveCurrency(currentCur);
-renderRecentTransactions();
-renderWalletStrip();
-
-renderAlerts();
-renderNews();
-
+if(!LEDGER){
+console.error("LEDGER not ready");
+return;
 }
 
 
