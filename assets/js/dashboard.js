@@ -21,28 +21,39 @@ let RCPT;
 
 function waitForModules(callback){
 
+  let attempts = 0;
+
   const check = () => {
 
-    if (
-      window.PAY54_LEDGER &&
-      window.PAY54_RECIPIENT &&
-      window.PAY54_RECEIPTS
-    ){
+    attempts++;
 
-      LEDGER = window.PAY54_LEDGER;
-      RECIP = window.PAY54_RECIPIENT;
-      RCPT = window.PAY54_RECEIPTS;
+    LEDGER = window.PAY54_LEDGER || null;
+    RECIP  = window.PAY54_RECIPIENT || null;
+    RCPT   = window.PAY54_RECEIPTS || null;
+
+    if (LEDGER) {
+
+      console.log("PAY54 modules ready");
+
+      callback();
+      return;
+    }
+
+    if (attempts > 20) {
+
+      console.warn("Modules not fully loaded — continuing with partial modules");
 
       callback();
       return;
     }
 
     setTimeout(check,100);
+
   };
 
   check();
-}
 
+}
   const LS = {
     THEME: "pay54_theme",
     CURRENCY: "pay54_currency",
