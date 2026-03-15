@@ -1336,7 +1336,8 @@ if(scanFab){
 
 bindStableClickRouting();
 refreshUI();
-  }
+
+}
 
 waitForModules(() => {
 
