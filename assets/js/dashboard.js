@@ -234,6 +234,10 @@ function getSelectedCurrency() {
 
 function getConvertedTotal(targetCur){
 
+  if(!LEDGER){
+    return 0;
+  }
+
   const balances = LEDGER.getBalances() || {};
 
   let total = 0;
