@@ -39,13 +39,10 @@ function waitForModules(callback){
       return;
     }
 
-    if (attempts > 20) {
-
-      console.warn("Modules not fully loaded — continuing with partial modules");
-
-      callback();
-      return;
-    }
+ if (attempts > 50) {
+  console.error("PAY54 core modules failed to load");
+  return;
+}
 
     setTimeout(check,100);
 
