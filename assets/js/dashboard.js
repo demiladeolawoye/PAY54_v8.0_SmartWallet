@@ -610,6 +610,7 @@ function openScanAndPay() {
 
   openModal({
     title: "Scan & Pay",
+
     bodyHTML: `
       <div id="qr-reader" style="width:100%; margin-bottom:15px;"></div>
 
@@ -646,30 +647,26 @@ function openScanAndPay() {
       const cancelBtn = modal.querySelector("#cancelSP");
 
       let html5QrCode;
-      const qrRegionId = "qr-reader";
 
-      function stopCamera() {
-        if (html5QrCode) {
+      function stopCamera(){
+        if(html5QrCode){
           html5QrCode.stop().catch(()=>{});
         }
       }
 
-      /* QR Scan Success */
-      function onScanSuccess(decodedText) {
+      /* QR Scan */
+
+      function onScanSuccess(decodedText){
 
         try {
 
           const parts = decodedText.split("|");
 
-          if (parts[0] === "PAY54") {
-
+          if(parts[0] === "PAY54"){
             merchantEl.value = parts[1] || "";
-
-            if (parts[2]) {
-              amountEl.value = parts[2];
-            }
-
-          } else {
+            if(parts[2]) amountEl.value = parts[2];
+          }
+          else{
             merchantEl.value = decodedText;
           }
 
@@ -678,125 +675,114 @@ function openScanAndPay() {
         }
 
         stopCamera();
+
       }
 
-      /* Start Camera */
+      if(window.Html5Qrcode){
 
-      if (window.Html5Qrcode) {
-
-        html5QrCode = new Html5Qrcode(qrRegionId);
+        html5QrCode = new Html5Qrcode("qr-reader");
 
         Html5Qrcode.getCameras()
-          .then(devices => {
+        .then(devices=>{
 
-            if (!devices || !devices.length) {
-              console.warn("No camera detected");
-              return;
-            }
+          if(!devices || !devices.length){
+            console.warn("No camera detected");
+            return;
+          }
 
-            html5QrCode.start(
-              { facingMode: "environment" },
-              { fps: 10, qrbox: { width: 250, height: 250 } },
-              onScanSuccess
-            );
+          html5QrCode.start(
+            { facingMode:"environment" },
+            { fps:10, qrbox:{ width:250,height:250 } },
+            onScanSuccess
+          );
 
-          })
-          .catch(err => console.warn("Camera error:", err));
+        })
+        .catch(err=>console.warn("Camera error:",err));
+
       }
 
-      cancelBtn.addEventListener("click", () => {
+      cancelBtn.addEventListener("click", ()=>{
         stopCamera();
         close();
       });
 
-      /* SUBMIT PAYMENT */
-form.addEventListener("submit", (e) => {
+      /* PAYMENT SUBMIT */
 
-  e.preventDefault();
+      form.addEventListener("submit",(e)=>{
 
-  const payBtn = form.querySelector("button[type='submit']");
+        e.preventDefault();
 
-  if (payBtn.dataset.busy === "1") return;
+        const merchant = merchantEl.value.trim();
+        const amount = Number(amountEl.value);
+        const currency = getSelectedCurrency();
 
-  payBtn.dataset.busy = "1";
-  payBtn.disabled = true;
-  payBtn.textContent = "Processing...";
+        try{
 
-  try {
+          const balances = LEDGER.getBalances();
+          const currentBalance = balances[currency] || 0;
 
-    const merchant = merchantEl.value.trim();
-    const amount = Number(amountEl.value);
-    const currency = getSelectedCurrency();
+          if(!merchant || !amount || amount <= 0){
+            alert("Enter valid merchant and amount");
+            return;
+          }
 
-    const balances = LEDGER.getBalances();
-    const currentBalance = balances[currency] || 0;
+          if(amount > currentBalance){
+            alert("Insufficient balance");
+            return;
+          }
 
-    if (!merchant || !amount || amount <= 0) {
-      alert("Enter valid merchant and amount");
-      throw "invalid_input";
+          /* Create ledger entry */
+
+          const entry = LEDGER.createEntry({
+            type:"scan_pay",
+            title:`Payment to ${merchant}`,
+            currency,
+            amount:-amount,
+            icon:"📲",
+            meta:{ merchant, channel:"QR" }
+          });
+
+          const tx = LEDGER.applyEntry(entry);
+
+          /* Update UI */
+
+          prependTxToDOM(tx);
+          refreshUI();
+
+          /* Stop camera */
+
+          stopCamera();
+
+          /* Feedback */
+
+          showToast(`${LEDGER.moneyFmt(currency,amount)} paid to ${merchant}`);
+
+          /* Receipt */
+
+          RCPT.openReceiptModal({
+            openModal,
+            title:`Payment to ${merchant}`,
+            tx,
+            lines:[
+              `Merchant: ${merchant}`,
+              `Amount: ${currency} ${amount.toLocaleString()}`,
+              `Channel: Scan & Pay`
+            ]
+          });
+
+        }
+        catch(err){
+          console.warn("ScanPay error:",err);
+        }
+
+      });
+
     }
 
-    if (amount > currentBalance) {
-      alert("Insufficient balance");
-      throw "insufficient_balance";
-    }
+  });
 
-    const entry = LEDGER.createEntry({
-      type: "scan_pay",
-      title: `Payment to ${merchant}`,
-      currency: currency,
-      amount: -amount,
-      icon: "📲",
-      meta: { merchant, channel: "QR" }
-    });
+}
 
-  const tx = LEDGER.applyEntry(entry);
-
-prependTxToDOM(tx);
-
-refreshUI();
-
-showToast(`💸 ${LEDGER.moneyFmt(currency, amount)} paid to ${merchant}`);
-
-    /* stop camera immediately */
-stopCamera();
-
-refreshUI();
-
-setTimeout(() => {
-
-requestAnimationFrame(()=>{
-
-RCPT.openReceiptModal({
-openModal,
-title:`Payment to ${merchant}`,
-tx,
-lines:[
-`Merchant: ${merchant}`,
-`Amount: ${currency} ${amount.toLocaleString()}`,
-`Channel: Scan & Pay`
-]
-});
-
-});
-
-  } catch (err) {
-
-    console.warn("ScanPay error:", err);
-
-  } finally {
-
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay";
-    payBtn.dataset.busy = "0";
-
-  }
-
-});
-      }   // closes onMount
-  });     // closes openModal
-
-}         // closes openScanAndPay
 window.PAY54_OPEN_SCAN = openScanAndPay;
 
       
