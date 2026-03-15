@@ -582,7 +582,9 @@ function refreshUI() {
 
     try {
 
-      setActiveCurrency(getSelectedCurrency());
+      if(LEDGER){
+  setActiveCurrency(getSelectedCurrency());
+}
 
       renderRecentTransactions();
 
