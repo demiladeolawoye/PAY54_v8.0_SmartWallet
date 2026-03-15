@@ -1274,11 +1274,54 @@ el = el.parentNode;
   --------------------------- */
 function init() {
 
-if(!LEDGER){
-console.error("LEDGER not ready");
-return;
-}
+  /* Prevent double initialization */
+  if (window.__PAY54_DASH_V81_INIT__) return;
+  window.__PAY54_DASH_V81_INIT__ = true;
 
+  /* Ensure LEDGER is ready */
+
+  if (!LEDGER) {
+    console.error("PAY54 init aborted: LEDGER not ready");
+    return;
+  }
+
+  /* Ensure FX base currency exists */
+
+  const currentCur = getSelectedCurrency();
+
+  if (LEDGER.setBaseCurrency) {
+    LEDGER.setBaseCurrency(currentCur);
+  }
+
+  /* Seed demo wallet balance (only once) */
+
+  seedDemoIfEmpty();
+
+  /* Seed demo alerts */
+
+  seedDemoAlertsIfEmpty();
+
+  /* Render core UI */
+
+  setActiveCurrency(currentCur);
+
+  renderRecentTransactions();
+
+  renderWalletStrip();
+
+  renderAlerts();
+
+  renderNews();
+
+  /* Bind click routing */
+
+  bindStableClickRouting();
+
+  /* Final UI refresh */
+
+  refreshUI();
+
+}
 
     // Header buttons
 if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
@@ -1311,11 +1354,6 @@ if(scanFab){
   scanFab.addEventListener("click", () => {
     openScanAndPay();
   });
-}
-
-bindStableClickRouting();
-refreshUI();
-
 }
 
 waitForModules(() => {
