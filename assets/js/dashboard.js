@@ -287,7 +287,7 @@ function setActiveCurrency(cur){
   }
 
   /* calculate converted balance */
-  const total = getConvertedTotal(cur);
+  const total = LEDGER ? getConvertedTotal(cur) : 0;
 
   if(balanceEl){
     balanceEl.textContent = LEDGER.moneyFmt(cur,total);
