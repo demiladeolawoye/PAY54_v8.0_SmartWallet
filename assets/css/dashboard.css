@@ -353,6 +353,10 @@ gap:10px;
   letter-spacing: -0.8px;
   margin: 10px 0 10px 0;
   line-height: 1.05;
+
+  will-change: transform;
+  transform: translateZ(0);
+  transition: transform .25s ease;
 }
 .balance-delta{
 
