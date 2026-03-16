@@ -728,6 +728,7 @@ gap:16px;
 .mobile-only{ display:none; }
 
 @media (max-width: 980px){
+
   .dash-grid{
     grid-template-columns: 1fr;
     padding:
@@ -757,6 +758,11 @@ gap:16px;
   .shortcut-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
   .utility-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
 
+  /* ADD THIS LINE */
+  .money-moves-grid{
+    grid-template-columns: repeat(2,1fr);
+  }
+
   /* Mobile balance CTA equal sizing */
   .balance-actions .btn{
     min-width: 120px;
@@ -766,6 +772,7 @@ gap:16px;
     align-items: center;
     justify-content: center;
   }
+
 }
 
 @media (max-width: 420px){
