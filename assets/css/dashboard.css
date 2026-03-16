@@ -604,6 +604,10 @@ gap:16px;
 
   margin-bottom:8px;
 }
+/* Quick Shortcut icon alignment fix */
+.shortcut-btn .t-icon{
+  margin-bottom:6px;
+}
 /* Quick Shortcuts Grid */
 .shortcut-grid{
   display:grid;
