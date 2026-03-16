@@ -559,7 +559,7 @@ function renderWalletStrip(){
 
   if(!strip) return;
 
-  const balances = LEDGER.getBalances();
+ const balances = LEDGER.getBalances() || {};
 
   const selected = getSelectedCurrency();
 
