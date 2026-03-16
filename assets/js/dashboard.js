@@ -1451,7 +1451,35 @@ if(scanFab){
     openScanAndPay();
   });
 }
+/* =========================
+   PAY54 Stability Watchdog
+========================= */
 
+setInterval(()=>{
+
+  try{
+
+    if(!LEDGER) return;
+
+    const balances = LEDGER.getBalances();
+
+    const sum = Object.values(balances).reduce((a,b)=>a+Number(b||0),0);
+
+    if(sum <= 0){
+
+      console.warn("Wallet UI detected zero state — recovering...");
+
+      seedDemoIfEmpty();
+      refreshUI();
+
+    }
+
+  }catch(e){
+    console.warn("Watchdog recovery triggered");
+    refreshUI();
+  }
+
+},5000);
 waitForModules(() => {
 
   if (document.readyState === "loading") {
