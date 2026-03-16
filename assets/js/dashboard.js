@@ -1395,6 +1395,9 @@ function init() {
   setActiveCurrency(currentCur);
   renderRecentTransactions();
   renderWalletStrip();
+   document.querySelectorAll(".wallet-chip").forEach(c =>
+  c.onclick = () => setActiveCurrency(c.dataset.cur)
+);
   renderAlerts();
   renderNews();
   renderFxTicker();
