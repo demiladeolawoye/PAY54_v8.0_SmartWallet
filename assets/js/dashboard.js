@@ -31,12 +31,11 @@ function waitForModules(callback){
     RECIP  = window.PAY54_RECIPIENT || null;
     RCPT   = window.PAY54_RECEIPTS || null;
 
-    if (LEDGER) {
+  if (LEDGER) {
 
   console.log("PAY54 modules ready");
 
   callback();
-  refreshUI();
 
   return;
 }
