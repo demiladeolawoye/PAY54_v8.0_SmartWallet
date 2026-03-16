@@ -1372,14 +1372,17 @@ function init() {
   if (window.__PAY54_DASH_V81_INIT__) return;
   window.__PAY54_DASH_V81_INIT__ = true;
 
-  /* Ensure LEDGER is ready */
+  /* Safety check */
+  if(!window.PAY54_LEDGER){
+    console.error("Ledger module missing — dashboard halted");
+    return;
+  }
 
+  /* Ensure LEDGER is ready */
   if (!LEDGER) {
     console.error("PAY54 init aborted: LEDGER not ready");
     return;
   }
-
-  /* Ensure FX base currency exists */
 
   const currentCur = getSelectedCurrency();
 
@@ -1387,35 +1390,19 @@ function init() {
     LEDGER.setBaseCurrency(currentCur);
   }
 
-  /* Seed demo wallet balance (only once) */
-
   seedDemoIfEmpty();
-
-  /* Seed demo alerts */
-
   seedDemoAlertsIfEmpty();
 
-  /* Render core UI */
-
   setActiveCurrency(currentCur);
-
   renderRecentTransactions();
-
   renderWalletStrip();
-
   renderAlerts();
-
   renderNews();
-renderFxTicker();
-
-  /* Bind click routing */
+  renderFxTicker();
 
   bindStableClickRouting();
 
-  /* Final UI refresh */
-
   refreshUI();
-
 }
 
     // Header buttons
@@ -1450,6 +1437,7 @@ if(scanFab){
     openScanAndPay();
   });
 }
+ 
 /* =========================
    PAY54 Stability Watchdog
 ========================= */
