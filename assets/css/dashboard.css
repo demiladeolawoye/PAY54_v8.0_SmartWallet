@@ -380,7 +380,6 @@ gap:10px;
 /* =========================
    PAY54 Multi-Currency Wallet Strip
 ========================= */
-
 .wallet-strip{
 
   display:flex;
@@ -388,14 +387,21 @@ gap:10px;
 
   overflow-x:auto;
 
-  scroll-snap-type:x mandatory;   /* ADD THIS */
+  scroll-snap-type:x mandatory;
+
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
 
   padding-top:6px;
   padding-bottom:6px;
 
+  padding-left:2px;
+  padding-right:2px;
+
   scrollbar-width:none;
 
 }
+
 
 .wallet-strip::-webkit-scrollbar{
   display:none;
