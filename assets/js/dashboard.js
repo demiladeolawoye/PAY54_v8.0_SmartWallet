@@ -271,7 +271,37 @@ if (currencySelect) {
 }
 
 /* Activate currency + render balance */
+/* =========================
+   PREMIUM BALANCE ANIMATION
+========================= */
 
+function animateBalance(targetValue, currency){
+
+  if(!balanceEl){
+    return;
+  }
+
+  const duration = 700;
+  const start = 0;
+  const startTime = performance.now();
+
+  function frame(now){
+
+    const progress = Math.min((now - startTime) / duration, 1);
+
+    const value = start + (targetValue - start) * progress;
+
+    balanceEl.textContent = LEDGER.moneyFmt(currency, value);
+
+    if(progress < 1){
+      requestAnimationFrame(frame);
+    }
+
+  }
+
+  requestAnimationFrame(frame);
+
+}
 function setActiveCurrency(cur){
 
   localStorage.setItem(LS.CURRENCY, cur);
