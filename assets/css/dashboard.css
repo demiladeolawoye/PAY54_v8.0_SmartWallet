@@ -992,3 +992,59 @@ opacity:1;
 }
 
 }
+/* =========================
+   PAY54 Balance Glow
+========================= */
+
+.balance-glow{
+
+animation:balancePulse .8s ease;
+
+}
+
+@keyframes balancePulse{
+
+0%{
+box-shadow:0 0 0 rgba(59,130,246,0);
+}
+
+50%{
+box-shadow:0 0 30px rgba(59,130,246,.35);
+}
+
+100%{
+box-shadow:0 0 0 rgba(59,130,246,0);
+}
+
+}
+/* =========================
+   FX Market Ticker
+========================= */
+
+.fx-ticker{
+
+display:flex;
+gap:18px;
+
+margin-top:8px;
+
+font-size:12px;
+font-weight:700;
+
+color:var(--muted);
+
+}
+
+.fx-item b{
+
+color:var(--text);
+margin-left:4px;
+
+}
+
+.fx-dir{
+
+margin-left:4px;
+font-weight:900;
+
+}
