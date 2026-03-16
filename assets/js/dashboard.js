@@ -590,6 +590,43 @@ function renderWalletStrip(){
   });
 
 }
+   /* =========================
+   FX MARKET TICKER
+========================= */
+
+function renderFxTicker(){
+
+  const el = document.getElementById("fxTicker");
+
+  if(!el || !LEDGER){
+    return;
+  }
+
+  const pairs = [
+    ["USD","NGN"],
+    ["GBP","NGN"],
+    ["EUR","NGN"]
+  ];
+
+  el.innerHTML = pairs.map(p=>{
+
+    const rate = LEDGER.getRate ? LEDGER.getRate(p[0],p[1]) : null;
+
+    if(!rate) return "";
+
+    const arrow = Math.random() > 0.5 ? "↑" : "↓";
+
+    return `
+      <span class="fx-item">
+        ${p[0]}/${p[1]} 
+        <b>${rate.toFixed(2)}</b>
+        <span class="fx-dir">${arrow}</span>
+      </span>
+    `;
+
+  }).join("");
+
+}
   /* ---------------------------
      Core Modals (minimal stable)
   --------------------------- */
