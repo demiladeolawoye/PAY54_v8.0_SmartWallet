@@ -649,6 +649,23 @@ function showToast(message){
   },3000);
 
 }
+   /* =========================
+   BALANCE GLOW EFFECT
+========================= */
+
+function triggerBalanceGlow(){
+
+  const card = document.getElementById("balanceCard");
+
+  if(!card) return;
+
+  card.classList.add("balance-glow");
+
+  setTimeout(()=>{
+    card.classList.remove("balance-glow");
+  },800);
+
+}
 function refreshUI() {
 
   requestAnimationFrame(() => {
