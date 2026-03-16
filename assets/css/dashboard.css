@@ -424,10 +424,14 @@ gap:10px;
 
   font-weight:800;
 
-  scroll-snap-align:start;   
+  scroll-snap-align:start;
+
+  transition: transform .15s ease;
 
 }
-
+.wallet-chip:hover{
+   transform:translateY(-2px);
+}
 .wallet-chip .wc-cur{
 
   font-size:11px;
