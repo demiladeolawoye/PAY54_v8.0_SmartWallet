@@ -1103,4 +1103,6 @@ font-weight:900;
 
   .dash-grid{ gap:16px; }
 
+  .dash-grid{ padding-left:12px; padding-right:12px; }
+
 }
