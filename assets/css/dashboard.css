@@ -515,8 +515,10 @@ gap:10px;
 }
 
 /* Money Moves */
-.tile-grid.cols-3{
-  grid-template-columns: repeat(auto-fit, minmax(170px,1fr));
+.money-moves-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:16px;
 }
 
 /* Services */
