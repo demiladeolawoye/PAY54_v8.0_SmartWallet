@@ -1391,6 +1391,7 @@ function init() {
   renderAlerts();
 
   renderNews();
+renderFxTicker();
 
   /* Bind click routing */
 
