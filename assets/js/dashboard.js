@@ -304,32 +304,31 @@ function setActiveCurrency(cur){
 
   localStorage.setItem(LS.CURRENCY, cur);
 
-  /* update currency pills */
   pillBtns.forEach(btn=>{
     btn.classList.toggle("active", btn.dataset.cur === cur);
   });
 
-  /* update mobile dropdown */
   if(currencySelect){
     currencySelect.value = cur;
   }
 
-  /* calculate converted balance */
- const total = LEDGER ? getConvertedTotal(cur) : 0;
+  const total = LEDGER ? getConvertedTotal(cur) : 0;
 
-if(balanceEl){
+  if(balanceEl){
 
-  balanceEl.textContent = "Converting...";
+    balanceEl.textContent = "Converting...";
 
-setTimeout(()=>{
+    setTimeout(()=>{
+      animateBalance(total,cur);
+    },180);
 
-  animateBalance(total,cur);
+  }
 
-},180);
+} // ✅ CLOSE FUNCTION
 
-} // FIX #1
 
-setActiveCurrency(getSelectedCurrency()); // FIX #2
+// ✅ CALL FUNCTION OUTSIDE
+setActiveCurrency(getSelectedCurrency());
 
   /* ---------------------------
      Profile / logout
