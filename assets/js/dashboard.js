@@ -317,11 +317,17 @@ function setActiveCurrency(cur){
   }
 
   /* calculate converted balance */
-  const total = LEDGER ? getConvertedTotal(cur) : 0;
+ const total = LEDGER ? getConvertedTotal(cur) : 0;
 
-  if(balanceEl){
-    balanceEl.textContent = LEDGER.moneyFmt(cur,total);
-  }
+if(balanceEl){
+
+  balanceEl.textContent = "Converting...";
+
+  setTimeout(()=>{
+
+    animateBalance(total,cur);
+
+  },180);
 
 }
 
