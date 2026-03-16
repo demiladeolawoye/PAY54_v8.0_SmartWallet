@@ -656,12 +656,12 @@ function refreshUI() {
     try {
 
       if(LEDGER){
-  setActiveCurrency(getSelectedCurrency());
-}
+        setActiveCurrency(getSelectedCurrency());
+      }
 
       renderRecentTransactions();
-
       renderWalletStrip();
+      triggerBalanceGlow();
 
     } catch (err) {
       console.error("UI refresh failed:", err);
