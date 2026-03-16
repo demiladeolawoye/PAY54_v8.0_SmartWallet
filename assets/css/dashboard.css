@@ -776,7 +776,11 @@ gap:16px;
     align-items: center;
     justify-content: center;
   }
-
+ /* ADD THIS */
+  .balance-card{
+    margin-left:0;
+    margin-right:0;
+  }
 }
 
 @media (max-width: 420px){
@@ -1061,5 +1065,15 @@ margin-left:4px;
 
 margin-left:4px;
 font-weight:900;
+
+}
+/* PAY54 Mobile Perfect Fit */
+@media (max-width:480px){
+
+  .balance-amount{ font-size:34px; }
+
+  .tile-btn{ min-height:96px; }
+
+  .dash-grid{ gap:16px; }
 
 }
