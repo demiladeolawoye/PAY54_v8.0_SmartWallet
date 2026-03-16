@@ -357,6 +357,8 @@ gap:10px;
   will-change: transform;
   transform: translateZ(0);
   transition: transform .25s ease;
+
+  text-shadow:0 0 12px rgba(59,130,246,.25);
 }
 .balance-delta{
 
