@@ -329,7 +329,9 @@ setTimeout(()=>{
 
 },180);
 
-} // ← ADD THIS LINE
+} // FIX #1
+
+setActiveCurrency(getSelectedCurrency()); // FIX #2
 
   /* ---------------------------
      Profile / logout
