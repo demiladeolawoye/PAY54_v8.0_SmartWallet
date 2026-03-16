@@ -33,14 +33,11 @@ function waitForModules(callback){
 
     if (LEDGER) {
 
-      console.log("PAY54 modules ready");
+  console.log("PAY54 modules ready");
 
-      callback();
-      return;
-    }
+  callback();
+  refreshUI();
 
- if (attempts > 50) {
-  console.error("PAY54 core modules failed to load");
   return;
 }
 
