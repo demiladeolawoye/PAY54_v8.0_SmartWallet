@@ -46,6 +46,10 @@ body.light{
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
+
+.dash-grid{ max-width:100vw; }
+.card{ width:100%; }
+
 /* MOBILE VIEWPORT WIDTH FIX */
 html, body{
   width:100%;
