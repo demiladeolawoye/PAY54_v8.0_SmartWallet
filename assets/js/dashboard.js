@@ -323,14 +323,13 @@ if(balanceEl){
 
   balanceEl.textContent = "Converting...";
 
-  setTimeout(()=>{
+setTimeout(()=>{
 
-    animateBalance(total,cur);
+  animateBalance(total,cur);
 
-  },180);
+},180);
 
-}
-
+} // ← ADD THIS LINE
 
   /* ---------------------------
      Profile / logout
