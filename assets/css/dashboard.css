@@ -377,6 +377,8 @@ gap:10px;
 
   overflow-x:auto;
 
+  scroll-snap-type:x mandatory;   /* ADD THIS */
+
   padding-top:6px;
   padding-bottom:6px;
 
@@ -404,6 +406,8 @@ gap:10px;
   flex-direction:column;
 
   font-weight:800;
+
+  scroll-snap-align:start;   
 
 }
 
