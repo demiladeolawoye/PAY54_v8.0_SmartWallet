@@ -849,7 +849,7 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
     bodyHTML: `
       <div style="text-align:center">
 
-        <div style="font-size:42px">✅</div>
+        <div class="pay-success-check">✔</div>
 
         <div style="font-weight:900;font-size:18px;margin-top:8px">
           Payment Completed
