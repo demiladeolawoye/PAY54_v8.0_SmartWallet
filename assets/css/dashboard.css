@@ -246,7 +246,7 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   margin:0 auto;
 
   display:grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: 1fr; /* FORCE MOBILE FIRST */
   gap:20px;
 
   padding-left:16px;
