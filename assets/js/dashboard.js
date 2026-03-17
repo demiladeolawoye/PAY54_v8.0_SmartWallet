@@ -858,35 +858,6 @@ function openScanAndPay() {
 
           showPaymentReceipt(tx, merchant, amount, currency);
 
-          /* Receipt */
-
-          RCPT.openReceiptModal({
-            openModal,
-            title:`Payment to ${merchant}`,
-            tx,
-            lines:[
-              `Merchant: ${merchant}`,
-              `Amount: ${currency} ${amount.toLocaleString()}`,
-              `Channel: Scan & Pay`
-            ]
-          });
-
-        }
-        catch(err){
-          console.warn("ScanPay error:",err);
-        }
-
-      });
-
-    }
-
-  });
-
-}
-
-window.PAY54_OPEN_SCAN = openScanAndPay;
-
-      
   /* =========================
    PAYMENT RECEIPT
 ========================= */
