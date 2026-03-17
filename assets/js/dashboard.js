@@ -856,7 +856,7 @@ function openScanAndPay() {
 
           /* Feedback */
 
-          showToast(`${LEDGER.moneyFmt(currency,amount)} paid to ${merchant}`);
+          showPaymentReceipt(tx, merchant, amount, currency);
 
           /* Receipt */
 
