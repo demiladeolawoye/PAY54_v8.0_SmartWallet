@@ -349,17 +349,10 @@ gap:10px;
   align-items:center;
 }
 .balance-amount{
-  font-size: 54px;
-  font-weight: 950;
-  letter-spacing: -0.8px;
-  margin: 10px 0 10px 0;
-  line-height: 1.05;
-
-  will-change: transform;
-  transform: translateZ(0);
-  transition: transform .25s ease;
-
-  text-shadow:0 0 12px rgba(59,130,246,.25);
+  font-size:clamp(28px,7vw,54px);
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  line-height:1.1;
 }
 .balance-delta{
 
