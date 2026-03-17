@@ -242,7 +242,7 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 --------------------------- */
 .dash-grid{
   width:100%;
-  max-width:1280px;
+  max-width:100%;
   margin:0 auto;
 
   display:grid;
