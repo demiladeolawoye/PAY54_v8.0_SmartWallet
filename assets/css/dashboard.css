@@ -252,7 +252,11 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   padding-left:16px;
   padding-right:16px;
 }
-
+@media (min-width: 981px){
+  .dash-grid{
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+}
 .left, .right{
   display:flex;
   flex-direction: column;
