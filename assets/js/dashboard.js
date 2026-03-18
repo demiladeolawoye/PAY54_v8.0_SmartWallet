@@ -574,6 +574,7 @@ function renderWalletStrip(){
     const chip = document.createElement("div");
 
     chip.className = "wallet-chip" + (cur === selected ? " active" : "");
+chip.dataset.cur = cur;
 
     chip.innerHTML = `
       <div class="wc-cur">${cur}</div>
