@@ -325,10 +325,6 @@ function setActiveCurrency(cur){
 
 } // ✅ CLOSE FUNCTION
 
-
-// ✅ CALL FUNCTION OUTSIDE
-setActiveCurrency(getSelectedCurrency());
-
   /* ---------------------------
      Profile / logout
   --------------------------- */
