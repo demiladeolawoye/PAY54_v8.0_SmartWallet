@@ -1343,12 +1343,6 @@ function init() {
   if (window.__PAY54_DASH_V81_INIT__) return;
   window.__PAY54_DASH_V81_INIT__ = true;
 
-  /* Safety check */
-  if(!window.PAY54_LEDGER){
-    console.error("Ledger module missing — dashboard halted");
-    return;
-  }
-
   /* Ensure LEDGER is ready */
   if (!LEDGER) {
     console.error("PAY54 init aborted: LEDGER not ready");
