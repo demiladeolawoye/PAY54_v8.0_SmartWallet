@@ -21,31 +21,26 @@ let RCPT;
 
 function waitForModules(callback){
 
-  let attempts = 0;
-
   const check = () => {
-
-    attempts++;
 
     LEDGER = window.PAY54_LEDGER || null;
     RECIP  = window.PAY54_RECIPIENT || null;
     RCPT   = window.PAY54_RECEIPTS || null;
 
-  if (LEDGER) {
+    if (
+      LEDGER &&
+      typeof LEDGER.getBalances === "function" &&
+      typeof LEDGER.applyEntry === "function"
+    ) {
+      console.log("✅ PAY54 modules FULLY ready");
+      callback();
+      return;
+    }
 
-  console.log("PAY54 modules ready");
-
-  callback();
-
-  return;
-}
-
-    setTimeout(check,100);
-
+    setTimeout(check, 100);
   };
 
   check();
-
 }
   const LS = {
     THEME: "pay54_theme",
