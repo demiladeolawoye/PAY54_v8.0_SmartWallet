@@ -883,6 +883,8 @@ body:not(.light) select option{
   left:50%;
   transform:translateX(-50%);
 
+  max-width:90%;   
+
   display:flex;
   align-items:center;
   gap:8px;
