@@ -251,11 +251,10 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   margin:0 auto;
 
   display:grid;
-  grid-template-columns: 1fr; /* FORCE MOBILE FIRST */
-  gap:20px;
+  grid-template-columns:1fr;
+  gap:18px;
 
-  padding-left:16px;
-  padding-right:16px;
+  padding:12px;
 }
 @media (min-width: 981px){
   .dash-grid{
