@@ -48,8 +48,6 @@ body.light{
 html,body{ height:100%; }
 
 
-.card{ width:100%; }
-
 /* MOBILE VIEWPORT WIDTH FIX */
 html, body{
   width:100%;
