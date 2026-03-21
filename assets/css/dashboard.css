@@ -928,13 +928,6 @@ body:not(.light) select option{
 /* =========================
    PAY54 Premium Balance Lift
 ========================= */
-
-.balance-card{
-  transition:
-    transform .35s ease,
-    box-shadow .35s ease;
-}
-
 /* lifted state */
 
 .balance-card.lifted{
