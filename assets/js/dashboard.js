@@ -860,6 +860,41 @@ function openScanAndPay() {
 }); // ✅ CLOSE openModal
 
 } // ✅ CLOSE openScanAndPay
+   /* =========================
+   Add Money
+========================= */
+function openAddMoney() {
+  openModal({
+    title: "Add Money",
+    bodyHTML: `
+      <div class="p54-note">Add money feature (UI phase)</div>
+      <div class="p54-actions">
+        <button class="p54-btn primary" id="okAdd">OK</button>
+      </div>
+    `,
+    onMount: ({ modal, close }) => {
+      modal.querySelector("#okAdd").addEventListener("click", close);
+    }
+  });
+}
+
+/* =========================
+   Withdraw
+========================= */
+function openWithdraw() {
+  openModal({
+    title: "Withdraw",
+    bodyHTML: `
+      <div class="p54-note">Withdraw feature (UI phase)</div>
+      <div class="p54-actions">
+        <button class="p54-btn primary" id="okWd">OK</button>
+      </div>
+    `,
+    onMount: ({ modal, close }) => {
+      modal.querySelector("#okWd").addEventListener("click", close);
+    }
+  });
+}
   function openSendUnified() { comingSoon("Send"); }
   function openReceive() { comingSoon("Receive"); }
   function openRequestMoney(){
