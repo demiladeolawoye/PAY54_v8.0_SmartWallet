@@ -79,6 +79,7 @@ body{
 .dash-header{
   position: sticky;
   top:0;
+  height:72px;   /* ✅ ADD THIS LINE HERE */
   z-index: 50;
   width: 100%;
   max-width:100%;   
