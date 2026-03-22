@@ -888,34 +888,10 @@ body:not(.light) select option{
 .scan-fab{
   position:fixed;
 
-  bottom: calc(16px + env(safe-area-inset-bottom));
+  bottom: calc(12px + env(safe-area-inset-bottom));
 
   left:50%;
   transform:translateX(-50%);
-
-  max-width:90%;
-  width:auto;
-
-  display:flex;
-  align-items:center;
-  gap:8px;
-
-  padding:14px 20px;
-
-  border-radius:999px;
-
-  background:linear-gradient(180deg,#3b82f6,#2563eb);
-
-  color:white;
-  font-weight:900;
-
-  border:none;
-
-  box-shadow:
-    0 16px 40px rgba(0,0,0,0.35),
-    0 0 0 4px rgba(59,130,246,.2);
-
-  cursor:pointer;
 
   z-index:9999;
 }
