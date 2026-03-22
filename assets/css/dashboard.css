@@ -255,8 +255,8 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 
   padding:12px;
 
-  /* keep only this */
-  padding-bottom: calc(180px + env(safe-area-inset-bottom));
+  /* ✅ CRITICAL */
+  padding-bottom: calc(200px + env(safe-area-inset-bottom));
 }
 @media (min-width: 981px){
   .dash-grid{
