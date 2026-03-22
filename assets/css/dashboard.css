@@ -255,11 +255,8 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 
   padding:12px;
 
-  /* ✅ prevents bottom cut-off */
-  padding-bottom: calc(120px + env(safe-area-inset-bottom));
-
-  /* ✅ viewport stability */
-  min-height: calc(100dvh - 80px);
+  /* keep only this */
+  padding-bottom: calc(140px + env(safe-area-inset-bottom));
 }
 @media (min-width: 981px){
   .dash-grid{
