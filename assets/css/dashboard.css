@@ -891,8 +891,7 @@ body:not(.light) select option{
 .scan-fab{
   position:fixed;
 
-  /* ✅ FIX: lifts button above mobile browser bar */
-  bottom: calc(24px + env(safe-area-inset-bottom));
+  bottom: calc(24px + env(safe-area-inset-bottom) + 10px);
 
   left:50%;
   transform:translateX(-50%);
@@ -921,7 +920,6 @@ body:not(.light) select option{
 
   cursor:pointer;
 
-  /* ✅ ensure always on top */
   z-index:9999;
 }
 
