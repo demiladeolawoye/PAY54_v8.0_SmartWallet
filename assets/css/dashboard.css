@@ -1089,4 +1089,9 @@ margin-left:4px;
 font-weight:900;
 
 }
-
+/* =========================
+   FAB SPACER (PREVENT OVERLAP)
+========================= */
+.fab-spacer{
+  height:120px;
+}
