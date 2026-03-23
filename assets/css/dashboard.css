@@ -256,8 +256,7 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 
   padding:12px;
 
-  /* ✅ CLEAN simple padding */
-  padding-bottom:40px;
+  overflow-y:auto;   /* ✅ THIS IS KEY */
 }
 @media (min-width: 981px){
   .dash-grid{
