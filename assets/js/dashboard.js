@@ -15,13 +15,29 @@
 (() => {
   "use strict";
 
-  /* =========================
-     PAY54 Viewport Fix Engine (FINAL)
-     Fixes:
-     ✅ Mobile browser bottom bar overlap
-     ✅ Dynamic viewport height (Chrome/Samsung)
-     ✅ iOS Safari resize issues
-  ========================= */
+ /* =========================
+   PAY54 Viewport Fix Engine (FINAL)
+========================= */
+
+function setRealViewportHeight() {
+  const height = window.visualViewport
+    ? window.visualViewport.height
+    : window.innerHeight;
+
+  document.documentElement.style.setProperty('--app-height', `${height}px`);
+}
+
+/* Run immediately */
+setRealViewportHeight();
+
+/* Listen to ALL changes */
+window.addEventListener('resize', setRealViewportHeight);
+window.addEventListener('orientationchange', setRealViewportHeight);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', setRealViewportHeight);
+  window.visualViewport.addEventListener('scroll', setRealViewportHeight);
+}
 
  let LEDGER;
 let RECIP;
