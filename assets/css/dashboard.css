@@ -45,7 +45,10 @@ body.light{
 }
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; }
+html, body{
+  height:100%;
+  overflow:hidden;
+}
 
 
 /* MOBILE VIEWPORT WIDTH FIX */
