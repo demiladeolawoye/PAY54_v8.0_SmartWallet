@@ -64,8 +64,9 @@ body{
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color: var(--text);
 
-  /* ✅ FINAL FIX */
-  min-height: 100svh;
+  /* ✅ REAL DEVICE HEIGHT */
+  height: var(--app-height);
+  overflow-x:hidden;
 
   background:
     radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,0.22), transparent 60%),
