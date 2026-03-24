@@ -1175,3 +1175,77 @@ font-weight:900;
 .fab-spacer{
   height:160px; /* 🔥 MATCH FAB SPACE */
 }
+/* =========================
+   🔥 FINAL UI FIX — MUST BE LAST
+========================= */
+
+/* ===== SMALLER + CENTERED BUTTONS ===== */
+.tile-btn{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+
+  padding:10px !important;
+  min-height:80px !important;
+}
+
+/* ICON */
+.tile-btn .t-icon{
+  width:26px !important;
+  height:26px !important;
+  font-size:14px !important;
+  margin-bottom:6px !important;
+}
+
+/* TITLE */
+.tile-btn .t-title{
+  font-size:13px !important;
+}
+
+/* SUB */
+.tile-btn .t-sub{
+  font-size:11px !important;
+}
+
+
+/* ===== WEB LAYOUT FIX ===== */
+
+/* MONEY MOVES → 3 x 2 */
+.money-moves-grid{
+  grid-template-columns: repeat(3,1fr) !important;
+  gap:12px !important;
+}
+
+/* SERVICES → 3 PER ROW */
+.tile-grid.cols-4{
+  grid-template-columns: repeat(3,1fr) !important;
+  gap:12px !important;
+}
+
+
+/* ===== MOBILE FIX ===== */
+@media (max-width:980px){
+
+  body{
+    overflow:hidden !important;
+  }
+
+  .dash-grid{
+    height: calc(var(--app-height) - 72px) !important;
+    overflow-y:auto !important;
+  }
+
+  .money-moves-grid{
+    grid-template-columns: repeat(2,1fr) !important;
+  }
+
+  .tile-grid.cols-4{
+    grid-template-columns: repeat(2,1fr) !important;
+  }
+
+  .tile-btn{
+    min-height:75px !important;
+  }
+}
