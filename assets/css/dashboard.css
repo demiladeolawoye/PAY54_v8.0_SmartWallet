@@ -259,7 +259,10 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 
   padding:12px;
 
-  overflow-y:auto;   /* ✅ THIS IS KEY */
+  height: calc(var(--app-height) - 72px); /* 🔥 CORE FIX */
+  overflow-y:auto;
+
+  padding-bottom:140px; /* 🔥 PREVENT FAB OVERLAP */
 }
 @media (min-width: 981px){
   .dash-grid{
