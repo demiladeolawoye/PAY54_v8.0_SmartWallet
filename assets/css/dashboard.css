@@ -47,7 +47,11 @@ body.light{
 *{ box-sizing:border-box; }
 html, body{
   height:100%;
-  overflow:hidden;
+  width:100%;
+  max-width:100%;
+
+  overflow-x:hidden;   /* 🔥 STOP LEFT/RIGHT SCROLL */
+  overflow-y:hidden;
 }
 
 
