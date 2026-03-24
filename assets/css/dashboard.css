@@ -892,7 +892,7 @@ body:not(.light) select option{
 .scan-fab{
   position:fixed;
 
-  bottom:20px;              /* ✅ stable */
+  bottom: calc(20px + env(safe-area-inset-bottom)); /* 🔥 SAFE AREA FIX */
   left:50%;
   transform:translateX(-50%);
 
@@ -919,7 +919,7 @@ body:not(.light) select option{
 
   cursor:pointer;
 
-  z-index:1000;  /* ✅ reduced but safe */
+  z-index:1000;
 }
 
 
