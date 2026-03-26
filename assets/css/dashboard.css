@@ -87,10 +87,10 @@ body{
 .dash-header{
   position: sticky;
   top:0;
-  height:72px;   /* ✅ ADD THIS LINE HERE */
+  height:72px;
   z-index: 50;
   width: 100%;
-  max-width:100%;   
+  max-width:100%;
 
   display:flex;
   align-items:center;
@@ -104,11 +104,17 @@ body{
     calc(18px + env(safe-area-inset-left));
 
   border-bottom: 1px solid var(--stroke);
-  backdrop-filter: blur(12px);
-  background: linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.06));
-}
-body.light .dash-header{
-  background: linear-gradient(180deg, rgba(255,255,255,0.90), rgba(255,255,255,0.66));
+
+  /* ✅ PREMIUM GLASS EFFECT */
+  backdrop-filter: blur(18px);
+
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.35),
+    rgba(0,0,0,0.10)
+  );
+
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
 .brand{ display:flex; align-items:center; gap:10px; min-width: 56px; }
