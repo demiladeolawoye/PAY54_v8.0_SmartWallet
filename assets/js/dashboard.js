@@ -1201,7 +1201,6 @@ function init() {
 
   setActiveCurrency(currentCur);
   renderRecentTransactions();
-  renderWalletStrip();
   renderAlerts();
   renderNews();
   renderFxTicker();
