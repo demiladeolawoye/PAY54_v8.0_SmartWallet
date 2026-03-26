@@ -173,8 +173,20 @@ body.light .logo{
   border-color: rgba(59,130,246,0.45);
 }
 .currency-pills .currency.active{
-  background: rgba(59,130,246,0.18);
-  border-color: rgba(59,130,246,0.55);
+
+  background: linear-gradient(
+    135deg,
+    rgba(59,130,246,0.9),
+    rgba(37,99,235,0.9)
+  );
+
+  color:#fff;
+
+  border-color: rgba(59,130,246,0.9);
+
+  box-shadow:
+    0 6px 18px rgba(59,130,246,0.35),
+    0 0 0 2px rgba(59,130,246,0.15);
 }
 
 /* Mobile dropdown */
