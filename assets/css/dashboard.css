@@ -378,6 +378,23 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
   box-shadow:
     0 18px 45px rgba(0,0,0,0.45);
 }
+/* =========================
+   LIGHT MODE CLEAN CARDS (FIX)
+========================= */
+body.light .card{
+  background: #ffffff;
+  border: 1px solid rgba(10,20,40,0.08);
+  box-shadow: 0 8px 25px rgba(20,40,80,0.08);
+  backdrop-filter: none;
+}
+
+/* LIGHT MODE TILES */
+body.light .tile-btn,
+body.light .shortcut-btn,
+body.light .utility-btn{
+  background: #ffffff;
+  border: 1px solid rgba(10,20,40,0.08);
+}
 .card h3{
   margin:0;
   font-size: 18px;
