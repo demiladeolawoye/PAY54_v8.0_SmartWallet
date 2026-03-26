@@ -567,41 +567,7 @@ function setActiveCurrency(cur){
     txFeed.innerHTML = "";
     txs.forEach(tx => prependTxToDOM(tx));
   }
-function renderWalletStrip(){
 
-  const strip = document.getElementById("walletStrip");
-
-  if(!strip) return;
-
- const balances = LEDGER.getBalances() || {};
-
-  const selected = getSelectedCurrency();
-
-  strip.innerHTML = "";
-
-  Object.keys(balances).forEach(cur=>{
-
-    const amt = balances[cur];
-
-    if(!amt) return;
-
-    const chip = document.createElement("div");
-
-    chip.className = "wallet-chip" + (cur === selected ? " active" : "");
-chip.dataset.cur = cur;
-
-    chip.innerHTML = `
-      <div class="wc-cur">${cur}</div>
-      <div class="wc-amt">${LEDGER.moneyFmt(cur, amt)}</div>
-    `;
-
-    chip.addEventListener("click",()=>setActiveCurrency(cur));
-
-    strip.appendChild(chip);
-
-  });
-
-}
    /* =========================
    FX MARKET TICKER
 ========================= */
