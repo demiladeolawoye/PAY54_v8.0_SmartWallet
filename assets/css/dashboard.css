@@ -695,10 +695,7 @@ gap:16px;
 
 /* ===== Tile Icons (Fintech Style) ===== */
 
-/* Quick Shortcut icon alignment fix */
-.shortcut-btn .t-icon{
-  margin-bottom:6px;
-}
+
 /* Quick Shortcuts Grid */
 .shortcut-grid{
   display:grid;
