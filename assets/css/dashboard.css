@@ -369,16 +369,20 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 
  position:relative;
 
- background:linear-gradient(
+ background: linear-gradient(
    135deg,
-   rgba(59,130,246,0.12),
-   rgba(59,130,246,0.02)
+   rgba(59,130,246,0.25),
+   rgba(139,92,246,0.15)
  );
 
- border:1px solid rgba(59,130,246,0.25);
- backdrop-filter:blur(6px);
+ border:1px solid rgba(59,130,246,0.35);
 
- /* ✅ ADD THIS */
+ backdrop-filter:blur(12px);
+
+ box-shadow:
+   0 20px 50px rgba(0,0,0,0.45),
+   0 0 40px rgba(59,130,246,0.15);
+
  transition:
    transform .35s ease,
    box-shadow .35s ease;
