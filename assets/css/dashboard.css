@@ -852,18 +852,16 @@ gap:16px;
     padding:12px;
   }
 
-  /* 🔥 FIX: SERVICES GRID (2 PER ROW ON MOBILE) */
   .tile-grid.cols-4{
     grid-template-columns: repeat(2, 1fr);
   }
 
-  /* 🔥 FIX: MONEY MOVES GRID */
   .money-moves-grid{
     grid-template-columns: repeat(2,1fr);
   }
 
- 
-  
+} /* ✅ CLOSE IT PROPERLY */
+
 @media (max-width: 420px){
   .balance-amount{ font-size: 38px; }
 }
