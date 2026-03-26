@@ -655,7 +655,6 @@ function refreshUI() {
       }
 
       renderRecentTransactions();
-      renderWalletStrip();
       triggerBalanceGlow();
 
     } catch (err) {
