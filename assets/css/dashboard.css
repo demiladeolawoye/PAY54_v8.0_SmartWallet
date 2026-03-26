@@ -128,11 +128,21 @@ body.light .logo{
 /* Currency pills (desktop) */
 .currency-pills{
   display:flex;
-  gap: 10px;
   align-items:center;
-  flex-wrap: nowrap;
-  margin-left:auto;
-  margin-right:auto;
+  justify-content:center;
+
+  gap:12px;
+
+  flex-wrap:nowrap;              /* 🚀 FORCE SINGLE LINE */
+  overflow-x:auto;               /* 🚀 SAFE SCROLL IF NEEDED */
+  scrollbar-width:none;
+
+  max-width:100%;
+  white-space:nowrap;
+}
+
+.currency-pills::-webkit-scrollbar{
+  display:none;
 }
 .currency-pills .currency{
   border: 1px solid var(--stroke2);
