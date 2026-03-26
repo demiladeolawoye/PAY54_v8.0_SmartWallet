@@ -190,6 +190,24 @@ body.light .logo{
     0 0 0 2px rgba(59,130,246,0.15);
 }
 
+/* ✅ ADD THIS BELOW */
+.currency-pills .currency{
+  backdrop-filter: blur(6px);
+}
+
+.currency-pills .currency.active{
+  transform: scale(1.05);
+}
+
+  color:#fff;
+
+  border-color: rgba(59,130,246,0.9);
+
+  box-shadow:
+    0 6px 18px rgba(59,130,246,0.35),
+    0 0 0 2px rgba(59,130,246,0.15);
+}
+
 /* Mobile dropdown */
 .currency-dd-wrap{ display:flex; align-items:center; }
 .currency-dropdown{
