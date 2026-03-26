@@ -145,15 +145,28 @@ body.light .logo{
   display:none;
 }
 .currency-pills .currency{
+
+  flex:0 0 auto;                 /* 🚀 PREVENT SHRINKING */
+
   border: 1px solid var(--stroke2);
   background: rgba(255,255,255,0.04);
-  color: var(--text);
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
+
+  padding:8px 14px;
+
+  border-radius:999px;
+
+  font-weight:800;
+  font-size:13px;
+
+  letter-spacing:0.3px;
+
   cursor:pointer;
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+
+  transition:
+    transform .12s ease,
+    background .12s ease,
+    border-color .12s ease,
+    box-shadow .12s ease;
 }
 .currency-pills .currency:hover{
   transform: translateY(-1px);
