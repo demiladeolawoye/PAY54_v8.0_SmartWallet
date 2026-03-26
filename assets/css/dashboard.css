@@ -438,7 +438,9 @@ body.light .utility-btn{
    box-shadow .35s ease;
 
 }
-
+.balance-card:hover{
+  transform: translateY(-4px) scale(1.01);
+}
 /* Balance header layout */
 .balance-top{
 
