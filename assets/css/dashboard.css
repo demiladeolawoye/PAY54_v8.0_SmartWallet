@@ -1199,24 +1199,3 @@ font-weight:900;
   }
 
 }
-
-
-/* =========================
-   WALLET STRIP (CONTROLLED SLIDE)
-========================= */
-
-.wallet-strip{
-  display:flex;
-  overflow-x:auto;
-
-  gap:10px;
-
-  padding:6px 4px;
-
-  scroll-snap-type:x mandatory;
-}
-
-.wallet-chip{
-  flex:0 0 32%; /* 🔥 ONLY 3 visible */
-  scroll-snap-align:start;
-}
