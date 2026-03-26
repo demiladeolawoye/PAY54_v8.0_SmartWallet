@@ -207,7 +207,12 @@ body.light .logo{
 
 .currency-pills .currency.active{
   transform: scale(1.05);
-}
+
+  background: linear-gradient(
+    135deg,
+    rgba(59,130,246,0.95),
+    rgba(37,99,235,0.95)
+  );
 
   color:#fff;
 
