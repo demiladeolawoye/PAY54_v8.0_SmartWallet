@@ -574,28 +574,32 @@ gap:16px;
 }
 
 .tile-btn{
-  text-align:left;
-  padding:16px;
-  border-radius: var(--radius);
-  border:1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
+  padding:14px;
 
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
+  border-radius:18px;
 
-  min-height:110px;
+  border:1px solid rgba(255,255,255,0.10);
 
-  min-width:0;   /* 🔥 ADD THIS */
-  width:100%;    /* 🔥 ADD THIS */
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+
+  backdrop-filter: blur(8px);
 
   cursor:pointer;
 
-  transition:
-    transform .15s ease,
-    border-color .15s ease,
-    background .15s ease,
-    box-shadow .15s ease;
+  transition: all .2s ease;
+}
+
+.tile-btn:hover{
+  transform: translateY(-4px) scale(1.02);
+
+  border-color: rgba(59,130,246,0.6);
+
+  box-shadow:
+    0 10px 30px rgba(59,130,246,0.25);
 }
 .tile-btn .t-title{
   display:block;
