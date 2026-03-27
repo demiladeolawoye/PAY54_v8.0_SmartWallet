@@ -1269,7 +1269,17 @@ font-weight:900;
 
   transition: all .2s ease;
 }
+/* =========================
+   LIGHT MODE TILE SYSTEM
+========================= */
 
+body.light .tile-btn,
+body.light .shortcut-btn,
+body.light .utility-btn{
+  background:#ffffff;
+  border:1px solid rgba(10,20,40,0.12);
+  box-shadow: 0 6px 18px rgba(20,40,80,0.06);
+}
 /* =========================
    DESKTOP GRID SYSTEM
 ========================= */
