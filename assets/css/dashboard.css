@@ -159,10 +159,6 @@ body.light .logo{
 
   flex:0 0 auto;
 
-  border: 1px solid rgba(255,255,255,0.18);
-
-  background: rgba(255,255,255,0.08);
-
   padding:8px 14px;
 
   border-radius:999px;
@@ -174,17 +170,22 @@ body.light .logo{
 
   cursor:pointer;
 
-  /* ✅ FIX: ALWAYS VISIBLE TEXT */
+  /* ✅ FIX CORE ISSUE */
   color:#ffffff;
 
-  /* ✅ BETTER CONTRAST */
-  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.10);
 
-  transition:
-    transform .12s ease,
-    background .12s ease,
-    border-color .12s ease,
-    box-shadow .12s ease;
+  border:1px solid rgba(255,255,255,0.25);
+
+  backdrop-filter: blur(10px);
+
+  transition: all .15s ease;
+}
+/* LIGHT MODE FIX */
+body.light .currency-pills .currency{
+  color:#0a1428;
+  background:#ffffff;
+  border:1px solid rgba(10,20,40,0.15);
 }
 .currency-pills .currency:hover{
   transform: translateY(-1px);
