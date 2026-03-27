@@ -667,28 +667,24 @@ gap:16px;
 
 .tile-btn{
   padding:14px;
-
   border-radius:18px;
-
   border:1px solid rgba(255,255,255,0.10);
-
   background: linear-gradient(
     180deg,
     rgba(255,255,255,0.06),
     rgba(255,255,255,0.02)
   );
-/* 🔥 LIGHT MODE TILE BORDER FIX */
-body.light .tile-btn{
-  border: 1px solid rgba(10,20,40,0.12);
-  background: #ffffff;
-}
   backdrop-filter: blur(8px);
-
   cursor:pointer;
-
   transition: all .2s ease;
 }
 
+/* ✨ ADD THIS RIGHT HERE */
+body.light .tile-btn{
+  border: 1px solid rgba(10,20,40,0.12);
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(20,40,80,0.06);
+}
 .tile-btn:hover{
   transform: translateY(-4px) scale(1.02);
 
@@ -696,6 +692,10 @@ body.light .tile-btn{
 
   box-shadow:
     0 10px 30px rgba(59,130,246,0.25);
+}
+body.light .tile-btn:hover{
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.35);
 }
 body.light .tile-btn:hover{
   background: rgba(59,130,246,0.08);
