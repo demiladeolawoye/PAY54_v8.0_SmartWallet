@@ -677,7 +677,11 @@ gap:16px;
     rgba(255,255,255,0.06),
     rgba(255,255,255,0.02)
   );
-
+/* 🔥 LIGHT MODE TILE BORDER FIX */
+body.light .tile-btn{
+  border: 1px solid rgba(10,20,40,0.12);
+  background: #ffffff;
+}
   backdrop-filter: blur(8px);
 
   cursor:pointer;
