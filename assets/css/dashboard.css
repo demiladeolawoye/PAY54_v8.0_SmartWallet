@@ -502,16 +502,13 @@ gap:10px;
 
   letter-spacing:-1px;
 
-  background: linear-gradient(
-    90deg,
-    #ffffff,
-    #60a5fa
-  );
-
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color:#ffffff; /* DEFAULT DARK MODE */
 
   line-height:1.1;
+}
+/* LIGHT MODE FIX — CRYSTAL CLEAR */
+body.light .balance-amount{
+  color:#0a1428; /* strong dark text */
 }
 .balance-delta{
 
