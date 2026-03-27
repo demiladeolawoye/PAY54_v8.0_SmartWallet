@@ -401,7 +401,14 @@ body.light .tile-btn,
 body.light .shortcut-btn,
 body.light .utility-btn{
   background: #ffffff;
-  border: 1px solid rgba(10,20,40,0.08);
+
+  /* 🔥 STRONGER BORDER */
+  border: 1px solid rgba(10,20,40,0.14);
+
+  /* 🔥 ADD DEPTH */
+  box-shadow: 
+    0 6px 16px rgba(20,40,80,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.6);
 }
 .card h3{
   margin:0;
