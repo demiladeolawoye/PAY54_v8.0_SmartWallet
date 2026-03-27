@@ -693,6 +693,10 @@ gap:16px;
   box-shadow:
     0 10px 30px rgba(59,130,246,0.25);
 }
+body.light .tile-btn:hover{
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.35);
+}
 .tile-btn .t-title{
   display:block;
   font-weight: 950;
