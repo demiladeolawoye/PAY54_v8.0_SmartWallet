@@ -157,10 +157,11 @@ body.light .logo{
 }
 .currency-pills .currency{
 
-  flex:0 0 auto;                 /* 🚀 PREVENT SHRINKING */
+  flex:0 0 auto;
 
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.18);
+
+  background: rgba(255,255,255,0.08);
 
   padding:8px 14px;
 
@@ -172,6 +173,12 @@ body.light .logo{
   letter-spacing:0.3px;
 
   cursor:pointer;
+
+  /* ✅ FIX: ALWAYS VISIBLE TEXT */
+  color:#ffffff;
+
+  /* ✅ BETTER CONTRAST */
+  backdrop-filter: blur(8px);
 
   transition:
     transform .12s ease,
