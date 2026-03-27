@@ -1236,7 +1236,39 @@ font-weight:900;
   font-size:11px;
   opacity:.75;
 }
+/* =========================
+   🔥 PAY54 UNIFIED TILE SYSTEM (NEW)
+========================= */
 
+.tile-btn,
+.shortcut-btn,
+.utility-btn{
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+
+  padding:14px;
+  min-height:90px;
+
+  border-radius:18px;
+
+  border:1px solid rgba(255,255,255,0.10);
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+
+  backdrop-filter: blur(8px);
+
+  cursor:pointer;
+
+  transition: all .2s ease;
+}
 
 /* =========================
    DESKTOP GRID SYSTEM
