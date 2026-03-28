@@ -668,10 +668,6 @@ gap:16px;
 
 /* ✨ ADD THIS RIGHT HERE */
 body.light .tile-btn{
-  border: 1px solid rgba(10,20,40,0.12);
-  background: #ffffff;
-  box-shadow: 0 6px 18px rgba(20,40,80,0.06);
-}
 .tile-btn .t-title{
   display:block;
   font-weight: 950;
