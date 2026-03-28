@@ -685,22 +685,6 @@ body.light .tile-btn{
   background: #ffffff;
   box-shadow: 0 6px 18px rgba(20,40,80,0.06);
 }
-.tile-btn:hover{
-  transform: translateY(-4px) scale(1.02);
-
-  border-color: rgba(59,130,246,0.6);
-
-  box-shadow:
-    0 10px 30px rgba(59,130,246,0.25);
-}
-body.light .tile-btn:hover{
-  background: rgba(59,130,246,0.08);
-  border-color: rgba(59,130,246,0.35);
-}
-body.light .tile-btn:hover{
-  background: rgba(59,130,246,0.08);
-  border-color: rgba(59,130,246,0.35);
-}
 .tile-btn .t-title{
   display:block;
   font-weight: 950;
@@ -1268,6 +1252,30 @@ font-weight:900;
   cursor:pointer;
 
   transition: all .2s ease;
+}|
+/* =========================
+   UNIFIED TILE HOVER (FINAL)
+========================= */
+
+.tile-btn:hover,
+.shortcut-btn:hover,
+.utility-btn:hover{
+
+  transform: translateY(-3px);
+
+  border-color: rgba(59,130,246,0.5);
+
+  box-shadow:
+    0 12px 28px rgba(59,130,246,0.25);
+}
+
+/* LIGHT MODE */
+body.light .tile-btn:hover,
+body.light .shortcut-btn:hover,
+body.light .utility-btn:hover{
+
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.35);
 }
 /* =========================
    LIGHT MODE TILE SYSTEM
