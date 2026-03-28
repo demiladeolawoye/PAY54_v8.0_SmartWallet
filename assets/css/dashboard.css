@@ -725,20 +725,6 @@ body.light .tile-btn{
   grid-template-columns: repeat(2, minmax(0,1fr));
   gap: 12px;
 }
-.utility-btn{
-  text-align:left;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--stroke2);
-  background: rgba(255,255,255,0.03);
-  cursor:pointer;
-  transition: transform .12s ease, border-color .12s ease, background .12s ease;
-}
-.utility-btn:hover{
-  transform: translateY(-1px);
-  border-color: rgba(59,130,246,0.45);
-  background: rgba(59,130,246,0.08);
-}
 .utility-btn .t-title{
   display:block;
   font-weight: 950;
