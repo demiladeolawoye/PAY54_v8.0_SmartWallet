@@ -939,7 +939,7 @@ function openAddMoney() {
             if(val === "yes"){
   agentFields.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
-      <input class="p54-input" placeholder="Agent Tag / Account" required>
+      <input class="p54-input small" placeholder="Agent Tag / Account" required>
     </div>
   `;
 } else {
