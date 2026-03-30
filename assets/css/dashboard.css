@@ -1258,3 +1258,10 @@ body.light .utility-btn{
   }
 
 }
+/* =========================
+   INPUT SIZE CONTROL (FINAL FIX)
+========================= */
+
+.p54-input.small{
+  max-width:260px;
+}
