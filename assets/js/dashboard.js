@@ -143,7 +143,7 @@ function waitForModules(callback){
       .p54-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
       @media (max-width:520px){ .p54-row{ grid-template-columns:1fr; } }
       .p54-label{ font-size:12px; font-weight:800; opacity:.85; }
-      .p54-input,.p54-select{
+   .p54-input,.p54-select{
   height:44px;
   font-size:16px;
   border-radius:12px;
@@ -151,9 +151,16 @@ function waitForModules(callback){
   background:rgba(255,255,255,.04);
   color:inherit;
   padding:0 12px;
+  padding-right:40px;
   outline:none;
+
   -webkit-appearance:none;
   appearance:none;
+
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23666' stroke-width='2'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:12px;
 }
       body.light .p54-input, body.light .p54-select{ border-color:rgba(10,20,40,.14); background:rgba(10,20,40,.04); }
       .p54-select option{ color:#0a1428; background:#ffffff; }
