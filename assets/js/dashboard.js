@@ -1239,7 +1239,7 @@ function openWithdraw(){
 
       /* SHARE LINK */
       modal.querySelector("#shareLink").addEventListener("click", ()=>{
-        const link = `https://pay54.app/pay/${userTag}`;
+        const link = `${window.location.origin}/?pay=${encodeURIComponent(userTag)}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(link)}`);
       });
 
