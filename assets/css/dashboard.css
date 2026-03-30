@@ -410,12 +410,6 @@ body.light .card{
     0 10px 30px rgba(20,40,80,0.10),
     inset 0 1px 0 rgba(255,255,255,0.6);
 }
-background: linear-gradient(
-  180deg,
-  #ffffff,
-  #f5f9ff
-);
-
 .card h3{
   margin:0;
   font-size: 18px;
