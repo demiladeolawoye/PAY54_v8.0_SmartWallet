@@ -350,7 +350,7 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 
   padding:12px;
 
-  height: calc(var(--app-height) - 72px); /* 🔥 FULL SCREEN FIT */
+  min-height: calc(100vh - 72px);/* 🔥 FULL SCREEN FIT */
   overflow-y:auto;
 
   padding-bottom:140px; /* 🔥 SPACE FOR FLOAT BUTTON */
