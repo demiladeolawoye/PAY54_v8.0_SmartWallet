@@ -1001,19 +1001,115 @@ function openAddMoney() {
 /* =========================
    Withdraw
 ========================= */
-function openWithdraw() {
+function openWithdraw(){
+
   openModal({
-    title: "Withdraw",
-    bodyHTML: `
-      <div class="p54-note">Withdraw feature (UI phase)</div>
-      <div class="p54-actions">
-        <button class="p54-btn primary" id="okWd">OK</button>
-      </div>
+    title:"Withdraw",
+
+    bodyHTML:`
+      <form class="p54-form" id="withdrawForm">
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="wdAmount" type="number" placeholder="0.00" required>
+        </div>
+
+        <div>
+          <div class="p54-label">Destination</div>
+          <select class="p54-select" id="wdDest">
+            <option value="bank">Bank</option>
+            <option value="agent">Agent</option>
+          </select>
+        </div>
+
+        <div id="wdDynamic"></div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelWD">Cancel</button>
+          <button class="p54-btn primary" type="submit">Withdraw</button>
+        </div>
+
+      </form>
     `,
-    onMount: ({ modal, close }) => {
-      modal.querySelector("#okWd").addEventListener("click", close);
+
+    onMount:({modal,close})=>{
+
+      const dest = modal.querySelector("#wdDest");
+      const dynamic = modal.querySelector("#wdDynamic");
+
+      function render(type){
+
+        if(type === "bank"){
+          dynamic.innerHTML = `
+            <select class="p54-select">
+              <option>GTBank</option>
+              <option>Access Bank</option>
+              <option>Zenith Bank</option>
+              <option>UBA</option>
+              <option>First Bank</option>
+            </select>
+          `;
+        }
+
+        if(type === "agent"){
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Agent Tag / Account" required>
+          `;
+        }
+
+      }
+
+      render("bank");
+
+      dest.addEventListener("change", e=>{
+        render(e.target.value);
+      });
+
+      modal.querySelector("#cancelWD").addEventListener("click",close);
+
+      modal.querySelector("#withdrawForm").addEventListener("submit",(e)=>{
+
+        e.preventDefault();
+
+        const amount = Number(modal.querySelector("#wdAmount").value);
+        const currency = getSelectedCurrency();
+
+        const balances = LEDGER.getBalances();
+        const current = balances[currency] || 0;
+
+        if(!amount || amount <= 0){
+          alert("Enter valid amount");
+          return;
+        }
+
+        if(amount > current){
+          alert("Insufficient balance");
+          return;
+        }
+
+        const entry = LEDGER.createEntry({
+          type:"withdraw",
+          title:"Withdrawal",
+          currency,
+          amount:-amount,
+          icon:"💵"
+        });
+
+        const tx = LEDGER.applyEntry(entry);
+
+        prependTxToDOM(tx);
+        refreshUI();
+
+        showPaymentReceipt(tx, "Withdrawal", amount, currency);
+
+        close();
+
+      });
+
     }
+
   });
+
 }
   function openSendUnified() { comingSoon("Send"); }
   function openReceive() { comingSoon("Receive"); }
