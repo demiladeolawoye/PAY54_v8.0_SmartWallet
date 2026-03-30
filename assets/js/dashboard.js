@@ -1184,7 +1184,72 @@ function openWithdraw(){
 
 }
   function openSendUnified() { comingSoon("Send"); }
-  function openReceive() { comingSoon("Receive"); }
+ function openReceive(){
+
+  const userTag = localStorage.getItem("pay54_name") || "pay54-user";
+  const accountNo = "3001234567";
+
+  openModal({
+    title:"Receive Money",
+
+    bodyHTML:`
+
+      <div style="text-align:center">
+
+        <div class="p54-note"><b>Your PAY54 Tag</b></div>
+        <div style="font-size:18px;font-weight:900;margin-bottom:10px">
+          @${userTag}
+        </div>
+
+        <div class="p54-note"><b>Account Number</b></div>
+        <div style="font-size:18px;font-weight:900;margin-bottom:16px">
+          ${accountNo}
+        </div>
+
+        <div id="qrBox" style="margin:10px auto;"></div>
+
+        <div class="p54-actions" style="justify-content:center;margin-top:16px">
+          <button class="p54-btn" id="copyTag">Copy Tag</button>
+          <button class="p54-btn" id="shareLink">Share</button>
+          <button class="p54-btn primary" id="closeReceive">Done</button>
+        </div>
+
+      </div>
+
+    `,
+
+    onMount: ({modal, close}) => {
+
+      const qrBox = modal.querySelector("#qrBox");
+
+      /* 🔥 QR PAYLOAD */
+      const payload = `PAY54|${userTag}|`;
+
+      new QRCode(qrBox,{
+        text:payload,
+        width:200,
+        height:200
+      });
+
+      /* COPY TAG */
+      modal.querySelector("#copyTag").addEventListener("click", ()=>{
+        navigator.clipboard.writeText(`@${userTag}`);
+        alert("Tag copied");
+      });
+
+      /* SHARE LINK */
+      modal.querySelector("#shareLink").addEventListener("click", ()=>{
+        const link = `https://pay54.app/pay/${userTag}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(link)}`);
+      });
+
+      modal.querySelector("#closeReceive").addEventListener("click", close);
+
+    }
+
+  });
+
+}
   function openRequestMoney(){
 
 openModal({
