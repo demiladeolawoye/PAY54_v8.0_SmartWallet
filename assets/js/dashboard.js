@@ -1383,7 +1383,6 @@ el = el.parentNode;
 /* =========================
    PAYMENT RECEIPT
 ========================= */
-
 function showPaymentReceipt(tx, merchant, amount, currency) {
 
   const receiptId = tx.id || ("P54-" + Date.now());
@@ -1417,41 +1416,42 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
         </div>
 
         <div class="p54-actions" style="margin-top:16px">
+          <button class="p54-btn" id="copyBtn">Copy</button>
+          <button class="p54-btn" id="shareBtn">WhatsApp</button>
+          <button class="p54-btn primary" id="doneBtn">Done</button>
+        </div>
 
-  <button class="p54-btn" id="copyBtn">Copy</button>
+      </div>
+    `,
 
-  <button class="p54-btn" id="shareBtn">WhatsApp</button>
+    onMount: ({ modal, close }) => {
 
-  <button class="p54-btn primary" id="doneBtn">Done</button>
-
-</div>
-const text = `PAY54 Receipt
+      const text = `PAY54 Receipt
 Merchant: ${merchant}
 Amount: ${LEDGER.moneyFmt(currency, amount)}
 Ref: ${receiptId}`;
 
-modal.querySelector("#copyBtn").addEventListener("click", ()=>{
-  navigator.clipboard.writeText(text);
-  alert("Copied!");
-});
+      modal.querySelector("#copyBtn").addEventListener("click", ()=>{
+        navigator.clipboard.writeText(text);
+        alert("Copied!");
+      });
 
-modal.querySelector("#shareBtn").addEventListener("click", ()=>{
-  const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-  window.open(url, "_blank");
-});
-    `,
-    onMount: ({ modal, close }) => {
-    modal.querySelector("#doneBtn").addEventListener("click", () => {
- close();
+      modal.querySelector("#shareBtn").addEventListener("click", ()=>{
+        const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+        window.open(url, "_blank");
+      });
 
-setTimeout(() => {
-  refreshUI();
-}, 60);
-});
+      modal.querySelector("#doneBtn").addEventListener("click", () => {
+        close();
+        setTimeout(() => refreshUI(), 60);
+      });
+
     }
+
   });
 
-}    
+}
+    
   /* ---------------------------
      INIT
   --------------------------- */
