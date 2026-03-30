@@ -937,15 +937,19 @@ function openAddMoney() {
 
           function renderAgentFields(val){
             if(val === "yes"){
-              agentFields.innerHTML = `
-                <input class="p54-input" placeholder="Agent Tag / Account" required>
-              `;
-            } else {
-              agentFields.innerHTML = `
-                <input class="p54-input" placeholder="Agent Name" required>
-                <input class="p54-input" placeholder="Account Number" required>
-              `;
-            }
+  agentFields.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+      <input class="p54-input" placeholder="Agent Tag / Account" required>
+    </div>
+  `;
+} else {
+  agentFields.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+      <input class="p54-input" placeholder="Agent Name" required>
+      <input class="p54-input" placeholder="Account Number" required>
+    </div>
+  `;
+}
           }
 
           renderAgentFields("yes");
