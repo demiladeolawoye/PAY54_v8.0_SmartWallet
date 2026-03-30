@@ -795,6 +795,10 @@ function openScanAndPay() {
 
         const merchant = merchantEl.value.trim();
         const amount = Number(parseFloat(amountEl.value).toFixed(2));
+         if(amount > 100000000){
+  alert("Amount too large");
+  return;
+}
         const currency = getSelectedCurrency();
 
         try{
