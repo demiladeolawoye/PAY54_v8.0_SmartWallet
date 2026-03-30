@@ -794,7 +794,7 @@ function openScanAndPay() {
         e.preventDefault();
 
         const merchant = merchantEl.value.trim();
-        const amount = Number(amountEl.value);
+        const amount = Number(parseFloat(amountEl.value).toFixed(2));
         const currency = getSelectedCurrency();
 
         try{
