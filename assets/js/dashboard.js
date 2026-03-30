@@ -186,6 +186,24 @@ function waitForModules(callback){
       .p54-filters{ display:grid; grid-template-columns: 1.4fr 0.8fr 0.8fr; gap:10px; margin:10px 0 12px; }
       @media (max-width:720px){ .p54-filters{ grid-template-columns: 1fr; } }
       .p54-small{ font-size:12px; opacity:.75; }
+      /* =========================
+   QR CENTER (DESKTOP ONLY)
+========================= */
+
+.qr-center-wrap{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin:20px 0;
+}
+
+/* Desktop enhancement */
+@media (min-width:768px){
+  .qr-center-wrap{
+    justify-content:center;
+    align-items:center;
+  }
+}
     `;
     document.head.appendChild(style);
   }
