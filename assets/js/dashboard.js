@@ -945,8 +945,8 @@ function openAddMoney() {
 } else {
   agentFields.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
-      <input class="p54-input" placeholder="Agent Name" required>
-      <input class="p54-input" placeholder="Account Number" required>
+     <input class="p54-input small" placeholder="Agent Name" required>
+<input class="p54-input small" placeholder="Account Number" required>
     </div>
   `;
 }
