@@ -965,7 +965,7 @@ function openAddMoney() {
 
         e.preventDefault();
 
-        const amount = Number(modal.querySelector("#amAmount").value);
+        const amount = Number(parseFloat(modal.querySelector("#amAmount").value).toFixed(2));
         const currency = getSelectedCurrency();
 
         if(!amount || amount <= 0){
@@ -1079,7 +1079,7 @@ function openWithdraw(){
 
         e.preventDefault();
 
-        const amount = Number(modal.querySelector("#wdAmount").value);
+        const amount = Number(parseFloat(modal.querySelector("#wdAmount").value).toFixed(2));
         const currency = getSelectedCurrency();
 
         const balances = LEDGER.getBalances();
