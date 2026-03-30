@@ -853,18 +853,149 @@ function openScanAndPay() {
    Add Money
 ========================= */
 function openAddMoney() {
+
   openModal({
     title: "Add Money",
+
     bodyHTML: `
-      <div class="p54-note">Add money feature (UI phase)</div>
-      <div class="p54-actions">
-        <button class="p54-btn primary" id="okAdd">OK</button>
-      </div>
+      <form class="p54-form" id="addMoneyForm">
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="amAmount" type="number" placeholder="0.00" required>
+        </div>
+
+        <div>
+          <div class="p54-label">Funding Source</div>
+          <select class="p54-select" id="amSource">
+            <option value="card">Card</option>
+            <option value="bank">Bank</option>
+            <option value="agent">Agent</option>
+          </select>
+        </div>
+
+        <div id="dynamicFields"></div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelAM">Cancel</button>
+          <button class="p54-btn primary" type="submit">Add Money</button>
+        </div>
+
+      </form>
     `,
+
     onMount: ({ modal, close }) => {
-      modal.querySelector("#okAdd").addEventListener("click", close);
+
+      const sourceEl = modal.querySelector("#amSource");
+      const dynamic = modal.querySelector("#dynamicFields");
+      const form = modal.querySelector("#addMoneyForm");
+
+      function renderFields(type){
+
+        if(type === "card"){
+          dynamic.innerHTML = `
+            <div class="p54-label">Select Card</div>
+            <select class="p54-select" id="amCard">
+              <option>PAY54 Virtual Card</option>
+              <option>Visa •••• 1234</option>
+              <option>Mastercard •••• 5678</option>
+            </select>
+          `;
+        }
+
+        if(type === "bank"){
+          dynamic.innerHTML = `
+            <div class="p54-label">Select Bank</div>
+            <select class="p54-select" id="amBank">
+              <option>GTBank</option>
+              <option>Access Bank</option>
+              <option>Zenith Bank</option>
+              <option>UBA</option>
+              <option>First Bank</option>
+              <option>Moniepoint</option>
+            </select>
+          `;
+        }
+
+        if(type === "agent"){
+          dynamic.innerHTML = `
+            <div class="p54-label">Is PAY54 Agent?</div>
+            <select class="p54-select" id="amAgentType">
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+
+            <div id="agentFields"></div>
+          `;
+
+          const agentType = dynamic.querySelector("#amAgentType");
+          const agentFields = dynamic.querySelector("#agentFields");
+
+          function renderAgentFields(val){
+            if(val === "yes"){
+              agentFields.innerHTML = `
+                <input class="p54-input" placeholder="Agent Tag / Account" required>
+              `;
+            } else {
+              agentFields.innerHTML = `
+                <input class="p54-input" placeholder="Agent Name" required>
+                <input class="p54-input" placeholder="Account Number" required>
+              `;
+            }
+          }
+
+          renderAgentFields("yes");
+
+          agentType.addEventListener("change", e => {
+            renderAgentFields(e.target.value);
+          });
+        }
+
+      }
+
+      renderFields("card");
+
+      sourceEl.addEventListener("change", e => {
+        renderFields(e.target.value);
+      });
+
+      modal.querySelector("#cancelAM").addEventListener("click", close);
+
+      form.addEventListener("submit", (e) => {
+
+        e.preventDefault();
+
+        const amount = Number(modal.querySelector("#amAmount").value);
+        const currency = getSelectedCurrency();
+
+        if(!amount || amount <= 0){
+          alert("Enter valid amount");
+          return;
+        }
+
+        const entry = LEDGER.createEntry({
+          type:"add_money",
+          title:"Wallet Top-up",
+          currency,
+          amount: amount,
+          icon:"➕"
+        });
+
+        const tx = LEDGER.applyEntry(entry);
+
+        prependTxToDOM(tx);
+        refreshUI();
+
+        showPaymentReceipt(tx, "Wallet Funding", amount, currency);
+
+        close();
+
+      });
+
     }
+
   });
+
 }
 
 /* =========================
