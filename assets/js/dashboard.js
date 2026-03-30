@@ -1417,10 +1417,28 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
         </div>
 
         <div class="p54-actions" style="margin-top:16px">
-          <button class="p54-btn primary" id="doneBtn">Done</button>
-        </div>
 
-      </div>
+  <button class="p54-btn" id="copyBtn">Copy</button>
+
+  <button class="p54-btn" id="shareBtn">WhatsApp</button>
+
+  <button class="p54-btn primary" id="doneBtn">Done</button>
+
+</div>
+const text = `PAY54 Receipt
+Merchant: ${merchant}
+Amount: ${LEDGER.moneyFmt(currency, amount)}
+Ref: ${receiptId}`;
+
+modal.querySelector("#copyBtn").addEventListener("click", ()=>{
+  navigator.clipboard.writeText(text);
+  alert("Copied!");
+});
+
+modal.querySelector("#shareBtn").addEventListener("click", ()=>{
+  const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
+});
     `,
     onMount: ({ modal, close }) => {
     modal.querySelector("#doneBtn").addEventListener("click", () => {
