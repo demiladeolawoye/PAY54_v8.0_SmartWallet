@@ -966,6 +966,10 @@ function openAddMoney() {
         e.preventDefault();
 
         const amount = Number(parseFloat(modal.querySelector("#amAmount").value).toFixed(2));
+         if(amount > 100000000){
+  alert("Amount too large");
+  return;
+}
         const currency = getSelectedCurrency();
 
         if(!amount || amount <= 0){
@@ -1080,6 +1084,10 @@ function openWithdraw(){
         e.preventDefault();
 
         const amount = Number(parseFloat(modal.querySelector("#wdAmount").value).toFixed(2));
+         if(amount > 100000000){
+  alert("Amount too large");
+  return;
+}
         const currency = getSelectedCurrency();
 
         const balances = LEDGER.getBalances();
