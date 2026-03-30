@@ -55,7 +55,6 @@ html, body{
   max-width:100%;
 
   overflow-x:hidden;   /* 🔥 STOP LEFT/RIGHT SCROLL */
-  overflow-y:hidden;
 }
 
 
