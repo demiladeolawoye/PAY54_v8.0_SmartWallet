@@ -866,7 +866,7 @@ function openAddMoney() {
 
         <div>
           <div class="p54-label">Amount</div>
-          <input class="p54-input" id="amAmount" type="number" placeholder="0.00" required>
+          <input class="p54-input" id="amAmount" type="number" step="0.01" placeholder="0.00" required>
         </div>
 
         <div>
