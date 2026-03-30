@@ -1206,7 +1206,9 @@ function openWithdraw(){
           ${accountNo}
         </div>
 
-        <div id="qrBox" style="margin:10px auto;"></div>
+        <div class="qr-center-wrap">
+  <div id="qrBox"></div>
+</div>
 
         <div class="p54-actions" style="justify-content:center;margin-top:16px">
           <button class="p54-btn" id="copyTag">Copy Tag</button>
