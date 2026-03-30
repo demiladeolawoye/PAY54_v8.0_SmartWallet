@@ -704,7 +704,7 @@ function openScanAndPay() {
 
         <div>
           <div class="p54-label">Amount</div>
-          <input class="p54-input" id="spAmount" type="number" min="0" placeholder="0.00" required />
+          <input class="p54-input" id="spAmount" type="number" step="0.01" min="0" placeholder="0.00" required />
         </div>
 
         <div>
