@@ -1059,26 +1059,59 @@ function openWithdraw(){
 
       function render(type){
 
-        if(type === "bank"){
-          dynamic.innerHTML = `
-            <select class="p54-select">
-              <option>GTBank</option>
-              <option>Access Bank</option>
-              <option>Zenith Bank</option>
-              <option>UBA</option>
-              <option>First Bank</option>
-            </select>
-          `;
-        }
+  if(type === "bank"){
+    dynamic.innerHTML = `
+      <div class="p54-label">Select Bank</div>
+      <select class="p54-select">
+        <option>GTBank</option>
+        <option>Access Bank</option>
+        <option>Zenith Bank</option>
+      </select>
+    `;
+  }
 
-        if(type === "agent"){
-          dynamic.innerHTML = `
-            <input class="p54-input" placeholder="Agent Tag / Account" required>
-          `;
-        }
+  if(type === "agent"){
+    dynamic.innerHTML = `
 
+      <div class="p54-label">Is PAY54 Agent?</div>
+      <select class="p54-select" id="wdAgentType">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+
+      <div id="wdAgentFields"></div>
+    `;
+
+    const agentType = dynamic.querySelector("#wdAgentType");
+    const agentFields = dynamic.querySelector("#wdAgentFields");
+
+    function renderAgentFields(val){
+
+      if(val === "yes"){
+        agentFields.innerHTML = `
+          <input class="p54-input small" placeholder="Agent Tag / Email" required>
+        `;
       }
 
+      if(val === "no"){
+        agentFields.innerHTML = `
+          <input class="p54-input small" placeholder="Agent Name" required>
+          <input class="p54-input small" placeholder="Bank Name" required>
+          <input class="p54-input small" placeholder="Account Number" required>
+        `;
+      }
+
+    }
+
+    renderAgentFields("yes");
+
+    agentType.addEventListener("change",(e)=>{
+      renderAgentFields(e.target.value);
+    });
+
+  }
+
+}
       render("bank");
 
       dest.addEventListener("change", e=>{
