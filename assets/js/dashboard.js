@@ -1033,17 +1033,6 @@ function openAddMoney() {
 
         prependTxToDOM(tx);
         refreshUI();
-
-        RCPT.openReceiptModal({
-  openModal,
-  title: "Wallet Funding",
-  tx,
-  lines: [
-    `Type: Add Money`,
-    `Amount: ${LEDGER.moneyFmt(currency, amount)}`
-  ]
-});
-
         close();
 
       });
@@ -1192,17 +1181,6 @@ function openWithdraw(){
 
         prependTxToDOM(tx);
         refreshUI();
-
-        RCPT.openReceiptModal({
-  openModal,
-  title: "Wallet Funding",
-  tx,
-  lines: [
-    `Type: Add Money`,
-    `Amount: ${LEDGER.moneyFmt(currency, amount)}`
-  ]
-});
-
         close();
 
       });
