@@ -1399,11 +1399,199 @@ modal.querySelector("#cancelQR").addEventListener("click",close);
 });
 
 }
+   /* =========================
+   GLOBAL TRANSFER (FX ENGINE)
+========================= */
+
+function openGlobalTransfer(){
+
+  openModal({
+
+    title:"PAY54 Global Transfer",
+
+    bodyHTML:`
+
+      <form class="p54-form" id="gtForm">
+
+        <div class="p54-row">
+
+          <div>
+            <div class="p54-label">From</div>
+            <select class="p54-select" id="gtFrom">
+              <option>NGN</option>
+              <option>GBP</option>
+              <option>USD</option>
+              <option>EUR</option>
+              <option>GHS</option>
+              <option>KES</option>
+            </select>
+            <input class="p54-input" id="gtFromAmt" placeholder="0.00">
+          </div>
+
+          <div>
+            <div class="p54-label">To</div>
+            <select class="p54-select" id="gtTo">
+              <option>GBP</option>
+              <option>USD</option>
+              <option>EUR</option>
+              <option>NGN</option>
+              <option>GHS</option>
+              <option>KES</option>
+            </select>
+            <input class="p54-input" id="gtToAmt" placeholder="0.00">
+          </div>
+
+        </div>
+
+        <div>
+          <div class="p54-label">Recipient Type</div>
+          <select class="p54-select" id="gtType">
+            <option value="pay54">PAY54 User</option>
+            <option value="bank">Bank Transfer</option>
+          </select>
+        </div>
+
+        <div id="gtRecipient"></div>
+
+        <div>
+          <div class="p54-label">Reference (optional)</div>
+          <input class="p54-input" id="gtRef" placeholder="e.g. Rent, Gift">
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelGT">Cancel</button>
+          <button class="p54-btn primary" type="submit">Send</button>
+        </div>
+
+      </form>
+
+    `,
+
+    onMount:({modal,close})=>{
+
+      const fromCur = modal.querySelector("#gtFrom");
+      const toCur   = modal.querySelector("#gtTo");
+      const fromAmt = modal.querySelector("#gtFromAmt");
+      const toAmt   = modal.querySelector("#gtToAmt");
+
+      const type = modal.querySelector("#gtType");
+      const recBox = modal.querySelector("#gtRecipient");
+
+      /* =========================
+         RECIPIENT LOGIC
+      ========================= */
+
+      function renderRecipient(val){
+
+        if(val === "pay54"){
+          recBox.innerHTML = `
+            <input class="p54-input" id="gtTag" placeholder="@PAY54 Tag" required>
+          `;
+        }
+
+        if(val === "bank"){
+          recBox.innerHTML = `
+            <input class="p54-input" placeholder="Account Name" required>
+            <input class="p54-input" placeholder="Account Number" required>
+            <input class="p54-input" placeholder="Bank Name" required>
+          `;
+        }
+
+      }
+
+      renderRecipient("pay54");
+
+      type.addEventListener("change",(e)=>{
+        renderRecipient(e.target.value);
+      });
+
+      /* =========================
+         FX ENGINE (BIDIRECTIONAL)
+      ========================= */
+
+      function convertForward(){
+        const from = fromCur.value;
+        const to = toCur.value;
+        const amount = parseFloat(fromAmt.value);
+
+        if(!amount || !LEDGER) return;
+
+        const result = LEDGER.convert(from,to,amount);
+        toAmt.value = result.toFixed(2);
+      }
+
+      function convertReverse(){
+        const from = fromCur.value;
+        const to = toCur.value;
+        const amount = parseFloat(toAmt.value);
+
+        if(!amount || !LEDGER) return;
+
+        const result = LEDGER.convert(to,from,amount);
+        fromAmt.value = result.toFixed(2);
+      }
+
+      fromAmt.addEventListener("input", convertForward);
+      toAmt.addEventListener("input", convertReverse);
+
+      fromCur.addEventListener("change", convertForward);
+      toCur.addEventListener("change", convertForward);
+
+      /* =========================
+         SUBMIT
+      ========================= */
+
+      modal.querySelector("#cancelGT").addEventListener("click", close);
+
+      modal.querySelector("#gtForm").addEventListener("submit",(e)=>{
+
+        e.preventDefault();
+
+        const amount = Number(parseFloat(fromAmt.value).toFixed(2));
+        const currency = fromCur.value;
+
+        const balances = LEDGER.getBalances();
+        const current = balances[currency] || 0;
+
+        if(!amount || amount <= 0){
+          alert("Enter valid amount");
+          return;
+        }
+
+        if(amount > current){
+          alert("Insufficient balance");
+          return;
+        }
+
+        const entry = LEDGER.createEntry({
+          type:"global_transfer",
+          title:"Global Transfer",
+          currency,
+          amount:-amount,
+          icon:"🌍"
+        });
+
+        const tx = LEDGER.applyEntry(entry);
+
+        prependTxToDOM(tx);
+        refreshUI();
+
+        showToast("Transfer successful 🌍");
+
+        close();
+
+      });
+
+    }
+
+  });
+
+}
   function openBankTransfer() { comingSoon("Bank Transfer"); }
   function openCrossBorderFXUnified() { 
   openGlobalTransfer(); 
 }
-
+   
   /* ---------------------------
      Ledger modal (View All)
   --------------------------- */
