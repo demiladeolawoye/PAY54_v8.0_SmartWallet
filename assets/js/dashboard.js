@@ -1725,10 +1725,11 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
         </div>
 
         <div class="p54-actions" style="margin-top:16px">
-          <button class="p54-btn" id="copyBtn">Copy</button>
-          <button class="p54-btn" id="shareBtn">WhatsApp</button>
-          <button class="p54-btn primary" id="doneBtn">Done</button>
-        </div>
+  <button class="p54-btn" id="copyBtn">Copy</button>
+  <button class="p54-btn" id="shareBtn">WhatsApp</button>
+  <button class="p54-btn" id="againBtn">Make Another Payment</button>
+  <button class="p54-btn primary" id="doneBtn">Close</button>
+</div>
 
       </div>
     `,
