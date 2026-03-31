@@ -1196,7 +1196,112 @@ close();
   });
 
 }
-  function openSendUnified() { comingSoon("Send"); }
+  function openSendUnified(){
+
+  openModal({
+
+    title:"Send Money",
+
+    bodyHTML:`
+
+      <form class="p54-form" id="sendForm">
+
+        <div>
+          <div class="p54-label">Recipient (PAY54 Tag)</div>
+          <input class="p54-input" id="sendUser" placeholder="@username" required>
+        </div>
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="sendAmount" type="number" step="0.01" placeholder="0.00" required>
+        </div>
+
+        <div>
+          <div class="p54-label">Reference (optional)</div>
+          <input class="p54-input" id="sendNote" placeholder="Optional note">
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelSend">Cancel</button>
+          <button class="p54-btn primary" type="submit">Send</button>
+        </div>
+
+      </form>
+
+    `,
+
+    onMount:({modal,close})=>{
+
+      const form = modal.querySelector("#sendForm");
+
+      modal.querySelector("#cancelSend").addEventListener("click", close);
+
+      form.addEventListener("submit",(e)=>{
+
+        e.preventDefault();
+
+        const user = modal.querySelector("#sendUser").value.trim();
+        const amount = Number(parseFloat(modal.querySelector("#sendAmount").value).toFixed(2));
+        const note = modal.querySelector("#sendNote").value.trim();
+
+        const currency = getSelectedCurrency();
+
+        /* VALIDATION */
+
+        if(!user || user.length < 2){
+          alert("Enter valid recipient");
+          return;
+        }
+
+        if(!amount || amount <= 0){
+          alert("Enter valid amount");
+          return;
+        }
+
+        if(amount > 100000000){
+          alert("Amount too large");
+          return;
+        }
+
+        const balances = LEDGER.getBalances();
+        const current = balances[currency] || 0;
+
+        if(amount > current){
+          alert("Insufficient balance");
+          return;
+        }
+
+        /* CREATE TRANSACTION */
+
+        const entry = LEDGER.createEntry({
+          type:"send",
+          title:`Sent to ${user}`,
+          currency,
+          amount:-amount,
+          icon:"📤",
+          meta:{ recipient:user, note }
+        });
+
+        const tx = LEDGER.applyEntry(entry);
+
+        /* UI UPDATE */
+
+        prependTxToDOM(tx);
+        refreshUI();
+
+        /* RECEIPT */
+
+        showPaymentReceipt(tx, user, amount, currency);
+
+        close();
+
+      });
+
+    }
+
+  });
+
+}
  function openReceive(){
 
   const userTag = localStorage.getItem("pay54_name") || "pay54-user";
