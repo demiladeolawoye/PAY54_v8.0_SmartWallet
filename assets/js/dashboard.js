@@ -1400,7 +1400,9 @@ modal.querySelector("#cancelQR").addEventListener("click",close);
 
 }
   function openBankTransfer() { comingSoon("Bank Transfer"); }
-  function openCrossBorderFXUnified() { comingSoon("Cross-border FX"); }
+  function openCrossBorderFXUnified() { 
+  openPAY54GlobalTransfer(); 
+}
 
   /* ---------------------------
      Ledger modal (View All)
