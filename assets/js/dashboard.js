@@ -1514,7 +1514,7 @@ function openGlobalTransfer(){
         const to = toCur.value;
         const amount = parseFloat(fromAmt.value);
 
-        if(!amount || !LEDGER) return;
+        if(!amount || !LEDGER || !LEDGER.convert) return;
 
         const result = LEDGER.convert(from,to,amount);
         toAmt.value = result.toFixed(2);
@@ -1525,7 +1525,7 @@ function openGlobalTransfer(){
         const to = toCur.value;
         const amount = parseFloat(toAmt.value);
 
-        if(!amount || !LEDGER) return;
+        if(!amount || !LEDGER || !LEDGER.convert) return;
 
         const result = LEDGER.convert(to,from,amount);
         fromAmt.value = result.toFixed(2);
