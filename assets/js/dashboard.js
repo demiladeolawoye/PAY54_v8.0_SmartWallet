@@ -1560,7 +1560,7 @@ function openGlobalTransfer(){
 prependTxToDOM(tx);
 refreshUI();
 
-showPaymentReceipt(tx, "Global Transfer", amount, currency);
+showPaymentReceipt(tx, "PAY54 Global Transfer", amount, currency);
 
 close();
       });
