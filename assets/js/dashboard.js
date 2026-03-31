@@ -194,7 +194,18 @@ function waitForModules(callback){
   display:flex;
   justify-content:center;
   align-items:center;
-  margin:20px 0;
+  margin:24px 0;
+}
+
+.qr-center-wrap #qrBox{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  padding:12px;
+  border-radius:16px;
+
+  background:#fff;
 }
 
 /* Desktop enhancement */
