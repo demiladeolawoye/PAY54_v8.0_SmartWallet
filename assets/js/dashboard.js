@@ -1557,13 +1557,12 @@ function openGlobalTransfer(){
 
         const tx = LEDGER.applyEntry(entry);
 
-        prependTxToDOM(tx);
-        refreshUI();
+prependTxToDOM(tx);
+refreshUI();
 
-        showToast("Global Transfer successful 🌍");
+showPaymentReceipt(tx, "Global Transfer", amount, currency);
 
-        close();
-
+close();
       });
 
     }
