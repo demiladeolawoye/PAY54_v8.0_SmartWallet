@@ -1029,11 +1029,14 @@ function openAddMoney() {
           icon:"➕"
         });
 
-        const tx = LEDGER.applyEntry(entry);
+      const tx = LEDGER.applyEntry(entry);
 
-        prependTxToDOM(tx);
-        refreshUI();
-        close();
+prependTxToDOM(tx);
+refreshUI();
+
+showPaymentReceipt(tx, "Wallet Funding", amount, currency);
+
+close();
 
       });
 
