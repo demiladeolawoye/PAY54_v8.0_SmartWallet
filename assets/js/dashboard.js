@@ -1180,11 +1180,14 @@ function openWithdraw(){
           icon:"💵"
         });
 
-        const tx = LEDGER.applyEntry(entry);
+      const tx = LEDGER.applyEntry(entry);
 
-        prependTxToDOM(tx);
-        refreshUI();
-        close();
+prependTxToDOM(tx);
+refreshUI();
+
+showPaymentReceipt(tx, "Withdrawal", amount, currency);
+
+close();
 
       });
 
