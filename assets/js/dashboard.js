@@ -1750,7 +1750,31 @@ Ref: ${receiptId}`;
         const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
         window.open(url, "_blank");
       });
+modal.querySelector("#againBtn").addEventListener("click", () => {
+  close();
 
+  setTimeout(() => {
+
+    // Smart routing based on transaction type
+    if(tx.type === "add_money"){
+      openAddMoney();
+    }
+    else if(tx.type === "withdraw"){
+      openWithdraw();
+    }
+    else if(tx.type === "scan_pay"){
+      openScanAndPay();
+    }
+    else if(tx.type === "global_transfer"){
+      openGlobalTransfer();
+    }
+    else{
+      openSendUnified();
+    }
+
+  }, 100);
+
+});
       modal.querySelector("#doneBtn").addEventListener("click", () => {
         close();
         setTimeout(() => refreshUI(), 60);
