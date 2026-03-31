@@ -1401,7 +1401,7 @@ modal.querySelector("#cancelQR").addEventListener("click",close);
 }
   function openBankTransfer() { comingSoon("Bank Transfer"); }
   function openCrossBorderFXUnified() { 
-  openPAY54GlobalTransfer(); 
+  openGlobalTransfer(); 
 }
 
   /* ---------------------------
