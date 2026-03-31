@@ -1576,7 +1576,7 @@ function openGlobalTransfer(){
         prependTxToDOM(tx);
         refreshUI();
 
-        showToast("Transfer successful 🌍");
+        showToast("Global Transfer successful 🌍");
 
         close();
 
