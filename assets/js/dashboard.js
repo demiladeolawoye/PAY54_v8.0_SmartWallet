@@ -1281,7 +1281,47 @@ close();
     onMount:({modal,close})=>{
 
       const form = modal.querySelector("#sendForm");
+const amountEl = modal.querySelector("#sendAmount");
+const previewEl = modal.querySelector("#sendPreview");
 
+function updatePreview(){
+
+  const amount = parseFloat(amountEl.value);
+  const currency = getSelectedCurrency();
+
+  if(!amount || amount <= 0){
+    previewEl.innerHTML = "";
+    return;
+  }
+
+  const funding = resolveFundingCurrency(currency, amount);
+
+  if(!funding){
+    previewEl.innerHTML = "❌ Insufficient balance";
+    return;
+  }
+
+  if(funding.type === "direct"){
+    previewEl.innerHTML = `
+      ✅ Sending ${LEDGER.moneyFmt(currency, amount)} 
+      from your ${currency} wallet
+    `;
+  }
+
+  if(funding.type === "fx"){
+    const rate = LEDGER.getRate(funding.from, funding.to);
+
+    previewEl.innerHTML = `
+      💱 Auto FX Conversion<br>
+      From: ${funding.from}<br>
+      To: ${funding.to}<br>
+      Rate: ${rate.toFixed(2)}
+    `;
+  }
+
+}
+
+amountEl.addEventListener("input", updatePreview);
       modal.querySelector("#cancelSend").addEventListener("click", close);
 
       form.addEventListener("submit",(e)=>{
@@ -1321,7 +1361,7 @@ if(!funding){
   alert(`Insufficient funds across all wallets`);
   return;
 }
-
+showToast("Processing payment...");
 /* CREATE TRANSACTION */
 let tx;
 
