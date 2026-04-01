@@ -1311,15 +1311,18 @@ close();
           return;
         }
 
-        const balances = LEDGER.getBalances();
-        const current = balances[currency] || 0;
+       const balances = LEDGER.getBalances();
+const current = balances[currency] || 0;
 
-        if(amount > current){
-          alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, current)}`);
-          return;
-        }
+/* 🔥 ADD THIS */
+const funding = resolveFundingCurrency(currency, amount);
 
-        /* CREATE TRANSACTION */
+if(!funding){
+  alert(`Insufficient funds across all wallets`);
+  return;
+}
+
+/* CREATE TRANSACTION */
 let tx;
 
 if(funding.type === "direct"){
@@ -1341,7 +1344,6 @@ if(funding.type === "direct"){
 
   const converted = LEDGER.convert(funding.from, funding.to, amount);
 
-  // Debit source wallet
   LEDGER.applyEntry(
     LEDGER.createEntry({
       type:"fx_debit",
@@ -1352,7 +1354,6 @@ if(funding.type === "direct"){
     })
   );
 
-  // Credit target wallet
   LEDGER.applyEntry(
     LEDGER.createEntry({
       type:"fx_credit",
@@ -1363,7 +1364,6 @@ if(funding.type === "direct"){
     })
   );
 
-  // Final send
   const entry = LEDGER.createEntry({
     type:"send",
     title:`Sent to ${user}`,
