@@ -1319,17 +1319,68 @@ close();
         }
 
         /* CREATE TRANSACTION */
+let tx;
 
-        const entry = LEDGER.createEntry({
-          type:"send",
-          title:`Sent to ${user}`,
-          currency,
-          amount:-amount,
-          icon:"📤",
-          meta:{ recipient:user, note }
-        });
+if(funding.type === "direct"){
 
-        const tx = LEDGER.applyEntry(entry);
+  const entry = LEDGER.createEntry({
+    type:"send",
+    title:`Sent to ${user}`,
+    currency,
+    amount:-amount,
+    icon:"📤",
+    meta:{ recipient:user, note }
+  });
+
+  tx = LEDGER.applyEntry(entry);
+
+}else if(funding.type === "fx"){
+
+  const rate = LEDGER.getRate(funding.from, funding.to);
+
+  const converted = LEDGER.convert(funding.from, funding.to, amount);
+
+  // Debit source wallet
+  LEDGER.applyEntry(
+    LEDGER.createEntry({
+      type:"fx_debit",
+      title:`FX Conversion (${funding.from} → ${funding.to})`,
+      currency: funding.from,
+      amount:-converted,
+      icon:"💱"
+    })
+  );
+
+  // Credit target wallet
+  LEDGER.applyEntry(
+    LEDGER.createEntry({
+      type:"fx_credit",
+      title:`FX Conversion`,
+      currency: funding.to,
+      amount: amount,
+      icon:"💱"
+    })
+  );
+
+  // Final send
+  const entry = LEDGER.createEntry({
+    type:"send",
+    title:`Sent to ${user}`,
+    currency,
+    amount:-amount,
+    icon:"📤",
+    meta:{
+      recipient:user,
+      note,
+      fx_used:true,
+      rate
+    }
+  });
+
+  tx = LEDGER.applyEntry(entry);
+
+}
+  
 
         /* UI UPDATE */
 
