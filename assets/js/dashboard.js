@@ -1178,10 +1178,12 @@ function openWithdraw(){
           return;
         }
 
-        if(amount > current){
-          alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, current)}`);
-          return;
-        }
+        const funding = resolveFundingCurrency(currency, amount);
+
+if(!funding){
+  alert(`Insufficient funds across all wallets`);
+  return;
+}
 
         const entry = LEDGER.createEntry({
           type:"withdraw",
