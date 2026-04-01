@@ -852,6 +852,7 @@ function openScanAndPay() {
 
           const balances = LEDGER.getBalances();
           const currentBalance = balances[currency] || 0;
+         const funding = resolveFundingCurrency(currency, amount);
 
           if(!merchant || !amount || amount <= 0){
             alert("Enter valid merchant and amount");
