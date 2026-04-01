@@ -675,6 +675,54 @@ function showToast(message){
   },3000);
 
 }
+  function requestPinVerification(callback){
+
+  const savedPin = localStorage.getItem(LS.PIN) || "1234"; // default PIN
+
+  openModal({
+    title: "Enter PIN",
+
+    bodyHTML: `
+      <div class="p54-note">Confirm your PIN to proceed</div>
+
+      <input 
+        class="p54-input" 
+        id="userPin" 
+        type="password" 
+        placeholder="••••"
+        maxlength="6"
+        style="margin-top:12px"
+      >
+
+      <div class="p54-actions">
+        <button class="p54-btn" id="cancelPin">Cancel</button>
+        <button class="p54-btn primary" id="confirmPin">Confirm</button>
+      </div>
+    `,
+
+    onMount: ({ modal, close }) => {
+
+      const input = modal.querySelector("#userPin");
+
+      modal.querySelector("#cancelPin").addEventListener("click", close);
+
+      modal.querySelector("#confirmPin").addEventListener("click", () => {
+
+        const entered = input.value.trim();
+
+        if(entered === savedPin){
+          close();
+          callback(); // ✅ proceed
+        } else {
+          alert("Incorrect PIN");
+        }
+
+      });
+
+    }
+  });
+
+} 
    /* =========================
    BALANCE GLOW EFFECT
 ========================= */
