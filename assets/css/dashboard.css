@@ -1304,3 +1304,17 @@ body.light .utility-btn{
 body.light .available-balance{
   color:#475569;
 }
+
+/* =========================
+   AVAILABLE BALANCE EMPHASIS
+========================= */
+
+.avail-label{
+  font-weight:700;
+  opacity:0.75;
+}
+
+.avail-value{
+  font-weight:900;
+  margin-left:4px;
+}
