@@ -856,7 +856,7 @@ function openScanAndPay() {
           }
 
           if(amount > currentBalance){
-            alert("Insufficient balance");
+            alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, current)}`);
             return;
           }
 
@@ -1176,7 +1176,7 @@ function openWithdraw(){
         }
 
         if(amount > current){
-          alert("Insufficient balance");
+          alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, current)}`);
           return;
         }
 
@@ -1275,7 +1275,7 @@ close();
         const current = balances[currency] || 0;
 
         if(amount > current){
-          alert("Insufficient balance");
+          alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, current)}`);
           return;
         }
 
@@ -1656,7 +1656,7 @@ function openGlobalTransfer(){
         }
 
         if(amount > current){
-          alert("Insufficient balance");
+          alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, current)}`);
           return;
         }
 
