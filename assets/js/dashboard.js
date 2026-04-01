@@ -373,7 +373,10 @@ const available = balances[cur] || 0;
 const availableEl = document.getElementById("availableBalance");
 
 if(availableEl){
-  availableEl.textContent = `Available in ${cur}: ${LEDGER.moneyFmt(cur, available)}`;
+  availableEl.innerHTML = `
+  <span class="avail-label">Available in ${cur}:</span>
+  <span class="avail-value">${LEDGER.moneyFmt(cur, available)}</span>
+`;
 }
   if(balanceEl){
 
