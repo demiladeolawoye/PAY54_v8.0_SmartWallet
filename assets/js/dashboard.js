@@ -73,6 +73,7 @@ function waitForModules(callback){
     EMAIL: "pay54_email",
     ALERTS: "pay54_alerts",
     SEED: "pay54_seed_v81"
+    PIN: "pay54_pin", 
   };
 
   const $ = (sel, root = document) => root.querySelector(sel);
