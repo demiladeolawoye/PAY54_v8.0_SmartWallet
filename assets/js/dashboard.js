@@ -1412,79 +1412,76 @@ if(!funding){
 }
 showToast("Processing payment...");
 /* CREATE TRANSACTION */
-let tx;
+requestPinVerification(() => {
 
-if(funding.type === "direct"){
+  showToast("Processing payment...");
 
-  const entry = LEDGER.createEntry({
-    type:"send",
-    title:`Sent to ${user}`,
-    currency,
-    amount:-amount,
-    icon:"📤",
-    meta:{ recipient:user, note }
-  });
+  let tx;
 
-  tx = LEDGER.applyEntry(entry);
+  if(funding.type === "direct"){
 
-}else if(funding.type === "fx"){
+    const entry = LEDGER.createEntry({
+      type:"send",
+      title:`Sent to ${user}`,
+      currency,
+      amount:-amount,
+      icon:"📤",
+      meta:{ recipient:user, note }
+    });
 
-  const rate = LEDGER.getRate(funding.from, funding.to);
+    tx = LEDGER.applyEntry(entry);
 
-  const converted = LEDGER.convert(funding.from, funding.to, amount);
+  } else if(funding.type === "fx"){
 
-  LEDGER.applyEntry(
-    LEDGER.createEntry({
-      type:"fx_debit",
-      title:`FX Conversion (${funding.from} → ${funding.to})`,
-      currency: funding.from,
-      amount:-converted,
-      icon:"💱"
-    })
-  );
+    const rate = LEDGER.getRate(funding.from, funding.to);
 
-  LEDGER.applyEntry(
-    LEDGER.createEntry({
-      type:"fx_credit",
-      title:`FX Conversion`,
-      currency: funding.to,
-      amount: amount,
-      icon:"💱"
-    })
-  );
+    const converted = LEDGER.convert(funding.from, funding.to, amount);
 
-  const entry = LEDGER.createEntry({
-    type:"send",
-    title:`Sent to ${user}`,
-    currency,
-    amount:-amount,
-    icon:"📤",
-    meta:{
-      recipient:user,
-      note,
-      fx_used:true,
-      rate
-    }
-  });
+    LEDGER.applyEntry(
+      LEDGER.createEntry({
+        type:"fx_debit",
+        title:`FX Conversion (${funding.from} → ${funding.to})`,
+        currency: funding.from,
+        amount:-converted,
+        icon:"💱"
+      })
+    );
 
-  tx = LEDGER.applyEntry(entry);
+    LEDGER.applyEntry(
+      LEDGER.createEntry({
+        type:"fx_credit",
+        title:`FX Conversion`,
+        currency: funding.to,
+        amount: amount,
+        icon:"💱"
+      })
+    );
 
-}
-  
+    const entry = LEDGER.createEntry({
+      type:"send",
+      title:`Sent to ${user}`,
+      currency,
+      amount:-amount,
+      icon:"📤",
+      meta:{
+        recipient:user,
+        note,
+        fx_used:true,
+        rate
+      }
+    });
 
-        /* UI UPDATE */
+    tx = LEDGER.applyEntry(entry);
+  }
 
-        prependTxToDOM(tx);
-        refreshUI();
+  prependTxToDOM(tx);
+  refreshUI();
 
-        /* RECEIPT */
+  showPaymentReceipt(tx, user, amount, currency);
 
-        showPaymentReceipt(tx, user, amount, currency);
+  close();
 
-        close();
-
-      });
-
+});
     }
 
   });
