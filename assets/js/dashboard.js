@@ -66,15 +66,15 @@ function waitForModules(callback){
 
   check();
 }
-  const LS = {
-    THEME: "pay54_theme",
-    CURRENCY: "pay54_currency",
-    NAME: "pay54_name",
-    EMAIL: "pay54_email",
-    ALERTS: "pay54_alerts",
-    SEED: "pay54_seed_v81"
-    PIN: "pay54_pin", 
-  };
+const LS = {
+  THEME: "pay54_theme",
+  CURRENCY: "pay54_currency",
+  NAME: "pay54_name",
+  EMAIL: "pay54_email",
+  ALERTS: "pay54_alerts",
+  SEED: "pay54_seed_v81",
+  PIN: "pay54_pin"
+};
 
   const $ = (sel, root = document) => root.querySelector(sel);
 
