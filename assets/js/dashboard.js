@@ -1207,6 +1207,40 @@ close();
   });
 
 }
+   function resolveFundingCurrency(targetCurrency, amount){
+
+  const balances = LEDGER.getBalances() || {};
+
+  // 1. Direct balance check
+  if((balances[targetCurrency] || 0) >= amount){
+    return {
+      type: "direct",
+      currency: targetCurrency,
+      amount: amount
+    };
+  }
+
+  // 2. Try other currencies
+  for(const cur in balances){
+
+    const bal = balances[cur] || 0;
+
+    if(!bal || cur === targetCurrency) continue;
+
+    const converted = LEDGER.convert(cur, targetCurrency, bal);
+
+    if(converted >= amount){
+      return {
+        type: "fx",
+        from: cur,
+        to: targetCurrency,
+        amount: amount
+      };
+    }
+  }
+
+  return null; // insufficient funds
+}
   function openSendUnified(){
 
   openModal({
