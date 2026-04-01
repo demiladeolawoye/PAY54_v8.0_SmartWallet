@@ -366,7 +366,15 @@ function setActiveCurrency(cur){
   }
 
   const total = LEDGER ? getConvertedTotal(cur) : 0;
+// 🔥 SMART AVAILABLE BALANCE
+const balances = LEDGER.getBalances() || {};
+const available = balances[cur] || 0;
 
+const availableEl = document.getElementById("availableBalance");
+
+if(availableEl){
+  availableEl.textContent = `Available in ${cur}: ${LEDGER.moneyFmt(cur, available)}`;
+}
   if(balanceEl){
 
     balanceEl.textContent = "Converting...";
