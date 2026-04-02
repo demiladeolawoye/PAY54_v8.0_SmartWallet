@@ -1915,6 +1915,8 @@ close();
 
 document.addEventListener("click",(e)=>{
 
+console.log("🟢 CLICK DETECTED:", e.target);
+
 let el = e.target;
 
 while(el && el !== document){
