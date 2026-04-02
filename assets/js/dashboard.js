@@ -1937,7 +1937,10 @@ const id = el.id;
 
 /* MONEY MOVES */
 
-if(action === "send") return openSendUnified();
+if(action === "send") {
+  if(!LEDGER) return alert("System loading...");
+  return openSendUnified();
+}
 if(action === "receive") return openReceive();
 if(action === "add") return openAddMoney();
 if(action === "withdraw") return openWithdraw();
