@@ -367,7 +367,13 @@ function setActiveCurrency(cur){
     currencySelect.value = cur;
   }
 
-  const total = LEDGER ? getConvertedTotal(cur) : 0;
+  let total = 0;
+
+try{
+  total = getConvertedTotal(cur);
+}catch(e){
+  console.warn("Conversion failed", e);
+}
 // 🔥 SMART AVAILABLE BALANCE
 const balances = LEDGER.getBalances() || {};
 const available = balances[cur] || 0;
