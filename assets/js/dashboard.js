@@ -245,7 +245,8 @@ const LS = {
     backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
     document.addEventListener("keydown", escClose);
 
-   document.body.style.overflow = "hidden";
+   const originalOverflow = document.body.style.overflow;
+document.body.style.overflow = "hidden";
    document.body.appendChild(backdrop);
     if (typeof onMount === "function") onMount({ modal: backdrop.querySelector(".p54-modal"), close });
     return { close };
