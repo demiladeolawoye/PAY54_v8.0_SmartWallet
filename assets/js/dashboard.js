@@ -2181,11 +2181,6 @@ const watchdog = setInterval(()=>{
      /* =========================
    🔥 FORCE CLICK SYSTEM (CRITICAL FIX)
 ========================= */
-
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("⚡ Forcing click routing INIT");
-  bindStableClickRouting();
-});
 waitForModules(() => {
 
   if (document.readyState === "loading") {
