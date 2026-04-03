@@ -1234,7 +1234,7 @@ function openWithdraw(){
         const currency = getSelectedCurrency();
 
         const balances = LEDGER.getBalances();
-        const current = balances[currency] || 0;
+        const currentBalance = balances[currency] || 0;
 
         if(!amount || amount <= 0){
           alert("Enter valid amount");
@@ -1414,7 +1414,7 @@ amountEl.addEventListener("input", updatePreview);
         }
 
        const balances = LEDGER.getBalances();
-const current = balances[currency] || 0;
+const currentBalance = balances[currency] || 0;
 
 /* 🔥 ADD THIS */
 const funding = resolveFundingCurrency(currency, amount);
@@ -1838,17 +1838,17 @@ function openGlobalTransfer(){
         const currency = fromCur.value;
 
         const balances = LEDGER.getBalances();
-        const current = balances[currency] || 0;
+        const currentBalance = balances[currency] || 0;
 
         if(!amount || amount <= 0){
           alert("Enter valid amount");
           return;
         }
 
-        if(amount > current){
-          alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, current)}`);
-          return;
-        }
+        if(amount > currentBalance){
+  alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, currentBalance)}`);
+  return;
+}
 
         const entry = LEDGER.createEntry({
           type:"global_transfer",
