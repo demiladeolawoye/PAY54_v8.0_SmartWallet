@@ -234,9 +234,9 @@ const LS = {
       </div>
     `;
 
-    function close() {
+ function close() {
   backdrop.remove();
-  document.body.style.overflow = "";
+  document.body.style.overflow = originalOverflow;
   document.removeEventListener("keydown", escClose);
 }
     function escClose(e) { if (e.key === "Escape") close(); }
