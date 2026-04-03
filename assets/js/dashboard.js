@@ -367,7 +367,12 @@ function setActiveCurrency(cur){
     currencySelect.value = cur;
   }
 
-  let total = 0;
+let total = 0;
+
+if(!LEDGER){
+  console.warn("Ledger not ready yet");
+  return;
+}
 
 try{
   total = getConvertedTotal(cur);
