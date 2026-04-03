@@ -1226,27 +1226,26 @@ body.light .utility-btn{
 /* =========================
    MOBILE SYSTEM (REAL FIX)
 ========================= */
-
 @media (max-width:980px){
 
-  html, body{
-    overflow-x:hidden !important;
-  }
-
   .dash-grid{
-    width:100%;
-    overflow-x:hidden;
+    grid-template-columns:1fr;
   }
 
-  /* MONEY MOVES */
   .money-moves-grid{
     grid-template-columns: repeat(2,1fr);
   }
 
-  /* SERVICES */
   .tile-grid.cols-4{
     grid-template-columns: repeat(2,1fr);
   }
+
+  .tile-btn,
+  .utility-btn{
+    min-height:78px;
+  }
+
+}
 
   /* BUTTON SIZE */
   .tile-btn,
