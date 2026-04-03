@@ -77,7 +77,6 @@ body{
     linear-gradient(180deg, #070b16, #0d1426);
 
   overflow-x:hidden;
-  overflow-y:auto; /* ✅ ENABLE SCROLL */
 }
 
 /* ---------------------------
