@@ -1915,20 +1915,11 @@ close();
 
 document.addEventListener("click",(e)=>{
 
-console.log("🟢 CLICK DETECTED:", e.target);
+let el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
 
-let el = e.target;
+if(!el) return;
 
-while(el && el !== document){
-
-if(
-el.classList &&
-(
-el.classList.contains("tile-btn") ||
-el.classList.contains("shortcut-btn") ||
-el.classList.contains("utility-btn")
-)
-){
+/* 🔥 GUARANTEED TARGET */
 
 const action = el.dataset.action;
 const service = el.dataset.service;
@@ -1937,10 +1928,7 @@ const id = el.id;
 
 /* MONEY MOVES */
 
-if(action === "send") {
-  if(!LEDGER) return alert("System loading...");
-  return openSendUnified();
-}
+if(action === "send") return openSendUnified();
 if(action === "receive") return openReceive();
 if(action === "add") return openAddMoney();
 if(action === "withdraw") return openWithdraw();
@@ -1973,12 +1961,6 @@ if(shortcut === "trading") return comingSoon("Trading");
 
 if(id === "atmFinderBtn") return comingSoon("ATM Finder");
 if(id === "posFinderBtn") return comingSoon("POS / Agent Finder");
-
-}
-
-el = el.parentNode;
-
-}
 
 });
 
