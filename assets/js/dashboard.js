@@ -921,10 +921,10 @@ function openScanAndPay() {
             return;
           }
 
-          if(amount > currentBalance){
-            alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, current)}`);
-            return;
-          }
+if(amount > currentBalance){
+  alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, currentBalance)}`);
+  return;
+}
 
           /* Create ledger entry */
 
