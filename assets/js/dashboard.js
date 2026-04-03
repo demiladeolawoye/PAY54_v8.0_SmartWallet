@@ -2099,7 +2099,9 @@ function init() {
   seedDemoIfEmpty();
   seedDemoAlertsIfEmpty();
 
+  setTimeout(()=>{
   setActiveCurrency(currentCur);
+}, 200);
   renderRecentTransactions();
   renderAlerts();
   renderNews();
