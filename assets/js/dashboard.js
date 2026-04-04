@@ -690,22 +690,64 @@ function showToast(message){
 }
   function requestPinVerification(callback){
 
-  const savedPin = localStorage.getItem(LS.PIN) || "1234"; // default PIN
+  let savedPin = localStorage.getItem(LS.PIN);
+
+  // 🔥 FIRST TIME SETUP
+  if(!savedPin){
+
+    openModal({
+      title: "Set Your PIN",
+
+      bodyHTML: `
+        <div class="p54-note">Create a 4-digit PIN</div>
+
+        <input class="p54-input" id="newPin" type="password" placeholder="Enter PIN" maxlength="4">
+        <input class="p54-input" id="confirmPin" type="password" placeholder="Confirm PIN" maxlength="4">
+
+        <div class="p54-actions">
+          <button class="p54-btn primary" id="savePin">Save PIN</button>
+        </div>
+      `,
+
+      onMount: ({modal, close}) => {
+
+        modal.querySelector("#savePin").addEventListener("click", ()=>{
+
+          const p1 = modal.querySelector("#newPin").value.trim();
+          const p2 = modal.querySelector("#confirmPin").value.trim();
+
+          if(p1.length !== 4 || p2.length !== 4){
+            alert("PIN must be 4 digits");
+            return;
+          }
+
+          if(p1 !== p2){
+            alert("PINs do not match");
+            return;
+          }
+
+          localStorage.setItem(LS.PIN, p1);
+
+          close();
+          callback();
+
+        });
+
+      }
+    });
+
+    return;
+  }
+
+  // 🔐 VERIFY PIN
 
   openModal({
     title: "Enter PIN",
 
     bodyHTML: `
-      <div class="p54-note">Confirm your PIN to proceed</div>
+      <div class="p54-note">Confirm your PIN</div>
 
-      <input 
-        class="p54-input" 
-        id="userPin" 
-        type="password" 
-        placeholder="••••"
-        maxlength="6"
-        style="margin-top:12px"
-      >
+      <input class="p54-input" id="userPin" type="password" placeholder="••••" maxlength="4">
 
       <div class="p54-actions">
         <button class="p54-btn" id="cancelPin">Cancel</button>
@@ -713,19 +755,17 @@ function showToast(message){
       </div>
     `,
 
-    onMount: ({ modal, close }) => {
+    onMount: ({modal, close}) => {
 
       const input = modal.querySelector("#userPin");
 
       modal.querySelector("#cancelPin").addEventListener("click", close);
 
-      modal.querySelector("#confirmPin").addEventListener("click", () => {
+      modal.querySelector("#confirmPin").addEventListener("click", ()=>{
 
-        const entered = input.value.trim();
-
-        if(entered === savedPin){
+        if(input.value === savedPin){
           close();
-          callback(); // ✅ proceed
+          callback();
         } else {
           alert("Incorrect PIN");
         }
@@ -735,7 +775,7 @@ function showToast(message){
     }
   });
 
-} 
+}
    /* =========================
    BALANCE GLOW EFFECT
 ========================= */
