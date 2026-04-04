@@ -1306,7 +1306,7 @@ close();
 
   return null; // insufficient funds
 }
-  function openSendUnified(){
+ function openSendUnified(){
 
   openModal({
 
@@ -1340,50 +1340,10 @@ close();
 
     `,
 
-    onMount:({modal,close})=>{
+    onMount: ({modal, close}) => {
 
       const form = modal.querySelector("#sendForm");
-const amountEl = modal.querySelector("#sendAmount");
-const previewEl = modal.querySelector("#sendPreview");
 
-function updatePreview(){
-
-  const amount = parseFloat(amountEl.value);
-  const currency = getSelectedCurrency();
-
-  if(!amount || amount <= 0){
-    previewEl.innerHTML = "";
-    return;
-  }
-
-  const funding = resolveFundingCurrency(currency, amount);
-
-  if(!funding){
-    previewEl.innerHTML = "❌ Insufficient balance";
-    return;
-  }
-
-  if(funding.type === "direct"){
-    previewEl.innerHTML = `
-      ✅ Sending ${LEDGER.moneyFmt(currency, amount)} 
-      from your ${currency} wallet
-    `;
-  }
-
-  if(funding.type === "fx"){
-    const rate = LEDGER.getRate(funding.from, funding.to);
-
-    previewEl.innerHTML = `
-      💱 Auto FX Conversion<br>
-      From: ${funding.from}<br>
-      To: ${funding.to}<br>
-      Rate: ${rate.toFixed(2)}
-    `;
-  }
-
-}
-
-amountEl.addEventListener("input", updatePreview);
       modal.querySelector("#cancelSend").addEventListener("click", close);
 
       form.addEventListener("submit",(e)=>{
@@ -1395,8 +1355,6 @@ amountEl.addEventListener("input", updatePreview);
         const note = modal.querySelector("#sendNote").value.trim();
 
         const currency = getSelectedCurrency();
-
-        /* VALIDATION */
 
         if(!user || user.length < 2){
           alert("Enter valid recipient");
@@ -1413,96 +1371,78 @@ amountEl.addEventListener("input", updatePreview);
           return;
         }
 
-       const balances = LEDGER.getBalances();
-const currentBalance = balances[currency] || 0;
+        const funding = resolveFundingCurrency(currency, amount);
 
-/* 🔥 ADD THIS */
-const funding = resolveFundingCurrency(currency, amount);
+        if(!funding){
+          alert(`Insufficient funds across all wallets`);
+          return;
+        }
 
-if(!funding){
-  alert(`Insufficient funds across all wallets`);
-  return;
-}
-showToast("Processing payment...");
-/* CREATE TRANSACTION */
-requestPinVerification(() => {
+        requestPinVerification(() => {
 
-  showToast("Processing payment...");
+          let tx;
 
-  let tx;
+          if(funding.type === "direct"){
 
-  if(funding.type === "direct"){
+            const entry = LEDGER.createEntry({
+              type:"send",
+              title:`Sent to ${user}`,
+              currency,
+              amount:-amount,
+              icon:"📤",
+              meta:{ recipient:user, note }
+            });
 
-    const entry = LEDGER.createEntry({
-      type:"send",
-      title:`Sent to ${user}`,
-      currency,
-      amount:-amount,
-      icon:"📤",
-      meta:{ recipient:user, note }
-    });
+            tx = LEDGER.applyEntry(entry);
 
-    tx = LEDGER.applyEntry(entry);
+          } else {
 
-  } else if(funding.type === "fx"){
+            const rate = LEDGER.getRate(funding.from, funding.to);
 
-    const rate = LEDGER.getRate(funding.from, funding.to);
+            const converted = LEDGER.convert(funding.from, funding.to, amount);
 
-    const converted = LEDGER.convert(funding.from, funding.to, amount);
+            LEDGER.applyEntry(
+              LEDGER.createEntry({
+                type:"fx_debit",
+                title:`FX Conversion (${funding.from} → ${funding.to})`,
+                currency: funding.from,
+                amount:-converted,
+                icon:"💱"
+              })
+            );
 
-    LEDGER.applyEntry(
-      LEDGER.createEntry({
-        type:"fx_debit",
-        title:`FX Conversion (${funding.from} → ${funding.to})`,
-        currency: funding.from,
-        amount:-converted,
-        icon:"💱"
-      })
-    );
+            LEDGER.applyEntry(
+              LEDGER.createEntry({
+                type:"fx_credit",
+                title:`FX Conversion`,
+                currency: funding.to,
+                amount: amount,
+                icon:"💱"
+              })
+            );
 
-    LEDGER.applyEntry(
-      LEDGER.createEntry({
-        type:"fx_credit",
-        title:`FX Conversion`,
-        currency: funding.to,
-        amount: amount,
-        icon:"💱"
-      })
-    );
+            const entry = LEDGER.createEntry({
+              type:"send",
+              title:`Sent to ${user}`,
+              currency,
+              amount:-amount,
+              icon:"📤",
+              meta:{ recipient:user, note, fx_used:true, rate }
+            });
 
-    const entry = LEDGER.createEntry({
-      type:"send",
-      title:`Sent to ${user}`,
-      currency,
-      amount:-amount,
-      icon:"📤",
-      meta:{
-        recipient:user,
-        note,
-        fx_used:true,
-        rate
-      }
-    });
+            tx = LEDGER.applyEntry(entry);
+          }
 
-    tx = LEDGER.applyEntry(entry);
-  }
+          prependTxToDOM(tx);
+          refreshUI();
+          showPaymentReceipt(tx, user, amount, currency);
 
-  prependTxToDOM(tx);
-  refreshUI();
+          close();
 
-  showPaymentReceipt(tx, user, amount, currency);
+        });
 
-  close();
+      });
 
-}); // ✅ CLOSE requestPinVerification
-
-
-}); // ✅ CLOSE form.addEventListener
-
-
-} // ✅ CLOSE openSendUnified
-
-});
     }
 
   });
