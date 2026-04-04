@@ -1494,6 +1494,14 @@ requestPinVerification(() => {
 
   close();
 
+}); // ✅ CLOSE requestPinVerification
+
+
+}); // ✅ CLOSE form.addEventListener
+
+
+} // ✅ CLOSE openSendUnified
+
 });
     }
 
