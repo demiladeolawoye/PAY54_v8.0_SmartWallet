@@ -2253,33 +2253,41 @@ modal.querySelector("#againBtn").addEventListener("click", () => {
   --------------------------- */
 function init() {
 
-  /* Prevent double initialization */
   if (window.__PAY54_DASH_V81_INIT__) return;
   window.__PAY54_DASH_V81_INIT__ = true;
 
-  /* Ensure LEDGER is ready */
-  if (!LEDGER) {
-    console.error("PAY54 init aborted: LEDGER not ready");
-    return;
+  try{
+
+    const ledger = safeLedger();
+
+    if (!ledger) {
+      console.error("🚨 INIT FAILED: NO LEDGER");
+      return;
+    }
+
+    const currentCur = getSelectedCurrency();
+
+    if (ledger.setBaseCurrency) {
+      ledger.setBaseCurrency(currentCur);
+    }
+
+    seedDemoIfEmpty();
+    seedDemoAlertsIfEmpty();
+
+    setTimeout(()=>{
+      setActiveCurrency(currentCur);
+    }, 200);
+
+    renderRecentTransactions();
+    renderAlerts();
+    renderNews();
+    renderFxTicker();
+
+  }catch(err){
+    console.error("🚨 INIT CRASH:", err);
   }
 
-  const currentCur = getSelectedCurrency();
-
-  if (LEDGER.setBaseCurrency) {
-    LEDGER.setBaseCurrency(currentCur);
-  }
-
-  seedDemoIfEmpty();
-  seedDemoAlertsIfEmpty();
-
-  setTimeout(()=>{
-  setActiveCurrency(currentCur);
-}, 200);
-  renderRecentTransactions();
-  renderAlerts();
-  renderNews();
-  renderFxTicker();
-
+  /* 🔥 ALWAYS BIND CLICK (NO MATTER WHAT) */
   bindStableClickRouting();
 
   refreshUI();
