@@ -1296,16 +1296,18 @@ if(!funding){
           icon:"💵"
         });
 
-      const tx = LEDGER.applyEntry(entry);
+   requestPinVerification(() => {
 
-prependTxToDOM(tx);
-refreshUI();
+  const tx = LEDGER.applyEntry(entry);
 
-showPaymentReceipt(tx, "Withdrawal", amount, currency);
+  prependTxToDOM(tx);
+  refreshUI();
 
-close();
+  showPaymentReceipt(tx, "Withdrawal", amount, currency);
 
-      });
+  close();
+
+});
 
     }
 
