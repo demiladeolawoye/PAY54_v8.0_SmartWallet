@@ -944,30 +944,30 @@ function openScanAndPay() {
 
         const merchant = merchantEl.value.trim();
         const amount = Number(parseFloat(amountEl.value).toFixed(2));
-         if(amount > 100000000){
-  alert("Amount too large");
-  return;
-}
+
+        if(amount > 100000000){
+          alert("Amount too large");
+          return;
+        }
+
         const currency = getSelectedCurrency();
 
         try{
 
           const balances = LEDGER.getBalances();
           const currentBalance = balances[currency] || 0;
-         
 
           if(!merchant || !amount || amount <= 0){
             alert("Enter valid merchant and amount");
             return;
           }
 
-if(amount > currentBalance){
-  alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, currentBalance)}`);
-  return;
-}
+          if(amount > currentBalance){
+            alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, currentBalance)}`);
+            return;
+          }
 
           /* Create ledger entry */
-
           const entry = LEDGER.createEntry({
             type:"scan_pay",
             title:`Payment to ${merchant}`,
@@ -977,30 +977,34 @@ if(amount > currentBalance){
             meta:{ merchant, channel:"QR" }
           });
 
-          const tx = LEDGER.applyEntry(entry);
+          /* 🔐 PIN PROTECTION (FINAL FIX) */
+          requestPinVerification(() => {
 
-          /* Update UI */
+            const tx = LEDGER.applyEntry(entry);
 
-          prependTxToDOM(tx);
-          refreshUI();
+            /* Update UI */
+            prependTxToDOM(tx);
+            refreshUI();
 
-          /* Stop camera */
+            /* Stop camera AFTER success */
+            stopCamera();
 
-          stopCamera();
+            /* Feedback */
+            showPaymentReceipt(tx, merchant, amount, currency);
 
-          /* Feedback */
+            close();
 
-         showPaymentReceipt(tx, merchant, amount, currency);
+          });
 
-} catch(err){
-  console.warn("ScanPay error:", err);
-}
+        } catch(err){
+          console.warn("ScanPay error:", err);
+        }
 
-}); // ✅ CLOSE form submit
+      }); // ✅ CLOSE form submit
 
-} // ✅ CLOSE onMount
+    } // ✅ CLOSE onMount
 
-}); // ✅ CLOSE openModal
+  }); // ✅ CLOSE openModal
 
 } // ✅ CLOSE openScanAndPay
    /* =========================
