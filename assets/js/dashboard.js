@@ -867,7 +867,14 @@ function refreshUI() {
 
 function addEntryAndRefresh(entry) {
 
-  const tx = LEDGER.applyEntry(entry);
+  const ledger = safeLedger();
+
+if(!ledger){
+  alert("System error. Please refresh.");
+  return;
+}
+
+const tx = ledger.applyEntry(entry);
 
   prependTxToDOM(tx);   // instantly add to dashboard
 
@@ -1031,7 +1038,14 @@ function openScanAndPay() {
           /* 🔐 PIN PROTECTION (FINAL FIX) */
           requestPinVerification(() => {
 
-            const tx = LEDGER.applyEntry(entry);
+           const ledger = safeLedger();
+
+if(!ledger){
+  alert("System error. Please refresh.");
+  return;
+}
+
+const tx = ledger.applyEntry(entry);
 
             /* Update UI */
             prependTxToDOM(tx);
@@ -1198,7 +1212,14 @@ function openAddMoney() {
           icon:"➕"
         });
 
-      const tx = LEDGER.applyEntry(entry);
+      const ledger = safeLedger();
+
+if(!ledger){
+  alert("System error. Please refresh.");
+  return;
+}
+
+const tx = ledger.applyEntry(entry);
 
 prependTxToDOM(tx);
 refreshUI();
@@ -1350,7 +1371,14 @@ if(!funding){
 
   requestPinVerification(() => {
 
-  const tx = LEDGER.applyEntry(entry);
+  const ledger = safeLedger();
+
+if(!ledger){
+  alert("System error. Please refresh.");
+  return;
+}
+
+const tx = ledger.applyEntry(entry);
 
   prependTxToDOM(tx);
   refreshUI();
