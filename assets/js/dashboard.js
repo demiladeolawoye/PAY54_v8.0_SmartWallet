@@ -2319,7 +2319,7 @@ const watchdog = setInterval(()=>{
     const balances = (safeLedger()?.getBalances() || {});
     const sum = Object.values(balances).reduce((a,b)=>a+Number(b||0),0);
 
-    if(sum <= 0 || isNaN(sum)){
+if(sum === 0 || isNaN(sum)){
 
       console.warn("Wallet UI detected zero state — recovering...");
       seedDemoIfEmpty();
