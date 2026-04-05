@@ -1277,9 +1277,6 @@ function openWithdraw(){
 }
         const currency = getSelectedCurrency();
 
-        const balances = LEDGER.getBalances();
-        const currentBalance = balances[currency] || 0;
-
         if(!amount || amount <= 0){
           alert("Enter valid amount");
           return;
