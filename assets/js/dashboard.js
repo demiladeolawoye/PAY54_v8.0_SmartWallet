@@ -307,7 +307,10 @@ if(!LEDGER || !LEDGER.getBalances){
   return 0;
 }
 
-  const balances = (safeLedger()?.getBalances() || {});
+  const ledger = safeLedger();
+if(!ledger) return;
+
+const balances = ledger.getBalances() || {};
 
   let total = 0;
 
@@ -396,7 +399,10 @@ try{
   console.warn("Conversion failed", e);
 }
 // 🔥 SMART AVAILABLE BALANCE
-const balances = (safeLedger()?.getBalances() || {});
+const ledger = safeLedger();
+if(!ledger) return;
+
+const balances = ledger.getBalances() || {};
 const available = balances[cur] || 0;
 
 const availableEl = document.getElementById("availableBalance");
@@ -1014,7 +1020,10 @@ function openScanAndPay() {
 
         try{
 
-          const balances = (safeLedger()?.getBalances() || {});
+          const ledger = safeLedger();
+if(!ledger) return;
+
+const balances = ledger.getBalances() || {};
           const currentBalance = balances[currency] || 0;
 
           if(!merchant || !amount || amount <= 0){
@@ -1400,7 +1409,10 @@ const tx = ledger.applyEntry(entry);
 } // ✅ CLOSE openWithdraw
    function resolveFundingCurrency(targetCurrency, amount){
 
-  const balances = (safeLedger()?.getBalances() || {});
+  const ledger = safeLedger();
+if(!ledger) return;
+
+const balances = ledger.getBalances() || {};
 
   // 1. Direct balance check
   if((balances[targetCurrency] || 0) >= amount){
@@ -2316,7 +2328,10 @@ const watchdog = setInterval(()=>{
 
     if(!LEDGER) return;
 
-    const balances = (safeLedger()?.getBalances() || {});
+    const ledger = safeLedger();
+if(!ledger) return;
+
+const balances = ledger.getBalances() || {};
     const sum = Object.values(balances).reduce((a,b)=>a+Number(b||0),0);
 
 if(sum === 0 || isNaN(sum)){
