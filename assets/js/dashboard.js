@@ -1848,6 +1848,28 @@ function openGlobalTransfer(){
       }
 
       fromAmt.addEventListener("input", convertForward);
+       function showRate(){
+
+  const rate = LEDGER.getRate(fromCur.value, toCur.value);
+
+  if(!rate) return;
+
+  let el = modal.querySelector("#fxRateInfo");
+
+  if(!el){
+    el = document.createElement("div");
+    el.id = "fxRateInfo";
+    el.className = "p54-note";
+    el.style.marginTop = "8px";
+    modal.querySelector("#gtForm").prepend(el);
+  }
+
+  el.innerHTML = `Rate: 1 ${fromCur.value} = ${rate.toFixed(4)} ${toCur.value}`;
+}
+
+fromAmt.addEventListener("input", showRate);
+fromCur.addEventListener("change", showRate);
+toCur.addEventListener("change", showRate);
       toAmt.addEventListener("input", convertReverse);
 
       fromCur.addEventListener("change", convertForward);
