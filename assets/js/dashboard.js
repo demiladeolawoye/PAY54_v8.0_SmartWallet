@@ -2096,61 +2096,41 @@ toCur.addEventListener("change", showRate);
      STABLE CLICK WIRING (FIXES Step 4)
   --------------------------- */
 
- function bindStableClickRouting(){
+function bindStableClickRouting(){
 
-document.addEventListener("click",(e)=>{
+  document.addEventListener("click",(e)=>{
 
-let el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
+    try{
 
-if(!el) return;
+      let el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
+      if(!el) return;
 
-/* 🔥 GUARANTEED TARGET */
+      const action = el.dataset.action;
+      const service = el.dataset.service;
+      const shortcut = el.dataset.shortcut;
+      const id = el.id;
 
-const action = el.dataset.action;
-const service = el.dataset.service;
-const shortcut = el.dataset.shortcut;
-const id = el.id;
+      if(action === "send") return openSendUnified();
+      if(action === "receive") return openReceive();
+      if(action === "add") return openAddMoney();
+      if(action === "withdraw") return openWithdraw();
+      if(action === "banktransfer") return openBankTransfer();
+      if(action === "scanpay") return openScanAndPay();
 
-/* MONEY MOVES */
+      if(service === "fx") return openCrossBorderFXUnified();
+      if(service === "merchantqr") return openMerchantQR();
+      if(service === "request") return openRequestMoney();
 
-if(action === "send") return openSendUnified();
-if(action === "receive") return openReceive();
-if(action === "add") return openAddMoney();
-if(action === "withdraw") return openWithdraw();
-if(action === "banktransfer") return openBankTransfer();
-if(action === "scanpay") return openScanAndPay();
+      if(id === "atmFinderBtn") return comingSoon("ATM Finder");
+      if(id === "posFinderBtn") return comingSoon("POS / Agent Finder");
 
-/* SERVICES */
+    }catch(err){
+      console.error("🚨 CLICK ERROR:", err);
+    }
 
-if(service === "fx") return openCrossBorderFXUnified();
-if(service === "bills") return comingSoon("Pay Bills & Top Up");
-if(service === "savings") return comingSoon("Savings & Goals");
-if(service === "cards") return comingSoon("Virtual & Linked Cards");
-if(service === "checkout") return comingSoon("PAY54 Smart Checkout");
-if(service === "shop") return comingSoon("Shop & Go");
-if(service === "merchantqr") return openMerchantQR();
-if(service === "trading") return comingSoon("Trading");
-if(service === "bet") return comingSoon("Bet Funding");
-if(service === "agent") return comingSoon("Become an Agent");
-if(service === "request") return openRequestMoney();
-if(service === "risk") return comingSoon("AI Risk Watch");
-
-/* SHORTCUTS */
-
-if(shortcut === "shop") return comingSoon("Shop & Go");
-if(shortcut === "agent") return comingSoon("Become an Agent");
-if(shortcut === "referral") return comingSoon("Refer & Earn");
-if(shortcut === "trading") return comingSoon("Trading");
-
-/* UTILITIES */
-
-if(id === "atmFinderBtn") return comingSoon("ATM Finder");
-if(id === "posFinderBtn") return comingSoon("POS / Agent Finder");
-
-});
+  });
 
 }
-
 /* =========================
    PAYMENT RECEIPT
 ========================= */
