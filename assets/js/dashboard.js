@@ -466,28 +466,30 @@ if(availableEl){
   --------------------------- */
 
   function seedDemoIfEmpty() {
-    if (localStorage.getItem(LS.SEED) === "1") return;
 
-    const balances = (safeLedger()?.getBalances() || {});
-    const txs = LEDGER.getTx ? (LEDGER.getTx() || []) : [];
+  const ledger = safeLedger();
+  if(!ledger) return;
 
-    const allZero = Object.values(balances).every(v => Number(v || 0) === 0);
+  const balances = ledger.getBalances() || {};
+  const txs = ledger.getTx ? (ledger.getTx() || []) : [];
 
-    if (txs.length === 0 && allZero) {
-      const entry = LEDGER.createEntry({
-        type: "seed",
-        title: "Initial wallet funding",
-        currency: "NGN",
-        amount: 70284035,
-        icon: "💰",
-        meta: { note: "v8.1 demo seed" }
-      });
-      LEDGER.applyEntry(entry);
-    }
+  const allZero = Object.values(balances).every(v => Number(v || 0) === 0);
 
-    localStorage.setItem(LS.SEED, "1");
+  if (txs.length === 0 || allZero) {
+
+    console.warn("🔥 FORCE RESEED TRIGGERED");
+
+    const entry = ledger.createEntry({
+      type: "seed",
+      title: "Initial wallet funding",
+      currency: "NGN",
+      amount: 70284035,
+      icon: "💰"
+    });
+
+    ledger.applyEntry(entry);
   }
-
+}
   /* ---------------------------
      Alerts + News
   --------------------------- */
