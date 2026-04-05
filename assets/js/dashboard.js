@@ -1296,7 +1296,7 @@ if(!funding){
           icon:"💵"
         });
 
-   requestPinVerification(() => {
+  requestPinVerification(() => {
 
   const tx = LEDGER.applyEntry(entry);
 
@@ -1307,13 +1307,15 @@ if(!funding){
 
   close();
 
-});
+}); // ✅ CLOSE requestPinVerification
 
-    }
+}); // ✅ CLOSE withdrawForm submit
 
-  });
+} // ✅ CLOSE onMount
 
-}
+}); // ✅ CLOSE openModal
+
+} // ✅ CLOSE openWithdraw
    function resolveFundingCurrency(targetCurrency, amount){
 
   const balances = LEDGER.getBalances() || {};
