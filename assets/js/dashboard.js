@@ -1861,47 +1861,123 @@ function openGlobalTransfer(){
 
       modal.querySelector("#gtForm").addEventListener("submit",(e)=>{
 
-        e.preventDefault();
+  e.preventDefault();
 
-        const amount = Number(parseFloat(fromAmt.value).toFixed(2));
-        const currency = fromCur.value;
+  const amount = Number(parseFloat(fromAmt.value).toFixed(2));
+  const fromCurrency = fromCur.value;
+  const toCurrency = toCur.value;
 
-        const balances = LEDGER.getBalances();
-        const currentBalance = balances[currency] || 0;
+  const reference = modal.querySelector("#gtRef").value.trim();
 
-        if(!amount || amount <= 0){
-          alert("Enter valid amount");
-          return;
-        }
+  if(!amount || amount <= 0){
+    alert("Enter valid amount");
+    return;
+  }
 
-        if(amount > currentBalance){
-  alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, currentBalance)}`);
-  return;
-}
+  if(amount > 100000000){
+    alert("Amount too large");
+    return;
+  }
 
-        const entry = LEDGER.createEntry({
-          type:"global_transfer",
-          title:"Global Transfer",
-          currency,
-          amount:-amount,
-          icon:"🌍"
-        });
+  /* 🔥 SMART FUNDING (MULTI WALLET) */
+  const funding = resolveFundingCurrency(fromCurrency, amount);
 
-        const tx = LEDGER.applyEntry(entry);
+  if(!funding){
+    alert(`Insufficient funds across all wallets`);
+    return;
+  }
 
-prependTxToDOM(tx);
-refreshUI();
+  /* 🔐 PIN REQUIRED */
+  requestPinVerification(() => {
 
-showPaymentReceipt(tx, "PAY54 Global Transfer", amount, currency);
+    let tx;
 
-close();
+    /* =========================
+       DIRECT (NO FX)
+    ========================= */
+    if(funding.type === "direct" && fromCurrency === toCurrency){
+
+      const entry = LEDGER.createEntry({
+        type:"global_transfer",
+        title:`Global Transfer (${fromCurrency})`,
+        currency: fromCurrency,
+        amount:-amount,
+        icon:"🌍",
+        meta:{ reference }
       });
+
+      tx = LEDGER.applyEntry(entry);
 
     }
 
+    /* =========================
+       FX TRANSFER
+    ========================= */
+    else {
+
+      const rate = LEDGER.getRate(fromCurrency, toCurrency);
+
+      const convertedAmount = LEDGER.convert(fromCurrency, toCurrency, amount);
+
+      /* 🔻 FX DEBIT */
+      LEDGER.applyEntry(
+        LEDGER.createEntry({
+          type:"fx_debit",
+          title:`FX Conversion (${fromCurrency} → ${toCurrency})`,
+          currency: fromCurrency,
+          amount:-amount,
+          icon:"💱"
+        })
+      );
+
+      /* 🔺 FX CREDIT */
+      LEDGER.applyEntry(
+        LEDGER.createEntry({
+          type:"fx_credit",
+          title:`FX Conversion`,
+          currency: toCurrency,
+          amount: convertedAmount,
+          icon:"💱"
+        })
+      );
+
+      /* 🌍 FINAL TRANSFER */
+      const entry = LEDGER.createEntry({
+        type:"global_transfer",
+        title:`Global Transfer to ${toCurrency}`,
+        currency: toCurrency,
+        amount:-convertedAmount,
+        icon:"🌍",
+        meta:{
+          reference,
+          fx_used:true,
+          rate
+        }
+      });
+
+      tx = LEDGER.applyEntry(entry);
+
+    }
+
+    /* =========================
+       UI UPDATE
+    ========================= */
+
+    prependTxToDOM(tx);
+    refreshUI();
+
+    showPaymentReceipt(
+      tx,
+      "PAY54 Global Transfer",
+      amount,
+      fromCurrency
+    );
+
+    close();
+
   });
 
-}
+});
   function openBankTransfer() { comingSoon("Bank Transfer"); }
   function openCrossBorderFXUnified() { 
   openGlobalTransfer(); 
