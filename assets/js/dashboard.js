@@ -481,7 +481,7 @@ if(availableEl){
 
   const allZero = Object.values(balances).every(v => Number(v || 0) === 0);
 
-  if (txs.length === 0 || allZero) {
+  if (txs.length === 0 && allZero) {
 
     console.warn("🔥 FORCE RESEED TRIGGERED");
 
