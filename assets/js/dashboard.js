@@ -40,6 +40,21 @@ if (window.visualViewport) {
 }
 
  let LEDGER;
+  function safeLedger(){
+
+  if(!window.PAY54_LEDGER){
+    console.error("🚨 LEDGER missing");
+    return null;
+  }
+
+  try{
+    return window.PAY54_LEDGER;
+  }catch(e){
+    console.error("🚨 LEDGER broken", e);
+    return null;
+  }
+
+} 
 let RECIP;
 let RCPT;
 
