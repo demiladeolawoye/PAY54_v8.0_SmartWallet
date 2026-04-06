@@ -1036,7 +1036,10 @@ const balances = ledger.getBalances() || {};
           }
 
           if(amount > currentBalance){
-            alert(`Insufficient ${currency} balance.\nAvailable: ${LEDGER.moneyFmt(currency, currentBalance)}`);
+            const ledger = safeLedger();
+if(!ledger) return;
+
+alert(`Insufficient ${currency} balance.\nAvailable: ${ledger.moneyFmt(currency, currentBalance)}`);
             return;
           }
 
