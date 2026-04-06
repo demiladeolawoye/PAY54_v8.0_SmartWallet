@@ -363,7 +363,10 @@ function animateBalance(targetValue, currency){
 
     const value = start + (targetValue - start) * progress;
 
-    balanceEl.textContent = LEDGER.moneyFmt(currency, value);
+   const ledger = safeLedger();
+if(!ledger) return;
+
+balanceEl.textContent = ledger.moneyFmt(currency, value);
 
     if(progress < 1){
       requestAnimationFrame(frame);
