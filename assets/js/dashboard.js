@@ -302,15 +302,10 @@ function getSelectedCurrency() {
 
 function getConvertedTotal(targetCur){
 
-if(!LEDGER || !LEDGER.getBalances){
-  console.warn("Ledger not ready — returning 0");
-  return 0;
-}
-
   const ledger = safeLedger();
-if(!ledger) return;
+  if(!ledger) return 0;
 
-const balances = ledger.getBalances() || {};
+  const balances = ledger.getBalances() || {};
 
   let total = 0;
 
@@ -323,14 +318,13 @@ const balances = ledger.getBalances() || {};
     if(c === targetCur){
       total += amt;
     }else{
-      total += Number(LEDGER.convert(c,targetCur,amt) || 0);
+      total += Number(ledger.convert(c,targetCur,amt) || 0);
     }
 
   });
 
   return total;
 }
-
 /* Currency selectors */
 pillBtns.forEach(btn =>
   btn.addEventListener("click", () => setActiveCurrency(btn.dataset.cur))
