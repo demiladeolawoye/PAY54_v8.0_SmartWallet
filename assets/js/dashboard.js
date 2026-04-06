@@ -2085,7 +2085,7 @@ toCur.addEventListener("change", showRate);
           <button class="p54-btn primary" type="button" id="closeLedger">Close</button>
         </div>
       `,
-     onMount: ({ modal, close }) => {
+    onMount: ({ modal, close }) => {
 
   const ledgerSafe = safeLedger();
   if(!ledgerSafe) return;
@@ -2108,8 +2108,9 @@ toCur.addEventListener("change", showRate);
       </div>
     `;
   }).join("") || `<div class="p54-note">No transactions found.</div>`;
-}
 
+  modal.querySelector("#closeLedger").addEventListener("click", close);
+}
   if (viewAllTxBtn) viewAllTxBtn.addEventListener("click", openLedger);
   if (viewAllTxMobileBtn) viewAllTxMobileBtn.addEventListener("click", openLedger);
 
