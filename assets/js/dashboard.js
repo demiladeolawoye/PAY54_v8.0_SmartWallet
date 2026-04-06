@@ -603,23 +603,27 @@ if(availableEl){
   const txFeed = recentTxFeedEl();
   if (!txFeed) return;
 
- const txs = (LEDGER.getTx() || []).slice(-5).reverse();
-    if (!txs.length) {
-      txFeed.innerHTML = `
-        <div class="feed-item">
-          <div class="feed-icon">📭</div>
-          <div class="feed-main">
-            <div class="feed-title">No transactions yet</div>
-            <div class="feed-sub">Your activity will appear here</div>
-          </div>
-        </div>
-      `;
-      return;
-    }
+  const ledger = safeLedger();
+  if (!ledger) return;
 
-    txFeed.innerHTML = "";
-    txs.forEach(tx => prependTxToDOM(tx));
+  const txs = (ledger.getTx() || []).slice(-5).reverse();
+
+  if (!txs.length) {
+    txFeed.innerHTML = `
+      <div class="feed-item">
+        <div class="feed-icon">📭</div>
+        <div class="feed-main">
+          <div class="feed-title">No transactions yet</div>
+          <div class="feed-sub">Your activity will appear here</div>
+        </div>
+      </div>
+    `;
+    return;
   }
+
+  txFeed.innerHTML = "";
+  txs.forEach(tx => prependTxToDOM(tx));
+}
 
    /* =========================
    FX MARKET TICKER
