@@ -2204,7 +2204,7 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
 
   const text = `PAY54 Receipt
 Merchant: ${merchant}
-Amount: ${ledger.moneyFmt(currency, amount)}
+Amount: ${safeLedger()?.moneyFmt(currency, amount) || amount}
 Ref: ${receiptId}`;
 
       modal.querySelector("#copyBtn").addEventListener("click", ()=>{
