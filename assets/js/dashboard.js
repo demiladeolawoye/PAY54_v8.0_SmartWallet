@@ -1433,7 +1433,7 @@ const balances = ledger.getBalances() || {};
 
     if(!bal || cur === targetCurrency) continue;
 
-    const converted = LEDGER.convert(cur, targetCurrency, bal);
+    const converted = ledger.convert(cur, targetCurrency, bal);
 
     if(converted >= amount){
       return {
