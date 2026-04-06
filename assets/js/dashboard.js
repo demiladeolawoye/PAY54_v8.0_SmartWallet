@@ -597,34 +597,6 @@ if(availableEl){
     return visible || feeds[0] || null;
   }
 
-  function prependTxToDOM(tx) {
-    const txFeed = recentTxFeedEl();
-    if (!txFeed) return;
-
-    const amtClass = tx.amount >= 0 ? "pos" : "neg";
-    const sign = tx.amount >= 0 ? "+" : "−";
-
-    const base = tx.base_currency || getSelectedCurrency();
-    const equivLine = (tx.currency !== base && tx.base_equiv != null)
-      ? `<div class="feed-sub">≈ ${LEDGER.moneyFmt(base, tx.base_equiv)} • rate ${(tx.fx_rate_used || 0).toFixed(4)}</div>`
-      : `<div class="feed-sub">${nowLabel()}</div>`;
-
-    const item = document.createElement("div");
-    item.className = "feed-item";
-    item.innerHTML = `
-      <div class="feed-icon">${tx.icon || "💳"}</div>
-      <div class="feed-main">
-        <div class="feed-title">${tx.title}</div>
-        ${equivLine}
-      </div>
-      <div class="feed-amt ${amtClass}">${sign} ${LEDGER.moneyFmt(tx.currency, Math.abs(tx.amount))}</div>
-    `;
-
-    txFeed.prepend(item);
-
-    const items = txFeed.querySelectorAll(".feed-item");
-    if (items.length > 5) items[items.length - 1].remove();
-  }
 
   function renderRecentTransactions() {
 
@@ -660,7 +632,42 @@ function renderFxTicker(){
   if(!el || !LEDGER){
     return;
   }
+function prependTxToDOM(tx) {
 
+  const ledger = safeLedger();
+  if(!ledger) return;
+
+  const txFeed = recentTxFeedEl();
+  if (!txFeed) return;
+
+  const amtClass = tx.amount >= 0 ? "pos" : "neg";
+  const sign = tx.amount >= 0 ? "+" : "−";
+
+  const base = tx.base_currency || getSelectedCurrency();
+
+  const equivLine = (tx.currency !== base && tx.base_equiv != null)
+    ? `<div class="feed-sub">≈ ${ledger.moneyFmt(base, tx.base_equiv)} • rate ${(tx.fx_rate_used || 0).toFixed(4)}</div>`
+    : `<div class="feed-sub">${nowLabel()}</div>`;
+
+  const item = document.createElement("div");
+  item.className = "feed-item";
+
+  item.innerHTML = `
+    <div class="feed-icon">${tx.icon || "💳"}</div>
+    <div class="feed-main">
+      <div class="feed-title">${tx.title}</div>
+      ${equivLine}
+    </div>
+    <div class="feed-amt ${amtClass}">
+      ${sign} ${ledger.moneyFmt(tx.currency, Math.abs(tx.amount))}
+    </div>
+  `;
+
+  txFeed.prepend(item);
+
+  const items = txFeed.querySelectorAll(".feed-item");
+  if (items.length > 5) items[items.length - 1].remove();
+}
   const pairs = [
     ["USD","NGN"],
     ["GBP","NGN"],
