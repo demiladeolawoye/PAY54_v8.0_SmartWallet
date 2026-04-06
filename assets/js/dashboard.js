@@ -413,7 +413,7 @@ const availableEl = document.getElementById("availableBalance");
 if(availableEl){
   availableEl.innerHTML = `
   <span class="avail-label">Available in ${cur}:</span>
-  <span class="avail-value">${LEDGER.moneyFmt(cur, available)}</span>
+  <span class="avail-value">${ledger.moneyFmt(cur, available)}</span>
 `;
 }
   if(balanceEl){
