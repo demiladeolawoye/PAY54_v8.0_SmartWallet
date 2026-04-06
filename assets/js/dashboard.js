@@ -2175,8 +2175,8 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
 
         <div class="p54-note" style="margin-top:10px"><b>Amount</b></div>
         <div style="font-size:18px;font-weight:900">
-          ${LEDGER.moneyFmt(currency, amount)}
-        </div>
+  ${ledger.moneyFmt(currency, amount)}
+</div>
 
         <div class="p54-note" style="margin-top:10px"><b>Receipt ID</b></div>
         <div>${receiptId}</div>
@@ -2197,9 +2197,12 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
 
     onMount: ({ modal, close }) => {
 
-      const text = `PAY54 Receipt
+  const ledger = safeLedger();
+  if(!ledger) return;
+
+  const text = `PAY54 Receipt
 Merchant: ${merchant}
-Amount: ${LEDGER.moneyFmt(currency, amount)}
+Amount: ${ledger.moneyFmt(currency, amount)}
 Ref: ${receiptId}`;
 
       modal.querySelector("#copyBtn").addEventListener("click", ()=>{
