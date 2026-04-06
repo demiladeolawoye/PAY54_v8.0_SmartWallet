@@ -2177,7 +2177,7 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
 
         <div class="p54-note" style="margin-top:10px"><b>Amount</b></div>
         <div style="font-size:18px;font-weight:900">
-  ${ledger.moneyFmt(currency, amount)}
+  ${safeLedger()?.moneyFmt(currency, amount) || amount}
 </div>
 
         <div class="p54-note" style="margin-top:10px"><b>Receipt ID</b></div>
