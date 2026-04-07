@@ -2085,45 +2085,48 @@ toCur.addEventListener("change", showRate);
   --------------------------- */
 
   function openLedger() {
-    const all = LEDGER.getTx() || [];
-    openModal({
-      title: "Transaction History",
-      bodyHTML: `
-        <div class="p54-note">Your latest activity.</div>
-        <div class="p54-divider"></div>
-        <div class="p54-ledger" id="ledgerList"></div>
-        <div class="p54-actions">
-          <button class="p54-btn primary" type="button" id="closeLedger">Close</button>
-        </div>
-      `,
-    onMount: ({ modal, close }) => {
 
   const ledgerSafe = safeLedger();
   if(!ledgerSafe) return;
 
-  const ledgerEl = modal.querySelector("#ledgerList");
+  const all = ledgerSafe.getTx() || [];
 
-  ledgerEl.innerHTML = all.slice(0, 80).map(tx => {
-    const cls = tx.amount >= 0 ? "p54-pos" : "p54-neg";
-    const sign = tx.amount >= 0 ? "+" : "−";
-
-    return `
-      <div class="p54-ledger-item">
-        <div class="p54-ledger-left">
-          <div class="p54-ledger-title">${tx.icon || "💳"} ${tx.title}</div>
-          <div class="p54-ledger-sub">${new Date(tx.created_at || Date.now()).toLocaleString()}</div>
-        </div>
-        <div class="p54-ledger-amt ${cls}">
-          ${sign} ${ledgerSafe.moneyFmt(tx.currency, Math.abs(tx.amount))}
-        </div>
+  openModal({
+    title: "Transaction History",
+    bodyHTML: `
+      <div class="p54-note">Your latest activity.</div>
+      <div class="p54-divider"></div>
+      <div class="p54-ledger" id="ledgerList"></div>
+      <div class="p54-actions">
+        <button class="p54-btn primary" type="button" id="closeLedger">Close</button>
       </div>
-    `;
-  }).join("") || `<div class="p54-note">No transactions found.</div>`;
+    `,
+    onMount: ({ modal, close }) => {
 
-  modal.querySelector("#closeLedger").addEventListener("click", close);
+      const ledgerEl = modal.querySelector("#ledgerList");
+
+      ledgerEl.innerHTML = all.slice(0, 80).map(tx => {
+        const cls = tx.amount >= 0 ? "p54-pos" : "p54-neg";
+        const sign = tx.amount >= 0 ? "+" : "−";
+
+        return `
+          <div class="p54-ledger-item">
+            <div class="p54-ledger-left">
+              <div class="p54-ledger-title">${tx.icon || "💳"} ${tx.title}</div>
+              <div class="p54-ledger-sub">${new Date(tx.created_at || Date.now()).toLocaleString()}</div>
+            </div>
+            <div class="p54-ledger-amt ${cls}">
+              ${sign} ${ledgerSafe.moneyFmt(tx.currency, Math.abs(tx.amount))}
+            </div>
+          </div>
+        `;
+      }).join("") || `<div class="p54-note">No transactions found.</div>`;
+
+      modal.querySelector("#closeLedger").addEventListener("click", close);
+    }
+  });
 }
-  if (viewAllTxBtn) viewAllTxBtn.addEventListener("click", openLedger);
-  if (viewAllTxMobileBtn) viewAllTxMobileBtn.addEventListener("click", openLedger);
+
 
   /* ---------------------------
      STABLE CLICK WIRING (FIXES Step 4)
