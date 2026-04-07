@@ -386,7 +386,8 @@ function setActiveCurrency(cur){
 
 let total = 0;
 
-if(!LEDGER){
+const ledger = safeLedger();
+if(!ledger){
   console.warn("Ledger not ready yet");
   return;
 }
