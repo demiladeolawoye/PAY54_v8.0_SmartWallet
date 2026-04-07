@@ -629,13 +629,9 @@ if(availableEl){
    FX MARKET TICKER
 ========================= */
 
-function renderFxTicker(){
-
-  const el = document.getElementById("fxTicker");
-
-  if(!el || !LEDGER){
-    return;
-  }
+/* =========================
+   TRANSACTION RENDER
+========================= */
 function prependTxToDOM(tx) {
 
   const ledger = safeLedger();
@@ -672,6 +668,18 @@ function prependTxToDOM(tx) {
   const items = txFeed.querySelectorAll(".feed-item");
   if (items.length > 5) items[items.length - 1].remove();
 }
+
+/* =========================
+   FX MARKET TICKER
+========================= */
+function renderFxTicker(){
+
+  const el = document.getElementById("fxTicker");
+
+  if(!el || !LEDGER){
+    return;
+  }
+
   const pairs = [
     ["USD","NGN"],
     ["GBP","NGN"],
@@ -695,7 +703,6 @@ function prependTxToDOM(tx) {
     `;
 
   }).join("");
-
 }
   /* ---------------------------
      Core Modals (minimal stable)
