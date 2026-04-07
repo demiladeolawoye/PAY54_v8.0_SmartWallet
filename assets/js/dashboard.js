@@ -42,17 +42,16 @@ if (window.visualViewport) {
  let LEDGER;
   function safeLedger(){
 
-  if(!window.PAY54_LEDGER){
-    console.error("🚨 LEDGER missing");
-    return null;
+  if (LEDGER) return LEDGER;
+
+  if (window.PAY54_LEDGER) {
+    LEDGER = window.PAY54_LEDGER;
+    return LEDGER;
   }
 
-  try{
-    return window.PAY54_LEDGER;
-  }catch(e){
-    console.error("🚨 LEDGER broken", e);
-    return null;
-  }
+  console.error("🚨 LEDGER NOT READY");
+  return null;
+}
 
 } 
 let RECIP;
