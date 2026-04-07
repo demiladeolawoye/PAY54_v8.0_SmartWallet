@@ -61,21 +61,24 @@ function waitForModules(callback){
 
   const check = () => {
 
-    LEDGER = window.PAY54_LEDGER || null;
-    RECIP  = window.PAY54_RECIPIENT || null;
-    RCPT   = window.PAY54_RECEIPTS || null;
-
     if (
-      LEDGER &&
-      typeof LEDGER.getBalances === "function" &&
-      typeof LEDGER.applyEntry === "function"
+      window.PAY54_LEDGER &&
+      typeof window.PAY54_LEDGER.getBalances === "function" &&
+      typeof window.PAY54_LEDGER.applyEntry === "function"
     ) {
+
+      LEDGER = window.PAY54_LEDGER;
+      RECIP  = window.PAY54_RECIPIENT || null;
+      RCPT   = window.PAY54_RECEIPTS || null;
+
       console.log("✅ PAY54 modules FULLY ready");
+
       callback();
       return;
     }
 
-    setTimeout(check, 100);
+    console.log("⏳ Waiting for PAY54 modules...");
+    setTimeout(check, 150);
   };
 
   check();
