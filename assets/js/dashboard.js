@@ -2287,18 +2287,22 @@ function init() {
       ledger.setBaseCurrency(currentCur);
     }
 
-    /* =========================
-       SEED + INITIAL STATE
-    ========================= */
-    seedDemoIfEmpty();
-    seedDemoAlertsIfEmpty();
+  /* =========================
+   SEED + INITIAL STATE
+========================= */
+setTimeout(() => {
+  seedDemoIfEmpty();
+  refreshUI();
+}, 300);
 
-    /* =========================
-       INITIAL UI RENDER
-    ========================= */
-    setTimeout(()=>{
-      setActiveCurrency(currentCur);
-    }, 200);
+seedDemoAlertsIfEmpty();
+
+/* =========================
+   INITIAL UI RENDER
+========================= */
+setTimeout(()=>{
+  setActiveCurrency(currentCur);
+}, 200);
 
     renderRecentTransactions();
     renderAlerts();
