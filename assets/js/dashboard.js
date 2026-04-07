@@ -2290,9 +2290,15 @@ function init() {
       ledger.setBaseCurrency(currentCur);
     }
 
+    /* =========================
+       SEED + INITIAL STATE
+    ========================= */
     seedDemoIfEmpty();
     seedDemoAlertsIfEmpty();
 
+    /* =========================
+       INITIAL UI RENDER
+    ========================= */
     setTimeout(()=>{
       setActiveCurrency(currentCur);
     }, 200);
@@ -2302,13 +2308,29 @@ function init() {
     renderNews();
     renderFxTicker();
 
+    /* =========================
+       🔥 ADD THIS HERE (CORRECT POSITION)
+    ========================= */
+    if (viewAllTxBtn) {
+      viewAllTxBtn.addEventListener("click", openLedger);
+    }
+
+    if (viewAllTxMobileBtn) {
+      viewAllTxMobileBtn.addEventListener("click", openLedger);
+    }
+
   }catch(err){
     console.error("🚨 INIT CRASH:", err);
   }
 
-  /* 🔥 ALWAYS BIND CLICK (NO MATTER WHAT) */
+  /* =========================
+     GLOBAL CLICK SYSTEM
+  ========================= */
   bindStableClickRouting();
 
+  /* =========================
+     FINAL UI REFRESH
+  ========================= */
   refreshUI();
 }
 
