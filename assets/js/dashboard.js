@@ -2380,7 +2380,6 @@ const balances = ledger.getBalances() || {};
 if(sum === 0 || isNaN(sum)){
 
       console.warn("Wallet UI detected zero state — recovering...");
-      seedDemoIfEmpty();
       refreshUI();
 
     }else{
