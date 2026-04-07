@@ -2404,12 +2404,10 @@ if(sum === 0 || isNaN(sum)){
 ========================= */
 waitForModules(() => {
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
+  console.log("🚀 INIT TRIGGERED AFTER LEDGER READY");
+
+  setTimeout(() => {
     init();
-  }
+  }, 100);
 
 });
-
-})();
