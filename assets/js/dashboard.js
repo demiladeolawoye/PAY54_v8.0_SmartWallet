@@ -40,7 +40,7 @@ if (window.visualViewport) {
 }
 
  let LEDGER;
-  function safeLedger(){
+ function safeLedger(){
 
   if (LEDGER) return LEDGER;
 
@@ -53,7 +53,6 @@ if (window.visualViewport) {
   return null;
 }
 
-} 
 let RECIP;
 let RCPT;
 
