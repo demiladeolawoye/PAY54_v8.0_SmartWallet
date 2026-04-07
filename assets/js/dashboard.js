@@ -2279,9 +2279,12 @@ function init() {
 
   try{
 
+    console.log("✅ INIT RUNNING");
+    console.log("LEDGER:", LEDGER);
+
     const ledger = safeLedger();
 
- const currentCur = getSelectedCurrency();
+    const currentCur = getSelectedCurrency();
 
     if (ledger.setBaseCurrency) {
       ledger.setBaseCurrency(currentCur);
