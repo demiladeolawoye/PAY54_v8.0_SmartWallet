@@ -468,30 +468,33 @@ if(availableEl){
      Demo seed ONCE (prevents ₦0.00)
   --------------------------- */
 
-  function seedDemoIfEmpty() {
+ function seedDemoIfEmpty(){
 
   const ledger = safeLedger();
   if(!ledger) return;
 
   const balances = ledger.getBalances() || {};
-  const txs = ledger.getTx ? (ledger.getTx() || []) : [];
 
-  const allZero = Object.values(balances).every(v => Number(v || 0) === 0);
+  const total = Object.values(balances)
+    .reduce((a,b)=>a + Number(b || 0), 0);
 
-  if (txs.length === 0 && allZero) {
-
-    console.warn("🔥 FORCE RESEED TRIGGERED");
-
-    const entry = ledger.createEntry({
-      type: "seed",
-      title: "Initial wallet funding",
-      currency: "NGN",
-      amount: 70284035,
-      icon: "💰"
-    });
-
-    ledger.applyEntry(entry);
+  // 🔥 ONLY CHECK TOTAL — ignore tx history
+  if(total > 0){
+    console.log("✅ Wallet already funded");
+    return;
   }
+
+  console.warn("🔥 FORCING INITIAL FUNDING");
+
+  const entry = ledger.createEntry({
+    type: "seed",
+    title: "Initial wallet funding",
+    currency: "NGN",
+    amount: 70284035,
+    icon: "💰"
+  });
+
+  ledger.applyEntry(entry);
 }
   /* ---------------------------
      Alerts + News
