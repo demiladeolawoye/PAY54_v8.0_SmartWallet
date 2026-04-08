@@ -2402,8 +2402,6 @@ waitForModules(() => {
 
   console.log("🚀 INIT TRIGGERED AFTER LEDGER READY");
 
-  setTimeout(() => {
-    init();
-  }, 100);
+  init(); // 🔥 NO DELAY — RUN IMMEDIATELY
 
 });
