@@ -2321,7 +2321,7 @@ setTimeout(()=>{
 /* =========================
    INITIAL UI RENDER
 ========================= */
-setActiveCurrency(currentCur);
+setActiveCurrency(getSelectedCurrency());
     renderRecentTransactions();
     renderAlerts();
     renderNews();
