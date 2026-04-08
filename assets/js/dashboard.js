@@ -2298,10 +2298,7 @@ seedDemoAlertsIfEmpty();
 /* =========================
    INITIAL UI RENDER
 ========================= */
-setTimeout(()=>{
-  setActiveCurrency(currentCur);
-}, 200);
-
+setActiveCurrency(currentCur);
     renderRecentTransactions();
     renderAlerts();
     renderNews();
