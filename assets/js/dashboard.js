@@ -2279,7 +2279,8 @@ function init() {
   try{
 
     console.log("✅ INIT RUNNING");
-    console.log("LEDGER:", LEDGER);
+   console.log("LEDGER OBJECT:", LEDGER);
+console.log("BALANCES:", LEDGER?.getBalances?.());;
 
     const ledger = safeLedger();
 
