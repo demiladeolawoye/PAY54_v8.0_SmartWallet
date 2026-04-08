@@ -477,14 +477,17 @@ if(availableEl){
  function seedDemoIfEmpty(){
 
   const ledger = safeLedger();
-  if(!ledger) return;
+
+  if(!ledger){
+    console.error("🚨 Cannot seed — ledger not ready");
+    return;
+  }
 
   const balances = ledger.getBalances() || {};
 
   const total = Object.values(balances)
     .reduce((a,b)=>a + Number(b || 0), 0);
 
-  // 🔥 ONLY CHECK TOTAL — ignore tx history
   if(total > 0){
     console.log("✅ Wallet already funded");
     return;
@@ -492,15 +495,23 @@ if(availableEl){
 
   console.warn("🔥 FORCING INITIAL FUNDING");
 
-  const entry = ledger.createEntry({
-    type: "seed",
-    title: "Initial wallet funding",
-    currency: "NGN",
-    amount: 70284035,
-    icon: "💰"
-  });
+  try{
 
-  ledger.applyEntry(entry);
+    const entry = ledger.createEntry({
+      type: "seed",
+      title: "Initial wallet funding",
+      currency: "NGN",
+      amount: 70284035,
+      icon: "💰"
+    });
+
+    ledger.applyEntry(entry);
+
+    console.log("✅ SEED APPLIED SUCCESSFULLY");
+
+  }catch(err){
+    console.error("🚨 SEED FAILED:", err);
+  }
 }
   /* ---------------------------
      Alerts + News
