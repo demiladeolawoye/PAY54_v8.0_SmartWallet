@@ -2313,6 +2313,11 @@ function init() {
 seedDemoIfEmpty();
 seedDemoAlertsIfEmpty();
 
+// 🔥 FORCE UI SYNC AFTER SEED
+setTimeout(()=>{
+  refreshUI();
+},50);
+
 /* =========================
    INITIAL UI RENDER
 ========================= */
