@@ -2291,11 +2291,8 @@ function init() {
   /* =========================
    SEED + INITIAL STATE
 ========================= */
-setTimeout(() => {
-  seedDemoIfEmpty();
-  refreshUI();
-}, 300);
-
+// 🔥 CRITICAL: Seed BEFORE UI renders
+seedDemoIfEmpty();
 seedDemoAlertsIfEmpty();
 
 /* =========================
