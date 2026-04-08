@@ -2419,6 +2419,9 @@ waitForModules(() => {
 
   console.log("🚀 INIT TRIGGERED AFTER LEDGER READY");
 
-  init(); // 🔥 NO DELAY — RUN IMMEDIATELY
+  init();
 
 });
+
+/* 🔥 CRITICAL: CLOSE THE FILE PROPERLY */
+})();
