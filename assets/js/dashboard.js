@@ -2369,36 +2369,34 @@ if(scanFab){
 }
  
 /* =========================
-   PAY54 Stability Watchdog
+   WATCHDOG DISABLED (DEBUG MODE)
 ========================= */
 
-const watchdog = setInterval(()=>{
+// const watchdog = setInterval(()=>{
 
-  try{
+//   try{
 
-    if(!LEDGER) return;
+//     if(!LEDGER) return;
 
-    const ledger = safeLedger();
-if(!ledger) return;
+//     const ledger = safeLedger();
+//     if(!ledger) return;
 
-const balances = ledger.getBalances() || {};
-    const sum = Object.values(balances).reduce((a,b)=>a+Number(b||0),0);
+//     const balances = ledger.getBalances() || {};
+//     const sum = Object.values(balances).reduce((a,b)=>a+Number(b||0),0);
 
-if(sum === 0 || isNaN(sum)){
+//     if(sum === 0 || isNaN(sum)){
+//       console.warn("Wallet UI detected zero state — recovering...");
+//       refreshUI();
+//     }else{
+//       clearInterval(watchdog);
+//     }
 
-      console.warn("Wallet UI detected zero state — recovering...");
-      refreshUI();
+//   }catch(e){
+//     console.warn("Watchdog recovery triggered");
+//     refreshUI();
+//   }
 
-    }else{
-      clearInterval(watchdog);
-    }
-
-  }catch(e){
-    console.warn("Watchdog recovery triggered");
-    refreshUI();
-  }
-
-},5000);
+// },5000);
      /* =========================
    🔥 FORCE CLICK SYSTEM (CRITICAL FIX)
 ========================= */
