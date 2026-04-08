@@ -873,9 +873,10 @@ function refreshUI() {
 
     try {
 
-      if(LEDGER){
-        setActiveCurrency(getSelectedCurrency());
-      }
+      const ledger = safeLedger();
+if(ledger){
+  setActiveCurrency(getSelectedCurrency());
+}
 
       renderRecentTransactions();
       triggerBalanceGlow();
