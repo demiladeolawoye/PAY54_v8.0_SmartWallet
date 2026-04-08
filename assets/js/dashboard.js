@@ -397,10 +397,8 @@ try{
 }catch(e){
   console.warn("Conversion failed", e);
 }
-// 🔥 SMART AVAILABLE BALANCE
-const ledger = safeLedger();
-if(!ledger) return;
 
+// 🔥 SMART AVAILABLE BALANCE
 const balances = ledger.getBalances() || {};
 const available = balances[cur] || 0;
 
@@ -408,9 +406,9 @@ const availableEl = document.getElementById("availableBalance");
 
 if(availableEl){
   availableEl.innerHTML = `
-  <span class="avail-label">Available in ${cur}:</span>
-  <span class="avail-value">${ledger.moneyFmt(cur, available)}</span>
-`;
+    <span class="avail-label">Available in ${cur}:</span>
+    <span class="avail-value">${ledger.moneyFmt(cur, available)}</span>
+  `;
 }
   if(balanceEl){
 
