@@ -2299,17 +2299,13 @@ function init() {
   try{
 
     console.log("✅ INIT RUNNING");
-   console.log("LEDGER OBJECT:", LEDGER);
-console.log("BALANCES:", LEDGER?.getBalances?.());;
 
     const ledger = safeLedger();
 
-    const currentCur = getSelectedCurrency();
-
-    if (ledger.setBaseCurrency) {
-      ledger.setBaseCurrency(currentCur);
+    if(!ledger){
+      console.error("🚨 INIT STOPPED — LEDGER NOT READY");
+      return;
     }
-
   /* =========================
    SEED + INITIAL STATE
 ========================= */
