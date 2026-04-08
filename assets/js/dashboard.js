@@ -40,6 +40,7 @@ if (window.visualViewport) {
 }
 
  let LEDGER;
+
 function safeLedger(){
 
   if (LEDGER && typeof LEDGER.getBalances === "function") {
@@ -50,10 +51,6 @@ function safeLedger(){
     LEDGER = window.PAY54_LEDGER;
     return LEDGER;
   }
-
-  console.error("🚨 LEDGER STILL NOT READY");
-  return null;
-}
 
   console.error("🚨 LEDGER NOT READY");
   return null;
