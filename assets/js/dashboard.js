@@ -2022,7 +2022,31 @@ function openCrossBorderFXUnified() {
   });
 }
 
+/* =========================
+   SERVICES REGISTRY (CRITICAL FIX)
+========================= */
 
+const SERVICES = {
+
+  add_money: openAddMoney,
+  withdraw: openWithdraw,
+  send: openSendUnified,
+  receive: openReceive,
+  scan_pay: openScanAndPay,
+
+  global_transfer: openGlobalTransfer,
+  fx: openCrossBorderFXUnified,
+  bank_transfer: openBankTransfer,
+
+  request_money: openRequestMoney,
+  merchant_qr: openMerchantQR,
+
+  agent: () => comingSoon("Become an Agent"),
+  shop: () => comingSoon("Shop & Go"),
+  refer: () => comingSoon("Refer & Earn"),
+  trading: () => comingSoon("Trading")
+
+};
   /* ---------------------------
      STABLE CLICK WIRING (FIXES Step 4)
   --------------------------- */
