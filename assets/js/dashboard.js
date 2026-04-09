@@ -1532,7 +1532,7 @@ if(!ledger){
 
 processTransaction(entry, {
   showReceipt: true,
-  title: "Wallet Funding"
+  title: "Withdrawal"
 });
 
   showPaymentReceipt(tx, "Withdrawal", amount, currency);
