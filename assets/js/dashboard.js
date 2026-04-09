@@ -313,9 +313,15 @@ const LS = {
       </div>
     `;
 
- function close() {
+function close() {
   backdrop.remove();
-  document.body.style.overflow = originalOverflow;
+
+  // 🔥 FORCE SCROLL RESTORE (BULLETPROOF)
+  document.body.style.overflow = "";
+  document.body.style.overflowY = "auto";
+  document.documentElement.style.overflow = "";
+  document.documentElement.style.overflowY = "auto";
+
   document.removeEventListener("keydown", escClose);
 }
     function escClose(e) { if (e.key === "Escape") close(); }
