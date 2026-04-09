@@ -1018,19 +1018,11 @@ if(ledger){
 
 function addEntryAndRefresh(entry) {
 
-  const ledger = safeLedger();
+  return processTransaction(entry, {
+    showReceipt: true,
+    title: "Wallet Funding"
+  });
 
-if(!ledger){
-  alert("System error. Please refresh.");
-  return;
-}
-
-processTransaction(entry, {
-  showReceipt: true,
-  title: "Wallet Funding"
-});
-
-  return tx;
 }
 
   function comingSoon(title) {
