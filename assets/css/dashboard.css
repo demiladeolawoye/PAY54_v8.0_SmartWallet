@@ -1315,3 +1315,9 @@ body.light .available-balance{
   letter-spacing:0.3px;
   font-size:14px;
 }
+/* =========================
+   MODAL SCROLL LOCK (v8.2 FIX)
+========================= */
+body.modal-open {
+  overflow: hidden;
+}
