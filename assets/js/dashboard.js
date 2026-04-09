@@ -1886,18 +1886,10 @@ function openGlobalTransfer(){
       const type = modal.querySelector("#gtType");
       const recBox = modal.querySelector("#gtRecipient");
 
-      /* =========================
-         RECIPIENT LOGIC
-      ========================= */
-
       function renderRecipient(val){
-
         if(val === "pay54"){
-          recBox.innerHTML = `
-            <input class="p54-input" id="gtTag" placeholder="@PAY54 Tag" required>
-          `;
+          recBox.innerHTML = `<input class="p54-input" placeholder="@PAY54 Tag" required>`;
         }
-
         if(val === "bank"){
           recBox.innerHTML = `
             <input class="p54-input" placeholder="Account Name" required>
@@ -1905,7 +1897,6 @@ function openGlobalTransfer(){
             <input class="p54-input" placeholder="Bank Name" required>
           `;
         }
-
       }
 
       renderRecipient("pay54");
@@ -1914,190 +1905,92 @@ function openGlobalTransfer(){
         renderRecipient(e.target.value);
       });
 
-      /* =========================
-         FX ENGINE (BIDIRECTIONAL)
-      ========================= */
-
       function convertForward(){
-        const from = fromCur.value;
-        const to = toCur.value;
+        if(!LEDGER) return;
         const amount = parseFloat(fromAmt.value);
-
-        if(!amount || !LEDGER || !LEDGER.convert) return;
-
-        const result = LEDGER.convert(from,to,amount);
-        toAmt.value = result.toFixed(2);
+        if(!amount) return;
+        toAmt.value = LEDGER.convert(fromCur.value,toCur.value,amount).toFixed(2);
       }
 
       function convertReverse(){
-        const from = fromCur.value;
-        const to = toCur.value;
+        if(!LEDGER) return;
         const amount = parseFloat(toAmt.value);
-
-        if(!amount || !LEDGER || !LEDGER.convert) return;
-
-        const result = LEDGER.convert(to,from,amount);
-        fromAmt.value = result.toFixed(2);
+        if(!amount) return;
+        fromAmt.value = LEDGER.convert(toCur.value,fromCur.value,amount).toFixed(2);
       }
 
       fromAmt.addEventListener("input", convertForward);
-       function showRate(){
-
-  const rate = LEDGER.getRate(fromCur.value, toCur.value);
-
-  if(!rate) return;
-
-  let el = modal.querySelector("#fxRateInfo");
-
-  if(!el){
-    el = document.createElement("div");
-    el.id = "fxRateInfo";
-    el.className = "p54-note";
-    el.style.marginTop = "8px";
-    modal.querySelector("#gtForm").prepend(el);
-  }
-
-  el.innerHTML = `Rate: 1 ${fromCur.value} = ${rate.toFixed(4)} ${toCur.value}`;
-}
-
-fromAmt.addEventListener("input", showRate);
-fromCur.addEventListener("change", showRate);
-toCur.addEventListener("change", showRate);
       toAmt.addEventListener("input", convertReverse);
 
       fromCur.addEventListener("change", convertForward);
       toCur.addEventListener("change", convertForward);
 
-      /* =========================
-         SUBMIT
-      ========================= */
-
       modal.querySelector("#cancelGT").addEventListener("click", close);
 
       modal.querySelector("#gtForm").addEventListener("submit",(e)=>{
 
-  e.preventDefault();
+        e.preventDefault();
 
-  const amount = Number(parseFloat(fromAmt.value).toFixed(2));
-  const fromCurrency = fromCur.value;
-  const toCurrency = toCur.value;
+        const amount = Number(parseFloat(fromAmt.value).toFixed(2));
+        const fromCurrency = fromCur.value;
+        const toCurrency = toCur.value;
 
-  const reference = modal.querySelector("#gtRef").value.trim();
-
-  if(!amount || amount <= 0){
-    alert("Enter valid amount");
-    return;
-  }
-
-  if(amount > 100000000){
-    alert("Amount too large");
-    return;
-  }
-
-  /* 🔥 SMART FUNDING (MULTI WALLET) */
-  const funding = resolveFundingCurrency(fromCurrency, amount);
-
-  if(!funding){
-    alert(`Insufficient funds across all wallets`);
-    return;
-  }
-
-  /* 🔐 PIN REQUIRED */
-  requestPinVerification(() => {
-
-    let tx;
-
-    /* =========================
-       DIRECT (NO FX)
-    ========================= */
-    if(funding.type === "direct" && fromCurrency === toCurrency){
-
-      const entry = LEDGER.createEntry({
-        type:"global_transfer",
-        title:`Global Transfer (${fromCurrency})`,
-        currency: fromCurrency,
-        amount:-amount,
-        icon:"🌍",
-        meta:{ reference }
-      });
-
-      tx = LEDGER.applyEntry(entry);
-
-    }
-
-    /* =========================
-       FX TRANSFER
-    ========================= */
-    else {
-
-      const rate = LEDGER.getRate(fromCurrency, toCurrency);
-
-      const convertedAmount = LEDGER.convert(fromCurrency, toCurrency, amount);
-
-      /* 🔻 FX DEBIT */
-      LEDGER.applyEntry(
-        LEDGER.createEntry({
-          type:"fx_debit",
-          title:`FX Conversion (${fromCurrency} → ${toCurrency})`,
-          currency: fromCurrency,
-          amount:-amount,
-          icon:"💱"
-        })
-      );
-
-      /* 🔺 FX CREDIT */
-      LEDGER.applyEntry(
-        LEDGER.createEntry({
-          type:"fx_credit",
-          title:`FX Conversion`,
-          currency: toCurrency,
-          amount: convertedAmount,
-          icon:"💱"
-        })
-      );
-
-      /* 🌍 FINAL TRANSFER */
-      const entry = LEDGER.createEntry({
-        type:"global_transfer",
-        title:`Global Transfer to ${toCurrency}`,
-        currency: toCurrency,
-        amount:-convertedAmount,
-        icon:"🌍",
-        meta:{
-          reference,
-          fx_used:true,
-          rate
+        if(!amount || amount <= 0){
+          alert("Enter valid amount");
+          return;
         }
+
+        requestPinVerification(()=>{
+
+          const converted = LEDGER.convert(fromCurrency,toCurrency,amount);
+
+          LEDGER.applyEntry(LEDGER.createEntry({
+            type:"fx_debit",
+            title:`FX ${fromCurrency} → ${toCurrency}`,
+            currency:fromCurrency,
+            amount:-amount,
+            icon:"💱"
+          }));
+
+          LEDGER.applyEntry(LEDGER.createEntry({
+            type:"fx_credit",
+            title:"FX Credit",
+            currency:toCurrency,
+            amount:converted,
+            icon:"💱"
+          }));
+
+          const tx = LEDGER.applyEntry(LEDGER.createEntry({
+            type:"global_transfer",
+            title:"Global Transfer",
+            currency:toCurrency,
+            amount:-converted,
+            icon:"🌍"
+          }));
+
+          prependTxToDOM(tx);
+          refreshUI();
+
+          showPaymentReceipt(tx,"Global Transfer",amount,fromCurrency);
+
+          close();
+
+        });
+
       });
 
-      tx = LEDGER.applyEntry(entry);
-
     }
-
-    /* =========================
-       UI UPDATE
-    ========================= */
-
-    prependTxToDOM(tx);
-    refreshUI();
-
-    showPaymentReceipt(
-      tx,
-      "PAY54 Global Transfer",
-      amount,
-      fromCurrency
-    );
-
-    close();
 
   });
 
-});
-  function openBankTransfer() { comingSoon("Bank Transfer"); }
-  function openCrossBorderFXUnified() { 
-  openGlobalTransfer(); 
 }
-   
+ function openBankTransfer() { 
+  comingSoon("Bank Transfer"); 
+}
+
+function openCrossBorderFXUnified() { 
+  openGlobalTransfer(); 
+}  
   /* ---------------------------
      Ledger modal (View All)
   --------------------------- */
