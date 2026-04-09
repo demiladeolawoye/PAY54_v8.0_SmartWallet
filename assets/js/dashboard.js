@@ -87,10 +87,35 @@ function safeLedger(){
     return LEDGER;
   }
 
-  console.error("🚨 LEDGER NOT READY");
+  console.warn("⚠️ Ledger not ready — retrying...");
+
   return null;
 }
+function waitForLedgerReady(callback){
 
+  let attempts = 0;
+
+  function check(){
+
+    const ledger = safeLedger();
+
+    if(ledger){
+      callback(ledger);
+      return;
+    }
+
+    attempts++;
+
+    if(attempts > 20){
+      console.error("🚨 Ledger failed to load after retries");
+      return;
+    }
+
+    setTimeout(check, 200);
+  }
+
+  check();
+}
 let RECIP;
 let RCPT;
 
