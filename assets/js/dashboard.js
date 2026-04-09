@@ -330,7 +330,6 @@ function close() {
     backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
     document.addEventListener("keydown", escClose);
 
-   const originalOverflow = document.body.style.overflow;
 document.body.classList.add("modal-open");
    document.body.appendChild(backdrop);
     if (typeof onMount === "function") onMount({ modal: backdrop.querySelector(".p54-modal"), close });
