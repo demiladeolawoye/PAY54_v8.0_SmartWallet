@@ -1378,9 +1378,6 @@ processTransaction(entry, {
   showReceipt: true,
   title: "Wallet Funding"
 });
-
-showPaymentReceipt(tx, "Wallet Funding", amount, currency);
-
 close();
 
       });
