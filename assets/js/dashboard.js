@@ -1383,122 +1383,23 @@ function openWithdraw(){
   openModal({
     title:"Withdraw",
 
-    bodyHTML:`
-      <form class="p54-form" id="withdrawForm">
+    bodyHTML: `...`, // keep your existing HTML
 
-        <div>
-          <div class="p54-label">Amount</div>
-          <input class="p54-input" id="wdAmount" type="number" step="0.01" placeholder="0.00" required>
-        </div>
+    onMount: ({modal, close}) => {
 
-        <div>
-          <div class="p54-label">Destination</div>
-          <select class="p54-select" id="wdDest">
-            <option value="bank">Bank</option>
-            <option value="agent">Agent</option>
-          </select>
-        </div>
+      const form = modal.querySelector("#withdrawForm");
 
-        <div id="wdDynamic"></div>
-
-        <div class="p54-actions">
-          <button class="p54-btn" type="button" id="cancelWD">Cancel</button>
-          <button class="p54-btn primary" type="submit">Withdraw</button>
-        </div>
-
-      </form>
-    `,
-
-    onMount:({modal,close})=>{
-
-      const dest = modal.querySelector("#wdDest");
-      const dynamic = modal.querySelector("#wdDynamic");
-
-      function render(type){
-
-  if(type === "bank"){
-    dynamic.innerHTML = `
-      <div class="p54-label">Select Bank</div>
-      <select class="p54-select">
-        <option>GTBank</option>
-        <option>Access Bank</option>
-        <option>Zenith Bank</option>
-      </select>
-    `;
-  }
-
-  if(type === "agent"){
-    dynamic.innerHTML = `
-
-      <div class="p54-label">Is PAY54 Agent?</div>
-      <select class="p54-select" id="wdAgentType">
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </select>
-
-      <div id="wdAgentFields"></div>
-    `;
-
-    const agentType = dynamic.querySelector("#wdAgentType");
-    const agentFields = dynamic.querySelector("#wdAgentFields");
-
-    function renderAgentFields(val){
-
-      if(val === "yes"){
-        agentFields.innerHTML = `
-          <input class="p54-input small" placeholder="Agent Tag / Email" required>
-        `;
-      }
-
-      if(val === "no"){
-        agentFields.innerHTML = `
-          <input class="p54-input small" placeholder="Agent Name" required>
-          <input class="p54-input small" placeholder="Bank Name" required>
-          <input class="p54-input small" placeholder="Account Number" required>
-        `;
-      }
-
-    }
-
-    renderAgentFields("yes");
-
-    agentType.addEventListener("change",(e)=>{
-      renderAgentFields(e.target.value);
-    });
-
-  }
-
-}
-      render("bank");
-
-      dest.addEventListener("change", e=>{
-        render(e.target.value);
-      });
-
-      modal.querySelector("#cancelWD").addEventListener("click",close);
-
-      modal.querySelector("#withdrawForm").addEventListener("submit",(e)=>{
+      form.addEventListener("submit",(e)=>{
 
         e.preventDefault();
 
         const amount = Number(parseFloat(modal.querySelector("#wdAmount").value).toFixed(2));
-         if(amount > 100000000){
-  alert("Amount too large");
-  return;
-}
         const currency = getSelectedCurrency();
 
         if(!amount || amount <= 0){
           alert("Enter valid amount");
           return;
         }
-
-        const funding = resolveFundingCurrency(currency, amount);
-
-if(!funding){
-  alert(`Insufficient funds across all wallets`);
-  return;
-}
 
         const entry = LEDGER.createEntry({
           type:"withdraw",
@@ -1508,31 +1409,24 @@ if(!funding){
           icon:"💵"
         });
 
- requestPinVerification(() => {
+        requestPinVerification(() => {
 
-  const ledger = safeLedger();
+          processTransaction(entry, {
+            showReceipt: true,
+            title: "Withdrawal"
+          });
 
-  if(!ledger){
-    alert("System error. Please refresh.");
-    return;
-  }
+          close();
 
- processTransaction(entry, {
-  showReceipt: true,
-  title: "Withdrawal"
-});
+        });
 
-close();
+      });
 
-}); // CLOSE requestPinVerification
+    }
 
-}); // CLOSE withdrawForm submit
+  });
 
-} // CLOSE onMount
-
-}); // CLOSE openModal
-
-} // CLOSE openWithdraw
+}
    function resolveFundingCurrency(targetCurrency, amount){
 
   const ledger = safeLedger();
