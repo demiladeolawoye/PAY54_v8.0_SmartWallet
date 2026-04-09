@@ -2111,37 +2111,32 @@ function openCrossBorderFXUnified() {
 
 function bindStableClickRouting(){
 
-  document.addEventListener("click",(e)=>{
+ document.addEventListener("click",(e)=>{
 
-    try{
+  try{
 
-      let el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
-      if(!el) return;
+    const el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
+    if(!el) return;
 
-      const action = el.dataset.action;
-      const service = el.dataset.service;
-      const shortcut = el.dataset.shortcut;
-      const id = el.id;
+    const action = el.dataset.action;
+    const service = el.dataset.service;
 
-      if(action === "send") return openSendUnified();
-      if(action === "receive") return openReceive();
-      if(action === "add") return openAddMoney();
-      if(action === "withdraw") return openWithdraw();
-      if(action === "banktransfer") return openBankTransfer();
-      if(action === "scanpay") return openScanAndPay();
-
-      if(service === "fx") return openCrossBorderFXUnified();
-      if(service === "merchantqr") return openMerchantQR();
-      if(service === "request") return openRequestMoney();
-
-      if(id === "atmFinderBtn") return comingSoon("ATM Finder");
-      if(id === "posFinderBtn") return comingSoon("POS / Agent Finder");
-
-    }catch(err){
-      console.error("🚨 CLICK ERROR:", err);
+    if(action && SERVICES[action]){
+      return SERVICES[action]();
     }
 
-  });
+    if(service && SERVICES[service]){
+      return SERVICES[service]();
+    }
+
+    if(el.id === "atmFinderBtn") return comingSoon("ATM Finder");
+    if(el.id === "posFinderBtn") return comingSoon("POS / Agent Finder");
+
+  }catch(err){
+    console.error("🚨 CLICK ERROR:", err);
+  }
+
+});
 
 }
 /* =========================
