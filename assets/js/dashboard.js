@@ -1517,24 +1517,22 @@ if(!funding){
     return;
   }
 
-  processTransaction(entry, {
-    showReceipt: true,
-    title: "Withdrawal"
-  });
-
-  close();
-
+ processTransaction(entry, {
+  showReceipt: true,
+  title: "Withdrawal"
 });
 
-}); // ✅ CLOSE requestPinVerification
+close();
 
-}); // ✅ CLOSE withdrawForm submit
+}); // CLOSE requestPinVerification
 
-} // ✅ CLOSE onMount
+}); // CLOSE withdrawForm submit
 
-}); // ✅ CLOSE openModal
+} // CLOSE onMount
 
-} // ✅ CLOSE openWithdraw
+}); // CLOSE openModal
+
+} // CLOSE openWithdraw
    function resolveFundingCurrency(targetCurrency, amount){
 
   const ledger = safeLedger();
