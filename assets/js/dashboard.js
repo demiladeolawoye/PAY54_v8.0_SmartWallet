@@ -1509,23 +1509,23 @@ if(!funding){
           icon:"💵"
         });
 
-  requestPinVerification(() => {
+ requestPinVerification(() => {
 
   const ledger = safeLedger();
 
-if(!ledger){
-  alert("System error. Please refresh.");
-  return;
-}
+  if(!ledger){
+    alert("System error. Please refresh.");
+    return;
+  }
 
-processTransaction(entry, {
-  showReceipt: true,
-  title: "Withdrawal"
-});
-
-  showPaymentReceipt(tx, "Withdrawal", amount, currency);
+  processTransaction(entry, {
+    showReceipt: true,
+    title: "Withdrawal"
+  });
 
   close();
+
+});
 
 }); // ✅ CLOSE requestPinVerification
 
