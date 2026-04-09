@@ -2370,9 +2370,10 @@ if(scanFab){
 ========================= */
 waitForModules(() => {
 
-  console.log("🚀 INIT TRIGGERED AFTER LEDGER READY");
-
-  init();
+  waitForLedgerReady(() => {
+    console.log("🚀 SAFE INIT START");
+    init();
+  });
 
 });
 
