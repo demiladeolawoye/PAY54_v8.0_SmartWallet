@@ -981,11 +981,10 @@ if(!ledger){
   return;
 }
 
-const tx = ledger.applyEntry(entry);
-
-  prependTxToDOM(tx);   // instantly add to dashboard
-
-  refreshUI();
+processTransaction(entry, {
+  showReceipt: true,
+  title: "Wallet Funding"
+});
 
   return tx;
 }
@@ -1158,11 +1157,10 @@ if(!ledger){
   return;
 }
 
-const tx = ledger.applyEntry(entry);
-
-            /* Update UI */
-            prependTxToDOM(tx);
-            refreshUI();
+processTransaction(entry, {
+  showReceipt: true,
+  title: "Wallet Funding"
+});
 
             /* Stop camera AFTER success */
             stopCamera();
@@ -1332,10 +1330,10 @@ if(!ledger){
   return;
 }
 
-const tx = ledger.applyEntry(entry);
-
-prependTxToDOM(tx);
-refreshUI();
+processTransaction(entry, {
+  showReceipt: true,
+  title: "Wallet Funding"
+});
 
 showPaymentReceipt(tx, "Wallet Funding", amount, currency);
 
@@ -1491,10 +1489,10 @@ if(!ledger){
   return;
 }
 
-const tx = ledger.applyEntry(entry);
-
-  prependTxToDOM(tx);
-  refreshUI();
+processTransaction(entry, {
+  showReceipt: true,
+  title: "Wallet Funding"
+});
 
   showPaymentReceipt(tx, "Withdrawal", amount, currency);
 
