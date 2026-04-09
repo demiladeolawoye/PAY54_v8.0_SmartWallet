@@ -1203,7 +1203,7 @@ if(!ledger){
 
 processTransaction(entry, {
   showReceipt: true,
-  title: "Wallet Funding"
+  title: "Scan Payment"
 });
 
             /* Stop camera AFTER success */
