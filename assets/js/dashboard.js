@@ -787,6 +787,50 @@ function renderFxTicker(){
 
   }).join("");
 }
+   /* =========================
+   v8.3 TRANSACTION PIPELINE
+========================= */
+
+function processTransaction(entry, meta = {}){
+
+  const ledger = safeLedger();
+
+  if(!ledger){
+    alert("System unavailable. Please refresh.");
+    return null;
+  }
+
+  // 🔒 BONUS PROTECTION (ADD THIS HERE)
+  if(Math.abs(entry.amount) > 100000000){
+    alert("Amount exceeds limit");
+    return null;
+  }
+
+  try{
+
+    const tx = ledger.applyEntry(entry);
+
+    prependTxToDOM(tx);
+    refreshUI();
+
+    // 🔥 Always show receipt if needed
+    if(meta.showReceipt){
+      showPaymentReceipt(
+        tx,
+        meta.title || "Transaction",
+        Math.abs(entry.amount),
+        entry.currency
+      );
+    }
+
+    return tx;
+
+  }catch(err){
+    console.error("🚨 TRANSACTION FAILED:", err);
+    alert("Transaction failed. Try again.");
+    return null;
+  }
+}
   /* ---------------------------
      Core Modals (minimal stable)
   --------------------------- */
