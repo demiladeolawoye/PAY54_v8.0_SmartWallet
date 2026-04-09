@@ -1208,10 +1208,6 @@ processTransaction(entry, {
 
             /* Stop camera AFTER success */
             stopCamera();
-
-            /* Feedback */
-            showPaymentReceipt(tx, merchant, amount, currency);
-
             close();
 
           });
