@@ -2008,8 +2008,8 @@ function openGlobalTransfer(){
   });
 
 }
- function openBankTransfer() { 
-  comingSoon("Bank Transfer"); 
+function openBankTransfer(){
+  openGlobalTransfer();
 }
 
 function openCrossBorderFXUnified() { 
