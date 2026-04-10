@@ -688,7 +688,10 @@ if(availableEl){
   const ledger = safeLedger();
   if (!ledger) return;
 
-  const txs = (ledger.getTx() || []).slice(-5).reverse();
+  const txs = (ledger.getTx() || [])
+  .slice()
+  .reverse()
+  .slice(0, 5);
 
   if (!txs.length) {
     txFeed.innerHTML = `
