@@ -749,9 +749,6 @@ function prependTxToDOM(tx) {
   `;
 
   txFeed.prepend(item);
-
-  const items = txFeed.querySelectorAll(".feed-item");
-  if (items.length > 5) items[items.length - 1].remove();
 }
 
 /* =========================
