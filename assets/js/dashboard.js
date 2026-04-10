@@ -1391,6 +1391,16 @@ function openWithdraw(){
           <input class="p54-input" id="wdAmount" type="number" step="0.01" placeholder="0.00" required>
         </div>
 
+        <div>
+          <div class="p54-label">Withdraw To</div>
+          <select class="p54-select" id="wdMethod">
+            <option value="bank">Bank Account</option>
+            <option value="agent">Agent</option>
+          </select>
+        </div>
+
+        <div id="wdDynamic"></div>
+
         <div class="p54-actions">
           <button class="p54-btn" type="button" id="cancelWD">Cancel</button>
           <button class="p54-btn primary" type="submit">Withdraw</button>
@@ -1401,36 +1411,49 @@ function openWithdraw(){
 
     onMount: ({modal, close}) => {
 
-      // ✅ FIX: cancel button
+      const methodEl = modal.querySelector("#wdMethod");
+      const dynamic = modal.querySelector("#wdDynamic");
+
+      function render(type){
+        if(type === "bank"){
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Account Name" required>
+            <input class="p54-input" placeholder="Account Number" required>
+            <input class="p54-input" placeholder="Bank Name" required>
+          `;
+        } else {
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Agent Name" required>
+            <input class="p54-input" placeholder="Agent ID" required>
+          `;
+        }
+      }
+
+      render("bank");
+      methodEl.addEventListener("change", e => render(e.target.value));
+
       modal.querySelector("#cancelWD").addEventListener("click", close);
 
-      const form = modal.querySelector("#withdrawForm");
-
-      form.addEventListener("submit",(e)=>{
+      modal.querySelector("#withdrawForm").addEventListener("submit",(e)=>{
 
         e.preventDefault();
 
         const amount = Number(parseFloat(modal.querySelector("#wdAmount").value).toFixed(2));
         const currency = getSelectedCurrency();
 
-        if(!amount || amount <= 0){
-          alert("Enter valid amount");
-          return;
-        }
-
-        const entry = LEDGER.createEntry({
-          type:"withdraw",
-          title:"Withdrawal",
-          currency,
-          amount:-amount,
-          icon:"💵"
-        });
-
         requestPinVerification(() => {
 
-          processTransaction(entry, {
-            showReceipt: true,
-            title: "Withdrawal"
+          const entry = LEDGER.createEntry({
+            type:"withdraw",
+            title:"Withdrawal",
+            currency,
+            amount:-amount,
+            icon:"💵"
+          });
+
+          processTransaction(entry,{
+            showReceipt:true,
+            title:"Withdrawal"
           });
 
           close();
