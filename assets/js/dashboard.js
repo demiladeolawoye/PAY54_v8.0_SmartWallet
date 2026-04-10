@@ -2337,12 +2337,14 @@ if(scanFab){
 ========================= */
 waitForModules(() => {
 
+  if(typeof SERVICES === "undefined"){
+    console.error("🚨 SERVICES not ready");
+    return;
+  }
+
   waitForLedgerReady(() => {
     console.log("🚀 SAFE INIT START");
     init();
   });
 
 });
-
-/* 🔥 CRITICAL: CLOSE THE FILE PROPERLY */
-})();
