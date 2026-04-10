@@ -2077,15 +2077,22 @@ function bindStableClickRouting(){
     const el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
     if(!el) return;
 
+    if(typeof SERVICES === "undefined"){
+      console.warn("⚠️ SERVICES not ready yet");
+      return;
+    }
+
     const action = el.dataset.action;
     const service = el.dataset.service;
 
     if(action && SERVICES[action]){
-      return SERVICES[action]();
+      SERVICES[action]();
+      return;
     }
 
     if(service && SERVICES[service]){
-      return SERVICES[service]();
+      SERVICES[service]();
+      return;
     }
 
     if(el.id === "atmFinderBtn") return comingSoon("ATM Finder");
@@ -2095,7 +2102,7 @@ function bindStableClickRouting(){
     console.error("🚨 CLICK ERROR:", err);
   }
 
-});
+ });
 
 }
 /* =========================
