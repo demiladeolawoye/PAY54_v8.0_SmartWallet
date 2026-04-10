@@ -1383,9 +1383,26 @@ function openWithdraw(){
   openModal({
     title:"Withdraw",
 
-    bodyHTML: `...`, // keep your existing HTML
+    bodyHTML: `
+      <form class="p54-form" id="withdrawForm">
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="wdAmount" type="number" step="0.01" placeholder="0.00" required>
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelWD">Cancel</button>
+          <button class="p54-btn primary" type="submit">Withdraw</button>
+        </div>
+
+      </form>
+    `,
 
     onMount: ({modal, close}) => {
+
+      // ✅ FIX: cancel button
+      modal.querySelector("#cancelWD").addEventListener("click", close);
 
       const form = modal.querySelector("#withdrawForm");
 
