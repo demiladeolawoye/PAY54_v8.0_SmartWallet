@@ -2348,3 +2348,6 @@ waitForModules(() => {
   });
 
 });
+
+/* 🔥 CRITICAL: CLOSE THE FILE PROPERLY */
+})();
