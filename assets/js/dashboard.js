@@ -2302,26 +2302,34 @@ function openBills(){
            TV (FIXED)
         ========================= */
         if(type === "tv"){
-          dynamic.innerHTML = `
-            <input class="p54-input" placeholder="Smart Card Number" required>
+  dynamic.innerHTML = `
+    <input class="p54-input" placeholder="Smart Card Number" required>
 
-            <select class="p54-select">
-              <option>DSTV</option>
-              <option>GOtv</option>
-              <option>Startimes</option>
-            </select>
+    <select class="p54-select">
+      <option>DSTV</option>
+      <option>GOtv</option>
+      <option>Startimes</option>
+    </select>
 
-            <select class="p54-select" id="tvPackage">
-              <option value="5000">Basic - ₦5000</option>
-              <option value="10000">Compact - ₦10000</option>
-              <option value="20000">Premium - ₦20000</option>
-            </select>
+    <select class="p54-select" id="tvPackage">
+      <option value="5000">Basic - ₦5000</option>
+      <option value="10000">Compact - ₦10000</option>
+      <option value="20000">Premium - ₦20000</option>
+    </select>
 
-            <input class="p54-input" id="billAmount" placeholder="Custom amount">
-          `;
-        }
-      }
+    <input class="p54-input" id="billAmount" placeholder="Custom amount">
+  `;
 
+  const pkg = dynamic.querySelector("#tvPackage");
+  const amountInput = dynamic.querySelector("#billAmount");
+
+  pkg.addEventListener("change", () => {
+    amountInput.value = pkg.value;
+  });
+
+  // 🔥 Default value auto-fill
+  amountInput.value = pkg.value;
+}
       render("airtime");
 
       typeEl.addEventListener("change",(e)=>{
