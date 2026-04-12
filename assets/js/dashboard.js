@@ -2163,7 +2163,86 @@ function openCrossBorderFXUnified() {
     }
   });
 }
+/* =========================
+   PAY54 SERVICES (ADD HERE ONLY)
+========================= */
 
+/* 💡 PAY BILLS */
+function openBills(){
+  openModal({
+    title:"Pay Bills & Top Up",
+    bodyHTML:`
+      <form class="p54-form" id="billForm">
+        <select class="p54-select" id="billType">
+          <option>Airtime</option>
+          <option>Data</option>
+          <option>Electricity</option>
+        </select>
+
+        <input class="p54-input" id="billAmount" placeholder="Amount">
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelBill">Cancel</button>
+          <button class="p54-btn primary">Pay</button>
+        </div>
+      </form>
+    `,
+    onMount:({modal,close})=>{
+      modal.querySelector("#cancelBill").onclick = close;
+
+      modal.querySelector("#billForm").onsubmit = (e)=>{
+        e.preventDefault();
+
+        const amount = Number(modal.querySelector("#billAmount").value);
+        const currency = getSelectedCurrency();
+
+        requestPinVerification(()=>{
+          const entry = LEDGER.createEntry({
+            type:"bill",
+            title:"Bill Payment",
+            currency,
+            amount:-amount,
+            icon:"💡"
+          });
+
+          processTransaction(entry,{showReceipt:true});
+          close();
+        });
+      };
+    }
+  });
+}
+
+/* 🏦 SAVINGS */
+function openSavings(){
+  openModal({
+    title:"Savings & Goals",
+    bodyHTML:`<button class="p54-btn primary" id="saveNow">Save ₦10,000</button>`,
+    onMount:({modal,close})=>{
+      modal.querySelector("#saveNow").onclick = ()=>{
+        const entry = LEDGER.createEntry({
+          type:"savings",
+          title:"Savings Deposit",
+          currency:"NGN",
+          amount:-10000,
+          icon:"🏦"
+        });
+
+        processTransaction(entry,{showReceipt:true});
+        close();
+      };
+    }
+  });
+}
+
+/* OTHER SERVICES (SAFE PLACEHOLDERS) */
+function openCards(){ comingSoon("Virtual & Linked Cards"); }
+function openCheckout(){ comingSoon("PAY54 Smart Checkout"); }
+function openShop(){ comingSoon("Shop & Go"); }
+function openTrading(){ comingSoon("Trading"); }
+function openBet(){ comingSoon("Bet Funding"); }
+function openAgent(){ comingSoon("Become an Agent"); }
+function openRisk(){ comingSoon("AI Risk Watch"); }
 /* =========================
    SERVICES REGISTRY (CRITICAL FIX)
 ========================= */
