@@ -2187,34 +2187,123 @@ search.addEventListener("input", ()=>{
 
 /* 💡 PAY BILLS */
 function openBills(){
+
   openModal({
     title:"Pay Bills & Top Up",
-    bodyHTML:`
-      <form class="p54-form" id="billForm">
-        <select class="p54-select" id="billType">
-          <option>Airtime</option>
-          <option>Data</option>
-          <option>Electricity</option>
-        </select>
 
-        <input class="p54-input" id="billAmount" placeholder="Amount">
+    bodyHTML:`
+
+      <form class="p54-form" id="billForm">
+
+        <div>
+          <div class="p54-label">Service Type</div>
+          <select class="p54-select" id="billType">
+            <option value="airtime">Airtime</option>
+            <option value="data">Data</option>
+            <option value="electricity">Electricity</option>
+            <option value="tv">TV Subscription</option>
+          </select>
+        </div>
+
+        <div id="billDynamic"></div>
 
         <div class="p54-actions">
           <button class="p54-btn" type="button" id="cancelBill">Cancel</button>
           <button class="p54-btn primary">Pay</button>
         </div>
+
       </form>
     `,
+
     onMount:({modal,close})=>{
+
+      const typeEl = modal.querySelector("#billType");
+      const dynamic = modal.querySelector("#billDynamic");
+
+      function render(type){
+
+        if(type === "airtime"){
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Phone Number" required>
+
+            <select class="p54-select">
+              <option>MTN</option>
+              <option>Airtel</option>
+              <option>Glo</option>
+              <option>9mobile</option>
+            </select>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              <button type="button" class="p54-btn amt">₦500</button>
+              <button type="button" class="p54-btn amt">₦1000</button>
+              <button type="button" class="p54-btn amt">₦1500</button>
+              <button type="button" class="p54-btn amt">₦2000</button>
+            </div>
+
+            <input class="p54-input" id="billAmount" placeholder="Custom amount">
+          `;
+        }
+
+        if(type === "data"){
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Phone Number" required>
+
+            <select class="p54-select">
+              <option>MTN 1GB - ₦1000</option>
+              <option>Airtel 2GB - ₦1500</option>
+            </select>
+          `;
+        }
+
+        if(type === "electricity"){
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Meter Number" required>
+
+            <select class="p54-select">
+              <option>Ikeja Electric</option>
+              <option>Eko Electric</option>
+              <option>Abuja Disco</option>
+            </select>
+
+            <input class="p54-input" id="billAmount" placeholder="Amount">
+          `;
+        }
+
+        if(type === "tv"){
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Smart Card Number" required>
+
+            <select class="p54-select">
+              <option>DSTV</option>
+              <option>GOtv</option>
+              <option>Startimes</option>
+            </select>
+
+            <select class="p54-select">
+              <option>Basic</option>
+              <option>Compact</option>
+              <option>Premium</option>
+            </select>
+          `;
+        }
+      }
+
+      render("airtime");
+
+      typeEl.addEventListener("change",(e)=>{
+        render(e.target.value);
+      });
+
       modal.querySelector("#cancelBill").onclick = close;
 
       modal.querySelector("#billForm").onsubmit = (e)=>{
         e.preventDefault();
 
-        const amount = Number(modal.querySelector("#billAmount").value);
+        const amount = Number(modal.querySelector("#billAmount")?.value || 1000);
         const currency = getSelectedCurrency();
 
         requestPinVerification(()=>{
+
           const entry = LEDGER.createEntry({
             type:"bill",
             title:"Bill Payment",
@@ -2227,6 +2316,7 @@ function openBills(){
           close();
         });
       };
+
     }
   });
 }
