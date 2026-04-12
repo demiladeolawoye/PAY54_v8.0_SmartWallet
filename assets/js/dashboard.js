@@ -2287,18 +2287,24 @@ function bindStableClickRouting(){
       return;
     }
 
-    const action = el.dataset.action;
-    const service = el.dataset.service;
+   const action = el.dataset.action;
+const service = el.dataset.service;
+const shortcut = el.dataset.shortcut;
 
-    if(action && SERVICES[action]){
-      SERVICES[action]();
-      return;
-    }
+if(action && SERVICES[action]){
+  SERVICES[action]();
+  return;
+}
 
-    if(service && SERVICES[service]){
-      SERVICES[service]();
-      return;
-    }
+if(service && SERVICES[service]){
+  SERVICES[service]();
+  return;
+}
+
+if(shortcut && SERVICES[shortcut]){
+  SERVICES[shortcut]();
+  return;
+}
 
     if(el.id === "atmFinderBtn") return comingSoon("ATM Finder");
     if(el.id === "posFinderBtn") return comingSoon("POS / Agent Finder");
