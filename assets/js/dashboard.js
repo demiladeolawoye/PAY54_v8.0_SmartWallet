@@ -2311,7 +2311,7 @@ function openBills(){
               <option>Startimes</option>
             </select>
 
-            <select class="p54-select">
+            <select class="p54-select" id="tvPackage">
               <option value="5000">Basic - ₦5000</option>
               <option value="10000">Compact - ₦10000</option>
               <option value="20000">Premium - ₦20000</option>
