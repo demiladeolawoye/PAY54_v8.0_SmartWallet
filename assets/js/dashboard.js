@@ -2362,6 +2362,8 @@ function openBills(){
 /* 🏦 SAVINGS */
 function openSavings(){
 
+  const goals = JSON.parse(localStorage.getItem(LS.GOALS) || "[]");
+
   openModal({
     title:"Savings & Goals",
 
@@ -2375,6 +2377,8 @@ function openSavings(){
 
         <input class="p54-input" id="saveAmount" placeholder="Amount to Save">
 
+        <div id="goalList" style="margin-top:10px"></div>
+
         <div class="p54-actions">
           <button class="p54-btn" type="button" id="cancelSave">Cancel</button>
           <button class="p54-btn primary">Save</button>
@@ -2385,27 +2389,61 @@ function openSavings(){
 
     onMount:({modal,close})=>{
 
+      const list = modal.querySelector("#goalList");
+
+      function renderGoals(){
+        list.innerHTML = goals.map(g=>`
+          <div class="p54-ledger-item">
+            <div>
+              <div class="p54-ledger-title">${g.name}</div>
+              <div class="p54-small">Saved: ₦${g.saved} / ₦${g.target}</div>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      renderGoals();
+
       modal.querySelector("#cancelSave").onclick = close;
 
       modal.querySelector("#saveForm").onsubmit = (e)=>{
         e.preventDefault();
 
+        const name = modal.querySelector("#goalName").value;
+        const target = Number(modal.querySelector("#goalTarget").value || 0);
         const amount = Number(modal.querySelector("#saveAmount").value);
+
         const currency = getSelectedCurrency();
 
         requestPinVerification(()=>{
 
+          /* SAVE GOAL */
+          let goal = goals.find(g=>g.name === name);
+
+          if(!goal){
+            goal = { name, target, saved:0 };
+            goals.push(goal);
+          }
+
+          goal.saved += amount;
+
+          localStorage.setItem(LS.GOALS, JSON.stringify(goals));
+
+          /* LEDGER ENTRY */
           const entry = LEDGER.createEntry({
             type:"savings",
-            title:"Savings Deposit",
+            title:`Saved to ${name}`,
             currency,
             amount:-amount,
             icon:"🏦"
           });
 
           processTransaction(entry,{showReceipt:true});
-          close();
+
+          renderGoals();
+
         });
+
       };
 
     }
