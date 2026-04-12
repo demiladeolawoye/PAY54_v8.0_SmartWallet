@@ -2170,24 +2170,25 @@ function openCrossBorderFXUnified() {
 
 const SERVICES = {
 
-  add_money: openAddMoney,
-  withdraw: openWithdraw,
   send: openSendUnified,
   receive: openReceive,
   scan_pay: openScanAndPay,
-
-  global_transfer: openGlobalTransfer,
-  fx: openCrossBorderFXUnified,
+  add_money: openAddMoney,
+  withdraw: openWithdraw,
   bank_transfer: openBankTransfer,
 
-  request_money: openRequestMoney,
-  merchant_qr: openMerchantQR,
-
-  agent: () => comingSoon("Become an Agent"),
-  shop: () => comingSoon("Shop & Go"),
-  refer: () => comingSoon("Refer & Earn"),
-  trading: () => comingSoon("Trading")
-
+  fx: openGlobalTransfer,
+  bills: openBills,
+  savings: openSavings,
+  cards: openCards,
+  checkout: openCheckout,
+  shop: openShop,
+  merchantqr: openMerchantQR,
+  trading: openTrading,
+  bet: openBet,
+  agent: openAgent,
+  request: openRequestMoney,
+  risk: openRisk
 };
   /* ---------------------------
      STABLE CLICK WIRING (FIXES Step 4)
