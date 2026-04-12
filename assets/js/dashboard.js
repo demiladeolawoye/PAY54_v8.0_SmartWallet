@@ -2009,7 +2009,109 @@ function openGlobalTransfer(){
 
 }
 function openBankTransfer(){
-  openGlobalTransfer();
+
+  openModal({
+    title:"Bank Transfer",
+
+    bodyHTML:`
+
+      <form class="p54-form" id="btForm">
+
+        <div>
+          <div class="p54-label">Select Bank</div>
+          <select class="p54-select" id="btBank">
+            <option>GTBank</option>
+            <option>Access Bank</option>
+            <option>Zenith Bank</option>
+            <option>UBA</option>
+            <option>First Bank</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="p54-label">Account Number</div>
+          <input class="p54-input" id="btAcc" placeholder="10-digit account" required>
+        </div>
+
+        <div>
+          <div class="p54-label">Account Name</div>
+          <input class="p54-input" id="btName" placeholder="Auto-resolve" readonly>
+        </div>
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="btAmount" type="number" placeholder="0.00" required>
+        </div>
+
+        <div>
+          <div class="p54-label">Reference</div>
+          <input class="p54-input" id="btRef" placeholder="Optional note">
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelBT">Cancel</button>
+          <button class="p54-btn primary" type="submit">Send</button>
+        </div>
+
+      </form>
+    `,
+
+    onMount: ({modal, close}) => {
+
+      const accInput = modal.querySelector("#btAcc");
+      const nameInput = modal.querySelector("#btName");
+
+      /* MOCK NAME RESOLVE */
+      accInput.addEventListener("input", () => {
+        if(accInput.value.length === 10){
+          nameInput.value = "John Doe"; // mock resolve
+        } else {
+          nameInput.value = "";
+        }
+      });
+
+      modal.querySelector("#cancelBT").addEventListener("click", close);
+
+      modal.querySelector("#btForm").addEventListener("submit", (e)=>{
+
+        e.preventDefault();
+
+        const amount = Number(modal.querySelector("#btAmount").value);
+        const currency = getSelectedCurrency();
+
+        if(!amount || amount <= 0){
+          alert("Enter valid amount");
+          return;
+        }
+
+        requestPinVerification(()=>{
+
+          const entry = LEDGER.createEntry({
+            type:"bank_transfer",
+            title:"Bank Transfer",
+            currency,
+            amount:-amount,
+            icon:"🏦",
+            meta:{
+              bank: modal.querySelector("#btBank").value,
+              account: modal.querySelector("#btAcc").value,
+              name: modal.querySelector("#btName").value
+            }
+          });
+
+          processTransaction(entry,{
+            showReceipt:true,
+            title:"Bank Transfer"
+          });
+
+          close();
+
+        });
+
+      });
+
+    }
+  });
 }
 
 function openCrossBorderFXUnified() { 
