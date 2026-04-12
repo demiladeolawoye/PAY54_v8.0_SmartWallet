@@ -1207,13 +1207,13 @@ processTransaction(entry, {
           console.warn("ScanPay error:", err);
         }
 
-      }); // ✅ CLOSE form submit
+          }); // CLOSE form submit
 
-    } // ✅ CLOSE onMount
+    } // CLOSE onMount
 
-  }); // ✅ CLOSE openModal
+  }); // CLOSE openModal
 
-} // ✅ CLOSE openScanAndPay
+} // CLOSE openScanAndPay
    /* =========================
    Add Money
 ========================= */
