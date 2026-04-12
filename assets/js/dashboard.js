@@ -2402,16 +2402,23 @@ function openSavings(){
       const list = modal.querySelector("#goalList");
 
       function renderGoals(){
-        list.innerHTML = goals.map(g=>`
-  <div class="p54-ledger-item" data-goal="${g.name}">
-            <div>
-              <div class="p54-ledger-title">${g.name}</div>
-              <div class="p54-small">Saved: ₦${g.saved} / ₦${g.target}</div>
-            </div>
-          </div>
-        `).join("");
-      }
 
+  list.innerHTML = goals.map(g=>`
+    <div class="p54-ledger-item" data-goal="${g.name}">
+      <div>
+        <div class="p54-ledger-title">${g.name}</div>
+        <div class="p54-small">Saved: ₦${g.saved} / ₦${g.target}</div>
+      </div>
+    </div>
+  `).join("");
+
+  // 🔥 ADD THIS RIGHT HERE
+  list.querySelectorAll("[data-goal]").forEach(el => {
+    el.addEventListener("click", () => {
+      openGoalDetails(el.dataset.goal);
+    });
+  });
+}
       renderGoals();
 
       modal.querySelector("#cancelSave").onclick = close;
