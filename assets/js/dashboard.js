@@ -2323,26 +2323,56 @@ function openBills(){
 
 /* 🏦 SAVINGS */
 function openSavings(){
+
   openModal({
     title:"Savings & Goals",
-    bodyHTML:`<button class="p54-btn primary" id="saveNow">Save ₦10,000</button>`,
-    onMount:({modal,close})=>{
-      modal.querySelector("#saveNow").onclick = ()=>{
-        const entry = LEDGER.createEntry({
-          type:"savings",
-          title:"Savings Deposit",
-          currency:"NGN",
-          amount:-10000,
-          icon:"🏦"
-        });
 
-        processTransaction(entry,{showReceipt:true});
-        close();
+    bodyHTML:`
+
+      <form class="p54-form" id="saveForm">
+
+        <input class="p54-input" id="goalName" placeholder="Goal name (e.g School Fees)" required>
+
+        <input class="p54-input" id="goalTarget" placeholder="Target Amount">
+
+        <input class="p54-input" id="saveAmount" placeholder="Amount to Save">
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelSave">Cancel</button>
+          <button class="p54-btn primary">Save</button>
+        </div>
+
+      </form>
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal.querySelector("#cancelSave").onclick = close;
+
+      modal.querySelector("#saveForm").onsubmit = (e)=>{
+        e.preventDefault();
+
+        const amount = Number(modal.querySelector("#saveAmount").value);
+        const currency = getSelectedCurrency();
+
+        requestPinVerification(()=>{
+
+          const entry = LEDGER.createEntry({
+            type:"savings",
+            title:"Savings Deposit",
+            currency,
+            amount:-amount,
+            icon:"🏦"
+          });
+
+          processTransaction(entry,{showReceipt:true});
+          close();
+        });
       };
+
     }
   });
 }
-
 /* OTHER SERVICES (SAFE PLACEHOLDERS) */
 function openCards(){ comingSoon("Virtual & Linked Cards"); }
 function openCheckout(){ comingSoon("PAY54 Smart Checkout"); }
