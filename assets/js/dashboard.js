@@ -2403,7 +2403,7 @@ function openSavings(){
 
       function renderGoals(){
         list.innerHTML = goals.map(g=>`
-          <div class="p54-ledger-item" data-goal="${g.name}">
+  <div class="p54-ledger-item" data-goal="${g.name}">
             <div>
               <div class="p54-ledger-title">${g.name}</div>
               <div class="p54-small">Saved: ₦${g.saved} / ₦${g.target}</div>
