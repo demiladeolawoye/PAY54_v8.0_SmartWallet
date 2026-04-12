@@ -2574,9 +2574,15 @@ modal.querySelector("#againBtn").addEventListener("click", () => {
     else if(tx.type === "global_transfer"){
       openGlobalTransfer();
     }
-    else{
-      openSendUnified();
-    }
+    else if(tx.type === "bill"){
+  openBills();
+}
+else if(tx.type === "savings"){
+  openSavings();
+}
+else{
+  openSendUnified();
+}
 
   }, 100);
 
