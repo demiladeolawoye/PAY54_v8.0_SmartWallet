@@ -152,7 +152,9 @@ const LS = {
   EMAIL: "pay54_email",
   ALERTS: "pay54_alerts",
   SEED: "pay54_seed_v81",
-  PIN: "pay54_pin"
+  PIN: "pay54_pin",
+
+  GOALS: "pay54_goals"
 };
 
   const $ = (sel, root = document) => root.querySelector(sel);
