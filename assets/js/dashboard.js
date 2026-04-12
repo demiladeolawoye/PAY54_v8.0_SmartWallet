@@ -2438,7 +2438,12 @@ function openSavings(){
           let goal = goals.find(g=>g.name === name);
 
           if(!goal){
-            goal = { name, target, saved:0 };
+           goal = { 
+  name, 
+  target, 
+  saved:0,
+  standing: null
+};
             goals.push(goal);
           }
 
