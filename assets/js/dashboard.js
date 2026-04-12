@@ -2133,7 +2133,8 @@ function openCrossBorderFXUnified() {
     bodyHTML: `
       <div class="p54-note">Your latest activity.</div>
       <div class="p54-divider"></div>
-      <div class="p54-ledger" id="ledgerList"></div>
+     <input class="p54-input" id="txSearch" placeholder="Search transactions">
+<div class="p54-ledger" id="ledgerList"></div>
       <div class="p54-actions">
         <button class="p54-btn primary" type="button" id="closeLedger">Close</button>
       </div>
@@ -2142,27 +2143,37 @@ function openCrossBorderFXUnified() {
 
       const ledgerEl = modal.querySelector("#ledgerList");
 
-      ledgerEl.innerHTML = all.slice(0, 80).map(tx => {
-        const cls = tx.amount >= 0 ? "p54-pos" : "p54-neg";
-        const sign = tx.amount >= 0 ? "+" : "−";
+function renderList(list){
+  ledgerEl.innerHTML = list.map(tx => {
+    const cls = tx.amount >= 0 ? "p54-pos" : "p54-neg";
+    const sign = tx.amount >= 0 ? "+" : "−";
 
-        return `
-          <div class="p54-ledger-item">
-            <div class="p54-ledger-left">
-              <div class="p54-ledger-title">${tx.icon || "💳"} ${tx.title}</div>
-              <div class="p54-ledger-sub">${new Date(tx.created_at || Date.now()).toLocaleString()}</div>
-            </div>
-            <div class="p54-ledger-amt ${cls}">
-              ${sign} ${ledgerSafe.moneyFmt(tx.currency, Math.abs(tx.amount))}
-            </div>
-          </div>
-        `;
-      }).join("") || `<div class="p54-note">No transactions found.</div>`;
-
-      modal.querySelector("#closeLedger").addEventListener("click", close);
-    }
-  });
+    return `
+      <div class="p54-ledger-item">
+        <div class="p54-ledger-left">
+          <div class="p54-ledger-title">${tx.title}</div>
+        </div>
+        <div class="p54-ledger-amt ${cls}">
+          ${sign} ${ledgerSafe.moneyFmt(tx.currency, Math.abs(tx.amount))}
+        </div>
+      </div>
+    `;
+  }).join("");
 }
+
+renderList(all);
+
+const search = modal.querySelector("#txSearch");
+
+search.addEventListener("input", ()=>{
+  const term = search.value.toLowerCase();
+
+  const filtered = all.filter(tx =>
+    tx.title.toLowerCase().includes(term)
+  );
+
+  renderList(filtered);
+});
 /* =========================
    PAY54 SERVICES (ADD HERE ONLY)
 ========================= */
