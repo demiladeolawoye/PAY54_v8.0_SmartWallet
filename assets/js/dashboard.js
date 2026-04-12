@@ -2222,11 +2222,14 @@ function openBills(){
 
       function render(type){
 
+        /* =========================
+           AIRTIME (FIXED BUTTONS)
+        ========================= */
         if(type === "airtime"){
           dynamic.innerHTML = `
-            <input class="p54-input" placeholder="Phone Number" required>
+            <input class="p54-input" id="billPhone" placeholder="Phone Number" required>
 
-            <select class="p54-select">
+            <select class="p54-select" id="billProvider">
               <option>MTN</option>
               <option>Airtel</option>
               <option>Glo</option>
@@ -2234,27 +2237,51 @@ function openBills(){
             </select>
 
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-              <button type="button" class="p54-btn amt">₦500</button>
-              <button type="button" class="p54-btn amt">₦1000</button>
-              <button type="button" class="p54-btn amt">₦1500</button>
-              <button type="button" class="p54-btn amt">₦2000</button>
+              <button type="button" class="p54-btn amt" data-amt="500">₦500</button>
+              <button type="button" class="p54-btn amt" data-amt="1000">₦1000</button>
+              <button type="button" class="p54-btn amt" data-amt="1500">₦1500</button>
+              <button type="button" class="p54-btn amt" data-amt="2000">₦2000</button>
+              <button type="button" class="p54-btn amt" data-amt="5000">₦5000</button>
             </div>
 
             <input class="p54-input" id="billAmount" placeholder="Custom amount">
           `;
+
+          /* ✅ FIX CLICK */
+          dynamic.querySelectorAll(".amt").forEach(btn=>{
+            btn.addEventListener("click",()=>{
+              dynamic.querySelector("#billAmount").value = btn.dataset.amt;
+            });
+          });
         }
 
+        /* =========================
+           DATA (PROPER UX)
+        ========================= */
         if(type === "data"){
           dynamic.innerHTML = `
             <input class="p54-input" placeholder="Phone Number" required>
 
-            <select class="p54-select">
-              <option>MTN 1GB - ₦1000</option>
-              <option>Airtel 2GB - ₦1500</option>
+            <select class="p54-select" id="dataProvider">
+              <option value="MTN">MTN</option>
+              <option value="Airtel">Airtel</option>
+              <option value="Glo">Glo</option>
+              <option value="9mobile">9mobile</option>
             </select>
+
+            <select class="p54-select" id="dataBundle">
+              <option value="1000">1GB - ₦1000</option>
+              <option value="1500">2GB - ₦1500</option>
+              <option value="5000">5GB - ₦5000</option>
+            </select>
+
+            <input class="p54-input" id="billAmount" placeholder="Custom amount (optional)">
           `;
         }
 
+        /* =========================
+           ELECTRICITY (OK)
+        ========================= */
         if(type === "electricity"){
           dynamic.innerHTML = `
             <input class="p54-input" placeholder="Meter Number" required>
@@ -2269,6 +2296,9 @@ function openBills(){
           `;
         }
 
+        /* =========================
+           TV (FIXED)
+        ========================= */
         if(type === "tv"){
           dynamic.innerHTML = `
             <input class="p54-input" placeholder="Smart Card Number" required>
@@ -2280,10 +2310,12 @@ function openBills(){
             </select>
 
             <select class="p54-select">
-              <option>Basic</option>
-              <option>Compact</option>
-              <option>Premium</option>
+              <option value="5000">Basic - ₦5000</option>
+              <option value="10000">Compact - ₦10000</option>
+              <option value="20000">Premium - ₦20000</option>
             </select>
+
+            <input class="p54-input" id="billAmount" placeholder="Custom amount">
           `;
         }
       }
@@ -2299,7 +2331,14 @@ function openBills(){
       modal.querySelector("#billForm").onsubmit = (e)=>{
         e.preventDefault();
 
-        const amount = Number(modal.querySelector("#billAmount")?.value || 1000);
+        let amount = Number(modal.querySelector("#billAmount")?.value);
+
+        /* fallback for bundles */
+        if(!amount){
+          const bundle = modal.querySelector("#dataBundle")?.value;
+          if(bundle) amount = Number(bundle);
+        }
+
         const currency = getSelectedCurrency();
 
         requestPinVerification(()=>{
@@ -2320,7 +2359,6 @@ function openBills(){
     }
   });
 }
-
 /* 🏦 SAVINGS */
 function openSavings(){
 
