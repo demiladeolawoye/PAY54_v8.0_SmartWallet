@@ -2470,6 +2470,126 @@ list.querySelectorAll("[data-goal]").forEach(el => {
     }
   });
 }
+   function openGoalDetails(goalName){
+
+  const goals = JSON.parse(localStorage.getItem(LS.GOALS) || "[]");
+  const goal = goals.find(g => g.name === goalName);
+
+  if(!goal){
+    alert("Goal not found");
+    return;
+  }
+
+  const txs = LEDGER.getTx().filter(tx =>
+    tx.type === "savings" && tx.title.includes(goal.name)
+  );
+
+  openModal({
+    title: goal.name,
+
+    bodyHTML: `
+      <div class="p54-note"><b>${goal.name}</b></div>
+
+      <div class="p54-small">
+        Saved: ₦${goal.saved} / ₦${goal.target}
+      </div>
+
+      <input class="p54-input" id="goalSearch" placeholder="Search transactions">
+
+      <div id="goalTx"></div>
+
+      <canvas id="goalChart" height="120"></canvas>
+
+      <div class="p54-actions">
+        <button class="p54-btn" id="saveMore">Save More</button>
+        <button class="p54-btn" id="setupSO">Standing Order</button>
+        <button class="p54-btn primary" id="closeGoal">Close</button>
+      </div>
+    `,
+
+    onMount: ({ modal, close }) => {
+
+      const txBox = modal.querySelector("#goalTx");
+
+      function render(list){
+        txBox.innerHTML = list.map(tx=>`
+          <div class="p54-ledger-item">
+            <div>${tx.title}</div>
+            <div>${tx.amount}</div>
+          </div>
+        `).join("");
+      }
+
+      render(txs);
+
+      // 🔍 SEARCH
+      modal.querySelector("#goalSearch").addEventListener("input", (e)=>{
+        const term = e.target.value.toLowerCase();
+        render(txs.filter(tx => tx.title.toLowerCase().includes(term)));
+      });
+
+      // 💰 SAVE MORE
+      modal.querySelector("#saveMore").addEventListener("click", ()=>{
+        const amount = Number(prompt("Enter amount to save"));
+        if(!amount) return;
+
+        goal.saved += amount;
+        localStorage.setItem(LS.GOALS, JSON.stringify(goals));
+
+        const entry = LEDGER.createEntry({
+          type:"savings",
+          title:`Saved to ${goal.name}`,
+          currency:getSelectedCurrency(),
+          amount:-amount,
+          icon:"🏦"
+        });
+
+        processTransaction(entry,{showReceipt:true});
+        close();
+      });
+
+      // 🔁 STANDING ORDER
+      modal.querySelector("#setupSO").addEventListener("click", ()=>{
+        const amount = prompt("Enter weekly saving amount");
+
+        if(!amount) return;
+
+        goal.standing = {
+          amount:Number(amount),
+          frequency:"weekly"
+        };
+
+        localStorage.setItem(LS.GOALS, JSON.stringify(goals));
+
+        alert("Standing order set ✅");
+      });
+
+      // 📊 PIE CHART
+      const canvas = modal.querySelector("#goalChart");
+      const ctx = canvas.getContext("2d");
+
+      const saved = goal.saved;
+      const remaining = goal.target - goal.saved;
+      const total = saved + remaining;
+
+      const angle = (saved / total) * Math.PI * 2;
+
+      ctx.beginPath();
+      ctx.moveTo(100,60);
+      ctx.arc(100,60,50,0,angle);
+      ctx.fillStyle="#22c55e";
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(100,60);
+      ctx.arc(100,60,50,angle,Math.PI*2);
+      ctx.fillStyle="#e5e7eb";
+      ctx.fill();
+
+      modal.querySelector("#closeGoal").addEventListener("click", close);
+    }
+  });
+}
 /* OTHER SERVICES (SAFE PLACEHOLDERS) */
 function openCards(){ comingSoon("Virtual & Linked Cards"); }
 function openCheckout(){ comingSoon("PAY54 Smart Checkout"); }
