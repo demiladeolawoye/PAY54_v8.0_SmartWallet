@@ -2301,7 +2301,7 @@ function openBills(){
         /* =========================
            TV (FIXED)
         ========================= */
-        if(type === "tv"){
+if(type === "tv"){
   dynamic.innerHTML = `
     <input class="p54-input" placeholder="Smart Card Number" required>
 
@@ -2312,6 +2312,7 @@ function openBills(){
     </select>
 
     <select class="p54-select" id="tvPackage">
+      <option value="">Select Package</option>
       <option value="5000">Basic - ₦5000</option>
       <option value="10000">Compact - ₦10000</option>
       <option value="20000">Premium - ₦20000</option>
@@ -2320,15 +2321,13 @@ function openBills(){
     <input class="p54-input" id="billAmount" placeholder="Custom amount">
   `;
 
+  // 🔥 ADD THIS EXACTLY HERE
   const pkg = dynamic.querySelector("#tvPackage");
   const amountInput = dynamic.querySelector("#billAmount");
 
   pkg.addEventListener("change", () => {
     amountInput.value = pkg.value;
   });
-
-  // 🔥 Default value auto-fill
-  amountInput.value = pkg.value;
 }
       render("airtime");
 
