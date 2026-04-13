@@ -2565,14 +2565,15 @@ list.querySelectorAll("[data-goal]").forEach(el => {
 
       // 🔁 STANDING ORDER
       modal.querySelector("#setupSO").addEventListener("click", ()=>{
-        const amount = prompt("Enter weekly saving amount");
+     const amount = Number(prompt("Enter saving amount"));
+const freq = prompt("Frequency: daily / weekly / monthly");
 
-        if(!amount) return;
+if(!amount || !freq) return;
 
-        goal.standing = {
-          amount:Number(amount),
-          frequency:"weekly"
-        };
+goal.standing = {
+  amount,
+  frequency: freq.toLowerCase()
+};
 
         localStorage.setItem(LS.GOALS, JSON.stringify(goals));
 
