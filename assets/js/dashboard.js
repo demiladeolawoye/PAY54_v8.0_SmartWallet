@@ -2535,7 +2535,18 @@ list.querySelectorAll("[data-goal]").forEach(el => {
         `).join("");
       }
 
-      render(txs);
+     const LIMIT = 10;
+
+function render(list){
+  const display = list.slice(-LIMIT);
+
+  txBox.innerHTML = display.map(tx=>`
+    <div class="p54-ledger-item">
+      <div>${tx.title}</div>
+      <div>${tx.amount}</div>
+    </div>
+  `).join("");
+}
 
       // 🔍 SEARCH
       modal.querySelector("#goalSearch").addEventListener("input", (e)=>{
