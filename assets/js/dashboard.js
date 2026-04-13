@@ -2321,13 +2321,15 @@ if(type === "tv"){
     <input class="p54-input" id="billAmount" placeholder="Custom amount">
   `;
 
-  // 🔥 ADD THIS EXACTLY HERE
+  // ✅ SAFE BINDING (IMPORTANT)
   const pkg = dynamic.querySelector("#tvPackage");
   const amountInput = dynamic.querySelector("#billAmount");
 
-  pkg.addEventListener("change", () => {
-    amountInput.value = pkg.value;
-  });
+  if(pkg && amountInput){
+    pkg.addEventListener("change", () => {
+      amountInput.value = pkg.value;
+    });
+  }
 }
       render("airtime");
 
