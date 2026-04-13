@@ -2403,7 +2403,7 @@ function openSavings(){
       function renderGoals(){
 
   list.innerHTML = goals.map(g=>`
-    <div class="p54-ledger-item" data-goal="${g.name}">
+  <div class="p54-ledger-item" data-goal="${g.name}">
       <div>
         <div class="p54-ledger-title">${g.name}</div>
         <div class="p54-small">Saved: ₦${g.saved} / ₦${g.target}</div>
@@ -2411,12 +2411,12 @@ function openSavings(){
     </div>
   `).join("");
 
-  // 🔥 ADD THIS RIGHT HERE
-  list.querySelectorAll("[data-goal]").forEach(el => {
-    el.addEventListener("click", () => {
-      openGoalDetails(el.dataset.goal);
-    });
+  // 🔥 ADD THIS IMMEDIATELY AFTER list.innerHTML
+list.querySelectorAll("[data-goal]").forEach(el => {
+  el.addEventListener("click", () => {
+    openGoalDetails(el.dataset.goal);
   });
+});
 }
       renderGoals();
 
