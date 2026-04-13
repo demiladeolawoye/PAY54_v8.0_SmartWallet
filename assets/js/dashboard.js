@@ -2763,6 +2763,9 @@ modal.querySelector("#againBtn").addEventListener("click", () => {
 else if(tx.type === "savings"){
   openSavings();
 }
+else if(tx.type === "bank_transfer"){
+  openBankTransfer();
+}
 else{
   openSendUnified();
 }
