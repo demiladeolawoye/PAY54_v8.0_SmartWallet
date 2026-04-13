@@ -2551,7 +2551,17 @@ function render(list){
       // 🔍 SEARCH
       modal.querySelector("#goalSearch").addEventListener("input", (e)=>{
         const term = e.target.value.toLowerCase();
-        render(txs.filter(tx => tx.title.toLowerCase().includes(term)));
+        const filtered = txs.filter(tx => {
+
+  return (
+    tx.title.toLowerCase().includes(term) ||
+    String(tx.amount).includes(term) ||
+    (tx.currency || "").toLowerCase().includes(term)
+  );
+
+});
+
+render(filtered);
       });
 
       // 💰 SAVE MORE
