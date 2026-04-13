@@ -709,7 +709,15 @@ if(availableEl){
   }
 
   txFeed.innerHTML = "";
-  txs.forEach(tx => prependTxToDOM(tx));
+
+/* 🔥 ADD SUMMARY HERE */
+const summary = document.createElement("div");
+summary.className = "p54-small";
+summary.innerHTML = `Total Contributions: ${txs.length}`;
+txFeed.appendChild(summary);
+
+/* existing loop */
+txs.forEach(tx => prependTxToDOM(tx));   
 }
 
    /* =========================
