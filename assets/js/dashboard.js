@@ -1925,12 +1925,12 @@ function openGlobalTransfer(){
           recBox.innerHTML = `<input class="p54-input" placeholder="@PAY54 Tag" required>`;
         }
         if(val === "bank"){
-          recBox.innerHTML = `
-            <input class="p54-input" placeholder="Account Name" required>
-            <input class="p54-input" placeholder="Account Number" required>
-            <input class="p54-input" placeholder="Bank Name" required>
-          `;
-        }
+  recBox.innerHTML = `
+    <input class="p54-input" placeholder="Account Name" required>
+    <input class="p54-input" id="gtAcc" placeholder="Account Number" required>
+    <input class="p54-input" placeholder="Bank Name" required>
+  `;
+}
       }
 
       renderRecipient("pay54");
