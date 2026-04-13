@@ -1323,6 +1323,14 @@ body.modal-open {
   overflow: hidden;
 }
 /* =========================
+   🔥 PAY54 PREMIUM SECTION SPACING (FINAL)
+========================= */
+
+/* Adds clean spacing between cards (Money Moves → Services) */
+.card + .card{
+  margin-top: 28px;
+}
+/* =========================
    🔥 FIX: SPACE BETWEEN SECTIONS (FINAL)
 ========================= */
 
