@@ -1938,6 +1938,12 @@ function openGlobalTransfer(){
       type.addEventListener("change",(e)=>{
         renderRecipient(e.target.value);
       });
+       /* 🔥 FORCE ACCOUNT NUMBER = NUMBERS ONLY */
+recBox.addEventListener("input", (e)=>{
+  if(e.target.id === "gtAcc"){
+    e.target.value = e.target.value.replace(/\D/g,"");
+  }
+});
 
       function convertForward(){
         if(!LEDGER) return;
