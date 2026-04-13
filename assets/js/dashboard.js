@@ -2321,7 +2321,6 @@ if(type === "tv"){
     <input class="p54-input" id="billAmount" placeholder="Custom amount">
   `;
 
-  // ✅ SAFE BINDING (IMPORTANT)
   const pkg = dynamic.querySelector("#tvPackage");
   const amountInput = dynamic.querySelector("#billAmount");
 
@@ -2331,7 +2330,10 @@ if(type === "tv"){
     });
   }
 }
-      render("airtime");
+
+} // 🔥🔥🔥 THIS IS THE MISSING LINE (CRITICAL)
+
+render("airtime");
 
       typeEl.addEventListener("change",(e)=>{
         render(e.target.value);
