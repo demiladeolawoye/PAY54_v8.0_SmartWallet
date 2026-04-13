@@ -2065,12 +2065,23 @@ function openBankTransfer(){
 
       /* MOCK NAME RESOLVE */
       accInput.addEventListener("input", () => {
-        if(accInput.value.length === 10){
-          nameInput.value = "John Doe"; // mock resolve
-        } else {
-          nameInput.value = "";
-        }
-      });
+
+  const val = accInput.value.replace(/\D/g, ""); // numbers only
+  accInput.value = val;
+
+  if(val.length === 10){
+
+    nameInput.value = "Resolving...";
+
+    setTimeout(() => {
+      nameInput.value = "John Doe"; // 🔁 replace with API later
+    }, 600);
+
+  } else {
+    nameInput.value = "";
+  }
+
+});
 
       modal.querySelector("#cancelBT").addEventListener("click", close);
 
