@@ -2830,17 +2830,20 @@ if(addBtn){
           const number = modal.querySelector("#cardNumber").value;
           const expiry = modal.querySelector("#cardExpiry").value;
 
-          cards.list.push({
-            id: "card_" + Date.now(),
-            type: "linked",
-            brand: detectCardBrand(number),
-            number: number.replace(/\s/g,""),
-            masked: "**** **** **** " + number.slice(-4),
-            expiry,
-            name,
-            status: "active",
-            isDefault: false
-          });
+         cards.list.push({
+  id: "card_" + Date.now(),
+  type: "linked",
+  brand: detectCardBrand(number),
+  number: number.replace(/\s/g,""),
+  masked: "**** **** **** " + number.slice(-4),
+  expiry,
+  name,
+  status: "active",
+  isDefault: false,
+
+  // 🔥 NEW (IMPORTANT)
+  balance: 0
+});
 
           save();
           close();
