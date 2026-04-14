@@ -2745,8 +2745,14 @@ function openCards(){
           bodyHTML:`
             <form id="addCardForm" class="p54-form">
 
-              <input class="p54-input" id="cardNumber" placeholder="Card Number" required>
-              <input class="p54-input" id="cardExpiry" placeholder="MM/YY" required>
+              <input class="p54-input" id="cardName" placeholder="Cardholder Name" required>
+
+<input class="p54-input" id="cardNumber" placeholder="Card Number" required>
+
+<div class="p54-row">
+  <input class="p54-input" id="cardExpiry" placeholder="MM/YY" required>
+  <input class="p54-input" id="cardCVV" placeholder="CVV" maxlength="3" required>
+</div>
 
               <div class="p54-actions">
                 <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
