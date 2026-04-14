@@ -2644,19 +2644,220 @@ goal.standing = {
 /* OTHER SERVICES (SAFE PLACEHOLDERS) */
 function openCards(){
 
-  let cardState = JSON.parse(localStorage.getItem("pay54_cards") || "null");
+  let cards = JSON.parse(localStorage.getItem("pay54_cards") || "null");
 
-  // 🔥 Create default virtual card if none exists
-  if(!cardState){
-    cardState = {
-      number: "**** **** **** 1234",
-      expiry: "12/28",
-      status: "active", // active | frozen
-      limit: 100000
+  // 🔥 INITIAL STRUCTURE (MULTI-CARD)
+  if(!cards){
+    cards = {
+      list: [
+        {
+          id: "card_1",
+          type: "virtual",
+          brand: "PAY54",
+          number: "**** **** **** 1234",
+          expiry: "12/28",
+          status: "active",
+          isDefault: true
+        }
+      ]
     };
-    localStorage.setItem("pay54_cards", JSON.stringify(cardState));
+    localStorage.setItem("pay54_cards", JSON.stringify(cards));
   }
 
+  function save(){
+    localStorage.setItem("pay54_cards", JSON.stringify(cards));
+  }
+
+  function render(){
+
+    return `
+      <div>
+
+        <div style="margin-bottom:12px;font-weight:900">Your Cards</div>
+
+        ${cards.list.map(c => `
+          <div style="
+            padding:12px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.1);
+            margin-bottom:8px;
+          ">
+
+            <div style="font-weight:900">${c.brand} ${c.number}</div>
+            <div style="font-size:12px">${c.expiry}</div>
+
+            <div style="margin-top:6px">
+              ${c.isDefault ? "✅ Default" : `<button class="p54-btn sm" data-set="${c.id}">Set Default</button>`}
+            </div>
+
+          </div>
+        `).join("")}
+
+        <div class="p54-actions">
+
+          <button class="p54-btn" id="addCardBtn">+ Add Card</button>
+          <button class="p54-btn" id="fundCardBtn">Fund Card</button>
+          <button class="p54-btn primary" id="closeCards">Close</button>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  openModal({
+    title:"Virtual & Linked Cards",
+    bodyHTML: render(),
+
+    onMount: ({modal, close}) => {
+
+      /* =========================
+         SET DEFAULT CARD
+      ========================= */
+      modal.querySelectorAll("[data-set]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+
+          const id = btn.dataset.set;
+
+          cards.list.forEach(c => c.isDefault = false);
+          const selected = cards.list.find(c => c.id === id);
+          if(selected) selected.isDefault = true;
+
+          save();
+          close();
+          setTimeout(openCards,100);
+
+        });
+      });
+
+      /* =========================
+         ADD NEW CARD
+      ========================= */
+      modal.querySelector("#addCardBtn").addEventListener("click", ()=>{
+
+        openModal({
+          title:"Add Card",
+
+          bodyHTML:`
+            <form id="addCardForm" class="p54-form">
+
+              <input class="p54-input" id="cardNumber" placeholder="Card Number" required>
+              <input class="p54-input" id="cardExpiry" placeholder="MM/YY" required>
+
+              <div class="p54-actions">
+                <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
+                <button class="p54-btn primary">Add Card</button>
+              </div>
+
+            </form>
+          `,
+
+          onMount:({modal, close})=>{
+
+            modal.querySelector("#cancelAdd").onclick = close;
+
+            modal.querySelector("#addCardForm").onsubmit = (e)=>{
+              e.preventDefault();
+
+              const number = modal.querySelector("#cardNumber").value;
+              const expiry = modal.querySelector("#cardExpiry").value;
+
+              cards.list.push({
+                id: "card_" + Date.now(),
+                type: "linked",
+                brand: "Visa",
+                number: "**** **** **** " + number.slice(-4),
+                expiry,
+                status:"active",
+                isDefault:false
+              });
+
+              save();
+              close();
+              setTimeout(()=>{
+                close();
+                openCards();
+              },100);
+            };
+
+          }
+        });
+
+      });
+
+      /* =========================
+         FUND CARD (PROPER FLOW)
+      ========================= */
+      modal.querySelector("#fundCardBtn").addEventListener("click", ()=>{
+
+        openModal({
+          title:"Fund Card",
+
+          bodyHTML:`
+            <form class="p54-form" id="fundForm">
+
+              <input class="p54-input" id="fundAmount" placeholder="Amount" required>
+
+              <select class="p54-select" id="fundSource">
+                <option value="wallet">Wallet Balance</option>
+                <option value="card">Linked Card</option>
+              </select>
+
+              <div class="p54-actions">
+                <button class="p54-btn" type="button" id="cancelFund">Cancel</button>
+                <button class="p54-btn primary">Fund</button>
+              </div>
+
+            </form>
+          `,
+
+          onMount:({modal, close})=>{
+
+            modal.querySelector("#cancelFund").onclick = close;
+
+            modal.querySelector("#fundForm").onsubmit = (e)=>{
+
+              e.preventDefault();
+
+              const amount = Number(modal.querySelector("#fundAmount").value);
+              const currency = getSelectedCurrency();
+
+              if(!amount || amount <= 0){
+                alert("Enter valid amount");
+                return;
+              }
+
+              requestPinVerification(()=>{
+
+                const entry = LEDGER.createEntry({
+                  type:"card_funding",
+                  title:"Card Funding",
+                  currency,
+                  amount:-amount,
+                  icon:"💳"
+                });
+
+                processTransaction(entry,{
+                  showReceipt:true,
+                  title:"Card Funding"
+                });
+
+                close();
+              });
+
+            };
+
+          }
+        });
+
+      });
+
+      modal.querySelector("#closeCards").onclick = close;
+
+    }
+  });
+
+}
   function renderUI(){
 
     const statusColor = cardState.status === "active" ? "#22c55e" : "#ef4444";
