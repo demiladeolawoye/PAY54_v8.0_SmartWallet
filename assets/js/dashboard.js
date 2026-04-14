@@ -2640,6 +2640,11 @@ goal.standing = {
     }
   });
 }
+   function detectCardBrand(number){
+  if(number.startsWith("4")) return "Visa";
+  if(number.startsWith("5")) return "Mastercard";
+  return "Card";
+}
 /* OTHER SERVICES (SAFE PLACEHOLDERS) */
 function openCards(){
 
