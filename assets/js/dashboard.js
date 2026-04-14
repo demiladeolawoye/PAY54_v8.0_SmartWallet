@@ -2675,56 +2675,60 @@ function openCards(){
 function render(){
 
   return `
-    <div>
+  <div>
 
-      <div style="margin-bottom:12px;font-weight:900">Your Cards</div>
+    <div style="margin-bottom:12px;font-weight:900">Your Cards</div>
 
-      ${cards.list.map(c => `
-        <div style="
-          padding:16px;
-          border-radius:16px;
-          background: linear-gradient(135deg, #1e3a8a, #2563eb);
-          color:#fff;
-          margin-bottom:12px;
-          position:relative;
-        ">
+    ${cards.list.map(c => `
+      <div style="
+        padding:16px;
+        border-radius:16px;
+        background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        color:#fff;
+        margin-bottom:12px;
+      ">
 
-          <div style="font-size:12px;opacity:.8">${c.brand}</div>
+        <div style="font-size:12px;opacity:.8">${c.brand}</div>
 
-          <div style="font-size:18px;font-weight:900;letter-spacing:2px;margin:10px 0">
-            ${c.masked || c.number || "**** **** **** 0000"}
-          </div>
-
-          <div style="display:flex;justify-content:space-between;font-size:12px">
-            <div>${c.name || "PAY54 USER"}</div>
-            <div>${c.expiry}</div>
-          </div>
-
-          <div style="margin-top:10px">
-            ${
-              c.status === "frozen"
-                ? `<span style="color:#facc15">❄ Frozen</span>`
-                : `<span style="color:#22c55e">● Active</span>`
-            }
-          </div>
-
-          <div style="margin-top:8px">
-            ${
-              c.isDefault
-                ? "✅ Default"
-                : `<button class="p54-btn sm" data-set="${c.id}">Set Default</button>`
-            }
-
-            <button class="p54-btn sm" data-freeze="${c.id}">
-              ${c.status === "frozen" ? "Unfreeze" : "Freeze"}
-            </button>
-          </div>
-
+        <div style="font-size:18px;font-weight:900;letter-spacing:2px;margin:10px 0">
+          ${c.masked || c.number || "**** **** **** 0000"}
         </div>
-      `).join("")}
 
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <div>${c.name || "PAY54 USER"}</div>
+          <div>${c.expiry}</div>
+        </div>
+
+        <div style="margin-top:10px">
+          ${c.status === "frozen"
+            ? `<span style="color:#facc15">❄ Frozen</span>`
+            : `<span style="color:#22c55e">● Active</span>`}
+        </div>
+
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          ${
+            c.isDefault
+              ? "✅ Default"
+              : `<button class="p54-btn sm" data-set="${c.id}">Set Default</button>`
+          }
+
+          <button class="p54-btn sm" data-freeze="${c.id}">
+            ${c.status === "frozen" ? "Unfreeze" : "Freeze"}
+          </button>
+        </div>
+
+      </div>
+    `).join("")}
+
+    <!-- 🔥 ACTION BUTTONS (CRITICAL FIX) -->
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="p54-btn" id="addCardBtn">Add Card</button>
+      <button class="p54-btn" id="fundCardBtn">Fund Card</button>
+      <button class="p54-btn primary" id="closeCards">Close</button>
     </div>
-  `;
+
+  </div>
+`;
 }
 
   openModal({
