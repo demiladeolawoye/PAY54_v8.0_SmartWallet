@@ -2730,24 +2730,44 @@ function openCards(){
 
     onMount: ({modal, close}) => {
 
-      /* =========================
-         SET DEFAULT CARD
-      ========================= */
-      modal.querySelectorAll("[data-set]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
+  /* =========================
+     SET DEFAULT CARD
+  ========================= */
+  modal.querySelectorAll("[data-set]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
 
-          const id = btn.dataset.set;
+      const id = btn.dataset.set;
 
-          cards.list.forEach(c => c.isDefault = false);
-          const selected = cards.list.find(c => c.id === id);
-          if(selected) selected.isDefault = true;
+      cards.list.forEach(c => c.isDefault = false);
+      const selected = cards.list.find(c => c.id === id);
+      if(selected) selected.isDefault = true;
 
-          save();
-          close();
-          setTimeout(openCards,100);
+      save();
+      close();
+      setTimeout(openCards,100);
 
-        });
-      });
+    });
+  });
+
+  /* =========================
+     FREEZE / UNFREEZE CARD 🔥
+  ========================= */
+  modal.querySelectorAll("[data-freeze]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+
+      const id = btn.dataset.freeze;
+
+      const card = cards.list.find(c => c.id === id);
+      if(!card) return;
+
+      card.status = card.status === "frozen" ? "active" : "frozen";
+
+      save();
+      close();
+      setTimeout(openCards,100);
+
+    });
+  });
 
       /* =========================
          ADD NEW CARD
