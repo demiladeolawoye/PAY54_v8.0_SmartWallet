@@ -2962,31 +2962,79 @@ modal.querySelectorAll("[data-pay]").forEach(btn=>{
             return;
           }
 
-          if((card.balance || 0) < amount){
-            alert("Insufficient card balance");
-            return;
-          }
+         const funding = resolveSmartPayment(amount, currency);
+
+if(!funding){
+  alert("Insufficient funds");
+  return;
+}
 
           requestPinVerification(()=>{
 
-            card.balance -= amount;
-            save();
+  if(funding.source === "wallet"){
 
-            const entry = LEDGER.createEntry({
-              type:"card_payment",
-              title:`Paid ${merchant} (Tap)`,
-              currency,
-              amount:-amount,
-              icon:"📶"
-            });
+    const entry = LEDGER.createEntry({
+      type:"tap_pay",
+      title:`Paid ${merchant} (Wallet)`,
+      currency,
+      amount:-amount,
+      icon:"📶"
+    });
 
-            processTransaction(entry,{
-              showReceipt:true,
-              title:"Contactless Payment"
-            });
+    processTransaction(entry,{showReceipt:true});
 
-            close();
-          });
+  }
+
+  else if(funding.source === "wallet_fx"){
+
+    LEDGER.applyEntry(
+      LEDGER.createEntry({
+        type:"fx_debit",
+        currency: funding.from,
+        amount:-funding.amount,
+        icon:"💱"
+      })
+    );
+
+    LEDGER.applyEntry(
+      LEDGER.createEntry({
+        type:"fx_credit",
+        currency: funding.to,
+        amount: funding.amount,
+        icon:"💱"
+      })
+    );
+
+    const entry = LEDGER.createEntry({
+      type:"tap_pay",
+      title:`Paid ${merchant} (FX Wallet)`,
+      currency,
+      amount:-amount,
+      icon:"📶"
+    });
+
+    processTransaction(entry,{showReceipt:true});
+
+  }
+
+  else if(funding.source === "card"){
+
+    funding.card.balance -= amount;
+
+    const entry = LEDGER.createEntry({
+      type:"card_payment",
+      title:`Paid ${merchant} (Card)`,
+      currency,
+      amount:-amount,
+      icon:"💳"
+    });
+
+    processTransaction(entry,{showReceipt:true});
+
+  }
+
+  close();
+});
 
         };
 
