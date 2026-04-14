@@ -2706,6 +2706,9 @@ function render(){
           <div>${c.name || "PAY54 USER"}</div>
           <div>${c.expiry}</div>
         </div>
+        <div style="margin-top:6px;font-size:13px;opacity:.9">
+  Balance: ${LEDGER.moneyFmt(getSelectedCurrency(), c.balance || 0)}
+</div>
 
         <div style="margin-top:10px">
           ${c.status === "frozen"
