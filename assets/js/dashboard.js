@@ -2789,7 +2789,100 @@ function render(){
 
     });
   });
+/* =========================
+   TAP TO PAY (CONTACTLESS)
+========================= */
+modal.querySelectorAll("[data-pay]").forEach(btn=>{
 
+  btn.addEventListener("click", ()=>{
+
+    const id = btn.dataset.pay;
+    const card = cards.list.find(c => c.id === id);
+
+    if(!card) return;
+
+    if(card.status === "frozen"){
+      alert("Card is frozen ❄");
+      return;
+    }
+
+    openModal({
+      title:"Tap to Pay",
+
+      bodyHTML:`
+        <form class="p54-form" id="tapForm">
+
+          <div class="p54-note">📶 Hold near terminal</div>
+
+          <div>
+            <div class="p54-label">Merchant</div>
+            <input class="p54-input" id="tapMerchant" placeholder="Store name" required>
+          </div>
+
+          <div>
+            <div class="p54-label">Amount</div>
+            <input class="p54-input" id="tapAmount" placeholder="0.00" required>
+          </div>
+
+          <div class="p54-actions">
+            <button class="p54-btn" type="button" id="cancelTap">Cancel</button>
+            <button class="p54-btn primary">Pay</button>
+          </div>
+
+        </form>
+      `,
+
+      onMount:({modal, close})=>{
+
+        modal.querySelector("#cancelTap").onclick = close;
+
+        modal.querySelector("#tapForm").onsubmit = (e)=>{
+
+          e.preventDefault();
+
+          const merchant = modal.querySelector("#tapMerchant").value;
+          const amount = Number(modal.querySelector("#tapAmount").value);
+          const currency = getSelectedCurrency();
+
+          if(!amount || amount <= 0){
+            alert("Enter valid amount");
+            return;
+          }
+
+          if((card.balance || 0) < amount){
+            alert("Insufficient card balance");
+            return;
+          }
+
+          requestPinVerification(()=>{
+
+            card.balance -= amount;
+            save();
+
+            const entry = LEDGER.createEntry({
+              type:"card_payment",
+              title:`Paid ${merchant} (Tap)`,
+              currency,
+              amount:-amount,
+              icon:"📶"
+            });
+
+            processTransaction(entry,{
+              showReceipt:true,
+              title:"Contactless Payment"
+            });
+
+            close();
+          });
+
+        };
+
+      }
+    });
+
+  });
+
+});
    
 
       /* =========================
