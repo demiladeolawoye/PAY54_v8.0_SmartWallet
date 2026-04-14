@@ -1513,6 +1513,67 @@ const balances = ledger.getBalances() || {};
 
   return null; // insufficient funds
 }
+  /* =========================
+   SMART PAYMENT ROUTER (CORE ENGINE)
+========================= */
+
+function resolveSmartPayment(amount, currency){
+
+  const ledger = safeLedger();
+  if(!ledger) return null;
+
+  const balances = ledger.getBalances() || {};
+  const cards = JSON.parse(localStorage.getItem("pay54_cards") || "{}");
+
+  /* ---------------------------
+     1. WALLET DIRECT
+  --------------------------- */
+  if((balances[currency] || 0) >= amount){
+    return {
+      source: "wallet",
+      currency,
+      amount
+    };
+  }
+
+  /* ---------------------------
+     2. WALLET FX FALLBACK
+  --------------------------- */
+  for(const cur in balances){
+
+    const bal = balances[cur] || 0;
+    if(!bal || cur === currency) continue;
+
+    const converted = ledger.convert(cur, currency, bal);
+
+    if(converted >= amount){
+      return {
+        source: "wallet_fx",
+        from: cur,
+        to: currency,
+        amount
+      };
+    }
+  }
+
+  /* ---------------------------
+     3. CARD FALLBACK
+  --------------------------- */
+  if(cards?.list){
+
+    const defaultCard = cards.list.find(c => c.isDefault && c.status === "active");
+
+    if(defaultCard && (defaultCard.balance || 0) >= amount){
+      return {
+        source: "card",
+        card: defaultCard,
+        amount
+      };
+    }
+  }
+
+  return null; // ❌ insufficient
+} 
  function openSendUnified(){
 
   openModal({
