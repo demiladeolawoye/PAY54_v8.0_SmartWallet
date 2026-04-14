@@ -2672,57 +2672,60 @@ function openCards(){
     localStorage.setItem("pay54_cards", JSON.stringify(cards));
   }
 
-  function render(){
+function render(){
 
-    return `
-      <div>
+  return `
+    <div>
 
-        <div style="margin-bottom:12px;font-weight:900">Your Cards</div>
+      <div style="margin-bottom:12px;font-weight:900">Your Cards</div>
 
-        ${cards.list.map(c => `
-          <div style="
-  padding:16px;
-  border-radius:16px;
-  background: linear-gradient(135deg, #1e3a8a, #2563eb);
-  color:#fff;
-  margin-bottom:12px;
-  position:relative;
-">
+      ${cards.list.map(c => `
+        <div style="
+          padding:16px;
+          border-radius:16px;
+          background: linear-gradient(135deg, #1e3a8a, #2563eb);
+          color:#fff;
+          margin-bottom:12px;
+          position:relative;
+        ">
 
-  <div style="font-size:12px;opacity:.8">${c.brand}</div>
+          <div style="font-size:12px;opacity:.8">${c.brand}</div>
 
-  <div style="font-size:18px;font-weight:900;letter-spacing:2px;margin:10px 0">
-    ${c.masked}
-  </div>
+          <div style="font-size:18px;font-weight:900;letter-spacing:2px;margin:10px 0">
+            ${c.masked || c.number || "**** **** **** 0000"}
+          </div>
 
-  <div style="display:flex;justify-content:space-between;font-size:12px">
-    <div>${c.name || "PAY54 USER"}</div>
-    <div>${c.expiry}</div>
-  </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px">
+            <div>${c.name || "PAY54 USER"}</div>
+            <div>${c.expiry}</div>
+          </div>
 
-  <div style="margin-top:10px">
-    ${
-      c.status === "frozen"
-        ? `<span style="color:#facc15">❄ Frozen</span>`
-        : `<span style="color:#22c55e">● Active</span>`
-    }
-  </div>
+          <div style="margin-top:10px">
+            ${
+              c.status === "frozen"
+                ? `<span style="color:#facc15">❄ Frozen</span>`
+                : `<span style="color:#22c55e">● Active</span>`
+            }
+          </div>
 
-  <div style="margin-top:8px">
-    ${
-      c.isDefault
-        ? "✅ Default"
-        : `<button class="p54-btn sm" data-set="${c.id}">Set Default</button>`
-    }
+          <div style="margin-top:8px">
+            ${
+              c.isDefault
+                ? "✅ Default"
+                : `<button class="p54-btn sm" data-set="${c.id}">Set Default</button>`
+            }
 
-    <button class="p54-btn sm" data-freeze="${c.id}">
-      ${c.status === "frozen" ? "Unfreeze" : "Freeze"}
-    </button>
-  </div>
+            <button class="p54-btn sm" data-freeze="${c.id}">
+              ${c.status === "frozen" ? "Unfreeze" : "Freeze"}
+            </button>
+          </div>
 
-</div>
-    `;
-  }
+        </div>
+      `).join("")}
+
+    </div>
+  `;
+}
 
   openModal({
     title:"Virtual & Linked Cards",
