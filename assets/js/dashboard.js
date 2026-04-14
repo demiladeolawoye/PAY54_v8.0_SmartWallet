@@ -1200,10 +1200,60 @@ if(!ledger){
   return;
 }
 
-processTransaction(entry, {
-  showReceipt: true,
-  title: "Scan Payment"
-});
+if(funding.source === "wallet"){
+
+  processTransaction(entry, {
+    showReceipt: true,
+    title: "Scan Payment"
+  });
+
+}
+
+else if(funding.source === "wallet_fx"){
+
+  LEDGER.applyEntry(
+    LEDGER.createEntry({
+      type:"fx_debit",
+      currency: funding.from,
+      amount:-funding.amount,
+      icon:"💱"
+    })
+  );
+
+  LEDGER.applyEntry(
+    LEDGER.createEntry({
+      type:"fx_credit",
+      currency: funding.to,
+      amount: funding.amount,
+      icon:"💱"
+    })
+  );
+
+  processTransaction(entry, {
+    showReceipt: true,
+    title: "Scan Payment (FX)"
+  });
+
+}
+
+else if(funding.source === "card"){
+
+  funding.card.balance -= amount;
+
+  const entry = LEDGER.createEntry({
+    type:"card_payment",
+    title:`Paid ${merchant} (Card)`,
+    currency,
+    amount:-amount,
+    icon:"💳"
+  });
+
+  processTransaction(entry, {
+    showReceipt: true,
+    title: "Card Payment"
+  });
+
+}
 
             /* Stop camera AFTER success */
             stopCamera();
