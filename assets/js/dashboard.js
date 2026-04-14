@@ -2714,16 +2714,22 @@ function render(){
         </div>
 
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-          ${
-            c.isDefault
-              ? "✅ Default"
-              : `<button class="p54-btn sm" data-set="${c.id}">Set Default</button>`
-          }
 
-          <button class="p54-btn sm" data-freeze="${c.id}">
-            ${c.status === "frozen" ? "Unfreeze" : "Freeze"}
-          </button>
-        </div>
+  <button class="p54-btn primary" data-pay="${c.id}">
+    Tap & Pay
+  </button>
+
+  ${
+    c.isDefault
+      ? "✅ Default"
+      : `<button class="p54-btn sm" data-set="${c.id}">Set Default</button>`
+  }
+
+  <button class="p54-btn sm" data-freeze="${c.id}">
+    ${c.status === "frozen" ? "Unfreeze" : "Freeze"}
+  </button>
+
+</div>
 
       </div>
     `).join("")}
