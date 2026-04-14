@@ -1173,13 +1173,12 @@ const balances = ledger.getBalances() || {};
             return;
           }
 
-          if(amount > currentBalance){
-            const ledger = safeLedger();
-if(!ledger) return;
+         const funding = resolveSmartPayment(amount, currency);
 
-alert(`Insufficient ${currency} balance.\nAvailable: ${ledger.moneyFmt(currency, currentBalance)}`);
-            return;
-          }
+if(!funding){
+  alert("Insufficient funds across wallet and cards");
+  return;
+}
 
           /* Create ledger entry */
           const entry = LEDGER.createEntry({
