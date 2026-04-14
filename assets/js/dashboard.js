@@ -2688,7 +2688,15 @@ function render(){
         margin-bottom:12px;
       ">
 
-        <div style="font-size:12px;opacity:.8">${c.brand}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+
+  <div style="font-size:12px;opacity:.8">${c.brand}</div>
+
+  <div style="font-size:18px;opacity:.9">
+    📶
+  </div>
+
+</div>
 
         <div style="font-size:18px;font-weight:900;letter-spacing:2px;margin:10px 0">
           ${c.masked || c.number || "**** **** **** 0000"}
