@@ -681,8 +681,7 @@ if(availableEl){
     return visible || feeds[0] || null;
   }
 
-
-  function renderRecentTransactions() {
+function renderRecentTransactions() {
 
   const txFeed = recentTxFeedEl();
   if (!txFeed) return;
@@ -691,9 +690,9 @@ if(availableEl){
   if (!ledger) return;
 
   const txs = (ledger.getTx() || [])
-  .slice()
-  .reverse()
-  .slice(0, 5);
+    .slice()
+    .reverse()
+    .slice(0, 5);
 
   if (!txs.length) {
     txFeed.innerHTML = `
@@ -710,15 +709,15 @@ if(availableEl){
 
   txFeed.innerHTML = "";
 
-/* 🔥 ADD SUMMARY HERE */
-const summary = document.createElement("div");
-summary.className = "p54-small";
-summary.innerHTML = `Total Contributions: ${txs.length}`;
-txFeed.appendChild(summary);
+  const summary = document.createElement("div");
+  summary.className = "p54-small";
+  summary.innerHTML = `Total Contributions: ${txs.length}`;
+  txFeed.appendChild(summary);
 
-/* existing loop */
-txs.forEach(tx => prependTxToDOM(tx));   
-}
+  txs.forEach(tx => prependTxToDOM(tx));
+
+} // ✅ THIS LINE IS CRITICAL
+ 
 
    /* =========================
    FX MARKET TICKER
