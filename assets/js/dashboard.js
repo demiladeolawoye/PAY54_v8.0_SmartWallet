@@ -2929,23 +2929,29 @@ if(fundBtn){
               return;
             }
 
-            requestPinVerification(()=>{
+       requestPinVerification(()=>{
 
-              const entry = LEDGER.createEntry({
-                type:"card_funding",
-                title:`Funded ${selectedCard.brand} •••• ${selectedCard.masked?.slice(-4)}`,
-                currency,
-                amount:-amount,
-                icon:"💳"
-              });
+  // 🔥 ADD MONEY TO CARD
+  selectedCard.balance = (selectedCard.balance || 0) + amount;
 
-              processTransaction(entry,{
-                showReceipt:true,
-                title:"Card Funding"
-              });
+  save(); // persist cards
 
-              close();
-            });
+  const entry = LEDGER.createEntry({
+    type:"card_funding",
+    title:`Funded ${selectedCard.brand} •••• ${selectedCard.masked?.slice(-4)}`,
+    currency,
+    amount:-amount,
+    icon:"💳"
+  });
+
+  processTransaction(entry,{
+    showReceipt:true,
+    title:"Card Funding"
+  });
+
+  close();
+
+});
 
           };
         }
