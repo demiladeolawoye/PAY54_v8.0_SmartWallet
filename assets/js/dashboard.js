@@ -2844,70 +2844,69 @@ const cvv = modal.querySelector("#cardCVV").value;
       /* =========================
          FUND CARD (PROPER FLOW)
       ========================= */
-      modal.querySelector("#fundCardBtn").addEventListener("click", ()=>{
+      /* =========================
+   SAFE ADD CARD BUTTON
+========================= */
+const addBtn = modal.querySelector("#addCardBtn");
 
-        openModal({
-          title:"Fund Card",
+if(addBtn){
+  addBtn.addEventListener("click", ()=>{
 
-          bodyHTML:`
-            <form class="p54-form" id="fundForm">
+    openModal({
+      title:"Add Card",
 
-              <input class="p54-input" id="fundAmount" placeholder="Amount" required>
+      bodyHTML:`
+        <form id="addCardForm" class="p54-form">
 
-              <select class="p54-select" id="fundSource">
-                <option value="wallet">Wallet Balance</option>
-                <option value="card">Linked Card</option>
-              </select>
+          <input class="p54-input" id="cardName" placeholder="Cardholder Name" required>
+          <input class="p54-input" id="cardNumber" placeholder="Card Number" required>
 
-              <div class="p54-actions">
-                <button class="p54-btn" type="button" id="cancelFund">Cancel</button>
-                <button class="p54-btn primary">Fund</button>
-              </div>
+          <div class="p54-row">
+            <input class="p54-input" id="cardExpiry" placeholder="MM/YY" required>
+            <input class="p54-input" id="cardCVV" placeholder="CVV" maxlength="3" required>
+          </div>
 
-            </form>
-          `,
+          <div class="p54-actions">
+            <button class="p54-btn" type="button" id="cancelAdd">Cancel</button>
+            <button class="p54-btn primary">Add Card</button>
+          </div>
 
-          onMount:({modal, close})=>{
+        </form>
+      `,
 
-            modal.querySelector("#cancelFund").onclick = close;
+      onMount:({modal, close})=>{
 
-            modal.querySelector("#fundForm").onsubmit = (e)=>{
+        modal.querySelector("#cancelAdd").onclick = close;
 
-              e.preventDefault();
+        modal.querySelector("#addCardForm").onsubmit = (e)=>{
+          e.preventDefault();
 
-              const amount = Number(modal.querySelector("#fundAmount").value);
-              const currency = getSelectedCurrency();
+          const name = modal.querySelector("#cardName").value;
+          const number = modal.querySelector("#cardNumber").value;
+          const expiry = modal.querySelector("#cardExpiry").value;
 
-              if(!amount || amount <= 0){
-                alert("Enter valid amount");
-                return;
-              }
+          cards.list.push({
+            id: "card_" + Date.now(),
+            type: "linked",
+            brand: detectCardBrand(number),
+            number: number.replace(/\s/g,""),
+            masked: "**** **** **** " + number.slice(-4),
+            expiry,
+            name,
+            status: "active",
+            isDefault: false
+          });
 
-              requestPinVerification(()=>{
+          save();
+          close();
+          setTimeout(openCards,100);
+        };
 
-                const entry = LEDGER.createEntry({
-                  type:"card_funding",
-                  title:"Card Funding",
-                  currency,
-                  amount:-amount,
-                  icon:"💳"
-                });
+      }
+    });
 
-                processTransaction(entry,{
-                  showReceipt:true,
-                  title:"Card Funding"
-                });
-
-                close();
-              });
-
-            };
-
-          }
-        });
-
-      });
-
+  });
+}
       modal.querySelector("#closeCards").onclick = close;
 
     }
