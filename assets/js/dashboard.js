@@ -2907,7 +2907,10 @@ if(addBtn){
 
   });
 }
-      modal.querySelector("#closeCards").onclick = close;
+      const closeBtn = modal.querySelector("#closeCards");
+if(closeBtn){
+  closeBtn.onclick = close;
+}
 
     }
   });
