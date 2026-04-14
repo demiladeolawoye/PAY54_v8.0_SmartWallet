@@ -2768,9 +2768,10 @@ function openCards(){
 
             modal.querySelector("#addCardForm").onsubmit = (e)=>{
               e.preventDefault();
-
-              const number = modal.querySelector("#cardNumber").value;
-              const expiry = modal.querySelector("#cardExpiry").value;
+const name = modal.querySelector("#cardName").value;
+const number = modal.querySelector("#cardNumber").value;
+const expiry = modal.querySelector("#cardExpiry").value;
+const cvv = modal.querySelector("#cardCVV").value;
 
            cards.list.push({
   id: "card_" + Date.now(),
