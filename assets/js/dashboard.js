@@ -816,7 +816,16 @@ function processTransaction(entry, meta = {}){
 
   try{
 
-    const tx = ledger.applyEntry(entry);
+   // 🔥 ENHANCED TRANSACTION TAGGING
+entry.meta = {
+  ...(entry.meta || {}),
+  source: meta.source || "wallet",
+  route: "smart_engine",
+  fx_used: meta.fx || false,
+  fees: meta.fees || 0
+};
+
+const tx = ledger.applyEntry(entry);
 
     prependTxToDOM(tx);
     refreshUI();
