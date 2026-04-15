@@ -2974,8 +2974,62 @@ modal.querySelectorAll("[data-pay]").forEach(btn=>{
          const funding = resolveSmartPayment(amount, currency);
 
 if(!funding){
-  alert("Insufficient funds");
+  alert("Insufficient funds across all sources");
   return;
+}
+
+/* =========================
+   🧠 SINGLE ROUTE
+========================= */
+if(funding.type === "single"){
+
+  const r = funding.route;
+
+  if(r.source === "wallet"){
+    // normal flow
+  }
+
+  else if(r.source === "fx"){
+    LEDGER.applyEntry(LEDGER.createEntry({
+      type:"fx_debit",
+      currency:r.from,
+      amount:-amount,
+      icon:"💱"
+    }));
+  }
+
+  else if(r.source === "card"){
+    r.card.balance -= amount;
+  }
+
+}
+
+/* =========================
+   🔥 SPLIT ROUTE
+========================= */
+if(funding.type === "split"){
+
+  funding.splits.forEach(part=>{
+
+    if(part.source === "wallet"){
+      // deduct wallet
+    }
+
+    if(part.source === "fx"){
+      LEDGER.applyEntry(LEDGER.createEntry({
+        type:"fx_debit",
+        currency:part.meta.from,
+        amount:-part.amount,
+        icon:"💱"
+      }));
+    }
+
+    if(part.source === "card"){
+      part.meta.card.balance -= part.amount;
+    }
+
+  });
+
 }
 
           requestPinVerification(()=>{
