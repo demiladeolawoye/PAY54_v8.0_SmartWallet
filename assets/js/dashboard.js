@@ -1182,7 +1182,7 @@ const balances = ledger.getBalances() || {};
             return;
           }
 
-         const funding = resolveSmartPayment(amount, currency);
+         =const funding = intelligentRouting(amount, currency);
 
 if(!funding){
   alert("Insufficient funds across wallet and cards");
