@@ -1729,7 +1729,7 @@ function resolveSmartPayment(amount, currency){
 
             const rate = LEDGER.getRate(funding.from, funding.to);
 
-            const converted = LEDGER.convert(funding.from, funding.to, amount);
+            const converted = LEDGER.convert(funding.from, funding.to, funding.amount);
 
             LEDGER.applyEntry(
               LEDGER.createEntry({
