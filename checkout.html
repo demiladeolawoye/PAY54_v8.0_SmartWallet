@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PAY54 Checkout</title>
+
+<link rel="stylesheet" href="assets/css/dashboard.css">
+
+<style>
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background:#0a0f1c;
+  color:#fff;
+  font-family:sans-serif;
+}
+
+.checkout-box{
+  width:100%;
+  max-width:420px;
+  background:#111827;
+  border-radius:16px;
+  padding:20px;
+}
+
+.checkout-title{
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+
+.checkout-item{
+  margin:10px 0;
+}
+
+.checkout-btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#2563eb;
+  color:white;
+  font-weight:900;
+  cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="checkout-box">
+
+  <div class="checkout-title">PAY54 Checkout</div>
+
+  <div class="checkout-item">
+    <b>Merchant:</b> <span id="coMerchant"></span>
+  </div>
+
+  <div class="checkout-item">
+    <b>Amount:</b> <span id="coAmount"></span>
+  </div>
+
+  <div class="checkout-item">
+    <b>Reference:</b> <span id="coRef"></span>
+  </div>
+
+  <button class="checkout-btn" id="payNow">Pay Now</button>
+
+</div>
+
+<script src="assets/js/ledger.js"></script>
+<script src="assets/js/receipts.js"></script>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const merchant = params.get("merchant") || "Unknown Store";
+const amount = Number(params.get("amount") || 0);
+const currency = params.get("currency") || "NGN";
+const ref = params.get("ref") || "N/A";
+const returnUrl = params.get("return") || "";
+
+document.getElementById("coMerchant").textContent = merchant;
+document.getElementById("coAmount").textContent = currency + " " + amount;
+document.getElementById("coRef").textContent = ref;
+
+document.getElementById("payNow").addEventListener("click", () => {
+
+  const ledger = window.PAY54_LEDGER;
+
+  if(!ledger){
+    alert("System not ready");
+    return;
+  }
+
+  const entry = ledger.createEntry({
+    type:"checkout",
+    title:`Paid ${merchant}`,
+    currency,
+    amount:-amount,
+    icon:"🛍"
+  });
+
+  ledger.applyEntry(entry);
+
+  alert("Payment Successful");
+
+  if(returnUrl){
+    window.location.href = returnUrl + "?status=success";
+  }
+
+});
+
+</script>
+
+</body>
+</html>
