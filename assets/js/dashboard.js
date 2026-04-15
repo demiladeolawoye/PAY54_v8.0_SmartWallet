@@ -1538,7 +1538,7 @@ function openWithdraw(){
   });
 
 }
-   function resolveFundingCurrency(targetCurrency, amount){
+   function resolveSmartPayment(targetCurrency, amount){
 
   const ledger = safeLedger();
 if(!ledger) return;
@@ -1701,7 +1701,7 @@ function resolveSmartPayment(amount, currency){
           return;
         }
 
-        const funding = resolveFundingCurrency(currency, amount);
+        const funding = resolveSmartPayment(currency, amount);
 
         if(!funding){
           alert(`Insufficient funds across all wallets`);
