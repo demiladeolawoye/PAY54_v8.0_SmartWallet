@@ -808,7 +808,12 @@ function processTransaction(entry, meta = {}){
     return null;
   }
 
-  // 🔒 BONUS PROTECTION (ADD THIS HERE)
+  // 🔒 GLOBAL VALIDATION
+  if(!entry.amount || isNaN(entry.amount)){
+    alert("Invalid transaction");
+    return null;
+  }
+
   if(Math.abs(entry.amount) > 100000000){
     alert("Amount exceeds limit");
     return null;
@@ -816,27 +821,27 @@ function processTransaction(entry, meta = {}){
 
   try{
 
-   // 🔥 ENHANCED TRANSACTION TAGGING
-entry.meta = {
-  ...(entry.meta || {}),
-  source: meta.source || "wallet",
-  route: "smart_engine",
-  fx_used: meta.fx || false,
-  fees: meta.fees || 0
-};
+    // 🔥 TRANSACTION META
+    entry.meta = {
+      ...(entry.meta || {}),
+      source: meta.source || "wallet",
+      route: "smart_engine",
+      fx_used: meta.fx || false,
+      fees: meta.fees || 0
+    };
 
-const tx = ledger.applyEntry(entry);
+    const tx = ledger.applyEntry(entry);
 
     prependTxToDOM(tx);
     refreshUI();
 
-    // 🔥 Always show receipt if needed
+    // ✅ ALWAYS USE tx (NOT entry)
     if(meta.showReceipt){
       showPaymentReceipt(
         tx,
         meta.title || "Transaction",
-        Math.abs(entry.amount),
-        entry.currency
+        Math.abs(tx.amount),
+        tx.currency
       );
     }
 
