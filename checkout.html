@@ -89,32 +89,48 @@ document.getElementById("coMerchant").textContent = merchant;
 document.getElementById("coAmount").textContent = currency + " " + amount;
 document.getElementById("coRef").textContent = ref;
 
-document.getElementById("payNow").addEventListener("click", () => {
+<script>
 
-  const ledger = window.PAY54_LEDGER;
+const params = new URLSearchParams(window.location.search);
 
-  if(!ledger){
-    alert("System not ready");
+const merchant = params.get("merchant") || "Unknown Store";
+const amount = Number(params.get("amount") || 0);
+const currency = params.get("currency") || "NGN";
+const ref = params.get("ref") || ("ORDER_" + Date.now());
+
+document.getElementById("coMerchant").textContent = merchant;
+document.getElementById("coAmount").textContent = currency + " " + amount;
+document.getElementById("coRef").textContent = ref;
+
+/* =========================
+   🔥 CREATE REQUEST ONLY
+========================= */
+
+(function(){
+
+  if(!window.PAY54_REQUESTS){
+    console.warn("Request system not ready");
     return;
   }
 
-  const entry = ledger.createEntry({
-    type:"checkout",
-    title:`Paid ${merchant}`,
+  PAY54_REQUESTS.create({
+    merchant,
+    amount,
     currency,
-    amount:-amount,
-    icon:"🛍"
+    ref
   });
 
-  ledger.applyEntry(entry);
+})();
 
-  alert("Payment Successful");
+/* =========================
+   🔁 AUTO REDIRECT TO DASHBOARD
+========================= */
 
-  if(returnUrl){
-    window.location.href = returnUrl + "?status=success";
-  }
+setTimeout(()=>{
+  window.location.href = "dashboard.html";
+}, 800);
 
-});
+</script>
 
 </script>
 
