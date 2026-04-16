@@ -3638,3 +3638,54 @@ waitForModules(() => {
 
 /* 🔥 CRITICAL: CLOSE THE FILE PROPERLY */
 })();
+/* =========================
+   PAY54 REQUEST ENGINE
+========================= */
+
+window.PAY54_REQUESTS = {
+
+  getAll(){
+    return JSON.parse(localStorage.getItem("pay54_requests") || "[]");
+  },
+
+  save(list){
+    localStorage.setItem("pay54_requests", JSON.stringify(list));
+  },
+
+  create(data){
+
+    const list = this.getAll();
+
+    // 🚫 Prevent duplicate requests
+    const exists = list.find(r => r.ref === data.ref);
+    if(exists) return exists;
+
+    const request = {
+      id: "req_" + Date.now(),
+      merchant: data.merchant,
+      amount: Number(data.amount),
+      currency: data.currency,
+      ref: data.ref,
+      status: "pending",
+      createdAt: Date.now()
+    };
+
+    list.unshift(request);
+    this.save(list);
+
+    return request;
+  },
+
+  markPaid(id){
+
+    const list = this.getAll();
+
+    const req = list.find(r => r.id === id);
+    if(req){
+      req.status = "paid";
+    }
+
+    this.save(list);
+  }
+
+};
