@@ -593,57 +593,68 @@ if(availableEl){
     ]);
   }
 
-  function renderAlerts() {
-    if (!alertsContainer) return;
+  function renderAlerts(){
 
-    const alerts = getAlerts();
-    if (!alerts.length) {
-      alertsContainer.innerHTML = `
-        <div class="feed-item">
-          <div class="feed-icon">✅</div>
-          <div class="feed-main">
-            <div class="feed-title">All clear</div>
-            <div class="feed-sub">No requests or alerts</div>
-          </div>
-        </div>
-      `;
-      return;
-    }
+  if(!alertsContainer) return;
 
-    alertsContainer.innerHTML = alerts.slice(0, 5).map(a => `
+  const alerts = getAlerts();
+
+  const requests = (window.PAY54_REQUESTS?.getAll() || [])
+    .filter(r => r.status === "pending");
+
+  const combined = [
+    ...requests.map(r => ({
+      id: r.id,
+      icon: "🛍",
+      title: `${r.merchant}`,
+      sub: `${r.currency} ${r.amount}`,
+      type: "request",
+      raw: r
+    })),
+    ...alerts.map(a => ({ ...a, type: "alert" }))
+  ];
+
+  if(!combined.length){
+    alertsContainer.innerHTML = `
       <div class="feed-item">
-        <div class="feed-icon">${a.icon || "🔔"}</div>
+        <div class="feed-icon">✅</div>
         <div class="feed-main">
-          <div class="feed-title">${a.title}</div>
-          <div class="feed-sub">${a.sub || ""}</div>
+          <div class="feed-title">All clear</div>
+          <div class="feed-sub">No requests or alerts</div>
         </div>
-        <button class="btn ghost sm" type="button" data-alert-open="${a.id}">Open</button>
       </div>
-    `).join("");
-
-    alertsContainer.querySelectorAll("[data-alert-open]").forEach((b) => {
-      b.addEventListener("click", () => {
-        const id = b.getAttribute("data-alert-open");
-        const item = getAlerts().find(x => x.id === id);
-        if (!item) return;
-
-        openModal({
-          title: item.title,
-          bodyHTML: `
-            <div class="p54-note"><b>${item.title}</b></div>
-            <div class="p54-small">${item.sub || ""}</div>
-            <div class="p54-divider"></div>
-            <div>${item.body || "Details will be expanded in Layer 3."}</div>
-            <div class="p54-actions">
-              <button class="p54-btn primary" type="button" id="closeA">Close</button>
-            </div>
-          `,
-          onMount: ({ modal, close }) => modal.querySelector("#closeA").addEventListener("click", close)
-        });
-      });
-    });
+    `;
+    return;
   }
 
+  alertsContainer.innerHTML = combined.slice(0,5).map(item => `
+    <div class="feed-item">
+      <div class="feed-icon">${item.icon}</div>
+      <div class="feed-main">
+        <div class="feed-title">${item.title}</div>
+        <div class="feed-sub">${item.sub}</div>
+      </div>
+      <button class="btn ghost sm" data-open="${item.id}">
+        ${item.type === "request" ? "Pay" : "Open"}
+      </button>
+    </div>
+  `).join("");
+
+  alertsContainer.querySelectorAll("[data-open]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+
+      const id = btn.dataset.open;
+
+      const req = requests.find(r => r.id === id);
+
+      if(req){
+        openCheckoutFromRequest(req);
+      }
+
+    });
+  });
+
+}
   function renderNews() {
     if (!newsFeedEl) return;
     const lines = [
