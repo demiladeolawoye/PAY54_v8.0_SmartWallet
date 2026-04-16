@@ -818,7 +818,15 @@ function processTransaction(entry, meta = {}){
     alert("System unavailable. Please refresh.");
     return null;
   }
+// 🚫 PREVENT DUPLICATE TRANSACTIONS
+const existing = (LEDGER.getTx() || []).find(
+  tx => tx.meta?.ref && tx.meta.ref === entry.meta?.ref
+);
 
+if(existing){
+  alert("Payment already processed");
+  return null;
+}
   // 🔒 GLOBAL VALIDATION
   if(!entry.amount || isNaN(entry.amount)){
     alert("Invalid transaction");
