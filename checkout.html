@@ -77,19 +77,87 @@ body{
 
 <script>
 
+/* =========================
+   GET URL PARAMS
+========================= */
 const params = new URLSearchParams(window.location.search);
 
 const merchant = params.get("merchant") || "Unknown Store";
 const amount = Number(params.get("amount") || 0);
 const currency = params.get("currency") || "NGN";
-const ref = params.get("ref") || "N/A";
-const returnUrl = params.get("return") || "";
+const ref = params.get("ref") || ("ORDER_" + Date.now());
 
-document.getElementById("coMerchant").textContent = merchant;
-document.getElementById("coAmount").textContent = currency + " " + amount;
-document.getElementById("coRef").textContent = ref;
+/* =========================
+   RENDER UI (AFTER LOAD)
+========================= */
+window.addEventListener("DOMContentLoaded", () => {
 
-<script>
+  document.getElementById("coMerchant").textContent = merchant;
+  document.getElementById("coAmount").textContent = currency + " " + amount;
+  document.getElementById("coRef").textContent = ref;
+
+});
+
+/* =========================
+   REQUEST ENGINE (LOCAL SAFE)
+========================= */
+if(!window.PAY54_REQUESTS){
+
+  window.PAY54_REQUESTS = {
+
+    getAll(){
+      return JSON.parse(localStorage.getItem("pay54_requests") || "[]");
+    },
+
+    save(list){
+      localStorage.setItem("pay54_requests", JSON.stringify(list));
+    },
+
+    create(data){
+
+      const list = this.getAll();
+
+      const exists = list.find(r => r.ref === data.ref);
+      if(exists) return exists;
+
+      const request = {
+        id: "req_" + Date.now(),
+        merchant: data.merchant,
+        amount: Number(data.amount),
+        currency: data.currency,
+        ref: data.ref,
+        status: "pending",
+        createdAt: Date.now()
+      };
+
+      list.unshift(request);
+      this.save(list);
+
+      return request;
+    }
+
+  };
+
+}
+
+/* =========================
+   CREATE REQUEST
+========================= */
+PAY54_REQUESTS.create({
+  merchant,
+  amount,
+  currency,
+  ref
+});
+
+/* =========================
+   REDIRECT TO DASHBOARD
+========================= */
+setTimeout(()=>{
+  window.location.href = "dashboard.html";
+}, 1000);
+
+</script>
 
 const params = new URLSearchParams(window.location.search);
 
