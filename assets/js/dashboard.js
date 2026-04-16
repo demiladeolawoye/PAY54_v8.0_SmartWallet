@@ -1857,6 +1857,75 @@ function resolveSmartPayment(amount, currency){
   });
 
 }
+   /* =========================
+   CHECKOUT FROM REQUEST
+========================= */
+function openCheckoutFromRequest(req){
+
+  openModal({
+    title: "PAY54 Smart Checkout",
+
+    bodyHTML: `
+      <div class="p54-note">Merchant Payment</div>
+
+      <div class="p54-divider"></div>
+
+      <div><b>Merchant:</b> ${req.merchant}</div>
+      <div><b>Amount:</b> ${req.currency} ${req.amount}</div>
+      <div><b>Ref:</b> ${req.ref}</div>
+
+      <div class="p54-actions" style="margin-top:16px">
+        <button class="p54-btn" id="cancel">Cancel</button>
+        <button class="p54-btn primary" id="payNow">Pay Now</button>
+      </div>
+    `,
+
+    onMount: ({modal, close})=>{
+
+      modal.querySelector("#cancel").onclick = close;
+
+      modal.querySelector("#payNow").onclick = ()=>{
+
+        const currency = req.currency;
+        const amount = req.amount;
+
+        const funding = resolveSmartPayment(amount, currency);
+
+        if(!funding){
+          alert("Insufficient funds");
+          return;
+        }
+
+        requestPinVerification(()=>{
+
+          const entry = LEDGER.createEntry({
+            type:"checkout",
+            title:`Paid ${req.merchant}`,
+            currency,
+            amount:-amount,
+            icon:"🛒",
+            meta:{ ref: req.ref }
+          });
+
+          processTransaction(entry,{
+            showReceipt:true,
+            title:"Checkout Payment"
+          });
+
+          PAY54_REQUESTS.markPaid(req.id);
+
+          close();
+          renderAlerts();
+
+        });
+
+      };
+
+    }
+
+  });
+
+}
   function openRequestMoney(){
 
 openModal({
