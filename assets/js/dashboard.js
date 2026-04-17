@@ -3393,7 +3393,218 @@ function openCheckout(){
   window.location.href = url;
 
 }
-function openShop(){ comingSoon("Shop & Go"); }
+function openShop(){
+
+  openModal({
+    title:"Shop & Go",
+
+    bodyHTML:`
+
+      <div class="p54-note">Choose a service</div>
+
+      <div class="p54-row" style="margin-top:12px">
+
+        <button class="p54-btn" data-cat="food">🍔 Food</button>
+        <button class="p54-btn" data-cat="tickets">🎟 Tickets</button>
+        <button class="p54-btn" data-cat="transport">🚗 Transport</button>
+
+      </div>
+
+      <div id="shopContent" style="margin-top:16px"></div>
+
+      <div class="p54-actions">
+        <button class="p54-btn primary" id="closeShop">Close</button>
+      </div>
+
+    `,
+
+    onMount:({modal,close})=>{
+
+      const content = modal.querySelector("#shopContent");
+
+      const merchants = {
+        food: [
+          {name:"KFC", icon:"🍗"},
+          {name:"Dominos", icon:"🍕"},
+          {name:"Uber Eats", icon:"🛵"}
+        ],
+        tickets: [
+          {name:"Cinema", icon:"🎬"},
+          {name:"Concert", icon:"🎤"},
+          {name:"Football Match", icon:"⚽"}
+        ],
+        transport: [
+          {name:"Uber", icon:"🚗"},
+          {name:"Bolt", icon:"🚕"},
+          {name:"Train", icon:"🚆"}
+        ]
+      };
+
+      /* =========================
+         CATEGORY CLICK
+      ========================= */
+      modal.querySelectorAll("[data-cat]").forEach(btn=>{
+
+        btn.addEventListener("click",()=>{
+
+          const cat = btn.dataset.cat;
+
+          content.innerHTML = merchants[cat].map(m=>`
+            <button class="p54-btn" data-merchant="${m.name}">
+              ${m.icon} ${m.name}
+            </button>
+          `).join("");
+
+          bindMerchantClicks();
+
+        });
+
+      });
+
+      /* =========================
+         MERCHANT FLOW
+      ========================= */
+      function bindMerchantClicks(){
+
+        content.querySelectorAll("[data-merchant]").forEach(btn=>{
+
+          btn.addEventListener("click",()=>{
+
+            const merchant = btn.dataset.merchant;
+
+            openModal({
+              title: merchant,
+
+              bodyHTML:`
+
+                <form class="p54-form" id="shopPayForm">
+
+                  <div>
+                    <div class="p54-label">Amount</div>
+                    <input class="p54-input" id="shopAmount" placeholder="0.00" required>
+                  </div>
+
+                  <div class="p54-actions">
+                    <button class="p54-btn" type="button" id="cancelPay">Cancel</button>
+                    <button class="p54-btn primary">Pay</button>
+                  </div>
+
+                </form>
+
+              `,
+
+              onMount:({modal,close})=>{
+
+                modal.querySelector("#cancelPay").onclick = close;
+
+                modal.querySelector("#shopPayForm").onsubmit = (e)=>{
+
+                  e.preventDefault();
+
+                  const amount = Number(modal.querySelector("#shopAmount").value);
+                  const currency = getSelectedCurrency();
+
+                  if(!amount || amount <= 0){
+                    alert("Enter valid amount");
+                    return;
+                  }
+
+                  const funding = resolveSmartPayment(amount, currency);
+
+                  if(!funding){
+                    alert("Insufficient funds");
+                    return;
+                  }
+
+                  requestPinVerification(()=>{
+
+                    let entry;
+
+                    if(funding.source === "wallet"){
+
+                      entry = LEDGER.createEntry({
+                        type:"shop",
+                        title:`${merchant}`,
+                        currency,
+                        amount:-amount,
+                        icon:"🛒"
+                      });
+
+                      processTransaction(entry,{showReceipt:true});
+
+                    }
+
+                    else if(funding.source === "wallet_fx"){
+
+                      LEDGER.applyEntry(
+                        LEDGER.createEntry({
+                          type:"fx_debit",
+                          currency: funding.from,
+                          amount:-funding.amount,
+                          icon:"💱"
+                        })
+                      );
+
+                      LEDGER.applyEntry(
+                        LEDGER.createEntry({
+                          type:"fx_credit",
+                          currency: funding.to,
+                          amount: funding.amount,
+                          icon:"💱"
+                        })
+                      );
+
+                      entry = LEDGER.createEntry({
+                        type:"shop",
+                        title:`${merchant}`,
+                        currency,
+                        amount:-amount,
+                        icon:"🛒"
+                      });
+
+                      processTransaction(entry,{showReceipt:true});
+
+                    }
+
+                    else if(funding.source === "card"){
+
+                      funding.card.balance -= amount;
+
+                      entry = LEDGER.createEntry({
+                        type:"card_payment",
+                        title:`${merchant} (Card)`,
+                        currency,
+                        amount:-amount,
+                        icon:"💳"
+                      });
+
+                      processTransaction(entry,{showReceipt:true});
+
+                    }
+
+                    close();
+
+                  });
+
+                };
+
+              }
+
+            });
+
+          });
+
+        });
+
+      }
+
+      modal.querySelector("#closeShop").onclick = close;
+
+    }
+
+  });
+
+}
 function openTrading(){ comingSoon("Trading"); }
 function openBet(){ comingSoon("Bet Funding"); }
 function openAgent(){ comingSoon("Become an Agent"); }
