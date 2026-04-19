@@ -3648,6 +3648,71 @@ function bindSubCategory(cat){
   });
 
 }
+   function openShopPayment(merchant){
+
+  openModal({
+    title: merchant,
+
+    bodyHTML: `
+      <form class="p54-form" id="shopPayForm">
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="shopAmount" placeholder="0.00" required>
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelPay">Cancel</button>
+          <button class="p54-btn primary">Pay</button>
+        </div>
+
+      </form>
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal.querySelector("#cancelPay").onclick = close;
+
+      modal.querySelector("#shopPayForm").onsubmit = (e)=>{
+
+        e.preventDefault();
+
+        const amount = Number(modal.querySelector("#shopAmount").value);
+        const currency = getSelectedCurrency();
+
+        if(!amount || amount <= 0){
+          alert("Enter valid amount");
+          return;
+        }
+
+        const funding = resolveSmartPayment(amount, currency);
+
+        if(!funding){
+          alert("Insufficient funds");
+          return;
+        }
+
+        requestPinVerification(()=>{
+
+          const entry = LEDGER.createEntry({
+            type:"shop",
+            title: merchant,
+            currency,
+            amount:-amount,
+            icon:"🛒"
+          });
+
+          processTransaction(entry,{showReceipt:true});
+          close();
+
+        });
+
+      };
+
+    }
+  });
+
+}
 function openTrading(){ comingSoon("Trading"); }
 function openBet(){ comingSoon("Bet Funding"); }
 function openAgent(){ comingSoon("Become an Agent"); }
