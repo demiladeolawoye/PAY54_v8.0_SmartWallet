@@ -3436,23 +3436,30 @@ function openShop(){
 
       const content = modal.querySelector("#shopContent");
 
-      const merchants = {
-        food: [
-          {name:"KFC", icon:"🍗"},
-          {name:"Dominos", icon:"🍕"},
-          {name:"Uber Eats", icon:"🛵"}
-        ],
-        tickets: [
-          {name:"Cinema", icon:"🎬"},
-          {name:"Concert", icon:"🎤"},
-          {name:"Football Match", icon:"⚽"}
-        ],
-        transport: [
-          {name:"Uber", icon:"🚗"},
-          {name:"Bolt", icon:"🚕"},
-          {name:"Train", icon:"🚆"}
-        ]
-      };
+ const SHOP_DATA = {
+  food: {
+    sub: ["Fast Food","Restaurants","Groceries"],
+    merchants: {
+      "Fast Food":["KFC","McDonalds"],
+      "Restaurants":["Uber Eats","Deliveroo"],
+      "Groceries":["Tesco","Asda"]
+    }
+  },
+  tickets: {
+    sub: ["Cinema","Events"],
+    merchants: {
+      "Cinema":["Odeon","Vue"],
+      "Events":["Ticketmaster"]
+    }
+  },
+  transport: {
+    sub: ["Taxi","Train"],
+    merchants: {
+      "Taxi":["Uber","Bolt"],
+      "Train":["National Rail"]
+    }
+  }
+};
 
       /* =========================
          CATEGORY CLICK
