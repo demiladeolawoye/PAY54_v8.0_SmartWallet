@@ -3464,23 +3464,24 @@ function openShop(){
       /* =========================
          CATEGORY CLICK
       ========================= */
-      modal.querySelectorAll("[data-cat]").forEach(btn=>{
+    modal.querySelectorAll(".shop-card").forEach(card=>{
 
-        btn.addEventListener("click",()=>{
+  card.addEventListener("click",()=>{
 
-          const cat = btn.dataset.cat;
+    const cat = card.dataset.cat;
+    const data = SHOP_DATA[cat];
 
-          content.innerHTML = merchants[cat].map(m=>`
-            <button class="p54-btn" data-merchant="${m.name}">
-              ${m.icon} ${m.name}
-            </button>
-          `).join("");
+    content.innerHTML = data.sub.map(sub=>`
+      <div class="shop-card sub-card" data-sub="${sub}">
+        <div class="title">${sub}</div>
+      </div>
+    `).join("");
 
-          bindMerchantClicks();
+    bindSubCategory(cat);
 
-        });
+  });
 
-      });
+});
 
       /* =========================
          MERCHANT FLOW
