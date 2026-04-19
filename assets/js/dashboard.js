@@ -3402,15 +3402,29 @@ function openShop(){
 
       <div class="p54-note">Choose a service</div>
 
-      <div class="p54-row" style="margin-top:12px">
+    <div class="shop-grid">
 
-        <button class="p54-btn" data-cat="food">🍔 Food</button>
-        <button class="p54-btn" data-cat="tickets">🎟 Tickets</button>
-        <button class="p54-btn" data-cat="transport">🚗 Transport</button>
+  <div class="shop-card" data-cat="food">
+    <div class="icon">🍔</div>
+    <div class="title">Food</div>
+    <div class="sub">Restaurants & delivery</div>
+  </div>
 
-      </div>
+  <div class="shop-card" data-cat="tickets">
+    <div class="icon">🎟</div>
+    <div class="title">Tickets</div>
+    <div class="sub">Events & cinema</div>
+  </div>
 
-      <div id="shopContent" style="margin-top:16px"></div>
+  <div class="shop-card" data-cat="transport">
+    <div class="icon">🚗</div>
+    <div class="title">Transport</div>
+    <div class="sub">Taxi & travel</div>
+  </div>
+
+</div>
+
+<div id="shopContent" style="margin-top:16px"></div>
 
       <div class="p54-actions">
         <button class="p54-btn primary" id="closeShop">Close</button>
