@@ -1731,7 +1731,7 @@ function resolveSmartPayment(amount, currency){
           return;
         }
 
-        const funding = resolveSmartPayment(currency, amount);
+        const funding = resolveSmartPayment(amount, currency);
 
         if(!funding){
           alert(`Insufficient funds across all wallets`);
