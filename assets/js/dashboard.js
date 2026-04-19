@@ -3516,63 +3516,41 @@ function bindSubCategory(cat){
             const merchant = btn.dataset.merchant;
 
             openModal({
-              title: merchant,
+  title: merchant,
 
-              bodyHTML:`
+  bodyHTML: `
+    <div class="p54-note">Choose how to continue</div>
 
-                <form class="p54-form" id="shopPayForm">
+    <div class="p54-actions" style="margin-top:12px">
+      <button class="p54-btn primary" id="payInside">Pay with PAY54</button>
+      <button class="p54-btn" id="goExternal">Go to site</button>
+    </div>
+  `,
 
-                  <div>
-                    <div class="p54-label">Amount</div>
-                    <input class="p54-input" id="shopAmount" placeholder="0.00" required>
-                  </div>
+  onMount: ({modal, close})=>{
 
-                  <div class="p54-actions">
-                    <button class="p54-btn" type="button" id="cancelPay">Cancel</button>
-                    <button class="p54-btn primary">Pay</button>
-                  </div>
+    /* =========================
+       OPTION 1: PAY INSIDE APP
+    ========================= */
+    modal.querySelector("#payInside").onclick = ()=>{
 
-                </form>
+      close();
+      openShopPayment(merchant);
 
-              `,
+    };
 
-              onMount:({modal,close})=>{
+    /* =========================
+       OPTION 2: AFFILIATE LINK
+    ========================= */
+    modal.querySelector("#goExternal").onclick = ()=>{
 
-                modal.querySelector("#cancelPay").onclick = close;
+      window.open("https://example.com?ref=pay54", "_blank");
+      close();
 
-                modal.querySelector("#shopPayForm").onsubmit = (e)=>{
+    };
 
-                  e.preventDefault();
-
-                  const amount = Number(modal.querySelector("#shopAmount").value);
-                  const currency = getSelectedCurrency();
-
-                  if(!amount || amount <= 0){
-                    alert("Enter valid amount");
-                    return;
-                  }
-
-                  const funding = resolveSmartPayment(amount, currency);
-
-                  if(!funding){
-                    alert("Insufficient funds");
-                    return;
-                  }
-
-                  requestPinVerification(()=>{
-
-                    let entry;
-
-                    if(funding.source === "wallet"){
-
-                      entry = LEDGER.createEntry({
-                        type:"shop",
-                        title:`${merchant}`,
-                        currency,
-                        amount:-amount,
-                        icon:"🛒"
-                      });
-
+  }
+});
                       processTransaction(entry,{showReceipt:true});
 
                     }
