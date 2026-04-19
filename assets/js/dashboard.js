@@ -3541,6 +3541,7 @@ function bindSubCategory(cat){
 
   }
 });
+}); // ✅ THIS LINE WAS MISSING           
    function openShopPayment(merchant){
 
   openModal({
