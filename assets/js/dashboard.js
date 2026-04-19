@@ -1557,42 +1557,53 @@ function openWithdraw(){
   });
 
 }
-   function resolveSmartPayment(targetCurrency, amount){
+function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
-if(!ledger) return;
+  if(!ledger) return null;
 
-const balances = ledger.getBalances() || {};
+  const balances = ledger.getBalances() || {};
+  const cards = JSON.parse(localStorage.getItem("pay54_cards") || "{}");
 
-  // 1. Direct balance check
-  if((balances[targetCurrency] || 0) >= amount){
+  if((balances[currency] || 0) >= amount){
     return {
-      type: "direct",
-      currency: targetCurrency,
-      amount: amount
+      source: "wallet",
+      currency,
+      amount
     };
   }
 
-  // 2. Try other currencies
   for(const cur in balances){
 
     const bal = balances[cur] || 0;
+    if(!bal || cur === currency) continue;
 
-    if(!bal || cur === targetCurrency) continue;
-
-    const converted = ledger.convert(cur, targetCurrency, bal);
+    const converted = ledger.convert(cur, currency, bal);
 
     if(converted >= amount){
       return {
-        type: "fx",
+        source: "wallet_fx",
         from: cur,
-        to: targetCurrency,
-        amount: amount
+        to: currency,
+        amount
       };
     }
   }
 
-  return null; // insufficient funds
+  if(cards?.list){
+
+    const defaultCard = cards.list.find(c => c.isDefault && c.status === "active");
+
+    if(defaultCard && (defaultCard.balance || 0) >= amount){
+      return {
+        source: "card",
+        card: defaultCard,
+        amount
+      };
+    }
+  }
+
+  return null;
 }
   /* =========================
    SMART PAYMENT ROUTER (CORE ENGINE)
