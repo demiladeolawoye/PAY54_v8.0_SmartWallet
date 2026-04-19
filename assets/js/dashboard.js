@@ -3482,7 +3482,28 @@ function openShop(){
   });
 
 });
+function bindSubCategory(cat){
 
+  content.querySelectorAll("[data-sub]").forEach(el=>{
+
+    el.addEventListener("click",()=>{
+
+      const sub = el.dataset.sub;
+      const merchants = SHOP_DATA[cat].merchants[sub];
+
+      content.innerHTML = merchants.map(m=>`
+        <button class="p54-btn" data-merchant="${m}">
+          🛒 ${m}
+        </button>
+      `).join("");
+
+      bindMerchantClicks();
+
+    });
+
+  });
+
+}
       /* =========================
          MERCHANT FLOW
       ========================= */
