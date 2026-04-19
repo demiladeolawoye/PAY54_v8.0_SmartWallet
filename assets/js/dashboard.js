@@ -3515,7 +3515,7 @@ function bindSubCategory(cat){
 
             const merchant = btn.dataset.merchant;
 
-            openModal({
+           openModal({
   title: merchant,
 
   bodyHTML: `
@@ -3529,103 +3529,18 @@ function bindSubCategory(cat){
 
   onMount: ({modal, close})=>{
 
-    /* =========================
-       OPTION 1: PAY INSIDE APP
-    ========================= */
     modal.querySelector("#payInside").onclick = ()=>{
-
       close();
       openShopPayment(merchant);
-
     };
 
-    /* =========================
-       OPTION 2: AFFILIATE LINK
-    ========================= */
     modal.querySelector("#goExternal").onclick = ()=>{
-
       window.open("https://example.com?ref=pay54", "_blank");
       close();
-
     };
 
   }
 });
-                      processTransaction(entry,{showReceipt:true});
-
-                    }
-
-                    else if(funding.source === "wallet_fx"){
-
-                      LEDGER.applyEntry(
-                        LEDGER.createEntry({
-                          type:"fx_debit",
-                          currency: funding.from,
-                          amount:-funding.amount,
-                          icon:"💱"
-                        })
-                      );
-
-                      LEDGER.applyEntry(
-                        LEDGER.createEntry({
-                          type:"fx_credit",
-                          currency: funding.to,
-                          amount: funding.amount,
-                          icon:"💱"
-                        })
-                      );
-
-                      entry = LEDGER.createEntry({
-                        type:"shop",
-                        title:`${merchant}`,
-                        currency,
-                        amount:-amount,
-                        icon:"🛒"
-                      });
-
-                      processTransaction(entry,{showReceipt:true});
-
-                    }
-
-                    else if(funding.source === "card"){
-
-                      funding.card.balance -= amount;
-
-                      entry = LEDGER.createEntry({
-                        type:"card_payment",
-                        title:`${merchant} (Card)`,
-                        currency,
-                        amount:-amount,
-                        icon:"💳"
-                      });
-
-                      processTransaction(entry,{showReceipt:true});
-
-                    }
-
-                    close();
-
-                  });
-
-                };
-
-              }
-
-            });
-
-          });
-
-        });
-
-      }
-
-      modal.querySelector("#closeShop").onclick = close;
-
-    }
-
-  });
-
-}
    function openShopPayment(merchant){
 
   openModal({
