@@ -3892,9 +3892,6 @@ waitForModules(() => {
   });
 
 });
-
-/* 🔥 CRITICAL: CLOSE THE FILE PROPERLY */
-})();
 /* =========================
    PAY54 REQUEST ENGINE
 ========================= */
@@ -3946,3 +3943,5 @@ window.PAY54_REQUESTS = {
   }
 
 };
+/* 🔥 CRITICAL: CLOSE THE FILE PROPERLY */
+})();
