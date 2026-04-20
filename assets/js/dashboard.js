@@ -3876,19 +3876,26 @@ if(scanFab){
 //   }
 
 // },5000);
-     /* =========================
-   🔥 FORCE CLICK SYSTEM (CRITICAL FIX)
+  /* =========================
+   SAFE BOOTSTRAP ENGINE (FIXED)
 ========================= */
-waitForModules(() => {
 
-  if(typeof SERVICES === "undefined"){
-    console.error("🚨 SERVICES not ready");
-    return;
-  }
+document.addEventListener("DOMContentLoaded", () => {
 
-  waitForLedgerReady(() => {
-    console.log("🚀 SAFE INIT START");
-    init();
+  console.log("🚀 DOM READY");
+
+  waitForModules(() => {
+
+    if (typeof SERVICES === "undefined") {
+      console.error("🚨 SERVICES not ready");
+      return;
+    }
+
+    waitForLedgerReady(() => {
+      console.log("✅ ALL SYSTEMS READY → INIT");
+      init();
+    });
+
   });
 
 });
