@@ -3050,7 +3050,7 @@ if(funding.type === "single"){
 /* =========================
    🔥 SPLIT ROUTE
 ========================= */
-if(funding.type === "split"){
+if(funding?.type === "split" && Array.isArray(funding.splits))
 
   funding.splits.forEach(part=>{
 
