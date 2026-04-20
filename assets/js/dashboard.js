@@ -3149,6 +3149,8 @@ if (funding?.type === "split" && Array.isArray(funding.splits)) {
 }); // openModal
 
 }); // click handler
+   
+}); // CLOSE forEach
 
       /* =========================
          FUND CARD (PROPER FLOW)
