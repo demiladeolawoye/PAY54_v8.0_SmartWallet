@@ -3140,17 +3140,15 @@ if(funding.type === "split"){
   }
 
   close();
-});
+}); // requestPinVerification
 
-        };
+}; // form submit
 
-      }
-    });
+} // onMount
 
-  });
+}); // openModal
 
-});
-   
+}); // click handler
 
       /* =========================
          FUND CARD (PROPER FLOW)
