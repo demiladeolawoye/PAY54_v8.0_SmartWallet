@@ -3050,24 +3050,24 @@ if(funding.type === "single"){
 /* =========================
    🔥 SPLIT ROUTE
 ========================= */
-if(funding?.type === "split" && Array.isArray(funding.splits))
+if (funding?.type === "split" && Array.isArray(funding.splits)) {
 
-  funding.splits.forEach(part=>{
+  funding.splits.forEach(part => {
 
-    if(part.source === "wallet"){
+    if (part.source === "wallet") {
       // deduct wallet
     }
 
-    if(part.source === "fx"){
+    else if (part.source === "fx") {
       LEDGER.applyEntry(LEDGER.createEntry({
-        type:"fx_debit",
-        currency:part.meta.from,
-        amount:-part.amount,
-        icon:"💱"
+        type: "fx_debit",
+        currency: part.meta.from,
+        amount: -part.amount,
+        icon: "💱"
       }));
     }
 
-    if(part.source === "card"){
+    else if (part.source === "card") {
       part.meta.card.balance -= part.amount;
     }
 
