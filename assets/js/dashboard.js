@@ -3018,61 +3018,6 @@ if(!funding){
   alert("Insufficient funds across all sources");
   return;
 }
-
-/* =========================
-   🧠 SINGLE ROUTE
-========================= */
-if(funding.type === "single"){
-
-  const r = funding.route;
-
-  if(r.source === "wallet"){
-    // normal flow
-  }
-
-  else if(r.source === "fx"){
-    LEDGER.applyEntry(LEDGER.createEntry({
-      type:"fx_debit",
-      currency:r.from,
-      amount:-amount,
-      icon:"💱"
-    }));
-  }
-
-  else if(r.source === "card"){
-    r.card.balance -= amount;
-  }
-
-}
-
-/* =========================
-   🔥 SPLIT ROUTE
-========================= */
-if (funding?.type === "split" && Array.isArray(funding.splits)) {
-
-  funding.splits.forEach(part => {
-
-    if (part.source === "wallet") {
-      // deduct wallet
-    }
-
-    else if (part.source === "fx") {
-      LEDGER.applyEntry(LEDGER.createEntry({
-        type: "fx_debit",
-        currency: part.meta.from,
-        amount: -part.amount,
-        icon: "💱"
-      }));
-    }
-
-    else if (part.source === "card") {
-      part.meta.card.balance -= part.amount;
-    }
-
-  });
-
-}
-
           requestPinVerification(()=>{
 
   if(funding.source === "wallet"){
