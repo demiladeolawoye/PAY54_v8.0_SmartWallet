@@ -2517,8 +2517,6 @@ if(type === "tv"){
   }
 }
 
-} // 🔥🔥🔥 THIS IS THE MISSING LINE (CRITICAL)
-
 render("airtime");
 
       typeEl.addEventListener("change",(e)=>{
