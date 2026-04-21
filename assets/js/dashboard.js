@@ -2511,7 +2511,7 @@ if(type === "tv"){
   const amountInput = dynamic.querySelector("#billAmount");
 
   if(pkg && amountInput){
-    pkg.addEventListener("change", () => {
+    pkg.addEventListener("change", function(){
       amountInput.value = pkg.value;
     });
   }
