@@ -3087,7 +3087,7 @@ if(!funding){
 
 }; // form submit
 
-} // onMount
+}, // onMount
 
 }); // openModal
 
