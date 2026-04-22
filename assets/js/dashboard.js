@@ -2526,36 +2526,33 @@ render("airtime");
       modal.querySelector("#cancelBill").onclick = close;
 
       modal.querySelector("#billForm").onsubmit = (e)=>{
-        e.preventDefault();
+  e.preventDefault();
 
-        let amount = Number(modal.querySelector("#billAmount")?.value);
+  let amount = Number(modal.querySelector("#billAmount")?.value);
 
-        /* fallback for bundles */
-        if(!amount){
-          const bundle = modal.querySelector("#dataBundle")?.value;
-          if(bundle) amount = Number(bundle);
-        }
+  if(!amount){
+    const bundle = modal.querySelector("#dataBundle")?.value;
+    if(bundle) amount = Number(bundle);
+  }
 
-        const currency = getSelectedCurrency();
+  const currency = getSelectedCurrency();
 
-        requestPinVerification(()=>{
+  requestPinVerification(()=>{
 
-          const entry = LEDGER.createEntry({
-            type:"bill",
-            title:"Bill Payment",
-            currency,
-            amount:-amount,
-            icon:"💡"
-          });
+    const entry = LEDGER.createEntry({
+      type:"bill",
+      title:"Bill Payment",
+      currency,
+      amount:-amount,
+      icon:"💡"
+    });
 
-          processTransaction(entry,{showReceipt:true});
-          close();
-        });
-      };
+    processTransaction(entry,{showReceipt:true});
+    close();
 
-    }
-  });
-}
+  }); // ✅ CLOSE requestPinVerification
+
+}; // ✅ CLOSE onsubmit
 /* 🏦 SAVINGS */
 function openSavings(){
 
