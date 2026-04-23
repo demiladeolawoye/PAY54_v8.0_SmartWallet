@@ -2625,14 +2625,6 @@ list.querySelectorAll("[data-goal]").forEach(el => {
 
       const txBox = modal.querySelector("#goalTx");
 
-      function render(list){
-        txBox.innerHTML = list.map(tx=>`
-          <div class="p54-ledger-item">
-            <div>${tx.title}</div>
-            <div>${tx.amount}</div>
-          </div>
-        `).join("");
-      }
 
      const LIMIT = 10;
 
