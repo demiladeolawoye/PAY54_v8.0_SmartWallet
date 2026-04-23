@@ -3811,5 +3811,4 @@ window.PAY54_REQUESTS = {
   }
 
 };
-/* 🔥 CRITICAL: CLOSE THE FILE PROPERLY */
-})();
+
