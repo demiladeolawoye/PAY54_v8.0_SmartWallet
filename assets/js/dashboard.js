@@ -2553,6 +2553,11 @@ render("airtime");
   }); // ✅ CLOSE requestPinVerification
 
 }; // ✅ CLOSE onsubmit
+
+} // ✅ CLOSE onMount
+}); // ✅ CLOSE openModal
+} // ✅ CLOSE openBills
+
 /* 🏦 SAVINGS */
 function openSavings(){
 
