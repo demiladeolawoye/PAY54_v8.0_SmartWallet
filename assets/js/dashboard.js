@@ -2380,7 +2380,6 @@ function openBills(){
     title:"Pay Bills & Top Up",
 
     bodyHTML:`
-
       <form class="p54-form" id="billForm">
 
         <div>
@@ -2410,32 +2409,18 @@ function openBills(){
 
       function render(type){
 
-        /* =========================
-           AIRTIME (FIXED BUTTONS)
-        ========================= */
         if(type === "airtime"){
           dynamic.innerHTML = `
             <input class="p54-input" id="billPhone" placeholder="Phone Number" required>
 
-            <select class="p54-select" id="billProvider">
-              <option>MTN</option>
-              <option>Airtel</option>
-              <option>Glo</option>
-              <option>9mobile</option>
-            </select>
-
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
               <button type="button" class="p54-btn amt" data-amt="500">₦500</button>
               <button type="button" class="p54-btn amt" data-amt="1000">₦1000</button>
-              <button type="button" class="p54-btn amt" data-amt="1500">₦1500</button>
-              <button type="button" class="p54-btn amt" data-amt="2000">₦2000</button>
-              <button type="button" class="p54-btn amt" data-amt="5000">₦5000</button>
             </div>
 
             <input class="p54-input" id="billAmount" placeholder="Custom amount">
           `;
 
-          /* ✅ FIX CLICK */
           dynamic.querySelectorAll(".amt").forEach(btn=>{
             btn.addEventListener("click",()=>{
               dynamic.querySelector("#billAmount").value = btn.dataset.amt;
@@ -2443,81 +2428,30 @@ function openBills(){
           });
         }
 
-        /* =========================
-           DATA (PROPER UX)
-        ========================= */
         if(type === "data"){
           dynamic.innerHTML = `
             <input class="p54-input" placeholder="Phone Number" required>
-
-            <select class="p54-select" id="dataProvider">
-              <option value="MTN">MTN</option>
-              <option value="Airtel">Airtel</option>
-              <option value="Glo">Glo</option>
-              <option value="9mobile">9mobile</option>
-            </select>
-
-            <select class="p54-select" id="dataBundle">
-              <option value="1000">1GB - ₦1000</option>
-              <option value="1500">2GB - ₦1500</option>
-              <option value="5000">5GB - ₦5000</option>
-            </select>
-
-            <input class="p54-input" id="billAmount" placeholder="Custom amount (optional)">
-          `;
-        }
-
-        /* =========================
-           ELECTRICITY (OK)
-        ========================= */
-        if(type === "electricity"){
-          dynamic.innerHTML = `
-            <input class="p54-input" placeholder="Meter Number" required>
-
-            <select class="p54-select">
-              <option>Ikeja Electric</option>
-              <option>Eko Electric</option>
-              <option>Abuja Disco</option>
-            </select>
-
             <input class="p54-input" id="billAmount" placeholder="Amount">
           `;
         }
 
-        /* =========================
-           TV (FIXED)
-        ========================= */
-if(type === "tv"){
-  dynamic.innerHTML = `
-    <input class="p54-input" placeholder="Smart Card Number" required>
+        if(type === "electricity"){
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Meter Number" required>
+            <input class="p54-input" id="billAmount" placeholder="Amount">
+          `;
+        }
 
-    <select class="p54-select">
-      <option>DSTV</option>
-      <option>GOtv</option>
-      <option>Startimes</option>
-    </select>
+        if(type === "tv"){
+          dynamic.innerHTML = `
+            <input class="p54-input" placeholder="Smart Card Number" required>
+            <input class="p54-input" id="billAmount" placeholder="Amount">
+          `;
+        }
+      }
 
-    <select class="p54-select" id="tvPackage">
-      <option value="">Select Package</option>
-      <option value="5000">Basic - ₦5000</option>
-      <option value="10000">Compact - ₦10000</option>
-      <option value="20000">Premium - ₦20000</option>
-    </select>
-
-    <input class="p54-input" id="billAmount" placeholder="Custom amount">
-  `;
-
-  const pkg = dynamic.querySelector("#tvPackage");
-  const amountInput = dynamic.querySelector("#billAmount");
-
-  if(pkg && amountInput){
-    pkg.addEventListener("change", function(){
-      amountInput.value = pkg.value;
-    });
-  }
-}
-
-render("airtime");
+      // ✅ THIS MUST BE HERE (INSIDE onMount)
+      render("airtime");
 
       typeEl.addEventListener("change",(e)=>{
         render(e.target.value);
@@ -2526,38 +2460,28 @@ render("airtime");
       modal.querySelector("#cancelBill").onclick = close;
 
       modal.querySelector("#billForm").onsubmit = (e)=>{
-  e.preventDefault();
+        e.preventDefault();
 
-  let amount = Number(modal.querySelector("#billAmount")?.value);
+        const amount = Number(modal.querySelector("#billAmount")?.value);
+        const currency = getSelectedCurrency();
 
-  if(!amount){
-    const bundle = modal.querySelector("#dataBundle")?.value;
-    if(bundle) amount = Number(bundle);
-  }
+        requestPinVerification(()=>{
+          const entry = LEDGER.createEntry({
+            type:"bill",
+            title:"Bill Payment",
+            currency,
+            amount:-amount,
+            icon:"💡"
+          });
 
-  const currency = getSelectedCurrency();
+          processTransaction(entry,{showReceipt:true});
+          close();
+        });
+      };
 
-  requestPinVerification(()=>{
-
-    const entry = LEDGER.createEntry({
-      type:"bill",
-      title:"Bill Payment",
-      currency,
-      amount:-amount,
-      icon:"💡"
-    });
-
-    processTransaction(entry,{showReceipt:true});
-    close();
-
-  }); // ✅ CLOSE requestPinVerification
-
-}; // ✅ CLOSE onsubmit
-
-} // ✅ CLOSE onMount
-}); // ✅ CLOSE openModal
-} // ✅ CLOSE openBills
-
+    }
+  });
+}
 /* 🏦 SAVINGS */
 function openSavings(){
 
