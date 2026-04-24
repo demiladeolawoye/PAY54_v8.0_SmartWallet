@@ -3010,8 +3010,6 @@ if(!funding){
 }); // openModal
 
 }); // click handler
-   
-}); // CLOSE forEach
 
       /* =========================
          FUND CARD (PROPER FLOW)
