@@ -3775,10 +3775,7 @@ window.PAY54_REQUESTS = {
   },
 
   create(data){
-
     const list = this.getAll();
-
-    // 🚫 Prevent duplicate requests
     const exists = list.find(r => r.ref === data.ref);
     if(exists) return exists;
 
@@ -3799,16 +3796,15 @@ window.PAY54_REQUESTS = {
   },
 
   markPaid(id){
-
     const list = this.getAll();
-
     const req = list.find(r => r.id === id);
     if(req){
       req.status = "paid";
     }
-
     this.save(list);
   }
 
 };
 
+/* 🔥 THIS IS THE FIX */
+})();
