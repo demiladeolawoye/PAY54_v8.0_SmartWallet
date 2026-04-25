@@ -457,8 +457,10 @@ function setActiveCurrency(cur){
 let total = 0;
 
 const ledger = safeLedger();
+
 if(!ledger){
-  console.warn("Ledger not ready yet");
+  console.warn("⏳ Ledger not ready — retrying balance render...");
+  setTimeout(() => setActiveCurrency(cur), 200);
   return;
 }
 
