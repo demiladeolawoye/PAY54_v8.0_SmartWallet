@@ -3638,13 +3638,20 @@ setTimeout(()=>{
 },50);
 
 /* =========================
-   INITIAL UI RENDER
+   SAFE INITIAL RENDER (FIXED)
 ========================= */
-setActiveCurrency(getSelectedCurrency());
-    renderRecentTransactions();
-    renderAlerts();
-    renderNews();
-    renderFxTicker();
+
+waitForLedgerReady(() => {
+
+  console.log("✅ Ledger confirmed — rendering UI");
+
+  setActiveCurrency(getSelectedCurrency());
+  renderRecentTransactions();
+  renderAlerts();
+  renderNews();
+  renderFxTicker();
+
+});
 
     /* =========================
        🔥 ADD THIS HERE (CORRECT POSITION)
