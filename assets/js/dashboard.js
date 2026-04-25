@@ -3465,35 +3465,32 @@ function bindStableClickRouting(){
     const el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
     if(!el) return;
 
-    if(typeof SERVICES === "undefined"){
-      console.warn("⚠️ SERVICES not ready yet");
+    // 🔥 HARD GUARD
+    if(typeof SERVICES === "undefined" || !SERVICES){
+      console.error("🚨 SERVICES NOT READY");
       return;
     }
 
-   const action = el.dataset.action;
-const service = el.dataset.service;
-const shortcut = el.dataset.shortcut;
+    const action = el.dataset.action;
+    const service = el.dataset.service;
+    const shortcut = el.dataset.shortcut;
 
-if(action && SERVICES[action]){
-  SERVICES[action]();
-  return;
-}
+    const key = action || service || shortcut;
 
-if(service && SERVICES[service]){
-  SERVICES[service]();
-  return;
-}
+    if(!key){
+      console.warn("⚠️ No action defined on element");
+      return;
+    }
 
-if(shortcut && SERVICES[shortcut]){
-  SERVICES[shortcut]();
-  return;
-}
+    if(typeof SERVICES[key] !== "function"){
+      console.warn("⚠️ Unknown service:", key);
+      return;
+    }
 
-    if(el.id === "atmFinderBtn") return comingSoon("ATM Finder");
-    if(el.id === "posFinderBtn") return comingSoon("POS / Agent Finder");
+    SERVICES[key]();
 
   }catch(err){
-    console.error("🚨 CLICK ERROR:", err);
+    console.error("🚨 CLICK SYSTEM FAILURE:", err);
   }
 
  });
