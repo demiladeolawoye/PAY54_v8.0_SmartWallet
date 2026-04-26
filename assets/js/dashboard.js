@@ -2873,57 +2873,88 @@ function render(){
     });
   });
 /* =========================
-   TAP TO PAY (CONTACTLESS)
+   TAP TO PAY (CONTACTLESS) — FIXED
 ========================= */
-modal.querySelectorAll("[data-pay]").forEach(btn=>{
 
-  btn.addEventListener("click", ()=>{
+modal.querySelectorAll("[data-pay]").forEach(btn => {
+
+  btn.addEventListener("click", () => {
 
     const id = btn.dataset.pay;
     const card = cards.list.find(c => c.id === id);
 
-    if(!card) return;
+    if (!card) return;
 
-    if(card.status === "frozen"){
+    if (card.status === "frozen") {
       alert("Card is frozen ❄");
       return;
     }
 
     openModal({
-      title:"Tap to Pay",
+      title: "Tap to Pay",
 
-      bodyHTML:`
+      bodyHTML: `
         <form class="p54-form" id="tapForm">
-          ...
+
+          <div>
+            <div class="p54-label">Amount</div>
+            <input class="p54-input" id="tapAmount" type="number" placeholder="0.00" required>
+          </div>
+
+          <div class="p54-actions">
+            <button class="p54-btn" type="button" id="cancelTap">Cancel</button>
+            <button class="p54-btn primary" type="submit">Pay</button>
+          </div>
+
         </form>
       `,
 
-      onMount:({modal, close})=>{
+      onMount: ({ modal, close }) => {
 
-        modal.querySelector("#cancelTap").onclick = close;
+        const cancelBtn = modal.querySelector("#cancelTap");
+        if (cancelBtn) cancelBtn.onclick = close;
 
-        modal.querySelector("#tapForm").onsubmit = (e)=>{
+        const form = modal.querySelector("#tapForm");
 
+        form.onsubmit = (e) => {
           e.preventDefault();
 
-          ...
-          
-          requestPinVerification(()=>{
+          const amount = Number(modal.querySelector("#tapAmount").value);
+          const currency = getSelectedCurrency();
 
-            ...
+          if (!amount || amount <= 0) {
+            alert("Enter valid amount");
+            return;
+          }
+
+          requestPinVerification(() => {
+
+            const entry = LEDGER.createEntry({
+              type: "card_payment",
+              title: "Tap Payment",
+              currency,
+              amount: -amount,
+              icon: "💳"
+            });
+
+            processTransaction(entry, {
+              showReceipt: true,
+              title: "Tap Payment"
+            });
+
             close();
 
-          }); // requestPinVerification
+          });
 
-        }; // form submit
+        };
 
-      }, // onMount
+      }
 
-    }); // openModal
+    });
 
-  }); // click handler
+  });
 
-}); // ✅ REQUIRED — closes forEach
+});
       /* =========================
    SAFE ADD CARD BUTTON
 ========================= */
