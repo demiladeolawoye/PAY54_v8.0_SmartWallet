@@ -3754,6 +3754,8 @@ window.PAY54_REQUESTS = {
     }
 
     this.save(list);
-  }
+   }
 
 };
+
+})();
