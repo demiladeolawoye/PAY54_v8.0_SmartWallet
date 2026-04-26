@@ -3757,15 +3757,3 @@ window.PAY54_REQUESTS = {
   }
 
 };
-
-/* =========================
-   SAFE CLOSING (CRITICAL FIX)
-========================= */
-
-try {
-  // Close app safely
-} catch(e){
-  console.error("FINAL WRAP ERROR", e);
-}
-
-})();
