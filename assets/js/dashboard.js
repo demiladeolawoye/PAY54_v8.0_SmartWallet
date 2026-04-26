@@ -3707,16 +3707,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.PAY54_REQUESTS = {
 
-  getAll(){
-    return JSON.parse(localStorage.getItem("pay54_requests") || "[]");
+  getAll: function(){
+    try{
+      return JSON.parse(localStorage.getItem("pay54_requests") || "[]");
+    }catch(e){
+      console.warn("REQUEST PARSE ERROR", e);
+      return [];
+    }
   },
 
-  save(list){
-    localStorage.setItem("pay54_requests", JSON.stringify(list));
+  save: function(list){
+    localStorage.setItem("pay54_requests", JSON.stringify(list || []));
   },
 
-  create(data){
+  create: function(data){
+
     const list = this.getAll();
+
     const exists = list.find(r => r.ref === data.ref);
     if(exists) return exists;
 
@@ -3736,15 +3743,27 @@ window.PAY54_REQUESTS = {
     return request;
   },
 
-  markPaid(id){
+  markPaid: function(id){
+
     const list = this.getAll();
+
     const req = list.find(r => r.id === id);
+
     if(req){
       req.status = "paid";
     }
+
     this.save(list);
   }
 
 };
 
-})();
+/* =========================
+   SAFE CLOSING (CRITICAL FIX)
+========================= */
+
+try {
+  // Close app safely
+} catch(e){
+  console.error("FINAL WRAP ERROR", e);
+}
