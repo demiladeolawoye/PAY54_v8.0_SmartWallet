@@ -3747,4 +3747,4 @@ window.PAY54_REQUESTS = {
 
 };
 
-// TEMP FIX: disable closing wrapper to prevent crash
+})();
