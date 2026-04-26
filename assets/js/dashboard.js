@@ -2875,7 +2875,6 @@ function render(){
 /* =========================
    TAP TO PAY (CONTACTLESS) — FIXED
 ========================= */
-
 modal.querySelectorAll("[data-pay]").forEach(btn => {
 
   btn.addEventListener("click", () => {
@@ -2911,12 +2910,10 @@ modal.querySelectorAll("[data-pay]").forEach(btn => {
 
       onMount: ({ modal, close }) => {
 
-        const cancelBtn = modal.querySelector("#cancelTap");
-        if (cancelBtn) cancelBtn.onclick = close;
+        modal.querySelector("#cancelTap").onclick = close;
 
-        const form = modal.querySelector("#tapForm");
+        modal.querySelector("#tapForm").onsubmit = (e) => {
 
-        form.onsubmit = (e) => {
           e.preventDefault();
 
           const amount = Number(modal.querySelector("#tapAmount").value);
@@ -2955,6 +2952,7 @@ modal.querySelectorAll("[data-pay]").forEach(btn => {
   });
 
 });
+
       /* =========================
    SAFE ADD CARD BUTTON
 ========================= */
