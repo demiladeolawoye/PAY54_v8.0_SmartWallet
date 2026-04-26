@@ -2894,24 +2894,7 @@ modal.querySelectorAll("[data-pay]").forEach(btn=>{
 
       bodyHTML:`
         <form class="p54-form" id="tapForm">
-
-          <div class="p54-note">📶 Hold near terminal</div>
-
-          <div>
-            <div class="p54-label">Merchant</div>
-            <input class="p54-input" id="tapMerchant" placeholder="Store name" required>
-          </div>
-
-          <div>
-            <div class="p54-label">Amount</div>
-            <input class="p54-input" id="tapAmount" placeholder="0.00" required>
-          </div>
-
-          <div class="p54-actions">
-            <button class="p54-btn" type="button" id="cancelTap">Cancel</button>
-            <button class="p54-btn primary">Pay</button>
-          </div>
-
+          ...
         </form>
       `,
 
@@ -2923,99 +2906,24 @@ modal.querySelectorAll("[data-pay]").forEach(btn=>{
 
           e.preventDefault();
 
-          const merchant = modal.querySelector("#tapMerchant").value;
-          const amount = Number(modal.querySelector("#tapAmount").value);
-          const currency = getSelectedCurrency();
-
-          if(!amount || amount <= 0){
-            alert("Enter valid amount");
-            return;
-          }
-
-         const funding = resolveSmartPayment(amount, currency);
-
-if(!funding){
-  alert("Insufficient funds across all sources");
-  return;
-}
+          ...
+          
           requestPinVerification(()=>{
 
-  if(funding.source === "wallet"){
+            ...
+            close();
 
-    const entry = LEDGER.createEntry({
-      type:"tap_pay",
-      title:`Paid ${merchant} (Wallet)`,
-      currency,
-      amount:-amount,
-      icon:"📶"
-    });
+          }); // requestPinVerification
 
-    processTransaction(entry,{showReceipt:true});
+        }; // form submit
 
-  }
+      }, // onMount
 
-  else if(funding.source === "wallet_fx"){
+    }); // openModal
 
-    LEDGER.applyEntry(
-      LEDGER.createEntry({
-        type:"fx_debit",
-        currency: funding.from,
-        amount:-funding.amount,
-        icon:"💱"
-      })
-    );
+  }); // click handler
 
-    LEDGER.applyEntry(
-      LEDGER.createEntry({
-        type:"fx_credit",
-        currency: funding.to,
-        amount: funding.amount,
-        icon:"💱"
-      })
-    );
-
-    const entry = LEDGER.createEntry({
-      type:"tap_pay",
-      title:`Paid ${merchant} (FX Wallet)`,
-      currency,
-      amount:-amount,
-      icon:"📶"
-    });
-
-    processTransaction(entry,{showReceipt:true});
-
-  }
-
-  else if(funding.source === "card"){
-
-    funding.card.balance -= amount;
-
-    const entry = LEDGER.createEntry({
-      type:"card_payment",
-      title:`Paid ${merchant} (Card)`,
-      currency,
-      amount:-amount,
-      icon:"💳"
-    });
-
-    processTransaction(entry,{showReceipt:true});
-
-  }
-
-  close();
-}); // requestPinVerification
-
-}; // form submit
-
-}, // onMount
-
-}); // openModal
-
-}); // click handler
-
-      /* =========================
-         FUND CARD (PROPER FLOW)
-      ========================= */
+}); // ✅ REQUIRED — closes forEach
       /* =========================
    SAFE ADD CARD BUTTON
 ========================= */
