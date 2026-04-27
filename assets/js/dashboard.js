@@ -1,6 +1,3 @@
-REPLACE your entire `assets/js/dashboard.js` with this:
-
-```javascript
 /* =========================
    PAY54 Dashboard — v8.2 STABLE CLEAN
    CTO FIX: BOOT + LEDGER + CLICK SYSTEM
