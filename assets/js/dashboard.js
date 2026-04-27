@@ -1676,57 +1676,71 @@ function resolveSmartPayment(amount, currency){
 
           let tx;
 
-          if(funding.type === "direct"){
+          if(funding.source === "wallet"){
 
-            const entry = LEDGER.createEntry({
-              type:"send",
-              title:`Sent to ${user}`,
-              currency,
-              amount:-amount,
-              icon:"📤",
-              meta:{ recipient:user, note }
-            });
+  const entry = LEDGER.createEntry({
+    type:"send",
+    title:`Sent to ${user}`,
+    currency,
+    amount:-amount,
+    icon:"📤",
+    meta:{ recipient:user, note }
+  });
 
-            tx = LEDGER.applyEntry(entry);
+  tx = LEDGER.applyEntry(entry);
 
-          } else {
+}
+else if(funding.source === "wallet_fx"){
 
-            const rate = LEDGER.getRate(funding.from, funding.to);
+  const rate = LEDGER.getRate(funding.from, funding.to);
 
-            const converted = LEDGER.convert(funding.from, funding.to, funding.amount);
+  const converted = LEDGER.convert(funding.from, funding.to, funding.amount);
 
-            LEDGER.applyEntry(
-              LEDGER.createEntry({
-                type:"fx_debit",
-                title:`FX Conversion (${funding.from} → ${funding.to})`,
-                currency: funding.from,
-                amount:-converted,
-                icon:"💱"
-              })
-            );
+  LEDGER.applyEntry(
+    LEDGER.createEntry({
+      type:"fx_debit",
+      title:`FX Conversion (${funding.from} → ${funding.to})`,
+      currency: funding.from,
+      amount:-converted,
+      icon:"💱"
+    })
+  );
 
-            LEDGER.applyEntry(
-              LEDGER.createEntry({
-                type:"fx_credit",
-                title:`FX Conversion`,
-                currency: funding.to,
-                amount: amount,
-                icon:"💱"
-              })
-            );
+  LEDGER.applyEntry(
+    LEDGER.createEntry({
+      type:"fx_credit",
+      title:`FX Conversion`,
+      currency: funding.to,
+      amount: amount,
+      icon:"💱"
+    })
+  );
 
-            const entry = LEDGER.createEntry({
-              type:"send",
-              title:`Sent to ${user}`,
-              currency,
-              amount:-amount,
-              icon:"📤",
-              meta:{ recipient:user, note, fx_used:true, rate }
-            });
+  const entry = LEDGER.createEntry({
+    type:"send",
+    title:`Sent to ${user}`,
+    currency,
+    amount:-amount,
+    icon:"📤",
+    meta:{ recipient:user, note, fx_used:true, rate }
+  });
 
-            tx = LEDGER.applyEntry(entry);
-          }
+  tx = LEDGER.applyEntry(entry);
 
+}
+else if(funding.source === "card"){
+
+  const entry = LEDGER.createEntry({
+    type:"card_payment",
+    title:`Paid ${user} (Card)`,
+    currency,
+    amount:-amount,
+    icon:"💳"
+  });
+
+  tx = LEDGER.applyEntry(entry);
+
+}
           prependTxToDOM(tx);
           refreshUI();
           showPaymentReceipt(tx, user, amount, currency);
