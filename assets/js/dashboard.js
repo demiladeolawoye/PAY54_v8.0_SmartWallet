@@ -2370,13 +2370,14 @@ search.addEventListener("input", ()=>{
 
   renderList(filtered);
 });
-       modal.querySelector("#closeLedger").addEventListener("click", close);
+             modal.querySelector("#closeLedger").addEventListener("click", close);
 
-} // ✅ CLOSE onMount
+    } // ✅ CLOSE onMount
 
-}); // ✅ CLOSE openModal
+  }); // ✅ CLOSE openModal
 
 } // ✅ CLOSE openLedger
+      
 /* =========================
    PAY54 SERVICES (ADD HERE ONLY)
 ========================= */
