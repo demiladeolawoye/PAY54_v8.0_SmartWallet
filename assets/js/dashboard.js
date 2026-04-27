@@ -3544,14 +3544,22 @@ function init() {
   if (window.__PAY54_DASH_V81_INIT__) return;
   window.__PAY54_DASH_V81_INIT__ = true;
 
-  try{
+  console.log("🚀 INIT STARTED CLEAN V8.1");
+
+  try {
 
     console.log("✅ INIT RUNNING");
 
     const ledger = safeLedger();
 
     if(!ledger){
-      console.error("🚨 INIT STOPPED — LEDGER NOT READY");
+      console.warn("⏳ Ledger not ready — retrying init...");
+      
+      setTimeout(() => {
+        window.__PAY54_DASH_V81_INIT__ = false; // 🔥 allow retry
+        init();
+      }, 200);
+
       return;
     }
   /* =========================
