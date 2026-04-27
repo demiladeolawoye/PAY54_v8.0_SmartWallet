@@ -3694,7 +3694,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 /* =========================
-   PAY54 REQUEST ENGINE
+   PAY54 REQUEST ENGINE (FINAL CLEAN)
 ========================= */
 
 window.PAY54_REQUESTS = {
@@ -3746,8 +3746,11 @@ window.PAY54_REQUESTS = {
     }
 
     this.save(list);
-   }
+  }
 
 };
 
+/* =========================
+   FINAL WRAPPER CLOSE
+========================= */
 })();
