@@ -2823,7 +2823,6 @@ function render(){
       </div>
     `).join("")}
 
-    <!-- 🔥 ACTION BUTTONS (CRITICAL FIX) -->
     <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
       <button class="p54-btn" id="addCardBtn">Add Card</button>
       <button class="p54-btn" id="fundCardBtn">Fund Card</button>
