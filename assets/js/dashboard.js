@@ -3403,42 +3403,28 @@ const SERVICES = {
 
 function bindStableClickRouting(){
 
- document.addEventListener("click",(e)=>{
-
-  try{
+  document.addEventListener("click",(e)=>{
 
     const el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
     if(!el) return;
 
-    // 🔥 HARD GUARD
-    if(typeof SERVICES === "undefined" || !SERVICES){
-      console.error("🚨 SERVICES NOT READY");
-      return;
-    }
-
-    const action = el.dataset.action;
-    const service = el.dataset.service;
-    const shortcut = el.dataset.shortcut;
-
-    const key = action || service || shortcut;
+    const key = el.dataset.action || el.dataset.service || el.dataset.shortcut;
 
     if(!key){
-      console.warn("⚠️ No action defined on element");
+      console.warn("⚠️ No action defined");
       return;
     }
 
-    if(typeof SERVICES[key] !== "function"){
+    if(!SERVICES[key]){
       console.warn("⚠️ Unknown service:", key);
       return;
     }
 
+    console.log("🔥 CLICK:", key);
+
     SERVICES[key]();
 
-  }catch(err){
-    console.error("🚨 CLICK SYSTEM FAILURE:", err);
-  }
-
- });
+  });
 
 }
 /* =========================
