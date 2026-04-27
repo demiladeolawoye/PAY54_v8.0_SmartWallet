@@ -730,15 +730,7 @@ function renderRecentTransactions() {
   txs.forEach(tx => prependTxToDOM(tx));
 
 } // ✅ THIS LINE IS CRITICAL
- 
 
-   /* =========================
-   FX MARKET TICKER
-========================= */
-
-/* =========================
-   TRANSACTION RENDER
-========================= */
 function prependTxToDOM(tx) {
 
   const ledger = safeLedger();
