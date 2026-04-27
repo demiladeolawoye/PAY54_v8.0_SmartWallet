@@ -476,12 +476,30 @@ const available = balances[cur] || 0;
 
 const availableEl = document.getElementById("availableBalance");
 
-if(availableEl){
-  availableEl.innerHTML = `
-    <span class="avail-label">Available in ${cur}:</span>
-    <span class="avail-value">${ledger.moneyFmt(cur, available)}</span>
-  `;
+let availableEl = document.getElementById("availableBalance");
+
+/* 🔥 AUTO-CREATE IF MISSING */
+if(!availableEl){
+
+  availableEl = document.createElement("div");
+  availableEl.id = "availableBalance";
+
+  availableEl.style.marginTop = "6px";
+  availableEl.style.fontSize = "13px";
+  availableEl.style.opacity = "0.85";
+
+  const parent = document.getElementById("balanceAmount")?.parentNode;
+
+  if(parent){
+    parent.appendChild(availableEl);
+  }
 }
+
+/* 🔥 ALWAYS UPDATE VALUE */
+availableEl.innerHTML = `
+  <span class="avail-label">Available in ${cur}:</span>
+  <span class="avail-value">${ledger.moneyFmt(cur, available)}</span>
+`;
   if(balanceEl){
 
     balanceEl.textContent = "Converting...";
