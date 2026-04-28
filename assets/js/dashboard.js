@@ -474,8 +474,6 @@ try{
 const balances = ledger.getBalances() || {};
 const available = balances[cur] || 0;
 
-const availableEl = document.getElementById("availableBalance");
-
 let availableEl = document.getElementById("availableBalance");
 
 /* 🔥 AUTO-CREATE IF MISSING */
