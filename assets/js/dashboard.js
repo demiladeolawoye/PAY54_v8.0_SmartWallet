@@ -3492,66 +3492,68 @@ function showPaymentReceipt(tx, merchant, amount, currency) {
       </div>
     `,
 
-    onMount: ({ modal, close }) => {
+   onMount: ({ modal, close }) => {
 
   const ledger = safeLedger();
-  if(!ledger) return;
+
+  if(!ledger){
+    console.warn("Ledger not ready in receipt");
+    return;
+  }
 
   const text = `PAY54 Receipt
 Merchant: ${merchant}
 Amount: ${safeLedger()?.moneyFmt(currency, amount) || amount}
 Ref: ${receiptId}`;
 
-      modal.querySelector("#copyBtn").addEventListener("click", ()=>{
-        navigator.clipboard.writeText(text);
-        alert("Copied!");
-      });
+  modal.querySelector("#copyBtn").addEventListener("click", ()=>{
+    navigator.clipboard.writeText(text);
+    alert("Copied!");
+  });
 
-      modal.querySelector("#shareBtn").addEventListener("click", ()=>{
-        const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-        window.open(url, "_blank");
-      });
-modal.querySelector("#againBtn").addEventListener("click", () => {
-  close();
+  modal.querySelector("#shareBtn").addEventListener("click", ()=>{
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  });
 
-  setTimeout(() => {
+  modal.querySelector("#againBtn").addEventListener("click", () => {
 
-    // Smart routing based on transaction type
-    if(tx.type === "add_money"){
-      openAddMoney();
-    }
-    else if(tx.type === "withdraw"){
-      openWithdraw();
-    }
-    else if(tx.type === "scan_pay"){
-      openScanAndPay();
-    }
-    else if(tx.type === "global_transfer"){
-      openGlobalTransfer();
-    }
-    else if(tx.type === "bill"){
-  openBills();
-}
-else if(tx.type === "savings"){
-  openSavings();
-}
-else if(tx.type === "bank_transfer"){
-  openBankTransfer();
-}
-else{
-  openSendUnified();
-}
+    close();
 
-  }, 100);
+    setTimeout(() => {
 
-});
-      modal.querySelector("#doneBtn").addEventListener("click", () => {
-        close();
-        setTimeout(() => refreshUI(), 60);
-      });
+      if(tx.type === "add_money"){
+        openAddMoney();
+      }
+      else if(tx.type === "withdraw"){
+        openWithdraw();
+      }
+      else if(tx.type === "scan_pay"){
+        openScanAndPay();
+      }
+      else if(tx.type === "global_transfer"){
+        openGlobalTransfer();
+      }
+      else if(tx.type === "bill"){
+        openBills();
+      }
+      else if(tx.type === "savings"){
+        openSavings();
+      }
+      else if(tx.type === "bank_transfer"){
+        openBankTransfer();
+      }
+      else{
+        openSendUnified();
+      }
 
-    }
+    }, 100);
 
+  });
+
+  modal.querySelector("#doneBtn").addEventListener("click", () => {
+    close();
+    setTimeout(() => refreshUI(), 60);
   });
 
 }
