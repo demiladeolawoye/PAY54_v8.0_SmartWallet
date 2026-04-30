@@ -3282,46 +3282,7 @@ function bindSubCategory(cat){
       /* =========================
          MERCHANT FLOW
       ========================= */
-    function bindMerchantClicks(){
-
-  content.querySelectorAll("[data-merchant]").forEach(btn=>{
-
-    btn.addEventListener("click",()=>{
-
-      const merchant = btn.dataset.merchant;
-
-      openModal({
-        title: merchant,
-
-        bodyHTML: `
-          <div class="p54-note">Choose how to continue</div>
-
-          <div class="p54-actions" style="margin-top:12px">
-            <button class="p54-btn primary" id="payInside">Pay with PAY54</button>
-            <button class="p54-btn" id="goExternal">Go to site</button>
-          </div>
-        `,
-
-        onMount: ({modal, close})=>{
-
-          modal.querySelector("#payInside").onclick = ()=>{
-            close();
-            openShopPayment(merchant);
-          };
-
-          modal.querySelector("#goExternal").onclick = ()=>{
-            window.open("https://example.com?ref=pay54", "_blank");
-            close();
-          };
-
-        }
-      });
-
-    });
-
-  });
-
-}           
+       
    function openShopPayment(merchant){
 
   openModal({
@@ -3341,7 +3302,44 @@ function bindSubCategory(cat){
         </div>
 
       </form>
-    `,
+    `,function bindMerchantClicks(){
+
+  content.querySelectorAll("[data-merchant]").forEach(btn=>{
+
+    btn.addEventListener("click",()=>{
+
+      const merchant = btn.dataset.merchant;
+
+      openModal({
+        title: merchant,
+        bodyHTML: `
+          <div class="p54-note">Choose how to continue</div>
+
+          <div class="p54-actions" style="margin-top:12px">
+            <button class="p54-btn primary" id="payInside">Pay with PAY54</button>
+            <button class="p54-btn" id="goExternal">Go to site</button>
+          </div>
+        `,
+        onMount: ({modal, close})=>{
+
+          modal.querySelector("#payInside").onclick = ()=>{
+            close();
+            openShopPayment(merchant);
+          };
+
+          modal.querySelector("#goExternal").onclick = ()=>{
+            window.open("https://example.com?ref=pay54", "_blank");
+            close();
+          };
+
+        }
+      });
+
+    });
+
+  });
+
+} // ✅ THIS LINE MUST EXIST
 
     onMount:({modal,close})=>{
 
