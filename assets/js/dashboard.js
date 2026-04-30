@@ -3302,7 +3302,11 @@ function bindSubCategory(cat){
         </div>
 
       </form>
-    `,function bindMerchantClicks(){
+   /* =========================
+   MERCHANT FLOW (FIXED)
+========================= */
+
+function bindMerchantClicks(){
 
   content.querySelectorAll("[data-merchant]").forEach(btn=>{
 
@@ -3339,9 +3343,31 @@ function bindSubCategory(cat){
 
   });
 
-} // ✅ THIS LINE MUST EXIST
+}
 
-    onMount:({modal,close})=>{
+
+function openShopPayment(merchant){
+
+  openModal({
+    title: merchant,
+
+    bodyHTML: `
+      <form class="p54-form" id="shopPayForm">
+
+        <div>
+          <div class="p54-label">Amount</div>
+          <input class="p54-input" id="shopAmount" placeholder="0.00" required>
+        </div>
+
+        <div class="p54-actions">
+          <button class="p54-btn" type="button" id="cancelPay">Cancel</button>
+          <button class="p54-btn primary">Pay</button>
+        </div>
+
+      </form>
+    `,
+
+    onMount: ({modal, close})=>{
 
       modal.querySelector("#cancelPay").onclick = close;
 
