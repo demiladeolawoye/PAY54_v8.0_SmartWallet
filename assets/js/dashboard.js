@@ -3785,6 +3785,8 @@ window.PAY54_REQUESTS = {
 };
 
 /* =========================
-   FINAL WRAPPER CLOSE
+   FINAL FILE END (FIX)
 ========================= */
+
+console.log("🔥 PAY54 DASHBOARD FULLY LOADED ✅");
 
