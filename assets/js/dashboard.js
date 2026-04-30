@@ -3551,16 +3551,20 @@ Ref: ${receiptId}`;
 
   });
 
-  modal.querySelector("#doneBtn").addEventListener("click", () => {
+   modal.querySelector("#doneBtn").addEventListener("click", () => {
     close();
     setTimeout(() => refreshUI(), 60);
   });
 
-}
-    
-  /* ---------------------------
-     INIT
-  --------------------------- */
+  } // closes onMount
+
+}); // ✅ CLOSE openModal PROPERLY
+
+} // ✅ CLOSE showPaymentReceipt FUNCTION
+
+/* ---------------------------
+   INIT
+--------------------------- */
 function init() {
 
   if (window.__PAY54_DASH_V81_INIT__) return;
