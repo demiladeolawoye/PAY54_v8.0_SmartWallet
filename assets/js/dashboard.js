@@ -429,7 +429,11 @@ function animateBalance(targetValue, currency){
     const value = start + (targetValue - start) * progress;
 
    const ledger = safeLedger();
-if(!ledger) return;
+
+if(!ledger){
+  console.warn("Ledger not ready in receipt");
+  return;
+}
 
 balanceEl.textContent = ledger.moneyFmt(currency, value);
 
