@@ -296,3 +296,280 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 
 });
+/* =========================
+   PART 2 — MONEY MOVES ENGINE
+========================= */
+
+/* =========================
+   SMART FUNDING ENGINE
+========================= */
+function resolveSmartPayment(amount, currency){
+
+  const ledger = safeLedger();
+  if(!ledger) return null;
+
+  const balances = ledger.getBalances();
+
+  if((balances[currency] || 0) >= amount){
+    return { source:"wallet" };
+  }
+
+  return null;
+}
+
+/* =========================
+   SEND MONEY
+========================= */
+function openSend(){
+
+  openModal({
+    title:"Send Money",
+
+    bodyHTML:`
+      <input id="user" class="p54-input" placeholder="@username">
+      <input id="amount" class="p54-input" placeholder="Amount">
+      <button id="sendBtn" class="p54-btn primary">Send</button>
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal.querySelector("#sendBtn").onclick = ()=>{
+
+        const user = modal.querySelector("#user").value;
+        const amount = Number(modal.querySelector("#amount").value);
+        const currency = getSelectedCurrency();
+
+        if(!user || !amount){
+          alert("Invalid input");
+          return;
+        }
+
+        const funding = resolveSmartPayment(amount,currency);
+
+        if(!funding){
+          alert("Insufficient balance");
+          return;
+        }
+
+        requestPinVerification(()=>{
+
+          const entry = LEDGER.createEntry({
+            type:"send",
+            title:`Sent to ${user}`,
+            currency,
+            amount:-amount,
+            icon:"📤"
+          });
+
+          processTransaction(entry,{showReceipt:true});
+          close();
+
+        });
+
+      };
+
+    }
+  });
+
+}
+
+/* =========================
+   RECEIVE
+========================= */
+function openReceive(){
+
+  openModal({
+    title:"Receive Money",
+    bodyHTML:`
+      <div>Your Tag:</div>
+      <div style="font-weight:bold">@pay54-user</div>
+      <button id="close" class="p54-btn primary">Done</button>
+    `,
+    onMount:({modal,close})=>{
+      modal.querySelector("#close").onclick = close;
+    }
+  });
+
+}
+
+/* =========================
+   ADD MONEY
+========================= */
+function openAddMoney(){
+
+  openModal({
+    title:"Add Money",
+
+    bodyHTML:`
+      <input id="amount" class="p54-input" placeholder="Amount">
+      <button id="addBtn" class="p54-btn primary">Add</button>
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal.querySelector("#addBtn").onclick = ()=>{
+
+        const amount = Number(modal.querySelector("#amount").value);
+        const currency = getSelectedCurrency();
+
+        if(!amount){
+          alert("Enter amount");
+          return;
+        }
+
+        const entry = LEDGER.createEntry({
+          type:"add",
+          title:"Wallet Funding",
+          currency,
+          amount:amount,
+          icon:"➕"
+        });
+
+        processTransaction(entry,{showReceipt:true});
+        close();
+
+      };
+
+    }
+  });
+
+}
+
+/* =========================
+   WITHDRAW
+========================= */
+function openWithdraw(){
+
+  openModal({
+    title:"Withdraw",
+
+    bodyHTML:`
+      <input id="amount" class="p54-input" placeholder="Amount">
+      <button id="wdBtn" class="p54-btn primary">Withdraw</button>
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal.querySelector("#wdBtn").onclick = ()=>{
+
+        const amount = Number(modal.querySelector("#amount").value);
+        const currency = getSelectedCurrency();
+
+        requestPinVerification(()=>{
+
+          const entry = LEDGER.createEntry({
+            type:"withdraw",
+            title:"Withdrawal",
+            currency,
+            amount:-amount,
+            icon:"💵"
+          });
+
+          processTransaction(entry,{showReceipt:true});
+          close();
+
+        });
+
+      };
+
+    }
+  });
+
+}
+
+/* =========================
+   BANK TRANSFER
+========================= */
+function openBankTransfer(){
+
+  openModal({
+    title:"Bank Transfer",
+
+    bodyHTML:`
+      <input id="acc" class="p54-input" placeholder="Account Number">
+      <input id="amount" class="p54-input" placeholder="Amount">
+      <button id="btBtn" class="p54-btn primary">Send</button>
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal.querySelector("#btBtn").onclick = ()=>{
+
+        const amount = Number(modal.querySelector("#amount").value);
+        const currency = getSelectedCurrency();
+
+        requestPinVerification(()=>{
+
+          const entry = LEDGER.createEntry({
+            type:"bank",
+            title:"Bank Transfer",
+            currency,
+            amount:-amount,
+            icon:"🏦"
+          });
+
+          processTransaction(entry,{showReceipt:true});
+          close();
+
+        });
+
+      };
+
+    }
+  });
+
+}
+
+/* =========================
+   SCAN & PAY (SIMPLIFIED CLEAN)
+========================= */
+function openScanPay(){
+
+  openModal({
+    title:"Scan & Pay",
+
+    bodyHTML:`
+      <input id="merchant" class="p54-input" placeholder="Merchant">
+      <input id="amount" class="p54-input" placeholder="Amount">
+      <button id="payBtn" class="p54-btn primary">Pay</button>
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal.querySelector("#payBtn").onclick = ()=>{
+
+        const merchant = modal.querySelector("#merchant").value;
+        const amount = Number(modal.querySelector("#amount").value);
+        const currency = getSelectedCurrency();
+
+        requestPinVerification(()=>{
+
+          const entry = LEDGER.createEntry({
+            type:"scan",
+            title:`Paid ${merchant}`,
+            currency,
+            amount:-amount,
+            icon:"📲"
+          });
+
+          processTransaction(entry,{showReceipt:true});
+          close();
+
+        });
+
+      };
+
+    }
+  });
+
+}
+
+/* =========================
+   REGISTER SERVICES
+========================= */
+SERVICES.send = openSend;
+SERVICES.receive = openReceive;
+SERVICES.add_money = openAddMoney;
+SERVICES.withdraw = openWithdraw;
+SERVICES.bank_transfer = openBankTransfer;
+SERVICES.scan_pay = openScanPay;
