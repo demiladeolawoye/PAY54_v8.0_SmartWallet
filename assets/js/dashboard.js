@@ -257,18 +257,34 @@ function bindClicks(){
 
   document.addEventListener("click",(e)=>{
 
-    const btn = e.target.closest("[data-action]");
-    if(!btn) return;
+  const btn =
+    e.target.closest("[data-action]") ||
+    e.target.closest("[data-service]") ||
+    e.target.closest("[data-shortcut]") ||
+    e.target.closest("[data-utility]");
 
-    const key = btn.dataset.action;
+  if(!btn) return;
 
-    if(!SERVICES[key]){
-      console.warn("Unknown action:", key);
-      return;
-    }
+  const key =
+    btn.dataset.action ||
+    btn.dataset.service ||
+    btn.dataset.shortcut ||
+    btn.dataset.utility;
 
-    SERVICES[key]();
-  });
+  if(!key){
+    console.warn("⚠️ No action key found");
+    return;
+  }
+
+  if(!SERVICES[key]){
+    console.warn("⚠️ No handler for:", key);
+    return;
+  }
+
+  console.log("👉 Triggering:", key);
+
+  SERVICES[key]();
+});
 
 }
 
