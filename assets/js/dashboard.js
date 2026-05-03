@@ -1265,9 +1265,6 @@ refreshUI = function(){
 
     _oldRefresh();
 
-    // Extra polish hook
-    renderFxTicker();
-
   }catch(e){
     console.warn("UI refresh safe fallback");
   }
