@@ -215,7 +215,7 @@ const ACTIONS = {
   },
 
   /* ==== WITHDRAW ==== */
-  withdraw(){
+ withdraw(){
   const m = modal("Withdraw", `
     <input id="amt" class="p54-input" placeholder="Amount">
     <button id="go" class="p54-btn primary">Withdraw</button>
@@ -233,12 +233,11 @@ const ACTIONS = {
 
     m.remove();
   };
-}
+},  // 👈 THIS COMMA FIXES EVERYTHING
 
-  bank_transfer(){
-    modal("Bank Transfer", "Coming next phase");
-  },
-
+bank_transfer(){
+  modal("Bank Transfer", "Coming next phase");
+},
   scan_pay(){
     modal("Scan & Pay", "Coming next phase");
   },
