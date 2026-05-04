@@ -1184,10 +1184,6 @@ processTransaction = function(entry, meta={}){
 
     const tx = _oldProcess(entry, meta);
 
-    if(tx){
-      showToast("Transaction Successful ✅");
-    }
-
     return tx;
 
   }catch(e){
