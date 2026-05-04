@@ -30,7 +30,17 @@ function safeLedger(){
 
   return null;
 }
+function getLedgerOrFail(){
+  const ledger = safeLedger();
 
+  if(!ledger){
+    alert("System loading… please try again");
+    console.error("🚨 Ledger not ready");
+    return null;
+  }
+
+  return ledger;
+}
 /* =========================
    WAIT FOR LEDGER
 ========================= */
