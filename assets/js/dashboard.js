@@ -97,10 +97,34 @@ function render(){
   const l = ledger();
   if(!l) return;
 
-  const bal = l.getBalances()[STATE.currency] || 0;
+  const balances = l.getBalances();
+
+  /* --- MAIN BALANCE --- */
+  const main = balances[STATE.currency] || 0;
 
   document.getElementById("balanceAmount").textContent =
-    l.moneyFmt(STATE.currency, bal);
+    l.moneyFmt(STATE.currency, main);
+
+  /* --- AVAILABLE PER CURRENCY --- */
+  const container = document.getElementById("availableBalance");
+
+  if(container){
+
+    container.innerHTML = Object.keys(balances).map(cur => {
+      return `
+        <span style="
+          margin-right:10px;
+          padding:4px 8px;
+          border-radius:8px;
+          background:#f3f4f6;
+          font-size:12px;
+        ">
+          ${cur}: ${l.moneyFmt(cur, balances[cur])}
+        </span>
+      `;
+    }).join("");
+
+  }
 }
 
 /* ========= MODAL ========= */
