@@ -379,7 +379,10 @@ function openSend(){
 
         requestPinVerification(()=>{
 
-          const entry = LEDGER.createEntry({
+          const ledger = getLedgerOrFail();
+if(!ledger) return;
+
+const entry = ledger.createEntry({
             type:"send",
             title:`Sent to ${user}`,
             currency,
