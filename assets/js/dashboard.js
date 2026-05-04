@@ -1,64 +1,62 @@
 "use strict";
 
 /* =========================
-   PAY54 — CLEAN CONTROLLER
+   PAY54 v10 — CORE ENGINE
+   (Stable, Fast, Scalable)
 ========================= */
 
-let LEDGER = null;
+/* ========= GLOBAL STATE ========= */
+const STATE = {
+  ledger: null,
+  currency: localStorage.getItem("pay54_currency") || "NGN"
+};
 
-/* =========================
-   SAFE LEDGER
-========================= */
-function getLedger(){
-  if(window.PAY54_LEDGER){
-    return window.PAY54_LEDGER;
-  }
-  alert("System still loading...");
-  return null;
+/* ========= INIT ========= */
+document.addEventListener("DOMContentLoaded", init);
+
+function init(){
+  waitForLedger(() => {
+    bindUI();
+    render();
+    console.log("✅ PAY54 READY (v10)");
+  });
 }
 
-/* =========================
-   INIT
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  waitForLedger(() => {
-    console.log("✅ PAY54 READY");
-    bindClicks();
-    refreshUI();
-  });
-});
-
-/* =========================
-   WAIT FOR LEDGER
-========================= */
+/* ========= WAIT FOR LEDGER ========= */
 function waitForLedger(cb){
   let tries = 0;
 
-  function check(){
+  const loop = () => {
     if(window.PAY54_LEDGER){
-      LEDGER = window.PAY54_LEDGER;
-      cb();
+      STATE.ledger = window.PAY54_LEDGER;
+      return cb();
+    }
+
+    if(tries++ > 40){
+      alert("System failed to load");
       return;
     }
 
-    tries++;
-    if(tries > 30){
-      alert("Ledger failed to load");
-      return;
-    }
+    setTimeout(loop, 100);
+  };
 
-    setTimeout(check, 150);
-  }
-
-  check();
+  loop();
 }
 
-/* =========================
-   CLICK SYSTEM
-========================= */
-function bindClicks(){
+/* ========= SAFE LEDGER ========= */
+function ledger(){
+  if(!STATE.ledger){
+    alert("System loading...");
+    return null;
+  }
+  return STATE.ledger;
+}
 
-  document.addEventListener("click", (e) => {
+/* ========= UI BIND ========= */
+function bindUI(){
+
+  /* ---- GLOBAL CLICK ROUTER ---- */
+  document.addEventListener("click", e => {
 
     const el =
       e.target.closest("[data-action]") ||
@@ -72,22 +70,41 @@ function bindClicks(){
       el.dataset.service ||
       el.dataset.shortcut;
 
-    console.log("👉", key);
-
-    if(actions[key]){
-      actions[key]();
+    if(ACTIONS[key]){
+      ACTIONS[key]();
     }else{
       console.warn("No handler:", key);
     }
+  });
 
+  /* ---- CURRENCY SWITCH ---- */
+  document.querySelectorAll(".currency").forEach(btn=>{
+    btn.onclick = ()=>{
+      STATE.currency = btn.dataset.cur;
+      localStorage.setItem("pay54_currency", STATE.currency);
+
+      document.querySelectorAll(".currency").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+
+      render();
+    };
   });
 
 }
 
-/* =========================
-   MODAL
-========================= */
-function openModal(title, content){
+/* ========= RENDER ========= */
+function render(){
+  const l = ledger();
+  if(!l) return;
+
+  const bal = l.getBalances()[STATE.currency] || 0;
+
+  document.getElementById("balanceAmount").textContent =
+    l.moneyFmt(STATE.currency, bal);
+}
+
+/* ========= MODAL ========= */
+function modal(title, html){
 
   const wrap = document.createElement("div");
   wrap.className = "p54-modal-backdrop";
@@ -96,139 +113,104 @@ function openModal(title, content){
     <div class="p54-modal">
       <div class="p54-modal-head">
         <div>${title}</div>
-        <button id="closeModal">✕</button>
+        <button class="close">✕</button>
       </div>
-      <div class="p54-modal-body">${content}</div>
+      <div class="p54-modal-body">${html}</div>
     </div>
   `;
 
-  wrap.onclick = (e)=>{
+  wrap.onclick = e => {
     if(e.target === wrap) wrap.remove();
   };
 
-  wrap.querySelector("#closeModal").onclick = ()=>wrap.remove();
+  wrap.querySelector(".close").onclick = ()=>wrap.remove();
 
   document.body.appendChild(wrap);
 
   return wrap;
 }
 
-/* =========================
-   REFRESH UI
-========================= */
-function refreshUI(){
-  const ledger = getLedger();
-  if(!ledger) return;
+/* ========= TRANSACTION ========= */
+function tx(entry){
+  const l = ledger();
+  if(!l) return;
 
-  const cur = localStorage.getItem("pay54_currency") || "NGN";
-  const balances = ledger.getBalances();
-
-  const el = document.getElementById("balanceAmount");
-  if(el){
-    el.textContent = ledger.moneyFmt(cur, balances[cur] || 0);
-  }
+  l.applyEntry(l.createEntry(entry));
+  render();
 }
 
-/* =========================
-   ACTIONS
-========================= */
-const actions = {
+/* ========= ACTIONS ========= */
+const ACTIONS = {
 
+  /* ==== SEND ==== */
   send(){
-    const m = openModal("Send", `
-      <input id="amt" placeholder="Amount" class="p54-input">
+    const m = modal("Send Money", `
+      <input id="amt" class="p54-input" placeholder="Amount">
       <button id="go" class="p54-btn primary">Send</button>
     `);
 
     m.querySelector("#go").onclick = ()=>{
-      const ledger = getLedger();
-      if(!ledger) return;
-
       const amt = Number(m.querySelector("#amt").value);
       if(!amt) return alert("Enter amount");
 
-      ledger.applyEntry(
-        ledger.createEntry({
-          type:"send",
-          title:"Sent",
-          currency:"NGN",
-          amount:-amt
-        })
-      );
+      tx({
+        type:"send",
+        title:"Sent",
+        currency: STATE.currency,
+        amount:-amt
+      });
 
-      refreshUI();
       m.remove();
     };
   },
 
+  /* ==== RECEIVE ==== */
   receive(){
-    openModal("Receive", `<div>@pay54-user</div>`);
+    modal("Receive", `<strong>@pay54-user</strong>`);
   },
 
+  /* ==== ADD MONEY ==== */
   add_money(){
-    const m = openModal("Add Money", `
-      <input id="amt" placeholder="Amount" class="p54-input">
+    const m = modal("Add Money", `
+      <input id="amt" class="p54-input" placeholder="Amount">
       <button id="go" class="p54-btn primary">Add</button>
     `);
 
     m.querySelector("#go").onclick = ()=>{
-      const ledger = getLedger();
-      if(!ledger) return;
-
       const amt = Number(m.querySelector("#amt").value);
 
-      ledger.applyEntry(
-        ledger.createEntry({
-          type:"add",
-          title:"Funding",
-          currency:"NGN",
-          amount:amt
-        })
-      );
+      tx({
+        type:"fund",
+        title:"Wallet Funding",
+        currency: STATE.currency,
+        amount: amt
+      });
 
-      refreshUI();
       m.remove();
     };
   },
 
+  /* ==== WITHDRAW ==== */
   withdraw(){
-    alert("Withdraw coming next");
+    modal("Withdraw", "Coming next phase");
   },
 
   bank_transfer(){
-    alert("Bank transfer coming next");
+    modal("Bank Transfer", "Coming next phase");
   },
 
   scan_pay(){
-    alert("Scan & Pay coming next");
+    modal("Scan & Pay", "Coming next phase");
   },
 
-  fx(){
-    alert("FX coming next");
-  },
-
-  bills(){
-    alert("Bills coming next");
-  },
-
-  savings(){
-    alert("Savings coming next");
-  },
-
-  cards(){
-    alert("Cards coming next");
-  },
-
-  shop(){
-    alert("Shop coming next");
-  },
-
-  trading(){
-    alert("Trading coming next");
-  },
-
-  agent(){
-    alert("Agent flow coming next");
-  }
+  /* ==== SERVICES ==== */
+  fx(){ modal("FX", "Global transfer coming"); },
+  bills(){ modal("Bills", "Bills coming"); },
+  savings(){ modal("Savings", "Savings coming"); },
+  cards(){ modal("Cards", "Cards coming"); },
+  shop(){ modal("Shop", "Shop coming"); },
+  trading(){ modal("Trading", "Trading coming"); },
+  agent(){ modal("Agent", "Agent onboarding coming"); },
+  merchantqr(){ modal("QR", "QR generator coming"); }
 
 };
