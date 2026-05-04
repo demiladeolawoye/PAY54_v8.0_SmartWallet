@@ -216,8 +216,24 @@ const ACTIONS = {
 
   /* ==== WITHDRAW ==== */
   withdraw(){
-    modal("Withdraw", "Coming next phase");
-  },
+  const m = modal("Withdraw", `
+    <input id="amt" class="p54-input" placeholder="Amount">
+    <button id="go" class="p54-btn primary">Withdraw</button>
+  `);
+
+  m.querySelector("#go").onclick = ()=>{
+    const amt = Number(m.querySelector("#amt").value);
+
+    tx({
+      type:"withdraw",
+      title:"Withdrawal",
+      currency: STATE.currency,
+      amount:-amt
+    });
+
+    m.remove();
+  };
+}
 
   bank_transfer(){
     modal("Bank Transfer", "Coming next phase");
