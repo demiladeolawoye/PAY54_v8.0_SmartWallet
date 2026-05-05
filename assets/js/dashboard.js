@@ -1,5 +1,10 @@
 "use strict";
 
+/* =========================
+   PAY54 v10 STABLE ENGINE
+   (WITH v8.1 FX LOGIC)
+========================= */
+
 /* ========= STATE ========= */
 const STATE = {
   ledger: null,
@@ -12,8 +17,9 @@ document.addEventListener("DOMContentLoaded", init);
 function init(){
   waitForLedger(() => {
     bindUI();
+    seedIfEmpty();   // 🔥 prevent 0.00
     render();
-    console.log("✅ PAY54 READY");
+    console.log("✅ PAY54 READY (FINAL)");
   });
 }
 
@@ -27,7 +33,7 @@ function waitForLedger(cb){
       return cb();
     }
 
-    if(tries++ > 40){
+    if(tries++ > 50){
       alert("System failed to load");
       return;
     }
@@ -38,15 +44,60 @@ function waitForLedger(cb){
   loop();
 }
 
-/* ========= LEDGER SAFE ========= */
+/* ========= SAFE LEDGER ========= */
 function ledger(){
-  if(!STATE.ledger) return null;
+  if(!STATE.ledger){
+    console.warn("Ledger not ready");
+    return null;
+  }
   return STATE.ledger;
+}
+
+/* ========= SEED ========= */
+function seedIfEmpty(){
+  const l = ledger();
+  if(!l) return;
+
+  const balances = l.getBalances();
+  const total = Object.values(balances).reduce((a,b)=>a + Number(b||0),0);
+
+  if(total > 0) return;
+
+  l.applyEntry(l.createEntry({
+    type:"seed",
+    title:"Initial funding",
+    currency:"NGN",
+    amount:5000000
+  }));
+
+  console.log("🔥 Wallet seeded");
+}
+
+/* ========= FX TOTAL ========= */
+function getConvertedTotal(targetCur){
+  const l = ledger();
+  if(!l) return 0;
+
+  const balances = l.getBalances();
+  let total = 0;
+
+  Object.keys(balances).forEach(c=>{
+    const amt = balances[c] || 0;
+
+    if(c === targetCur){
+      total += amt;
+    } else {
+      total += l.convert(c, targetCur, amt);
+    }
+  });
+
+  return total;
 }
 
 /* ========= UI BIND ========= */
 function bindUI(){
 
+  /* CLICK ROUTER */
   document.addEventListener("click", e => {
 
     const el =
@@ -70,7 +121,7 @@ function bindUI(){
     }
   });
 
-  /* currency */
+  /* CURRENCY SWITCH */
   document.querySelectorAll(".currency").forEach(btn=>{
     btn.onclick = ()=>{
       STATE.currency = btn.dataset.cur;
@@ -92,20 +143,20 @@ function render(){
 
   const balances = l.getBalances();
 
-  /* MAIN */
-  const main = balances[STATE.currency] || 0;
+  /* 🔥 TOTAL BALANCE (FIXED) */
+  const total = getConvertedTotal(STATE.currency);
 
   document.getElementById("balanceAmount").textContent =
-    l.moneyFmt(STATE.currency, main);
+    l.moneyFmt(STATE.currency, total);
 
-  /* CLEAN DISPLAY (FIXED) */
+  /* 🔥 AVAILABLE (PER WALLET) */
   const container = document.getElementById("availableBalance");
 
   if(container){
 
     const other = Object.keys(balances)
-      .filter(c => c !== STATE.currency)
-      .slice(0,2);
+      .filter(c => balances[c] > 0)
+      .slice(0, 3);
 
     container.innerHTML = `
       <div style="font-size:12px;opacity:0.7;margin-top:6px;">
@@ -142,7 +193,7 @@ function modal(title, html){
   return wrap;
 }
 
-/* ========= TRANSACTION ========= */
+/* ========= TX ========= */
 function tx(entry){
   const l = ledger();
   if(!l) return;
@@ -155,66 +206,68 @@ function tx(entry){
 const ACTIONS = {
 
   send(){
-    const m = modal("Send Money", `
-      <input id="amt" class="p54-input" placeholder="Amount">
-      <button id="go" class="p54-btn primary">Send</button>
+    const m = modal("Send", `
+      <input id="amt" placeholder="Amount">
+      <button id="go">Send</button>
     `);
 
     m.querySelector("#go").onclick = ()=>{
       const amt = Number(m.querySelector("#amt").value);
-      if(!amt) return alert("Enter amount");
+      if(!amt) return;
 
-      tx({ type:"send", title:"Sent", currency: STATE.currency, amount:-amt });
+      tx({ type:"send", currency:STATE.currency, amount:-amt });
       m.remove();
     };
   },
 
   receive(){
-    modal("Receive", `<strong>@pay54-user</strong>`);
+    modal("Receive", "@pay54-user");
   },
 
   add_money(){
     const m = modal("Add Money", `
-      <input id="amt" class="p54-input" placeholder="Amount">
-      <button id="go" class="p54-btn primary">Add</button>
+      <input id="amt" placeholder="Amount">
+      <button id="go">Add</button>
     `);
 
     m.querySelector("#go").onclick = ()=>{
       const amt = Number(m.querySelector("#amt").value);
-      tx({ type:"fund", title:"Wallet Funding", currency: STATE.currency, amount: amt });
+
+      tx({ type:"fund", currency:STATE.currency, amount:amt });
       m.remove();
     };
   },
 
   withdraw(){
     const m = modal("Withdraw", `
-      <input id="amt" class="p54-input" placeholder="Amount">
-      <button id="go" class="p54-btn primary">Withdraw</button>
+      <input id="amt" placeholder="Amount">
+      <button id="go">Withdraw</button>
     `);
 
     m.querySelector("#go").onclick = ()=>{
       const amt = Number(m.querySelector("#amt").value);
-      tx({ type:"withdraw", title:"Withdrawal", currency: STATE.currency, amount:-amt });
+
+      tx({ type:"withdraw", currency:STATE.currency, amount:-amt });
       m.remove();
     };
   },
 
-  bank_transfer(){ modal("Bank Transfer", "Coming next phase"); },
-  scan_pay(){ modal("Scan & Pay", "Coming next phase"); },
+  bank_transfer(){ modal("Bank Transfer","Coming soon"); },
+  scan_pay(){ modal("Scan & Pay","Coming soon"); },
 
-  fx(){ modal("FX Transfer", "Coming soon"); },
-  bills(){ modal("Bills", "Coming soon"); },
-  savings(){ modal("Savings", "Coming soon"); },
-  cards(){ modal("Cards", "Coming soon"); },
-  shop(){ modal("Shop", "Coming soon"); },
-  trading(){ modal("Trading", "Coming soon"); },
-  agent(){ modal("Agent", "Coming soon"); },
-  merchantqr(){ modal("QR Generator", "Coming soon"); },
-  request(){ modal("Request Money", "Coming soon"); },
-  checkout(){ modal("Checkout", "Coming soon"); },
-  risk(){ modal("Risk Watch", "System active"); },
+  fx(){ modal("FX","Coming soon"); },
+  bills(){ modal("Bills","Coming soon"); },
+  savings(){ modal("Savings","Coming soon"); },
+  cards(){ modal("Cards","Coming soon"); },
+  shop(){ modal("Shop","Coming soon"); },
+  trading(){ modal("Trading","Coming soon"); },
+  agent(){ modal("Agent","Coming soon"); },
+  merchantqr(){ modal("QR","Coming soon"); },
+  request(){ modal("Request","Coming soon"); },
+  checkout(){ modal("Checkout","Coming soon"); },
+  risk(){ modal("Risk","Active"); },
 
-  atm(){ modal("ATM Finder", "Nearby ATMs"); },
-  pos(){ modal("POS Finder", "Nearby agents"); }
+  atm(){ modal("ATM Finder","Nearby ATMs"); },
+  pos(){ modal("POS Finder","Nearby agents"); }
 
 };
