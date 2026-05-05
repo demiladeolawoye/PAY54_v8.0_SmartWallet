@@ -3619,9 +3619,7 @@ seedDemoIfEmpty();
 seedDemoAlertsIfEmpty();
 
 // 🔥 FORCE UI SYNC AFTER SEED
-setTimeout(()=>{
-  refreshUI();
-},50);
+refreshUI();
 
 /* =========================
    SAFE INITIAL RENDER (FIXED)
