@@ -111,21 +111,19 @@ function render(){
 
   if(container){
 
-    container.innerHTML = Object.keys(balances).map(cur => {
-      return `
-        <span style="
-          margin-right:10px;
-          padding:4px 8px;
-          border-radius:8px;
-          background:#f3f4f6;
-          font-size:12px;
-        ">
-          ${cur}: ${l.moneyFmt(cur, balances[cur])}
-        </span>
-      `;
-    }).join("");
+    const container = document.getElementById("availableBalance");
 
-  }
+if (container) {
+
+  const other = Object.keys(balances)
+    .filter(c => c !== STATE.currency)
+    .slice(0, 2); // show only 2 (clean UI)
+
+  container.innerHTML = `
+    <div style="font-size:12px;opacity:0.7;margin-top:6px;">
+      ${other.map(c => `${c}: ${l.moneyFmt(c, balances[c])}`).join(" • ")}
+    </div>
+  `;
 }
 
 /* ========= MODAL ========= */
