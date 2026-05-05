@@ -58,10 +58,11 @@ function bindUI(){
   /* ---- GLOBAL CLICK ROUTER ---- */
   document.addEventListener("click", e => {
 
-    const el =
-      e.target.closest("[data-action]") ||
-      e.target.closest("[data-service]") ||
-      e.target.closest("[data-shortcut]");
+const el =
+  e.target.closest("[data-action]") ||
+  e.target.closest("[data-service]") ||
+  e.target.closest("[data-shortcut]") ||
+  e.target.closest("[data-utility]");
 
     if(!el) return;
 
