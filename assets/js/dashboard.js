@@ -1,11 +1,6 @@
 "use strict";
 
-/* =========================
-   PAY54 v10 — CORE ENGINE
-   (Stable, Fast, Scalable)
-========================= */
-
-/* ========= GLOBAL STATE ========= */
+/* ========= STATE ========= */
 const STATE = {
   ledger: null,
   currency: localStorage.getItem("pay54_currency") || "NGN"
@@ -18,7 +13,7 @@ function init(){
   waitForLedger(() => {
     bindUI();
     render();
-    console.log("✅ PAY54 READY (v10)");
+    console.log("✅ PAY54 READY");
   });
 }
 
@@ -43,33 +38,30 @@ function waitForLedger(cb){
   loop();
 }
 
-/* ========= SAFE LEDGER ========= */
+/* ========= LEDGER SAFE ========= */
 function ledger(){
-  if(!STATE.ledger){
-    alert("System loading...");
-    return null;
-  }
+  if(!STATE.ledger) return null;
   return STATE.ledger;
 }
 
 /* ========= UI BIND ========= */
 function bindUI(){
 
-  /* ---- GLOBAL CLICK ROUTER ---- */
   document.addEventListener("click", e => {
 
-const el =
-  e.target.closest("[data-action]") ||
-  e.target.closest("[data-service]") ||
-  e.target.closest("[data-shortcut]") ||
-  e.target.closest("[data-utility]");
+    const el =
+      e.target.closest("[data-action]") ||
+      e.target.closest("[data-service]") ||
+      e.target.closest("[data-shortcut]") ||
+      e.target.closest("[data-utility]");
 
     if(!el) return;
 
     const key =
       el.dataset.action ||
       el.dataset.service ||
-      el.dataset.shortcut;
+      el.dataset.shortcut ||
+      el.dataset.utility;
 
     if(ACTIONS[key]){
       ACTIONS[key]();
@@ -78,7 +70,7 @@ const el =
     }
   });
 
-  /* ---- CURRENCY SWITCH ---- */
+  /* currency */
   document.querySelectorAll(".currency").forEach(btn=>{
     btn.onclick = ()=>{
       STATE.currency = btn.dataset.cur;
@@ -90,40 +82,37 @@ const el =
       render();
     };
   });
-
 }
 
 /* ========= RENDER ========= */
 function render(){
+
   const l = ledger();
   if(!l) return;
 
   const balances = l.getBalances();
 
-  /* --- MAIN BALANCE --- */
+  /* MAIN */
   const main = balances[STATE.currency] || 0;
 
   document.getElementById("balanceAmount").textContent =
     l.moneyFmt(STATE.currency, main);
 
-  /* --- AVAILABLE PER CURRENCY --- */
+  /* CLEAN DISPLAY (FIXED) */
   const container = document.getElementById("availableBalance");
 
   if(container){
 
-    const container = document.getElementById("availableBalance");
+    const other = Object.keys(balances)
+      .filter(c => c !== STATE.currency)
+      .slice(0,2);
 
-if (container) {
-
-  const other = Object.keys(balances)
-    .filter(c => c !== STATE.currency)
-    .slice(0, 2); // show only 2 (clean UI)
-
-  container.innerHTML = `
-    <div style="font-size:12px;opacity:0.7;margin-top:6px;">
-      ${other.map(c => `${c}: ${l.moneyFmt(c, balances[c])}`).join(" • ")}
-    </div>
-  `;
+    container.innerHTML = `
+      <div style="font-size:12px;opacity:0.7;margin-top:6px;">
+        ${other.map(c => `${c}: ${l.moneyFmt(c, balances[c])}`).join(" • ")}
+      </div>
+    `;
+  }
 }
 
 /* ========= MODAL ========= */
@@ -165,7 +154,6 @@ function tx(entry){
 /* ========= ACTIONS ========= */
 const ACTIONS = {
 
-  /* ==== MONEY ==== */
   send(){
     const m = modal("Send Money", `
       <input id="amt" class="p54-input" placeholder="Amount">
@@ -211,15 +199,9 @@ const ACTIONS = {
     };
   },
 
-  bank_transfer(){
-    modal("Bank Transfer", "Coming next phase");
-  },
+  bank_transfer(){ modal("Bank Transfer", "Coming next phase"); },
+  scan_pay(){ modal("Scan & Pay", "Coming next phase"); },
 
-  scan_pay(){
-    modal("Scan & Pay", "Coming next phase");
-  },
-
-  /* ==== SERVICES ==== */
   fx(){ modal("FX Transfer", "Coming soon"); },
   bills(){ modal("Bills", "Coming soon"); },
   savings(){ modal("Savings", "Coming soon"); },
@@ -232,13 +214,7 @@ const ACTIONS = {
   checkout(){ modal("Checkout", "Coming soon"); },
   risk(){ modal("Risk Watch", "System active"); },
 
-  /* ==== UTILITIES (THIS WAS MISSING) ==== */
-  atm(){
-    modal("ATM Finder", "Nearby ATMs");
-  },
-
-  pos(){
-    modal("POS / Agent Finder", "Nearby agents");
-  }
+  atm(){ modal("ATM Finder", "Nearby ATMs"); },
+  pos(){ modal("POS Finder", "Nearby agents"); }
 
 };
