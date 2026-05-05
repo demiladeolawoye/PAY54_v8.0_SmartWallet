@@ -3449,7 +3449,8 @@ function bindStableClickRouting(){
   document.addEventListener("click",(e)=>{
 
     const el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
-    if(!el) return;
+
+if(!el || el.closest(".p54-modal")) return;
 
     const key = el.dataset.action || el.dataset.service || el.dataset.shortcut;
 
