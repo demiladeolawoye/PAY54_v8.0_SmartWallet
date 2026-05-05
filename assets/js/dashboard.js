@@ -167,7 +167,7 @@ function tx(entry){
 /* ========= ACTIONS ========= */
 const ACTIONS = {
 
-  /* ==== SEND ==== */
+  /* ==== MONEY ==== */
   send(){
     const m = modal("Send Money", `
       <input id="amt" class="p54-input" placeholder="Amount">
@@ -178,23 +178,15 @@ const ACTIONS = {
       const amt = Number(m.querySelector("#amt").value);
       if(!amt) return alert("Enter amount");
 
-      tx({
-        type:"send",
-        title:"Sent",
-        currency: STATE.currency,
-        amount:-amt
-      });
-
+      tx({ type:"send", title:"Sent", currency: STATE.currency, amount:-amt });
       m.remove();
     };
   },
 
-  /* ==== RECEIVE ==== */
   receive(){
     modal("Receive", `<strong>@pay54-user</strong>`);
   },
 
-  /* ==== ADD MONEY ==== */
   add_money(){
     const m = modal("Add Money", `
       <input id="amt" class="p54-input" placeholder="Amount">
@@ -203,54 +195,52 @@ const ACTIONS = {
 
     m.querySelector("#go").onclick = ()=>{
       const amt = Number(m.querySelector("#amt").value);
-
-      tx({
-        type:"fund",
-        title:"Wallet Funding",
-        currency: STATE.currency,
-        amount: amt
-      });
-
+      tx({ type:"fund", title:"Wallet Funding", currency: STATE.currency, amount: amt });
       m.remove();
     };
   },
 
-  /* ==== WITHDRAW ==== */
- withdraw(){
-  const m = modal("Withdraw", `
-    <input id="amt" class="p54-input" placeholder="Amount">
-    <button id="go" class="p54-btn primary">Withdraw</button>
-  `);
+  withdraw(){
+    const m = modal("Withdraw", `
+      <input id="amt" class="p54-input" placeholder="Amount">
+      <button id="go" class="p54-btn primary">Withdraw</button>
+    `);
 
-  m.querySelector("#go").onclick = ()=>{
-    const amt = Number(m.querySelector("#amt").value);
+    m.querySelector("#go").onclick = ()=>{
+      const amt = Number(m.querySelector("#amt").value);
+      tx({ type:"withdraw", title:"Withdrawal", currency: STATE.currency, amount:-amt });
+      m.remove();
+    };
+  },
 
-    tx({
-      type:"withdraw",
-      title:"Withdrawal",
-      currency: STATE.currency,
-      amount:-amt
-    });
+  bank_transfer(){
+    modal("Bank Transfer", "Coming next phase");
+  },
 
-    m.remove();
-  };
-},  // 👈 THIS COMMA FIXES EVERYTHING
-
-bank_transfer(){
-  modal("Bank Transfer", "Coming next phase");
-},
   scan_pay(){
     modal("Scan & Pay", "Coming next phase");
   },
 
   /* ==== SERVICES ==== */
-  fx(){ modal("FX", "Global transfer coming"); },
-  bills(){ modal("Bills", "Bills coming"); },
-  savings(){ modal("Savings", "Savings coming"); },
-  cards(){ modal("Cards", "Cards coming"); },
-  shop(){ modal("Shop", "Shop coming"); },
-  trading(){ modal("Trading", "Trading coming"); },
-  agent(){ modal("Agent", "Agent onboarding coming"); },
-  merchantqr(){ modal("QR", "QR generator coming"); }
+  fx(){ modal("FX Transfer", "Coming soon"); },
+  bills(){ modal("Bills", "Coming soon"); },
+  savings(){ modal("Savings", "Coming soon"); },
+  cards(){ modal("Cards", "Coming soon"); },
+  shop(){ modal("Shop", "Coming soon"); },
+  trading(){ modal("Trading", "Coming soon"); },
+  agent(){ modal("Agent", "Coming soon"); },
+  merchantqr(){ modal("QR Generator", "Coming soon"); },
+  request(){ modal("Request Money", "Coming soon"); },
+  checkout(){ modal("Checkout", "Coming soon"); },
+  risk(){ modal("Risk Watch", "System active"); },
+
+  /* ==== UTILITIES (THIS WAS MISSING) ==== */
+  atm(){
+    modal("ATM Finder", "Nearby ATMs");
+  },
+
+  pos(){
+    modal("POS / Agent Finder", "Nearby agents");
+  }
 
 };
