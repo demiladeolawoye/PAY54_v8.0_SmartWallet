@@ -3627,17 +3627,13 @@ setTimeout(()=>{
    SAFE INITIAL RENDER (FIXED)
 ========================= */
 
-waitForLedgerReady(() => {
+console.log("✅ Ledger confirmed — rendering UI");
 
-  console.log("✅ Ledger confirmed — rendering UI");
-
-  setActiveCurrency(getSelectedCurrency());
-  renderRecentTransactions();
-  renderAlerts();
-  renderNews();
-  renderFxTicker();
-
-});
+setActiveCurrency(getSelectedCurrency());
+renderRecentTransactions();
+renderAlerts();
+renderNews();
+renderFxTicker();
 
     /* =========================
        🔥 ADD THIS HERE (CORRECT POSITION)
