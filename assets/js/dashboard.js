@@ -1,19 +1,15 @@
 /* =========================
-   PAY54 v9.2 — UI RESTORED (ON TOP OF v9 ENGINE)
+   PAY54 DASHBOARD v9.2 CLEAN STABLE
 ========================= */
 
 (function(){
 "use strict";
 
 /* =========================
-   CORE ENGINE ACCESS
+   SAFE LEDGER ACCESS
 ========================= */
 function getLedger(){
   return window.PAY54_LEDGER || null;
-}
-
-function getCurrency(){
-  return localStorage.getItem("pay54_currency") || "NGN";
 }
 
 /* =========================
@@ -22,24 +18,7 @@ function getCurrency(){
 const $ = (s)=>document.querySelector(s);
 
 /* =========================
-   TRANSACTION PIPELINE
-========================= */
-function processTx(entry){
-
-  const ledger = getLedger();
-  if(!ledger){
-    alert("System not ready");
-    return;
-  }
-
-  const tx = ledger.applyEntry(entry);
-
-  renderAll();
-  showReceipt(tx);
-}
-
-/* =========================
-   RENDER
+   BASIC RENDER
 ========================= */
 function renderBalance(){
 
@@ -49,86 +28,47 @@ function renderBalance(){
   const ledger = getLedger();
   if(!ledger) return;
 
-  const bal = ledger.getBalances();
-  const cur = getCurrency();
+  const balances = ledger.getBalances();
+  const cur = localStorage.getItem("pay54_currency") || "NGN";
 
-  el.textContent = ledger.moneyFmt(cur, bal[cur] || 0);
+  el.textContent = ledger.moneyFmt(cur, balances[cur] || 0);
 }
 
-function renderRecent(){
-
-  const container = $('[data-role="recentTxFeed"]');
-  if(!container) return;
+/* =========================
+   TRANSACTION
+========================= */
+function processTx(entry){
 
   const ledger = getLedger();
-  if(!ledger) return;
+  if(!ledger){
+    alert("System not ready");
+    return;
+  }
 
-  const txs = ledger.getTx().slice(0,5);
-
-  container.innerHTML = txs.map(tx=>`
-    <div class="feed-item">
-      <div class="feed-title">${tx.title}</div>
-      <div class="feed-sub">${tx.currency} ${tx.amount}</div>
-    </div>
-  `).join("");
-}
-
-function renderAll(){
+  ledger.applyEntry(entry);
   renderBalance();
-  renderRecent();
 }
 
 /* =========================
-   RECEIPT
-========================= */
-function showReceipt(tx){
-  alert(`${tx.title}\n${tx.currency} ${tx.amount}`);
-}
-
-/* =========================
-   PIN
-========================= */
-function requirePIN(cb){
-
-  let pin = localStorage.getItem("pay54_pin");
-
-  if(!pin){
-    pin = prompt("Create PIN");
-    if(!pin) return;
-    localStorage.setItem("pay54_pin", pin);
-  }
-
-  const input = prompt("Enter PIN");
-
-  if(input === pin){
-    cb();
-  }else{
-    alert("Wrong PIN");
-  }
-}
-
-/* =========================
-   ACTIONS (CONNECTED TO UI)
+   FLOWS
 ========================= */
 
-function sendFlow(){
+function send(){
 
   const user = prompt("Recipient");
   const amount = Number(prompt("Amount"));
 
   if(!amount) return;
 
-  requirePIN(()=>{
-    processTx({
-      type:"send",
-      title:`Sent to ${user}`,
-      currency:getCurrency(),
-      amount:-amount
-    });
+  processTx({
+    type:"send",
+    title:`Sent to ${user}`,
+    currency:"NGN",
+    amount:-amount
   });
 }
 
-function addMoneyFlow(){
+function addMoney(){
 
   const amount = Number(prompt("Amount"));
   if(!amount) return;
@@ -136,66 +76,43 @@ function addMoneyFlow(){
   processTx({
     type:"fund",
     title:"Wallet Top-up",
-    currency:getCurrency(),
+    currency:"NGN",
     amount:amount
   });
 }
 
-function withdrawFlow(){
+function withdraw(){
 
   const amount = Number(prompt("Amount"));
   if(!amount) return;
 
-  requirePIN(()=>{
-    processTx({
-      type:"withdraw",
-      title:"Withdrawal",
-      currency:getCurrency(),
-      amount:-amount
-    });
+  processTx({
+    type:"withdraw",
+    title:"Withdrawal",
+    currency:"NGN",
+    amount:-amount
   });
 }
 
-function scanPayFlow(){
-  alert("Scan & Pay coming next layer");
-}
-
-function bankTransferFlow(){
-  alert("Bank Transfer flow coming next");
-}
-
 /* =========================
-   🔥 AUTO UI BINDING (KEY FIX)
+   CLICK BINDING
 ========================= */
 function bindUI(){
 
-  // MONEY MOVES
-  bind("send", sendFlow);
-  bind("receive", ()=>alert("Receive coming"));
-  bind("scan_pay", scanPayFlow);
-  bind("add_money", addMoneyFlow);
-  bind("withdraw", withdrawFlow);
-  bind("bank_transfer", bankTransferFlow);
+  document.querySelectorAll("[data-action='send']")
+    .forEach(el=>el.onclick = send);
 
-  // SERVICES
-  bind("fx", ()=>alert("FX coming"));
-  bind("bills", ()=>alert("Bills coming"));
-  bind("savings", ()=>alert("Savings coming"));
-  bind("cards", ()=>alert("Cards coming"));
-}
+  document.querySelectorAll("[data-action='add_money']")
+    .forEach(el=>el.onclick = addMoney);
 
-/* =========================
-   UNIVERSAL BINDER
-========================= */
-function bind(action, handler){
+  document.querySelectorAll("[data-action='withdraw']")
+    .forEach(el=>el.onclick = withdraw);
 
-  document.querySelectorAll(`
-    [data-action="${action}"],
-    [data-service="${action}"],
-    [data-shortcut="${action}"]
-  `).forEach(el=>{
-    el.addEventListener("click", handler);
-  });
+  document.querySelectorAll("[data-action='scan_pay']")
+    .forEach(el=>el.onclick = ()=>alert("Scan Pay coming"));
+
+  document.querySelectorAll("[data-action='bank_transfer']")
+    .forEach(el=>el.onclick = ()=>alert("Bank Transfer coming"));
 
 }
 
@@ -204,10 +121,10 @@ function bind(action, handler){
 ========================= */
 function init(){
 
-  console.log("🚀 PAY54 UI RESTORED");
+  console.log("✅ PAY54 LOADED CLEAN");
 
   bindUI();
-  renderAll();
+  renderBalance();
 }
 
 /* =========================
@@ -222,7 +139,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
       init();
     }
 
-  },150);
+  },200);
 
 });
 
