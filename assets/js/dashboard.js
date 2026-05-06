@@ -1,20 +1,14 @@
 /* =========================
-   PAY54 DASHBOARD v9.5 CORE ENGINE
-   Stable + Scalable Build
+   PAY54 v9.6 HYBRID (STABLE + FULL UI RESTORE)
 ========================= */
 
 (function(){
 "use strict";
 
 /* =========================
-   CORE
+   CORE HELPERS
 ========================= */
-
-const LS = {
-  CUR: "pay54_currency"
-};
-
-function $(s){ return document.querySelector(s); }
+const $ = (s)=>document.querySelector(s);
 
 function getLedger(){
   return window.PAY54_LEDGER || null;
@@ -23,7 +17,6 @@ function getLedger(){
 /* =========================
    BALANCE ENGINE
 ========================= */
-
 function renderBalance(){
 
   const el = $("#balanceAmount");
@@ -33,79 +26,78 @@ function renderBalance(){
   if(!ledger) return;
 
   const balances = ledger.getBalances();
-  const cur = localStorage.getItem(LS.CUR) || "NGN";
+  const cur = localStorage.getItem("pay54_currency") || "NGN";
 
   el.textContent = ledger.moneyFmt(cur, balances[cur] || 0);
 }
 
 /* =========================
-   TRANSACTION ENGINE (SAFE)
+   CURRENCY SYSTEM (RESTORED)
 ========================= */
+function bindCurrency(){
 
-function processTx(entry, label){
+  const pills = document.querySelectorAll(".currency");
+  const dropdown = $("#currencySelect");
+
+  function setCurrency(cur){
+    localStorage.setItem("pay54_currency", cur);
+
+    pills.forEach(p=>{
+      p.classList.toggle("active", p.dataset.cur === cur);
+    });
+
+    if(dropdown) dropdown.value = cur;
+
+    renderBalance();
+  }
+
+  pills.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      setCurrency(btn.dataset.cur);
+    });
+  });
+
+  if(dropdown){
+    dropdown.addEventListener("change",(e)=>{
+      setCurrency(e.target.value);
+    });
+  }
+}
+
+/* =========================
+   TRANSACTION ENGINE
+========================= */
+function processTx(entry){
 
   const ledger = getLedger();
-
   if(!ledger){
     alert("System not ready");
     return;
   }
 
-  if(!entry.amount || isNaN(entry.amount)){
-    alert("Invalid amount");
-    return;
-  }
-
-  const tx = ledger.applyEntry(entry);
-
+  ledger.applyEntry(entry);
   renderBalance();
-
-  showReceipt(tx, label);
-
 }
 
 /* =========================
-   RECEIPT (CLEAN VERSION)
-========================= */
-
-function showReceipt(tx, label){
-
-  alert(
-`PAY54 RECEIPT
-${label}
-
-Amount: ${tx.amount}
-Currency: ${tx.currency}
-Time: ${new Date().toLocaleString()}
-`
-  );
-
-}
-
-/* =========================
-   MONEY FLOWS
+   FLOWS
 ========================= */
 
 function send(){
-
-  const user = prompt("Recipient (@username)");
+  const user = prompt("Recipient");
   const amount = Number(prompt("Amount"));
-
-  if(!user || !amount) return;
+  if(!amount) return;
 
   processTx({
     type:"send",
     title:`Sent to ${user}`,
     currency:"NGN",
     amount:-amount
-  }, "Send Money");
-
+  });
 }
 
 function addMoney(){
-
   const amount = Number(prompt("Amount"));
-
   if(!amount) return;
 
   processTx({
@@ -113,14 +105,11 @@ function addMoney(){
     title:"Wallet Top-up",
     currency:"NGN",
     amount:amount
-  }, "Add Money");
-
+  });
 }
 
 function withdraw(){
-
   const amount = Number(prompt("Amount"));
-
   if(!amount) return;
 
   processTx({
@@ -128,54 +117,33 @@ function withdraw(){
     title:"Withdrawal",
     currency:"NGN",
     amount:-amount
-  }, "Withdraw");
-
+  });
 }
 
-/* =========================
-   BANK TRANSFER (FIXED)
-========================= */
-
 function bankTransfer(){
-
-  const bank = prompt("Bank Name");
-  const acc = prompt("Account Number");
+  const bank = prompt("Bank");
   const amount = Number(prompt("Amount"));
-
-  if(!bank || !acc || !amount) return;
+  if(!amount) return;
 
   processTx({
     type:"bank_transfer",
     title:`Transfer to ${bank}`,
     currency:"NGN",
-    amount:-amount,
-    meta:{
-      bank,
-      account: acc
-    }
-  }, "Bank Transfer");
-
+    amount:-amount
+  });
 }
-
-/* =========================
-   PLACEHOLDERS (SAFE)
-========================= */
 
 function scanPay(){
-  alert("Scan & Pay coming next phase");
-}
-
-function fx(){
-  alert("Global Transfer coming next phase");
+  alert("Scan Pay coming");
 }
 
 /* =========================
-   ROUTING ENGINE (CRITICAL)
+   SERVICES MAP
 ========================= */
 
 const ACTIONS = {
   send,
-  receive: ()=>alert("Receive coming"),
+  receive: ()=>alert("Receive"),
   scan_pay: scanPay,
   add_money: addMoney,
   withdraw,
@@ -183,46 +151,70 @@ const ACTIONS = {
 };
 
 const SERVICES = {
-  fx,
-  bills: ()=>alert("Bills coming"),
-  savings: ()=>alert("Savings coming"),
-  cards: ()=>alert("Cards coming"),
-  checkout: ()=>alert("Checkout coming"),
-  shop: ()=>alert("Shop coming"),
-  merchantqr: ()=>alert("QR coming"),
-  trading: ()=>alert("Trading coming"),
-  bet: ()=>alert("Bet coming"),
-  agent: ()=>alert("Agent coming"),
-  request: ()=>alert("Request coming"),
-  risk: ()=>alert("Risk coming")
+  fx: ()=>alert("FX coming"),
+  bills: ()=>alert("Bills"),
+  savings: ()=>alert("Savings"),
+  cards: ()=>alert("Cards"),
+  checkout: ()=>alert("Checkout"),
+  shop: ()=>alert("Shop"),
+  merchantqr: ()=>alert("QR"),
+  trading: ()=>alert("Trading"),
+  bet: ()=>alert("Bet"),
+  agent: ()=>alert("Agent"),
+  request: ()=>alert("Request"),
+  risk: ()=>alert("Risk")
 };
 
 /* =========================
-   CLICK ENGINE (STABLE)
+   🔥 FULL CLICK ENGINE (v8.1 RESTORED)
 ========================= */
 
 function bindClicks(){
 
   document.addEventListener("click",(e)=>{
 
-    const btn = e.target.closest(".tile-btn");
-    if(!btn) return;
+    const el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
 
-    const action = btn.dataset.action;
-    const service = btn.dataset.service;
+    if(!el) return;
 
-    if(action && ACTIONS[action]){
+    const action =
+      el.dataset.action ||
+      el.dataset.service ||
+      el.dataset.shortcut ||
+      el.dataset.utility;
+
+    if(!action){
+      console.warn("No action");
+      return;
+    }
+
+    if(ACTIONS[action]){
       ACTIONS[action]();
       return;
     }
 
-    if(service && SERVICES[service]){
-      SERVICES[service]();
+    if(SERVICES[action]){
+      SERVICES[action]();
       return;
     }
 
+    console.warn("Unknown:", action);
+
   });
 
+}
+
+/* =========================
+   HEADER BUTTONS (RESTORED)
+========================= */
+
+function bindHeader(){
+
+  const addBtn = $("#addMoneyBtn");
+  const wdBtn = $("#withdrawBtn");
+
+  if(addBtn) addBtn.onclick = addMoney;
+  if(wdBtn) wdBtn.onclick = withdraw;
 }
 
 /* =========================
@@ -231,18 +223,20 @@ function bindClicks(){
 
 function init(){
 
-  console.log("✅ PAY54 v9.5 LOADED");
+  console.log("✅ PAY54 v9.6 HYBRID ACTIVE");
 
-  bindClicks();
+  bindClicks();        // 🔥 FULL routing restored
+  bindCurrency();      // 🔥 FIX pills
+  bindHeader();        // 🔥 FIX header buttons
+
   renderBalance();
-
 }
 
 /* =========================
    BOOT
 ========================= */
 
-document.addEventListener("DOMContentLoaded", ()=>{
+document.addEventListener("DOMContentLoaded",()=>{
 
   const wait = setInterval(()=>{
 
