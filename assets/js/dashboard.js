@@ -3590,7 +3590,10 @@ function init() {
    SEED + INITIAL STATE
 ========================= */
 // 🔥 CRITICAL: Seed BEFORE UI renders
-seedDemoIfEmpty();
+waitForLedgerReady(() => {
+  console.log("🌱 Running seed after ledger ready");
+  seedDemoIfEmpty();
+});
 seedDemoAlertsIfEmpty();
 
 // 🔥 FORCE UI SYNC AFTER SEED
