@@ -3590,16 +3590,20 @@ function init() {
    SEED + INITIAL STATE
 ========================= */
 // 🔥 CRITICAL: Seed BEFORE UI renders
+// 🔥 CRITICAL: Seed AFTER ledger is ready
 waitForLedgerReady(() => {
-  console.log("🌱 Running seed after ledger ready");
-  seedDemoIfEmpty();
-});
-seedDemoAlertsIfEmpty();
 
-// 🔥 FORCE UI SYNC AFTER SEED
-setTimeout(()=>{
-  refreshUI();
-},50);
+  console.log("🌱 Running seed after ledger ready");
+
+  seedDemoIfEmpty();
+  seedDemoAlertsIfEmpty();
+
+  // 🔥 GUARANTEED SAFE UI SYNC
+  setTimeout(() => {
+    refreshUI();
+  }, 80);
+
+});
 
 /* =========================
    SAFE INITIAL RENDER (FIXED)
