@@ -3710,20 +3710,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("🚀 DOM READY");
 
-  waitForModules(() => {
+  function waitForEverything(){
 
-    if (typeof SERVICES === "undefined") {
-      console.error("🚨 SERVICES not ready");
+    if (
+      window.PAY54_LEDGER &&
+      typeof window.PAY54_LEDGER.getBalances === "function" &&
+      typeof window.PAY54_LEDGER.applyEntry === "function"
+    ){
+      console.log("✅ CORE MODULES READY");
+
+      try {
+        init();
+      } catch(e){
+        console.error("🚨 INIT FAILED:", e);
+      }
+
       return;
     }
 
-    waitForLedgerReady(() => {
-      console.log("✅ ALL SYSTEMS READY → INIT");
-      init();
-    });
+    console.log("⏳ Waiting for core modules...");
+    setTimeout(waitForEverything, 150);
+  }
 
-  });
-
+  waitForEverything();
 });
 /* =========================
    PAY54 REQUEST ENGINE (FINAL CLEAN)
