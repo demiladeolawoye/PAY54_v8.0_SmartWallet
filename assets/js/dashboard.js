@@ -3253,31 +3253,9 @@ function bindSubCategory(cat){
   });
 
 }
-      /* =========================
-         MERCHANT FLOW
-      ========================= */
-       
-   function openShopPayment(merchant){
-
-  openModal({
-    title: merchant,
-
-    bodyHTML: `
-      <form class="p54-form" id="shopPayForm">
-
-        <div>
-          <div class="p54-label">Amount</div>
-          <input class="p54-input" id="shopAmount" placeholder="0.00" required>
-        </div>
-
-        <div class="p54-actions">
-          <button class="p54-btn" type="button" id="cancelPay">Cancel</button>
-          <button class="p54-btn primary">Pay</button>
-        </div>
-
-      </form>
-   /* =========================
-   MERCHANT FLOW (FIXED)
+      
+/* =========================
+   SHOP MERCHANT FLOW (FINAL CLEAN)
 ========================= */
 
 function bindMerchantClicks(){
