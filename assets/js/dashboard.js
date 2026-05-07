@@ -3351,18 +3351,20 @@ function openShopPayment(merchant){
             amount:-amount,
             icon:"🛒"
           });
-
-          processTransaction(entry,{showReceipt:true});
+                processTransaction(entry,{showReceipt:true});
           close();
 
-        });
+        }); // CLOSE requestPinVerification
 
-      };
+      }; // CLOSE form submit
 
-    }
-  });
+    } // CLOSE onMount
 
-}
+  }); // CLOSE openModal
+
+} // CLOSE openShop
+
+
 function openTrading(){ comingSoon("Trading"); }
 function openBet(){ comingSoon("Bet Funding"); }
 function openAgent(){ comingSoon("Become an Agent"); }
