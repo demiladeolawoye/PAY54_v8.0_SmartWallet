@@ -3772,7 +3772,29 @@ window.PAY54_REQUESTS = {
   }
 
 };
+window.PAY54_UI = {
 
+  openSend: openSendUnified,
+  openReceive,
+  openScanAndPay,
+  openAddMoney,
+  openWithdraw,
+  openBankTransfer,
+
+  openGlobalTransfer,
+  openBills,
+  openSavings,
+  openCards,
+  openCheckout,
+  openShop,
+  openMerchantQR,
+  openRequestMoney,
+
+  openTrading,
+  openAgent,
+  openRisk
+
+};
 /* =========================
    FINAL FILE END (FIX)
 ========================= */
