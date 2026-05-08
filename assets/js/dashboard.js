@@ -3369,32 +3369,7 @@ function openTrading(){ comingSoon("Trading"); }
 function openBet(){ comingSoon("Bet Funding"); }
 function openAgent(){ comingSoon("Become an Agent"); }
 function openRisk(){ comingSoon("AI Risk Watch"); }
-/* =========================
-   SERVICES REGISTRY (CRITICAL FIX)
-========================= */
 
-const SERVICES = {
-
-  send: openSendUnified,
-  receive: openReceive,
-  scan_pay: openScanAndPay,
-  add_money: openAddMoney,
-  withdraw: openWithdraw,
-  bank_transfer: openBankTransfer,
-
-  fx: openGlobalTransfer,
-  bills: openBills,
-  savings: openSavings,
-  cards: openCards,
-  checkout: openCheckout,
-  shop: openShop,
-  merchantqr: openMerchantQR,
-  trading: openTrading,
-  bet: openBet,
-  agent: openAgent,
-  request: openRequestMoney,
-  risk: openRisk
-};
   /* ---------------------------
      STABLE CLICK WIRING (FIXES Step 4)
   --------------------------- */
