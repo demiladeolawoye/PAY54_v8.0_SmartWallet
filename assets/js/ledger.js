@@ -205,25 +205,26 @@
   }
 
   // Expose API
-  window.PAY54_LEDGER = {
-    LS,
-    SYMBOLS,
-    moneyFmt,
+window.PAY54_LEDGER = {
+  LS,
+  SYMBOLS,
+  moneyFmt,
 
-    getBalances,
-    setBalances,
+  getBalances,
+  setBalances,
 
-    getRates,
-    rate,
-    convert,
+  getRates,
+  rate,
+  getRate: rate,
+  convert,
 
-    getBaseCurrency,
-    setBaseCurrency,
+  getBaseCurrency,
+  setBaseCurrency,
 
-    getTx,
-    setTx,
+  getTx,
+  setTx,
 
-    createEntry,
-    applyEntry
-  };
+  createEntry,
+  applyEntry
+};
 })();
