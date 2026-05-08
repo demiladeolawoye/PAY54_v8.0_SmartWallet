@@ -3373,33 +3373,48 @@ function openRisk(){ comingSoon("AI Risk Watch"); }
   /* ---------------------------
      STABLE CLICK WIRING (FIXES Step 4)
   --------------------------- */
-
 function bindStableClickRouting(){
 
   document.addEventListener("click",(e)=>{
 
-    const el = e.target.closest(".tile-btn, .shortcut-btn, .utility-btn");
+    const el = e.target.closest(
+      ".tile-btn, .shortcut-btn, .utility-btn"
+    );
+
     if(!el) return;
 
-    const key = el.dataset.action || el.dataset.service || el.dataset.shortcut;
+    const key =
+      el.dataset.action ||
+      el.dataset.service ||
+      el.dataset.shortcut;
 
     if(!key){
-      console.warn("⚠️ No action defined");
+      console.warn("No service key");
       return;
     }
 
-    if(!SERVICES[key]){
-      console.warn("⚠️ Unknown service:", key);
+    const registry = window.PAY54_SERVICES;
+
+    if(!registry || !registry[key]){
+      console.warn("Unknown service:", key);
       return;
     }
 
-    console.log("🔥 CLICK:", key);
+    try{
 
-    SERVICES[key]();
+      registry[key].handler();
+
+    }catch(err){
+
+      console.error("Service failed:", key, err);
+      alert("Temporary PAY54 issue");
+
+    }
 
   });
 
 }
+
 /* =========================
    PAYMENT RECEIPT
 ========================= */
