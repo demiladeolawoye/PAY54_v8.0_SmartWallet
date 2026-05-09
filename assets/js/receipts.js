@@ -91,14 +91,19 @@
   modal.querySelector("#doneRcpt").addEventListener("click", close);
   modal.querySelector("#copyRcpt").addEventListener("click", () => copyToClipboard(receiptText));
   modal.querySelector("#waRcpt").addEventListener("click", () => shareWhatsApp(receiptText));
-  modal.querySelector("#againRcpt").addEventListener("click", () => {
-    close();
-    setTimeout(()=> window.PAY54_OPEN_SCAN(),200);
-  });
-}
+ modal.querySelector("#againRcpt").addEventListener("click", () => {
 
-});   // closes openModal
+  close();
 
+  setTimeout(() => {
+
+    if(window.PAY54_UI?.openScanAndPay){
+      window.PAY54_UI.openScanAndPay();
+    }
+
+  }, 200);
+
+});
 }
 
 window.PAY54_RECEIPTS = { openReceiptModal };
