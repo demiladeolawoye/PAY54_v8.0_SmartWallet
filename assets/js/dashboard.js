@@ -3556,40 +3556,21 @@ function init() {
 
       return;
     }
-  /* =========================
-   SEED + INITIAL STATE
-========================= */
-// 🔥 CRITICAL: Seed BEFORE UI renders
-// 🔥 CRITICAL: Seed AFTER ledger is ready
-waitForLedgerReady(() => {
-
-  console.log("🌱 Running seed after ledger ready");
-
-  seedDemoIfEmpty();
-  seedDemoAlertsIfEmpty();
-
-  // 🔥 GUARANTEED SAFE UI SYNC
-  setTimeout(() => {
-    refreshUI();
-  }, 80);
-
-});
-
 /* =========================
-   SAFE INITIAL RENDER (FIXED)
+   INITIAL SYSTEM RENDER
 ========================= */
 
-waitForLedgerReady(() => {
+seedDemoIfEmpty();
+seedDemoAlertsIfEmpty();
 
-  console.log("✅ Ledger confirmed — rendering UI");
+setActiveCurrency(getSelectedCurrency());
 
-  setActiveCurrency(getSelectedCurrency());
-  renderRecentTransactions();
-  renderAlerts();
-  renderNews();
-  renderFxTicker();
+renderRecentTransactions();
+renderAlerts();
+renderNews();
+renderFxTicker();
 
-});
+refreshUI();
 
     /* =========================
        🔥 ADD THIS HERE (CORRECT POSITION)
