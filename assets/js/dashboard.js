@@ -14,6 +14,7 @@
 
 
   "use strict";
+const { openModal } = window.PAY54_MODALS;
 /* =========================
    🚨 GLOBAL ERROR GUARD (PRODUCTION SAFETY)
 ========================= */
