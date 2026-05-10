@@ -3698,6 +3698,58 @@ window.PAY54_REQUESTS = {
   }
 
 };
+       /* =========================
+   SAFE DIRECT TILE BINDING
+========================= */
+
+function bindDirectActions(){
+
+  const map = {
+
+    send: openSendUnified,
+    receive: openReceive,
+    scanpay: openScanAndPay,
+    addmoney: openAddMoney,
+    withdraw: openWithdraw,
+    banktransfer: openBankTransfer,
+
+    globaltransfer: openGlobalTransfer,
+    bills: openBills,
+    savings: openSavings,
+    cards: openCards,
+    checkout: openCheckout,
+    shop: openShop,
+    merchantqr: openMerchantQR,
+    requestmoney: openRequestMoney,
+
+    trading: openTrading,
+    agent: openAgent,
+    risk: openRisk
+
+  };
+
+  document.querySelectorAll("[data-action]").forEach(btn => {
+
+    const key = btn.dataset.action?.toLowerCase();
+
+    if(!map[key]) return;
+
+    btn.onclick = (e) => {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      try{
+        map[key]();
+      }catch(err){
+        console.error("ACTION FAILED:", key, err);
+      }
+
+    };
+
+  });
+
+}
 window.PAY54_UI = {
 
   openSend: openSendUnified,
