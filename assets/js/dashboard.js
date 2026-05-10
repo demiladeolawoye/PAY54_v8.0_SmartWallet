@@ -3526,7 +3526,7 @@ renderNews();
 renderFxTicker();
 
 refreshUI();
-
+bindDirectActions();
     /* =========================
        🔥 ADD THIS HERE (CORRECT POSITION)
     ========================= */
