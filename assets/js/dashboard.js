@@ -3370,51 +3370,6 @@ function openBet(){ comingSoon("Bet Funding"); }
 function openAgent(){ comingSoon("Become an Agent"); }
 function openRisk(){ comingSoon("AI Risk Watch"); }
 
-  /* ---------------------------
-     STABLE CLICK WIRING (FIXES Step 4)
-  --------------------------- */
-function bindStableClickRouting(){
-
-  document.addEventListener("click",(e)=>{
-
-    const el = e.target.closest(
-      ".tile-btn, .shortcut-btn, .utility-btn"
-    );
-
-    if(!el) return;
-
-    const key =
-      el.dataset.action ||
-      el.dataset.service ||
-      el.dataset.shortcut;
-
-    if(!key){
-      console.warn("No service key");
-      return;
-    }
-
-    const registry = window.PAY54_SERVICES;
-
-    if(!registry || !registry[key]){
-      console.warn("Unknown service:", key);
-      return;
-    }
-
-    try{
-
-      registry[key].handler();
-
-    }catch(err){
-
-      console.error("Service failed:", key, err);
-      alert("Temporary PAY54 issue");
-
-    }
-
-  });
-
-}
-
 /* =========================
    PAYMENT RECEIPT
 ========================= */
