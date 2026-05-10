@@ -3588,16 +3588,6 @@ refreshUI();
   }
 
   /* =========================
-     GLOBAL CLICK SYSTEM
-  ========================= */
- if (typeof bindStableClickRouting === "function") {
-  bindStableClickRouting();
-  console.log("✅ Click routing ACTIVE");
-} else {
-  console.error("❌ bindStableClickRouting missing");
-}
-
-  /* =========================
      FINAL UI REFRESH
   ========================= */
   refreshUI();
