@@ -3384,48 +3384,51 @@ try {
       return;
     }
 
-    /* =========================
-       INITIAL SYSTEM RENDER
-    ========================= */
+   /* =========================
+   INITIAL SYSTEM RENDER
+========================= */
 
-    seedDemoIfEmpty();
-    seedDemoAlertsIfEmpty();
+seedDemoIfEmpty();
+seedDemoAlertsIfEmpty();
 
-    setActiveCurrency(getSelectedCurrency());
+setActiveCurrency(getSelectedCurrency());
 
-    renderRecentTransactions();
-    renderAlerts();
-    renderNews();
-    renderFxTicker();
+renderRecentTransactions();
+renderAlerts();
+renderNews();
+renderFxTicker();
 
-    refreshUI();
+refreshUI();
 
-    bindDirectActions();
+bindDirectActions();
 
-    console.log("✅ INITIAL RENDER COMPLETE");
+/* =========================
+   VIEW ALL TX BINDING
+========================= */
+
+if (viewAllTxBtn) {
+  viewAllTxBtn.addEventListener("click", openLedger);
+}
+
+if (viewAllTxMobileBtn) {
+  viewAllTxMobileBtn.addEventListener("click", openLedger);
+}
+
+console.log("✅ INITIAL RENDER COMPLETE");
 
 } catch(err){
 
-    console.error("🚨 INIT CRASH:", err);
+  console.error("🚨 INIT CRASH:", err);
 
 }
-    /* =========================
-       🔥 ADD THIS HERE (CORRECT POSITION)
-    ========================= */
-    if (viewAllTxBtn) {
-      viewAllTxBtn.addEventListener("click", openLedger);
-    }
 
-    if (viewAllTxMobileBtn) {
-      viewAllTxMobileBtn.addEventListener("click", openLedger);
-    }
+/* =========================
+   FINAL UI REFRESH
+========================= */
 
-  /* =========================
-     FINAL UI REFRESH
-  ========================= */
-  refreshUI();
+refreshUI();
+
 }
-
     // Header buttons
 if (addMoneyBtn) addMoneyBtn.addEventListener("click", openAddMoney);
 if (withdrawBtn) withdrawBtn.addEventListener("click", openWithdraw);
