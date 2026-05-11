@@ -3364,38 +3364,51 @@ function init() {
 
   console.log("🚀 INIT STARTED CLEAN V8.1");
 
-  try {
+try {
 
     console.log("✅ INIT RUNNING");
 
     const ledger = safeLedger();
 
     if(!ledger){
+
       console.warn("⏳ Ledger not ready — retrying init...");
-      
+
       setTimeout(() => {
-        window.__PAY54_DASH_V81_INIT__ = false; // 🔥 allow retry
+
+        window.__PAY54_DASH_V81_INIT__ = false;
         init();
+
       }, 200);
 
       return;
     }
-/* =========================
-   INITIAL SYSTEM RENDER
-========================= */
 
-seedDemoIfEmpty();
-seedDemoAlertsIfEmpty();
+    /* =========================
+       INITIAL SYSTEM RENDER
+    ========================= */
 
-setActiveCurrency(getSelectedCurrency());
+    seedDemoIfEmpty();
+    seedDemoAlertsIfEmpty();
 
-renderRecentTransactions();
-renderAlerts();
-renderNews();
-renderFxTicker();
+    setActiveCurrency(getSelectedCurrency());
 
-refreshUI();
-bindDirectActions();
+    renderRecentTransactions();
+    renderAlerts();
+    renderNews();
+    renderFxTicker();
+
+    refreshUI();
+
+    bindDirectActions();
+
+    console.log("✅ INITIAL RENDER COMPLETE");
+
+} catch(err){
+
+    console.error("🚨 INIT CRASH:", err);
+
+}
     /* =========================
        🔥 ADD THIS HERE (CORRECT POSITION)
     ========================= */
