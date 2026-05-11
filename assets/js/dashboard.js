@@ -1539,7 +1539,7 @@ function resolveSmartPayment(amount, currency){
 
           let tx;
 
-          if(funding.source === "wallet"){
+     if(funding.source === "wallet"){
 
   const entry = LEDGER.createEntry({
     type:"send",
@@ -1550,7 +1550,10 @@ function resolveSmartPayment(amount, currency){
     meta:{ recipient:user, note }
   });
 
-  tx = LEDGER.applyEntry(entry);
+  tx = processTransaction(entry,{
+    showReceipt:true,
+    title:"Money Transfer"
+  });
 
 }
 else if(funding.source === "wallet_fx"){
