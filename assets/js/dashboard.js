@@ -14,7 +14,11 @@
 
 
   "use strict";
-const { openModal } = window.PAY54_MODALS;
+const openModal = window.PAY54_MODALS?.openModal;
+
+if(!openModal){
+  console.error("🚨 Modal engine failed to load");
+}
 /* =========================
    🚨 GLOBAL ERROR GUARD (PRODUCTION SAFETY)
 ========================= */
