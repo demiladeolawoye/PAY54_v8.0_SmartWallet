@@ -3420,10 +3420,6 @@ try {
       viewAllTxMobileBtn.addEventListener("click", openLedger);
     }
 
-  }catch(err){
-    console.error("🚨 INIT CRASH:", err);
-  }
-
   /* =========================
      FINAL UI REFRESH
   ========================= */
