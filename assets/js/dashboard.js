@@ -3400,6 +3400,42 @@ renderFxTicker();
 refreshUI();
 
 bindDirectActions();
+/* =========================
+   SAFE UI EVENT ENGINE
+========================= */
+
+// Header buttons
+if (addMoneyBtn){
+  addMoneyBtn.onclick = openAddMoney;
+}
+
+if (withdrawBtn){
+  withdrawBtn.onclick = openWithdraw;
+}
+
+/* Floating Scan Pay */
+const scanFab = document.getElementById("scanPayFab");
+
+if(scanFab){
+  scanFab.onclick = openScanAndPay;
+}
+
+/* Balance Card Scroll */
+const balanceCard = document.getElementById("balanceCard");
+
+if(balanceCard){
+
+  window.addEventListener("scroll", () => {
+
+    if(window.scrollY > 40){
+      balanceCard.classList.add("lifted");
+    }else{
+      balanceCard.classList.remove("lifted");
+    }
+
+  });
+
+}  
 
 /* =========================
    VIEW ALL TX BINDING
