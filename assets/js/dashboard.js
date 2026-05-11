@@ -1607,10 +1607,6 @@ else if(funding.source === "card"){
   tx = LEDGER.applyEntry(entry);
 
 }
-          prependTxToDOM(tx);
-          refreshUI();
-          showPaymentReceipt(tx, user, amount, currency);
-
           close();
 
         });
