@@ -663,76 +663,7 @@ function renderFxTicker(){
 
   }).join("");
 }
-   function openCreatePinModal(callback){
-
-  openModal({
-    title: "Create Transaction PIN",
-
-    bodyHTML: `
-      <div class="p54-note">Set a 4-digit PIN for secure transactions</div>
-
-      <input 
-        class="p54-input" 
-        id="newPin" 
-        type="password" 
-        placeholder="Enter PIN"
-        maxlength="6"
-        style="margin-top:12px"
-      >
-
-      <input 
-        class="p54-input" 
-        id="confirmPin" 
-        type="password" 
-        placeholder="Confirm PIN"
-        maxlength="6"
-        style="margin-top:10px"
-      >
-
-      <div class="p54-actions">
-        <button class="p54-btn" id="cancelCreatePin">Cancel</button>
-        <button class="p54-btn primary" id="savePin">Save PIN</button>
-      </div>
-    `,
-
-    onMount: ({ modal, close }) => {
-
-      const pin1 = modal.querySelector("#newPin");
-      const pin2 = modal.querySelector("#confirmPin");
-
-      modal.querySelector("#cancelCreatePin").addEventListener("click", close);
-
-      modal.querySelector("#savePin").addEventListener("click", () => {
-
-        const p1 = pin1.value.trim();
-        const p2 = pin2.value.trim();
-
-        if(p1.length < 4){
-          alert("PIN must be at least 4 digits");
-          return;
-        }
-
-        if(p1 !== p2){
-          alert("PINs do not match");
-          return;
-        }
-
-        localStorage.setItem(LS.PIN, p1);
-
-        alert("PIN set successfully ✅");
-
-        close();
-
-        if(callback){
-          callback(); // 🔥 continue original action
-        }
-
-      });
-
-    }
-  });
-
-}
+  
    /* =========================
    BALANCE GLOW EFFECT
 ========================= */
