@@ -274,35 +274,6 @@ function actionShop(){
 }
 
 /* =========================
-   CLICK SYSTEM (UNIVERSAL)
-========================= */
-function bindClicks(){
-
-  document.addEventListener("click",(e)=>{
-
-    const el = e.target.closest("[data-action]");
-    if(!el) return;
-
-    const action = el.dataset.action;
-
-    const actions = {
-      send: actionSend,
-      add: actionAddMoney,
-      withdraw: actionWithdraw,
-      shop: actionShop
-    };
-
-    if(actions[action]){
-      log("Action:", action);
-      actions[action]();
-    }else{
-      log("Unknown action:", action);
-    }
-
-  });
-}
-
-/* =========================
    RENDER ALL
 ========================= */
 function renderAll(){
