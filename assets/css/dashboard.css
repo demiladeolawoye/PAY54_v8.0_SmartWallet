@@ -1233,13 +1233,10 @@ body.light .utility-btn{
 
 }
 
-  /* BUTTON SIZE */
-  .tile-btn,
+    .tile-btn,
   .utility-btn{
     min-height:78px;
   }
-
-}
 /* =========================
    INPUT SIZE CONTROL (FINAL FIX)
 ========================= */
