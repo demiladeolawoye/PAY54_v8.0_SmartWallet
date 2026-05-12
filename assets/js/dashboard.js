@@ -705,7 +705,7 @@ if(ledger){
 
 function addEntryAndRefresh(entry) {
 
-  return processTransaction(entry, {
+  return PAY54_TX.processTransaction(entry, {
     showReceipt: true,
     title: "Wallet Funding"
   });
@@ -880,7 +880,7 @@ if(!ledger){
 
 if(funding.source === "wallet"){
 
-  processTransaction(entry, {
+ PAY54_TX.processTransaction(entry, {
     showReceipt: true,
     title: "Scan Payment"
   });
@@ -907,7 +907,7 @@ else if(funding.source === "wallet_fx"){
     })
   );
 
-  processTransaction(entry, {
+  PAY54_TX.processTransaction(entry, {
     showReceipt: true,
     title: "Scan Payment (FX)"
   });
@@ -926,7 +926,7 @@ else if(funding.source === "card"){
     icon:"💳"
   });
 
-  processTransaction(entry, {
+  PAY54_TX.processTransaction(entry, {
     showReceipt: true,
     title: "Card Payment"
   });
@@ -1097,7 +1097,7 @@ if(!ledger){
   return;
 }
 
-processTransaction(entry, {
+PAY54_TX.processTransaction(entry, {
   showReceipt: true,
   title: "Wallet Funding"
 });
@@ -1187,7 +1187,7 @@ function openWithdraw(){
             icon:"💵"
           });
 
-          processTransaction(entry,{
+         PAY54_TX.processTransaction(entry,{
             showReceipt:true,
             title:"Withdrawal"
           });
@@ -1339,7 +1339,7 @@ function resolveSmartPayment(amount, currency){
     meta:{ recipient:user, note }
   });
 
-  tx = processTransaction(entry,{
+  tx = PAY54_TX.processTransaction(entry,{
     showReceipt:true,
     title:"Money Transfer"
   });
@@ -1525,7 +1525,7 @@ function openCheckoutFromRequest(req){
             meta:{ ref: req.ref }
           });
 
-          processTransaction(entry,{
+         PAY54_TX.processTransaction(entry,{
             showReceipt:true,
             title:"Checkout Payment"
           });
@@ -1946,7 +1946,7 @@ function openBankTransfer(){
             }
           });
 
-          processTransaction(entry,{
+         PAY54_TX.processTransaction(entry,{
             showReceipt:true,
             title:"Bank Transfer"
           });
@@ -2134,7 +2134,7 @@ function openBills(){
             icon:"💡"
           });
 
-          processTransaction(entry,{showReceipt:true});
+          PAY54_TX.processTransaction(entry,{showReceipt:true});
           close();
         });
       };
@@ -2233,7 +2233,7 @@ list.querySelectorAll("[data-goal]").forEach(el => {
             icon:"🏦"
           });
 
-          processTransaction(entry,{showReceipt:true});
+        PAY54_TX.processTransaction(entry,{showReceipt:true});
 
           renderGoals();
 
@@ -2331,7 +2331,7 @@ render(filtered);
           icon:"🏦"
         });
 
-        processTransaction(entry,{showReceipt:true});
+       PAY54_TX.processTransaction(entry,{showReceipt:true});
         close();
       });
 
@@ -2591,7 +2591,7 @@ modal.querySelectorAll("[data-pay]").forEach(btn => {
               icon: "💳"
             });
 
-            processTransaction(entry, {
+            PAY54_TX.processTransaction(entry, {
               showReceipt: true,
               title: "Tap Payment"
             });
@@ -2765,7 +2765,7 @@ if(fundBtn){
     icon:"💳"
   });
 
-  processTransaction(entry,{
+  PAY54_TX.processTransaction(entry,{
     showReceipt:true,
     title:"Card Funding"
   });
@@ -3008,7 +3008,7 @@ function openShopPayment(merchant){
             amount:-amount,
             icon:"🛒"
           });
-                processTransaction(entry,{showReceipt:true});
+                PAY54_TX.processTransaction(entry,{showReceipt:true});
           close();
 
         }); // CLOSE requestPinVerification
