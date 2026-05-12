@@ -624,13 +624,6 @@ body.light .balance-amount{
   gap:14px;
 }
 
-/* Money Moves */
-.money-moves-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:16px;
-}
-
 .tile-btn{
   padding:14px;
   border-radius:18px;
