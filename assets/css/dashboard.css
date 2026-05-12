@@ -1186,28 +1186,87 @@ body.light .utility-btn{
 /* =========================
    DESKTOP GRID SYSTEM
 ========================= */
+/* =========================
+   PAY54 FINAL GRID SYSTEM
+========================= */
 
-/* MONEY MOVES → 3 x 2 */
+/* MONEY MOVES */
 .money-moves-grid{
-  grid-template-columns: repeat(3,1fr);
-  gap:12px;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:14px;
+  width:100%;
 }
 
-/* SERVICES → 3 PER ROW */
+/* SERVICES */
 .tile-grid.cols-4{
-  grid-template-columns: repeat(3,1fr);
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:14px;
+  width:100%;
+}
+
+/* QUICK SHORTCUTS */
+.shortcut-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
   gap:12px;
 }
 
-/* UTILITIES CENTER FIX */
+/* UTILITIES */
+.utility-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:12px;
+}
+
+/* TILE SYSTEM */
+.tile-btn,
+.shortcut-btn,
 .utility-btn{
+
+  width:100%;
+
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
+
   text-align:center;
+
+  min-height:110px;
+
+  padding:16px;
+
+  border-radius:18px;
 }
 
+/* MOBILE */
+@media (max-width:980px){
+
+  .money-moves-grid{
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .tile-grid.cols-4{
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .shortcut-grid{
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .utility-grid{
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .tile-btn,
+  .shortcut-btn,
+  .utility-btn{
+    min-height:92px;
+  }
+
+}
 
 /* =========================
    MOBILE SYSTEM (REAL FIX)
