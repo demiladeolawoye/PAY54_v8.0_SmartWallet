@@ -869,7 +869,7 @@ if(!funding){
           });
 
           /* 🔐 PIN PROTECTION (FINAL FIX) */
-          requestPinVerification(() => {
+          PAY54_TX.requestPinVerification(()=>{
 
            const ledger = safeLedger();
 
@@ -1177,7 +1177,7 @@ function openWithdraw(){
         const amount = Number(parseFloat(modal.querySelector("#wdAmount").value).toFixed(2));
         const currency = getSelectedCurrency();
 
-        requestPinVerification(() => {
+        PAY54_TX.requestPinVerification(()=>{
 
           const entry = LEDGER.createEntry({
             type:"withdraw",
@@ -1324,7 +1324,7 @@ function resolveSmartPayment(amount, currency){
           return;
         }
 
-        requestPinVerification(() => {
+        PAY54_TX.requestPinVerification(()=>{
 
           let tx;
 
@@ -1514,7 +1514,7 @@ function openCheckoutFromRequest(req){
           return;
         }
 
-        requestPinVerification(()=>{
+        PAY54_TX.requestPinVerification(()=>{
 
           const entry = LEDGER.createEntry({
             type:"checkout",
@@ -1800,7 +1800,7 @@ recBox.addEventListener("input", (e)=>{
           return;
         }
 
-        requestPinVerification(()=>{
+        PAY54_TX.requestPinVerification(()=>{
 
           const converted = LEDGER.convert(fromCurrency,toCurrency,amount);
 
@@ -1931,7 +1931,7 @@ function openBankTransfer(){
           return;
         }
 
-        requestPinVerification(()=>{
+        PAY54_TX.requestPinVerification(()=>{
 
           const entry = LEDGER.createEntry({
             type:"bank_transfer",
@@ -2125,7 +2125,7 @@ function openBills(){
         const amount = Number(modal.querySelector("#billAmount")?.value);
         const currency = getSelectedCurrency();
 
-        requestPinVerification(()=>{
+        PAY54_TX.requestPinVerification(()=>{
           const entry = LEDGER.createEntry({
             type:"bill",
             title:"Bill Payment",
@@ -2205,7 +2205,7 @@ list.querySelectorAll("[data-goal]").forEach(el => {
 
         const currency = getSelectedCurrency();
 
-        requestPinVerification(()=>{
+        PAY54_TX.requestPinVerification(()=>{
 
           /* SAVE GOAL */
           let goal = goals.find(g=>g.name === name);
@@ -2581,7 +2581,7 @@ modal.querySelectorAll("[data-pay]").forEach(btn => {
             return;
           }
 
-          requestPinVerification(() => {
+          PAY54_TX.requestPinVerification(()=>{
 
             const entry = LEDGER.createEntry({
               type: "card_payment",
@@ -2750,7 +2750,7 @@ if(fundBtn){
               return;
             }
 
-       requestPinVerification(()=>{
+       PAY54_TX.requestPinVerification(()=>{
 
   // 🔥 ADD MONEY TO CARD
   selectedCard.balance = (selectedCard.balance || 0) + amount;
@@ -2999,7 +2999,7 @@ function openShopPayment(merchant){
           return;
         }
 
-        requestPinVerification(()=>{
+        PAY54_TX.requestPinVerification(()=>{
 
           const entry = LEDGER.createEntry({
             type:"shop",
