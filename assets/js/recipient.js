@@ -291,7 +291,6 @@ function init(){
 
   log("INIT v9.1");
 
-  bindClicks();
   renderAll();
 }
 
