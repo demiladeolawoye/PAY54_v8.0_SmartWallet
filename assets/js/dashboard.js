@@ -1831,7 +1831,7 @@ recBox.addEventListener("input", (e)=>{
           prependTxToDOM(tx);
           refreshUI();
 
-          showPaymentReceipt(tx,"Global Transfer",amount,fromCurrency);
+      PAY54_TX.showPaymentReceipt(tx,"Global Transfer",amount,fromCurrency);
 
           close();
 
