@@ -87,25 +87,40 @@
          <button class="p54-btn primary" id="doneRcpt">Close</button>
         </div>
       `,
-      onMount: ({ modal, close }) => {
-  modal.querySelector("#doneRcpt").addEventListener("click", close);
-  modal.querySelector("#copyRcpt").addEventListener("click", () => copyToClipboard(receiptText));
-  modal.querySelector("#waRcpt").addEventListener("click", () => shareWhatsApp(receiptText));
- modal.querySelector("#againRcpt").addEventListener("click", () => {
+         onMount: ({ modal, close }) => {
 
-  close();
+        modal.querySelector("#doneRcpt")
+          .addEventListener("click", close);
 
-  setTimeout(() => {
+        modal.querySelector("#copyRcpt")
+          .addEventListener("click", () => copyToClipboard(receiptText));
 
-    if(window.PAY54_UI?.openScanAndPay){
-      window.PAY54_UI.openScanAndPay();
-    }
+        modal.querySelector("#waRcpt")
+          .addEventListener("click", () => shareWhatsApp(receiptText));
 
-  }, 200);
+        modal.querySelector("#againRcpt")
+          .addEventListener("click", () => {
 
-});
-}
+            close();
 
-window.PAY54_RECEIPTS = { openReceiptModal };
+            setTimeout(() => {
+
+              if(window.PAY54_UI?.openScanAndPay){
+                window.PAY54_UI.openScanAndPay();
+              }
+
+            }, 200);
+
+          });
+
+      }
+
+    });
+
+  }
+
+  window.PAY54_RECEIPTS = {
+    openReceiptModal
+  };
 
 })();
