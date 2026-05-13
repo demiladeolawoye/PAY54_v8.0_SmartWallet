@@ -1417,3 +1417,42 @@ body.modal-open {
   font-size:11px;
   opacity:.7;
 }
+/* =========================
+   PAY54 CLICK RECOVERY FIX
+========================= */
+
+.left,
+.right,
+.card,
+.tile-btn,
+.shortcut-btn,
+.utility-btn,
+.balance-card,
+.scan-fab,
+.dash-header {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+/* Kill invisible overlays */
+.left::before,
+.left::after,
+.right::before,
+.right::after,
+.dash-grid::before,
+.dash-grid::after {
+  pointer-events: none !important;
+}
+
+/* Ensure cards stay clickable */
+.card {
+  overflow: visible;
+}
+
+/* Prevent parent layer from blocking */
+.dash-grid,
+.left,
+.right {
+  isolation: isolate;
+}
