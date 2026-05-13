@@ -1456,3 +1456,61 @@ body.modal-open {
 .right {
   isolation: isolate;
 }
+/* =========================================
+   PAY54 FINAL CLICK ENGINE FIX
+========================================= */
+
+/* Parent containers must NEVER intercept clicks */
+.left,
+.right,
+.dash-grid {
+  pointer-events: none !important;
+}
+
+/* Actual interactive components */
+.left > *,
+.right > *,
+.card,
+.tile-btn,
+.shortcut-btn,
+.utility-btn,
+button,
+input,
+select,
+textarea,
+.scan-fab,
+.profile-menu,
+.currency-pills,
+.currency,
+.icon-btn,
+.avatar-btn {
+  pointer-events: auto !important;
+}
+
+/* Ensure tiles are above layout layers */
+.tile-btn,
+.shortcut-btn,
+.utility-btn {
+  position: relative;
+  z-index: 9999 !important;
+}
+
+/* Kill invisible overlays */
+.left::before,
+.left::after,
+.right::before,
+.right::after,
+.dash-grid::before,
+.dash-grid::after,
+.card::before,
+.card::after {
+  pointer-events: none !important;
+}
+
+/* Prevent transform stacking issues */
+.left,
+.right,
+.card,
+.tile-btn {
+  transform: translateZ(0);
+}
