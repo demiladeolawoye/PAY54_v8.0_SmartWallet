@@ -1514,3 +1514,59 @@ textarea,
 .tile-btn {
   transform: translateZ(0);
 }
+/* =========================================
+   PAY54 FINAL INTERACTION FIX
+========================================= */
+
+/* Ensure layout containers behave normally */
+.dash-grid,
+.left,
+.right,
+.card {
+  position: relative;
+  overflow: visible;
+}
+
+/* Real clickable components */
+.tile-btn,
+.shortcut-btn,
+.utility-btn,
+.btn,
+.icon-btn,
+.avatar-btn,
+.currency,
+.scan-fab,
+.pm-item {
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+/* Prevent pseudo overlays blocking UI */
+.dash-grid::before,
+.dash-grid::after,
+.left::before,
+.left::after,
+.right::before,
+.right::after,
+.card::before,
+.card::after {
+  pointer-events: none !important;
+}
+
+/* Prevent transform stacking bugs */
+.tile-btn,
+.shortcut-btn,
+.utility-btn {
+  transform: translateZ(0);
+}
+
+/* CRITICAL */
+body,
+.dashboard,
+main,
+section,
+div {
+  pointer-events: auto;
+}
