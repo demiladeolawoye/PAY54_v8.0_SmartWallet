@@ -1553,12 +1553,6 @@ select {
   cursor: pointer;
 }
 
-/* Kill ALL overlay blockers */
-*::before,
-*::after {
-  pointer-events: none !important;
-}
-
 /* Prevent GPU layer bugs */
 .tile-btn,
 .shortcut-btn,
