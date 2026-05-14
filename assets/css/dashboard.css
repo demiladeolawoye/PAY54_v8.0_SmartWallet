@@ -1567,3 +1567,42 @@ section,
 div {
   isolation: auto !important;
 }
+/* =========================================
+   PAY54 SAFE CLICK RECOVERY
+========================================= */
+
+html,
+body,
+.dashboard,
+.dash-grid,
+.left,
+.right,
+.card {
+  pointer-events:auto !important;
+}
+
+/* Interactive controls */
+button,
+.tile-btn,
+.shortcut-btn,
+.utility-btn,
+.btn,
+.icon-btn,
+.avatar-btn,
+.currency,
+.scan-fab,
+.pm-item,
+input,
+select,
+textarea {
+  pointer-events:auto !important;
+  cursor:pointer;
+}
+
+/* Decorative layers only */
+.card::before,
+.card::after,
+.balance-card::before,
+.balance-card::after {
+  pointer-events:none;
+}
