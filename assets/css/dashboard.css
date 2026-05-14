@@ -1570,3 +1570,63 @@ section,
 div {
   pointer-events: auto;
 }
+/* =========================================
+   PAY54 HIT-TEST RECOVERY ENGINE
+========================================= */
+
+/* Restore browser interaction engine */
+html,
+body {
+  pointer-events: auto !important;
+  overflow-x: hidden;
+}
+
+/* Main layout */
+.dashboard,
+.dash-grid,
+.left,
+.right,
+.card {
+  pointer-events: auto !important;
+  position: relative;
+}
+
+/* ALL interactive controls */
+button,
+.tile-btn,
+.shortcut-btn,
+.utility-btn,
+.btn,
+.icon-btn,
+.avatar-btn,
+.currency,
+.scan-fab,
+.pm-item,
+input,
+select {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
+}
+
+/* Kill ALL overlay blockers */
+*::before,
+*::after {
+  pointer-events: none !important;
+}
+
+/* Prevent GPU layer bugs */
+.tile-btn,
+.shortcut-btn,
+.utility-btn,
+.card {
+  transform: translate3d(0,0,0);
+}
+
+/* CRITICAL SAFETY */
+main,
+section,
+div {
+  isolation: auto !important;
+}
