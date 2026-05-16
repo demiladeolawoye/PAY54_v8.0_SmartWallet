@@ -1,95 +1,494 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <title>PAY54 — Dashboard</title>
 
-  <!-- STYLES -->
-  <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/dashboard.css" />
+<meta charset="UTF-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+/>
+
+<title>PAY54 — Dashboard</title>
+
+<!-- CSS -->
+<link rel="stylesheet" href="assets/css/global.css">
+<link rel="stylesheet" href="assets/css/dashboard.css">
+
 </head>
 
 <body class="dark">
 
-  <!-- =========================
-       AUTH GUARD
-  ========================== -->
-  <script src="assets/js/session.js"></script>
-  <script>
-    if (!window.PAY54Session || !PAY54Session.isAuthenticated()) {
-      window.location.replace("login.html");
-    }
-  </script>
+<!-- =========================
+     SESSION GUARD
+========================= -->
+<script src="assets/js/session.js"></script>
 
-  <!-- =========================
-       HEADER
-  ========================== -->
-  <header class="dashboard-header">
+<script>
+if(!window.PAY54Session || !PAY54Session.isAuthenticated()){
+  window.location.replace("login.html");
+}
+</script>
 
-    <!-- TOP ROW: BRAND + ACTIONS -->
-    <div class="dashboard-header-top">
+<!-- =========================
+     HEADER
+========================= -->
+<header class="dash-header">
 
-      <!-- BRAND -->
-      <div class="brand">
-        <img
-          src="assets/img/pay54-logo.svg"
-          alt="PAY54"
-          class="dash-logo"
-        />
-      </div>
+  <!-- BRAND -->
+  <div class="brand">
+    <img
+      src="assets/img/pay54-logo.svg"
+      alt="PAY54"
+      class="logo"
+    >
+  </div>
 
-      <!-- ACTIONS -->
-      <div class="header-actions">
-        <button id="themeToggle" title="Toggle theme">🌙</button>
-        <button id="profileBtn" title="Profile">👤</button>
-        <button id="logoutBtn">Logout</button>
+  <!-- DESKTOP CURRENCY -->
+  <div class="currency-pills desktop-only">
+
+    <button class="currency active" data-cur="NGN">NGN</button>
+    <button class="currency" data-cur="GBP">GBP</button>
+    <button class="currency" data-cur="USD">USD</button>
+    <button class="currency" data-cur="EUR">EUR</button>
+    <button class="currency" data-cur="GHS">GHS</button>
+    <button class="currency" data-cur="KES">KES</button>
+
+  </div>
+
+  <!-- MOBILE -->
+  <div class="currency-dd-wrap mobile-only">
+    <select id="currencySelect" class="currency-dropdown">
+      <option value="NGN">NGN</option>
+      <option value="GBP">GBP</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GHS">GHS</option>
+      <option value="KES">KES</option>
+    </select>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="header-actions">
+
+    <button
+      class="icon-btn"
+      id="themeToggle"
+      title="Theme"
+    >
+      <span class="icon">🌙</span>
+    </button>
+
+    <button
+      class="avatar-btn"
+      id="profileBtn"
+      title="Profile"
+    >
+      <div class="avatar">P</div>
+    </button>
+
+    <!-- PROFILE MENU -->
+    <div class="profile-wrap">
+
+      <div
+        class="profile-menu"
+        id="profileMenu"
+        aria-hidden="true"
+      >
+
+        <div class="pm-head">
+          <div class="pm-name" id="profileName">PAY54 User</div>
+          <div class="pm-email" id="profileEmail">
+            user@pay54.app
+          </div>
+        </div>
+
+        <button class="pm-item">
+          Profile
+        </button>
+
+        <button class="pm-item">
+          Help & Support
+        </button>
+
+        <button class="pm-item">
+          Contact Support
+        </button>
+
+        <button
+          class="pm-item danger"
+          id="logoutBtn"
+        >
+          Logout
+        </button>
+
       </div>
 
     </div>
 
-    <!-- CURRENCY ROW -->
-    <div class="currency-row">
-      <span class="currency active">NGN</span>
-      <span class="currency">USD</span>
-      <span class="currency">GBP</span>
-      <span class="currency">EUR</span>
-      <span class="currency">CAD</span>
-      <span class="currency">AED</span>
-      <span class="currency">AUD</span>
+  </div>
+
+</header>
+
+<!-- =========================
+     DASHBOARD
+========================= -->
+
+<main class="dash-grid">
+
+  <!-- LEFT -->
+  <section class="left">
+
+    <!-- =========================
+         BALANCE
+    ========================= -->
+    <div
+      class="card balance-card"
+      id="balanceCard"
+    >
+
+      <div class="balance-top">
+
+        <div>
+          <div class="label">
+            TOTAL BALANCE
+          </div>
+
+          <div
+            class="balance-amount"
+            id="balanceAmount"
+          >
+            Loading...
+          </div>
+
+          <div
+            id="availableBalance"
+            class="available-balance"
+          >
+          </div>
+
+        </div>
+
+        <div class="balance-actions">
+
+          <button
+            class="btn primary"
+            id="addMoneyBtn"
+          >
+            Add Money
+          </button>
+
+          <button
+            class="btn"
+            id="withdrawBtn"
+          >
+            Withdraw
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="balance-meta">
+        Across wallets (converted) • FX wallets enabled
+      </div>
+
+      <div class="identity">
+
+        <div>
+          <strong>Acct:</strong>
+          3001234567
+        </div>
+
+        <div>
+          <strong>Tag:</strong>
+          @pay54-user
+        </div>
+
+        <div>
+          <strong>KYC:</strong>
+          Level 2
+        </div>
+
+      </div>
+
+      <div class="trust-chip">
+        🔒 Security & Financial compliance active
+      </div>
+
+      <!-- FX -->
+      <div
+        class="fx-ticker"
+        id="fxTicker"
+      ></div>
+
     </div>
 
-  </header>
+    <!-- =========================
+         MONEY MOVES
+    ========================= -->
+    <div class="card">
 
-  <!-- =========================
-       MAIN PLACEHOLDER
-  ========================== -->
-  <main class="dashboard-placeholder">
-    <h2>Dashboard loading…</h2>
-    <p>Wallet & services will appear here.</p>
-  </main>
+      <div class="card-topline">
+        <h3>Money Moves</h3>
+      </div>
 
-  <!-- =========================
-       SCRIPTS
-  ========================== -->
-  <script src="assets/js/theme.js"></script>
+      <div class="money-moves-grid">
 
-  <script>
-    // Logout
-    document.getElementById("logoutBtn").onclick = () => {
-      PAY54Session.destroySession();
-    };
+        <button class="tile-btn" data-action="send">
+          <div class="t-icon">📤</div>
+          <div class="t-title">Send</div>
+        </button>
 
-    // Currency switch (UI only – Phase 2 safe)
-    document.querySelectorAll(".currency").forEach(el => {
-      el.onclick = () => {
-        document
-          .querySelectorAll(".currency")
-          .forEach(c => c.classList.remove("active"));
-        el.classList.add("active");
-      };
-    });
-  </script>
+        <button class="tile-btn" data-action="receive">
+          <div class="t-icon">📥</div>
+          <div class="t-title">Receive</div>
+        </button>
+
+        <button class="tile-btn" data-action="scanpay">
+          <div class="t-icon">📲</div>
+          <div class="t-title">Scan & Pay</div>
+        </button>
+
+        <button class="tile-btn" data-action="addmoney">
+          <div class="t-icon">➕</div>
+          <div class="t-title">Add Money</div>
+        </button>
+
+        <button class="tile-btn" data-action="withdraw">
+          <div class="t-icon">💵</div>
+          <div class="t-title">Withdraw</div>
+        </button>
+
+        <button class="tile-btn" data-action="banktransfer">
+          <div class="t-icon">🏦</div>
+          <div class="t-title">Bank Transfer</div>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- =========================
+         SERVICES
+    ========================= -->
+    <div class="card">
+
+      <div class="card-topline">
+        <h3>Services</h3>
+      </div>
+
+      <p class="sub">
+        FX, bills, cards, checkout, agents & more.
+      </p>
+
+      <div class="tile-grid cols-4">
+
+        <button class="tile-btn" data-action="globaltransfer">
+          <div class="t-icon">🌍</div>
+          <div class="t-title">Global Transfer</div>
+        </button>
+
+        <button class="tile-btn" data-action="bills">
+          <div class="t-icon">💡</div>
+          <div class="t-title">Bills</div>
+        </button>
+
+        <button class="tile-btn" data-action="savings">
+          <div class="t-icon">🏦</div>
+          <div class="t-title">Savings</div>
+        </button>
+
+        <button class="tile-btn" data-action="cards">
+          <div class="t-icon">💳</div>
+          <div class="t-title">Cards</div>
+        </button>
+
+        <button class="tile-btn" data-action="checkout">
+          <div class="t-icon">🛒</div>
+          <div class="t-title">Checkout</div>
+        </button>
+
+        <button class="tile-btn" data-action="shop">
+          <div class="t-icon">🛍</div>
+          <div class="t-title">Shop & Go</div>
+        </button>
+
+        <button class="tile-btn" data-action="merchantqr">
+          <div class="t-icon">🔳</div>
+          <div class="t-title">Merchant QR</div>
+        </button>
+
+        <button class="tile-btn" data-action="requestmoney">
+          <div class="t-icon">💸</div>
+          <div class="t-title">Request Money</div>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- =========================
+         RECENT TX
+    ========================= -->
+    <div class="card">
+
+      <div class="card-topline">
+
+        <h3>Recent Transactions</h3>
+
+        <button
+          class="pill-link"
+          id="viewAllTx"
+        >
+          View All
+        </button>
+
+      </div>
+
+      <div
+        class="feed"
+        data-role="recentTxFeed"
+      ></div>
+
+    </div>
+
+  </section>
+
+  <!-- RIGHT -->
+  <section class="right">
+
+    <!-- SHORTCUTS -->
+    <div class="card">
+
+      <div class="card-topline">
+        <h3>Quick Shortcuts</h3>
+      </div>
+
+      <div class="shortcut-grid">
+
+        <button class="shortcut-btn" data-action="send">
+          <div class="t-icon">📤</div>
+          <div class="t-title">Send</div>
+        </button>
+
+        <button class="shortcut-btn" data-action="requestmoney">
+          <div class="t-icon">💸</div>
+          <div class="t-title">Request</div>
+        </button>
+
+        <button class="shortcut-btn" data-action="cards">
+          <div class="t-icon">💳</div>
+          <div class="t-title">Cards</div>
+        </button>
+
+        <button class="shortcut-btn" data-action="globaltransfer">
+          <div class="t-icon">🌍</div>
+          <div class="t-title">FX</div>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- UTILITIES -->
+    <div class="card">
+
+      <div class="card-topline">
+        <h3>Utilities</h3>
+      </div>
+
+      <div class="utility-grid">
+
+        <button class="utility-btn">
+          <div class="t-icon">🏧</div>
+          <div class="t-title">ATM Finder</div>
+        </button>
+
+        <button class="utility-btn">
+          <div class="t-icon">📍</div>
+          <div class="t-title">POS Finder</div>
+        </button>
+
+        <button class="utility-btn">
+          <div class="t-icon">🤝</div>
+          <div class="t-title">Agent Finder</div>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- ALERTS -->
+    <div class="card">
+
+      <div class="card-topline">
+
+        <h3>Requests & Alerts</h3>
+
+        <button
+          class="pill-link"
+          id="clearAlerts"
+        >
+          Clear
+        </button>
+
+      </div>
+
+      <div
+        class="feed"
+        id="alerts"
+      ></div>
+
+    </div>
+
+    <!-- NEWS -->
+    <div class="card">
+
+      <div class="card-topline">
+        <h3>News & Insights</h3>
+      </div>
+
+      <div
+        class="feed"
+        id="newsFeed"
+      ></div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<!-- FLOATING SCAN -->
+<button
+  class="scan-fab"
+  id="scanPayFab"
+>
+  <span class="fab-icon">📲</span>
+  <span class="fab-label">Scan & Pay</span>
+</button>
+
+<div class="fab-spacer"></div>
+
+<!-- =========================
+     SCRIPTS
+========================= -->
+
+<script src="assets/js/theme.js"></script>
+
+<script src="assets/js/modals.js"></script>
+
+<script src="assets/js/ledger.js"></script>
+
+<script src="assets/js/receipts.js"></script>
+
+<script src="assets/js/tx.js"></script>
+
+<script src="assets/js/services.js"></script>
+
+<script src="assets/js/recipient.js"></script>
+
+<script src="assets/js/dashboard.js"></script>
 
 </body>
 </html>
