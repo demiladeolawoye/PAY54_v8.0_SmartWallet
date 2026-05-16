@@ -3188,7 +3188,9 @@ console.log("✅ INITIAL RENDER COMPLETE");
 
 refreshUI();
 
-}
+} // CLOSE try
+
+} // CLOSE init
   
   /* =========================
    SAFE BOOTSTRAP ENGINE (FIXED)
