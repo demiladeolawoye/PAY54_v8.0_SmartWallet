@@ -157,7 +157,6 @@ function bindDashboardButtons(){
 /* =========================================
    ROUTER
 ========================================= */
-
 function routeAction(action){
 
   try{
