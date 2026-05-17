@@ -165,14 +165,13 @@ function routeAction(action){
     const UI = window.PAY54_UI;
 
     if(!UI){
-
       console.warn("PAY54_UI missing");
-
       return;
-
     }
 
     switch(action){
+
+      /* MONEY MOVES */
 
       case "send":
         UI.openSend();
@@ -183,10 +182,12 @@ function routeAction(action){
         break;
 
       case "scan":
+      case "scanpay":
         UI.openScanAndPay();
         break;
 
       case "add-money":
+      case "addmoney":
         UI.openAddMoney();
         break;
 
@@ -195,7 +196,54 @@ function routeAction(action){
         break;
 
       case "bank-transfer":
+      case "banktransfer":
         UI.openBankTransfer();
+        break;
+
+      /* SERVICES */
+
+      case "globaltransfer":
+        UI.openGlobalTransfer();
+        break;
+
+      case "bills":
+        UI.openBills();
+        break;
+
+      case "savings":
+        UI.openSavings();
+        break;
+
+      case "cards":
+        UI.openCards();
+        break;
+
+      case "checkout":
+        UI.openCheckout();
+        break;
+
+      case "shop":
+        UI.openShop();
+        break;
+
+      case "merchantqr":
+        UI.openMerchantQR();
+        break;
+
+      case "requestmoney":
+        UI.openRequestMoney();
+        break;
+
+      case "trading":
+        UI.openTrading();
+        break;
+
+      case "agent":
+        UI.openAgent();
+        break;
+
+      case "risk":
+        UI.openRisk();
         break;
 
       default:
