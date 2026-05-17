@@ -3188,8 +3188,6 @@ console.log("✅ INITIAL RENDER COMPLETE");
 
 refreshUI();
 
-} // CLOSE try
-
 } // CLOSE init
   
   /* =========================
