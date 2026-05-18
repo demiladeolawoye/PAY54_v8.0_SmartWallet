@@ -101,9 +101,9 @@ function bindCurrencyPills(){
   pills.forEach(pill => {
 
     pill.addEventListener("click", () => {
-
-      const cur =
-        pill.dataset.currency;
+       
+const cur =
+  pill.dataset.cur;
 
       if(!cur) return;
 
