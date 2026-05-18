@@ -170,33 +170,46 @@ function routeAction(action){
 
     switch(action){
 
-  case "send":
-    UI.openSend();
-    break;
+/* =========================================
+   MONEY MOVES
+========================================= */
 
-  case "receive":
-    UI.openReceive();
-    break;
+case "send":
+  UI.openSend();
+  break;
 
-  case "scanpay":
-    UI.openScanAndPay();
-    break;
+case "receive":
+  UI.openReceive();
+  break;
 
-  case "addmoney":
-    UI.openAddMoney();
-    break;
+/* SCAN & PAY */
+case "scanpay":
+case "scan_pay":
+  UI.openScanAndPay();
+  break;
 
-  case "withdraw":
-    UI.openWithdraw();
-    break;
+/* ADD MONEY */
+case "addmoney":
+case "add_money":
+  UI.openAddMoney();
+  break;
 
-  case "banktransfer":
-    UI.openBankTransfer();
-    break;
+/* WITHDRAW */
+case "withdraw":
+  UI.openWithdraw();
+  break;
 
-  case "globaltransfer":
-    UI.openGlobalTransfer();
-    break;
+/* BANK TRANSFER */
+case "banktransfer":
+case "bank_transfer":
+  UI.openBankTransfer();
+  break;
+
+/* FX / GLOBAL TRANSFER */
+case "globaltransfer":
+case "fx":
+  UI.openGlobalTransfer();
+  break;
 
   case "bills":
     UI.openBills();
