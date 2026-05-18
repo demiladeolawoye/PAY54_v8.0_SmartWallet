@@ -170,85 +170,78 @@ function routeAction(action){
 
     switch(action){
 
-      /* MONEY MOVES */
+  case "send":
+    UI.openSend();
+    break;
 
-      case "send":
-        UI.openSend();
-        break;
+  case "receive":
+    UI.openReceive();
+    break;
 
-      case "receive":
-        UI.openReceive();
-        break;
+  case "scanpay":
+    UI.openScanAndPay();
+    break;
 
-      case "scan":
-      case "scanpay":
-        UI.openScanAndPay();
-        break;
+  case "addmoney":
+    UI.openAddMoney();
+    break;
 
-      case "add-money":
-      case "addmoney":
-        UI.openAddMoney();
-        break;
+  case "withdraw":
+    UI.openWithdraw();
+    break;
 
-      case "withdraw":
-        UI.openWithdraw();
-        break;
+  case "banktransfer":
+    UI.openBankTransfer();
+    break;
 
-      case "bank-transfer":
-      case "banktransfer":
-        UI.openBankTransfer();
-        break;
+  case "globaltransfer":
+    UI.openGlobalTransfer();
+    break;
 
-      /* SERVICES */
+  case "bills":
+    UI.openBills();
+    break;
 
-      case "globaltransfer":
-        UI.openGlobalTransfer();
-        break;
+  case "savings":
+    UI.openSavings();
+    break;
 
-      case "bills":
-        UI.openBills();
-        break;
+  case "cards":
+    UI.openCards();
+    break;
 
-      case "savings":
-        UI.openSavings();
-        break;
+  case "checkout":
+    UI.openCheckout();
+    break;
 
-      case "cards":
-        UI.openCards();
-        break;
+  case "shop":
+    UI.openShop();
+    break;
 
-      case "checkout":
-        UI.openCheckout();
-        break;
+  case "merchantqr":
+    UI.openMerchantQR();
+    break;
 
-      case "shop":
-        UI.openShop();
-        break;
+  case "requestmoney":
+    UI.openRequestMoney();
+    break;
 
-      case "merchantqr":
-        UI.openMerchantQR();
-        break;
+  case "trading":
+    UI.openTrading();
+    break;
 
-      case "requestmoney":
-        UI.openRequestMoney();
-        break;
+  case "agent":
+    UI.openAgent();
+    break;
 
-      case "trading":
-        UI.openTrading();
-        break;
+  case "risk":
+    UI.openRisk();
+    break;
 
-      case "agent":
-        UI.openAgent();
-        break;
+  default:
+    console.warn("Unknown action:", action);
 
-      case "risk":
-        UI.openRisk();
-        break;
-
-      default:
-        console.warn("Unknown action:", action);
-
-    }
+}
 
   }catch(err){
 
