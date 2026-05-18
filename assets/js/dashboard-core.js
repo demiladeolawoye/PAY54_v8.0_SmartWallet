@@ -96,7 +96,7 @@ function renderBalance(){
 function bindCurrencyPills(){
 
   const pills =
-    qsa(".currency-pill");
+  qsa(".currency");
 
   pills.forEach(pill => {
 
