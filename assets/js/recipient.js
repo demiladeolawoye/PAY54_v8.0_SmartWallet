@@ -306,5 +306,81 @@ document.addEventListener("DOMContentLoaded", ()=>{
   });
 
 });
+/* =========================
+   PAY54 UI BRIDGE
+========================= */
 
+window.PAY54_UI = {
+
+  openSend(){
+    actionSend();
+  },
+
+  openReceive(){
+    alert("Receive Money Coming Soon");
+  },
+
+  openScanAndPay(){
+    alert("Scan & Pay Coming Soon");
+  },
+
+  openAddMoney(){
+    actionAddMoney();
+  },
+
+  openWithdraw(){
+    actionWithdraw();
+  },
+
+  openBankTransfer(){
+    alert("Bank Transfer Coming Soon");
+  },
+
+  openGlobalTransfer(){
+    alert("Global Transfer Coming Soon");
+  },
+
+  openBills(){
+    alert("Bills Coming Soon");
+  },
+
+  openSavings(){
+    alert("Savings Coming Soon");
+  },
+
+  openCards(){
+    alert("Cards Coming Soon");
+  },
+
+  openCheckout(){
+    alert("Checkout Coming Soon");
+  },
+
+  openShop(){
+    actionShop();
+  },
+
+  openMerchantQR(){
+    alert("Merchant QR Coming Soon");
+  },
+
+  openRequestMoney(){
+    alert("Request Money Coming Soon");
+  },
+
+  openTrading(){
+    alert("Trading Coming Soon");
+  },
+
+  openAgent(){
+    alert("Become Agent Coming Soon");
+  },
+
+  openRisk(){
+    alert("AI Risk Watch Coming Soon");
+  }
+
+};
+
+log("PAY54_UI READY");
 })();
