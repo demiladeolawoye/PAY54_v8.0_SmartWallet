@@ -2731,4 +2731,4 @@ window.PAY54_UI = {
 
 };
 
-console.log("✅ PAY54_UI READY");  
+console.log("✅ PAY54_UI READY");
