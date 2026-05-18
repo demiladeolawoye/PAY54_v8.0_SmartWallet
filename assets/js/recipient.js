@@ -120,7 +120,7 @@ function renderBalance(){
   const ledger = getLedger();
   if(!ledger) return;
 
-  const el = safeEl("balanceAmount");
+  const el = safeEl("totalBalance");
   if(!el){
     log("balanceAmount not found — skipping");
     return;
