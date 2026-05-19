@@ -231,9 +231,9 @@ case "fx":
     UI.openMerchantQR();
     break;
 
-  case "requestmoney":
-    UI.openRequestMoney();
-    break;
+case "request":
+  UI.openRequestMoney();
+  break;
 
   case "trading":
     UI.openTrading();
