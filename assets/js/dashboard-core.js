@@ -243,6 +243,10 @@ case "request":
     UI.openAgent();
     break;
 
+   case "bet":
+  alert("Bet Funding coming soon");
+  break;
+          
   case "risk":
     UI.openRisk();
     break;
