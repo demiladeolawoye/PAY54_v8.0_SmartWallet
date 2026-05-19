@@ -2708,16 +2708,18 @@ function openRisk(){
 
 window.PAY54_UI = {
 
+  /* MONEY MOVES */
   openSend: openSendUnified,
-
   openReceive,
   openScanAndPay,
   openAddMoney,
   openWithdraw,
   openBankTransfer,
 
+  /* FX */
   openGlobalTransfer,
 
+  /* SERVICES */
   openBills,
   openSavings,
   openCards,
@@ -2732,3 +2734,42 @@ window.PAY54_UI = {
 };
 
 console.log("✅ PAY54_UI READY");
+
+
+/* =========================
+   BALANCE CARD BUTTONS
+========================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const addBtn =
+    document.getElementById("addMoneyBtn");
+
+  if(addBtn){
+
+    addBtn.addEventListener("click", () => {
+
+      if(window.PAY54_UI?.openAddMoney){
+        window.PAY54_UI.openAddMoney();
+      }
+
+    });
+
+  }
+
+  const withdrawBtn =
+    document.getElementById("withdrawBtn");
+
+  if(withdrawBtn){
+
+    withdrawBtn.addEventListener("click", () => {
+
+      if(window.PAY54_UI?.openWithdraw){
+        window.PAY54_UI.openWithdraw();
+      }
+
+    });
+
+  }
+
+});
