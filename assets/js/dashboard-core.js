@@ -183,13 +183,11 @@ case "receive":
   break;
 
 /* SCAN & PAY */
-case "scanpay":
 case "scan_pay":
   UI.openScanAndPay();
   break;
 
 /* ADD MONEY */
-case "addmoney":
 case "add_money":
   UI.openAddMoney();
   break;
@@ -200,16 +198,14 @@ case "withdraw":
   break;
 
 /* BANK TRANSFER */
-case "banktransfer":
 case "bank_transfer":
   UI.openBankTransfer();
   break;
 
 /* FX / GLOBAL TRANSFER */
-case "globaltransfer":
 case "fx":
   UI.openGlobalTransfer();
-  break;
+  break
 
   case "bills":
     UI.openBills();
