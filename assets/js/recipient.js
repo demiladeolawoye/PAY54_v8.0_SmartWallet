@@ -333,11 +333,22 @@ function close() {
     document.addEventListener("keydown", escClose);
 
 document.body.classList.add("modal-open");
-   document.body.appendChild(backdrop);
-    if (typeof onMount === "function") onMount({ modal: backdrop.querySelector(".p54-modal"), close });
-    return { close };
-  }
+document.body.appendChild(backdrop);
 
+if (typeof onMount === "function") {
+  onMount({ modal: backdrop.querySelector(".p54-modal"), close });
+}
+
+return { close };
+
+}
+
+/* =========================
+   GLOBAL MODAL EXPORT
+========================= */
+window.openModal = openModal;
+
+console.log("🔥 PAY54 FEATURE ENGINE READY");
   /* ---------------------------
      Theme (light default)
   --------------------------- */
