@@ -316,11 +316,16 @@ const LS = {
     `;
 
 function close() {
+
   backdrop.remove();
 
-  // 🔥 FORCE SCROLL RESTORE (BULLETPROOF)
+  // 🔥 REMOVE MODAL LOCK
+  document.body.classList.remove("modal-open");
+
+  // 🔥 FORCE SCROLL RESTORE
   document.body.style.overflow = "";
   document.body.style.overflowY = "auto";
+
   document.documentElement.style.overflow = "";
   document.documentElement.style.overflowY = "auto";
 
