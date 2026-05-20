@@ -24,9 +24,31 @@ function txLedger(){
   }
 
   console.warn("⚠️ Ledger unavailable");
+
   return null;
+
 }
 
+/* =========================
+   UNIVERSAL TOAST ACCESS
+========================= */
+
+function showToast(message){
+
+  if(
+    window.PAY54_TOAST &&
+    typeof window.PAY54_TOAST.showToast === "function"
+  ){
+
+    window.PAY54_TOAST.showToast(message);
+
+  }else{
+
+    console.warn("Toast engine unavailable");
+
+  }
+
+}
 /* =========================
    CREATE PIN
 ========================= */
