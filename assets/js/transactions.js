@@ -28,32 +28,6 @@ function txLedger(){
 }
 
 /* =========================
-   TOAST ENGINE
-========================= */
-
-function showToast(message){
-
-  const container = document.getElementById("toastContainer");
-
-  if(!container){
-    console.warn("Toast container missing");
-    return;
-  }
-
-  const toast = document.createElement("div");
-
-  toast.className = "p54-toast";
-  toast.textContent = message;
-
-  container.appendChild(toast);
-
-  setTimeout(()=>{
-    toast.remove();
-  },3000);
-
-}
-
-/* =========================
    CREATE PIN
 ========================= */
 
