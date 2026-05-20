@@ -12,8 +12,7 @@
    ✅ Seeds demo balance ONCE if ledger empty (prevents ₦0.00 regression)
 ========================= */
 
-
-  "use strict";
+"use strict";
 /* =========================
    🚨 GLOBAL ERROR GUARD (PRODUCTION SAFETY)
 ========================= */
