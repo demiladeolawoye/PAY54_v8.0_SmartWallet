@@ -293,7 +293,6 @@ function initDashboard(){
 /* =========================================
    SAFE BOOTSTRAP
 ========================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
 
   console.log("📦 DOM READY");
@@ -305,6 +304,32 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("✅ Modules ready");
 
       initDashboard();
+
+      /* =========================================
+         UNIVERSAL FEEDS INIT
+      ========================================= */
+
+      if(window.seedDemoAlertsIfEmpty){
+        window.seedDemoAlertsIfEmpty();
+      }
+
+      if(window.renderAlerts){
+        window.renderAlerts();
+      }
+
+      if(window.renderNews){
+        window.renderNews();
+      }
+
+      if(window.renderFxTicker){
+        window.renderFxTicker();
+      }
+
+      if(window.renderRecentTransactions){
+        window.renderRecentTransactions();
+      }
+
+      console.log("✅ PAY54 FEEDS INITIALIZED");
 
       return;
 
