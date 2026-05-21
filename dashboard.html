@@ -89,7 +89,7 @@
 
 </div>
 
-        <div id="totalBalance" class="balance-amount">₦0.00</div>
+       <div id="balanceAmount" class="balance-amount">₦0.00</div>
         <div id="availableBalance" class="available-balance"></div>
         <div class="balance-meta">Across wallets (converted) • FX wallets enabled • Device + PIN secured</div>
         <div id="fxTicker" class="fx-ticker"></div>
@@ -332,27 +332,28 @@
 </button>
 <div id="toastContainer"></div>
 
-<!-- PAY54 Core Engine -->
-
+<!-- CORE -->
 <script src="assets/js/ledger.js?v=8101"></script>
 
-<!-- Core Modules -->
-
-<script src="assets/js/recipient.js?v=8101"></script>
+<!-- MODAL ENGINE -->
 <script src="assets/js/modals.js?v=9000"></script>
+
+<!-- UI ENGINE -->
+<script src="assets/js/ui-engine.js?v=1000"></script>
+
+<!-- FEATURE ENGINE -->
+<script src="assets/js/recipient.js?v=8101"></script>
+
+<!-- RECEIPTS -->
 <script src="assets/js/receipts.js?v=8101"></script>
+
+<!-- SERVICES -->
 <script src="assets/js/services.js?v=8101"></script>
 
-<!-- NEW TRANSACTION ENGINE -->
+<!-- TRANSACTIONS -->
 <script src="assets/js/transactions.js?v=8101"></script>
 
-<!-- External Libraries -->
-
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<!-- Dashboard Controller (LAST) -->
-<script src="assets/js/ui-engine.js"></script>
-<script src="assets/js/dashboard-core.js"></script>
+<!-- CONTROLLER LAST -->
+<script src="assets/js/dashboard-core.js?v=9000"></script>
 </body>
 </html>
