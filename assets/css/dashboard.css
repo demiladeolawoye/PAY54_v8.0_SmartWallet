@@ -1505,14 +1505,6 @@ body.modal-open {
   transform: translateZ(0);
 }
 
-/* CRITICAL */
-body,
-.dashboard,
-main,
-section,
-div {
-  pointer-events: auto;
-}
 /* =========================================
    PAY54 HIT-TEST RECOVERY ENGINE
 ========================================= */
