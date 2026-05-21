@@ -1,109 +1,122 @@
-/* =========================
-   PAY54 v9.0 — Service Registry
-   SINGLE SOURCE OF SERVICE ROUTING
-========================= */
-
 (() => {
 
 "use strict";
 
+function safeHandler(fnName){
+
+  return () => {
+
+    try{
+
+      const UI = window.PAY54_UI;
+
+      if(!UI){
+        console.warn("PAY54_UI unavailable");
+        return;
+      }
+
+      if(typeof UI[fnName] !== "function"){
+        console.warn(`${fnName} missing`);
+        return;
+      }
+
+      UI[fnName]();
+
+    }catch(err){
+
+      console.error("SERVICE ROUTE FAILED:", err);
+
+    }
+
+  };
+
+}
+
 window.PAY54_SERVICES = {
 
-  /* =========================
-     MONEY MOVES
-  ========================= */
-
-  send: {
-    title: "Send",
-  handler: () => {
-  if(window.PAY54_UI?.openSend){
-    window.PAY54_UI.openSend();
-  }
-}
+  send:{
+    title:"Send",
+    handler:safeHandler("openSend")
   },
 
-  receive: {
-    title: "Receive",
-    handler: () => window.PAY54_UI.openReceive()
+  receive:{
+    title:"Receive",
+    handler:safeHandler("openReceive")
   },
 
-  scan_pay: {
-    title: "Scan & Pay",
-    handler: () => window.PAY54_UI.openScanAndPay()
+  scan_pay:{
+    title:"Scan & Pay",
+    handler:safeHandler("openScanAndPay")
   },
 
-  add_money: {
-    title: "Add Money",
-    handler: () => window.PAY54_UI.openAddMoney()
+  add_money:{
+    title:"Add Money",
+    handler:safeHandler("openAddMoney")
   },
 
-  withdraw: {
-    title: "Withdraw",
-    handler: () => window.PAY54_UI.openWithdraw()
+  withdraw:{
+    title:"Withdraw",
+    handler:safeHandler("openWithdraw")
   },
 
-  bank_transfer: {
-    title: "Bank Transfer",
-    handler: () => window.PAY54_UI.openBankTransfer()
+  bank_transfer:{
+    title:"Bank Transfer",
+    handler:safeHandler("openBankTransfer")
   },
 
-  /* =========================
-     SERVICES
-  ========================= */
-
-  fx: {
-    title: "PAY54 Global Transfer",
-    handler: () => window.PAY54_UI.openGlobalTransfer()
+  fx:{
+    title:"PAY54 Global Transfer",
+    handler:safeHandler("openGlobalTransfer")
   },
 
-  bills: {
-    title: "Bills & Top Up",
-    handler: () => window.PAY54_UI.openBills()
+  bills:{
+    title:"Bills & Top Up",
+    handler:safeHandler("openBills")
   },
 
-  savings: {
-    title: "Savings",
-    handler: () => window.PAY54_UI.openSavings()
+  savings:{
+    title:"Savings",
+    handler:safeHandler("openSavings")
   },
 
-  cards: {
-    title: "Cards",
-    handler: () => window.PAY54_UI.openCards()
+  cards:{
+    title:"Cards",
+    handler:safeHandler("openCards")
   },
 
-  checkout: {
-    title: "Checkout",
-    handler: () => window.PAY54_UI.openCheckout()
+  checkout:{
+    title:"Checkout",
+    handler:safeHandler("openCheckout")
   },
 
-  shop: {
-    title: "Shop & Go",
-    handler: () => window.PAY54_UI.openShop()
+  shop:{
+    title:"Shop & Go",
+    handler:safeHandler("openShop")
   },
 
-  merchantqr: {
-    title: "Merchant QR",
-    handler: () => window.PAY54_UI.openMerchantQR()
+  merchantqr:{
+    title:"Merchant QR",
+    handler:safeHandler("openMerchantQR")
   },
 
-  request: {
-    title: "Request Money",
-    handler: () => window.PAY54_UI.openRequestMoney()
+  request:{
+    title:"Request Money",
+    handler:safeHandler("openRequestMoney")
   },
 
-  trading: {
-    title: "Trading",
-    handler: () => window.PAY54_UI.openTrading()
+  trading:{
+    title:"Trading",
+    handler:safeHandler("openTrading")
   },
 
-  agent: {
-    title: "Agent",
-    handler: () => window.PAY54_UI.openAgent()
+  agent:{
+    title:"Agent",
+    handler:safeHandler("openAgent")
   },
 
-  risk: {
-    title: "AI Risk Watch",
-    handler: () => window.PAY54_UI.openRisk()
+  risk:{
+    title:"AI Risk Watch",
+    handler:safeHandler("openRisk")
   }
 
 };
