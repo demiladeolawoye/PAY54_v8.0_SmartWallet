@@ -151,8 +151,6 @@ window.PAY54_MODALS = (function(){
   openModal
 };
 
-window.openModal = openModal;
-
 return {
   openModal
 };
