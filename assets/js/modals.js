@@ -147,8 +147,14 @@ window.PAY54_MODALS = (function(){
 
   }
 
-  return {
-    openModal
-  };
+ window.PAY54_MODALS = {
+  openModal
+};
+
+window.openModal = openModal;
+
+return {
+  openModal
+};
 
 })();
