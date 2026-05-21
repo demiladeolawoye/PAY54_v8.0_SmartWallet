@@ -15,7 +15,11 @@ window.PAY54_SERVICES = {
 
   send: {
     title: "Send",
-    handler: () => window.PAY54_UI.openSend()
+  handler: () => {
+  if(window.PAY54_UI?.openSend){
+    window.PAY54_UI.openSend();
+  }
+}
   },
 
   receive: {
