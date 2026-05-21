@@ -1553,12 +1553,6 @@ select {
   transform: translate3d(0,0,0);
 }
 
-/* CRITICAL SAFETY */
-main,
-section,
-div {
-  isolation: auto !important;
-}
 /* =========================================
    PAY54 SAFE CLICK RECOVERY
 ========================================= */
