@@ -615,12 +615,6 @@ body.light .balance-amount{
    PAY54 Smart Tile Grid
    Fintech-grade responsive layout
 ========================= */
-
-.tile-grid{
-  display:grid;
-  gap:14px;
-}
-
 .tile-btn{
   padding:14px;
   border-radius:18px;
