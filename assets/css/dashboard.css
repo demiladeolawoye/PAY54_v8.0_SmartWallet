@@ -629,9 +629,6 @@ body.light .balance-amount{
   transition: all .2s ease;
 }
 
-/* ===== Tile Icons (Fintech Style) ===== */
-
-
 /* Quick Shortcuts Grid */
 .shortcut-grid{
   display:grid;
