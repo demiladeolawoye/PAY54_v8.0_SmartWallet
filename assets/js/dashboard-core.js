@@ -70,7 +70,7 @@ function renderBalance(){
       Number(balances[active] || 0);
 
     const balanceEl =
-      qs("#totalBalance");
+  qs("#balanceAmount");
 
     if(balanceEl){
 
