@@ -151,6 +151,20 @@ window.PAY54_MODALS = (function(){
   openModal
 };
 
+/* =========================================
+   GLOBAL LEGACY SUPPORT
+========================================= */
+
+window.openModal = openModal;
+
+window.closeAllModals = function(){
+
+  document
+    .querySelectorAll(".p54-modal-backdrop")
+    .forEach(el => el.remove());
+
+};
+
 return {
   openModal
 };
