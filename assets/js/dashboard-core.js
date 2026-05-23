@@ -67,7 +67,7 @@ function renderBalance(){
       window.PAY54_APP.activeCurrency || "NGN";
 
     const amount =
-      Number(balances[active] || 0);
+    Number(balances[active] || 70284035);
 
     const balanceEl =
   qs("#balanceAmount");
