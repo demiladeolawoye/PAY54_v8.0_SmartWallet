@@ -27,7 +27,9 @@ window.PAY54_MODALS = (function(){
       }
 
       .p54-modal{
-        width:min(720px,100%);
+        width:min(560px,100%);
+        max-height:90vh;
+        overflow:auto;
         border-radius:18px;
         background:#0f172a;
         color:#fff;
