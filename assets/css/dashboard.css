@@ -1583,3 +1583,137 @@ textarea {
 .balance-card::after {
   pointer-events:none;
 }
+/* =========================================
+   PAY54 PREMIUM FORM SYSTEM v10.2
+========================================= */
+
+.p54-form{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.p54-label{
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:6px;
+  color:var(--muted);
+}
+
+.p54-input,
+.p54-select,
+.p54-textarea{
+
+  width:100%;
+
+  padding:14px 16px;
+
+  border-radius:14px;
+
+  border:1px solid rgba(255,255,255,0.12);
+
+  background:rgba(255,255,255,0.05);
+
+  color:var(--text);
+
+  font-size:15px;
+  font-weight:700;
+
+  outline:none;
+
+  transition:all .2s ease;
+}
+
+body.light .p54-input,
+body.light .p54-select,
+body.light .p54-textarea{
+
+  background:#f8fbff;
+
+  border:1px solid rgba(10,20,40,0.12);
+
+  color:#0a1428;
+}
+
+.p54-input:focus,
+.p54-select:focus,
+.p54-textarea:focus{
+
+  border-color:#3b82f6;
+
+  box-shadow:
+    0 0 0 4px rgba(59,130,246,0.12);
+}
+
+.p54-actions{
+
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+
+  margin-top:8px;
+}
+
+.p54-btn{
+
+  height:46px;
+
+  padding:0 18px;
+
+  border:none;
+
+  border-radius:14px;
+
+  font-weight:800;
+
+  cursor:pointer;
+
+  transition:all .2s ease;
+}
+
+.p54-btn.primary{
+
+  background:linear-gradient(
+    135deg,
+    #3b82f6,
+    #2563eb
+  );
+
+  color:#fff;
+
+  box-shadow:
+    0 10px 25px rgba(59,130,246,0.35);
+}
+
+.p54-btn.primary:hover{
+  transform:translateY(-2px);
+}
+
+.p54-btn:not(.primary){
+
+  background:rgba(255,255,255,0.08);
+
+  color:var(--text);
+
+  border:1px solid rgba(255,255,255,0.12);
+}
+
+body.light .p54-btn:not(.primary){
+
+  background:#ffffff;
+
+  border:1px solid rgba(10,20,40,0.12);
+
+  color:#0a1428;
+}
+
+#qr-reader{
+
+  overflow:hidden;
+
+  border-radius:18px;
+
+  border:1px solid rgba(255,255,255,0.12);
+
+  margin-bottom:16px;
+}
