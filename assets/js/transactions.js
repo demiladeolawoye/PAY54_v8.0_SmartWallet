@@ -450,3 +450,112 @@ if(typeof seedDemoAlertsIfEmpty === "function"){
 }
 
 console.log("✅ GLOBAL FEED EXPORTS READY");
+/* =========================================
+   DEMO ALERTS DATA
+========================================= */
+
+const PAY54_ALERTS = [
+
+  {
+    title: "Security Alert",
+    message: "New login detected from London."
+  },
+
+  {
+    title: "Transfer Update",
+    message: "Your FX transfer completed successfully."
+  }
+
+];
+
+/* =========================================
+   DEMO NEWS DATA
+========================================= */
+
+const PAY54_NEWS = [
+
+  {
+    title: "PAY54 Expansion",
+    summary: "PAY54 expands payment corridors globally."
+  },
+
+  {
+    title: "FX Markets",
+    summary: "GBP strengthens against NGN today."
+  }
+
+];
+
+/* =========================================
+   RENDER ALERTS
+========================================= */
+
+function renderAlerts(){
+
+  const container =
+    document.querySelector("#alertsFeed");
+
+  if(!container) return;
+
+  container.innerHTML =
+    PAY54_ALERTS.map(alert => `
+
+      <div class="feed-item">
+
+        <div class="feed-title">
+          ${alert.title}
+        </div>
+
+        <div class="feed-sub">
+          ${alert.message}
+        </div>
+
+        <button
+          class="feed-open-btn"
+          onclick="openAlertItem(this)"
+        >
+          Open
+        </button>
+
+      </div>
+
+    `).join("");
+
+}
+
+/* =========================================
+   RENDER NEWS
+========================================= */
+
+function renderNews(){
+
+  const container =
+    document.querySelector("#newsFeed");
+
+  if(!container) return;
+
+  container.innerHTML =
+    PAY54_NEWS.map(item => `
+
+      <div class="feed-item">
+
+        <div class="feed-title">
+          ${item.title}
+        </div>
+
+        <div class="feed-sub">
+          ${item.summary}
+        </div>
+
+        <button
+          class="feed-open-btn"
+          onclick="openNewsItem(this)"
+        >
+          Open
+        </button>
+
+      </div>
+
+    `).join("");
+
+}
