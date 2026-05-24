@@ -359,6 +359,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   waitForModules();
+
+}); // ✅ CLOSE DOMContentLoaded PROPERLY
+
 /* =========================================
    PAY54 UTILITIES ENGINE
 ========================================= */
