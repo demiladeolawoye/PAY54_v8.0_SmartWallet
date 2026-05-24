@@ -426,24 +426,3 @@ window.PAY54_TX = {
 
 console.log("✅ PAY54 TRANSACTION ENGINE LOADED");
 
-/* =========================================
-   GLOBAL FEED EXPORTS
-========================================= */
-
-window.renderAlerts =
-  renderAlerts;
-
-window.renderNews =
-  renderNews;
-
-window.renderFxTicker =
-  renderFxTicker;
-
-window.renderRecentTransactions =
-  renderRecentTransactions;
-
-window.seedDemoAlertsIfEmpty =
-  seedDemoAlertsIfEmpty;
-
-console.log("✅ GLOBAL FEED EXPORTS READY");
-
