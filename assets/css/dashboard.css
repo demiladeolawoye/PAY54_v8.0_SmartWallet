@@ -1717,3 +1717,39 @@ body.light .p54-btn:not(.primary){
 
   margin-bottom:16px;
 }
+/* =========================
+   PAY54 RECEIVE QR CENTER FIX
+========================= */
+
+.p54-receive-wrap{
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  text-align:center;
+
+  width:100%;
+}
+
+.p54-receive-qr{
+
+  margin:24px auto;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  width:100%;
+}
+
+.p54-receive-actions{
+
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  flex-wrap:wrap;
+
+  margin-top:20px;
+}
