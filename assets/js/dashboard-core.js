@@ -359,5 +359,127 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   waitForModules();
+/* =========================================
+   PAY54 UTILITIES ENGINE
+========================================= */
 
+window.openATMFinder = function(){
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  openModal({
+
+    title: "ATM Finder",
+
+    bodyHTML: `
+
+      <div class="p54-form">
+
+        <div class="p54-note">
+          Find nearby ATMs instantly
+        </div>
+
+        <input
+          class="p54-input"
+          placeholder="Enter city or postcode"
+        >
+
+        <div class="utility-results">
+
+          <div class="utility-location-card">
+
+            <div class="utility-location-title">
+              🏧 Barclays ATM
+            </div>
+
+            <div class="utility-location-sub">
+              0.4 miles away • Thamesmead
+            </div>
+
+          </div>
+
+          <div class="utility-location-card">
+
+            <div class="utility-location-title">
+              🏧 HSBC ATM
+            </div>
+
+            <div class="utility-location-sub">
+              0.8 miles away • Woolwich
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `
+
+  });
+
+};
+
+window.openPOSFinder = function(){
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  openModal({
+
+    title: "POS / Agent Finder",
+
+    bodyHTML: `
+
+      <div class="p54-form">
+
+        <div class="p54-note">
+          Find PAY54 agents nearby
+        </div>
+
+        <input
+          class="p54-input"
+          placeholder="Enter city or postcode"
+        >
+
+        <div class="utility-results">
+
+          <div class="utility-location-card">
+
+            <div class="utility-location-title">
+              📍 PAY54 Agent
+            </div>
+
+            <div class="utility-location-sub">
+              0.2 miles away • Abbey Wood
+            </div>
+
+          </div>
+
+          <div class="utility-location-card">
+
+            <div class="utility-location-title">
+              📍 PAY54 POS Merchant
+            </div>
+
+            <div class="utility-location-sub">
+              1.1 miles away • Greenwich
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `
+
+  });
+
+};
 });
