@@ -482,4 +482,4 @@ window.openPOSFinder = function(){
   });
 
 };
-});
+
