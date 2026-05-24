@@ -250,7 +250,24 @@ case "request":
   case "risk":
     UI.openRisk();
     break;
+          
+/* ATM FINDER */
+case "atm":
 
+  if(window.openATMFinder){
+    window.openATMFinder();
+  }
+
+  break;
+
+/* POS FINDER */
+case "pos":
+
+  if(window.openPOSFinder){
+    window.openPOSFinder();
+  }
+
+  break;
   default:
     console.warn("Unknown action:", action);
 
