@@ -425,4 +425,28 @@ window.PAY54_TX = {
 };
 
 console.log("✅ PAY54 TRANSACTION ENGINE LOADED");
+/* =========================================
+   GLOBAL FEED EXPORTS
+========================================= */
 
+if(typeof renderAlerts === "function"){
+  window.renderAlerts = renderAlerts;
+}
+
+if(typeof renderNews === "function"){
+  window.renderNews = renderNews;
+}
+
+if(typeof renderFxTicker === "function"){
+  window.renderFxTicker = renderFxTicker;
+}
+
+if(typeof renderRecentTransactions === "function"){
+  window.renderRecentTransactions = renderRecentTransactions;
+}
+
+if(typeof seedDemoAlertsIfEmpty === "function"){
+  window.seedDemoAlertsIfEmpty = seedDemoAlertsIfEmpty;
+}
+
+console.log("✅ GLOBAL FEED EXPORTS READY");
