@@ -482,4 +482,48 @@ window.openPOSFinder = function(){
   });
 
 };
+/* =========================================
+   ALERT MODAL VIEWER
+========================================= */
 
+window.openAlertItem = function(btn){
+
+  const item =
+    btn.closest(".feed-item");
+
+  if(!item) return;
+
+  const title =
+    item.querySelector(".feed-title")?.textContent || "Alert";
+
+  const sub =
+    item.querySelector(".feed-sub")?.textContent || "";
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  openModal({
+
+    title,
+
+    bodyHTML: `
+
+      <div class="p54-feed-reader">
+
+        <div class="p54-feed-reader-title">
+          ${title}
+        </div>
+
+        <div class="p54-feed-reader-sub">
+          ${sub}
+        </div>
+
+      </div>
+
+    `
+
+  });
+
+};
