@@ -1647,33 +1647,56 @@ else if(funding.source === "card"){
   openModal({
     title:"Receive Money",
 
-    bodyHTML:`
+bodyHTML: `
 
-      <div style="text-align:center">
+<div class="p54-receive-wrap">
 
-        <div class="p54-note"><b>Your PAY54 Tag</b></div>
-        <div style="font-size:18px;font-weight:900;margin-bottom:10px">
-          @${userTag}
-        </div>
+  <div class="p54-label">
+    Your PAY54 Tag
+  </div>
 
-        <div class="p54-note"><b>Account Number</b></div>
-        <div style="font-size:18px;font-weight:900;margin-bottom:16px">
-          ${accountNo}
-        </div>
+  <div style="
+    font-size:28px;
+    font-weight:900;
+    margin-top:6px;
+  ">
+    @Demi Olawoye
+  </div>
 
-        <div class="qr-center-wrap">
-  <div id="qrBox"></div>
+  <div class="p54-label" style="margin-top:18px;">
+    Account Number
+  </div>
+
+  <div style="
+    font-size:32px;
+    font-weight:900;
+    margin-top:6px;
+  ">
+    3001234567
+  </div>
+
+  <div class="p54-receive-qr">
+    <div id="receiveQR"></div>
+  </div>
+
+  <div class="p54-receive-actions">
+
+    <button class="p54-btn" id="copyTag">
+      Copy Tag
+    </button>
+
+    <button class="p54-btn" id="shareTag">
+      Share
+    </button>
+
+    <button class="p54-btn primary" id="doneReceive">
+      Done
+    </button>
+
+  </div>
+
 </div>
-
-        <div class="p54-actions" style="justify-content:center;margin-top:16px">
-          <button class="p54-btn" id="copyTag">Copy Tag</button>
-          <button class="p54-btn" id="shareLink">Share</button>
-          <button class="p54-btn primary" id="closeReceive">Done</button>
-        </div>
-
-      </div>
-
-    `,
+`   `,
 
     onMount: ({modal, close}) => {
 
