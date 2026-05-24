@@ -419,7 +419,8 @@ window.PAY54_TX = {
   processTransaction,
   showPaymentReceipt,
   showToast,
-  requestPinVerification
+  requestPinVerification,
+  openCreatePinModal
 
 };
 
