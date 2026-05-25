@@ -1861,3 +1861,51 @@ body.light .utility-location-card{
 
   color:var(--muted);
 }
+/* =========================================
+   MULTI WALLET BALANCES
+========================================= */
+
+.wallet-balances{
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  margin-top:14px;
+
+}
+
+.wallet-balance-row{
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding:8px 12px;
+
+  border-radius:12px;
+
+  background:rgba(255,255,255,.06);
+
+  font-size:13px;
+  font-weight:700;
+
+}
+
+body.light .wallet-balance-row{
+
+  background:rgba(15,23,42,.05);
+
+}
+
+.wallet-balance-cur{
+
+  opacity:.7;
+
+}
+
+.wallet-balance-amt{
+
+  font-weight:800;
+
+}
