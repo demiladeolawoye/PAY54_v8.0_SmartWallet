@@ -61,16 +61,17 @@ function renderBalance(){
 
     if(!ledger) return;
 
-    const balances = ledger.getBalances();
+    const balances =
+      ledger.getBalances();
 
     const active =
       window.PAY54_APP.activeCurrency || "NGN";
 
     const amount =
-    Number(balances[active] || 70284035);
+      Number(balances[active] || 70284035);
 
     const balanceEl =
-  qs("#balanceAmount");
+      qs("#balanceAmount");
 
     if(balanceEl){
 
@@ -79,16 +80,55 @@ function renderBalance(){
 
     }
 
+    /* =========================================
+       MULTI WALLET BALANCES
+    ========================================= */
+
+    const walletContainer =
+      qs("#walletBalances");
+
+    if(walletContainer){
+
+      walletContainer.innerHTML =
+
+        Object.entries(balances)
+
+        .map(([cur, amt]) => {
+
+          return `
+
+            <div class="wallet-balance-row">
+
+              <span class="wallet-balance-cur">
+                ${cur}
+              </span>
+
+              <span class="wallet-balance-amt">
+                ${ledger.moneyFmt(cur, amt)}
+              </span>
+
+            </div>
+
+          `;
+
+        })
+
+        .join("");
+
+    }
+
     console.log("✅ BALANCE RENDERED");
 
   }catch(err){
 
-    console.error("BALANCE RENDER FAILED", err);
+    console.error(
+      "BALANCE RENDER FAILED",
+      err
+    );
 
   }
 
 }
-
 /* =========================================
    CURRENCY SWITCHER
 ========================================= */
