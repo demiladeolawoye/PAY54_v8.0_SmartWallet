@@ -429,6 +429,12 @@ window.openATMFinder = function(){
           class="p54-input"
           placeholder="Enter city or postcode"
         >
+        <button
+  class="btn primary utility-search-btn"
+  style="margin-top:14px;width:100%"
+>
+  Search Nearby
+</button>
 
         <div class="utility-results">
 
