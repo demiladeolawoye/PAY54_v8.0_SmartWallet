@@ -2659,3 +2659,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
+/* =========================
+   PAY54 UI EXPORT ENGINE
+========================= */
+
+window.PAY54_UI = {
+
+  openSend: openSendUnified,
+  openReceive,
+  openScanAndPay,
+  openAddMoney,
+  openWithdraw,
+  openBankTransfer,
+  openGlobalTransfer,
+  openBills,
+  openSavings,
+  openCards,
+  openCheckout,
+  openShop,
+  openMerchantQR,
+  openRequestMoney,
+  openTrading,
+  openAgent,
+  openRisk,
+  openLedger
+
+};
+
+console.log("✅ PAY54 UI ENGINE READY");
