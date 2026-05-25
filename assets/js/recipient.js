@@ -1696,7 +1696,7 @@ bodyHTML: `
   </div>
 
 </div>
-`   `,
+`,
 
     onMount: ({modal, close}) => {
 
