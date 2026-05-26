@@ -264,8 +264,14 @@ case "fx":
     break;
 
   case "shop":
-    UI.openShop();
-    break;
+  UI.openShop();
+  break;
+
+case "refer":
+
+  alert("Refer & Earn coming soon");
+
+  break;
 
   case "merchantqr":
     UI.openMerchantQR();
