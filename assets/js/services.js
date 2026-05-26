@@ -90,14 +90,19 @@ window.PAY54_SERVICES = {
   },
 
   shop:{
-    title:"Shop & Go",
-    handler:safeHandler("openShop")
-  },
+  title:"Shop & Go",
+  handler:safeHandler("openShop")
+},
 
-  merchantqr:{
-    title:"Merchant QR",
-    handler:safeHandler("openMerchantQR")
-  },
+refer:{
+  title:"Refer & Earn",
+  handler:safeHandler("openReferEarn")
+},
+
+merchantqr:{
+  title:"Merchant QR",
+  handler:safeHandler("openMerchantQR")
+},
 
   request:{
     title:"Request Money",
