@@ -635,7 +635,38 @@ body.light .balance-amount{
   grid-template-columns:repeat(2,1fr);
   gap:12px;
 }
+.shortcut-btn{
 
+  padding:14px;
+
+  border-radius:18px;
+
+  border:1px solid rgba(255,255,255,0.10);
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+
+  backdrop-filter: blur(8px);
+
+  cursor:pointer;
+
+  transition: all .2s ease;
+
+}
+
+.shortcut-btn:hover{
+
+  transform: translateY(-3px);
+
+  border-color: rgba(59,130,246,0.35);
+
+  box-shadow:
+    0 10px 24px rgba(59,130,246,0.18);
+
+}
 /* Desktop layout */
 @media (min-width:768px){
   .shortcut-grid{
