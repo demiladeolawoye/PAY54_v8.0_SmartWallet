@@ -194,7 +194,8 @@ const LS = {
   const withdrawBtn = $("#withdrawBtn");
 
   const clearAlertsBtn = $("#clearAlerts");
-  const alertsContainer = $("#alerts");
+  const alertsContainer =
+  $("#alertsFeed");
 
   const viewAllTxBtn = $("#viewAllTx");
   const viewAllTxMobileBtn = $("#viewAllTxMobile");
