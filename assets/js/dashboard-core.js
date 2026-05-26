@@ -686,3 +686,131 @@ window.openNewsItem = function(btn){
   });
 
 };
+/* =========================================
+   ALERTS RENDER ENGINE
+========================================= */
+
+window.renderAlerts = function(){
+
+  const container =
+    document.querySelector("#alertsFeed");
+
+  if(!container) return;
+
+  const alerts = [
+
+    {
+      id:"a1",
+      icon:"🔔",
+      title:"Security Alert",
+      body:"New login detected from London."
+    },
+
+    {
+      id:"a2",
+      icon:"💸",
+      title:"Transfer successful",
+      body:"Your FX transfer completed successfully."
+    },
+
+    {
+      id:"a3",
+      icon:"🛡️",
+      title:"Security tip",
+      body:"Keep your PIN private at all times."
+    }
+
+  ];
+
+  container.innerHTML = alerts.map(alert => `
+
+    <div class="feed-item">
+
+      <div class="feed-icon">
+        ${alert.icon}
+      </div>
+
+      <div class="feed-content">
+
+        <div class="feed-title">
+          ${alert.title}
+        </div>
+
+        <div class="feed-sub">
+          ${alert.body}
+        </div>
+
+      </div>
+
+      <button
+        class="feed-open-btn"
+        onclick="openAlertItem(this)"
+      >
+        Open
+      </button>
+
+    </div>
+
+  `).join("");
+
+};
+
+/* =========================================
+   NEWS RENDER ENGINE
+========================================= */
+
+window.renderNews = function(){
+
+  const container =
+    document.querySelector("#newsFeed");
+
+  if(!container) return;
+
+  const news = [
+
+    {
+      icon:"📰",
+      title:"PAY54 launches FX wallets",
+      body:"Hold and convert across key currencies."
+    },
+
+    {
+      icon:"📈",
+      title:"Markets: USD strengthens",
+      body:"Global FX markets show increased volatility."
+    }
+
+  ];
+
+  container.innerHTML = news.map(item => `
+
+    <div class="feed-item">
+
+      <div class="feed-icon">
+        ${item.icon}
+      </div>
+
+      <div class="feed-content">
+
+        <div class="feed-title">
+          ${item.title}
+        </div>
+
+        <div class="feed-sub">
+          ${item.body}
+        </div>
+
+      </div>
+
+      <button
+        class="feed-open-btn"
+        onclick="openNewsItem(this)"
+      >
+        Open
+      </button>
+
+    </div>
+
+  `).join("");
+
+};
