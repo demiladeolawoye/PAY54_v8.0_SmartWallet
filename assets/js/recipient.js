@@ -550,14 +550,35 @@ availableEl.innerHTML = `
       { icon: "🎁", title: "Refer & Earn rewards", sub: "Invite friends to unlock bonuses." }
     ];
     newsFeedEl.innerHTML = lines.map(n => `
-      <div class="feed-item">
-        <div class="feed-icon">${n.icon}</div>
-        <div class="feed-main">
-          <div class="feed-title">${n.title}</div>
-          <div class="feed-sub">${n.sub}</div>
-        </div>
+
+  <div class="feed-item">
+
+    <div class="feed-icon">
+      ${n.icon}
+    </div>
+
+    <div class="feed-main">
+
+      <div class="feed-title">
+        ${n.title}
       </div>
-    `).join("");
+
+      <div class="feed-sub">
+        ${n.sub}
+      </div>
+
+    </div>
+
+    <button
+      class="btn ghost sm"
+      onclick="openNewsItem(this)"
+    >
+      Open
+    </button>
+
+  </div>
+
+`).join("");
   }
 
   if (clearAlertsBtn) {
