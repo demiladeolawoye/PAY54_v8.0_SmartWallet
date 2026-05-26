@@ -1940,3 +1940,93 @@ body.light .wallet-balance-row{
   font-weight:800;
 
 }
+/* =========================================
+   PAY54 FEEDS — PREMIUM UI FIX
+========================================= */
+
+.feed{
+
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+
+}
+
+.feed-item{
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:16px;
+
+  padding:16px 18px;
+
+  border-radius:18px;
+
+  background:#ffffff;
+
+  border:1px solid rgba(15,23,42,.08);
+
+  min-height:82px;
+
+  transition:all .22s ease;
+
+}
+
+.feed-item:hover{
+
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 10px 24px rgba(15,23,42,.08);
+
+}
+
+.feed-main{
+
+  flex:1;
+  min-width:0;
+
+}
+
+.feed-title{
+
+  font-size:15px;
+  font-weight:900;
+
+  color:#0f172a;
+
+  margin-bottom:4px;
+
+  line-height:1.2;
+
+}
+
+.feed-sub{
+
+  font-size:13px;
+
+  color:#64748b;
+
+  line-height:1.45;
+
+}
+
+.feed-item .btn{
+
+  flex-shrink:0;
+
+  min-width:74px;
+  height:40px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:12px;
+
+  font-size:13px;
+  font-weight:800;
+
+}
