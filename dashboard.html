@@ -321,126 +321,56 @@
         </div>
       </div>
 
-      <!-- REQUESTS & ALERTS -->
+            <!-- REQUESTS & ALERTS -->
       <div class="card">
+
         <div class="card-topline">
+
           <h3>Requests &amp; Alerts</h3>
-          <button class="btn ghost sm" type="button" id="clearAlerts">Clear all</button>
+
+          <button
+            class="btn ghost sm"
+            type="button"
+            id="clearAlerts"
+          >
+            Clear all
+          </button>
+
         </div>
- <div class="feed" id="alertsFeed">
 
-  <div class="feed-item">
+        <div
+          class="feed"
+          id="alertsFeed"
+        ></div>
 
-    <div class="feed-main">
-
-      <div class="feed-title">
-        Security Alert
       </div>
-
-      <div class="feed-sub">
-        New login detected from London.
-      </div>
-
-    </div>
-
-    <button
-      class="btn ghost sm"
-      onclick="openAlertItem(this)"
-    >
-      Open
-    </button>
-
-  </div>
-
-  <div class="feed-item">
-
-    <div class="feed-main">
-
-      <div class="feed-title">
-        Transfer Completed
-      </div>
-
-      <div class="feed-sub">
-        Your FX transfer completed successfully.
-      </div>
-
-    </div>
-
-    <button
-      class="btn ghost sm"
-      onclick="openAlertItem(this)"
-    >
-      Open
-    </button>
-
-  </div>
-
-</div>
 
       <!-- NEWS -->
       <div class="card">
+
         <div class="card-topline">
           <h3>News &amp; Insights</h3>
         </div>
-       <div class="feed" id="newsFeed">
 
-  <div class="feed-item">
+        <div
+          class="feed"
+          id="newsFeed"
+        ></div>
 
-    <div class="feed-main">
-
-      <div class="feed-title">
-        PAY54 launches FX wallets
       </div>
 
-      <div class="feed-sub">
-        Hold and convert across key currencies.
-      </div>
-
-    </div>
-
-    <button
-      class="btn ghost sm"
-      onclick="openNewsItem(this)"
-    >
-      Open
-    </button>
-
-  </div>
-
-  <div class="feed-item">
-
-    <div class="feed-main">
-
-      <div class="feed-title">
-        Markets: USD strengthens
-      </div>
-
-      <div class="feed-sub">
-        FX markets show increased volatility today.
-      </div>
-
-    </div>
-
-    <button
-      class="btn ghost sm"
-      onclick="openNewsItem(this)"
-    >
-      Open
-    </button>
-
-  </div>
-
-</div>
     </section>
-</main>
 
-<div class="fab-spacer"></div>
+  </main>
 
-<button id="scanPayFab" class="scan-fab">
-  <span class="fab-icon">📷</span>
-  <span class="fab-label">Scan & Pay</span>
-</button>
-<div id="toastContainer"></div>
+  <div class="fab-spacer"></div>
+
+  <button id="scanPayFab" class="scan-fab">
+    <span class="fab-icon">📷</span>
+    <span class="fab-label">Scan & Pay</span>
+  </button>
+
+  <div id="toastContainer"></div>
 
 <!-- CORE -->
 <script src="assets/js/ledger.js"></script>
