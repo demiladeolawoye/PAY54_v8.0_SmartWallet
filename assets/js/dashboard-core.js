@@ -592,6 +592,9 @@ openModal({
   }
 
 });
+
+}; // ✅ CLOSE POS FINDER FUNCTION
+
   
 /* =========================================
    ALERT MODAL VIEWER
