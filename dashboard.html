@@ -327,8 +327,55 @@
           <h3>Requests &amp; Alerts</h3>
           <button class="btn ghost sm" type="button" id="clearAlerts">Clear all</button>
         </div>
-        <div class="feed" id="alertsFeed"></div>
+ <div class="feed" id="alertsFeed">
+
+  <div class="feed-item">
+
+    <div class="feed-main">
+
+      <div class="feed-title">
+        Security Alert
       </div>
+
+      <div class="feed-sub">
+        New login detected from London.
+      </div>
+
+    </div>
+
+    <button
+      class="btn ghost sm"
+      onclick="openAlertItem(this)"
+    >
+      Open
+    </button>
+
+  </div>
+
+  <div class="feed-item">
+
+    <div class="feed-main">
+
+      <div class="feed-title">
+        Transfer Completed
+      </div>
+
+      <div class="feed-sub">
+        Your FX transfer completed successfully.
+      </div>
+
+    </div>
+
+    <button
+      class="btn ghost sm"
+      onclick="openAlertItem(this)"
+    >
+      Open
+    </button>
+
+  </div>
+
+</div>
 
       <!-- NEWS -->
       <div class="card">
