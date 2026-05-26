@@ -498,6 +498,9 @@ window.openATMFinder = function(){
   }
 
 });
+
+}; // ✅ CLOSE ATM FINDER FUNCTION
+
 window.openPOSFinder = function(){
 
   const openModal =
