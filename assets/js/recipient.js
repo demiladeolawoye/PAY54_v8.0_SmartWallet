@@ -1047,7 +1047,10 @@ function openScanAndPay() {
 
       }
 
-      if(window.Html5Qrcode){
+      if(
+  window.Html5Qrcode &&
+  modal.querySelector("#qr-reader")
+){
 
         html5QrCode = new Html5Qrcode("qr-reader");
 
