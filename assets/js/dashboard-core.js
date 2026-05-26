@@ -413,129 +413,183 @@ window.openATMFinder = function(){
 
   if(!openModal) return;
 
-  openModal({
+ openModal({
 
-    title: "ATM Finder",
+  title: "ATM Finder",
 
-    bodyHTML: `
+  bodyHTML: `
 
-      <div class="p54-form">
+    <div class="p54-form">
 
-        <div class="p54-note">
-          Find nearby ATMs instantly
-        </div>
-
-        <input
-          class="p54-input"
-          placeholder="Enter city or postcode"
-        >
-        <button
-  class="btn primary utility-search-btn"
-  style="margin-top:14px;width:100%"
->
-  Search Nearby
-</button>
-
-        <div class="utility-results">
-
-          <div class="utility-location-card">
-
-            <div class="utility-location-title">
-              🏧 Barclays ATM
-            </div>
-
-            <div class="utility-location-sub">
-              0.4 miles away • Thamesmead
-            </div>
-
-          </div>
-
-          <div class="utility-location-card">
-
-            <div class="utility-location-title">
-              🏧 HSBC ATM
-            </div>
-
-            <div class="utility-location-sub">
-              0.8 miles away • Woolwich
-            </div>
-
-          </div>
-
-        </div>
-
+      <div class="p54-note">
+        Find nearby ATMs instantly
       </div>
 
-    `
+      <input
+        id="atmSearchInput"
+        class="p54-input"
+        placeholder="Enter city or postcode"
+      >
 
-  });
+      <button
+        id="atmSearchBtn"
+        class="btn primary utility-search-btn"
+        style="margin-top:14px;width:100%"
+      >
+        Search Nearby
+      </button>
 
-};
+      <div
+        id="atmResults"
+        class="utility-results"
+        style="margin-top:16px"
+      ></div>
 
+    </div>
+
+  `,
+
+  onMount: ({ modal }) => {
+
+    const btn =
+      modal.querySelector("#atmSearchBtn");
+
+    const input =
+      modal.querySelector("#atmSearchInput");
+
+    const results =
+      modal.querySelector("#atmResults");
+
+    btn.addEventListener("click", () => {
+
+      const city =
+        input.value.trim() || "London";
+
+      results.innerHTML = `
+
+        <div class="utility-location-card">
+
+          <div class="utility-location-title">
+            🏧 Barclays ATM
+          </div>
+
+          <div class="utility-location-sub">
+            0.4 miles away • ${city}
+          </div>
+
+        </div>
+
+        <div class="utility-location-card">
+
+          <div class="utility-location-title">
+            🏧 HSBC ATM
+          </div>
+
+          <div class="utility-location-sub">
+            0.8 miles away • ${city}
+          </div>
+
+        </div>
+
+      `;
+
+    });
+
+  }
+
+});
 window.openPOSFinder = function(){
 
   const openModal =
     window.PAY54_MODALS?.openModal;
 
   if(!openModal) return;
+openModal({
 
-  openModal({
+  title: "POS / Agent Finder",
 
-    title: "POS / Agent Finder",
+  bodyHTML: `
 
-    bodyHTML: `
+    <div class="p54-form">
 
-      <div class="p54-form">
-
-        <div class="p54-note">
-          Find PAY54 agents nearby
-        </div>
-
-        <input
-          class="p54-input"
-          placeholder="Enter city or postcode"
-        >
-<button
-  class="btn primary utility-search-btn"
-  style="margin-top:14px;width:100%"
->
-  Search Nearby
-</button>
-        <div class="utility-results">
-
-          <div class="utility-location-card">
-
-            <div class="utility-location-title">
-              📍 PAY54 Agent
-            </div>
-
-            <div class="utility-location-sub">
-              0.2 miles away • Abbey Wood
-            </div>
-
-          </div>
-
-          <div class="utility-location-card">
-
-            <div class="utility-location-title">
-              📍 PAY54 POS Merchant
-            </div>
-
-            <div class="utility-location-sub">
-              1.1 miles away • Greenwich
-            </div>
-
-          </div>
-
-        </div>
-
+      <div class="p54-note">
+        Find PAY54 agents nearby
       </div>
 
-    `
+      <input
+        id="posSearchInput"
+        class="p54-input"
+        placeholder="Enter city or postcode"
+      >
 
-  });
+      <button
+        id="posSearchBtn"
+        class="btn primary utility-search-btn"
+        style="margin-top:14px;width:100%"
+      >
+        Search Nearby
+      </button>
 
-};
+      <div
+        id="posResults"
+        class="utility-results"
+        style="margin-top:16px"
+      ></div>
+
+    </div>
+
+  `,
+
+  onMount: ({ modal }) => {
+
+    const btn =
+      modal.querySelector("#posSearchBtn");
+
+    const input =
+      modal.querySelector("#posSearchInput");
+
+    const results =
+      modal.querySelector("#posResults");
+
+    btn.addEventListener("click", () => {
+
+      const city =
+        input.value.trim() || "London";
+
+      results.innerHTML = `
+
+        <div class="utility-location-card">
+
+          <div class="utility-location-title">
+            📍 PAY54 Agent
+          </div>
+
+          <div class="utility-location-sub">
+            0.2 miles away • ${city}
+          </div>
+
+        </div>
+
+        <div class="utility-location-card">
+
+          <div class="utility-location-title">
+            📍 PAY54 POS Merchant
+          </div>
+
+          <div class="utility-location-sub">
+            1.1 miles away • ${city}
+          </div>
+
+        </div>
+
+      `;
+
+    });
+
+  }
+
+});
+  
 /* =========================================
    ALERT MODAL VIEWER
 ========================================= */
