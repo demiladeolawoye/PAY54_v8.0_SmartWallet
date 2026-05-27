@@ -2178,3 +2178,94 @@ body.light .wallet-balance-row{
   font-size:28px;
   font-weight:900;
 }
+
+/* =========================================
+   SHOP & GO
+========================================= */
+
+.shop-hero{
+  text-align:center;
+  margin-bottom:24px;
+}
+
+.shop-icon{
+  font-size:48px;
+  margin-bottom:10px;
+}
+
+.shop-title{
+  font-size:26px;
+  font-weight:900;
+}
+
+.shop-sub{
+  opacity:.7;
+  margin-top:6px;
+}
+
+.shop-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+
+.shop-card{
+
+  border:none;
+
+  border-radius:20px;
+
+  padding:20px;
+
+  cursor:pointer;
+
+  text-align:left;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.08),
+      rgba(255,255,255,0.03)
+    );
+
+  border:1px solid rgba(255,255,255,.08);
+
+  transition:all .25s ease;
+
+}
+
+.shop-card:hover{
+
+  transform:translateY(-4px);
+
+  border-color:
+    rgba(59,130,246,.35);
+
+  box-shadow:
+    0 12px 30px rgba(59,130,246,.18);
+
+}
+
+.shop-card-icon{
+  font-size:34px;
+  margin-bottom:12px;
+}
+
+.shop-card-title{
+  font-size:16px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.shop-card-sub{
+  opacity:.7;
+  font-size:13px;
+}
+
+@media(max-width:640px){
+
+  .shop-grid{
+    grid-template-columns:1fr;
+  }
+
+}
