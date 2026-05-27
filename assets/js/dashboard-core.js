@@ -601,6 +601,139 @@ openModal({
 
 }; // ✅ CLOSE POS FINDER FUNCTION
 
+/* =========================================
+   PAY54 REFER & EARN
+========================================= */
+
+window.PAY54_UI =
+window.PAY54_UI || {};
+
+window.PAY54_UI.openReferEarn = function(){
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  openModal({
+
+    title: "Refer & Earn",
+
+    bodyHTML: `
+
+      <div class="p54-referral">
+
+        <div class="referral-hero">
+
+          <div class="referral-icon">
+            🎁
+          </div>
+
+          <div class="referral-title">
+            Invite Friends & Earn
+          </div>
+
+          <div class="referral-sub">
+            Earn rewards when friends join PAY54.
+          </div>
+
+        </div>
+
+        <div class="referral-card">
+
+          <div class="referral-label">
+            Your Referral Code
+          </div>
+
+          <div class="referral-code">
+            PAY54-DEMI-2026
+          </div>
+
+        </div>
+
+        <div class="referral-stats">
+
+          <div class="ref-stat">
+            <span class="ref-stat-value">
+              12
+            </span>
+
+            <span class="ref-stat-label">
+              Friends Invited
+            </span>
+          </div>
+
+          <div class="ref-stat">
+            <span class="ref-stat-value">
+              ₦45,000
+            </span>
+
+            <span class="ref-stat-label">
+              Rewards Earned
+            </span>
+          </div>
+
+        </div>
+
+        <div class="p54-actions">
+
+          <button
+            class="p54-btn"
+            id="copyReferralBtn"
+          >
+            Copy Code
+          </button>
+
+          <button
+            class="p54-btn primary"
+            id="shareReferralBtn"
+          >
+            Share Invite
+          </button>
+
+        </div>
+
+      </div>
+
+    `,
+
+    onMount: ({ modal }) => {
+
+      modal
+        .querySelector("#copyReferralBtn")
+        .addEventListener("click", () => {
+
+          navigator.clipboard.writeText(
+            "PAY54-DEMI-2026"
+          );
+
+          window.PAY54_TOAST
+            ?.showToast(
+              "Referral code copied"
+            );
+
+        });
+
+      modal
+        .querySelector("#shareReferralBtn")
+        .addEventListener("click", () => {
+
+          const text = encodeURIComponent(
+            "Join PAY54 using my referral code PAY54-DEMI-2026"
+          );
+
+          window.open(
+            `https://wa.me/?text=${text}`,
+            "_blank"
+          );
+
+        });
+
+    }
+
+  });
+
+};
   
 /* =========================================
    ALERT MODAL VIEWER
