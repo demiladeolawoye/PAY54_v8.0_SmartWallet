@@ -269,7 +269,7 @@ case "fx":
 
 case "refer":
 
-  alert("Refer & Earn coming soon");
+  UI.openReferEarn();
 
   break;
 
