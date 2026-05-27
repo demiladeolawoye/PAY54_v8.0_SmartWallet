@@ -2115,3 +2115,66 @@ body.light .wallet-balance-row{
   color:var(--muted);
   font-weight:700;
 }
+
+/* =========================================
+   PAY54 AGENT ONBOARDING
+========================================= */
+
+.p54-agent-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.agent-hero{
+  text-align:center;
+}
+
+.agent-icon{
+  font-size:54px;
+  margin-bottom:10px;
+}
+
+.agent-title{
+  font-size:22px;
+  font-weight:900;
+}
+
+.agent-sub{
+  margin-top:8px;
+  line-height:1.5;
+  color:var(--muted);
+  font-weight:700;
+}
+
+.agent-earnings-card{
+
+  padding:18px;
+
+  border-radius:18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(16,185,129,.15),
+      rgba(34,197,94,.08)
+    );
+
+  border:
+    1px solid rgba(16,185,129,.25);
+
+  text-align:center;
+
+}
+
+.agent-earnings-title{
+  font-size:13px;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.agent-earnings-value{
+  margin-top:8px;
+  font-size:28px;
+  font-weight:900;
+}
