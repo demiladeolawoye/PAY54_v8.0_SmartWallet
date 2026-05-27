@@ -953,3 +953,207 @@ window.renderNews = function(){
   `).join("");
 
 };
+
+/* =========================================
+   PAY54 AGENT ONBOARDING
+========================================= */
+
+window.PAY54_UI =
+window.PAY54_UI || {};
+
+window.PAY54_UI.openAgent = function(){
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  openModal({
+
+    title: "Become a PAY54 Agent",
+
+    bodyHTML: `
+
+      <div class="p54-agent-wrap">
+
+        <div class="agent-hero">
+
+          <div class="agent-icon">
+            🏪
+          </div>
+
+          <div class="agent-title">
+            Start earning with PAY54
+          </div>
+
+          <div class="agent-sub">
+            Become an authorised PAY54 cash agent
+            and earn commissions daily.
+          </div>
+
+        </div>
+
+        <div class="p54-form">
+
+          <input
+            id="agentName"
+            class="p54-input"
+            placeholder="Full name"
+          >
+
+          <input
+            id="agentPhone"
+            class="p54-input"
+            placeholder="Phone number"
+            style="margin-top:12px"
+          >
+
+          <select
+            id="agentBusiness"
+            class="p54-input"
+            style="margin-top:12px"
+          >
+            <option value="">
+              Select business type
+            </option>
+
+            <option>
+              POS Business
+            </option>
+
+            <option>
+              Retail Shop
+            </option>
+
+            <option>
+              Supermarket
+            </option>
+
+            <option>
+              Mobile Money
+            </option>
+
+          </select>
+
+          <input
+            id="agentLocation"
+            class="p54-input"
+            placeholder="Location / City"
+            style="margin-top:12px"
+          >
+
+          <input
+            id="agentCapacity"
+            class="p54-input"
+            placeholder="Daily cash capacity"
+            style="margin-top:12px"
+          >
+
+        </div>
+
+        <div class="agent-earnings-card">
+
+          <div class="agent-earnings-title">
+            Estimated Monthly Earnings
+          </div>
+
+          <div class="agent-earnings-value">
+            ₦150,000+
+          </div>
+
+        </div>
+
+        <div class="p54-actions">
+
+          <button
+            class="p54-btn"
+            id="cancelAgentBtn"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="p54-btn primary"
+            id="submitAgentBtn"
+          >
+            Submit Application
+          </button>
+
+        </div>
+
+      </div>
+
+    `,
+
+    onMount: ({ modal, close }) => {
+
+      modal
+        .querySelector("#cancelAgentBtn")
+        .addEventListener("click", close);
+
+      modal
+        .querySelector("#submitAgentBtn")
+        .addEventListener("click", () => {
+
+          const payload = {
+
+            name:
+              modal.querySelector("#agentName")
+              .value.trim(),
+
+            phone:
+              modal.querySelector("#agentPhone")
+              .value.trim(),
+
+            business:
+              modal.querySelector("#agentBusiness")
+              .value.trim(),
+
+            location:
+              modal.querySelector("#agentLocation")
+              .value.trim(),
+
+            capacity:
+              modal.querySelector("#agentCapacity")
+              .value.trim()
+
+          };
+
+          if(
+            !payload.name ||
+            !payload.phone ||
+            !payload.business
+          ){
+
+            window.PAY54_TOAST
+              ?.showToast(
+                "Complete all required fields"
+              );
+
+            return;
+
+          }
+
+          localStorage.setItem(
+            "pay54_agent_application",
+            JSON.stringify(payload)
+          );
+
+          close();
+
+          setTimeout(() => {
+
+            window.PAY54_TOAST
+              ?.showToast(
+                "Agent application submitted"
+              );
+
+          }, 200);
+
+        });
+
+    }
+
+  });
+
+};
