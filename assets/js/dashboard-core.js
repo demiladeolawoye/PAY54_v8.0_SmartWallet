@@ -1157,3 +1157,156 @@ window.PAY54_UI.openAgent = function(){
   });
 
 };
+
+/* =========================================
+   PAY54 SHOP & GO
+========================================= */
+
+window.PAY54_UI =
+window.PAY54_UI || {};
+
+window.PAY54_UI.openShop = function(){
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  openModal({
+
+    title: "Shop & Go",
+
+    bodyHTML: `
+
+      <div class="p54-shop">
+
+        <div class="shop-hero">
+
+          <div class="shop-icon">
+            🛍️
+          </div>
+
+          <div class="shop-title">
+            PAY54 Lifestyle Hub
+          </div>
+
+          <div class="shop-sub">
+            Food, transport, shopping & experiences
+          </div>
+
+        </div>
+
+        <div class="shop-grid">
+
+          <button
+            class="shop-card"
+            data-shop="food"
+          >
+            <div class="shop-card-icon">🍔</div>
+
+            <div class="shop-card-title">
+              Food Delivery
+            </div>
+
+            <div class="shop-card-sub">
+              Order meals instantly
+            </div>
+          </button>
+
+          <button
+            class="shop-card"
+            data-shop="taxi"
+          >
+            <div class="shop-card-icon">🚕</div>
+
+            <div class="shop-card-title">
+              Taxi Booking
+            </div>
+
+            <div class="shop-card-sub">
+              Ride anywhere
+            </div>
+          </button>
+
+          <button
+            class="shop-card"
+            data-shop="tickets"
+          >
+            <div class="shop-card-icon">🎟️</div>
+
+            <div class="shop-card-title">
+              Event Tickets
+            </div>
+
+            <div class="shop-card-sub">
+              Concerts & events
+            </div>
+          </button>
+
+          <button
+            class="shop-card"
+            data-shop="shopping"
+          >
+            <div class="shop-card-icon">🛒</div>
+
+            <div class="shop-card-title">
+              Marketplace
+            </div>
+
+            <div class="shop-card-sub">
+              Shop online
+            </div>
+          </button>
+
+        </div>
+
+      </div>
+
+    `,
+
+    onMount: ({ modal }) => {
+
+      modal
+        .querySelectorAll(".shop-card")
+        .forEach(card => {
+
+          card.addEventListener("click", () => {
+
+            const type =
+              card.dataset.shop;
+
+            let message =
+              "Coming soon";
+
+            if(type === "food"){
+              message =
+                "Food delivery launching soon";
+            }
+
+            if(type === "taxi"){
+              message =
+                "Taxi booking launching soon";
+            }
+
+            if(type === "tickets"){
+              message =
+                "Ticketing engine launching soon";
+            }
+
+            if(type === "shopping"){
+              message =
+                "Marketplace launching soon";
+            }
+
+            window.PAY54_TOAST
+              ?.showToast(message);
+
+          });
+
+        });
+
+    }
+
+  });
+
+};
