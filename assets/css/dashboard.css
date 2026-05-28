@@ -2401,96 +2401,55 @@ body.light .wallet-balance-row{
 }
 
 /* =========================================
-   PAY54 BILLS ENGINE
+   PAY54 BILLS ENGINE v2
 ========================================= */
 
-.bills-grid{
-
+.bill-tabs{
   display:grid;
-
-  grid-template-columns:
-    repeat(2,1fr);
-
+  grid-template-columns:repeat(2,1fr);
   gap:12px;
-
-  margin-top:18px;
-  margin-bottom:18px;
-
+  margin-top:20px;
 }
 
-.bill-card{
-
+.bill-tab{
   border:none;
-
-  border-radius:16px;
-
+  border-radius:14px;
   padding:14px;
-
-  font-weight:800;
-
   cursor:pointer;
-
-  background:
-    rgba(255,255,255,0.06);
-
-  border:
-    1px solid rgba(255,255,255,0.08);
-
-  transition:all .2s ease;
-
+  font-weight:800;
+  background:#f4f7fb;
 }
 
-.bill-card:hover{
-
-  transform:translateY(-2px);
-
-  border-color:#3b82f6;
-
+.bill-tab.active{
+  background:#2563eb;
+  color:#fff;
 }
 
-.bill-card.active{
-
-  background:
-    linear-gradient(
-      135deg,
-      #3b82f6,
-      #2563eb
-    );
-
-  color:white;
-
-  border-color:#3b82f6;
-
-  box-shadow:
-    0 10px 24px
-    rgba(59,130,246,.25);
-
+.quick-amounts{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
 }
 
-.bills-hero{
-  text-align:center;
-  margin-bottom:14px;
+.quick-amount{
+  border:none;
+  border-radius:999px;
+  padding:10px 14px;
+  cursor:pointer;
+  font-weight:800;
+  background:#eef4ff;
 }
 
-.bills-icon{
-  font-size:32px;
+.bill-balance{
+  margin-top:14px;
+  font-size:13px;
+  font-weight:700;
 }
 
-.bills-title{
-  font-size:24px;
-  font-weight:900;
-  margin-top:8px;
-}
-
-.bills-sub{
-  opacity:.7;
-  margin-top:4px;
-}
-
-@media (max-width:640px){
-
-  .bills-grid{
-    grid-template-columns:1fr 1fr;
-  }
-
+.bill-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:22px;
 }
