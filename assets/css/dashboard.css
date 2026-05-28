@@ -2555,16 +2555,11 @@ body.light .wallet-balance-row{
 
   overflow-y:auto;
 
+  overflow-x:hidden;
+
   padding-right:4px;
-}
 
-.p54-savings-wrap::-webkit-scrollbar{
-  width:6px;
-}
-
-.p54-savings-wrap::-webkit-scrollbar-thumb{
-  background:rgba(59,130,246,.35);
-  border-radius:999px;
+  width:100%;
 }
 
 .savings-grid{
@@ -2576,25 +2571,27 @@ body.light .wallet-balance-row{
   gap:14px;
 
   margin-top:18px;
-}
 
-@media(max-width:680px){
-
-  .savings-grid{
-    grid-template-columns:1fr;
-  }
-
+  width:100%;
 }
 
 .saving-goal-card{
 
-  min-height:300px;
+  width:100%;
+
+  min-width:0;
+
+  min-height:320px;
 
   display:flex;
+
   flex-direction:column;
+
   justify-content:space-between;
 
   padding:18px;
+
+  overflow:hidden;
 
   border-radius:20px;
 
@@ -2606,68 +2603,24 @@ body.light .wallet-balance-row{
     0 10px 25px rgba(20,40,80,.08);
 }
 
-body:not(.light) .saving-goal-card{
-
-  background:rgba(255,255,255,.04);
-
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.goal-open-btn{
-
-  width:100%;
-
-  margin-top:18px;
-}
-
-.create-goal-card{
-
-  min-height:180px;
-
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-
-  border-radius:22px;
-
-  border:2px dashed rgba(59,130,246,.25);
-
-  cursor:pointer;
-
-  transition:.2s ease;
-}
-
-.create-goal-card:hover{
-
-  border-color:#3b82f6;
-
-  background:rgba(59,130,246,.05);
-}
-
-.goal-limit-note{
-
-  margin-top:12px;
-
-  font-size:12px;
-
-  font-weight:700;
-
-  color:var(--muted);
-
-  text-align:center;
-}
-
+.goal-open-btn,
 .goal-delete-btn{
 
   width:100%;
 
+  min-height:46px;
+
+  flex-shrink:0;
+}
+
+.goal-delete-btn{
   margin-top:10px;
 }
 
-.goal-delete-btn[disabled]{
+@media(max-width:680px){
 
-  opacity:.45;
+  .savings-grid{
+    grid-template-columns:1fr;
+  }
 
-  cursor:not-allowed;
 }
