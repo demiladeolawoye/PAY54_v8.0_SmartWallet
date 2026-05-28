@@ -2453,3 +2453,94 @@ body.light .wallet-balance-row{
   gap:12px;
   margin-top:22px;
 }
+
+/* =========================================
+   PAY54 CARDS ENGINE
+========================================= */
+
+.cards-actions{
+  display:flex;
+  gap:12px;
+  margin:20px 0;
+  flex-wrap:wrap;
+}
+
+.cards-container{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.pay54-card-ui{
+
+  border-radius:24px;
+
+  padding:20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #111827,
+      #1e3a8a
+    );
+
+  color:#fff;
+
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.35);
+
+}
+
+.card-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.card-brand{
+  font-size:18px;
+  font-weight:900;
+}
+
+.card-number{
+  margin-top:30px;
+  font-size:24px;
+  letter-spacing:3px;
+  font-weight:900;
+}
+
+.card-meta{
+  display:flex;
+  justify-content:space-between;
+  margin-top:22px;
+  font-size:13px;
+}
+
+.card-status{
+  margin-top:12px;
+  font-weight:800;
+}
+
+.default-card-badge{
+  margin-top:12px;
+  display:inline-block;
+  background:#22c55e;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+}
+
+.card-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:20px;
+}
+
+.empty-cards{
+  padding:24px;
+  text-align:center;
+  opacity:.7;
+}
