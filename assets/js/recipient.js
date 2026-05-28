@@ -1749,7 +1749,7 @@ bodyHTML: `
         window.open(`https://wa.me/?text=${encodeURIComponent(link)}`);
       });
 
-      modal.querySelector("#closeReceive").addEventListener("click", close);
+      modal.querySelector("#doneReceive").addEventListener("click", close);
 
     }
 
