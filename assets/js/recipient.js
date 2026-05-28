@@ -1723,61 +1723,61 @@ bodyHTML: `
 </div>
 `,
 
-    onMount: ({modal, close}) => {
+ onMount: ({modal, close}) => {
 
-     const qrBox =
-  modal.querySelector("#receiveQR");
+  const qrBox =
+    modal.querySelector("#receiveQR");
 
-      /* 🔥 QR PAYLOAD */
-      const payload = `PAY54|${userTag}|`;
+  const payload =
+    `PAY54|${userTag}|`;
 
-     if(window.QRCode){
+  if(window.QRCode){
 
-  new QRCode(qrBox,{
+    new QRCode(qrBox,{
+      text: payload,
+      width: 200,
+      height: 200
+    });
 
-    text: payload,
+  }else{
 
-    width: 200,
+    qrBox.innerHTML = `
+      <div class="p54-note">
+        QR Engine unavailable
+      </div>
+    `;
 
-    height: 200
+  }
 
-  });
+  modal
+    .querySelector("#copyTag")
+    .addEventListener("click",()=>{
 
-}else{
+      navigator.clipboard.writeText(
+        `@${userTag}`
+      );
 
-  qrBox.innerHTML = `
+      alert("Tag copied");
 
-    <div class="p54-note">
+    });
 
-      QR Engine unavailable
+  modal
+    .querySelector("#shareTag")
+    .addEventListener("click",()=>{
 
-    </div>
+      const link =
+        `${window.location.origin}/?pay=${encodeURIComponent(userTag)}`;
 
-  `;
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(link)}`,
+        "_blank"
+      );
 
-  console.warn(
-    "QRCode library missing"
-  );
+    });
 
-}
-
-      /* COPY TAG */
-      modal.querySelector("#copyTag").addEventListener("click", ()=>{
-        navigator.clipboard.writeText(`@${userTag}`);
-        alert("Tag copied");
-      });
-
-      /* SHARE LINK */
-      modal.querySelector("#shareTag").addEventListener("click", ()=>{
-        const link = `${window.location.origin}/?pay=${encodeURIComponent(userTag)}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(link)}`);
-      });
-
-      modal.querySelector("#doneReceive").addEventListener("click", close);
-
-    }
-
-  });
+  modal
+    .querySelector("#doneReceive")
+    .addEventListener("click", close);
 
 }
    /* =========================
