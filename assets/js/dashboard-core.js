@@ -1879,3 +1879,346 @@ window.PAY54_UI.openCheckout = function(){
   });
 
 };
+
+/* =========================================
+   PAY54 BILLS & TOP UP ENGINE
+========================================= */
+
+window.PAY54_UI =
+window.PAY54_UI || {};
+
+window.PAY54_UI.openBills = function(){
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  openModal({
+
+    title: "Bills & Top Up",
+
+    bodyHTML: `
+
+      <div class="p54-bills">
+
+        <div class="bills-hero">
+
+          <div class="bills-icon">
+            ⚡
+          </div>
+
+          <div class="bills-title">
+            Pay Bills Instantly
+          </div>
+
+          <div class="bills-sub">
+            Airtime, data, electricity & subscriptions
+          </div>
+
+        </div>
+
+        <div class="bills-grid">
+
+          <button
+            class="bill-card active"
+            data-type="airtime"
+          >
+            📱 Airtime
+          </button>
+
+          <button
+            class="bill-card"
+            data-type="data"
+          >
+            🌐 Data
+          </button>
+
+          <button
+            class="bill-card"
+            data-type="electricity"
+          >
+            💡 Electricity
+          </button>
+
+          <button
+            class="bill-card"
+            data-type="tv"
+          >
+            📺 Cable TV
+          </button>
+
+          <button
+            class="bill-card"
+            data-type="bet"
+          >
+            🎯 Betting
+          </button>
+
+        </div>
+
+        <div class="p54-form">
+
+          <select
+            id="billProvider"
+            class="p54-input p54-select"
+          >
+            <option value="">
+              Select Provider
+            </option>
+
+            <option>
+              MTN
+            </option>
+
+            <option>
+              Airtel
+            </option>
+
+            <option>
+              Glo
+            </option>
+
+            <option>
+              Vodafone
+            </option>
+
+          </select>
+
+          <input
+            id="billAccount"
+            class="p54-input"
+            placeholder="Phone / Meter / Smartcard"
+            style="margin-top:12px"
+          >
+
+          <input
+            id="billAmount"
+            class="p54-input"
+            type="number"
+            placeholder="Amount"
+            style="margin-top:12px"
+          >
+
+          <select
+            id="billWallet"
+            class="p54-input p54-select"
+            style="margin-top:12px"
+          >
+            <option value="NGN">
+              NGN Wallet
+            </option>
+
+            <option value="GBP">
+              GBP Wallet
+            </option>
+
+            <option value="USD">
+              USD Wallet
+            </option>
+          </select>
+
+          <div
+            class="available-balance"
+            id="billBalance"
+          >
+          </div>
+
+        </div>
+
+        <div class="p54-actions">
+
+          <button
+            class="p54-btn"
+            id="cancelBillBtn"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="p54-btn primary"
+            id="payBillBtn"
+          >
+            Pay Bill
+          </button>
+
+        </div>
+
+      </div>
+
+    `,
+
+    onMount: ({ modal, close }) => {
+
+      const ledger =
+        window.PAY54_LEDGER;
+
+      const txEngine =
+        window.PAY54_TX;
+
+      let selectedType =
+        "airtime";
+
+      const walletSelect =
+        modal.querySelector("#billWallet");
+
+      const balanceEl =
+        modal.querySelector("#billBalance");
+
+      function refreshBalance(){
+
+        const cur =
+          walletSelect.value;
+
+        const balances =
+          ledger.getBalances();
+
+        balanceEl.innerHTML = `
+
+          <span class="avail-label">
+            Available:
+          </span>
+
+          <span class="avail-value">
+            ${ledger.moneyFmt(
+              cur,
+              balances[cur] || 0
+            )}
+          </span>
+
+        `;
+
+      }
+
+      refreshBalance();
+
+      walletSelect.addEventListener(
+        "change",
+        refreshBalance
+      );
+
+      modal
+        .querySelectorAll(".bill-card")
+        .forEach(card => {
+
+          card.addEventListener("click", () => {
+
+            modal
+              .querySelectorAll(".bill-card")
+              .forEach(c =>
+                c.classList.remove("active")
+              );
+
+            card.classList.add("active");
+
+            selectedType =
+              card.dataset.type;
+
+          });
+
+        });
+
+      modal
+        .querySelector("#cancelBillBtn")
+        .addEventListener("click", close);
+
+      modal
+        .querySelector("#payBillBtn")
+        .addEventListener("click", () => {
+
+          const provider =
+            modal.querySelector("#billProvider")
+            .value.trim();
+
+          const account =
+            modal.querySelector("#billAccount")
+            .value.trim();
+
+          const amount =
+            Number(
+              modal.querySelector("#billAmount")
+              .value
+            );
+
+          const currency =
+            walletSelect.value;
+
+          if(
+            !provider ||
+            !account ||
+            !amount
+          ){
+
+            window.PAY54_TOAST
+              ?.showToast(
+                "Complete all fields"
+              );
+
+            return;
+
+          }
+
+          txEngine.requestPinVerification(() => {
+
+            const entry =
+              ledger.createEntry({
+
+                type: "bill_payment",
+
+                title: "Bills Payment",
+
+                currency,
+
+                amount: -Math.abs(amount),
+
+                icon: "⚡",
+
+                meta: {
+
+                  provider,
+                  account,
+                  bill_type: selectedType
+
+                }
+
+              });
+
+            const tx =
+              txEngine.processTransaction(
+                entry,
+                {
+                  source: "bills",
+                  title: provider,
+                  showReceipt: true
+                }
+              );
+
+            if(tx){
+
+              close();
+
+              setTimeout(() => {
+
+                window.PAY54_TOAST
+                  ?.showToast(
+                    provider +
+                    " payment successful"
+                  );
+
+                if(window.renderBalance){
+                  window.renderBalance();
+                }
+
+              },200);
+
+            }
+
+          });
+
+        });
+
+    }
+
+  });
+
+};
