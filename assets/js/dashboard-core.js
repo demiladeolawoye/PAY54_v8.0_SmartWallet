@@ -1881,7 +1881,7 @@ window.PAY54_UI.openCheckout = function(){
 };
 
 /* =========================================
-   PAY54 BILLS & TOP UP ENGINE
+   PAY54 BILLS ENGINE v2 PREMIUM
 ========================================= */
 
 window.PAY54_UI =
@@ -1892,13 +1892,84 @@ window.PAY54_UI.openBills = function(){
   const openModal =
     window.PAY54_MODALS?.openModal;
 
-  if(!openModal) return;
+  const LEDGER =
+    window.PAY54_LEDGER;
+
+  const RECEIPTS =
+    window.PAY54_RECEIPTS;
+
+  if(!openModal || !LEDGER) return;
+
+  const providers = {
+
+    airtime:[
+      "MTN",
+      "Airtel",
+      "Glo",
+      "9mobile"
+    ],
+
+    data:[
+      "MTN Data",
+      "Airtel Data",
+      "Glo Data",
+      "9mobile Data"
+    ],
+
+    electricity:[
+      "IKEDC",
+      "EKEDC",
+      "Abuja Electric",
+      "KEDCO"
+    ],
+
+    cable:[
+      "DSTV",
+      "GOtv",
+      "Startimes"
+    ]
+
+  };
+
+  const bundles = {
+
+    "MTN Data":[
+      "1GB - ₦500",
+      "2GB - ₦1000",
+      "5GB - ₦2000"
+    ],
+
+    "Airtel Data":[
+      "1GB - ₦500",
+      "3GB - ₦1500",
+      "6GB - ₦3000"
+    ],
+
+    DSTV:[
+      "Compact",
+      "Compact Plus",
+      "Premium"
+    ],
+
+    GOtv:[
+      "Jolli",
+      "Max",
+      "Supa"
+    ],
+
+    Startimes:[
+      "Nova",
+      "Basic",
+      "Classic"
+    ]
+
+  };
 
   openModal({
 
-    title: "Bills & Top Up",
+    title:"Bills & Top Up",
 
-    bodyHTML: `
+    bodyHTML:`
 
       <div class="p54-bills">
 
@@ -1918,75 +1989,49 @@ window.PAY54_UI.openBills = function(){
 
         </div>
 
-        <div class="bills-grid">
+        <div class="bill-tabs">
 
-          <button
-            class="bill-card active"
-            data-type="airtime"
-          >
+          <button class="bill-tab active"
+            data-type="airtime">
             📱 Airtime
           </button>
 
-          <button
-            class="bill-card"
-            data-type="data"
-          >
+          <button class="bill-tab"
+            data-type="data">
             🌐 Data
           </button>
 
-          <button
-            class="bill-card"
-            data-type="electricity"
-          >
+          <button class="bill-tab"
+            data-type="electricity">
             💡 Electricity
           </button>
 
-          <button
-            class="bill-card"
-            data-type="tv"
-          >
+          <button class="bill-tab"
+            data-type="cable">
             📺 Cable TV
-          </button>
-
-          <button
-            class="bill-card"
-            data-type="bet"
-          >
-            🎯 Betting
           </button>
 
         </div>
 
-        <div class="p54-form">
+        <div class="bill-form">
 
           <select
             id="billProvider"
-            class="p54-input p54-select"
+            class="p54-input"
+          ></select>
+
+          <select
+            id="billBundle"
+            class="p54-input"
+            style="margin-top:12px"
           >
             <option value="">
-              Select Provider
+              Select Bundle
             </option>
-
-            <option>
-              MTN
-            </option>
-
-            <option>
-              Airtel
-            </option>
-
-            <option>
-              Glo
-            </option>
-
-            <option>
-              Vodafone
-            </option>
-
           </select>
 
           <input
-            id="billAccount"
+            id="billTarget"
             class="p54-input"
             placeholder="Phone / Meter / Smartcard"
             style="margin-top:12px"
@@ -2000,47 +2045,70 @@ window.PAY54_UI.openBills = function(){
             style="margin-top:12px"
           >
 
+          <div class="quick-amounts">
+
+            <button
+              class="quick-amount"
+              data-amount="500"
+            >
+              ₦500
+            </button>
+
+            <button
+              class="quick-amount"
+              data-amount="1000"
+            >
+              ₦1000
+            </button>
+
+            <button
+              class="quick-amount"
+              data-amount="2000"
+            >
+              ₦2000
+            </button>
+
+            <button
+              class="quick-amount"
+              data-amount="5000"
+            >
+              ₦5000
+            </button>
+
+          </div>
+
           <select
             id="billWallet"
-            class="p54-input p54-select"
+            class="p54-input"
             style="margin-top:12px"
           >
             <option value="NGN">
               NGN Wallet
             </option>
-
-            <option value="GBP">
-              GBP Wallet
-            </option>
-
-            <option value="USD">
-              USD Wallet
-            </option>
           </select>
 
           <div
-            class="available-balance"
             id="billBalance"
-          >
+            class="bill-balance"
+          ></div>
+
+          <div class="bill-actions">
+
+            <button
+              class="btn ghost"
+              id="cancelBillBtn"
+            >
+              Cancel
+            </button>
+
+            <button
+              class="btn primary"
+              id="payBillBtn"
+            >
+              Pay Bill
+            </button>
+
           </div>
-
-        </div>
-
-        <div class="p54-actions">
-
-          <button
-            class="p54-btn"
-            id="cancelBillBtn"
-          >
-            Cancel
-          </button>
-
-          <button
-            class="p54-btn primary"
-            id="payBillBtn"
-          >
-            Pay Bill
-          </button>
 
         </div>
 
@@ -2050,170 +2118,228 @@ window.PAY54_UI.openBills = function(){
 
     onMount: ({ modal, close }) => {
 
-      const ledger =
-        window.PAY54_LEDGER;
-
-      const txEngine =
-        window.PAY54_TX;
-
-      let selectedType =
+      let activeType =
         "airtime";
 
-      const walletSelect =
-        modal.querySelector("#billWallet");
+      const balances =
+        LEDGER.getBalances();
+
+      const providerEl =
+        modal.querySelector("#billProvider");
+
+      const bundleEl =
+        modal.querySelector("#billBundle");
+
+      const targetEl =
+        modal.querySelector("#billTarget");
+
+      const amountEl =
+        modal.querySelector("#billAmount");
 
       const balanceEl =
         modal.querySelector("#billBalance");
 
-      function refreshBalance(){
-
-        const cur =
-          walletSelect.value;
-
-        const balances =
-          ledger.getBalances();
+      function renderBalance(){
 
         balanceEl.innerHTML = `
-
-          <span class="avail-label">
-            Available:
-          </span>
-
-          <span class="avail-value">
-            ${ledger.moneyFmt(
-              cur,
-              balances[cur] || 0
+          Available:
+          <strong>
+            ${LEDGER.moneyFmt(
+              "NGN",
+              balances.NGN
             )}
-          </span>
-
+          </strong>
         `;
 
       }
 
-      refreshBalance();
+      function loadProviders(type){
 
-      walletSelect.addEventListener(
-        "change",
-        refreshBalance
-      );
+        providerEl.innerHTML = "";
+
+        providers[type].forEach(p => {
+
+          const opt =
+            document.createElement("option");
+
+          opt.value = p;
+          opt.textContent = p;
+
+          providerEl.appendChild(opt);
+
+        });
+
+        loadBundles();
+
+      }
+
+      function loadBundles(){
+
+        const provider =
+          providerEl.value;
+
+        const list =
+          bundles[provider] || [];
+
+        bundleEl.innerHTML = `
+          <option value="">
+            Select Bundle
+          </option>
+        `;
+
+        list.forEach(item => {
+
+          const opt =
+            document.createElement("option");
+
+          opt.value = item;
+          opt.textContent = item;
+
+          bundleEl.appendChild(opt);
+
+        });
+
+      }
+
+      renderBalance();
+
+      loadProviders(activeType);
 
       modal
-        .querySelectorAll(".bill-card")
-        .forEach(card => {
+        .querySelectorAll(".bill-tab")
+        .forEach(tab => {
 
-          card.addEventListener("click", () => {
+          tab.addEventListener("click", () => {
 
             modal
-              .querySelectorAll(".bill-card")
-              .forEach(c =>
-                c.classList.remove("active")
+              .querySelectorAll(".bill-tab")
+              .forEach(t =>
+                t.classList.remove("active")
               );
 
-            card.classList.add("active");
+            tab.classList.add("active");
 
-            selectedType =
-              card.dataset.type;
+            activeType =
+              tab.dataset.type;
+
+            loadProviders(activeType);
 
           });
 
         });
 
-      modal
-        .querySelector("#cancelBillBtn")
-        .addEventListener("click", close);
+      providerEl.addEventListener(
+        "change",
+        loadBundles
+      );
 
       modal
-        .querySelector("#payBillBtn")
-        .addEventListener("click", () => {
+        .querySelectorAll(".quick-amount")
+        .forEach(btn => {
 
-          const provider =
-            modal.querySelector("#billProvider")
-            .value.trim();
+          btn.addEventListener("click", () => {
 
-          const account =
-            modal.querySelector("#billAccount")
-            .value.trim();
+            amountEl.value =
+              btn.dataset.amount;
+
+          });
+
+        });
+
+      modal.querySelector(
+        "#cancelBillBtn"
+      ).addEventListener(
+        "click",
+        close
+      );
+
+      modal.querySelector(
+        "#payBillBtn"
+      ).addEventListener(
+        "click",
+        () => {
 
           const amount =
-            Number(
-              modal.querySelector("#billAmount")
-              .value
-            );
+            Number(amountEl.value);
 
-          const currency =
-            walletSelect.value;
-
-          if(
-            !provider ||
-            !account ||
-            !amount
-          ){
+          if(!amount || amount <= 0){
 
             window.PAY54_TOAST
               ?.showToast(
-                "Complete all fields"
+                "Enter valid amount"
               );
 
             return;
 
           }
 
-          txEngine.requestPinVerification(() => {
+          const tx =
+            LEDGER.createEntry({
 
-            const entry =
-              ledger.createEntry({
+              type:"bill",
 
-                type: "bill_payment",
+              title:"Bill Payment",
 
-                title: "Bills Payment",
+              currency:"NGN",
 
-                currency,
+              amount:-amount,
 
-                amount: -Math.abs(amount),
+              icon:"⚡",
 
-                icon: "⚡",
+              meta:{
+                provider:
+                  providerEl.value,
+                target:
+                  targetEl.value,
+                bundle:
+                  bundleEl.value,
+                category:
+                  activeType
+              }
 
-                meta: {
+            });
 
-                  provider,
-                  account,
-                  bill_type: selectedType
+          LEDGER.applyEntry(tx);
 
-                }
+          close();
 
-              });
+          RECEIPTS?.openReceiptModal({
 
-            const tx =
-              txEngine.processTransaction(
-                entry,
-                {
-                  source: "bills",
-                  title: provider,
-                  showReceipt: true
-                }
-              );
+            openModal,
 
-            if(tx){
+            title:"Bill Payment",
 
-              close();
+            tx,
 
-              setTimeout(() => {
+            lines:[
 
-                window.PAY54_TOAST
-                  ?.showToast(
-                    provider +
-                    " payment successful"
-                  );
+              `Provider: ${providerEl.value}`,
 
-                if(window.renderBalance){
-                  window.renderBalance();
-                }
+              `Category: ${activeType}`,
 
-              },200);
+              `Bundle: ${bundleEl.value || "N/A"}`,
 
-            }
+              `Target: ${targetEl.value}`,
+
+              `Amount: ${LEDGER.moneyFmt("NGN",amount)}`,
+
+              `Status: SUCCESS`
+
+            ]
 
           });
+
+          window.PAY54_TOAST
+            ?.showToast(
+              "Bill payment successful"
+            );
+
+          if(
+            typeof renderBalances ===
+            "function"
+          ){
+            renderBalances();
+          }
 
         });
 
