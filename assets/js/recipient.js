@@ -1744,7 +1744,7 @@ bodyHTML: `
       });
 
       /* SHARE LINK */
-      modal.querySelector("#shareLink").addEventListener("click", ()=>{
+      modal.querySelector("#shareTag").addEventListener("click", ()=>{
         const link = `${window.location.origin}/?pay=${encodeURIComponent(userTag)}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(link)}`);
       });
