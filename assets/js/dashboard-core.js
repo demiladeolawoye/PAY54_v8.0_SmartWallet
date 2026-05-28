@@ -3593,10 +3593,12 @@ window.PAY54_UI.openSavings = function(){
         "Auto save plan updated"
       );
 
-  });
+    });
 
-}
+} // end onMount
 
-  renderSavings();
+    });// end openModal
 
-};
+    renderSavings();
+
+}; // end openGoal
