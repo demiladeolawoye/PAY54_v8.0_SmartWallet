@@ -2546,100 +2546,169 @@ body.light .wallet-balance-row{
 }
 
 /* =========================================
-   PAY54 SAVINGS V2
+   PAY54 SAVINGS V3 PREMIUM
 ========================================= */
 
-.p54-savings-wrap{
+.p54-savings-v3{
   display:flex;
   flex-direction:column;
   gap:18px;
-  max-height:72vh;
 }
 
-.p54-savings-scroll{
-  overflow:auto;
+.p54-save-summary{
+  background:linear-gradient(
+    135deg,
+    #1d4ed8,
+    #2563eb
+  );
+  border-radius:24px;
+  padding:24px;
+  color:#fff;
+}
+
+.p54-save-summary small{
+  opacity:.8;
+  font-size:13px;
+}
+
+.p54-save-summary h2{
+  margin-top:10px;
+  font-size:40px;
+  font-weight:900;
+}
+
+.p54-goals-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+
+.p54-goal-premium{
+  border-radius:22px;
+  padding:18px;
+  background:#fff;
+  border:1px solid rgba(15,23,42,.06);
   display:flex;
   flex-direction:column;
   gap:14px;
-  padding-right:4px;
+  box-shadow:
+    0 8px 24px rgba(15,23,42,.06);
 }
 
-.p54-savings-sticky{
-  position:sticky;
-  bottom:0;
-  background:#fff;
-  padding-top:14px;
-  border-top:1px solid rgba(15,23,42,.08);
-}
-
-body.dark .p54-savings-sticky{
+body.dark .p54-goal-premium{
   background:#0f172a;
-  border-top:1px solid rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.06);
 }
 
-.p54-goal-card{
-  border:1px solid rgba(15,23,42,.08);
-  border-radius:18px;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-body.dark .p54-goal-card{
-  border-color:rgba(255,255,255,.08);
-}
-
-.p54-goal-top{
+.p54-goal-head{
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
 
-.p54-goal-title{
-  font-weight:800;
+.p54-goal-name{
   font-size:16px;
+  font-weight:800;
 }
 
-.p54-goal-progress{
-  height:10px;
-  border-radius:999px;
-  background:#e5e7eb;
-  overflow:hidden;
+.p54-goal-circle{
+  width:88px;
+  height:88px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:
+    conic-gradient(
+      #2563eb var(--progress),
+      #e5e7eb 0deg
+    );
+  margin:auto;
 }
 
-.p54-goal-progress-bar{
-  height:100%;
-  border-radius:999px;
-  background:linear-gradient(
-    135deg,
-    #2563eb,
-    #1d4ed8
-  );
+.p54-goal-circle-inner{
+  width:68px;
+  height:68px;
+  border-radius:50%;
+  background:#fff;
+  display:grid;
+  place-items:center;
+  font-size:14px;
+  font-weight:800;
+}
+
+body.dark .p54-goal-circle-inner{
+  background:#0f172a;
+}
+
+.p54-goal-stat{
+  text-align:center;
+}
+
+.p54-goal-stat strong{
+  display:block;
+  font-size:20px;
+  margin-top:6px;
 }
 
 .p54-goal-actions{
   display:flex;
   gap:10px;
-  flex-wrap:wrap;
 }
 
-.p54-save-btn{
+.p54-goal-btn{
+  flex:1;
   border:none;
   border-radius:12px;
-  padding:10px 14px;
-  font-weight:700;
+  padding:10px;
   cursor:pointer;
+  font-weight:700;
+}
+
+.p54-goal-btn.primary{
   background:#2563eb;
   color:#fff;
 }
 
-.p54-save-btn.alt{
+.p54-goal-btn.alt{
   background:#eef2ff;
   color:#1e3a8a;
 }
 
-body.dark .p54-save-btn.alt{
+body.dark .p54-goal-btn.alt{
   background:#172554;
   color:#fff;
+}
+
+.p54-create-goal{
+  border-radius:22px;
+  border:2px dashed rgba(37,99,235,.3);
+  padding:20px;
+  text-align:center;
+  cursor:pointer;
+}
+
+.p54-goal-detail{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.p54-goal-balance{
+  text-align:center;
+}
+
+.p54-goal-balance h2{
+  font-size:42px;
+  font-weight:900;
+}
+
+.p54-goal-auto{
+  border-radius:18px;
+  padding:16px;
+  background:#f8fafc;
+}
+
+body.dark .p54-goal-auto{
+  background:#111827;
 }
