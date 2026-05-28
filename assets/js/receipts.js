@@ -173,7 +173,15 @@ switch(txType){
     }
 
   break;
+      
+case "savings":
 
+  if(window.PAY54_UI?.openSavings){
+    window.PAY54_UI.openSavings();
+  }
+
+break;
+      
   case "bet":
 
     if(window.PAY54_UI?.openBetFunding){
