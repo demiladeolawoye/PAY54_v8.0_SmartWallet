@@ -3127,10 +3127,10 @@ window.PAY54_UI.openSavings = function(){
 
             btn.addEventListener("click", () => {
 
-              const index =
-                Number(
-                  btn.dataset.deleteGoal
-                );
+             const index =
+  Number(
+    btn.dataset.deleteGoal
+  );
 
               const goals =
                 getGoals();
