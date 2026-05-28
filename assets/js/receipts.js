@@ -134,7 +134,7 @@ switch(txType){
 
   break;
 
-  case "bills":
+ case "bill":
 
     if(window.PAY54_UI?.openBills){
       window.PAY54_UI.openBills();
