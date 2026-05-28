@@ -3396,40 +3396,206 @@ window.PAY54_UI.openSavings = function(){
 
       `,
 
-      onMount: ({ modal, close }) => {
+  onMount: ({ modal, close }) => {
 
-        modal
-          .querySelector("#saveAutoBtn")
-          .addEventListener("click", () => {
+  const addBtn =
+    modal.querySelector("#addMoneyGoalBtn");
 
-            goal.auto_save = {
+  const withdrawBtn =
+    modal.querySelector("#withdrawGoalBtn");
 
-              frequency:
-                modal.querySelector("#autoFrequency").value,
+  const autoBtn =
+    modal.querySelector("#saveAutoBtn");
 
-              amount:
-                Number(
-                  modal.querySelector("#autoAmount").value
-                )
+  /* =========================
+     ADD MONEY
+  ========================= */
 
-            };
+  addBtn?.addEventListener("click", () => {
 
-            goals[index] = goal;
+    const amount =
+      Number(
+        prompt("Enter amount to save")
+      );
 
-            saveGoals(goals);
+    if(!amount || amount <= 0){
 
-            window.PAY54_TOAST
-              ?.showToast(
-                "Auto save plan updated"
-              );
+      window.PAY54_TOAST
+        ?.showToast(
+          "Invalid amount"
+        );
 
-          });
+      return;
 
-      }
+    }
+
+    const balances =
+      LEDGER.getBalances();
+
+    const available =
+      balances.NGN || 0;
+
+    if(amount > available){
+
+      window.PAY54_TOAST
+        ?.showToast(
+          "Insufficient balance"
+        );
+
+      return;
+
+    }
+
+    goal.saved += amount;
+
+    goals[index] = goal;
+
+    saveGoals(goals);
+
+    LEDGER.applyEntry({
+
+      currency:"NGN",
+
+      amount:-amount,
+
+      type:"savings",
+
+      title:`Savings Deposit • ${goal.name}`
 
     });
 
-  }
+    window.PAY54_TOAST
+      ?.showToast(
+        "Money added successfully"
+      );
+
+    close();
+
+    setTimeout(() => {
+
+      renderSavings();
+
+      renderBalance?.();
+
+    }, 180);
+
+  });
+
+  /* =========================
+     WITHDRAW
+  ========================= */
+
+  withdrawBtn?.addEventListener("click", () => {
+
+    const amount =
+      Number(
+        prompt("Enter withdrawal amount")
+      );
+
+    if(!amount || amount <= 0){
+
+      window.PAY54_TOAST
+        ?.showToast(
+          "Invalid amount"
+        );
+
+      return;
+
+    }
+
+    if(amount > goal.saved){
+
+      window.PAY54_TOAST
+        ?.showToast(
+          "Insufficient savings"
+        );
+
+      return;
+
+    }
+
+    goal.saved -= amount;
+
+    goals[index] = goal;
+
+    saveGoals(goals);
+
+    LEDGER.applyEntry({
+
+      currency:"NGN",
+
+      amount:amount,
+
+      type:"savings_withdrawal",
+
+      title:`Savings Withdrawal • ${goal.name}`
+
+    });
+
+    window.PAY54_TOAST
+      ?.showToast(
+        "Withdrawal successful"
+      );
+
+    close();
+
+    setTimeout(() => {
+
+      renderSavings();
+
+      renderBalance?.();
+
+    }, 180);
+
+  });
+
+  /* =========================
+     AUTO SAVE PLAN
+  ========================= */
+
+  autoBtn?.addEventListener("click", () => {
+
+    const frequency =
+      modal.querySelector("#autoFrequency")
+      ?.value;
+
+    const amount =
+      Number(
+        modal.querySelector("#autoAmount")
+        ?.value
+      );
+
+    if(!amount || amount <= 0){
+
+      window.PAY54_TOAST
+        ?.showToast(
+          "Enter valid auto save amount"
+        );
+
+      return;
+
+    }
+
+    goal.auto_save = {
+
+      frequency,
+
+      amount
+
+    };
+
+    goals[index] = goal;
+
+    saveGoals(goals);
+
+    window.PAY54_TOAST
+      ?.showToast(
+        "Auto save plan updated"
+      );
+
+  });
+
+}
 
   renderSavings();
 
