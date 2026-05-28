@@ -3222,79 +3222,76 @@ window.PAY54_UI.openSavings = function(){
 
       onMount: ({ modal, close }) => {
 
-        modal
-          .querySelector("#saveGoalBtn")
-          .addEventListener("click", () => {
+  modal
+    .querySelector("#saveGoalBtn")
+    .addEventListener("click", () => {
 
-            const name =
-              modal.querySelector("#goalName")
-              .value.trim();
+      const name =
+        modal.querySelector("#goalName")
+        .value.trim();
 
-            const target =
-              Number(
-                modal.querySelector("#goalTarget")
-                .value
-              );
+      const target =
+        Number(
+          modal.querySelector("#goalTarget")
+          .value
+        );
 
-            if(!name || !target){
+      if(!name || !target){
 
-              window.PAY54_TOAST
-                ?.showToast(
-                  "Complete all fields"
-                );
+        window.PAY54_TOAST
+          ?.showToast(
+            "Complete all fields"
+          );
 
-              return;
-
-            }
-
-            const goals =
-              getGoals();
-
-            if(goals.length >= 4){
-
-              window.PAY54_TOAST
-                ?.showToast(
-                  "Maximum 4 goals allowed"
-                );
-
-              return;
-
-            }
-
-            goals.push({
-
-              name,
-
-              target,
-
-              saved:0,
-
-              auto_save:null
-
-            });
-
-            saveGoals(goals);
-
-            close();
-
-            setTimeout(() => {
-
-              renderSavings();
-
-              window.PAY54_TOAST
-                ?.showToast(
-                  "Goal created"
-                );
-
-            }, 150);
-
-          });
+        return;
 
       }
 
+      const goals =
+        getGoals();
+
+      if(goals.length >= 4){
+
+        window.PAY54_TOAST
+          ?.showToast(
+            "Maximum 4 goals allowed"
+          );
+
+        return;
+
+      }
+
+      goals.push({
+
+        name,
+        target,
+        saved:0,
+        auto_save:null
+
+      });
+
+      saveGoals(goals);
+
+      close();
+
+      setTimeout(() => {
+
+        renderSavings();
+
+        window.PAY54_TOAST
+          ?.showToast(
+            "Goal created"
+          );
+
+      },150);
+
     });
 
-  }
+} // close onMount
+
+}); // close openModal
+
+} // close openCreateGoal
 
   function openGoal(index){
 
