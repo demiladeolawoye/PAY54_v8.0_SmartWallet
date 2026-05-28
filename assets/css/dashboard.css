@@ -2546,169 +2546,128 @@ body.light .wallet-balance-row{
 }
 
 /* =========================================
-   PAY54 SAVINGS V3 PREMIUM
+   PAY54 SAVINGS V3.5 FINAL FIX PACK
 ========================================= */
 
-.p54-savings-v3{
-  display:flex;
-  flex-direction:column;
-  gap:18px;
+.p54-savings-wrap{
+
+  max-height:85vh;
+
+  overflow-y:auto;
+
+  padding-right:4px;
 }
 
-.p54-save-summary{
-  background:linear-gradient(
-    135deg,
-    #1d4ed8,
-    #2563eb
-  );
-  border-radius:24px;
-  padding:24px;
-  color:#fff;
+.p54-savings-wrap::-webkit-scrollbar{
+  width:6px;
 }
 
-.p54-save-summary small{
-  opacity:.8;
-  font-size:13px;
+.p54-savings-wrap::-webkit-scrollbar-thumb{
+  background:rgba(59,130,246,.35);
+  border-radius:999px;
 }
 
-.p54-save-summary h2{
-  margin-top:10px;
-  font-size:40px;
-  font-weight:900;
-}
+.savings-grid{
 
-.p54-goals-grid{
   display:grid;
-  grid-template-columns:
-    repeat(auto-fit,minmax(220px,1fr));
-  gap:16px;
-}
 
-.p54-goal-premium{
-  border-radius:22px;
-  padding:18px;
-  background:#fff;
-  border:1px solid rgba(15,23,42,.06);
-  display:flex;
-  flex-direction:column;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+
   gap:14px;
-  box-shadow:
-    0 8px 24px rgba(15,23,42,.06);
+
+  margin-top:18px;
 }
 
-body.dark .p54-goal-premium{
-  background:#0f172a;
-  border-color:rgba(255,255,255,.06);
+@media(max-width:680px){
+
+  .savings-grid{
+    grid-template-columns:1fr;
+  }
+
 }
 
-.p54-goal-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+.saving-goal-card{
 
-.p54-goal-name{
-  font-size:16px;
-  font-weight:800;
-}
+  min-height:300px;
 
-.p54-goal-circle{
-  width:88px;
-  height:88px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:
-    conic-gradient(
-      #2563eb var(--progress),
-      #e5e7eb 0deg
-    );
-  margin:auto;
-}
-
-.p54-goal-circle-inner{
-  width:68px;
-  height:68px;
-  border-radius:50%;
-  background:#fff;
-  display:grid;
-  place-items:center;
-  font-size:14px;
-  font-weight:800;
-}
-
-body.dark .p54-goal-circle-inner{
-  background:#0f172a;
-}
-
-.p54-goal-stat{
-  text-align:center;
-}
-
-.p54-goal-stat strong{
-  display:block;
-  font-size:20px;
-  margin-top:6px;
-}
-
-.p54-goal-actions{
-  display:flex;
-  gap:10px;
-}
-
-.p54-goal-btn{
-  flex:1;
-  border:none;
-  border-radius:12px;
-  padding:10px;
-  cursor:pointer;
-  font-weight:700;
-}
-
-.p54-goal-btn.primary{
-  background:#2563eb;
-  color:#fff;
-}
-
-.p54-goal-btn.alt{
-  background:#eef2ff;
-  color:#1e3a8a;
-}
-
-body.dark .p54-goal-btn.alt{
-  background:#172554;
-  color:#fff;
-}
-
-.p54-create-goal{
-  border-radius:22px;
-  border:2px dashed rgba(37,99,235,.3);
-  padding:20px;
-  text-align:center;
-  cursor:pointer;
-}
-
-.p54-goal-detail{
   display:flex;
   flex-direction:column;
-  gap:18px;
+  justify-content:space-between;
+
+  padding:18px;
+
+  border-radius:20px;
+
+  background:#ffffff;
+
+  border:1px solid rgba(10,20,40,.08);
+
+  box-shadow:
+    0 10px 25px rgba(20,40,80,.08);
 }
 
-.p54-goal-balance{
+body:not(.light) .saving-goal-card{
+
+  background:rgba(255,255,255,.04);
+
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.goal-open-btn{
+
+  width:100%;
+
+  margin-top:18px;
+}
+
+.create-goal-card{
+
+  min-height:180px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:22px;
+
+  border:2px dashed rgba(59,130,246,.25);
+
+  cursor:pointer;
+
+  transition:.2s ease;
+}
+
+.create-goal-card:hover{
+
+  border-color:#3b82f6;
+
+  background:rgba(59,130,246,.05);
+}
+
+.goal-limit-note{
+
+  margin-top:12px;
+
+  font-size:12px;
+
+  font-weight:700;
+
+  color:var(--muted);
+
   text-align:center;
 }
 
-.p54-goal-balance h2{
-  font-size:42px;
-  font-weight:900;
+.goal-delete-btn{
+
+  width:100%;
+
+  margin-top:10px;
 }
 
-.p54-goal-auto{
-  border-radius:18px;
-  padding:16px;
-  background:#f8fafc;
-}
+.goal-delete-btn[disabled]{
 
-body.dark .p54-goal-auto{
-  background:#111827;
+  opacity:.45;
+
+  cursor:not-allowed;
 }
