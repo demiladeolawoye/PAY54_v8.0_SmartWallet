@@ -1725,7 +1725,8 @@ bodyHTML: `
 
     onMount: ({modal, close}) => {
 
-      const qrBox = modal.querySelector("#qrBox");
+     const qrBox =
+  modal.querySelector("#receiveQR");
 
       /* 🔥 QR PAYLOAD */
       const payload = `PAY54|${userTag}|`;
