@@ -1731,11 +1731,35 @@ bodyHTML: `
       /* 🔥 QR PAYLOAD */
       const payload = `PAY54|${userTag}|`;
 
-      new QRCode(qrBox,{
-        text:payload,
-        width:200,
-        height:200
-      });
+     if(window.QRCode){
+
+  new QRCode(qrBox,{
+
+    text: payload,
+
+    width: 200,
+
+    height: 200
+
+  });
+
+}else{
+
+  qrBox.innerHTML = `
+
+    <div class="p54-note">
+
+      QR Engine unavailable
+
+    </div>
+
+  `;
+
+  console.warn(
+    "QRCode library missing"
+  );
+
+}
 
       /* COPY TAG */
       modal.querySelector("#copyTag").addEventListener("click", ()=>{
