@@ -2900,7 +2900,7 @@ window.PAY54_UI.openCards = function(){
 };
 
 /* =========================================
-   PAY54 SAVINGS & GOALS
+   PAY54 SAVINGS V2
 ========================================= */
 
 window.PAY54_UI =
@@ -2913,143 +2913,315 @@ window.PAY54_UI.openSavings = function(){
 
   if(!openModal) return;
 
-  const ledger =
+  const LEDGER =
     window.PAY54_LEDGER;
 
-  const balances =
-    ledger.getBalances();
+  let balances =
+    LEDGER.getBalances();
 
-  const activeCur =
-    window.PAY54_APP?.activeCurrency || "NGN";
-
-  const available =
-    balances[activeCur] || 0;
+  let available =
+    balances.NGN || 0;
 
   const goals =
     JSON.parse(
       localStorage.getItem("pay54_goals") || "[]"
     );
 
-  openModal({
+  function saveGoals(list){
+    localStorage.setItem(
+      "pay54_goals",
+      JSON.stringify(list)
+    );
+  }
 
-    title: "Savings & Goals",
+  function renderGoals(){
 
-    bodyHTML: `
+    const wrap =
+      document.getElementById(
+        "p54GoalsWrap"
+      );
 
-      <div class="p54-savings">
+    if(!wrap) return;
 
-        <div class="savings-hero">
+    wrap.innerHTML = "";
 
-          <div class="savings-icon">
-            💰
+    goals.forEach((goal,index)=>{
+
+      const percent =
+        Math.min(
+          100,
+          Math.round(
+            (goal.saved / goal.target) * 100
+          )
+        );
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        "p54-goal-card";
+
+      card.innerHTML = `
+
+        <div class="p54-goal-top">
+
+          <div>
+            <div class="p54-goal-title">
+              ${goal.name}
+            </div>
+
+            <div>
+              ${LEDGER.moneyFmt(
+                goal.currency,
+                goal.target
+              )}
+            </div>
           </div>
 
-          <div class="savings-title">
-            Smart Savings
-          </div>
-
-          <div class="savings-sub">
-            Build wealth automatically
+          <div>
+            ${percent}%
           </div>
 
         </div>
 
-        <div class="savings-balance-card">
+        <div class="p54-goal-progress">
+          <div
+            class="p54-goal-progress-bar"
+            style="width:${percent}%"
+          ></div>
+        </div>
 
-          <div class="savings-balance-label">
-            Available Balance
-          </div>
+        <div>
+          Saved:
+          <strong>
+            ${LEDGER.moneyFmt(
+              goal.currency,
+              goal.saved
+            )}
+          </strong>
+        </div>
 
-          <div class="savings-balance-value">
-            ${ledger.moneyFmt(activeCur, available)}
-          </div>
+        <div class="p54-goal-actions">
+
+          <button
+            class="p54-save-btn"
+            data-add="${index}"
+          >
+            Add Money
+          </button>
+
+          <button
+            class="p54-save-btn alt"
+            data-auto="${index}"
+          >
+            Auto Save
+          </button>
+
+          <button
+            class="p54-save-btn alt"
+            data-delete="${index}"
+          >
+            Delete
+          </button>
 
         </div>
 
-        <div class="goal-list">
+      `;
 
-          ${
-            goals.length
-            ? goals.map(goal => {
+      wrap.appendChild(card);
 
-              const pct =
-                Math.min(
-                  100,
-                  Math.round(
-                    (goal.saved / goal.target) * 100
-                  )
-                );
+    });
 
-              return `
+    bindActions();
 
-                <div class="goal-card">
+  }
 
-                  <div class="goal-top">
+  function bindActions(){
 
-                    <div>
-                      <div class="goal-name">
-                        ${goal.name}
-                      </div>
+    document
+      .querySelectorAll("[data-add]")
+      .forEach(btn=>{
 
-                      <div class="goal-target">
-                        ${ledger.moneyFmt(goal.currency, goal.target)}
-                      </div>
-                    </div>
+        btn.onclick = ()=>{
 
-                    <div class="goal-percent">
-                      ${pct}%
-                    </div>
+          const index =
+            btn.dataset.add;
 
-                  </div>
+          const amount =
+            Number(
+              prompt("Amount to save")
+            );
 
-                  <div class="goal-progress">
-
-                    <div
-                      class="goal-progress-fill"
-                      style="width:${pct}%"
-                    ></div>
-
-                  </div>
-
-                  <div class="goal-bottom">
-
-                    <div class="goal-saved">
-                      Saved:
-                      ${ledger.moneyFmt(goal.currency, goal.saved)}
-                    </div>
-
-                    <button
-                      class="goal-save-btn"
-                      data-goal="${goal.id}"
-                    >
-                      Save
-                    </button>
-
-                  </div>
-
-                </div>
-
-              `;
-
-            }).join("")
-            : `
-
-              <div class="empty-goals">
-
-                No savings goals yet
-
-              </div>
-
-            `
+          if(!amount || amount <= 0){
+            return;
           }
 
+          if(amount > available){
+
+            PAY54_TOAST.showToast(
+              "Insufficient balance"
+            );
+
+            return;
+          }
+
+          goals[index].saved += amount;
+
+          balances.NGN -= amount;
+
+          LEDGER.setBalances(balances);
+
+          saveGoals(goals);
+
+          renderGoals();
+
+          PAY54_TOAST.showToast(
+            "Savings updated"
+          );
+
+        };
+
+      });
+
+    document
+      .querySelectorAll("[data-auto]")
+      .forEach(btn=>{
+
+        btn.onclick = ()=>{
+
+          const index =
+            btn.dataset.auto;
+
+          const amount =
+            prompt(
+              "Auto save amount"
+            );
+
+          const frequency =
+            prompt(
+              "weekly / fortnightly / monthly"
+            );
+
+          goals[index].auto_save = {
+
+            enabled:true,
+            amount:Number(amount),
+            frequency
+
+          };
+
+          saveGoals(goals);
+
+          PAY54_TOAST.showToast(
+            "Auto save configured"
+          );
+
+        };
+
+      });
+
+    document
+      .querySelectorAll("[data-delete]")
+      .forEach(btn=>{
+
+        btn.onclick = ()=>{
+
+          const index =
+            Number(
+              btn.dataset.delete
+            );
+
+          goals.splice(index,1);
+
+          saveGoals(goals);
+
+          renderGoals();
+
+          PAY54_TOAST.showToast(
+            "Goal deleted"
+          );
+
+        };
+
+      });
+
+  }
+
+  openModal({
+
+    title:"Savings & Goals",
+
+    bodyHTML:`
+
+      <div class="p54-savings-wrap">
+
+        <div>
+
+          <div
+            style="
+              text-align:center;
+              margin-bottom:16px;
+            "
+          >
+            <div style="font-size:46px;">
+              💰
+            </div>
+
+            <div
+              style="
+                font-size:34px;
+                font-weight:900;
+              "
+            >
+              Smart Savings
+            </div>
+
+            <div class="muted">
+              Build wealth automatically
+            </div>
+
+          </div>
+
+          <div
+            style="
+              background:#eef2ff;
+              padding:18px;
+              border-radius:18px;
+              margin-bottom:18px;
+            "
+          >
+            <div>
+              Available Balance
+            </div>
+
+            <div
+              style="
+                font-size:44px;
+                font-weight:900;
+              "
+            >
+              ${LEDGER.moneyFmt(
+                "NGN",
+                available
+              )}
+            </div>
+          </div>
+
         </div>
 
-        <div class="p54-divider"></div>
+        <div
+          class="p54-savings-scroll"
+          id="p54GoalsWrap"
+        ></div>
 
-        <div class="create-goal-wrap">
+        <div class="p54-savings-sticky">
 
-          <div class="create-goal-title">
+          <div
+            style="
+              font-weight:800;
+              margin-bottom:12px;
+            "
+          >
             Create New Goal
           </div>
 
@@ -3062,15 +3234,15 @@ window.PAY54_UI.openSavings = function(){
           <input
             id="goalTarget"
             class="p54-input"
-            type="number"
             placeholder="Target amount"
-            style="margin-top:12px"
+            type="number"
+            style="margin-top:12px;"
           >
 
           <select
             id="goalCurrency"
             class="p54-input"
-            style="margin-top:12px"
+            style="margin-top:12px;"
           >
             <option>NGN</option>
             <option>GBP</option>
@@ -3078,16 +3250,16 @@ window.PAY54_UI.openSavings = function(){
             <option>EUR</option>
           </select>
 
-          <div class="p54-actions">
-
-            <button
-              class="p54-btn primary"
-              id="createGoalBtn"
-            >
-              Create Goal
-            </button>
-
-          </div>
+          <button
+            id="createGoalBtn"
+            class="p54-btn primary"
+            style="
+              width:100%;
+              margin-top:14px;
+            "
+          >
+            Create Goal
+          </button>
 
         </div>
 
@@ -3095,201 +3267,68 @@ window.PAY54_UI.openSavings = function(){
 
     `,
 
-    onMount: ({ modal, close }) => {
+    onMount:()=>{
 
-      /* CREATE GOAL */
+      renderGoals();
 
-      modal
-        .querySelector("#createGoalBtn")
-        .addEventListener("click", () => {
+      document
+        .getElementById(
+          "createGoalBtn"
+        )
+        .onclick = ()=>{
 
           const name =
-            modal.querySelector("#goalName")
-            .value.trim();
+            document
+              .getElementById(
+                "goalName"
+              )
+              .value
+              .trim();
 
           const target =
             Number(
-              modal.querySelector("#goalTarget")
-              .value
+              document
+                .getElementById(
+                  "goalTarget"
+                )
+                .value
             );
 
           const currency =
-            modal.querySelector("#goalCurrency")
-            .value;
+            document
+              .getElementById(
+                "goalCurrency"
+              )
+              .value;
 
           if(!name || !target){
 
-            window.PAY54_TOAST
-              ?.showToast(
-                "Complete all fields"
-              );
+            PAY54_TOAST.showToast(
+              "Complete all fields"
+            );
 
             return;
 
           }
 
-          const newGoal = {
-
-            id:
-              "GOAL-" +
-              Date.now(),
+          goals.push({
 
             name,
-
-            currency,
-
             target,
-
-            saved: 0
-
-          };
-
-          goals.unshift(newGoal);
-
-          localStorage.setItem(
-            "pay54_goals",
-            JSON.stringify(goals)
-          );
-
-          close();
-
-          setTimeout(() => {
-
-            window.PAY54_UI
-              ?.openSavings();
-
-            window.PAY54_TOAST
-              ?.showToast(
-                "Savings goal created"
-              );
-
-          }, 200);
-
-        });
-
-      /* SAVE INTO GOAL */
-
-      modal
-        .querySelectorAll(".goal-save-btn")
-        .forEach(btn => {
-
-          btn.addEventListener("click", () => {
-
-            const goalId =
-              btn.dataset.goal;
-
-            const amount =
-              prompt(
-                "Enter amount to save"
-              );
-
-            const saveAmount =
-              Number(amount);
-
-            if(
-              !saveAmount ||
-              saveAmount <= 0
-            ){
-              return;
-            }
-
-            const goal =
-              goals.find(
-                g => g.id === goalId
-              );
-
-            if(!goal){
-              return;
-            }
-
-            if(
-              balances[goal.currency] <
-              saveAmount
-            ){
-
-              window.PAY54_TOAST
-                ?.showToast(
-                  "Insufficient balance"
-                );
-
-              return;
-
-            }
-
-            const tx =
-              ledger.createEntry({
-
-                type: "savings",
-
-                title:
-                  "Savings Deposit",
-
-                currency:
-                  goal.currency,
-
-                amount:
-                  -saveAmount,
-
-                icon: "💰",
-
-                meta: {
-
-                  goal: goal.name
-
-                }
-
-              });
-
-            ledger.applyEntry(tx);
-
-            goal.saved += saveAmount;
-
-            localStorage.setItem(
-              "pay54_goals",
-              JSON.stringify(goals)
-            );
-
-            if(window.renderBalance){
-              window.renderBalance();
-            }
-
-            if(window.renderRecentTransactions){
-              window.renderRecentTransactions();
-            }
-
-            close();
-
-            setTimeout(() => {
-
-              window.PAY54_RECEIPTS
-                ?.openReceiptModal({
-
-                  openModal:
-                    window.PAY54_MODALS
-                    ?.openModal,
-
-                  title:
-                    "Savings Deposit",
-
-                  tx,
-
-                  lines: [
-
-                    `Goal: ${goal.name}`,
-
-                    `Amount: ${ledger.moneyFmt(goal.currency, saveAmount)}`,
-
-                    `Status: SUCCESS`
-
-                  ]
-
-                });
-
-            }, 200);
+            currency,
+            saved:0
 
           });
 
-        });
+          saveGoals(goals);
+
+          renderGoals();
+
+          PAY54_TOAST.showToast(
+            "Goal created"
+          );
+
+        };
 
     }
 
