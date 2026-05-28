@@ -2546,153 +2546,100 @@ body.light .wallet-balance-row{
 }
 
 /* =========================================
-   PAY54 SAVINGS & GOALS
+   PAY54 SAVINGS V2
 ========================================= */
 
-.p54-savings{
+.p54-savings-wrap{
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:18px;
+  max-height:72vh;
 }
 
-.savings-hero{
-  text-align:center;
-}
-
-.savings-icon{
-  font-size:44px;
-}
-
-.savings-title{
-  font-size:28px;
-  font-weight:900;
-}
-
-.savings-sub{
-  color:var(--muted);
-  font-weight:700;
-}
-
-.savings-balance-card{
-  padding:16px;
-  border-radius:18px;
-  background:linear-gradient(
-    135deg,
-    rgba(59,130,246,.15),
-    rgba(139,92,246,.12)
-  );
-  border:1px solid rgba(59,130,246,.18);
-}
-
-.savings-balance-label{
-  font-size:12px;
-  font-weight:800;
-  color:var(--muted);
-}
-
-.savings-balance-value{
-  font-size:28px;
-  font-weight:900;
-  margin-top:4px;
-}
-
-.goal-list{
+.p54-savings-scroll{
+  overflow:auto;
   display:flex;
   flex-direction:column;
   gap:14px;
+  padding-right:4px;
 }
 
-.goal-card{
-  padding:14px;
+.p54-savings-sticky{
+  position:sticky;
+  bottom:0;
+  background:#fff;
+  padding-top:14px;
+  border-top:1px solid rgba(15,23,42,.08);
+}
+
+body.dark .p54-savings-sticky{
+  background:#0f172a;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.p54-goal-card{
+  border:1px solid rgba(15,23,42,.08);
   border-radius:18px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.03);
-}
-
-.goal-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.goal-name{
-  font-weight:900;
-  font-size:16px;
-}
-
-.goal-target{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:4px;
-}
-
-.goal-percent{
-  font-weight:900;
-  color:#22c55e;
-}
-
-.goal-progress{
-  margin-top:12px;
-  height:10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  overflow:hidden;
-}
-
-.goal-progress-fill{
-  height:100%;
-  border-radius:999px;
-  background:linear-gradient(
-    90deg,
-    #22c55e,
-    #3b82f6
-  );
-}
-
-.goal-bottom{
-  margin-top:12px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.goal-saved{
-  font-size:13px;
-  color:var(--muted);
-  font-weight:700;
-}
-
-.goal-save-btn{
-  border:none;
-  border-radius:999px;
-  padding:8px 14px;
-  background:linear-gradient(
-    135deg,
-    #3b82f6,
-    #2563eb
-  );
-  color:#fff;
-  font-weight:800;
-  cursor:pointer;
-}
-
-.empty-goals{
-  text-align:center;
-  padding:24px;
-  border-radius:18px;
-  border:1px dashed var(--stroke);
-  color:var(--muted);
-  font-weight:700;
-}
-
-.create-goal-wrap{
+  padding:16px;
   display:flex;
   flex-direction:column;
   gap:12px;
 }
 
-.create-goal-title{
-  font-weight:900;
+body.dark .p54-goal-card{
+  border-color:rgba(255,255,255,.08);
+}
+
+.p54-goal-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.p54-goal-title{
+  font-weight:800;
   font-size:16px;
+}
+
+.p54-goal-progress{
+  height:10px;
+  border-radius:999px;
+  background:#e5e7eb;
+  overflow:hidden;
+}
+
+.p54-goal-progress-bar{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(
+    135deg,
+    #2563eb,
+    #1d4ed8
+  );
+}
+
+.p54-goal-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.p54-save-btn{
+  border:none;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:700;
+  cursor:pointer;
+  background:#2563eb;
+  color:#fff;
+}
+
+.p54-save-btn.alt{
+  background:#eef2ff;
+  color:#1e3a8a;
+}
+
+body.dark .p54-save-btn.alt{
+  background:#172554;
+  color:#fff;
 }
