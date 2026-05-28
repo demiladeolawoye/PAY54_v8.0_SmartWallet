@@ -105,9 +105,90 @@
 
             setTimeout(() => {
 
-              if(window.PAY54_UI?.openScanAndPay){
-                window.PAY54_UI.openScanAndPay();
-              }
+             const txType =
+  tx?.type || "";
+
+switch(txType){
+
+  case "checkout":
+
+    if(window.PAY54_UI?.openCheckout){
+      window.PAY54_UI.openCheckout();
+    }
+
+  break;
+
+  case "send":
+
+    if(window.PAY54_UI?.openSend){
+      window.PAY54_UI.openSend();
+    }
+
+  break;
+
+  case "fx":
+
+    if(window.PAY54_UI?.openGlobalTransfer){
+      window.PAY54_UI.openGlobalTransfer();
+    }
+
+  break;
+
+  case "bills":
+
+    if(window.PAY54_UI?.openBills){
+      window.PAY54_UI.openBills();
+    }
+
+  break;
+
+  case "add_money":
+
+    if(window.PAY54_UI?.openAddMoney){
+      window.PAY54_UI.openAddMoney();
+    }
+
+  break;
+
+  case "withdraw":
+
+    if(window.PAY54_UI?.openWithdraw){
+      window.PAY54_UI.openWithdraw();
+    }
+
+  break;
+
+  case "bank_transfer":
+
+    if(window.PAY54_UI?.openBankTransfer){
+      window.PAY54_UI.openBankTransfer();
+    }
+
+  break;
+
+  case "shop":
+
+    if(window.PAY54_UI?.openShop){
+      window.PAY54_UI.openShop();
+    }
+
+  break;
+
+  case "bet":
+
+    if(window.PAY54_UI?.openBetFunding){
+      window.PAY54_UI.openBetFunding();
+    }
+
+  break;
+
+  default:
+
+    if(window.PAY54_UI?.openScanAndPay){
+      window.PAY54_UI.openScanAndPay();
+    }
+
+}
 
             }, 200);
 
