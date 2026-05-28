@@ -2348,3 +2348,553 @@ window.PAY54_UI.openBills = function(){
   });
 
 };
+
+/* =========================================
+   PAY54 CARDS ENGINE v1
+========================================= */
+
+window.PAY54_UI =
+window.PAY54_UI || {};
+
+window.PAY54_UI.openCards = function(){
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  const STORAGE_KEY =
+    "pay54_cards";
+
+  function getCards(){
+
+    return JSON.parse(
+      localStorage.getItem(STORAGE_KEY)
+      || "[]"
+    );
+
+  }
+
+  function saveCards(cards){
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(cards)
+    );
+
+  }
+
+  function createCard(payload){
+
+    const cards = getCards();
+
+    cards.unshift(payload);
+
+    saveCards(cards);
+
+  }
+
+  function renderCards(container){
+
+    const cards = getCards();
+
+    if(!cards.length){
+
+      container.innerHTML = `
+
+        <div class="empty-cards">
+
+          No cards available
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+    container.innerHTML = cards.map(card => `
+
+      <div class="pay54-card-ui">
+
+        <div class="card-top">
+
+          <div class="card-brand">
+            PAY54
+          </div>
+
+          <div class="card-scheme">
+            ${card.scheme}
+          </div>
+
+        </div>
+
+        <div class="card-number">
+          •••• •••• •••• ${card.last4}
+        </div>
+
+        <div class="card-meta">
+
+          <div>
+            ${card.currency}
+          </div>
+
+          <div>
+            ${card.type}
+          </div>
+
+        </div>
+
+        <div class="card-status">
+
+          ${
+            card.frozen
+            ? "❄️ Frozen"
+            : "✅ Active"
+          }
+
+        </div>
+
+        ${
+          card.default
+          ? `
+            <div class="default-card-badge">
+              Default Payment Card
+            </div>
+          `
+          : ""
+        }
+
+        <div class="card-actions">
+
+          <button
+            class="btn ghost sm freezeCardBtn"
+            data-id="${card.id}"
+          >
+            ${
+              card.frozen
+              ? "Unfreeze"
+              : "Freeze"
+            }
+          </button>
+
+          <button
+            class="btn ghost sm defaultCardBtn"
+            data-id="${card.id}"
+          >
+            Set Default
+          </button>
+
+          <button
+            class="btn ghost sm deleteCardBtn"
+            data-id="${card.id}"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+    bindCardActions(container);
+
+  }
+
+  function bindCardActions(container){
+
+    container
+      .querySelectorAll(".freezeCardBtn")
+      .forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+          const id =
+            btn.dataset.id;
+
+          const cards =
+            getCards();
+
+          const card =
+            cards.find(c => c.id === id);
+
+          if(!card) return;
+
+          card.frozen =
+            !card.frozen;
+
+          saveCards(cards);
+
+          renderCards(container);
+
+          window.PAY54_TOAST
+            ?.showToast(
+              card.frozen
+              ? "Card frozen"
+              : "Card activated"
+            );
+
+        });
+
+      });
+
+    container
+      .querySelectorAll(".defaultCardBtn")
+      .forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+          const id =
+            btn.dataset.id;
+
+          const cards =
+            getCards();
+
+          cards.forEach(c => {
+            c.default = false;
+          });
+
+          const card =
+            cards.find(c => c.id === id);
+
+          if(card){
+            card.default = true;
+          }
+
+          saveCards(cards);
+
+          renderCards(container);
+
+          window.PAY54_TOAST
+            ?.showToast(
+              "Default payment card updated"
+            );
+
+        });
+
+      });
+
+    container
+      .querySelectorAll(".deleteCardBtn")
+      .forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+          const id =
+            btn.dataset.id;
+
+          let cards =
+            getCards();
+
+          cards =
+            cards.filter(
+              c => c.id !== id
+            );
+
+          saveCards(cards);
+
+          renderCards(container);
+
+          window.PAY54_TOAST
+            ?.showToast(
+              "Card deleted"
+            );
+
+        });
+
+      });
+
+  }
+
+  openModal({
+
+    title: "Virtual & Linked Cards",
+
+    bodyHTML: `
+
+      <div class="p54-cards-wrap">
+
+        <div class="cards-hero">
+
+          <div class="cards-icon">
+            💳
+          </div>
+
+          <div class="cards-title">
+            PAY54 Smart Cards
+          </div>
+
+          <div class="cards-sub">
+            Virtual cards, linked bank cards
+            & contactless-ready payments
+          </div>
+
+        </div>
+
+        <div class="cards-actions">
+
+          <button
+            id="createVirtualCardBtn"
+            class="btn primary"
+          >
+            Create Virtual Card
+          </button>
+
+          <button
+            id="linkExternalCardBtn"
+            class="btn ghost"
+          >
+            Link Bank Card
+          </button>
+
+        </div>
+
+        <div
+          id="cardsContainer"
+          class="cards-container"
+        ></div>
+
+      </div>
+
+    `,
+
+    onMount: ({ modal }) => {
+
+      const container =
+        modal.querySelector(
+          "#cardsContainer"
+        );
+
+      renderCards(container);
+
+      modal
+        .querySelector(
+          "#createVirtualCardBtn"
+        )
+        .addEventListener("click", () => {
+
+          openModal({
+
+            title:"Create Virtual Card",
+
+            bodyHTML: `
+
+              <div class="p54-form">
+
+                <select
+                  id="cardCurrency"
+                  class="p54-input"
+                >
+                  <option value="USD">
+                    USD Virtual Visa
+                  </option>
+
+                  <option value="GBP">
+                    GBP Mastercard
+                  </option>
+
+                  <option value="NGN">
+                    NGN Virtual Card
+                  </option>
+
+                </select>
+
+                <div class="p54-actions">
+
+                  <button
+                    class="btn primary"
+                    id="confirmCreateCard"
+                  >
+                    Create Card
+                  </button>
+
+                </div>
+
+              </div>
+
+            `,
+
+            onMount: ({ modal, close }) => {
+
+              modal
+                .querySelector(
+                  "#confirmCreateCard"
+                )
+                .addEventListener(
+                  "click",
+                  () => {
+
+                    const currency =
+                      modal.querySelector(
+                        "#cardCurrency"
+                      ).value;
+
+                    const scheme =
+                      currency === "GBP"
+                      ? "Mastercard"
+                      : "Visa";
+
+                    createCard({
+
+                      id:
+                        "CARD-" +
+                        Date.now(),
+
+                      currency,
+
+                      scheme,
+
+                      type:
+                        "Virtual",
+
+                      last4:
+                        Math.floor(
+                          1000 +
+                          Math.random() * 9000
+                        ),
+
+                      frozen:false,
+
+                      default:false
+
+                    });
+
+                    close();
+
+                    renderCards(container);
+
+                    window.PAY54_TOAST
+                      ?.showToast(
+                        "Virtual card created"
+                      );
+
+                  }
+                );
+
+            }
+
+          });
+
+        });
+
+      modal
+        .querySelector(
+          "#linkExternalCardBtn"
+        )
+        .addEventListener("click", () => {
+
+          openModal({
+
+            title:"Link Bank Card",
+
+            bodyHTML: `
+
+              <div class="p54-form">
+
+                <input
+                  id="bankName"
+                  class="p54-input"
+                  placeholder="Bank name"
+                >
+
+                <input
+                  id="last4Digits"
+                  class="p54-input"
+                  placeholder="Last 4 digits"
+                  style="margin-top:12px"
+                >
+
+                <div class="p54-actions">
+
+                  <button
+                    class="btn primary"
+                    id="confirmLinkCard"
+                  >
+                    Link Card
+                  </button>
+
+                </div>
+
+              </div>
+
+            `,
+
+            onMount: ({ modal, close }) => {
+
+              modal
+                .querySelector(
+                  "#confirmLinkCard"
+                )
+                .addEventListener(
+                  "click",
+                  () => {
+
+                    const bank =
+                      modal.querySelector(
+                        "#bankName"
+                      ).value.trim();
+
+                    const last4 =
+                      modal.querySelector(
+                        "#last4Digits"
+                      ).value.trim();
+
+                    if(!bank || !last4){
+
+                      window.PAY54_TOAST
+                        ?.showToast(
+                          "Complete all fields"
+                        );
+
+                      return;
+
+                    }
+
+                    createCard({
+
+                      id:
+                        "LINK-" +
+                        Date.now(),
+
+                      currency:"GBP",
+
+                      scheme:"Visa",
+
+                      type:
+                        bank,
+
+                      last4,
+
+                      frozen:false,
+
+                      default:false,
+
+                      linked:true
+
+                    });
+
+                    close();
+
+                    renderCards(container);
+
+                    window.PAY54_TOAST
+                      ?.showToast(
+                        "Bank card linked"
+                      );
+
+                  }
+                );
+
+            }
+
+          });
+
+        });
+
+    }
+
+  });
+
+};
