@@ -3553,48 +3553,43 @@ window.PAY54_UI.openSavings = function(){
   /* =========================
      AUTO SAVE PLAN
   ========================= */
+autoBtn?.addEventListener("click", () => {
 
-  autoBtn?.addEventListener("click", () => {
+  const frequency =
+    modal.querySelector("#autoFrequency").value;
 
-    const frequency =
-      modal.querySelector("#autoFrequency")
-      ?.value;
+  const amount =
+    Number(
+      modal.querySelector("#autoAmount").value
+    );
 
-    const amount =
-      Number(
-        modal.querySelector("#autoAmount")
-        ?.value
-      );
+  if(!amount || amount <= 0){
 
-    if(!amount || amount <= 0){
+    window.PAY54_TOAST?.showToast(
+      "Enter valid auto save amount"
+    );
 
-      window.PAY54_TOAST
-        ?.showToast(
-          "Enter valid auto save amount"
-        );
+    return;
 
-      return;
+  }
 
-    }
+  goal.auto_save = {
 
-    goal.auto_save = {
+    frequency,
 
-      frequency,
+    amount
 
-      amount
+  };
 
-    };
+  goals[index] = goal;
 
-    goals[index] = goal;
+  saveGoals(goals);
 
-    saveGoals(goals);
+  window.PAY54_TOAST?.showToast(
+    "✅ Auto Save Plan Updated"
+  );
 
-    window.PAY54_TOAST
-      ?.showToast(
-        "Auto save plan updated"
-      );
-
-    });
+});
 
 } // end onMount
 
