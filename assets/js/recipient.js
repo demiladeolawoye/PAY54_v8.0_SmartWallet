@@ -1775,11 +1775,15 @@ bodyHTML: `
 
     });
 
-  modal
-    .querySelector("#doneReceive")
-    .addEventListener("click", close);
+ modal
+  .querySelector("#doneReceive")
+  .addEventListener("click", close);
 
-}
+} // end onMount
+
+}); // end openModal
+
+} // end openReceive
    /* =========================
    CHECKOUT FROM REQUEST
 ========================= */
