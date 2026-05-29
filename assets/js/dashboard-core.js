@@ -3082,12 +3082,16 @@ window.PAY54_UI.openSavings = function(){
                   +
                 </div>
 
-                <div style="
-                  font-size:24px;
-                  font-weight:900;
-                ">
-                  Create New Goal
-                </div>
+                <button
+  id="createGoalBtn"
+  class="create-goal-btn"
+>
+  ➕ Create New Goal
+</button>
+
+<div class="goal-helper">
+  Maximum 4 savings goals
+</div>
 
                 <div class="goal-limit-note">
                   Maximum 4 savings goals
