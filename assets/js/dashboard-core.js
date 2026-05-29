@@ -3594,8 +3594,14 @@ window.PAY54_UI.openSavings = function(){
 
 } // end onMount
 
-    });// end openModal
+    }); // end openModal
 
-    renderSavings();
+  } // end openGoal
 
-}; // end openGoal
+  /* =========================
+     START SAVINGS MODULE
+  ========================= */
+
+  renderSavings();
+
+}; // end window.PAY54_UI.openSavings
