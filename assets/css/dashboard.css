@@ -2624,3 +2624,53 @@ body.light .wallet-balance-row{
   }
 
 }
+
+.create-goal-btn{
+
+  width:100%;
+
+  padding:14px;
+
+  border:none;
+
+  border-radius:14px;
+
+  font-size:15px;
+
+  font-weight:800;
+
+  cursor:pointer;
+
+  color:#fff;
+
+  background:
+  linear-gradient(
+    135deg,
+    #3b82f6,
+    #2563eb
+  );
+
+  box-shadow:
+    0 10px 24px
+    rgba(59,130,246,.35);
+
+  transition:.2s;
+}
+
+.create-goal-btn:hover{
+
+  transform:translateY(-2px);
+
+}
+
+.goal-helper{
+
+  text-align:center;
+
+  margin-top:8px;
+
+  font-size:12px;
+
+  opacity:.75;
+
+}
