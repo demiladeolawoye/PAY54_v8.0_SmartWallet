@@ -4051,8 +4051,8 @@ ${req.paymentLink}`;
 
           if(!req) return;
 
-          const link =
-            `${location.origin}/request/${req.id}`;
+         const link =
+req.paymentLink;
 
           await navigator.clipboard
             .writeText(link);
