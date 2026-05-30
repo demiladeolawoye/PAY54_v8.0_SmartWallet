@@ -828,7 +828,6 @@ window.openNewsItem = function(btn){
 /* =========================================
    ALERTS RENDER ENGINE
 ========================================= */
-
 window.renderAlerts = function(){
 
   const container =
@@ -861,39 +860,173 @@ window.renderAlerts = function(){
 
   ];
 
-  container.innerHTML = alerts.map(alert => `
+  const requests =
+    window.PAY54_REQUESTS?.getRequests()
+    || [];
 
-    <div class="feed-item">
+  const alertHtml =
+    alerts.map(alert => `
 
-      <div class="feed-icon">
-        ${alert.icon}
-      </div>
+      <div class="feed-item">
 
-      <div class="feed-content">
-
-        <div class="feed-title">
-          ${alert.title}
+        <div class="feed-icon">
+          ${alert.icon}
         </div>
 
-        <div class="feed-sub">
-          ${alert.body}
+        <div class="feed-content">
+
+          <div class="feed-title">
+            ${alert.title}
+          </div>
+
+          <div class="feed-sub">
+            ${alert.body}
+          </div>
+
         </div>
+
+        <button
+          class="feed-open-btn"
+          onclick="openAlertItem(this)"
+        >
+          Open
+        </button>
 
       </div>
 
-      <button
-        class="feed-open-btn"
-        onclick="openAlertItem(this)"
-      >
-        Open
-      </button>
+    `).join("");
 
-    </div>
+  const requestHtml =
+    requests.map(req => `
 
-  `).join("");
+      <div class="feed-item">
+
+        <div class="feed-icon">
+          💰
+        </div>
+
+        <div class="feed-content">
+
+          <div class="feed-title">
+            ${req.recipient}
+          </div>
+
+          <div class="feed-sub">
+            Requested ₦${req.amount}
+          </div>
+
+          <div class="feed-sub">
+            Status: ${req.status}
+          </div>
+
+        </div>
+
+        <button
+          class="feed-open-btn approveReq"
+          data-id="${req.id}"
+        >
+          Approve
+        </button>
+
+        <button
+          class="feed-open-btn declineReq"
+          data-id="${req.id}"
+        >
+          Decline
+        </button>
+
+      </div>
+
+    `).join("");
+
+  container.innerHTML =
+    alertHtml + requestHtml;
+
+  if(
+    typeof bindRequestButtons ===
+    "function"
+  ){
+    bindRequestButtons();
+  }
 
 };
 
+function bindRequestButtons(){
+
+  document
+    .querySelectorAll(".approveReq")
+    .forEach(btn => {
+
+      btn.onclick = () => {
+
+        const id =
+          btn.dataset.id;
+
+        const req =
+          window.PAY54_REQUESTS
+          .getRequests()
+          .find(r => r.id === id);
+
+        if(!req) return;
+
+        window.PAY54_TX
+          .requestPinVerification(()=>{
+
+            const entry =
+              window.PAY54_LEDGER
+              .createEntry({
+
+                type:"request",
+
+                title:
+                  "Request Payment",
+
+                currency:"NGN",
+
+                amount:-req.amount,
+
+                icon:"💸"
+
+              });
+
+            window.PAY54_TX
+              .processTransaction(
+                entry,
+                {
+                  title:"Request Payment",
+                  showReceipt:true
+                }
+              );
+
+            window.PAY54_REQUESTS
+              .markPaid(id);
+
+            renderAlerts();
+
+          });
+
+      };
+
+    });
+
+  document
+    .querySelectorAll(".declineReq")
+    .forEach(btn => {
+
+      btn.onclick = () => {
+
+        window.PAY54_REQUESTS
+          .markDeclined(
+            btn.dataset.id
+          );
+
+        renderAlerts();
+
+      };
+
+    });
+
+}
 /* =========================================
    NEWS RENDER ENGINE
 ========================================= */
