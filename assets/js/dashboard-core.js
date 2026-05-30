@@ -3925,31 +3925,37 @@ window.PAY54_UI.openRequestMoney = function(){
 
         }
 
-        const requestId =
-          "REQ-" + Date.now();
+     const requestId =
+  "REQ-" + Date.now();
+
+const paymentLink =
+
+`${location.origin}/request.html?id=${requestId}`;
 
         const payload = {
 
-          id: requestId,
+  id: requestId,
 
-          recipient:
-            recipient.value.trim(),
+  paymentLink,
 
-          phone:
-            phone.value.trim(),
+  recipient:
+    recipient.value.trim(),
 
-          amount:
-            Number(amount.value),
+  phone:
+    phone.value.trim(),
 
-          reason:
-            reason.value.trim(),
+  amount:
+    Number(amount.value),
 
-          status: "pending",
+  reason:
+    reason.value.trim(),
 
-          created_at:
-            new Date().toISOString()
+  status:"pending",
 
-        };
+  created_at:
+    new Date().toISOString()
+
+};
 
         if(
           window.PAY54_REQUESTS?.createRequest
