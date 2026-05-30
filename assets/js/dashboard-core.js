@@ -3828,115 +3828,228 @@ window.PAY54_UI.openRequestMoney = function(){
 
       <div class="p54-form">
 
-     <input
-  id="reqRecipient"
-  class="p54-input"
-  placeholder="Recipient Name"
->
+        <input
+          id="reqRecipient"
+          class="p54-input"
+          placeholder="Recipient Name"
+        >
 
-<input
-  id="reqPhone"
-  class="p54-input"
-  placeholder="Phone Number"
-  style="margin-top:12px"
->
+        <input
+          id="reqPhone"
+          class="p54-input"
+          placeholder="Phone Number"
+          style="margin-top:12px"
+        >
 
-<input
-  id="reqAmount"
-  class="p54-input"
-  type="number"
-  placeholder="Amount"
-  style="margin-top:12px"
->
+        <input
+          id="reqAmount"
+          class="p54-input"
+          type="number"
+          placeholder="Amount"
+          style="margin-top:12px"
+        >
 
-<input
-  id="reqReason"
-  class="p54-input"
-  placeholder="Reason"
-  style="margin-top:12px"
->
+        <input
+          id="reqReason"
+          class="p54-input"
+          placeholder="Reason"
+          style="margin-top:12px"
+        >
 
-<div class="p54-actions">
+        <div class="p54-actions">
 
-  <button
-    class="p54-btn"
-    id="whatsappRequestBtn"
-  >
-    WhatsApp
-  </button>
+          <button
+            class="p54-btn"
+            id="whatsappRequestBtn"
+          >
+            WhatsApp
+          </button>
 
-  <button
-    class="p54-btn"
-    id="smsRequestBtn"
-  >
-    SMS
-  </button>
+          <button
+            class="p54-btn"
+            id="smsRequestBtn"
+          >
+            SMS
+          </button>
 
-  <button
-    class="p54-btn primary"
-    id="copyRequestBtn"
-  >
-    Copy Link
-  </button>
+          <button
+            class="p54-btn primary"
+            id="copyRequestBtn"
+          >
+            Copy Link
+          </button>
 
-</div>
+        </div>
+
+      </div>
 
     `,
 
-    onMount: ({modal,close}) => {
+    onMount: ({ modal, close }) => {
 
-      modal
-        .querySelector("#createRequestBtn")
-        .addEventListener("click",()=>{
+      const whatsappBtn =
+        modal.querySelector("#whatsappRequestBtn");
 
-          const recipient =
-            modal.querySelector("#requestRecipient")
-            .value.trim();
+      const smsBtn =
+        modal.querySelector("#smsRequestBtn");
 
-          const amount =
-            Number(
-              modal.querySelector("#requestAmount")
-              .value
-            );
+      const copyBtn =
+        modal.querySelector("#copyRequestBtn");
 
-          const reason =
-            modal.querySelector("#requestReason")
-            .value.trim();
+      const recipient =
+        modal.querySelector("#reqRecipient");
 
-          if(
-            !recipient ||
-            !amount
-          ){
+      const phone =
+        modal.querySelector("#reqPhone");
 
-            window.PAY54_TOAST
-              ?.showToast(
-                "Complete all fields"
-              );
+      const amount =
+        modal.querySelector("#reqAmount");
 
-            return;
+      const reason =
+        modal.querySelector("#reqReason");
 
-          }
+      function createRequestPayload(){
 
-          window.PAY54_REQUESTS
-            .createRequest({
-
-              recipient,
-              amount,
-              reason,
-              currency:"NGN"
-
-            });
-
-          close();
-
-          renderAlerts();
+        if(
+          !recipient.value.trim() ||
+          !phone.value.trim() ||
+          !amount.value.trim()
+        ){
 
           window.PAY54_TOAST
             ?.showToast(
-              "Request created"
+              "Complete all required fields"
             );
 
-        });
+          return null;
+
+        }
+
+        const requestId =
+          "REQ-" + Date.now();
+
+        const payload = {
+
+          id: requestId,
+
+          recipient:
+            recipient.value.trim(),
+
+          phone:
+            phone.value.trim(),
+
+          amount:
+            Number(amount.value),
+
+          reason:
+            reason.value.trim(),
+
+          status: "pending",
+
+          created_at:
+            new Date().toISOString()
+
+        };
+
+        if(
+          window.PAY54_REQUESTS?.createRequest
+        ){
+
+          window.PAY54_REQUESTS
+            .createRequest(payload);
+
+        }
+
+        if(window.renderAlerts){
+
+          window.renderAlerts();
+
+        }
+
+        return payload;
+
+      }
+
+      whatsappBtn?.addEventListener(
+        "click",
+        () => {
+
+          const req =
+            createRequestPayload();
+
+          if(!req) return;
+
+          const text =
+
+`Hi ${req.recipient},
+
+${localStorage.getItem("pay54_name") || "PAY54 User"}
+
+is requesting ₦${req.amount}
+
+Reason:
+${req.reason}`;
+
+          window.open(
+            `https://wa.me/?text=${encodeURIComponent(text)}`,
+            "_blank"
+          );
+
+          close();
+
+        }
+      );
+
+      smsBtn?.addEventListener(
+        "click",
+        () => {
+
+          const req =
+            createRequestPayload();
+
+          if(!req) return;
+
+          const text =
+
+`PAY54 Request
+
+₦${req.amount}
+
+Reason:
+${req.reason}`;
+
+          window.location.href =
+            `sms:${req.phone}?body=${encodeURIComponent(text)}`;
+
+          close();
+
+        }
+      );
+
+      copyBtn?.addEventListener(
+        "click",
+        async () => {
+
+          const req =
+            createRequestPayload();
+
+          if(!req) return;
+
+          const link =
+            `${location.origin}/request/${req.id}`;
+
+          await navigator.clipboard
+            .writeText(link);
+
+          window.PAY54_TOAST
+            ?.showToast(
+              "Request link copied"
+            );
+
+          close();
+
+        }
+      );
 
     }
 
