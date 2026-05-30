@@ -3828,39 +3828,58 @@ window.PAY54_UI.openRequestMoney = function(){
 
       <div class="p54-form">
 
-        <input
-          id="requestRecipient"
-          class="p54-input"
-          placeholder="Recipient Name"
-        >
+     <input
+  id="reqRecipient"
+  class="p54-input"
+  placeholder="Recipient Name"
+>
 
-        <input
-          id="requestAmount"
-          class="p54-input"
-          type="number"
-          placeholder="Amount"
-          style="margin-top:12px"
-        >
+<input
+  id="reqPhone"
+  class="p54-input"
+  placeholder="Phone Number"
+  style="margin-top:12px"
+>
 
-        <input
-          id="requestReason"
-          class="p54-input"
-          placeholder="Reason"
-          style="margin-top:12px"
-        >
+<input
+  id="reqAmount"
+  class="p54-input"
+  type="number"
+  placeholder="Amount"
+  style="margin-top:12px"
+>
 
-        <button
-          id="createRequestBtn"
-          class="btn primary"
-          style="
-            width:100%;
-            margin-top:18px
-          "
-        >
-          Send Request
-        </button>
+<input
+  id="reqReason"
+  class="p54-input"
+  placeholder="Reason"
+  style="margin-top:12px"
+>
 
-      </div>
+<div class="p54-actions">
+
+  <button
+    class="p54-btn"
+    id="whatsappRequestBtn"
+  >
+    WhatsApp
+  </button>
+
+  <button
+    class="p54-btn"
+    id="smsRequestBtn"
+  >
+    SMS
+  </button>
+
+  <button
+    class="p54-btn primary"
+    id="copyRequestBtn"
+  >
+    Copy Link
+  </button>
+
+</div>
 
     `,
 
