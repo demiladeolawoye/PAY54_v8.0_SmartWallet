@@ -4023,12 +4023,16 @@ ${req.paymentLink}`;
 
           const text =
 
-`PAY54 Request
+`PAY54 Payment Request
 
 ₦${req.amount}
 
 Reason:
-${req.reason}`;
+${req.reason}
+
+Pay:
+
+${req.paymentLink}`;
 
           window.location.href =
             `sms:${req.phone}?body=${encodeURIComponent(text)}`;
