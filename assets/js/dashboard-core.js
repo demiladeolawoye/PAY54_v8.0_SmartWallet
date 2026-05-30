@@ -3985,16 +3985,22 @@ const paymentLink =
 
           if(!req) return;
 
-          const text =
+const text =
 
-`Hi ${req.recipient},
+`💳 PAY54 Payment Request
 
 ${localStorage.getItem("pay54_name") || "PAY54 User"}
 
-is requesting ₦${req.amount}
+is requesting:
+
+₦${req.amount}
 
 Reason:
-${req.reason}`;
+${req.reason}
+
+Pay securely here:
+
+${req.paymentLink}`;
 
           window.open(
             `https://wa.me/?text=${encodeURIComponent(text)}`,
