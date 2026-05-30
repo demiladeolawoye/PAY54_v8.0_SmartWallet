@@ -3604,3 +3604,190 @@ autoBtn?.addEventListener("click", () => {
   renderSavings();
 
 }; // end window.PAY54_UI.openSavings
+
+/* =========================================
+   PAY54 REQUEST MONEY ENGINE
+========================================= */
+
+window.PAY54_REQUESTS = {
+
+  getRequests(){
+
+    return JSON.parse(
+      localStorage.getItem("pay54_requests") || "[]"
+    );
+
+  },
+
+  saveRequests(list){
+
+    localStorage.setItem(
+      "pay54_requests",
+      JSON.stringify(list)
+    );
+
+  },
+
+  createRequest(payload){
+
+    const list = this.getRequests();
+
+    list.unshift({
+
+      id:"REQ-"+Date.now(),
+
+      status:"pending",
+
+      created:new Date().toISOString(),
+
+      ...payload
+
+    });
+
+    this.saveRequests(list);
+
+  },
+
+  markPaid(id){
+
+    const list = this.getRequests();
+
+    const req =
+      list.find(r => r.id === id);
+
+    if(req){
+      req.status = "paid";
+    }
+
+    this.saveRequests(list);
+
+  },
+
+  markDeclined(id){
+
+    const list = this.getRequests();
+
+    const req =
+      list.find(r => r.id === id);
+
+    if(req){
+      req.status = "declined";
+    }
+
+    this.saveRequests(list);
+
+  }
+
+};
+
+window.PAY54_UI.openRequestMoney = function(){
+
+  const openModal =
+    window.PAY54_MODALS?.openModal;
+
+  if(!openModal) return;
+
+  openModal({
+
+    title:"Request Money",
+
+    bodyHTML:`
+
+      <div class="p54-form">
+
+        <input
+          id="requestRecipient"
+          class="p54-input"
+          placeholder="Recipient Name"
+        >
+
+        <input
+          id="requestAmount"
+          class="p54-input"
+          type="number"
+          placeholder="Amount"
+          style="margin-top:12px"
+        >
+
+        <input
+          id="requestReason"
+          class="p54-input"
+          placeholder="Reason"
+          style="margin-top:12px"
+        >
+
+        <button
+          id="createRequestBtn"
+          class="btn primary"
+          style="
+            width:100%;
+            margin-top:18px
+          "
+        >
+          Send Request
+        </button>
+
+      </div>
+
+    `,
+
+    onMount: ({modal,close}) => {
+
+      modal
+        .querySelector("#createRequestBtn")
+        .addEventListener("click",()=>{
+
+          const recipient =
+            modal.querySelector("#requestRecipient")
+            .value.trim();
+
+          const amount =
+            Number(
+              modal.querySelector("#requestAmount")
+              .value
+            );
+
+          const reason =
+            modal.querySelector("#requestReason")
+            .value.trim();
+
+          if(
+            !recipient ||
+            !amount
+          ){
+
+            window.PAY54_TOAST
+              ?.showToast(
+                "Complete all fields"
+              );
+
+            return;
+
+          }
+
+          window.PAY54_REQUESTS
+            .createRequest({
+
+              recipient,
+              amount,
+              reason,
+              currency:"NGN"
+
+            });
+
+          close();
+
+          renderAlerts();
+
+          window.PAY54_TOAST
+            ?.showToast(
+              "Request created"
+            );
+
+        });
+
+    }
+
+  });
+
+};
