@@ -1679,10 +1679,17 @@ body.light .p54-textarea{
 .p54-actions{
 
   display:flex;
-  justify-content:flex-end;
-  gap:12px;
 
-  margin-top:8px;
+  flex-wrap:wrap;
+
+  gap:10px;
+
+  justify-content:center;
+
+  align-items:center;
+
+  margin-top:15px;
+
 }
 
 .p54-btn{
