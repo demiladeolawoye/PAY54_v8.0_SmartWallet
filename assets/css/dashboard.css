@@ -2701,3 +2701,53 @@ body.light .wallet-balance-row{
   opacity:.75;
 
 }
+
+/* =====================================
+   PAY54 QR ACTION BUTTON FIX
+===================================== */
+
+.p54-actions{
+
+    display:flex !important;
+
+    flex-wrap:wrap !important;
+
+    gap:10px !important;
+
+    justify-content:center !important;
+
+    margin-top:20px !important;
+
+}
+
+.p54-actions .p54-btn{
+
+    display:inline-flex !important;
+
+    align-items:center !important;
+
+    justify-content:center !important;
+
+    min-width:110px !important;
+
+    height:42px !important;
+
+    padding:0 14px !important;
+
+    visibility:visible !important;
+
+    opacity:1 !important;
+
+}
+
+#printQR,
+#shareQR,
+#downloadQR{
+
+    display:inline-flex !important;
+
+    visibility:visible !important;
+
+    opacity:1 !important;
+
+}
