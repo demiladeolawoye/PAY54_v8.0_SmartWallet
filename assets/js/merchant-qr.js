@@ -9,13 +9,56 @@ bodyHTML:`
 <form class="p54-form" id="qrForm">
 
 <div>
-<div class="p54-label">Merchant Name</div>
-<input class="p54-input" id="qrMerchant" required>
+  <div class="p54-label">
+    Merchant Name
+  </div>
+
+  <input
+    class="p54-input"
+    id="qrMerchant"
+    required
+  >
 </div>
 
 <div>
-<div class="p54-label">Amount (optional)</div>
-<input class="p54-input" id="qrAmount" type="number" placeholder="0.00">
+  <div class="p54-label">
+    Amount
+  </div>
+
+  <input
+    class="p54-input"
+    id="qrAmount"
+    type="number"
+    placeholder="5000"
+  >
+</div>
+
+<div>
+  <div class="p54-label">
+    Description
+  </div>
+
+  <input
+    class="p54-input"
+    id="qrDescription"
+    placeholder="Product or Service"
+  >
+</div>
+
+<div>
+  <div class="p54-label">
+    Currency
+  </div>
+
+  <select
+    class="p54-input"
+    id="qrCurrency"
+  >
+    <option value="NGN">NGN</option>
+    <option value="GBP">GBP</option>
+    <option value="USD">USD</option>
+    <option value="EUR">EUR</option>
+  </select>
 </div>
 
 <div id="qrOutput" style="text-align:center;margin-top:15px"></div>
