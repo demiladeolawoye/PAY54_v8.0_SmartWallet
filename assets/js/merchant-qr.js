@@ -64,10 +64,31 @@ bodyHTML:`
 <div id="qrOutput" style="text-align:center;margin-top:15px"></div>
 
 <div class="p54-actions">
-<button class="p54-btn" type="button" id="cancelQR">Close</button>
-<button class="p54-btn primary" type="submit">Generate QR</button>
-</div>
 
+<button
+  class="p54-btn"
+  type="button"
+  id="downloadQR"
+>
+Download
+</button>
+
+<button
+  class="p54-btn"
+  type="button"
+  id="cancelQR"
+>
+Close
+</button>
+
+<button
+  class="p54-btn primary"
+  type="submit"
+>
+Generate QR
+</button>
+
+</div>
 </form>
 
 `,
