@@ -192,8 +192,6 @@ modal.querySelector("#downloadQR")
 
 });
 
-}
-
   modal.querySelector("#printQR")
 .addEventListener("click",()=>{
 
