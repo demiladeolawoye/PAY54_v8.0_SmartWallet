@@ -92,17 +92,18 @@ Generate QR
 </form>
 
 `,
-
 onMount:({modal,close})=>{
 
 const form = modal.querySelector("#qrForm");
 const output = modal.querySelector("#qrOutput");
 
+let merchant = "";
+
 form.addEventListener("submit",(e)=>{
 
 e.preventDefault();
 
-const merchant =
+merchant =
   modal.querySelector("#qrMerchant").value;
 
 const amount =
@@ -133,20 +134,47 @@ JSON.stringify({
 
 });
 
-output.innerHTML="";
+output.innerHTML = "";
 
 new QRCode(output,{
-text:payload,
-width:220,
-height:220
+  text:payload,
+  width:220,
+  height:220
 });
 
 });
 
-modal.querySelector("#cancelQR").addEventListener("click",close);
+modal.querySelector("#cancelQR")
+.addEventListener("click",close);
+
+modal.querySelector("#downloadQR")
+.addEventListener("click",()=>{
+
+  const canvas =
+    output.querySelector("canvas");
+
+  if(!canvas){
+
+    alert(
+      "Generate QR first"
+    );
+
+    return;
+
+  }
+
+  const link =
+    document.createElement("a");
+
+  link.href =
+    canvas.toDataURL();
+
+  link.download =
+    `${merchant || "PAY54"}-QR.png`;
+
+  link.click();
+
+});
 
 }
 
-});
-
-}
