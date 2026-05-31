@@ -81,8 +81,17 @@ form.addEventListener("submit",(e)=>{
 
 e.preventDefault();
 
-const merchant = modal.querySelector("#qrMerchant").value;
-const amount = modal.querySelector("#qrAmount").value;
+const merchant =
+  modal.querySelector("#qrMerchant").value;
+
+const amount =
+  modal.querySelector("#qrAmount").value;
+
+const description =
+  modal.querySelector("#qrDescription").value;
+
+const currency =
+  modal.querySelector("#qrCurrency").value;
 
 const payload = `PAY54|${merchant}|${amount}`;
 
