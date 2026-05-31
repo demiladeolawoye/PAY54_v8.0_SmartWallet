@@ -93,7 +93,24 @@ const description =
 const currency =
   modal.querySelector("#qrCurrency").value;
 
-const payload = `PAY54|${merchant}|${amount}`;
+const payload =
+JSON.stringify({
+
+  merchant,
+
+  amount,
+
+  description,
+
+  currency,
+
+  reference:
+    "INV-" + Date.now(),
+
+  created:
+    Date.now()
+
+});
 
 output.innerHTML="";
 
