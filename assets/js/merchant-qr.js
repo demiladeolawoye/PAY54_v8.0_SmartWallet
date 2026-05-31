@@ -194,3 +194,122 @@ modal.querySelector("#downloadQR")
 
 }
 
+  modal.querySelector("#printQR")
+.addEventListener("click",()=>{
+
+  const canvas =
+    output.querySelector("canvas");
+
+  if(!canvas){
+
+    alert(
+      "Generate QR first"
+    );
+
+    return;
+
+  }
+
+  const win =
+    window.open(
+      "",
+      "_blank"
+    );
+
+  if(!win){
+
+    alert(
+      "Popup blocked"
+    );
+
+    return;
+
+  }
+
+  win.document.write(`
+
+    <html>
+
+      <head>
+
+        <title>
+          PAY54 Merchant QR
+        </title>
+
+      </head>
+
+      <body style="
+        text-align:center;
+        padding:30px;
+      ">
+
+        <h2>
+          PAY54 Merchant QR
+        </h2>
+
+        <img
+          src="${canvas.toDataURL()}"
+          style="width:300px"
+        >
+
+      </body>
+
+    </html>
+
+  `);
+
+  win.document.close();
+
+  setTimeout(()=>{
+
+    win.print();
+
+  },300);
+
+});
+
+modal.querySelector("#shareQR")
+.addEventListener("click",async()=>{
+
+  const canvas =
+    output.querySelector("canvas");
+
+  if(!canvas){
+
+    alert(
+      "Generate QR first"
+    );
+
+    return;
+
+  }
+
+  const qrData =
+    canvas.toDataURL();
+
+  try{
+
+    await navigator.clipboard
+      .writeText(qrData);
+
+    alert(
+      "QR copied for sharing"
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+    alert(
+      "Share failed"
+    );
+
+  }
+
+});
+
+} // closes onMount
+
+}); // closes openModal
+
+} // closes openMerchantQR
