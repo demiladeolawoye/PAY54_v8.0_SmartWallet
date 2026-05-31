@@ -1692,6 +1692,18 @@ body.light .p54-textarea{
 
 }
 
+.p54-actions .p54-btn{
+
+  min-width:110px;
+
+  display:inline-flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+}
+
 .p54-btn{
 
   height:46px;
