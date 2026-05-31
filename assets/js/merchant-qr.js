@@ -68,24 +68,40 @@ bodyHTML:`
 <button
   class="p54-btn"
   type="button"
-  id="downloadQR"
+  id="cancelQR"
 >
-Download
+  Close
 </button>
 
 <button
   class="p54-btn"
   type="button"
-  id="cancelQR"
+  id="printQR"
 >
-Close
+  Print
+</button>
+
+<button
+  class="p54-btn"
+  type="button"
+  id="shareQR"
+>
+  Share
+</button>
+
+<button
+  class="p54-btn"
+  type="button"
+  id="downloadQR"
+>
+  Download
 </button>
 
 <button
   class="p54-btn primary"
   type="submit"
 >
-Generate QR
+  Generate QR
 </button>
 
 </div>
