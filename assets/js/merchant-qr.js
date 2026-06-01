@@ -311,3 +311,18 @@ modal.querySelector("#shareQR")
 }); // closes openModal
 
 } // closes openMerchantQR
+
+
+/* =========================
+   PAY54 MERCHANT QR EXPORT
+========================= */
+
+window.PAY54_MERCHANT_QR = {
+
+  open: openMerchantQR
+
+};
+
+console.log(
+  "✅ PAY54 MERCHANT QR READY"
+);
