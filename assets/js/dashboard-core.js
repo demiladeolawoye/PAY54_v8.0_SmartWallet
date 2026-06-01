@@ -1817,7 +1817,13 @@ ${merchant.risk}
 <div class="checkout-section">
 
 <div class="checkout-label">
+
 Funding Source
+
+</div>
+
+${fundingHTML}
+
 </div>
 
 <label class="checkout-radio">
