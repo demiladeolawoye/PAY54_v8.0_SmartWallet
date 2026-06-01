@@ -2751,3 +2751,42 @@ body.light .wallet-balance-row{
     opacity:1 !important;
 
 }
+
+.p54-checkout-premium{
+display:flex;
+flex-direction:column;
+gap:16px;
+}
+
+.checkout-wallet-card,
+.checkout-reward-card,
+.checkout-summary,
+.checkout-card{
+
+padding:16px;
+
+border-radius:16px;
+
+border:1px solid rgba(255,255,255,.10);
+
+background:rgba(255,255,255,.04);
+}
+
+.checkout-radio{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px;
+font-weight:700;
+}
+
+.checkout-wallet-amount{
+font-size:26px;
+font-weight:900;
+}
+
+.checkout-row{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+}
