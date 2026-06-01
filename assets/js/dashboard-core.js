@@ -1710,308 +1710,367 @@ window.PAY54_UI.openTrading = function(){
 
 window.PAY54_UI =
 window.PAY54_UI || {};
-
 window.PAY54_UI.openCheckout = function(){
 
-  const openModal =
-    window.PAY54_MODALS?.openModal;
+const openModal =
+window.PAY54_MODALS?.openModal;
 
-  if(!openModal){
-    console.error("Modal engine unavailable");
-    return;
-  }
+if(!openModal){
+console.error("Modal engine unavailable");
+return;
+}
 
-  const ledger =
-    window.PAY54_LEDGER;
+const ledger =
+window.PAY54_LEDGER;
 
-  if(!ledger){
-    console.error("Ledger unavailable");
-    return;
-  }
+if(!ledger){
+console.error("Ledger unavailable");
+return;
+}
 
-  const balances =
-    ledger.getBalances();
+const balances =
+ledger.getBalances();
 
-  const activeCurrency =
-    window.PAY54_APP.activeCurrency || "NGN";
+const activeCurrency =
+window.PAY54_APP.activeCurrency || "NGN";
 
-  const availableBalance =
-    balances[activeCurrency] || 0;
+const availableBalance =
+balances[activeCurrency] || 0;
 
-  const merchant = {
+const merchant = {
 
-    name: "Amazon Marketplace",
+name:"Amazon Marketplace",
 
-    amount: 125.50,
+merchantId:"MRC-78493",
 
-    currency: activeCurrency,
+item:"Wireless Headphones",
 
-    risk: "Low",
+risk:"LOW",
 
-    item: "Wireless Headphones",
+trust:98,
 
-    merchantId: "MRC-78493"
+amount:125.50,
 
-  };
+fee:1.50,
 
-  openModal({
+discount:2.00,
 
-    title: "PAY54 Smart Checkout",
-
-    bodyHTML: `
-
-      <div class="p54-checkout">
-
-        <div class="checkout-hero">
-
-          <div class="checkout-icon">
-            🛍️
-          </div>
-
-          <div class="checkout-title">
-            Pending Checkout Approval
-          </div>
-
-          <div class="checkout-sub">
-            Review merchant request securely
-          </div>
-
-        </div>
-
-        <div class="checkout-card">
-
-          <div class="checkout-row">
-            <span>Merchant</span>
-            <strong>${merchant.name}</strong>
-          </div>
-
-          <div class="checkout-row">
-            <span>Item</span>
-            <strong>${merchant.item}</strong>
-          </div>
-
-          <div class="checkout-row">
-            <span>Risk Level</span>
-            <strong class="risk-low">
-              ${merchant.risk}
-            </strong>
-          </div>
-
-          <div class="checkout-row">
-            <span>Merchant ID</span>
-            <strong>${merchant.merchantId}</strong>
-          </div>
-
-          <div class="checkout-row">
-            <span>Wallet</span>
-            <strong>${activeCurrency}</strong>
-          </div>
-
-          <div class="checkout-row">
-            <span>Available</span>
-            <strong>
-              ${ledger.moneyFmt(
-                activeCurrency,
-                availableBalance
-              )}
-            </strong>
-          </div>
-
-        </div>
-
-        <div class="checkout-amount-wrap">
-
-          <div class="checkout-amount-label">
-            Amount
-          </div>
-
-          <div class="checkout-amount">
-            ${ledger.moneyFmt(
-              merchant.currency,
-              merchant.amount
-            )}
-          </div>
-
-        </div>
-
-        <div class="p54-actions">
-
-          <button
-            class="p54-btn"
-            id="declineCheckoutBtn"
-          >
-            Decline
-          </button>
-
-          <button
-            class="p54-btn primary"
-            id="approveCheckoutBtn"
-          >
-            Approve Payment
-          </button>
-
-        </div>
-
-      </div>
-
-    `,
-
-    onMount: ({ modal, close }) => {
-
-      modal
-        .querySelector("#declineCheckoutBtn")
-        .addEventListener("click", () => {
-
-          close();
-
-          setTimeout(() => {
-
-            window.PAY54_TOAST
-              ?.showToast(
-                "Checkout declined"
-              );
-
-          }, 200);
-
-        });
-
-      modal
-        .querySelector("#approveCheckoutBtn")
-        .addEventListener("click", () => {
-
-          if(
-            availableBalance <
-            merchant.amount
-          ){
-
-            window.PAY54_TOAST
-              ?.showToast(
-                "Insufficient balance"
-              );
-
-            return;
-
-          }
-
-          window.PAY54_TX
-            ?.requestPinVerification(() => {
-
-              const entry =
-                ledger.createEntry({
-
-                  type: "checkout",
-
-                  title: "Smart Checkout",
-
-                  icon: "🛍️",
-
-                  currency: merchant.currency,
-
-                  amount: -merchant.amount,
-
-                  meta: {
-
-                    merchant:
-                      merchant.name,
-
-                    item:
-                      merchant.item,
-
-                    risk:
-                      merchant.risk,
-
-                    merchant_id:
-                      merchant.merchantId
-
-                  }
-
-                });
-
-              const tx =
-                window.PAY54_TX
-                ?.processTransaction(
-
-                  entry,
-
-                  {
-
-                    title:
-                      merchant.name,
-
-                    source:
-                      "checkout",
-
-                    showReceipt: false
-
-                  }
-
-                );
-
-              close();
-
-              setTimeout(() => {
-
-                if(
-                  window
-                  .PAY54_RECEIPTS
-                  ?.openReceiptModal
-                ){
-
-                  window
-                    .PAY54_RECEIPTS
-                    .openReceiptModal({
-
-                      openModal,
-
-                      title:
-                        "PAY54 Smart Checkout",
-
-                      tx,
-
-                      lines: [
-
-                        `Merchant: ${merchant.name}`,
-
-                        `Item: ${merchant.item}`,
-
-                        `Amount: ${ledger.moneyFmt(
-                          merchant.currency,
-                          merchant.amount
-                        )}`,
-
-                        `Wallet: ${merchant.currency}`,
-
-                        `Risk Level: ${merchant.risk}`,
-
-                        `Status: APPROVED`
-
-                      ]
-
-                    });
-
-                }
-
-                renderBalance();
-
-                if(
-                  window
-                  .renderRecentTransactions
-                ){
-                  window
-                    .renderRecentTransactions();
-                }
-
-              }, 250);
-
-            });
-
-        });
-
-    }
-
-  });
+currency:activeCurrency
 
 };
+
+const total =
+merchant.amount +
+merchant.fee -
+merchant.discount;
+
+openModal({
+
+title:"PAY54 Smart Checkout",
+
+bodyHTML:`
+
+<div class="p54-checkout-premium">
+
+<div class="checkout-hero">
+
+<div class="checkout-icon">
+🛒
+</div>
+
+<div class="checkout-title">
+Merchant Verified
+</div>
+
+<div class="checkout-sub">
+Trust Score ${merchant.trust}/100
+</div>
+
+</div>
+
+<div class="checkout-card">
+
+<div class="checkout-row">
+<span>Merchant</span>
+<strong>${merchant.name}</strong>
+</div>
+
+<div class="checkout-row">
+<span>Item</span>
+<strong>${merchant.item}</strong>
+</div>
+
+<div class="checkout-row">
+<span>Merchant ID</span>
+<strong>${merchant.merchantId}</strong>
+</div>
+
+<div class="checkout-row">
+<span>Risk</span>
+<strong style="color:#22c55e">
+${merchant.risk}
+</strong>
+</div>
+
+</div>
+
+<div class="checkout-section">
+
+<div class="checkout-label">
+Funding Source
+</div>
+
+<label class="checkout-radio">
+<input type="radio" name="funding"
+value="wallet" checked>
+PAY54 Wallet
+</label>
+
+<label class="checkout-radio">
+<input type="radio" name="funding"
+value="visa">
+Visa •••• 4588
+</label>
+
+<label class="checkout-radio">
+<input type="radio" name="funding"
+value="mastercard">
+Mastercard •••• 2241
+</label>
+
+<label class="checkout-radio">
+<input type="radio" name="funding"
+value="mobilemoney">
+Mobile Money
+</label>
+
+<label class="checkout-radio">
+<input type="radio" name="funding"
+value="bank">
+Bank Account
+</label>
+
+</div>
+
+<div class="checkout-wallet-card">
+
+<div class="checkout-wallet-title">
+Available Balance
+</div>
+
+<div class="checkout-wallet-amount">
+
+${ledger.moneyFmt(
+activeCurrency,
+availableBalance
+)}
+
+</div>
+
+</div>
+
+<div class="checkout-reward-card">
+
+<div>
+🎁 Reward Points
+</div>
+
+<strong>
+120 PAY54 Points
+</strong>
+
+<hr>
+
+<div>
+💸 Cashback
+</div>
+
+<strong>
+£1.20
+</strong>
+
+</div>
+
+<div class="checkout-summary">
+
+<div class="checkout-row">
+<span>Subtotal</span>
+<strong>
+${ledger.moneyFmt(
+merchant.currency,
+merchant.amount
+)}
+</strong>
+</div>
+
+<div class="checkout-row">
+<span>Fee</span>
+<strong>
+${ledger.moneyFmt(
+merchant.currency,
+merchant.fee
+)}
+</strong>
+</div>
+
+<div class="checkout-row">
+<span>Discount</span>
+<strong style="color:#22c55e">
+-${ledger.moneyFmt(
+merchant.currency,
+merchant.discount
+)}
+</strong>
+</div>
+
+<div class="checkout-row">
+
+<span>
+Total
+</span>
+
+<strong>
+
+${ledger.moneyFmt(
+merchant.currency,
+total
+)}
+
+</strong>
+
+</div>
+
+</div>
+
+<div class="p54-actions">
+
+<button
+class="p54-btn"
+id="declineCheckoutBtn">
+Decline
+</button>
+
+<button
+class="p54-btn primary"
+id="approveCheckoutBtn">
+Approve Payment
+</button>
+
+</div>
+
+</div>
+
+`,
+
+onMount:({modal,close})=>{
+
+modal
+.querySelector("#declineCheckoutBtn")
+.addEventListener("click",()=>{
+
+close();
+
+window.PAY54_TOAST
+?.showToast(
+"Checkout cancelled"
+);
+
+});
+
+modal
+.querySelector("#approveCheckoutBtn")
+.addEventListener("click",()=>{
+
+if(
+availableBalance < total
+){
+
+window.PAY54_TOAST
+?.showToast(
+"Insufficient balance"
+);
+
+return;
+
+}
+
+window.PAY54_TX
+?.requestPinVerification(()=>{
+
+const entry =
+ledger.createEntry({
+
+type:"checkout",
+
+title:"Smart Checkout",
+
+icon:"🛒",
+
+currency:
+merchant.currency,
+
+amount:-total,
+
+meta:{
+
+merchant:
+merchant.name,
+
+item:
+merchant.item,
+
+merchantId:
+merchant.merchantId
+
+}
+
+});
+
+const tx =
+window.PAY54_TX
+.processTransaction(
+
+entry,
+
+{
+
+title:
+merchant.name,
+
+source:
+"checkout",
+
+showReceipt:true
+
+}
+
+);
+
+if(
+typeof renderBalance
+===
+"function"
+){
+renderBalance();
+}
+
+close();
+
+window.PAY54_TOAST
+?.showToast(
+"Payment approved"
+);
+
+});
+
+});
+
+}
+
+});
+
+};
+
 
 /* =========================================
    PAY54 BILLS ENGINE v2 PREMIUM
