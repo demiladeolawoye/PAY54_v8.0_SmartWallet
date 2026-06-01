@@ -2790,3 +2790,45 @@ display:flex;
 justify-content:space-between;
 padding:8px 0;
 }
+
+/* =====================================
+   PAY54 CHECKOUT MODAL FIX
+===================================== */
+
+.p54-checkout-premium{
+
+display:flex;
+flex-direction:column;
+gap:18px;
+
+padding-bottom:40px;
+
+}
+
+.checkout-summary{
+
+margin-top:18px;
+
+}
+
+.p54-actions{
+
+position:sticky;
+bottom:0;
+
+background:#fff;
+
+padding:16px 0;
+
+display:flex;
+gap:12px;
+
+z-index:10;
+
+}
+
+body:not(.light) .p54-actions{
+
+background:#0f172a;
+
+}
