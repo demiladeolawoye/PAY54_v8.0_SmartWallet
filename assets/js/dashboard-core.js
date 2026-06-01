@@ -1763,7 +1763,75 @@ const total =
 merchant.amount +
 merchant.fee -
 merchant.discount;
+const savedCards =
+  JSON.parse(
+    localStorage.getItem(
+      "pay54_cards"
+    ) || "[]"
+  );
 
+const fundingHTML = `
+
+<label class="checkout-radio">
+
+<input
+  type="radio"
+  name="funding"
+  value="wallet"
+  checked
+>
+
+PAY54 Wallet
+
+</label>
+
+${savedCards.map(card => `
+
+<label class="checkout-radio">
+
+<input
+  type="radio"
+  name="funding"
+  value="${card.id}"
+>
+
+${card.scheme}
+•••• ${card.last4}
+
+${card.default
+  ? "(Default)"
+  : ""
+}
+
+</label>
+
+`).join("")}
+
+<label class="checkout-radio">
+
+<input
+  type="radio"
+  name="funding"
+  value="mobilemoney"
+>
+
+Mobile Money
+
+</label>
+
+<label class="checkout-radio">
+
+<input
+  type="radio"
+  name="funding"
+  value="bank"
+>
+
+Bank Account
+
+</label>
+
+`;
 openModal({
 
 title:"PAY54 Smart Checkout",
@@ -1823,38 +1891,6 @@ Funding Source
 </div>
 
 ${fundingHTML}
-
-</div>
-
-<label class="checkout-radio">
-<input type="radio" name="funding"
-value="wallet" checked>
-PAY54 Wallet
-</label>
-
-<label class="checkout-radio">
-<input type="radio" name="funding"
-value="visa">
-Visa •••• 4588
-</label>
-
-<label class="checkout-radio">
-<input type="radio" name="funding"
-value="mastercard">
-Mastercard •••• 2241
-</label>
-
-<label class="checkout-radio">
-<input type="radio" name="funding"
-value="mobilemoney">
-Mobile Money
-</label>
-
-<label class="checkout-radio">
-<input type="radio" name="funding"
-value="bank">
-Bank Account
-</label>
 
 </div>
 
