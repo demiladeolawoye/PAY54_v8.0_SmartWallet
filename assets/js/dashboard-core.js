@@ -3226,7 +3226,9 @@ if(existingCards.length >= 3){
   return;
 
 }
-         createCard({
+         console.log("STEP 1");
+
+createCard({
 
 id:
 "LINK-" + Date.now(),
@@ -3258,6 +3260,7 @@ transactions:[]
 
 });
 
+console.log("STEP 2");
                     close();
 
                     renderCards(container);
