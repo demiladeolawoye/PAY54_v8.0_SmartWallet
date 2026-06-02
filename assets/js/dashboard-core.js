@@ -3002,7 +3002,6 @@ if(existingCards.length >= 3){
   return;
 
 }
-console.log("STEP 1");
 
 createCard({
 
