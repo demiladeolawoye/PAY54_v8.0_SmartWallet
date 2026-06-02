@@ -3213,7 +3213,7 @@ cvv.length < 3
 
                     }
 const existingCards =
-window.PAY54_CARDS?.getCards?.() || [];
+getCards();
 
 if(existingCards.length >= 3){
 
