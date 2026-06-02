@@ -3258,9 +3258,9 @@ transactions:[]
 });
 
 console.log("STEP 2");
-                    close();
-
                     renderCards(container);
+
+close();
 
                     window.PAY54_TOAST
                       ?.showToast(
