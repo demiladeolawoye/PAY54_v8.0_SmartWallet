@@ -3183,7 +3183,7 @@ cvv.length < 3
 
                     }
 
-          createCard({
+         createCard({
 
 id:
 "LINK-" + Date.now(),
@@ -3192,7 +3192,7 @@ currency:"GBP",
 
 scheme:cardType,
 
-type:bank,
+type:"Bank",
 
 cardholder,
 
