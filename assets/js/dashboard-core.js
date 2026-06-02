@@ -2618,18 +2618,27 @@ window.PAY54_UI.openCards = function(){
 
   }
 
-  function createCard(payload){
+ function createCard(payload){
 
-    const cards = getCards();
+  const cards = getCards();
 
-if(cards.length >= 3){
+  if(cards.length >= 3){
 
-  window.PAY54_TOAST
-    ?.showToast(
-      "Maximum 3 cards allowed"
-    );
+    window.PAY54_TOAST
+      ?.showToast(
+        "Maximum 3 cards allowed"
+      );
 
-  return false;
+    return false;
+
+  }
+
+  cards.push(payload);
+
+  saveCards(cards);
+
+  return true;
+
 }
 
   function renderCards(container){
