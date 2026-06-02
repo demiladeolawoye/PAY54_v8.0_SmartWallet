@@ -2972,28 +2972,33 @@ window.PAY54_UI.openCards = function(){
 
                     createCard({
 
-                      id:
-                        "CARD-" +
-                        Date.now(),
+id:
+"LINK-" + Date.now(),
 
-                      currency,
+currency:"GBP",
 
-                      scheme,
+scheme:cardType,
 
-                      type:
-                        "Virtual",
+type:bank,
 
-                      last4:
-                        Math.floor(
-                          1000 +
-                          Math.random() * 9000
-                        ),
+cardholder,
 
-                      frozen:false,
+last4:
+cardNumber.slice(-4),
 
-                      default:false
+expiry,
 
-                    });
+frozen:false,
+
+default:false,
+
+linked:true,
+
+balance:0,
+
+transactions:[]
+
+});
 
                     close();
 
