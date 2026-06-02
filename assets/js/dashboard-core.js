@@ -3128,7 +3128,6 @@ Link Card
 </div>
 
 `
-
             `,
 
             onMount: ({ modal, close }) => {
