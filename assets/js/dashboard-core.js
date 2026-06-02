@@ -3022,36 +3022,112 @@ window.PAY54_UI.openCards = function(){
           openModal({
 
             title:"Link Bank Card",
+             
+            bodyHTML:`
 
-            bodyHTML: `
+<div class="p54-form">
 
-              <div class="p54-form">
+<div class="p54-label">
+Cardholder Name
+</div>
 
-                <input
-                  id="bankName"
-                  class="p54-input"
-                  placeholder="Bank name"
-                >
+<input
+id="cardholderName"
+class="p54-input"
+placeholder="John Smith"
+>
 
-                <input
-                  id="last4Digits"
-                  class="p54-input"
-                  placeholder="Last 4 digits"
-                  style="margin-top:12px"
-                >
+<div class="p54-label">
+Bank Name
+</div>
 
-                <div class="p54-actions">
+<input
+id="bankName"
+class="p54-input"
+placeholder="Barclays"
+>
 
-                  <button
-                    class="btn primary"
-                    id="confirmLinkCard"
-                  >
-                    Link Card
-                  </button>
+<div class="p54-label">
+Card Number
+</div>
 
-                </div>
+<input
+id="cardNumber"
+class="p54-input"
+maxlength="19"
+placeholder="1234 5678 9012 3456"
+>
 
-              </div>
+<div class="p54-grid-2">
+
+<div>
+
+<div class="p54-label">
+Expiry Date
+</div>
+
+<input
+id="expiryDate"
+class="p54-input"
+placeholder="MM/YY"
+>
+
+</div>
+
+<div>
+
+<div class="p54-label">
+CVV
+</div>
+
+<input
+id="cvv"
+class="p54-input"
+maxlength="4"
+placeholder="123"
+>
+
+</div>
+
+</div>
+
+<div class="p54-label">
+Card Type
+</div>
+
+<select
+id="cardType"
+class="p54-input"
+>
+
+<option value="Visa">
+Visa
+</option>
+
+<option value="Mastercard">
+Mastercard
+</option>
+
+<option value="Amex">
+American Express
+</option>
+
+</select>
+
+<div class="p54-actions">
+
+<button
+class="btn primary"
+id="confirmLinkCard"
+>
+Link Card
+</button>
+
+</div>
+
+</div>
+
+`
 
             `,
 
