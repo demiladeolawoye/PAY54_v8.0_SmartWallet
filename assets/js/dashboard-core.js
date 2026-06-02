@@ -3179,28 +3179,35 @@ cvv.length < 3
 
                     }
 
-                    createCard({
+          createCard({
 
-                      id:
-                        "LINK-" +
-                        Date.now(),
+id:
+"LINK-" + Date.now(),
 
-                      currency:"GBP",
+currency:"GBP",
 
-                      scheme:"Visa",
+scheme:cardType,
 
-                      type:
-                        bank,
+type:bank,
 
-                      last4,
+cardholder,
 
-                      frozen:false,
+last4:
+cardNumber.slice(-4),
 
-                      default:false,
+expiry,
 
-                      linked:true
+frozen:false,
 
-                    });
+default:false,
+
+linked:true,
+
+balance:0,
+
+transactions:[]
+
+});
 
                     close();
 
