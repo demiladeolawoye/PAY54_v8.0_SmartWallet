@@ -2622,11 +2622,15 @@ window.PAY54_UI.openCards = function(){
 
     const cards = getCards();
 
-    cards.unshift(payload);
+if(cards.length >= 3){
 
-    saveCards(cards);
+  window.PAY54_TOAST
+    ?.showToast(
+      "Maximum 3 cards allowed"
+    );
 
-  }
+  return false;
+}
 
   function renderCards(container){
 
