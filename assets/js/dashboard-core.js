@@ -2990,7 +2990,7 @@ window.PAY54_UI.openCards = function(){
                       ? "Mastercard"
                       : "Visa";
 const existingCards =
-window.PAY54_CARDS?.getCards?.() || [];
+getCards();
 
 if(existingCards.length >= 3){
 
