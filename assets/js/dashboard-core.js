@@ -3164,7 +3164,13 @@ const cardType =
 modal.querySelector("#cardType")
 .value;
 
-                    if(!bank || !last4){
+                   if(
+!cardholder ||
+!bank ||
+cardNumber.length < 16 ||
+!expiry ||
+cvv.length < 3
+){
 
                       window.PAY54_TOAST
                         ?.showToast(
