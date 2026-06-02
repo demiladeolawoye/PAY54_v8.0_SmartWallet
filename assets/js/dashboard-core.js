@@ -256,8 +256,15 @@ case "fx":
     break;
 
   case "cards":
-    UI.openCards();
-    break;
+
+  console.log(
+    "CARDS ENGINE:",
+    window.PAY54_CARDS
+  );
+
+  UI.openCards();
+
+  break;
 
   case "checkout":
     UI.openCheckout();
