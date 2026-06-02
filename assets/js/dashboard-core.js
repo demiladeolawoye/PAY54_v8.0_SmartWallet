@@ -2983,7 +2983,7 @@ window.PAY54_UI.openCards = function(){
                       ? "Mastercard"
                       : "Visa";
 const existingCards =
-window.PAY54_CARDS.getCards();
+window.PAY54_CARDS?.getCards?.() || [];
 
 if(existingCards.length >= 3){
 
