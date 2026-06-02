@@ -3230,8 +3230,7 @@ if(existingCards.length >= 3){
 
 createCard({
 
-id:
-"LINK-" + Date.now(),
+id:"LINK-" + Date.now(),
 
 currency:"GBP",
 
@@ -3239,10 +3238,11 @@ scheme:cardType,
 
 type:"Bank",
 
+bank,
+
 cardholder,
 
-last4:
-cardNumber.slice(-4),
+last4: cardNumber.slice(-4),
 
 expiry,
 
@@ -3257,7 +3257,6 @@ linked:true,
 balance:0,
 
 transactions:[]
-
 });
 
 console.log("STEP 2");
