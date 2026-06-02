@@ -3197,22 +3197,20 @@ const cardType =
 modal.querySelector("#cardType")
 .value;
 
-                   if(
-!cardholder ||
-!bank ||
-cardNumber.length < 16 ||
-!expiry ||
-cvv.length < 3
+if(
+ !cardholder ||
+ !bank ||
+ !/^\d{16}$/.test(cardNumber) ||
+ !expiry ||
+ cvv.length < 3
 ){
 
-                      window.PAY54_TOAST
-                        ?.showToast(
-                          "Complete all fields"
-                        );
+ window.PAY54_TOAST?.showToast(
+   "Enter valid card details"
+ );
 
-                      return;
-
-                    }
+ return;
+}
 const existingCards =
 getCards();
 
