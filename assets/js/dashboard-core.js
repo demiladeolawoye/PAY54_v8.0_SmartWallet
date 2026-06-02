@@ -2973,8 +2973,20 @@ if(cards.length >= 3){
                       currency === "GBP"
                       ? "Mastercard"
                       : "Visa";
+const existingCards =
+window.PAY54_CARDS.getCards();
 
-                    createCard({
+if(existingCards.length >= 3){
+
+  window.PAY54_TOAST
+  ?.showToast(
+    "Maximum 3 cards allowed"
+  );
+
+  return;
+
+}
+createCard({
 
 id:
 "CARD-" + Date.now(),
@@ -2989,6 +3001,8 @@ last4:
 Math.floor(
 1000 + Math.random() * 9000
 ),
+
+contactless:true,
 
 frozen:false,
 
@@ -3182,7 +3196,19 @@ cvv.length < 3
                       return;
 
                     }
+const existingCards =
+window.PAY54_CARDS.getCards();
 
+if(existingCards.length >= 3){
+
+  window.PAY54_TOAST
+  ?.showToast(
+    "Maximum 3 cards allowed"
+  );
+
+  return;
+
+}
          createCard({
 
 id:
@@ -3200,6 +3226,8 @@ last4:
 cardNumber.slice(-4),
 
 expiry,
+
+contactless:true,
 
 frozen:false,
 
