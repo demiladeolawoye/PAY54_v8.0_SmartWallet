@@ -2648,6 +2648,31 @@ window.PAY54_UI.openCards = function(){
 
 }
 
+   function getCardTheme(card){
+
+  if(card.type === "Virtual"){
+    return "theme-pay54";
+  }
+
+  const bank =
+    (card.bank || "")
+    .toLowerCase();
+
+  if(bank.includes("gt")){
+    return "theme-gtbank";
+  }
+
+  if(bank.includes("access")){
+    return "theme-access";
+  }
+
+  if(bank.includes("demi")){
+    return "theme-demi";
+  }
+
+  return "theme-linked";
+}
+   
   function renderCards(container){
 
     const cards = getCards();
