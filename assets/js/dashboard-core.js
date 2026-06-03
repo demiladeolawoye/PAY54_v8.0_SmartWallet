@@ -3349,19 +3349,21 @@ Link Card
 
 `,
             onMount: ({ modal, close }) => {
+modal
+  .querySelector(
+    "#confirmLinkCard"
+  )
+  .addEventListener(
+    "click",
+    () => {
 
-              modal
-                .querySelector(
-                  "#confirmLinkCard"
-                )
-                .addEventListener(
-                  "click",
-                  () => {
+      console.log(
+        "LINK CARD CLICKED"
+      );
 
-                   const cardholder =
-modal.querySelector("#cardholderName")
-.value.trim();
-
+      const cardholder =
+      modal.querySelector("#cardholderName")
+      .value.trim();
 const bank =
 modal.querySelector("#bankName")
 .value.trim();
