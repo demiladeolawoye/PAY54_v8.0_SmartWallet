@@ -2722,9 +2722,17 @@ ${getCardTheme(card)}"
             ${card.currency}
           </div>
 
-          <div>
-            ${card.type}
-          </div>
+        <div>
+
+${card.type === "Bank"
+
+? card.bank
+
+: card.type
+
+}
+
+</div>
 
         </div>
 
