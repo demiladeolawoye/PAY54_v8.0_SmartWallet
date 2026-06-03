@@ -3421,6 +3421,10 @@ if(
  cvv.length < 3
 ){
 
+   console.log(
+  "VALIDATION FAILED"
+);
+   
  window.PAY54_TOAST?.showToast(
    "Enter valid card details"
  );
