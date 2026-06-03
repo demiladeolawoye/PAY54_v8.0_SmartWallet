@@ -3416,7 +3416,7 @@ modal.querySelector("#cardType")
 if(
  !cardholder ||
  !bank ||
- !/^\d{16}$/.test(cardNumber) ||
+ cardNumber.length < 16 ||
  !expiry ||
  cvv.length < 3
 ){
