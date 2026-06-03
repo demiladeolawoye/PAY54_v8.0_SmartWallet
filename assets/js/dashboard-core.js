@@ -3156,10 +3156,11 @@ container
 
         </div>
 
-        <div
-          id="cardsContainer"
-          class="cards-container"
-        ></div>
+       <div
+  id="cardsContainer"
+  class="pay54-cards-scroll"
+>
+</div>
 
       </div>
 
