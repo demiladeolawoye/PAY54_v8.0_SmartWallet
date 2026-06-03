@@ -3414,6 +3414,8 @@ if(existingCards.length >= 3){
          console.log("STEP 1");
 
 const created =
+const created =
+const created =
 createCard({
 
 id:"LINK-" + Date.now(),
@@ -3447,9 +3449,11 @@ transactions:[]
 });
 
 console.log(
-"CREATE RESULT:",
-created
+  "CREATE RESULT:",
+  created
 );
+
+console.log("STEP 2");
 
 if(!created){
 
