@@ -2722,32 +2722,53 @@ window.PAY54_UI.openCards = function(){
 
         <div class="card-actions">
 
-          <button
-            class="btn ghost sm freezeCardBtn"
-            data-id="${card.id}"
-          >
-            ${
-              card.frozen
-              ? "Unfreeze"
-              : "Freeze"
-            }
-          </button>
+  <button
+    class="btn primary sm cardDetailsBtn"
+    data-id="${card.id}"
+  >
+    Details
+  </button>
 
-          <button
-            class="btn ghost sm defaultCardBtn"
-            data-id="${card.id}"
-          >
-            Set Default
-          </button>
+  <button
+    class="btn ghost sm fundCardBtn"
+    data-id="${card.id}"
+  >
+    Fund
+  </button>
 
-          <button
-            class="btn ghost sm deleteCardBtn"
-            data-id="${card.id}"
-          >
-            Delete
-          </button>
+  <button
+    class="btn ghost sm withdrawCardBtn"
+    data-id="${card.id}"
+  >
+    Withdraw
+  </button>
 
-        </div>
+  <button
+    class="btn ghost sm freezeCardBtn"
+    data-id="${card.id}"
+  >
+    ${
+      card.frozen
+      ? "Unfreeze"
+      : "Freeze"
+    }
+  </button>
+
+  <button
+    class="btn ghost sm defaultCardBtn"
+    data-id="${card.id}"
+  >
+    Default
+  </button>
+
+  <button
+    class="btn ghost sm deleteCardBtn"
+    data-id="${card.id}"
+  >
+    Delete
+  </button>
+
+</div>
 
       </div>
 
