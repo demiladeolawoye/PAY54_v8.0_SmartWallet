@@ -2650,27 +2650,40 @@ window.PAY54_UI.openCards = function(){
 
    function getCardTheme(card){
 
+  /* PAY54 Virtual Cards */
+
   if(card.type === "Virtual"){
-    return "theme-pay54";
+
+    return "pay54-virtual-theme";
+
   }
+
+  /* Linked Bank Cards */
 
   const bank =
     (card.bank || "")
     .toLowerCase();
 
   if(bank.includes("gt")){
-    return "theme-gtbank";
+
+    return "gtbank-theme";
+
   }
 
   if(bank.includes("access")){
-    return "theme-access";
+
+    return "access-theme";
+
   }
 
   if(bank.includes("demi")){
-    return "theme-demi";
+
+    return "demi-theme";
+
   }
 
-  return "theme-linked";
+  return "linked-card-theme";
+
 }
    
   function renderCards(container){
