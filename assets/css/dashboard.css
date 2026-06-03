@@ -3066,3 +3066,62 @@ rgba(
 );
 
 }
+
+/* =========================
+   PAY54 Card Themes
+========================= */
+
+.pay54-virtual-theme{
+
+  background:
+  linear-gradient(
+    135deg,
+    #1e3a8a,
+    #312e81
+  );
+
+}
+
+.gtbank-theme{
+
+  background:
+  linear-gradient(
+    135deg,
+    #f97316,
+    #1e293b
+  );
+
+}
+
+.access-theme{
+
+  background:
+  linear-gradient(
+    135deg,
+    #ff7900,
+    #ffb347
+  );
+
+}
+
+.demi-theme{
+
+  background:
+  linear-gradient(
+    135deg,
+    #111827,
+    #334155
+  );
+
+}
+
+.linked-card-theme{
+
+  background:
+  linear-gradient(
+    135deg,
+    #475569,
+    #64748b
+  );
+
+}
