@@ -2670,7 +2670,10 @@ window.PAY54_UI.openCards = function(){
 
     container.innerHTML = cards.map(card => `
 
-      <div class="pay54-card-ui">
+     <div
+class="pay54-card-ui
+${getCardTheme(card)}"
+>
 
         <div class="card-top">
 
