@@ -2735,7 +2735,22 @@ ${card.type === "Bank"
 </div>
 
         </div>
+${
+card.linked
 
+? `
+
+<div class="linked-badge">
+
+Linked Funding Card
+
+</div>
+
+`
+
+: ""
+
+}
         <div class="card-status">
 
           ${
