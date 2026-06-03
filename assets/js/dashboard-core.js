@@ -2765,19 +2765,34 @@ ${card.type === "Bank"
     Details
   </button>
 
-  <button
-    class="btn ghost sm fundCardBtn"
-    data-id="${card.id}"
-  >
-    Fund
-  </button>
+  ${
+card.type === "Virtual"
 
-  <button
-    class="btn ghost sm withdrawCardBtn"
-    data-id="${card.id}"
-  >
-    Withdraw
-  </button>
+?
+
+`
+
+<button
+class="btn ghost sm fundCardBtn"
+data-id="${card.id}"
+>
+Fund
+</button>
+
+<button
+class="btn ghost sm withdrawCardBtn"
+data-id="${card.id}"
+>
+Withdraw
+</button>
+
+`
+
+:
+
+""
+
+}
 
   <button
     class="btn ghost sm cardTransactionsBtn"
