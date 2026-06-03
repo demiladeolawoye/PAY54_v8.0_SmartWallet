@@ -2881,7 +2881,69 @@ container
   });
 
 });  
-     
+    container
+.querySelectorAll(".cardTransactionsBtn")
+.forEach(btn=>{
+
+  btn.addEventListener("click",()=>{
+
+    const id =
+      btn.dataset.id;
+
+    const card =
+      getCards().find(
+        c => c.id === id
+      );
+
+    if(!card) return;
+
+    const txs =
+      card.transactions || [];
+
+    openModal({
+
+      title:"Card Transactions",
+
+      bodyHTML:`
+
+        <div class="card-tx-wrap">
+
+          ${
+            txs.length
+
+            ? txs.map(tx=>`
+
+              <div class="card-tx-row">
+
+                <div>
+                  ${tx.title || "Transaction"}
+                </div>
+
+                <strong>
+                  ${tx.amount || 0}
+                </strong>
+
+              </div>
+
+            `).join("")
+
+            :
+
+            `<div>
+              No transactions found
+            </div>`
+
+          }
+
+        </div>
+
+      `
+
+    });
+
+  });
+
+}); 
     container
       .querySelectorAll(".freezeCardBtn")
       .forEach(btn => {
