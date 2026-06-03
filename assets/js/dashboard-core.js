@@ -3411,6 +3411,7 @@ if(existingCards.length >= 3){
 }
          console.log("STEP 1");
 
+const created =
 createCard({
 
 id:"LINK-" + Date.now(),
@@ -3440,17 +3441,28 @@ linked:true,
 balance:0,
 
 transactions:[]
+
 });
 
-console.log("STEP 2");
-                    renderCards(container);
+console.log(
+"CREATE RESULT:",
+created
+);
+
+if(!created){
+
+  return;
+
+}
+
+renderCards(container);
 
 close();
 
-                    window.PAY54_TOAST
-                      ?.showToast(
-                        "Bank card linked"
-                      );
+window.PAY54_TOAST
+?.showToast(
+"Bank card linked successfully"
+);
 
                   }
                 );
