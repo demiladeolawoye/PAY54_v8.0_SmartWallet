@@ -2720,7 +2720,7 @@ window.PAY54_UI.openCards = function(){
           : ""
         }
 
-        <div class="card-actions">
+       <div class="card-actions">
 
   <button
     class="btn primary sm cardDetailsBtn"
@@ -2741,6 +2741,13 @@ window.PAY54_UI.openCards = function(){
     data-id="${card.id}"
   >
     Withdraw
+  </button>
+
+  <button
+    class="btn ghost sm cardTransactionsBtn"
+    data-id="${card.id}"
+  >
+    Transactions
   </button>
 
   <button
@@ -2768,7 +2775,7 @@ window.PAY54_UI.openCards = function(){
     Delete
   </button>
 
-</div>
+</div> 
 
       </div>
 
