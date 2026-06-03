@@ -3361,6 +3361,35 @@ modal
         "LINK CARD CLICKED"
       );
 
+       console.log(
+  "CARDHOLDER:",
+  cardholder
+);
+
+console.log(
+  "BANK:",
+  bank
+);
+
+console.log(
+  "CARD:",
+  cardNumber
+);
+
+console.log(
+  "CARD LENGTH:",
+  cardNumber.length
+);
+
+console.log(
+  "EXPIRY:",
+  expiry
+);
+
+console.log(
+  "CVV:",
+  cvv
+);
       const cardholder =
       modal.querySelector("#cardholderName")
       .value.trim();
