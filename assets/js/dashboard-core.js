@@ -3414,29 +3414,7 @@ console.log(
   "CVV:",
   cvv
 );
-      const cardholder =
-      modal.querySelector("#cardholderName")
-      .value.trim();
-const bank =
-modal.querySelector("#bankName")
-.value.trim();
-
-const cardNumber =
-modal.querySelector("#cardNumber")
-.value.replace(/\s/g,"");
-
-const expiry =
-modal.querySelector("#expiryDate")
-.value.trim();
-
-const cvv =
-modal.querySelector("#cvv")
-.value.trim();
-
-const cardType =
-modal.querySelector("#cardType")
-.value;
-
+     
 if(
  !cardholder ||
  !bank ||
