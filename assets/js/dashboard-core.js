@@ -3411,43 +3411,40 @@ if(existingCards.length >= 3){
   return;
 
 }
-         console.log("STEP 1");
+       
+console.log("STEP 1");
 
-const created =
-const created =
-const created =
-createCard({
+const created = createCard({
 
-id:"LINK-" + Date.now(),
+  id:"LINK-" + Date.now(),
 
-currency:"GBP",
+  currency:"GBP",
 
-scheme:cardType,
+  scheme:cardType,
 
-type:"Bank",
+  type:"Bank",
 
-bank,
+  bank,
 
-cardholder,
+  cardholder,
 
-last4: cardNumber.slice(-4),
+  last4: cardNumber.slice(-4),
 
-expiry,
+  expiry,
 
-contactless:true,
+  contactless:true,
 
-frozen:false,
+  frozen:false,
 
-default:false,
+  default:false,
 
-linked:true,
+  linked:true,
 
-balance:0,
+  balance:0,
 
-transactions:[]
+  transactions:[]
 
 });
-
 console.log(
   "CREATE RESULT:",
   created
