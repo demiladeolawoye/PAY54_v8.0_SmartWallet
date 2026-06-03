@@ -2779,7 +2779,102 @@ window.PAY54_UI.openCards = function(){
   }
 
   function bindCardActions(container){
+container
+.querySelectorAll(".cardDetailsBtn")
+.forEach(btn=>{
 
+  btn.addEventListener("click",()=>{
+
+    const id =
+      btn.dataset.id;
+
+    const card =
+      getCards().find(
+        c => c.id === id
+      );
+
+    if(!card) return;
+
+    openModal({
+
+      title:"Card Details",
+
+      bodyHTML:`
+
+        <div class="card-detail-wrap">
+
+          <h3>
+            ${card.scheme}
+          </h3>
+
+          <div>
+            **** ${card.last4}
+          </div>
+
+          <hr>
+
+          <div>
+            Currency:
+            ${card.currency}
+          </div>
+
+          <div>
+            Type:
+            ${card.type}
+          </div>
+
+          <div>
+            Balance:
+            ${card.balance || 0}
+          </div>
+
+          <div>
+            Contactless:
+            ${
+              card.contactless
+              ? "ON"
+              : "OFF"
+            }
+          </div>
+
+        </div>
+
+      `
+
+    });
+
+  });
+
+});
+    container
+.querySelectorAll(".fundCardBtn")
+.forEach(btn=>{
+
+  btn.addEventListener("click",()=>{
+
+    window.PAY54_TOAST
+      ?.showToast(
+        "Fund Card v2 Coming Next"
+      );
+
+  });
+
+});
+   container
+.querySelectorAll(".withdrawCardBtn")
+.forEach(btn=>{
+
+  btn.addEventListener("click",()=>{
+
+    window.PAY54_TOAST
+      ?.showToast(
+        "Withdraw Card v2 Coming Next"
+      );
+
+  });
+
+});  
+     
     container
       .querySelectorAll(".freezeCardBtn")
       .forEach(btn => {
