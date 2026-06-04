@@ -3167,3 +3167,91 @@ rgba(
   background:rgba(59,130,246,.6);
 
 }
+
+.cards-scroll-area{
+
+  max-height:550px;
+
+  overflow-y:auto;
+
+  overflow-x:hidden;
+
+  padding-right:8px;
+
+}
+
+.pay54-card-ui{
+
+  border-radius:20px;
+
+  padding:18px;
+
+  margin-bottom:16px;
+
+  color:#fff;
+
+}
+
+.card-top{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  margin-bottom:20px;
+
+}
+
+.card-number{
+
+  font-size:20px;
+
+  font-weight:700;
+
+  letter-spacing:2px;
+
+  margin-bottom:16px;
+
+}
+
+.card-holder{
+
+  font-size:13px;
+
+  opacity:.9;
+
+}
+
+.card-footer{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  margin-top:14px;
+
+}
+
+.card-actions{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:8px;
+
+  margin-top:18px;
+
+}
+
+.card-actions button{
+
+  border:none;
+
+  border-radius:10px;
+
+  padding:8px 12px;
+
+  cursor:pointer;
+
+}
