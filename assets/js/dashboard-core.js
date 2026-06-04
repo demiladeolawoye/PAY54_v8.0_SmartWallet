@@ -2607,21 +2607,23 @@ window.PAY54_UI.openCards = function(){
   const STORAGE_KEY =
     "pay54_cards";
 
-  window.saveCards = function(cards){
+window.saveCards = function(cards){
 
    localStorage.setItem(
-      "pay54_cards",
+      STORAGE_KEY,
       JSON.stringify(cards)
    );
 
-}
+};
 
-    return JSON.parse(
+function getCards(){
+
+   return JSON.parse(
       localStorage.getItem(STORAGE_KEY)
       || "[]"
-    );
+   );
 
-  }
+}
 
  function createCard(payload){
 
