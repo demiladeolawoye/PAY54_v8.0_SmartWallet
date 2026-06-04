@@ -3512,7 +3512,23 @@ if(!bank){
 if(
   cardNumber.length !== 15 &&
   cardNumber.length !== 16
+)
+const expiryRegex =
+/^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+
+if(
+ !expiryRegex.test(expiry)
 ){
+
+  window.PAY54_TOAST?.showToast(
+    "Expiry must be MM/YY"
+  );
+
+  return;
+
+}
+
+{
 
   window.PAY54_TOAST?.showToast(
     "Card number must be exactly 15 or 16 digits"
