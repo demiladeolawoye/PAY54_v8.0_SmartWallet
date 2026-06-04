@@ -2686,250 +2686,42 @@ window.PAY54_UI.openCards = function(){
 
 }
    
-  function renderCards(container){
+function renderCards(container){
 
-    const cards = getCards();
+  const cards = getCards();
 
-    if(!cards.length){
+  if(!cards.length){
 
-      container.innerHTML = `
-
-        <div class="empty-cards">
-
-          No cards available
-
-        </div>
-
-      `;
-
-      return;
-
-    }
-container.innerHTML = `
-
-<div class="cards-scroll-area">
-
-${cards.map(card => `
-
-<div class="pay54-card-ui">
-
-  <div class="card-top">
-
-    <div class="card-brand">
-      PAY54
-    </div>
-
-    <div class="card-scheme">
-      ${card.scheme}
-    </div>
-
-  </div>
-
-  <div class="card-number">
-    •••• •••• •••• ${card.last4}
-  </div>
-
-  <div class="card-meta">
-
-    <div>
-      ${card.currency}
-    </div>
-
-    <div>
-      ${card.type}
-    </div>
-
-  </div>
-
-  <!-- card status -->
-
-  <!-- card actions -->
-
-</div>
-
-`).join("")}
-
-</div>
-
-`;
-
-        <div class="card-top">
-
-          <div class="card-brand">
-            PAY54
-          </div>
-
-          <div class="card-scheme">
-            ${card.scheme}
-          </div>
-
-        </div>
-
-        <div class="card-number">
-          •••• •••• •••• ${card.last4}
-        </div>
-
-        <div class="card-meta">
-
-          <div>
-            ${card.currency}
-          </div>
-
-        <div>
-
-${card.type === "Bank"
-
-? card.bank
-
-: card.type
-
-}
-
-</div>
-
-        </div>
-${
-card.linked
-
-? `
-
-<div class="linked-badge">
-
-Linked Funding Card
-
-</div>
-
-`
-
-: ""
-
-}
-        <div class="card-status">
-
-          ${
-            card.frozen
-            ? "❄️ Frozen"
-            : "✅ Active"
-          }
-
-        </div>
-
-        ${
-          card.default
-          ? `
-            <div class="default-card-badge">
-              Default Payment Card
-            </div>
-          `
-          : ""
-        }
-
-
-<div class="card-actions">
-
-${
-card.linked
-
-?
-
-`
-
-<button
-class="btn ghost sm cardDetailsBtn"
-data-id="${card.id}"
->
-Details
-</button>
-
-<button
-class="btn ghost sm freezeCardBtn"
-data-id="${card.id}"
->
-${card.frozen ? "Unfreeze" : "Freeze"}
-</button>
-
-<button
-class="btn ghost sm defaultCardBtn"
-data-id="${card.id}"
->
-Default
-</button>
-
-<button
-class="btn ghost sm deleteCardBtn"
-data-id="${card.id}"
->
-Delete
-</button>
-
-`
-
-:
-
-`
-
-<button
-class="btn ghost sm cardDetailsBtn"
-data-id="${card.id}"
->
-Details
-</button>
-
-<button
-class="btn ghost sm fundCardBtn"
-data-id="${card.id}"
->
-Fund
-</button>
-
-<button
-class="btn ghost sm withdrawCardBtn"
-data-id="${card.id}"
->
-Withdraw
-</button>
-
-<button
-class="btn ghost sm cardTxBtn"
-data-id="${card.id}"
->
-Transactions
-</button>
-
-<button
-class="btn ghost sm freezeCardBtn"
-data-id="${card.id}"
->
-${card.frozen ? "Unfreeze" : "Freeze"}
-</button>
-
-<button
-class="btn ghost sm defaultCardBtn"
-data-id="${card.id}"
->
-Default
-</button>
-
-<button
-class="btn ghost sm deleteCardBtn"
-data-id="${card.id}"
->
-Delete
-</button>
-
-`
-
-}
-
-</div>
-
+    container.innerHTML = `
+      <div class="empty-cards">
+        No cards available
       </div>
+    `;
 
-    `).join("");
-
-    bindCardActions(container);
-
+    return;
   }
+
+  container.innerHTML = `
+
+    <div class="cards-scroll-area">
+
+      ${cards.map(card => `
+
+        <div class="pay54-card-ui ${getCardTheme(card)}">
+
+          ALL CARD HTML HERE
+
+        </div>
+
+      `).join("")}
+
+    </div>
+
+  `;
+
+  bindCardActions(container);
+
+} 
 
   function bindCardActions(container){
 container
