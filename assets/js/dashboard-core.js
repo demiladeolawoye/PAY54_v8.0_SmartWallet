@@ -2705,13 +2705,53 @@ window.PAY54_UI.openCards = function(){
       return;
 
     }
+container.innerHTML = `
 
-    container.innerHTML = cards.map(card => `
+<div class="cards-scroll-area">
 
-     <div
-class="pay54-card-ui
-${getCardTheme(card)}"
->
+${cards.map(card => `
+
+<div class="pay54-card-ui">
+
+  <div class="card-top">
+
+    <div class="card-brand">
+      PAY54
+    </div>
+
+    <div class="card-scheme">
+      ${card.scheme}
+    </div>
+
+  </div>
+
+  <div class="card-number">
+    •••• •••• •••• ${card.last4}
+  </div>
+
+  <div class="card-meta">
+
+    <div>
+      ${card.currency}
+    </div>
+
+    <div>
+      ${card.type}
+    </div>
+
+  </div>
+
+  <!-- card status -->
+
+  <!-- card actions -->
+
+</div>
+
+`).join("")}
+
+</div>
+
+`;
 
         <div class="card-top">
 
