@@ -2607,7 +2607,14 @@ window.PAY54_UI.openCards = function(){
   const STORAGE_KEY =
     "pay54_cards";
 
-  function getCards(){
+  window.saveCards = function(cards){
+
+   localStorage.setItem(
+      "pay54_cards",
+      JSON.stringify(cards)
+   );
+
+}
 
     return JSON.parse(
       localStorage.getItem(STORAGE_KEY)
