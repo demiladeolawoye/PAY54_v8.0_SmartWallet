@@ -2616,25 +2616,15 @@ window.PAY54_UI.openCards = function(){
 
   }
 
-  function saveCards(cards){
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(cards)
-    );
-
-  }
-
  function createCard(payload){
 
   const cards = getCards();
 
-  if(cards.length >= 3){
+  if(cards.length >= 4){
 
-    window.PAY54_TOAST
-      ?.showToast(
-        "Maximum 3 cards allowed"
-      );
+    window.PAY54_TOAST?.showToast(
+      "Maximum 4 cards allowed"
+    );
 
     return false;
 
