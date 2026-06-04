@@ -2819,8 +2819,9 @@ container
   });
 
 });  
-    container
-.querySelectorAll(".cardTransactionsBtn")
+     
+   container
+.querySelectorAll(".cardTxBtn")
 .forEach(btn=>{
 
   btn.addEventListener("click",()=>{
