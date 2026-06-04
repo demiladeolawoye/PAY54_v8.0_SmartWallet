@@ -3527,9 +3527,9 @@ getCards();
 if(existingCards.length >= 4){
 
   window.PAY54_TOAST
-  ?.showToast(
-    "Maximum 3 cards allowed"
-  );
+?.showToast(
+  "Maximum 4 cards allowed. Delete a card before adding another."
+);
 
   return;
 
