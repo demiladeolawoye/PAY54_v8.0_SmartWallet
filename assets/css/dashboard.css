@@ -3125,3 +3125,45 @@ rgba(
   );
 
 }
+
+/* =========================================
+   PAY54 Cards Scroll Container
+========================================= */
+
+.cards-scroll-area{
+
+  max-height:520px;
+
+  overflow-y:auto;
+
+  overflow-x:hidden;
+
+  padding-right:8px;
+
+}
+
+.cards-scroll-area::-webkit-scrollbar{
+
+  width:8px;
+
+}
+
+.cards-scroll-area::-webkit-scrollbar-track{
+
+  background:transparent;
+
+}
+
+.cards-scroll-area::-webkit-scrollbar-thumb{
+
+  background:rgba(59,130,246,.35);
+
+  border-radius:999px;
+
+}
+
+.cards-scroll-area::-webkit-scrollbar-thumb:hover{
+
+  background:rgba(59,130,246,.6);
+
+}
