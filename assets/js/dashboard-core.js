@@ -3408,235 +3408,209 @@ Link Card
 
 `,
             onMount: ({ modal, close }) => {
-modal
-  .querySelector(
-    "#confirmLinkCard"
-  )
-  .addEventListener(
+
+  const cardTypeSelect =
+  modal.querySelector("#cardType");
+
+  cardTypeSelect.addEventListener(
+    "mousedown",
+    e => e.stopPropagation()
+  );
+
+  cardTypeSelect.addEventListener(
     "click",
-    () => {
-
-      console.log(
-        "LINK CARD CLICKED"
-      );
-
-       const cardholder =
-modal.querySelector("#cardholderName")
-.value.trim();
-
-const bank =
-modal.querySelector("#bankName")
-.value.trim();
-
-const cardNumber =
-modal.querySelector("#cardNumber")
-.value.replace(/\s/g,"");
-
-const expiry =
-modal.querySelector("#expiryDate")
-.value.trim();
-
-const cvv =
-modal.querySelector("#cvv")
-.value.trim();
-
-const cardTypeSelect =
-modal.querySelector("#cardType");
-
-cardTypeSelect.addEventListener(
-  "mousedown",
-  e => e.stopPropagation()
-);
-
-cardTypeSelect.addEventListener(
-  "click",
-  e => e.stopPropagation()
-);
-
-cardTypeSelect.addEventListener(
-  "focus",
-  e => e.stopPropagation()
-);
-
-const cardType =
-cardTypeSelect.value;
-
-console.log(
-  "CARDHOLDER:",
-  cardholder
-);
-
-console.log(
-  "BANK:",
-  bank
-);
-
-console.log(
-  "CARD:",
-  cardNumber
-);
-
-console.log(
-  "CARD LENGTH:",
-  cardNumber.length
-);
-
-console.log(
-  "EXPIRY:",
-  expiry
-);
-
-console.log(
-  "CVV:",
-  cvv
-);
-     
-if(!cardholder){
-
-  window.PAY54_TOAST?.showToast(
-    "Enter cardholder name"
+    e => e.stopPropagation()
   );
 
-  return;
-}
-
-if(!bank){
-
-  window.PAY54_TOAST?.showToast(
-    "Enter bank name"
+  cardTypeSelect.addEventListener(
+    "focus",
+    e => e.stopPropagation()
   );
 
-  return;
-}
+  const expiryInput =
+  modal.querySelector("#expiryDate");
 
-if(
-  cardNumber.length !== 15 &&
-  cardNumber.length !== 16
-)
-const expiryRegex =
-/^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+  expiryInput.addEventListener(
+    "input",
+    e => {
 
-if(
- !expiryRegex.test(expiry)
-){
+      let value =
+        e.target.value.replace(/\D/g,'');
 
-  window.PAY54_TOAST?.showToast(
-    "Expiry must be MM/YY"
+      if(value.length > 2){
+
+        value =
+          value.substring(0,2)
+          + "/"
+          + value.substring(2,4);
+
+      }
+
+      e.target.value = value;
+
+    }
   );
 
-  return;
+  modal
+    .querySelector("#confirmLinkCard")
+    .addEventListener(
+      "click",
+      () => {
 
-}
+        const cardholder =
+        modal.querySelector("#cardholderName")
+        .value.trim();
 
-{
+        const bank =
+        modal.querySelector("#bankName")
+        .value.trim();
 
-  window.PAY54_TOAST?.showToast(
-    "Card number must be exactly 15 or 16 digits"
-  );
+        const cardNumber =
+        modal.querySelector("#cardNumber")
+        .value.replace(/\s/g,"");
 
-  return;
-}
+        const expiry =
+        modal.querySelector("#expiryDate")
+        .value.trim();
 
-if(!expiry){
+        const cvv =
+        modal.querySelector("#cvv")
+        .value.trim();
 
-  window.PAY54_TOAST?.showToast(
-    "Enter expiry date"
-  );
+        const cardType =
+        modal.querySelector("#cardType")
+        .value;
 
-  return;
-}
+        if(!cardholder){
 
-if(cvv.length < 3){
+          window.PAY54_TOAST?.showToast(
+            "Enter cardholder name"
+          );
 
-  window.PAY54_TOAST?.showToast(
-    "Enter valid CVV"
-  );
+          return;
 
-  return;
-}
-const existingCards =
-getCards();
+        }
 
-if(existingCards.length >= 4){
+        if(!bank){
 
-  window.PAY54_TOAST
-?.showToast(
-  "Maximum 4 cards allowed. Delete a card before adding another."
-);
+          window.PAY54_TOAST?.showToast(
+            "Enter bank name"
+          );
 
-  return;
+          return;
 
-}
-       
-console.log("STEP 1");
+        }
 
-const created = createCard({
+        if(
+          cardNumber.length !== 15 &&
+          cardNumber.length !== 16
+        ){
 
-  id:"LINK-" + Date.now(),
+          window.PAY54_TOAST?.showToast(
+            "Card number must be exactly 15 or 16 digits"
+          );
 
-  currency:"GBP",
+          return;
 
-  scheme:cardType,
+        }
 
-  type:"Bank",
+        const expiryRegex =
+        /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
 
-  bank,
+        if(
+          !expiryRegex.test(expiry)
+        ){
 
-  cardholder,
+          window.PAY54_TOAST?.showToast(
+            "Expiry must be MM/YY"
+          );
 
-  last4: cardNumber.slice(-4),
+          return;
 
-  expiry,
+        }
 
-  contactless:true,
+        if(cvv.length < 3){
 
-  frozen:false,
+          window.PAY54_TOAST?.showToast(
+            "Enter valid CVV"
+          );
 
-  default:false,
+          return;
 
-  linked:true,
+        }
 
-  balance:0,
+        const existingCards =
+        getCards();
 
-  transactions:[]
+        if(existingCards.length >= 4){
 
-});
-console.log(
-  "CREATE RESULT:",
-  created
-);
+          window.PAY54_TOAST?.showToast(
+            "Maximum 4 cards allowed. Delete a card before adding another."
+          );
 
-console.log("STEP 2");
+          return;
 
-if(!created){
+        }
 
-  return;
+        console.log("STEP 1");
 
-}
+        const created =
+        createCard({
 
-renderCards(container);
+          id:"LINK-" + Date.now(),
 
-close();
+          currency:"GBP",
 
-window.PAY54_TOAST
-?.showToast(
-"Bank card linked successfully"
-);
+          scheme:cardType,
 
-                  }
-                );
+          type:"Bank",
 
-            }
+          bank,
 
-          });
+          cardholder,
+
+          last4:
+          cardNumber.slice(-4),
+
+          expiry,
+
+          contactless:true,
+
+          frozen:false,
+
+          default:false,
+
+          linked:true,
+
+          balance:0,
+
+          transactions:[]
 
         });
 
-    }
+        console.log(
+          "CREATE RESULT:",
+          created
+        );
 
-  });
+        if(!created){
 
-};
+          return;
+
+        }
+
+        renderCards(container);
+
+        close();
+
+        window.PAY54_TOAST?.showToast(
+          "Bank card linked successfully"
+        );
+
+      }
+    );
+
+}
 
 /* =========================================
    PAY54 SAVINGS V3 PREMIUM
