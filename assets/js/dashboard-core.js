@@ -3375,7 +3375,7 @@ if(
 const existingCards =
 getCards();
 
-if(existingCards.length >= 3){
+if(existingCards.length >= 4){
 
   window.PAY54_TOAST
   ?.showToast(
