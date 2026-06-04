@@ -3492,10 +3492,13 @@ if(!bank){
   return;
 }
 
-if(cardNumber.length < 15){
+if(
+  cardNumber.length !== 15 &&
+  cardNumber.length !== 16
+){
 
   window.PAY54_TOAST?.showToast(
-    "Card number must be 15 or 16 digits"
+    "Card number must be exactly 15 or 16 digits"
   );
 
   return;
