@@ -3284,11 +3284,10 @@ container
 const existingCards =
 getCards();
 
-if(existingCards.length >= 3){
+if(existingCards.length >= 4){
 
-  window.PAY54_TOAST
-  ?.showToast(
-    "Maximum 3 cards allowed"
+  window.PAY54_TOAST?.showToast(
+    "Maximum 4 cards allowed. Delete an existing card to add a new one."
   );
 
   return;
