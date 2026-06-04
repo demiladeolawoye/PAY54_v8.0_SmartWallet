@@ -3440,9 +3440,26 @@ const cvv =
 modal.querySelector("#cvv")
 .value.trim();
 
+const cardTypeSelect =
+modal.querySelector("#cardType");
+
+cardTypeSelect.addEventListener(
+  "mousedown",
+  e => e.stopPropagation()
+);
+
+cardTypeSelect.addEventListener(
+  "click",
+  e => e.stopPropagation()
+);
+
+cardTypeSelect.addEventListener(
+  "focus",
+  e => e.stopPropagation()
+);
+
 const cardType =
-modal.querySelector("#cardType")
-.value;
+cardTypeSelect.value;
 
 console.log(
   "CARDHOLDER:",
