@@ -3468,7 +3468,7 @@ console.log(
 if(
  !cardholder ||
  !bank ||
- cardNumber.length < 16 ||
+ cardNumber.length < 15 ||
  !expiry ||
  cvv.length < 3
 ){
