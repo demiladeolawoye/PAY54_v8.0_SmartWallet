@@ -3472,23 +3472,49 @@ console.log(
   cvv
 );
      
-if(
- !cardholder ||
- !bank ||
- cardNumber.length < 15 ||
- !expiry ||
- cvv.length < 3
-){
+if(!cardholder){
 
-   console.log(
-  "VALIDATION FAILED"
-);
-   
- window.PAY54_TOAST?.showToast(
-   "Enter valid card details"
- );
+  window.PAY54_TOAST?.showToast(
+    "Enter cardholder name"
+  );
 
- return;
+  return;
+}
+
+if(!bank){
+
+  window.PAY54_TOAST?.showToast(
+    "Enter bank name"
+  );
+
+  return;
+}
+
+if(cardNumber.length < 15){
+
+  window.PAY54_TOAST?.showToast(
+    "Card number must be 15 or 16 digits"
+  );
+
+  return;
+}
+
+if(!expiry){
+
+  window.PAY54_TOAST?.showToast(
+    "Enter expiry date"
+  );
+
+  return;
+}
+
+if(cvv.length < 3){
+
+  window.PAY54_TOAST?.showToast(
+    "Enter valid CVV"
+  );
+
+  return;
 }
 const existingCards =
 getCards();
