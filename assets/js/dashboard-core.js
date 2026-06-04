@@ -2699,7 +2699,128 @@ function renderCards(container){
 
         <div class="pay54-card-ui ${getCardTheme(card)}">
 
-          ALL CARD HTML HERE
+          <div class="card-top">
+
+            <div class="card-bank">
+
+              ${
+                card.type === "Virtual"
+                ? "PAY54 Virtual Card"
+                : card.bank
+              }
+
+            </div>
+
+            <div class="card-scheme">
+
+              ${card.scheme}
+
+            </div>
+
+          </div>
+
+          <div class="card-number">
+
+            •••• •••• •••• ${card.last4}
+
+          </div>
+
+          <div class="card-holder">
+
+            ${
+              card.cardholder ||
+              "PAY54 USER"
+            }
+
+          </div>
+
+          <div class="card-footer">
+
+            <span>
+
+              ${
+                card.type === "Virtual"
+                ? card.currency
+                : "LINKED"
+              }
+
+            </span>
+
+            <span>
+
+              ${
+                card.frozen
+                ? "❄ Frozen"
+                : "🟢 Active"
+              }
+
+            </span>
+
+          </div>
+
+          <div class="card-actions">
+
+            <button
+              class="cardDetailsBtn"
+              data-id="${card.id}"
+            >
+              Details
+            </button>
+
+            ${
+              card.type === "Virtual"
+              ?
+              `
+              <button
+                class="fundCardBtn"
+                data-id="${card.id}"
+              >
+                Fund
+              </button>
+
+              <button
+                class="withdrawCardBtn"
+                data-id="${card.id}"
+              >
+                Withdraw
+              </button>
+
+              <button
+                class="cardTxBtn"
+                data-id="${card.id}"
+              >
+                Transactions
+              </button>
+              `
+              : ""
+            }
+
+            <button
+              class="freezeCardBtn"
+              data-id="${card.id}"
+            >
+              ${
+                card.frozen
+                ? "Unfreeze"
+                : "Freeze"
+              }
+            </button>
+
+            <button
+              class="defaultCardBtn"
+              data-id="${card.id}"
+            >
+              Default
+            </button>
+
+            <button
+              class="deleteCardBtn"
+              data-id="${card.id}"
+            >
+              Delete
+            </button>
+
+          </div>
 
         </div>
 
@@ -2711,7 +2832,7 @@ function renderCards(container){
 
   bindCardActions(container);
 
-} 
+}
 
   function bindCardActions(container){
 container
