@@ -3615,6 +3615,8 @@ Link Card
 
 }); // END openModal
 
+}); // END linkExternalCardBtn click
+
 }; // END openCards
 
 /* =========================================
