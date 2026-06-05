@@ -3607,14 +3607,15 @@ Link Card
           "Bank card linked successfully"
         );
 
-      }
-    );
+           }
 
-}); // CLOSE onMount
+    ); // CLOSE addEventListener
 
-}); // CLOSE Link Card modal
+  } // CLOSE onMount FUNCTION BODY
 
-}); // CLOSE Link External Card handler
+}); // CLOSE openModal
+
+}); // CLOSE Link Card button handler
 
 }; // CLOSE openCards
 
