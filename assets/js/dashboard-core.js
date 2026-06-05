@@ -3603,21 +3603,21 @@ Link Card
 
         close();
 
-        window.PAY54_TOAST?.showToast(
+                window.PAY54_TOAST?.showToast(
           "Bank card linked successfully"
         );
 
-           }
+      } // END click callback
 
-    ); // CLOSE addEventListener
+    ); // END addEventListener
 
-  } // CLOSE onMount FUNCTION BODY
+  } // END onMount
 
-}); // CLOSE openModal
+}); // END openModal
 
-}); // CLOSE Link Card button handler
+}); // END Link Card action
 
-}; // CLOSE openCards
+}; // END openCards
 
 /* =========================================
    PAY54 SAVINGS V3 PREMIUM
