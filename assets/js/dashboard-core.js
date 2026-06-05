@@ -3610,7 +3610,13 @@ Link Card
       }
     );
 
-}
+}); // CLOSE onMount
+
+}); // CLOSE Link Card modal
+
+}); // CLOSE Link External Card handler
+
+}; // CLOSE openCards
 
 /* =========================================
    PAY54 SAVINGS V3 PREMIUM
