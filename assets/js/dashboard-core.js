@@ -3412,21 +3412,6 @@ Link Card
   const cardTypeSelect =
   modal.querySelector("#cardType");
 
-  cardTypeSelect.addEventListener(
-    "mousedown",
-    e => e.stopPropagation()
-  );
-
-  cardTypeSelect.addEventListener(
-    "click",
-    e => e.stopPropagation()
-  );
-
-  cardTypeSelect.addEventListener(
-    "focus",
-    e => e.stopPropagation()
-  );
-
   const expiryInput =
   modal.querySelector("#expiryDate");
 
