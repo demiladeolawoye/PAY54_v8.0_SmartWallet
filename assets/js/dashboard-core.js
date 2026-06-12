@@ -2579,10 +2579,10 @@ window.PAY54_UI.openBills = function(){
             );
 
           if(
-            typeof renderBalances ===
+            typeof renderBalance===
             "function"
           ){
-            renderBalances();
+            renderBalance();
           }
 
         });
