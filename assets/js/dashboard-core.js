@@ -2610,13 +2610,11 @@ window.PAY54_UI.openCards = function(){
   const STORAGE_KEY =
     "pay54_cards";
 
-window.saveCards = function(cards){
-
-   localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(cards)
-   );
-
+function saveCards(cards){
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(cards)
+  );
 };
 
 function getCards(){
