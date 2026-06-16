@@ -2595,58 +2595,143 @@ function openAgent(){
 
 function openRisk(){
 
+  const ledger = safeLedger();
+
+  const txs =
+    ledger?.getTx?.() || [];
+
+  const recentCount =
+    txs.filter(tx => {
+
+      const date =
+        new Date(
+          tx.created_at ||
+          tx.created ||
+          Date.now()
+        );
+
+      const hours =
+        (Date.now() - date.getTime()) /
+        3600000;
+
+      return hours <= 24;
+
+    }).length;
+
+  let riskLevel = "LOW";
+  let riskIcon = "🟢";
+  let advice = "No unusual activity detected.";
+
+  if(recentCount > 10){
+
+    riskLevel = "MEDIUM";
+    riskIcon = "🟡";
+    advice =
+      "Higher than normal activity detected.";
+
+  }
+
+  if(recentCount > 20){
+
+    riskLevel = "HIGH";
+    riskIcon = "🔴";
+    advice =
+      "Multiple rapid transactions detected.";
+
+  }
+
   openModal({
 
     title:"AI Risk Watch",
 
     bodyHTML:`
 
-      <div class="risk-score low">
+      <div class="p54-note">
 
-        <h3>🟢 Low Risk</h3>
-
-        <p>
-          No suspicious activity detected.
-        </p>
+        PAY54 AI Security Monitor
 
       </div>
 
       <div class="p54-divider"></div>
 
       <div class="feed-item">
-        <div class="feed-icon">🛡️</div>
-        <div class="feed-main">
-          <div class="feed-title">
-            Device Security
-          </div>
-          <div class="feed-sub">
-            Trusted device
-          </div>
+
+        <div class="feed-icon">
+          ${riskIcon}
         </div>
+
+        <div class="feed-main">
+
+          <div class="feed-title">
+            Risk Level
+          </div>
+
+          <div class="feed-sub">
+            ${riskLevel}
+          </div>
+
+        </div>
+
       </div>
 
       <div class="feed-item">
-        <div class="feed-icon">💳</div>
-        <div class="feed-main">
-          <div class="feed-title">
-            Transaction Monitoring
-          </div>
-          <div class="feed-sub">
-            No anomalies detected
-          </div>
+
+        <div class="feed-icon">
+          📊
         </div>
+
+        <div class="feed-main">
+
+          <div class="feed-title">
+            Transactions (24h)
+          </div>
+
+          <div class="feed-sub">
+            ${recentCount}
+          </div>
+
+        </div>
+
       </div>
 
       <div class="feed-item">
-        <div class="feed-icon">🤖</div>
+
+        <div class="feed-icon">
+          🤖
+        </div>
+
         <div class="feed-main">
+
           <div class="feed-title">
             AI Recommendation
           </div>
+
           <div class="feed-sub">
-            Continue normal activity
+            ${advice}
           </div>
+
         </div>
+
+      </div>
+
+      <div class="feed-item">
+
+        <div class="feed-icon">
+          🛡️
+        </div>
+
+        <div class="feed-main">
+
+          <div class="feed-title">
+            Device Security
+          </div>
+
+          <div class="feed-sub">
+            Trusted Device
+          </div>
+
+        </div>
+
       </div>
 
       <div class="p54-actions">
@@ -2666,7 +2751,10 @@ function openRisk(){
 
       modal
         .querySelector("#closeRisk")
-        .addEventListener("click",close);
+        .addEventListener(
+          "click",
+          close
+        );
 
     }
 
