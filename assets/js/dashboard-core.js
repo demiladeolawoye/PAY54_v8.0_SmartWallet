@@ -522,6 +522,116 @@ function(){
     `).join("");
 
 };
+window.openTransactionHistory =
+function(){
+
+ const openModal =
+ window.PAY54_MODALS?.openModal;
+
+ if(!openModal) return;
+
+ const txs =
+ window.PAY54_HISTORY
+ .getAll();
+
+ openModal({
+
+ title:
+ "Transaction History",
+
+ bodyHTML:`
+
+<div class="p54-history">
+
+<input
+id="txSearch"
+class="p54-input"
+placeholder="Search transactions"
+>
+
+<div
+id="txHistoryResults"
+>
+
+${txs.map(tx => `
+
+<div
+class="tx-history-item"
+>
+
+<div>
+
+<strong>
+${tx.title}
+</strong>
+
+</div>
+
+<div>
+${tx.amount}
+</div>
+
+<div>
+${new Date(
+tx.created
+).toLocaleString()}
+</div>
+
+</div>
+
+`).join("")}
+
+</div>
+
+</div>
+
+`,
+
+onMount: ({ modal }) => {
+
+const search =
+modal.querySelector(
+"#txSearch"
+);
+
+const results =
+modal.querySelector(
+"#txHistoryResults"
+);
+
+search.addEventListener(
+"input",
+()=>{
+
+const value =
+search.value
+.toLowerCase();
+
+results
+.querySelectorAll(
+".tx-history-item"
+)
+.forEach(item => {
+
+item.style.display =
+
+item.innerText
+.toLowerCase()
+.includes(value)
+
+? ""
+
+: "none";
+
+});
+
+});
+
+}
+
+});
+
+};
 /* =========================================
    PAY54 UTILITIES ENGINE
 ========================================= */
