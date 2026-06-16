@@ -2820,6 +2820,7 @@ window.PAY54_UI = {
   openMerchantQR,
   openRequestMoney,
   openTrading,
+  openBetFunding,
   openAgent,
   openRisk,
   openLedger
