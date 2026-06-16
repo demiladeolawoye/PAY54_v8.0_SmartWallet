@@ -560,13 +560,15 @@ txs.map(tx => `
 
     </div>
 
-    <div class="feed-sub">
+ <div class="feed-sub">
 
-      ${new Date(
-        tx.created
-      ).toLocaleString()}
+  ${new Date(
+    tx.created_at ||
+    tx.created ||
+    Date.now()
+  ).toLocaleString()}
 
-    </div>
+</div>
 
   </div>
 
