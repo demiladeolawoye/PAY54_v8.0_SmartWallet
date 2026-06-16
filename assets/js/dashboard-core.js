@@ -297,7 +297,7 @@ case "request":
     break;
 
    case "bet":
-  alert("Bet Funding coming soon");
+  UI.openBetFunding();
   break;
           
   case "risk":
