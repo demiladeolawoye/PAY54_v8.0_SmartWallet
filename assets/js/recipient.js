@@ -2589,6 +2589,183 @@ function openTrading(){
   comingSoon("Trading");
 }
 
+function openBetFunding(){
+
+  openModal({
+
+    title:"Bet Funding",
+
+    bodyHTML:`
+
+      <form
+        class="p54-form"
+        id="betForm"
+      >
+
+        <div>
+
+          <div class="p54-label">
+            Betting Platform
+          </div>
+
+          <select
+            class="p54-select"
+            id="betProvider"
+          >
+            <option>Bet365</option>
+            <option>Betway</option>
+            <option>SportyBet</option>
+            <option>1xBet</option>
+            <option>William Hill</option>
+            <option>BetKing</option>
+          </select>
+
+        </div>
+
+        <div>
+
+          <div class="p54-label">
+            Account Username
+          </div>
+
+          <input
+            class="p54-input"
+            id="betUser"
+            placeholder="Bet Account Username"
+            required
+          >
+
+        </div>
+
+        <div>
+
+          <div class="p54-label">
+            Amount
+          </div>
+
+          <input
+            class="p54-input"
+            id="betAmount"
+            type="number"
+            placeholder="0.00"
+            required
+          >
+
+        </div>
+
+        <div
+          class="p54-note"
+          style="margin-top:12px"
+        >
+          🔞 18+ Only. Please gamble responsibly.
+        </div>
+
+        <div class="p54-actions">
+
+          <button
+            class="p54-btn"
+            type="button"
+            id="cancelBet"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="p54-btn primary"
+            type="submit"
+          >
+            Fund Account
+          </button>
+
+        </div>
+
+      </form>
+
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal
+        .querySelector("#cancelBet")
+        .addEventListener(
+          "click",
+          close
+        );
+
+      modal
+        .querySelector("#betForm")
+        .addEventListener(
+          "submit",
+          (e)=>{
+
+            e.preventDefault();
+
+            const provider =
+              modal.querySelector("#betProvider").value;
+
+            const username =
+              modal.querySelector("#betUser").value.trim();
+
+            const amount =
+              Number(
+                modal.querySelector("#betAmount").value
+              );
+
+            if(
+              !username ||
+              !amount ||
+              amount <= 0
+            ){
+              alert("Enter valid details");
+              return;
+            }
+
+            const currency =
+              getSelectedCurrency();
+
+            requestPinVerification(()=>{
+
+              const entry =
+                LEDGER.createEntry({
+
+                  type:"bet",
+
+                  title:`Bet Funding • ${provider}`,
+
+                  currency,
+
+                  amount:-amount,
+
+                  icon:"🎲",
+
+                  meta:{
+                    provider,
+                    username
+                  }
+
+                });
+
+              processTransaction(
+                entry,
+                {
+                  showReceipt:true,
+                  title:"Bet Funding"
+                }
+              );
+
+              close();
+
+            });
+
+          }
+        );
+
+    }
+
+  });
+
+}
+
 function openAgent(){
   comingSoon("Become an Agent");
 }
