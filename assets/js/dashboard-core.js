@@ -353,7 +353,17 @@ function initDashboard(){
   bindCurrencyPills();
 
   bindDashboardButtons();
+  const scanFab =
+document.getElementById("scanPayFab");
 
+if(scanFab){
+
+  scanFab.addEventListener(
+    "click",
+    () => routeAction("scan_pay")
+  );
+
+}
   renderBalance();
 
   if(
