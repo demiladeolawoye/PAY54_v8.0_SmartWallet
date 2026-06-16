@@ -3598,12 +3598,15 @@ Link Card
 
   } // END onMount
 
-}); // END openModal
+}); // END Link Card modal
 
 }); // END linkExternalCardBtn click
 
-}; // END openCards
+} // END Main Cards Modal onMount
 
+}); // END Main Cards Modal
+
+}; // END openCards
 /* =========================================
    PAY54 SAVINGS V3 PREMIUM
 ========================================= */
