@@ -2594,7 +2594,84 @@ function openAgent(){
 }
 
 function openRisk(){
-  comingSoon("AI Risk Watch");
+
+  openModal({
+
+    title:"AI Risk Watch",
+
+    bodyHTML:`
+
+      <div class="risk-score low">
+
+        <h3>🟢 Low Risk</h3>
+
+        <p>
+          No suspicious activity detected.
+        </p>
+
+      </div>
+
+      <div class="p54-divider"></div>
+
+      <div class="feed-item">
+        <div class="feed-icon">🛡️</div>
+        <div class="feed-main">
+          <div class="feed-title">
+            Device Security
+          </div>
+          <div class="feed-sub">
+            Trusted device
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="feed-icon">💳</div>
+        <div class="feed-main">
+          <div class="feed-title">
+            Transaction Monitoring
+          </div>
+          <div class="feed-sub">
+            No anomalies detected
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="feed-icon">🤖</div>
+        <div class="feed-main">
+          <div class="feed-title">
+            AI Recommendation
+          </div>
+          <div class="feed-sub">
+            Continue normal activity
+          </div>
+        </div>
+      </div>
+
+      <div class="p54-actions">
+
+        <button
+          class="p54-btn primary"
+          id="closeRisk"
+        >
+          Close
+        </button>
+
+      </div>
+
+    `,
+
+    onMount:({modal,close})=>{
+
+      modal
+        .querySelector("#closeRisk")
+        .addEventListener("click",close);
+
+    }
+
+  });
+
 }
 
 /* =========================
