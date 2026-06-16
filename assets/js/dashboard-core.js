@@ -493,33 +493,47 @@ function(){
 
   }
 
-  container.innerHTML =
+container.innerHTML =
 
-    txs.map(tx => `
+txs.map(tx => `
 
-      <div class="tx-row">
+<div class="feed-item">
 
-        <div>
+  <div class="feed-icon">
 
-          <div class="tx-title">
-            ${tx.title}
-          </div>
+    ${
+      tx.icon || "💸"
+    }
 
-          <div class="tx-date">
-            ${new Date(
-              tx.created
-            ).toLocaleString()}
-          </div>
+  </div>
 
-        </div>
+  <div class="feed-content">
 
-        <strong>
-          ${tx.amount}
-        </strong>
+    <div class="feed-title">
 
-      </div>
+      ${tx.title}
 
-    `).join("");
+    </div>
+
+    <div class="feed-sub">
+
+      ${new Date(
+        tx.created
+      ).toLocaleString()}
+
+    </div>
+
+  </div>
+
+  <div class="feed-amount">
+
+    ${tx.amount}
+
+  </div>
+
+</div>
+
+`).join("");
 
 };
 window.openTransactionHistory =
