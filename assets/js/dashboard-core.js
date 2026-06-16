@@ -414,7 +414,108 @@ document.addEventListener("DOMContentLoaded", () => {
   waitForModules();
 
 }); // ✅ CLOSE DOMContentLoaded PROPERLY
+/* =========================================
+   PAY54 TRANSACTION HISTORY ENGINE
+========================================= */
 
+window.PAY54_HISTORY = {
+
+  getAll(){
+
+    return JSON.parse(
+      localStorage.getItem(
+        "pay54_transactions"
+      ) || "[]"
+    );
+
+  },
+
+  save(list){
+
+    localStorage.setItem(
+      "pay54_transactions",
+      JSON.stringify(list)
+    );
+
+  },
+
+  add(tx){
+
+    const list =
+      this.getAll();
+
+    list.unshift(tx);
+
+    this.save(list);
+
+  }
+
+};
+
+/* =========================================
+   RECENT TRANSACTIONS
+========================================= */
+
+window.renderRecentTransactions =
+function(){
+
+  const container =
+    document.querySelector(
+      "#recentTransactions"
+    );
+
+  if(!container) return;
+
+  const txs =
+    window.PAY54_HISTORY
+      .getAll()
+      .slice(0,5);
+
+  if(!txs.length){
+
+    container.innerHTML = `
+
+      <div class="empty-state">
+
+        No transactions yet
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML =
+
+    txs.map(tx => `
+
+      <div class="tx-row">
+
+        <div>
+
+          <div class="tx-title">
+            ${tx.title}
+          </div>
+
+          <div class="tx-date">
+            ${new Date(
+              tx.created
+            ).toLocaleString()}
+          </div>
+
+        </div>
+
+        <strong>
+          ${tx.amount}
+        </strong>
+
+      </div>
+
+    `).join("");
+
+};
 /* =========================================
    PAY54 UTILITIES ENGINE
 ========================================= */
