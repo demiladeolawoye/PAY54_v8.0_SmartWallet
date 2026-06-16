@@ -584,8 +584,7 @@ txs.map(tx => `
 `).join("");
 
 };
-window.openTransactionHistory =
-function(){
+window.openTransactionHistory = function(){
 
  const openModal =
  window.PAY54_MODALS?.openModal;
@@ -593,100 +592,62 @@ function(){
  if(!openModal) return;
 
  const txs =
- window.PAY54_HISTORY
- .getAll();
+ window.PAY54_HISTORY.getAll();
 
  openModal({
 
- title:
- "Transaction History",
+ title:"Transaction History",
 
  bodyHTML:`
 
 <div class="p54-history">
 
+<div class="history-filters">
+
 <input
 id="txSearch"
 class="p54-input"
-placeholder="Search transactions"
+placeholder="Search name, amount, currency or reference"
 >
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+
+<input
+id="txDateFrom"
+type="date"
+class="p54-input"
+>
+
+<input
+id="txDateTo"
+type="date"
+class="p54-input"
+>
+
+</div>
+
+<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+
+<button class="btn ghost txQuickFilter" data-filter="today">
+Today
+</button>
+
+<button class="btn ghost txQuickFilter" data-filter="7">
+Last 7 Days
+</button>
+
+<button class="btn ghost txQuickFilter" data-filter="30">
+Last 30 Days
+</button>
+
+</div>
+
+</div>
 
 <div
 id="txHistoryResults"
+style="margin-top:16px"
 >
-
-${
-
-txs.length
-
-?
-
-txs.map(tx => `
-
-<div
-class="tx-history-item"
->
-
-  <div
-    class="tx-history-left"
-  >
-
-    <div
-      class="tx-history-icon"
-    >
-      ${tx.icon || "💸"}
-    </div>
-
-    <div>
-
-      <div
-        class="tx-history-title"
-      >
-        ${tx.title}
-      </div>
-
-      <div
-        class="tx-history-date"
-      >
-        ${new Date(
-          tx.created
-        ).toLocaleString()}
-      </div>
-
-    </div>
-
-  </div>
-
-  <div
-    class="tx-history-amount"
-  >
-
-    ${window.PAY54_LEDGER.moneyFmt(
-      tx.currency || "NGN",
-      Math.abs(
-        tx.amount || 0
-      )
-    )}
-
-  </div>
-
-</div>
-
-`).join("")
-
-:
-
-`
-
-<div class="empty-state">
-
-No transactions found
-
-</div>
-
-`
-
-}
 
 </div>
 
@@ -696,47 +657,215 @@ No transactions found
 
 onMount: ({ modal }) => {
 
-const search =
-modal.querySelector(
-"#txSearch"
-);
+ const search =
+ modal.querySelector("#txSearch");
 
-const results =
-modal.querySelector(
-"#txHistoryResults"
-);
+ const fromDate =
+ modal.querySelector("#txDateFrom");
 
-search.addEventListener(
-"input",
-()=>{
+ const toDate =
+ modal.querySelector("#txDateTo");
 
-const value =
-search.value
-.toLowerCase();
+ const results =
+ modal.querySelector("#txHistoryResults");
 
-results
-.querySelectorAll(
-".tx-history-item"
-)
-.forEach(item => {
+ let activeQuickFilter = null;
 
-item.style.display =
+ function render(list){
 
-item.innerText
-.toLowerCase()
-.includes(value)
+   if(!list.length){
 
-? ""
+     results.innerHTML = `
+       <div class="empty-state">
+         No transactions found
+       </div>
+     `;
 
-: "none";
+     return;
+   }
 
-});
+   results.innerHTML = list.map(tx => {
 
-});
+     const txDate =
+       tx.created ||
+       tx.created_at ||
+       new Date().toISOString();
 
-}
+     return `
 
-});
+     <div class="tx-history-item">
+
+       <div class="tx-history-left">
+
+         <div class="tx-history-icon">
+           ${tx.icon || "💸"}
+         </div>
+
+         <div>
+
+           <div class="tx-history-title">
+             ${tx.title || "Transaction"}
+           </div>
+
+           <div class="tx-history-date">
+             ${new Date(txDate).toLocaleString()}
+           </div>
+
+         </div>
+
+       </div>
+
+       <div class="tx-history-amount">
+
+         ${window.PAY54_LEDGER.moneyFmt(
+           tx.currency || "NGN",
+           Math.abs(tx.amount || 0)
+         )}
+
+       </div>
+
+     </div>
+
+     `;
+
+   }).join("");
+
+ }
+
+ function applyFilters(){
+
+   const keyword =
+   search.value.toLowerCase();
+
+   const from =
+   fromDate.value;
+
+   const to =
+   toDate.value;
+
+   let filtered = [...txs];
+
+   if(keyword){
+
+     filtered = filtered.filter(tx => {
+
+       return JSON.stringify(tx)
+       .toLowerCase()
+       .includes(keyword);
+
+     });
+
+   }
+
+   if(from){
+
+     filtered = filtered.filter(tx => {
+
+       const txDate =
+       new Date(
+         tx.created ||
+         tx.created_at
+       );
+
+       return txDate >= new Date(from);
+
+     });
+
+   }
+
+   if(to){
+
+     filtered = filtered.filter(tx => {
+
+       const txDate =
+       new Date(
+         tx.created ||
+         tx.created_at
+       );
+
+       return txDate <= new Date(
+         to + "T23:59:59"
+       );
+
+     });
+
+   }
+
+   if(activeQuickFilter){
+
+     const now =
+     new Date();
+
+     filtered = filtered.filter(tx => {
+
+       const txDate =
+       new Date(
+         tx.created ||
+         tx.created_at
+       );
+
+       const diff =
+       (now - txDate) /
+       (1000*60*60*24);
+
+       return diff <= activeQuickFilter;
+
+     });
+
+   }
+
+   render(filtered);
+
+ }
+
+ search.addEventListener(
+ "input",
+ applyFilters
+ );
+
+ fromDate.addEventListener(
+ "change",
+ applyFilters
+ );
+
+ toDate.addEventListener(
+ "change",
+ applyFilters
+ );
+
+ modal
+ .querySelectorAll(".txQuickFilter")
+ .forEach(btn => {
+
+   btn.addEventListener(
+   "click",
+   ()=>{
+
+     const filter =
+     btn.dataset.filter;
+
+     if(filter === "today"){
+
+       activeQuickFilter = 1;
+
+     }else{
+
+       activeQuickFilter =
+       Number(filter);
+
+     }
+
+     applyFilters();
+
+   });
+
+ });
+
+ render(txs);
+
+ }
+
+ });
 
 };
 /* =========================================
