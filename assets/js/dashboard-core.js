@@ -592,7 +592,7 @@ window.openTransactionHistory = function(){
  if(!openModal) return;
 
  const txs =
- window.PAY54_HISTORY.getAll();
+window.PAY54_HISTORY?.getAll?.() || [];
 
  openModal({
 
