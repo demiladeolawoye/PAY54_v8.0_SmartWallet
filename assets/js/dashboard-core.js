@@ -540,15 +540,20 @@ function(){
 
 container.innerHTML =
 
-txs.map(tx => `
+txs.map(tx => {
+
+  const txDate =
+    tx.created_at ||
+    tx.created ||
+    Date.now();
+
+  return `
 
 <div class="feed-item">
 
   <div class="feed-icon">
 
-    ${
-      tx.icon || "💸"
-    }
+    ${tx.icon || "💸"}
 
   </div>
 
@@ -560,17 +565,29 @@ txs.map(tx => `
 
     </div>
 
- <div class="feed-sub">
+    <div class="feed-sub">
 
-  ${new Date(
-    tx.created_at ||
-    tx.created ||
-    Date.now()
-  ).toLocaleString()}
+      ${new Date(txDate)
+        .toLocaleString()}
+
+    </div>
+
+  </div>
+
+  <div class="feed-amount">
+
+    ${window.PAY54_LEDGER.moneyFmt(
+      tx.currency || "NGN",
+      Math.abs(tx.amount || 0)
+    )}
+
+  </div>
 
 </div>
 
-  </div>
+`;
+
+}).join("");
 
 <div class="feed-amount">
 
