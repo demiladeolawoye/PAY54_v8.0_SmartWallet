@@ -611,23 +611,56 @@ ${txs.map(tx => `
 class="tx-history-item"
 >
 
-<div>
+  <div
+    class="tx-history-left"
+  >
 
-<strong>
-${tx.title}
-</strong>
+    <div
+      class="tx-history-icon"
+    >
 
-</div>
+      ${
+        tx.icon || "💸"
+      }
 
-<div>
-${tx.amount}
-</div>
+    </div>
 
-<div>
-${new Date(
-tx.created
-).toLocaleString()}
-</div>
+    <div>
+
+      <div
+        class="tx-history-title"
+      >
+
+        ${tx.title}
+
+      </div>
+
+      <div
+        class="tx-history-date"
+      >
+
+        ${new Date(
+          tx.created
+        ).toLocaleString()}
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    class="tx-history-amount"
+  >
+
+    ${window.PAY54_LEDGER.moneyFmt(
+      tx.currency || "NGN",
+      Math.abs(
+        tx.amount || 0
+      )
+    )}
+
+  </div>
 
 </div>
 
