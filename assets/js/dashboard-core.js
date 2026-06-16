@@ -3409,7 +3409,7 @@ Link Card
 `,
             onMount: ({ modal, close }) => {
 
-  const cardTypeSelect =
+ const cardTypeSelect =
   modal.querySelector("#cardType");
 
   const expiryInput =
