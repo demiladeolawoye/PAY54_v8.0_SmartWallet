@@ -605,7 +605,13 @@ placeholder="Search transactions"
 id="txHistoryResults"
 >
 
-${txs.map(tx => `
+${
+
+txs.length
+
+?
+
+txs.map(tx => `
 
 <div
 class="tx-history-item"
@@ -618,11 +624,7 @@ class="tx-history-item"
     <div
       class="tx-history-icon"
     >
-
-      ${
-        tx.icon || "💸"
-      }
-
+      ${tx.icon || "💸"}
     </div>
 
     <div>
@@ -630,19 +632,15 @@ class="tx-history-item"
       <div
         class="tx-history-title"
       >
-
         ${tx.title}
-
       </div>
 
       <div
         class="tx-history-date"
       >
-
         ${new Date(
           tx.created
         ).toLocaleString()}
-
       </div>
 
     </div>
@@ -664,7 +662,21 @@ class="tx-history-item"
 
 </div>
 
-`).join("")}
+`).join("")
+
+:
+
+`
+
+<div class="empty-state">
+
+No transactions found
+
+</div>
+
+`
+
+}
 
 </div>
 
