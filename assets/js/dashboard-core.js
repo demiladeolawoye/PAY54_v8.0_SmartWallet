@@ -342,7 +342,9 @@ function initDashboard(){
 
   if(window.PAY54_APP.initialized){
 
-    console.warn("Dashboard already initialized");
+    console.warn(
+      "Dashboard already initialized"
+    );
 
     return;
 
@@ -354,15 +356,48 @@ function initDashboard(){
 
   renderBalance();
 
-if(window.renderRecentTransactions){
+  if(
+    window.renderRecentTransactions
+  ){
 
-  window.renderRecentTransactions();
+    window.renderRecentTransactions();
 
-}
+  }
 
-  window.PAY54_APP.initialized = true;
+  /* =========================
+     VIEW ALL TRANSACTIONS
+  ========================= */
 
-  console.log("🔥 PAY54 DASHBOARD READY");
+  const viewAllBtn =
+    document.getElementById(
+      "viewAllTx"
+    );
+
+  if(viewAllBtn){
+
+    viewAllBtn.addEventListener(
+      "click",
+      () => {
+
+        if(
+          window.openTransactionHistory
+        ){
+
+          window.openTransactionHistory();
+
+        }
+
+      }
+    );
+
+  }
+
+  window.PAY54_APP.initialized =
+    true;
+
+  console.log(
+    "🔥 PAY54 DASHBOARD READY"
+  );
 
 }
 
