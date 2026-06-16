@@ -3255,3 +3255,130 @@ rgba(
   cursor:pointer;
 
 }
+/* =========================================
+   PAY54 TRANSACTION HISTORY
+========================================= */
+
+.p54-history{
+
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+
+}
+
+.tx-history-item{
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:14px;
+
+  border-radius:16px;
+
+  background:
+  rgba(255,255,255,0.04);
+
+  border:
+  1px solid rgba(
+    255,
+    255,
+    255,
+    0.08
+  );
+
+  margin-bottom:10px;
+
+  transition:all .25s ease;
+
+}
+
+.tx-history-item:hover{
+
+  transform:
+  translateY(-2px);
+
+  background:
+  rgba(255,255,255,0.06);
+
+}
+
+.tx-history-left{
+
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+}
+
+.tx-history-icon{
+
+  width:42px;
+  height:42px;
+
+  border-radius:12px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:18px;
+
+  background:
+  rgba(0,212,170,0.12);
+
+}
+
+.tx-history-title{
+
+  font-size:14px;
+
+  font-weight:700;
+
+}
+
+.tx-history-date{
+
+  margin-top:4px;
+
+  font-size:12px;
+
+  opacity:.75;
+
+}
+
+.tx-history-amount{
+
+  font-size:15px;
+
+  font-weight:900;
+
+  color:var(--success,#10b981);
+
+  white-space:nowrap;
+
+}
+
+.empty-state{
+
+  padding:28px;
+
+  text-align:center;
+
+  border-radius:16px;
+
+  background:
+  rgba(255,255,255,0.04);
+
+  border:
+  1px dashed rgba(
+    255,
+    255,
+    255,
+    0.15
+  );
+
+  opacity:.75;
+
+}
