@@ -525,11 +525,14 @@ txs.map(tx => `
 
   </div>
 
-  <div class="feed-amount">
+<div class="feed-amount">
 
-    ${tx.amount}
+  ${window.PAY54_LEDGER.moneyFmt(
+      tx.currency || "NGN",
+      Math.abs(tx.amount || 0)
+  )}
 
-  </div>
+</div>
 
 </div>
 
