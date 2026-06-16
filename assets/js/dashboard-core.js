@@ -354,6 +354,12 @@ function initDashboard(){
 
   renderBalance();
 
+if(window.renderRecentTransactions){
+
+  window.renderRecentTransactions();
+
+}
+
   window.PAY54_APP.initialized = true;
 
   console.log("🔥 PAY54 DASHBOARD READY");
