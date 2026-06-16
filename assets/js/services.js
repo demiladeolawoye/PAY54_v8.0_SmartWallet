@@ -114,6 +114,11 @@ merchantqr:{
     handler:safeHandler("openTrading")
   },
 
+  bet:{
+  title:"Bet Funding",
+  handler:safeHandler("openBetFunding")
+},
+  
   agent:{
     title:"Agent",
     handler:safeHandler("openAgent")
