@@ -552,24 +552,17 @@ txs.map(tx => {
 <div class="feed-item">
 
   <div class="feed-icon">
-
     ${tx.icon || "💸"}
-
   </div>
 
   <div class="feed-content">
 
     <div class="feed-title">
-
       ${tx.title}
-
     </div>
 
     <div class="feed-sub">
-
-      ${new Date(txDate)
-        .toLocaleString()}
-
+      ${new Date(txDate).toLocaleString()}
     </div>
 
   </div>
@@ -589,20 +582,6 @@ txs.map(tx => {
 
 }).join("");
 
-<div class="feed-amount">
-
-  ${window.PAY54_LEDGER.moneyFmt(
-      tx.currency || "NGN",
-      Math.abs(tx.amount || 0)
-  )}
-
-</div>
-
-</div>
-
-`).join("");
-
-};
 window.openTransactionHistory = function(){
 
  const openModal =
