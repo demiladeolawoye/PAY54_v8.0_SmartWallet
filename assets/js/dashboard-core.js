@@ -3592,13 +3592,13 @@ Link Card
           "Bank card linked successfully"
         );
 
-      } // END click callback
+        } // END click callback
 
     ); // END addEventListener
 
-  } // END onMount
+  } // END Link Card Modal onMount
 
-}); // END Link Card modal
+}); // END Link Card Modal
 
 }); // END linkExternalCardBtn click
 
