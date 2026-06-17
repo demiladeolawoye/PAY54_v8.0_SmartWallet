@@ -5057,7 +5057,7 @@ window.PAY54_UI.openRequestMoney = function(){
 
 const paymentLink =
 
-`${location.origin}/request.html?id=${requestId}`;
+`${location.origin}/dashboard.html?request=${requestId}`;
 
         const payload = {
 
