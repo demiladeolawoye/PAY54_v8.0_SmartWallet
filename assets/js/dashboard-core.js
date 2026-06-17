@@ -84,49 +84,62 @@ function renderBalance(){
        MULTI WALLET BALANCES
     ========================================= */
 
-    const walletContainer =
-      qs("#walletBalances");
+/* =========================================
+   MULTI WALLET BALANCES
+========================================= */
 
-    if(walletContainer){
+const walletContainer =
+  qs("#walletBalances");
 
-      walletContainer.innerHTML =
+if(walletContainer){
 
-        Object.entries(balances)
+  let walletHTML =
 
-        .map(([cur, amt]) => {
+    Object.entries(balances)
 
-          return `
+    .filter(([cur, amt]) => {
 
-            <div class="wallet-balance-row">
+      return Number(amt) > 0;
 
-              <span class="wallet-balance-cur">
-                ${cur}
-              </span>
+    })
 
-              <span class="wallet-balance-amt">
-                ${ledger.moneyFmt(cur, amt)}
-              </span>
+    .map(([cur, amt]) => {
 
-            </div>
+      return `
 
-          `;
+        <div class="wallet-balance-row">
 
-        })
+          <span class="wallet-balance-cur">
+            ${cur}
+          </span>
 
-        .join("");
+          <span class="wallet-balance-amt">
+            ${ledger.moneyFmt(cur, amt)}
+          </span>
 
-    }
+        </div>
 
-    console.log("✅ BALANCE RENDERED");
+      `;
 
-  }catch(err){
+    })
 
-    console.error(
-      "BALANCE RENDER FAILED",
-      err
-    );
+    .join("");
 
-  }
+  walletHTML += `
+
+    <div
+      class="wallet-add-row"
+      id="addWalletBtn"
+    >
+
+      ➕ Add Wallet
+
+    </div>
+
+  `;
+
+  walletContainer.innerHTML =
+    walletHTML;
 
 }
 /* =========================================
