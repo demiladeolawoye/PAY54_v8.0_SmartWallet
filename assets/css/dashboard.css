@@ -3382,3 +3382,60 @@ rgba(
   opacity:.75;
 
 }
+/* =========================
+   PAY54 MOBILE CURRENCY HINT
+========================= */
+
+.currency-pills{
+
+position:relative;
+
+}
+
+.currency-scroll-hint{
+
+position:absolute;
+
+right:6px;
+
+top:50%;
+
+transform:translateY(-50%);
+
+font-size:18px;
+
+font-weight:700;
+
+opacity:.65;
+
+pointer-events:none;
+
+animation:pay54ArrowPulse 2s infinite;
+
+}
+
+@keyframes pay54ArrowPulse{
+
+0%{
+opacity:.3;
+}
+
+50%{
+opacity:1;
+}
+
+100%{
+opacity:.3;
+}
+
+}
+
+@media(min-width:768px){
+
+.currency-scroll-hint{
+
+display:none;
+
+}
+
+}
