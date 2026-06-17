@@ -1871,9 +1871,6 @@ window.PAY54_UI.openAgent = function(){
 window.PAY54_UI =
 window.PAY54_UI || {};
 
-window.PAY54_UI =
-window.PAY54_UI || {};
-
 window.PAY54_UI.openShop = function(){
 
 const openModal =
