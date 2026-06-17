@@ -205,6 +205,20 @@ if(walletContainer){
     walletHTML;
 
 }
+       console.log(
+    "✅ BALANCE RENDERED"
+  );
+
+  }catch(err){
+
+    console.error(
+      "BALANCE RENDER FAILED",
+      err
+    );
+
+  }
+
+}
 /* =========================================
    CURRENCY SWITCHER
 ========================================= */
