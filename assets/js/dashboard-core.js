@@ -426,9 +426,33 @@ function initDashboard(){
 
   }
 
-  bindCurrencyPills();
+bindCurrencyPills();
 
-  bindDashboardButtons();
+bindDashboardButtons();
+
+if(!window.PAY54_APP.walletListenerBound){
+
+document.addEventListener(
+"click",
+e=>{
+
+if(
+e.target.id ===
+"addWalletBtn"
+){
+
+window.PAY54_UI
+.openAddWallet();
+
+}
+
+}
+);
+
+window.PAY54_APP.walletListenerBound =
+true;
+
+}
   const scanFab =
 document.getElementById("scanPayFab");
 
