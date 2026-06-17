@@ -1857,152 +1857,191 @@ window.PAY54_UI.openAgent = function(){
 window.PAY54_UI =
 window.PAY54_UI || {};
 
+window.PAY54_UI =
+window.PAY54_UI || {};
+
 window.PAY54_UI.openShop = function(){
 
-  const openModal =
-    window.PAY54_MODALS?.openModal;
+const openModal =
+window.PAY54_MODALS?.openModal;
 
-  if(!openModal) return;
+if(!openModal) return;
 
-  openModal({
+const vendors = {
 
-    title: "Shop & Go",
+food:[
 
-    bodyHTML: `
+{
+name:"McDonald's",
+url:"https://www.mcdonalds.com"
+},
 
-      <div class="p54-shop">
+{
+name:"KFC",
+url:"https://www.kfc.com"
+},
 
-        <div class="shop-hero">
+{
+name:"Chicken Republic",
+url:"https://www.chicken-republic.com"
+}
 
-          <div class="shop-icon">
-            🛍️
-          </div>
+],
 
-          <div class="shop-title">
-            PAY54 Lifestyle Hub
-          </div>
+taxi:[
 
-          <div class="shop-sub">
-            Food, transport, shopping & experiences
-          </div>
+{
+name:"Uber",
+url:"https://www.uber.com"
+},
 
-        </div>
+{
+name:"Bolt",
+url:"https://bolt.eu"
+},
 
-        <div class="shop-grid">
+{
+name:"FREE NOW",
+url:"https://www.free-now.com"
+}
 
-          <button
-            class="shop-card"
-            data-shop="food"
-          >
-            <div class="shop-card-icon">🍔</div>
+],
 
-            <div class="shop-card-title">
-              Food Delivery
-            </div>
+tickets:[
 
-            <div class="shop-card-sub">
-              Order meals instantly
-            </div>
-          </button>
+{
+name:"Ticketmaster",
+url:"https://www.ticketmaster.com"
+},
 
-          <button
-            class="shop-card"
-            data-shop="taxi"
-          >
-            <div class="shop-card-icon">🚕</div>
+{
+name:"Eventbrite",
+url:"https://www.eventbrite.com"
+},
 
-            <div class="shop-card-title">
-              Taxi Booking
-            </div>
+{
+name:"AXS",
+url:"https://www.axs.com"
+}
 
-            <div class="shop-card-sub">
-              Ride anywhere
-            </div>
-          </button>
+],
 
-          <button
-            class="shop-card"
-            data-shop="tickets"
-          >
-            <div class="shop-card-icon">🎟️</div>
+shopping:[
 
-            <div class="shop-card-title">
-              Event Tickets
-            </div>
+{
+name:"Amazon",
+url:"https://www.amazon.com"
+},
 
-            <div class="shop-card-sub">
-              Concerts & events
-            </div>
-          </button>
+{
+name:"eBay",
+url:"https://www.ebay.com"
+},
 
-          <button
-            class="shop-card"
-            data-shop="shopping"
-          >
-            <div class="shop-card-icon">🛒</div>
+{
+name:"Temu",
+url:"https://www.temu.com"
+}
 
-            <div class="shop-card-title">
-              Marketplace
-            </div>
-
-            <div class="shop-card-sub">
-              Shop online
-            </div>
-          </button>
-
-        </div>
-
-      </div>
-
-    `,
-
-    onMount: ({ modal }) => {
-
-      modal
-        .querySelectorAll(".shop-card")
-        .forEach(card => {
-
-          card.addEventListener("click", () => {
-
-            const type =
-              card.dataset.shop;
-
-            let message =
-              "Coming soon";
-
-            if(type === "food"){
-              message =
-                "Food delivery launching soon";
-            }
-
-            if(type === "taxi"){
-              message =
-                "Taxi booking launching soon";
-            }
-
-            if(type === "tickets"){
-              message =
-                "Ticketing engine launching soon";
-            }
-
-            if(type === "shopping"){
-              message =
-                "Marketplace launching soon";
-            }
-
-            window.PAY54_TOAST
-              ?.showToast(message);
-
-          });
-
-        });
-
-    }
-
-  });
+]
 
 };
 
+openModal({
+
+title:"Shop & Go Marketplace",
+
+bodyHTML:`
+
+<div class="shop-grid">
+
+<button
+class="shop-cat"
+data-type="food"
+>
+🍔 Food Delivery
+</button>
+
+<button
+class="shop-cat"
+data-type="taxi"
+>
+🚕 Taxi Booking
+</button>
+
+<button
+class="shop-cat"
+data-type="tickets"
+>
+🎟 Event Tickets
+</button>
+
+<button
+class="shop-cat"
+data-type="shopping"
+>
+🛒 Online Shopping
+</button>
+
+</div>
+
+<div
+id="shopResults"
+style="margin-top:20px"
+></div>
+
+`,
+
+onMount:({modal})=>{
+
+const results =
+modal.querySelector(
+"#shopResults"
+);
+
+modal
+.querySelectorAll(".shop-cat")
+.forEach(btn=>{
+
+btn.addEventListener(
+"click",
+()=>{
+
+const type =
+btn.dataset.type;
+
+results.innerHTML =
+
+vendors[type]
+
+.map(v=>`
+
+<button
+class="btn primary"
+style="
+width:100%;
+margin-bottom:10px;
+"
+onclick="window.open('${v.url}','_blank')"
+>
+
+${v.name}
+
+</button>
+
+`)
+
+.join("");
+
+});
+
+});
+
+}
+
+});
+
+};
 /* =========================================
    PAY54 TRADING ENGINE
 ========================================= */
