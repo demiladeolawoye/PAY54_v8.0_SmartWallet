@@ -581,6 +581,7 @@ txs.map(tx => {
 `;
 
 }).join("");
+};    
 
 window.openTransactionHistory = function(){
 
