@@ -2049,256 +2049,207 @@ ${v.name}
 window.PAY54_UI =
 window.PAY54_UI || {};
 
+window.PAY54_UI =
+window.PAY54_UI || {};
+
 window.PAY54_UI.openTrading = function(){
 
-  const openModal =
-    window.PAY54_MODALS?.openModal;
+const openModal =
+window.PAY54_MODALS?.openModal;
+
+if(!openModal) return;
+
+openModal({
+
+title:"PAY54 Trading Hub",
+
+bodyHTML:`
+
+<div class="trading-grid">
+
+<button
+class="trade-category"
+data-type="crypto"
+>
+₿ Crypto
+</button>
+
+<button
+class="trade-category"
+data-type="stocks"
+>
+📈 Stocks
+</button>
+
+<button
+class="trade-category"
+data-type="etf"
+>
+🏦 ETFs
+</button>
+
+<button
+class="trade-category"
+data-type="fx"
+>
+💱 Forex
+</button>
+
+</div>
+
+<div
+id="tradeResults"
+style="margin-top:20px"
+></div>
+
+`,
+
+onMount:({modal})=>{
+
+const assets = {
+
+crypto:[
+"BTC",
+"ETH",
+"SOL",
+"XRP",
+"ADA"
+],
+
+stocks:[
+"Apple",
+"Tesla",
+"Nvidia",
+"Microsoft",
+"Amazon"
+],
+
+etf:[
+"S&P 500 ETF",
+"NASDAQ ETF",
+"Global Tech ETF"
+],
+
+fx:[
+"GBP/USD",
+"EUR/USD",
+"USD/NGN",
+"GBP/NGN",
+"EUR/NGN"
+]
+
+};
+
+const results =
+modal.querySelector(
+"#tradeResults"
+);
 
-  if(!openModal) return;
+modal
+.querySelectorAll(
+".trade-category"
+)
+.forEach(btn=>{
 
-  openModal({
+btn.addEventListener(
+"click",
+()=>{
 
-    title: "PAY54 Trading",
+const type =
+btn.dataset.type;
 
-    bodyHTML: `
+results.innerHTML =
 
-      <div class="p54-trading">
+(assets[type] || [])
 
-        <div class="trading-hero">
+.map(asset=>`
 
-          <div class="trading-icon">
-            📈
-          </div>
+<div
+class="trade-asset"
+style="
+padding:12px;
+border:1px solid rgba(255,255,255,.1);
+border-radius:12px;
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+"
+>
 
-          <div class="trading-title">
-            Global Markets
-          </div>
+<div>
 
-          <div class="trading-sub">
-            Crypto, Stocks & FX Markets
-          </div>
+<strong>
+${asset}
+</strong>
 
-        </div>
+</div>
 
-        <div class="trading-grid">
+<div>
 
-          <button
-            class="trade-card"
-            data-market="btc"
-          >
+<button
+class="btn primary tradeBuyBtn"
+data-asset="${asset}"
+>
+Buy
+</button>
 
-            <div class="trade-top">
+<button
+class="btn ghost tradeSellBtn"
+data-asset="${asset}"
+>
+Sell
+</button>
 
-              <div class="trade-symbol">
-                BTC
-              </div>
+</div>
 
-              <div class="trade-change pos">
-                +4.2%
-              </div>
+</div>
 
-            </div>
+`)
 
-            <div class="trade-name">
-              Bitcoin
-            </div>
+.join("");
 
-            <div class="trade-price">
-              $68,420
-            </div>
+results
+.querySelectorAll(".tradeBuyBtn")
+.forEach(b=>{
 
-          </button>
+b.addEventListener(
+"click",
+()=>{
 
-          <button
-            class="trade-card"
-            data-market="eth"
-          >
+window.PAY54_TOAST
+?.showToast(
+`Buy ${b.dataset.asset} coming soon`
+);
 
-            <div class="trade-top">
+});
 
-              <div class="trade-symbol">
-                ETH
-              </div>
+});
 
-              <div class="trade-change pos">
-                +2.1%
-              </div>
+results
+.querySelectorAll(".tradeSellBtn")
+.forEach(b=>{
 
-            </div>
+b.addEventListener(
+"click",
+()=>{
 
-            <div class="trade-name">
-              Ethereum
-            </div>
+window.PAY54_TOAST
+?.showToast(
+`Sell ${b.dataset.asset} coming soon`
+);
 
-            <div class="trade-price">
-              $3,240
-            </div>
+});
 
-          </button>
+});
 
-          <button
-            class="trade-card"
-            data-market="tesla"
-          >
+});
 
-            <div class="trade-top">
+});
 
-              <div class="trade-symbol">
-                TSLA
-              </div>
+}
 
-              <div class="trade-change neg">
-                -0.8%
-              </div>
-
-            </div>
-
-            <div class="trade-name">
-              Tesla
-            </div>
-
-            <div class="trade-price">
-              $245
-            </div>
-
-          </button>
-
-          <button
-            class="trade-card"
-            data-market="usdngn"
-          >
-
-            <div class="trade-top">
-
-              <div class="trade-symbol">
-                USD/NGN
-              </div>
-
-              <div class="trade-change pos">
-                +1.5%
-              </div>
-
-            </div>
-
-            <div class="trade-name">
-              FX Pair
-            </div>
-
-            <div class="trade-price">
-              ₦1,580
-            </div>
-
-          </button>
-
-        </div>
-
-      </div>
-
-    `,
-
-    onMount: ({ modal }) => {
-
-      modal
-        .querySelectorAll(".trade-card")
-        .forEach(card => {
-
-          card.addEventListener("click", () => {
-
-            const market =
-              card.dataset.market;
-
-            let name = "Market";
-
-            if(market === "btc"){
-              name = "Bitcoin";
-            }
-
-            if(market === "eth"){
-              name = "Ethereum";
-            }
-
-            if(market === "tesla"){
-              name = "Tesla";
-            }
-
-            if(market === "usdngn"){
-              name = "USD/NGN";
-            }
-
-            openModal({
-
-              title: `${name} Trading`,
-
-              bodyHTML: `
-
-                <div class="trade-detail">
-
-                  <div class="trade-detail-chart">
-                    📊 Live Chart Coming Soon
-                  </div>
-
-                  <div class="trade-actions">
-
-                    <button
-                      class="btn primary trade-action-btn"
-                    >
-                      Buy
-                    </button>
-
-                    <button
-                      class="btn ghost trade-action-btn"
-                    >
-                      Sell
-                    </button>
-
-                    <button
-                      class="btn ghost trade-action-btn"
-                    >
-                      Watchlist
-                    </button>
-
-                  </div>
-
-                </div>
-
-              `,
-
-              onMount: ({ modal }) => {
-
-                modal
-                  .querySelectorAll(
-                    ".trade-action-btn"
-                  )
-                  .forEach(btn => {
-
-                    btn.addEventListener(
-                      "click",
-                      () => {
-
-                        const text =
-                          btn.textContent.trim();
-
-                        window.PAY54_TOAST
-                          ?.showToast(
-                            `${text} feature coming soon`
-                          );
-
-                      }
-                    );
-
-                  });
-
-              }
-
-            });
-
-          });
-
-        });
-
-    }
-
-  });
+});
 
 };
 
