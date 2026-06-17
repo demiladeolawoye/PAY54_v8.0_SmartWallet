@@ -21,6 +21,69 @@ window.PAY54_APP = {
 
 };
 
+window.PAY54_UI =
+window.PAY54_UI || {};
+
+window.PAY54_UI.openAddWallet =
+function(){
+
+const openModal =
+window.PAY54_MODALS?.openModal;
+
+if(!openModal) return;
+
+openModal({
+
+title:"Add Wallet",
+
+bodyHTML:`
+
+<select
+id="walletCurrency"
+class="p54-input"
+>
+
+<option value="GBP">GBP Wallet</option>
+<option value="USD">USD Wallet</option>
+<option value="EUR">EUR Wallet</option>
+<option value="GHS">GHS Wallet</option>
+<option value="KES">KES Wallet</option>
+<option value="ZAR">ZAR Wallet</option>
+
+</select>
+
+<button
+id="createWalletBtn"
+class="btn primary"
+style="width:100%;margin-top:15px"
+>
+
+Create Wallet
+
+</button>
+
+`,
+
+onMount:({modal,close})=>{
+
+modal
+.querySelector("#createWalletBtn")
+.addEventListener("click",()=>{
+
+window.PAY54_TOAST
+?.showToast(
+"Wallet creation enabled"
+);
+
+close();
+
+});
+
+}
+
+});
+
+};
 /* =========================================
    SAFE MODULE CHECKER
 ========================================= */
