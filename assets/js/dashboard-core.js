@@ -305,7 +305,19 @@ function routeAction(action){
 ========================================= */
 
 case "send":
-  UI.openSend();
+
+  if(typeof UI.openSend === "function"){
+
+    UI.openSend();
+
+  }else{
+
+    console.warn(
+      "openSend unavailable"
+    );
+
+  }
+
   break;
 
 case "receive":
