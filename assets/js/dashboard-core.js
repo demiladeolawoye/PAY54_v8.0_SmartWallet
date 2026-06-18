@@ -112,6 +112,30 @@ function qsa(selector){
   return document.querySelectorAll(selector);
 }
 
+function safeMoneyFmt(
+  currency,
+  amount
+){
+
+  const ledger =
+    window.PAY54_LEDGER;
+
+  if(
+    ledger &&
+    typeof ledger.moneyFmt === "function"
+  ){
+
+    return ledger.moneyFmt(
+      currency,
+      amount
+    );
+
+  }
+
+  return `${currency} ${Number(amount).toLocaleString()}`;
+
+}
+
 /* =========================================
    BALANCE RENDER ENGINE
 ========================================= */
