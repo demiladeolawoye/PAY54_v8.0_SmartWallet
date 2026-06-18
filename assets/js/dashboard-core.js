@@ -211,7 +211,7 @@ if(walletContainer){
           </span>
 
           <span class="wallet-balance-amt">
-            ${ledger.moneyFmt(cur, amt)}
+            ${safeMoneyFmt(cur, amt)}
           </span>
 
         </div>
