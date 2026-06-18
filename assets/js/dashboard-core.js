@@ -94,7 +94,14 @@ function modulesReady(){
 
     window.PAY54_LEDGER &&
     typeof window.PAY54_LEDGER.getBalances === "function" &&
-    typeof window.PAY54_LEDGER.applyEntry === "function"
+    typeof window.PAY54_LEDGER.applyEntry === "function" &&
+
+    window.PAY54_MODALS &&
+    typeof window.PAY54_MODALS.openModal === "function" &&
+
+    window.PAY54_UI &&
+
+    window.PAY54_TX
 
   );
 
