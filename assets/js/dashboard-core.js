@@ -163,7 +163,10 @@ function renderBalance(){
     if(balanceEl){
 
       balanceEl.textContent =
-        ledger.moneyFmt(active, amount);
+        safeMoneyFmt(
+ active,
+ amount
+);
 
     }
 
