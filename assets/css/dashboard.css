@@ -324,16 +324,29 @@ body.light .profile-menu{ background: rgba(255,255,255,0.94); }
 --------------------------- */
 .dash-grid{
   width:100%;
-  max-width:100%;
+  max-width:1440px;
+
   margin:0 auto;
 
   display:grid;
+
   grid-template-columns:1fr;
-  gap:18px;
 
-  padding:12px;
-  padding-bottom:140px;
+  gap:20px;
 
+  padding-top:16px;
+
+  padding-right:
+    max(16px, env(safe-area-inset-right));
+
+  padding-left:
+    max(16px, env(safe-area-inset-left));
+
+  padding-bottom:
+    calc(
+      140px +
+      env(safe-area-inset-bottom)
+    );
 }
 @media (min-width: 981px){
   .dash-grid{
