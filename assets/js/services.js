@@ -70,12 +70,12 @@ window.PAY54_SERVICES = {
   },
 
   bills:{
-    title:"Bills & Top Up",
+   title:"PAY54 Pay",
     handler:safeHandler("openBills")
   },
 
   savings:{
-    title:"Savings",
+    title:"PAY54 Vaults",
     handler:safeHandler("openSavings")
   },
 
@@ -90,12 +90,12 @@ window.PAY54_SERVICES = {
   },
 
   shop:{
-  title:"Shop & Go",
+  title:"PAY54 Marketplace",
   handler:safeHandler("openShop")
 },
 
 refer:{
-  title:"Refer & Earn",
+  title:"PAY54 Rewards",
   handler:safeHandler("openReferEarn")
 },
 
@@ -110,12 +110,12 @@ merchantqr:{
   },
 
   trading:{
-    title:"Trading",
+    title:"PAY54 Invest",
     handler:safeHandler("openTrading")
   },
 
   agent:{
-    title:"Agent",
+    title:"PAY54 Agent+",
     handler:safeHandler("openAgent")
   },
 
