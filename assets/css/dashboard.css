@@ -162,6 +162,72 @@ body.light .logo{
 .currency-pills::-webkit-scrollbar{
   display:none;
 }
+.currency-pills::before,
+.currency-pills::after{
+
+  content:"";
+
+  position:absolute;
+
+  top:0;
+
+  width:24px;
+
+  height:100%;
+
+  z-index:5;
+
+  pointer-events:none;
+
+}
+
+.currency-pills::before{
+
+  left:0;
+
+  background:
+  linear-gradient(
+    90deg,
+    rgba(13,20,38,1),
+    rgba(13,20,38,0)
+  );
+
+}
+
+.currency-pills::after{
+
+  right:0;
+
+  background:
+  linear-gradient(
+    270deg,
+    rgba(13,20,38,1),
+    rgba(13,20,38,0)
+  );
+
+}
+
+body.light .currency-pills::before{
+
+  background:
+  linear-gradient(
+    90deg,
+    #f4f8ff,
+    rgba(244,248,255,0)
+  );
+
+}
+
+body.light .currency-pills::after{
+
+  background:
+  linear-gradient(
+    270deg,
+    #f4f8ff,
+    rgba(244,248,255,0)
+  );
+
+}
 .currency-pills .currency{
 
   flex:0 0 auto;
