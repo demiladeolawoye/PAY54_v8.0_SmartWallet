@@ -132,18 +132,31 @@ body.light .logo{
 
 /* Currency pills (desktop) */
 .currency-pills{
+
+  position:relative;
+
   display:flex;
+
   align-items:center;
-  justify-content:center;
 
-  gap:12px;
+  gap:10px;
 
-  flex-wrap:nowrap;              /* 🚀 FORCE SINGLE LINE */
-  overflow-x:auto;               /* 🚀 SAFE SCROLL IF NEEDED */
+  overflow-x:auto;
+
+  overflow-y:hidden;
+
+  scroll-snap-type:x mandatory;
+
+  -webkit-overflow-scrolling:touch;
+
   scrollbar-width:none;
 
+  padding-inline:24px;
+
   max-width:100%;
+
   white-space:nowrap;
+
 }
 
 .currency-pills::-webkit-scrollbar{
