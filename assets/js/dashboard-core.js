@@ -2631,6 +2631,8 @@ window.PAY54_UI || {};
 
 window.PAY54_UI.openCards = function(){
 
+try{
+
   const openModal =
     window.PAY54_MODALS?.openModal;
 
