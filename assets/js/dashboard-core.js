@@ -3634,6 +3634,19 @@ Link Card
 
 }); // END linkExternalCardBtn click
 
+}catch(err){
+
+  console.error(
+    "OPEN CARDS FAILED",
+    err
+  );
+
+  window.PAY54_TOAST?.showToast(
+    "Cards module failed"
+  );
+
+}
+
 }; // END openCards
 
 /* =========================================
