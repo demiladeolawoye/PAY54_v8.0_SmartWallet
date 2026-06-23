@@ -394,11 +394,17 @@ console.log(
 
   function waitForModules(){
 
-    if(modulesReady()){
+   if(modulesReady()){
 
-      console.log("✅ Modules ready");
+    console.log("✅ Modules ready");
 
-      initDashboard();
+    if(
+      typeof seedDemoIfEmpty === "function"
+    ){
+      seedDemoIfEmpty();
+    }
+
+    initDashboard();
 
       /* =========================================
          UNIVERSAL FEEDS INIT
