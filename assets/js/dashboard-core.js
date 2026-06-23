@@ -220,94 +220,63 @@ function routeAction(action){
 ========================================= */
 
 case "send":
-  UI.openSend();
-  break;
+  return UI.openSend?.();
 
 case "receive":
-  UI.openReceive();
-  break;
+  return UI.openReceive?.();
 
 /* SCAN & PAY */
 case "scan_pay":
-  UI.openScanAndPay();
-  break;
+  return UI.openScanAndPay?.()
 
 /* ADD MONEY */
 case "add_money":
-  UI.openAddMoney();
-  break;
+  return UI.openAddMoney?.();
 
 /* WITHDRAW */
 case "withdraw":
-  UI.openWithdraw();
-  break;
+  return UI.openWithdraw?.();
 
 /* BANK TRANSFER */
 case "bank_transfer":
-  UI.openBankTransfer();
-  break;
+  return UI.openBankTransfer?.();
 
 /* FX / GLOBAL TRANSFER */
 case "fx":
-  UI.openGlobalTransfer();
-  break;
+  return UI.openGlobalTransfer?.();
 
   case "bills":
-    UI.openBills();
-    break;
+  return UI.openBills?.();
 
-  case "savings":
-    UI.openSavings();
-    break;
+case "savings":
+  return UI.openSavings?.();
 
-  case "cards":
+case "cards":
+  return UI.openCards?.();
 
-  console.log(
-    "CARDS ENGINE:",
-    window.PAY54_CARDS
-  );
+case "checkout":
+  return UI.openCheckout?.();
 
-  UI.openCards();
-
-  break;
-
-  case "checkout":
-    UI.openCheckout();
-    break;
-
-  case "shop":
-  UI.openShop();
-  break;
+case "shop":
+  return UI.openShop?.();
 
 case "refer":
+  return UI.openReferEarn?.();
 
-  UI.openReferEarn();
-
-  break;
-
-  case "merchantqr":
-    UI.openMerchantQR();
-    break;
+case "merchantqr":
+  return UI.openMerchantQR?.();
 
 case "request":
-  UI.openRequestMoney();
-  break;
+  return UI.openRequestMoney?.();
 
-  case "trading":
-    UI.openTrading();
-    break;
+case "trading":
+  return UI.openTrading?.();
 
-  case "agent":
-    UI.openAgent();
-    break;
+case "agent":
+  return UI.openAgent?.();
 
-   case "bet":
-  alert("Bet Funding coming soon");
-  break;
-          
-  case "risk":
-    UI.openRisk();
-    break;
+case "risk":
+  return UI.openRisk?.();
           
 /* ATM FINDER */
 case "atm":
