@@ -396,15 +396,16 @@ console.log(
 
    if(modulesReady()){
 
-    console.log("✅ Modules ready");
+ console.log("✅ Modules ready");
 
-    if(
-      typeof seedDemoIfEmpty === "function"
-    ){
-      seedDemoIfEmpty();
-    }
+if(
+  typeof seedDemoIfEmpty ===
+  "function"
+){
+  seedDemoIfEmpty();
+}
 
-    initDashboard();
+initDashboard();
 
       /* =========================================
          UNIVERSAL FEEDS INIT
