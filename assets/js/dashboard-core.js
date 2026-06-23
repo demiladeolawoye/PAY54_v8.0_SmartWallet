@@ -248,7 +248,7 @@ case "bank_transfer":
 /* FX / GLOBAL TRANSFER */
 case "fx":
   UI.openGlobalTransfer();
-  break
+  break;
 
   case "bills":
     UI.openBills();
