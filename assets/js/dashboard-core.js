@@ -372,6 +372,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("📦 DOM READY");
 
+console.log(
+  "LEDGER:",
+  !!window.PAY54_LEDGER
+);
+
+console.log(
+  "MODALS:",
+  !!window.PAY54_MODALS
+);
+
+console.log(
+  "UI:",
+  !!window.PAY54_UI
+);
+
+console.log(
+  "CARDS:",
+  !!window.PAY54_CARDS
+);
+
   function waitForModules(){
 
     if(modulesReady()){
