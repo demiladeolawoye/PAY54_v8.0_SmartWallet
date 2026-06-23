@@ -32,6 +32,8 @@ function modulesReady(){
     window.PAY54_LEDGER &&
     window.PAY54_MODALS &&
     window.PAY54_UI &&
+    window.PAY54_CARDS &&
+
     typeof window.PAY54_LEDGER.getBalances === "function" &&
     typeof window.PAY54_LEDGER.applyEntry === "function" &&
     typeof window.PAY54_MODALS.openModal === "function"
