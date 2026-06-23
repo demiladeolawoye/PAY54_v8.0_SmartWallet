@@ -333,7 +333,24 @@ function initDashboard(){
   console.log("🔥 PAY54 DASHBOARD READY");
 
 }
+window.onerror = function(
+  msg,
+  src,
+  line,
+  col,
+  err
+){
 
+  console.error(
+    "PAY54 RUNTIME ERROR",
+    msg,
+    line,
+    col
+  );
+
+  return true;
+
+};
 /* =========================================
    SAFE BOOTSTRAP
 ========================================= */
