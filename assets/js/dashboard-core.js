@@ -2963,52 +2963,68 @@ function(){
     onMount:({modal})=>{
 
       modal
-      .querySelector(
-        "#createVirtualCardBtn"
-      )
-      .addEventListener(
-        "click",
-        ()=>{
+.querySelector(
+  "#createVirtualCardBtn"
+)
+.addEventListener(
+  "click",
+  ()=>{
 
-          createCard({
+    createCard({
 
-            id:
-            "CARD-"+Date.now(),
+      id:
+      "CARD-"+Date.now(),
 
-            scheme:"Visa",
+      scheme:"Visa",
 
-            currency:"NGN",
+      currency:"NGN",
 
-            type:"Virtual",
+      type:"Virtual",
 
-            last4:
-            Math.floor(
-              1000 +
-              Math.random()*9000
-            ),
+      last4:
+      Math.floor(
+        1000 +
+        Math.random()*9000
+      ),
 
-            frozen:false,
+      frozen:false,
 
-            default:false
+      default:false
 
-          });
+    });
 
-          window.PAY54_TOAST
-          ?.showToast(
-            "Virtual card created"
-          );
+    window.PAY54_TOAST
+    ?.showToast(
+      "Virtual card created"
+    );
 
-          window.PAY54_UI
-          .openCards();
+    window.PAY54_UI
+    .openCards();
 
-        }
-      );
+  }
+);
 
-      modal
-      .querySelectorAll(
-        ".card-freeze"
-      )
-      .forEach(btn=>{
+modal
+.querySelector(
+  "#linkExternalCardBtn"
+)
+?.addEventListener(
+  "click",
+  ()=>{
+
+    window.PAY54_TOAST
+    ?.showToast(
+      "Linked Bank Cards module coming in v10.2"
+    );
+
+  }
+);
+
+modal
+.querySelectorAll(
+  ".card-freeze"
+)
+.forEach(btn=>{
 
         btn.onclick=()=>{
 
