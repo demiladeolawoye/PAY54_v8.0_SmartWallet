@@ -3113,18 +3113,108 @@ function(){
 
 modal
 .querySelector(
-  "#linkExternalCardBtn"
+ "#linkExternalCardBtn"
 )
-?.addEventListener(
-  "click",
-  ()=>{
+.addEventListener(
+ "click",
+ ()=>{
 
-    window.PAY54_TOAST
-    ?.showToast(
-      "Linked Bank Cards module coming in v10.2"
-    );
+   openModal({
 
-  }
+     title:"Link Bank Card",
+
+     bodyHTML:`
+
+     <div class="p54-form">
+
+       <input
+         id="bankName"
+         class="p54-input"
+         placeholder="Bank Name"
+       >
+
+       <input
+         id="cardholder"
+         class="p54-input"
+         placeholder="Cardholder Name"
+       >
+
+       <input
+         id="last4"
+         class="p54-input"
+         maxlength="4"
+         placeholder="Last 4 Digits"
+       >
+
+       <button
+         id="saveLinkedCard"
+         class="btn primary"
+       >
+         Link Card
+       </button>
+
+     </div>
+
+     `,
+
+     onMount:({modal,close})=>{
+
+       modal
+       .querySelector(
+         "#saveLinkedCard"
+       )
+       .addEventListener(
+         "click",
+         ()=>{
+
+           createCard({
+
+             id:
+             "LINK-"+Date.now(),
+
+             type:"Linked",
+
+             bank:
+             modal.querySelector(
+               "#bankName"
+             ).value,
+
+             cardholder:
+             modal.querySelector(
+               "#cardholder"
+             ).value,
+
+             scheme:"Visa",
+
+             last4:
+             modal.querySelector(
+               "#last4"
+             ).value,
+
+             frozen:false,
+
+             default:false
+
+           });
+
+           close();
+
+           window.PAY54_TOAST
+           ?.showToast(
+             "Bank card linked"
+           );
+
+           window.PAY54_UI
+           .openCards();
+
+         }
+       );
+
+     }
+
+   });
+
+ }
 );
 
 modal
