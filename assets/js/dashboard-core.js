@@ -1111,21 +1111,39 @@ window.renderNews = function(){
 
   if(!container) return;
 
-  const news = [
+ const news = [
 
-    {
-      icon:"📰",
-      title:"PAY54 launches FX wallets",
-      body:"Hold and convert across key currencies."
-    },
+{
+icon:"📰",
+title:"PAY54 launches FX wallets",
+body:"Hold and convert across currencies."
+},
 
-    {
-      icon:"📈",
-      title:"Markets: USD strengthens",
-      body:"Global FX markets show increased volatility."
-    }
+{
+icon:"📈",
+title:"Markets: USD strengthens",
+body:"FX volatility increases globally."
+},
 
-  ];
+{
+icon:"₿",
+title:"Bitcoin gains momentum",
+body:"Crypto markets continue rally."
+},
+
+{
+icon:"🏦",
+title:"BoE rate update",
+body:"Bank of England signals changes."
+},
+
+{
+icon:"💹",
+title:"ETF demand rises",
+body:"Institutional inflows increase."
+}
+
+];
 
   container.innerHTML = news.map(item => `
 
