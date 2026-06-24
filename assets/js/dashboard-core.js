@@ -178,24 +178,30 @@ const cur =
 
 function bindDashboardButtons(){
 
-  qsa("[data-action]").forEach(btn => {
+ document.addEventListener(
+  "click",
+  e => {
 
-    btn.addEventListener("click", () => {
+   const btn =
+   e.target.closest(
+    "[data-action]"
+   );
 
-      const action =
-        btn.dataset.action;
+   if(!btn) return;
 
-      if(!action) return;
+   const action =
+   btn.dataset.action;
 
-      console.log("🟢 ACTION:", action);
+   if(!action) return;
 
-      routeAction(action);
+   routeAction(action);
 
-    });
+  }
+ );
 
-  });
-
-  console.log("✅ Dashboard buttons bound");
+ console.log(
+  "✅ Universal Dashboard Routing Active"
+ );
 
 }
 
