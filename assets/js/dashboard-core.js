@@ -303,15 +303,22 @@ case "pos":
 
   break;
   default:
-    console.warn("Unknown action:", action);
+  console.warn(
+    "Unknown action:",
+    action
+  );
+  break;
 
-}
+   }
 
-  }catch(err){
+ }catch(err){
 
-    console.error("ROUTER FAILED", err);
+   console.error(
+     "ROUTER FAILED",
+     err
+   );
 
-  }
+ }
 
 }
 
