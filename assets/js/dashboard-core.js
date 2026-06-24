@@ -331,37 +331,28 @@ case "pos":
 function initDashboard(){
 
   if(window.PAY54_APP.initialized){
-
-    console.warn(
-      "Dashboard already initialized"
-    );
-
     return;
-
   }
 
   const ledger =
     window.PAY54_LEDGER;
 
-  let selectedWallet =
-    "GBP";
+  let selectedWallet = "GBP";
 
-  if(ledger){
+  if(
+    ledger &&
+    typeof ledger.getBalances === "function"
+  ){
 
     const balances =
       ledger.getBalances();
 
     const firstWallet =
       Object.keys(balances)
-      .find(
-        cur => balances[cur] > 0
-      );
+      .find(cur => balances[cur] > 0);
 
     if(firstWallet){
-
-      selectedWallet =
-        firstWallet;
-
+      selectedWallet = firstWallet;
     }
 
   }
@@ -381,34 +372,17 @@ function initDashboard(){
     );
 
   if(activePill){
-
     activePill.classList.add("active");
-
   }
 
-  if(typeof renderBalance === "function"){
+  bindCurrencyPills();
 
-bindCurrencyPills();
-
-bindDashboardButtons();
-
-setTimeout(() => {
+  bindDashboardButtons();
 
   renderBalance();
 
-}, 300);
-
-window.addEventListener(
-  "load",
-  () => {
-
-    renderBalance();
-
-  }
-);
-
-window.PAY54_APP.initialized =
-  true;
+  window.PAY54_APP.initialized =
+    true;
 
   console.log(
     "🔥 PAY54 DASHBOARD READY"
