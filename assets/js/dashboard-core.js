@@ -210,16 +210,15 @@ function bindDashboardButtons(){
 ========================================= */
 function routeAction(action){
 
-  try{
+ const UI =
+ window.PAY54_UI || {};
 
-    const UI = window.PAY54_UI;
+ console.log(
+  "ROUTING:",
+  action
+ );
 
-    if(!UI){
-      console.warn("PAY54_UI missing");
-      return;
-    }
-
-    switch(action){
+ switch(action){
 
 /* =========================================
    MONEY MOVES
