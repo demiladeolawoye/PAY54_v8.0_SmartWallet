@@ -360,36 +360,60 @@ function initDashboard(){
 
   }
 
-  window.PAY54_APP.activeCurrency =
-    selectedWallet;
+ window.PAY54_APP.activeCurrency =
+selectedWallet;
 
-  document
-    .querySelectorAll(".currency")
-    .forEach(p =>
-      p.classList.remove("active")
+/* Clear active pills */
+
+document
+.querySelectorAll(".currency")
+.forEach(pill => {
+
+  pill.classList.remove(
+    "active"
+  );
+
+  if(
+    pill.dataset.cur ===
+    selectedWallet
+  ){
+
+    pill.classList.add(
+      "active"
     );
 
-  const activePill =
-    document.querySelector(
-      `.currency[data-cur="${selectedWallet}"]`
-    );
-
-  if(activePill){
-    activePill.classList.add("active");
   }
 
-  bindCurrencyPills();
+});
 
-  bindDashboardButtons();
+/* Sync mobile selector */
 
-  renderBalance();
+const dropdown =
+document.querySelector(
+  "#currencySelect"
+);
 
-  window.PAY54_APP.initialized =
-    true;
+if(dropdown){
 
-  console.log(
-    "🔥 PAY54 DASHBOARD READY"
-  );
+  dropdown.value =
+    selectedWallet;
+
+}
+
+/* Force balance refresh */
+
+renderBalance();
+
+bindCurrencyPills();
+
+bindDashboardButtons();
+
+window.PAY54_APP.initialized =
+  true;
+
+console.log(
+  "🔥 PAY54 DASHBOARD READY"
+);
 
 }
 window.onerror = function(
