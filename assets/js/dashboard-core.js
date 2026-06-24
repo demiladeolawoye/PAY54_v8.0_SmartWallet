@@ -2931,12 +2931,119 @@ function(){
 
         <div class="cards-actions">
 
-          <button
-            id="createVirtualCardBtn"
-            class="btn primary"
-          >
-            Create Virtual Card
-          </button>
+         modal
+.querySelector(
+  "#createVirtualCardBtn"
+)
+.addEventListener(
+  "click",
+  ()=>{
+
+    openModal({
+
+      title:"Create Virtual Card",
+
+      bodyHTML:`
+
+      <div class="p54-form">
+
+        <select
+          id="virtualCurrency"
+          class="p54-input"
+        >
+
+          <option value="NGN">
+            NGN Virtual Card
+          </option>
+
+          <option value="GBP">
+            GBP Virtual Card
+          </option>
+
+          <option value="USD">
+            USD Virtual Card
+          </option>
+
+          <option value="EUR">
+            EUR Virtual Card
+          </option>
+
+        </select>
+
+        <button
+          id="confirmCreateCard"
+          class="btn primary"
+          style="margin-top:15px"
+        >
+          Create Card
+        </button>
+
+      </div>
+
+      `,
+
+      onMount:({modal,close})=>{
+
+        modal
+        .querySelector(
+          "#confirmCreateCard"
+        )
+        .addEventListener(
+          "click",
+          ()=>{
+
+            const currency =
+            modal.querySelector(
+              "#virtualCurrency"
+            ).value;
+
+            const scheme =
+            currency==="GBP"
+            ? "Mastercard"
+            : "Visa";
+
+            createCard({
+
+              id:
+              "CARD-"+Date.now(),
+
+              currency,
+
+              scheme,
+
+              type:"Virtual",
+
+              last4:
+              Math.floor(
+                1000+
+                Math.random()*9000
+              ),
+
+              frozen:false,
+
+              default:false
+
+            });
+
+            close();
+
+            window.PAY54_TOAST
+            ?.showToast(
+              `${currency} card created`
+            );
+
+            window.PAY54_UI
+            .openCards();
+
+          }
+        );
+
+      }
+
+    });
+
+  }
+);
 
           <button
             id="linkExternalCardBtn"
