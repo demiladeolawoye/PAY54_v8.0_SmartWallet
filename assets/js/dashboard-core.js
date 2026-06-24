@@ -1568,7 +1568,7 @@ window.PAY54_UI.openShop = function(){
 };
 
 /* =========================================
-   PAY54 TRADING ENGINE
+   PAY54 Invest ENGINE
 ========================================= */
 
 window.PAY54_UI =
@@ -1583,7 +1583,7 @@ window.PAY54_UI.openTrading = function(){
 
   openModal({
 
-    title: "PAY54 Trading",
+    title: "PAY54 Invest",
 
     bodyHTML: `
 
