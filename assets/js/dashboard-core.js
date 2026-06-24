@@ -309,16 +309,18 @@ case "pos":
   );
   break;
 
-   }
+    } // END switch
 
- }catch(err){
+  } // END try
 
-   console.error(
-     "ROUTER FAILED",
-     err
-   );
+  catch(err){
 
- }
+    console.error(
+      "ROUTER FAILED",
+      err
+    );
+
+  }
 
 }
 
