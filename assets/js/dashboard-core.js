@@ -316,9 +316,46 @@ function initDashboard(){
 
   if(window.PAY54_APP.initialized){
 
-    console.warn("Dashboard already initialized");
+    console.warn(
+      "Dashboard already initialized"
+    );
 
     return;
+
+  }
+
+  const ledger =
+    window.PAY54_LEDGER;
+
+  if(ledger){
+
+    const balances =
+      ledger.getBalances();
+
+    const firstWallet =
+      Object.keys(balances)
+      .find(cur => balances[cur] > 0);
+
+    if(firstWallet){
+
+      window.PAY54_APP.activeCurrency =
+        firstWallet;
+
+      const activePill =
+        document.querySelector(
+          `.currency[data-cur="${firstWallet}"]`
+        );
+
+      document
+        .querySelectorAll(".currency")
+        .forEach(p =>
+          p.classList.remove("active")
+        );
+
+      activePill
+        ?.classList.add("active");
+
+    }
 
   }
 
@@ -330,7 +367,9 @@ function initDashboard(){
 
   window.PAY54_APP.initialized = true;
 
-  console.log("🔥 PAY54 DASHBOARD READY");
+  console.log(
+    "🔥 PAY54 DASHBOARD READY"
+  );
 
 }
 window.onerror = function(
