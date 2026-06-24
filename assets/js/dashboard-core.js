@@ -279,6 +279,9 @@ case "request":
 case "trading":
   return UI.openTrading?.();
 
+case "bet":
+  return UI.openBetFunding?.();
+
 case "agent":
   return UI.openAgent?.();
 
