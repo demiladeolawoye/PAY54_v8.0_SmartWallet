@@ -327,6 +327,9 @@ function initDashboard(){
   const ledger =
     window.PAY54_LEDGER;
 
+  let selectedWallet =
+    "GBP";
+
   if(ledger){
 
     const balances =
@@ -334,38 +337,47 @@ function initDashboard(){
 
     const firstWallet =
       Object.keys(balances)
-      .find(cur => balances[cur] > 0);
+      .find(
+        cur => balances[cur] > 0
+      );
 
     if(firstWallet){
 
-      window.PAY54_APP.activeCurrency =
+      selectedWallet =
         firstWallet;
-
-      const activePill =
-        document.querySelector(
-          `.currency[data-cur="${firstWallet}"]`
-        );
-
-      document
-        .querySelectorAll(".currency")
-        .forEach(p =>
-          p.classList.remove("active")
-        );
-
-      activePill
-        ?.classList.add("active");
 
     }
 
   }
 
-  bindCurrencyPills();
+  window.PAY54_APP.activeCurrency =
+    selectedWallet;
 
-  bindDashboardButtons();
+  document
+    .querySelectorAll(".currency")
+    .forEach(p =>
+      p.classList.remove("active")
+    );
 
-  renderBalance();
+  const activePill =
+    document.querySelector(
+      `.currency[data-cur="${selectedWallet}"]`
+    );
 
-  window.PAY54_APP.initialized = true;
+  if(activePill){
+
+    activePill.classList.add("active");
+
+  }
+
+  if(typeof renderBalance === "function"){
+
+    renderBalance();
+
+  }
+
+  window.PAY54_APP.initialized =
+    true;
 
   console.log(
     "🔥 PAY54 DASHBOARD READY"
