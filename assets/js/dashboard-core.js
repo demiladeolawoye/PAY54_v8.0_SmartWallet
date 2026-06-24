@@ -372,12 +372,18 @@ function initDashboard(){
 
   if(typeof renderBalance === "function"){
 
-    renderBalance();
+  renderBalance();
 
-  }
+/* =========================
+   BIND DASHBOARD EVENTS
+========================= */
 
-  window.PAY54_APP.initialized =
-    true;
+bindCurrencyPills();
+
+bindDashboardButtons();
+
+window.PAY54_APP.initialized =
+  true;
 
   console.log(
     "🔥 PAY54 DASHBOARD READY"
