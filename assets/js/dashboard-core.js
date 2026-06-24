@@ -899,30 +899,39 @@ window.renderAlerts = function(){
 
   if(!container) return;
 
-  const alerts = [
+const alerts = [
 
-    {
-      id:"a1",
-      icon:"🔔",
-      title:"Security Alert",
-      body:"New login detected from London."
-    },
+{
+icon:"🔔",
+title:"Security Alert",
+body:"New login detected from London."
+},
 
-    {
-      id:"a2",
-      icon:"💸",
-      title:"Transfer successful",
-      body:"Your FX transfer completed successfully."
-    },
+{
+icon:"💸",
+title:"Transfer Successful",
+body:"Your FX transfer completed."
+},
 
-    {
-      id:"a3",
-      icon:"🛡️",
-      title:"Security tip",
-      body:"Keep your PIN private at all times."
-    }
+{
+icon:"🛡️",
+title:"Security Tip",
+body:"Enable biometric login."
+},
 
-  ];
+{
+icon:"💳",
+title:"Card Activity",
+body:"Virtual card used online."
+},
+
+{
+icon:"🌍",
+title:"Global Transfer",
+body:"GBP transfer delivered."
+}
+
+];
 
   const requests =
     window.PAY54_REQUESTS?.getRequests()
