@@ -372,15 +372,24 @@ function initDashboard(){
 
   if(typeof renderBalance === "function"){
 
-  renderBalance();
-
-/* =========================
-   BIND DASHBOARD EVENTS
-========================= */
-
 bindCurrencyPills();
 
 bindDashboardButtons();
+
+setTimeout(() => {
+
+  renderBalance();
+
+}, 300);
+
+window.addEventListener(
+  "load",
+  () => {
+
+    renderBalance();
+
+  }
+);
 
 window.PAY54_APP.initialized =
   true;
