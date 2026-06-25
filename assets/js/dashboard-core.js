@@ -212,118 +212,123 @@ function routeAction(action){
 
  try{
 
-   const UI =
-   window.PAY54_UI || {};
+  const UI =
+window.PAY54_UI || {};
 
-   console.log(
-     "ROUTING:",
-     action
-   );
+console.log(
+  "ROUTE ACTION:",
+  action
+);
 
-   switch(action){
+console.log(
+  "UI AVAILABLE:",
+  Object.keys(UI)
+);
+  switch(action){
 
-/* =========================================
-   MONEY MOVES
-========================================= */
+    /* =========================================
+       MONEY MOVES
+    ========================================= */
 
-case "send":
-  return UI.openSend?.();
+    case "send":
+      return UI.openSend?.();
 
-case "receive":
-  return UI.openReceive?.();
+    case "receive":
+      return UI.openReceive?.();
 
-/* SCAN & PAY */
-case "scan_pay":
-  return UI.openScanAndPay?.()
+    case "scan_pay":
+      return UI.openScanAndPay?.();
 
-/* ADD MONEY */
-case "add_money":
-  return UI.openAddMoney?.();
+    case "add_money":
+      return UI.openAddMoney?.();
 
-/* WITHDRAW */
-case "withdraw":
-  return UI.openWithdraw?.();
+    case "withdraw":
+      return UI.openWithdraw?.();
 
-/* BANK TRANSFER */
-case "bank_transfer":
-  return UI.openBankTransfer?.();
+    case "bank_transfer":
+      return UI.openBankTransfer?.();
 
-/* FX / GLOBAL TRANSFER */
-case "fx":
-  return UI.openGlobalTransfer?.();
+    case "fx":
+      return UI.openGlobalTransfer?.();
 
-  case "bills":
-  return UI.openBills?.();
+    case "bills":
+      return UI.openBills?.();
 
-case "savings":
-  return UI.openSavings?.();
+    case "savings":
+      return UI.openSavings?.();
 
-case "cards":
-  return UI.openCards?.();
+    case "cards":
+      return UI.openCards?.();
 
-case "checkout":
-  return UI.openCheckout?.();
+    case "checkout":
+      return UI.openCheckout?.();
 
-case "shop":
-  return UI.openShop?.();
+    case "shop":
+      return UI.openShop?.();
 
-case "refer":
-  return UI.openReferEarn?.();
+    case "refer":
+      return UI.openReferEarn?.();
 
-case "merchantqr":
-  return UI.openMerchantQR?.();
+    case "merchantqr":
+      return UI.openMerchantQR?.();
 
-case "request":
-  return UI.openRequestMoney?.();
+    case "request":
+      return UI.openRequestMoney?.();
 
-case "trading":
-  return UI.openTrading?.();
+    case "trading":
+      return UI.openTrading?.();
 
-case "bet":
-  return UI.openBetFunding?.();
+    case "bet":
+      return UI.openBetFunding?.();
 
-case "agent":
-  return UI.openAgent?.();
+    case "agent":
+      return UI.openAgent?.();
 
-case "risk":
-  return UI.openRisk?.();
-          
-/* ATM FINDER */
-case "atm":
+    case "risk":
+      return UI.openRisk?.();
 
-  if(window.openATMFinder){
-    window.openATMFinder();
+    case "atm":
+
+      if(window.openATMFinder){
+
+        window.openATMFinder();
+
+      }
+
+      break;
+
+    case "pos":
+
+      if(window.openPOSFinder){
+
+        window.openPOSFinder();
+
+      }
+
+      break;
+
+    default:
+
+      console.warn(
+        "Unknown action:",
+        action
+      );
+
+      break;
+
   }
 
-  break;
+}catch(err){
 
-/* POS FINDER */
-case "pos":
-
-  if(window.openPOSFinder){
-    window.openPOSFinder();
-  }
-
-  break;
-  default:
-  console.warn(
-    "Unknown action:",
-    action
+  console.error(
+    "ROUTER FAILED",
+    action,
+    err
   );
-  break;
 
-    } // END switch
-
-  } // END try
-
-  catch(err){
-
-    console.error(
-      "ROUTER FAILED",
-      err
-    );
-
-  }
+  window.PAY54_TOAST?.showToast(
+    `Action failed: ${action}`
+  );
 
 }
 
