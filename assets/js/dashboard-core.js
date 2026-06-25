@@ -4370,3 +4370,59 @@ req.paymentLink;
   });
 
 };
+/* =========================================
+   PAY54 UI RECOVERY ENGINE
+========================================= */
+
+window.PAY54_UI =
+window.PAY54_UI || {};
+
+const missingModules = {
+
+  openSend:"Send",
+
+  openReceive:"Receive",
+
+  openScanAndPay:"Scan & Pay",
+
+  openAddMoney:"Add Money",
+
+  openWithdraw:"Withdraw",
+
+  openBankTransfer:"Bank Transfer",
+
+  openGlobalTransfer:"Global Transfer",
+
+  openMerchantQR:"Merchant QR",
+
+  openBetFunding:"Bet Funding",
+
+  openRisk:"AI Risk Watch"
+
+};
+
+Object.entries(missingModules)
+.forEach(([fn,title])=>{
+
+  if(typeof window.PAY54_UI[fn] !== "function"){
+
+    window.PAY54_UI[fn]=function(){
+
+      window.PAY54_TOAST
+      ?.showToast(
+        `${title} loading...`
+      );
+
+      console.warn(
+        `${fn} not yet implemented`
+      );
+
+    };
+
+  }
+
+});
+
+console.log(
+"✅ PAY54 UI Recovery Loaded"
+);
