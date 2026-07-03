@@ -306,7 +306,23 @@
             return [...logs];
 
         },
+history(){
 
+    return [...logs];
+
+},
+
+last(){
+
+    if(logs.length===0){
+
+        return null;
+
+    }
+
+    return logs[logs.length-1];
+
+},
         clear(){
 
             logs.length=0;
