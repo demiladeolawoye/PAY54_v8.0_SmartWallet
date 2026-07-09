@@ -1,13 +1,56 @@
 "use strict";
 
 /* =========================================
-   PAY54 CARDS ENGINE v1
+   PAY54 ENTERPRISE CARDS ENGINE
+   Version 11.0.0
 ========================================= */
 
 window.PAY54_CARDS = (function(){
 
 const STORAGE_KEY =
   "pay54_cards";
+
+const STORAGE_META_KEY =
+  "pay54_cards_meta";
+
+const ENGINE_VERSION =
+  "11.0.0";
+
+const ENGINE_NAME =
+  "PAY54 Enterprise Cards Engine";
+
+function now(){
+
+  return new Date()
+    .toISOString();
+
+}
+
+function uuid(){
+
+  if(
+    window.crypto &&
+    crypto.randomUUID
+  ){
+
+    return crypto.randomUUID();
+
+  }
+
+  return (
+
+    Date.now()
+      .toString(36)
+
+    +
+
+    Math.random()
+      .toString(36)
+      .substring(2)
+
+  );
+
+}
 
 /* =========================================
    LOAD
@@ -38,8 +81,33 @@ function getCards(){
 function saveCards(cards){
 
   localStorage.setItem(
+
     STORAGE_KEY,
+
     JSON.stringify(cards)
+
+  );
+
+  localStorage.setItem(
+
+    STORAGE_META_KEY,
+
+    JSON.stringify({
+
+      version:
+        ENGINE_VERSION,
+
+      engine:
+        ENGINE_NAME,
+
+      updated:
+        now(),
+
+      cards:
+        cards.length
+
+    })
+
   );
 
 }
@@ -53,11 +121,41 @@ function addCard(card){
   const cards =
     getCards();
 
-  cards.push(card);
+  const newCard = {
+
+    id:
+      card.id || uuid(),
+
+    created:
+      card.created || now(),
+
+    updated:
+      now(),
+
+    frozen:
+      false,
+
+    default:
+      false,
+
+    balance:
+      0,
+
+    controls:{},
+
+    transactions:[],
+
+    ...card
+
+  };
+
+  cards.push(
+    newCard
+  );
 
   saveCards(cards);
 
-  return card;
+  return newCard;
 
 }
 
@@ -159,13 +257,22 @@ function updateCardBalance(
       c => c.id === id
     );
 
-  if(!card) return;
+  if(!card){
+
+    return null;
+
+  }
 
   card.balance =
-    (card.balance || 0)
-    + amount;
+    Number(card.balance || 0)
+    + Number(amount || 0);
+
+  card.updated =
+    now();
 
   saveCards(cards);
+
+  return card;
 
 }
 
@@ -186,7 +293,11 @@ function updateControls(
       c => c.id === id
     );
 
-  if(!card) return;
+  if(!card){
+
+    return null;
+
+  }
 
   card.controls = {
 
@@ -196,7 +307,12 @@ function updateControls(
 
   };
 
+  card.updated =
+    now();
+
   saveCards(cards);
+
+  return card;
 
 }
 
@@ -217,14 +333,35 @@ function addCardTransaction(
       c => c.id === id
     );
 
-  if(!card) return;
+  if(!card){
+
+    return null;
+
+  }
 
   card.transactions =
-    card.transactions || [];
+    Array.isArray(card.transactions)
+      ? card.transactions
+      : [];
 
-  card.transactions.unshift(tx);
+  card.transactions.unshift({
+
+    id:
+      uuid(),
+
+    created:
+      now(),
+
+    ...tx
+
+  });
+
+  card.updated =
+    now();
 
   saveCards(cards);
+
+  return card;
 
 }
 
@@ -239,7 +376,17 @@ function getCardTransactions(
   const card =
     getCardById(id);
 
-  return card?.transactions || [];
+  if(!card){
+
+    return [];
+
+  }
+
+  return Array.isArray(
+    card.transactions
+  )
+    ? [...card.transactions]
+    : [];
 
 }
    
@@ -249,24 +396,51 @@ function getCardTransactions(
 
 return{
 
+  /* Repository */
+
   getCards,
+  getCardById,
   saveCards,
+
+  /* Card Management */
+
   addCard,
   deleteCard,
   toggleFreeze,
   setDefault,
   getDefaultCard,
 
+  /* Financial */
+
   updateCardBalance,
-  getCardById,
+
+  /* Controls */
+
   updateControls,
+
+  /* Transactions */
+
   addCardTransaction,
-  getCardTransactions
+  getCardTransactions,
+
+  /* Engine */
+
+  version:
+    ENGINE_VERSION,
+
+  engine:
+    ENGINE_NAME
 
 };
 
 })();
 
-console.log(
-"✅ PAY54 CARDS ENGINE READY"
+console.info(
+
+  "✅ PAY54 Enterprise Cards Engine",
+
+  ENGINE_VERSION,
+
+  "loaded."
+
 );
