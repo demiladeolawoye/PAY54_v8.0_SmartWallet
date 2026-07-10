@@ -4,10 +4,11 @@
    PAY54 VIRTUAL & LINKED CARDS v2.0 PREMIUM
 ========================================= */
 
-window.PAY54_UI =
-window.PAY54_UI || {};
+window.PAY54_CARDS_UI =
+window.PAY54_CARDS_UI || {};
 
-window.PAY54_UI.openCards = function(){
+window.PAY54_CARDS_UI.openCards =
+function(){
 
 const openModal =
 window.PAY54_MODALS?.openModal;
