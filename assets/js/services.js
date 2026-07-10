@@ -4,27 +4,52 @@
 
 function safeHandler(fnName){
 
-  return () => {
+  return async () => {
 
     try{
 
-      const UI = window.PAY54_UI;
+      const UI =
+        window.PAY54_UI;
 
       if(!UI){
-        console.warn("PAY54_UI unavailable");
-        return;
+
+        console.warn(
+          "PAY54_UI unavailable"
+        );
+
+        return false;
+
       }
 
       if(typeof UI[fnName] !== "function"){
-        console.warn(`${fnName} missing`);
-        return;
+
+        console.warn(
+          `${fnName} missing`
+        );
+
+        return false;
+
       }
 
-      UI[fnName]();
+      await Promise.resolve(
+        UI[fnName]()
+      );
+
+      return true;
 
     }catch(err){
 
-      console.error("SERVICE ROUTE FAILED:", err);
+      console.error(
+
+        "[PAY54 SERVICES]",
+
+        fnName,
+
+        err
+
+      );
+
+      return false;
 
     }
 
@@ -32,6 +57,30 @@ function safeHandler(fnName){
 
 }
 
+  const VERSION =
+  "11.0.0";
+
+function getService(name){
+
+  return window.PAY54_SERVICES?.[
+    name
+  ];
+
+}
+
+function hasService(name){
+
+  return !!getService(name);
+
+}
+
+function listServices(){
+
+  return Object.keys(
+    window.PAY54_SERVICES || {}
+  );
+
+}
 window.PAY54_SERVICES = {
 
   send:{
@@ -70,12 +119,12 @@ window.PAY54_SERVICES = {
   },
 
   bills:{
-    title:"Bills & Top Up",
+    title:"PAY54 Pay",
     handler:safeHandler("openBills")
   },
 
   savings:{
-    title:"Savings",
+    title:"PAY54 Vaults",
     handler:safeHandler("openSavings")
   },
 
@@ -89,9 +138,9 @@ window.PAY54_SERVICES = {
     handler:safeHandler("openCheckout")
   },
 
-  shop:{
-  title:"Shop & Go",
-  handler:safeHandler("openShop")
+shop:{
+    title:"PAY54 Marketplace",
+    handler:safeHandler("openShop")
 },
 
 refer:{
@@ -109,8 +158,8 @@ merchantqr:{
     handler:safeHandler("openRequestMoney")
   },
 
-  trading:{
-    title:"Trading",
+ trading:{
+    title:"PAY54 Invest",
     handler:safeHandler("openTrading")
   },
 
@@ -120,17 +169,53 @@ merchantqr:{
 },
   
   agent:{
-    title:"Agent",
+    title:"PAY54 Agent+",
     handler:safeHandler("openAgent")
   },
 
   risk:{
-    title:"AI Risk Watch",
+    title:"PAY54 Shield",
     handler:safeHandler("openRisk")
   }
 
 };
 
-console.log("✅ PAY54 SERVICES READY");
+window.PAY54_SERVICE_REGISTRY = Object.freeze({
+
+  version:
+    VERSION,
+
+  get:
+    getService,
+
+  has:
+    hasService,
+
+  list:
+    listServices,
+
+  count(){
+
+    return listServices().length;
+
+  },
+
+  names(){
+
+    return listServices();
+
+  }
+
+});
+
+console.info(
+
+  "✅ PAY54 Services",
+
+  VERSION,
+
+  "loaded."
+
+);
 
 })();
