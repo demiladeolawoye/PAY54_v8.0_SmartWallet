@@ -179,7 +179,11 @@ merchantqr:{
   }
 
 };
-
+  
+Object.freeze(
+  window.PAY54_SERVICES
+);
+  
 window.PAY54_SERVICE_REGISTRY = Object.freeze({
 
   version:
