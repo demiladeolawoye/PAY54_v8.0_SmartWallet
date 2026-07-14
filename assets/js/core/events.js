@@ -843,7 +843,11 @@ function createEvent(
 
     };
 
-    return freeze(event);
+    freeze(event.payload);
+
+freeze(event.metadata);
+
+return event;
 
 }
 
@@ -1230,3 +1234,203 @@ function listenerCount(
     return total;
 
 }
+
+   /* ========================================================================
+   EVENT CONSTANTS
+======================================================================== */
+
+const EVENTS = Object.freeze({
+
+    APP_READY:
+        "app.ready",
+
+    APP_SHUTDOWN:
+        "app.shutdown",
+
+    USER_LOGIN:
+        "user.login",
+
+    USER_LOGOUT:
+        "user.logout",
+
+    WALLET_UPDATED:
+        "wallet.updated",
+
+    WALLET_LOADED:
+        "wallet.loaded",
+
+    LEDGER_UPDATED:
+        "ledger.balance.updated",
+
+    LEDGER_ENTRY:
+        "ledger.entry.created",
+
+    TX_STARTED:
+        "transaction.started",
+
+    TX_COMPLETED:
+        "transaction.completed",
+
+    TX_FAILED:
+        "transaction.failed",
+
+    TX_REVERSED:
+        "transaction.reversed",
+
+    CARD_CREATED:
+        "cards.created",
+
+    CARD_UPDATED:
+        "cards.updated",
+
+    CARD_DELETED:
+        "cards.deleted",
+
+    CARD_FROZEN:
+        "cards.frozen",
+
+    CARD_UNFROZEN:
+        "cards.unfrozen",
+
+    CARD_DEFAULT:
+        "cards.default.changed",
+
+    DASHBOARD_REFRESH:
+        "dashboard.refresh",
+
+    SERVICE_OPEN:
+        "services.open",
+
+    SERVICE_CLOSE:
+        "services.closed",
+
+    SECURITY_WARNING:
+        "security.warning"
+
+});
+
+/* ========================================================================
+   ENTERPRISE API
+======================================================================== */
+
+const API = {
+
+    VERSION,
+
+    EVENTS,
+
+    subscribe,
+
+    once,
+
+    unsubscribe,
+
+    publish,
+
+    publishAsync,
+
+    replay,
+
+    clear,
+
+    clearHistory,
+
+    getHistory,
+
+    hasListeners,
+
+    listenerCount,
+
+    getDiagnostics
+
+};
+
+/* ========================================================================
+   BACKWARD COMPATIBILITY
+======================================================================== */
+
+API.on = subscribe;
+
+API.off = unsubscribe;
+
+API.emit = publish;
+
+API.emitAsync = publishAsync;
+
+/* ========================================================================
+   GLOBAL EXPORT
+======================================================================== */
+
+Object.defineProperty(
+
+    window,
+
+    "PAY54_EVENTS",
+
+    {
+
+        value:Object.freeze(API),
+
+        configurable:false,
+
+        writable:false,
+
+        enumerable:true
+
+    }
+
+);
+
+/* ========================================================================
+   ENTERPRISE SELF TEST
+======================================================================== */
+
+(function(){
+
+    const start = now();
+
+    publish(
+
+        EVENTS.APP_READY,
+
+        {
+
+            version:VERSION
+
+        },
+
+        {
+
+            source:"bootstrap"
+
+        }
+
+    );
+
+    const elapsed =
+
+        now() - start;
+
+    console.info(
+
+        "%cPAY54 Enterprise Event Bus",
+
+        "color:#2563eb;font-weight:bold;",
+
+        "v"+VERSION,
+
+        "(" +
+
+        elapsed.toFixed(2) +
+
+        "ms)"
+
+    );
+
+})();
+
+/* ========================================================================
+   MODULE COMPLETE
+======================================================================== */
+
+})();
