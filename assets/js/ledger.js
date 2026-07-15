@@ -188,8 +188,36 @@
   }
 
   function setBaseCurrency(cur) {
-    localStorage.setItem(LS.BASE_CUR, cur);
-  }
+
+    const previous =
+
+        getBaseCurrency();
+
+    localStorage.setItem(
+
+        LS.BASE_CUR,
+
+        cur
+
+    );
+
+    publishLedgerEvent(
+
+        "ledger.currency.changed",
+
+        {
+
+            previous,
+
+            current: cur,
+
+            updatedAt: nowISO()
+
+        }
+
+    );
+
+}
 
   function getBaseCurrency(fallback = "NGN") {
     return localStorage.getItem(LS.BASE_CUR) || fallback;
