@@ -520,17 +520,31 @@ try{
 
     );
 
-    if(window.prependTxToDOM){
+ publishTransactionEvent(
 
-        window.prependTxToDOM(tx);
+    "transaction.ui.refresh",
+
+    {
+
+        transaction: {
+
+            ...tx
+
+        },
+
+        refreshBalance: true,
+
+        refreshFeed: true,
+
+        refreshCards: true,
+
+        refreshServices: true,
+
+        occurredAt: new Date().toISOString()
 
     }
 
-    if(window.refreshUI){
-
-        window.refreshUI();
-
-    }
+);
 
     if(meta.showReceipt){
 
