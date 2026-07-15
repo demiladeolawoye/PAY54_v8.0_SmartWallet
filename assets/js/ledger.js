@@ -13,6 +13,38 @@
 (() => {
   "use strict";
 
+  const EVENTS = window.PAY54_EVENTS;
+
+  function publishLedgerEvent(eventName, payload = {}) {
+
+    try {
+
+      if (
+        EVENTS &&
+        typeof EVENTS.publish === "function"
+      ) {
+
+        EVENTS.publish(
+          eventName,
+          payload,
+          {
+            source: "ledger"
+          }
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "[PAY54_LEDGER]",
+        error
+      );
+
+    }
+
+  }
+
   const LS = {
     BALANCES: "pay54_balances",
     TX: "pay54_transactions",
