@@ -859,9 +859,11 @@ function createEvent(
 
     };
 
-    freeze(event.payload);
+ freeze(event.payload);
 
 freeze(event.metadata);
+
+Object.seal(event);
 
 return event;
 
