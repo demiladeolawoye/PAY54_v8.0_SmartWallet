@@ -71,59 +71,87 @@ function publishServiceEvent(
 
 function safeHandler(fnName){
 
-  return async () => {
+    return () => {
 
-    try{
+        publishServiceEvent(
 
-      const UI =
-        window.PAY54_UI;
+            SERVICE_EVENTS.OPEN,
 
-      if(!UI){
+            {
 
-        console.warn(
-          "PAY54_UI unavailable"
+                service: fnName,
+
+                openedAt:
+
+                    new Date().toISOString()
+
+            }
+
         );
 
-        return false;
+        try{
 
-      }
+            const UI = window.PAY54_UI;
 
-      if(typeof UI[fnName] !== "function"){
+            if(!UI){
 
-        console.warn(
-          `${fnName} missing`
-        );
+                throw new Error(
 
-        return false;
+                    "PAY54_UI unavailable"
 
-      }
+                );
 
-      await Promise.resolve(
-        UI[fnName]()
-      );
+            }
 
-      return true;
+            if(
 
-    }catch(err){
+                typeof UI[fnName] !== "function"
 
-      console.error(
+            ){
 
-        "[PAY54 SERVICES]",
+                throw new Error(
 
-        fnName,
+                    `${fnName} missing`
 
-        err
+                );
 
-      );
+            }
 
-      return false;
+            UI[fnName]();
 
-    }
+        }catch(err){
 
-  };
+            publishServiceEvent(
+
+                SERVICE_EVENTS.ERROR,
+
+                {
+
+                    service: fnName,
+
+                    error: err.message,
+
+                    occurredAt:
+
+                        new Date().toISOString()
+
+                }
+
+            );
+
+            console.error(
+
+                "SERVICE ROUTE FAILED:",
+
+                err
+
+            );
+
+        }
+
+    };
 
 }
-
   const VERSION =
   "11.0.0";
 
