@@ -175,10 +175,39 @@
 
 }
 
-  function initRates() {
-    const payload = { updated_at: nowISO(), table: DEFAULT_RATES };
-    localStorage.setItem(LS.RATES, JSON.stringify(payload));
-    return payload;
+  const payload = {
+
+    updated_at: nowISO(),
+
+    table: DEFAULT_RATES
+
+};
+
+localStorage.setItem(
+
+    LS.RATES,
+
+    JSON.stringify(payload)
+
+);
+
+publishLedgerEvent(
+
+    "ledger.fx.updated",
+
+    {
+
+        updated_at: payload.updated_at,
+
+        currencies:
+
+            Object.keys(payload.table)
+
+    }
+
+);
+
+return payload;
   }
 
   function getRates() {
