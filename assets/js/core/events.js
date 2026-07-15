@@ -906,62 +906,116 @@ async function executeListener(
 }
 
 /* ========================================================================
-   DISPATCH
+   SYNCHRONOUS DISPATCH ENGINE
 ======================================================================== */
 
-async function dispatch(
+function dispatch(event){
 
-    event
-
-){
-
-    const bucket=
-
+    const bucket =
         collectListeners(
-
             event.name
-
         );
 
-    for(
-
-        const listener
-
-        of bucket
-
-    ){
+    for(const listener of bucket){
 
         if(
-
             event.cancelled ||
-
             event.propagationStopped
-
         ){
-
             break;
-
         }
 
-        await executeListener(
+        try{
 
-            listener,
+            listener.callback(event);
 
-            event
+            diagnostics.delivered++;
 
-        );
+        }catch(error){
+
+            diagnostics.failed++;
+
+            console.error(
+                "[PAY54_EVENTS]",
+                event.name,
+                error
+            );
+
+        }
 
         if(listener.once){
 
             unsubscribe(
-
                 listener.id
-
             );
 
         }
 
     }
+
+    event.processingTime =
+        now() -
+        event.started;
+
+    return event;
+
+}
+
+/* ========================================================================
+   ASYNC DISPATCH ENGINE
+======================================================================== */
+
+async function dispatchAsync(event){
+
+    const bucket =
+        collectListeners(
+            event.name
+        );
+
+    for(const listener of bucket){
+
+        if(
+            event.cancelled ||
+            event.propagationStopped
+        ){
+            break;
+        }
+
+        try{
+
+            await Promise.resolve(
+                listener.callback(event)
+            );
+
+            diagnostics.delivered++;
+
+        }catch(error){
+
+            diagnostics.failed++;
+
+            console.error(
+                "[PAY54_EVENTS]",
+                event.name,
+                error
+            );
+
+        }
+
+        if(listener.once){
+
+            unsubscribe(
+                listener.id
+            );
+
+        }
+
+    }
+
+    event.processingTime =
+        now() -
+        event.started;
+
+    return event;
 
 }
 
@@ -979,26 +1033,18 @@ function publish(
 
 ){
 
-    eventName=
-
+    eventName =
         validateEventName(
-
             eventName
-
         );
 
     diagnostics.published++;
 
-    const event=
-
+    const event =
         createEvent(
-
             eventName,
-
             payload,
-
             options
-
         );
 
     pushHistory({
@@ -1015,9 +1061,7 @@ function publish(
 
     });
 
-    dispatch(event);
-
-    return event;
+    return dispatch(event);
 
 }
 
@@ -1035,26 +1079,18 @@ async function publishAsync(
 
 ){
 
-    eventName=
-
+    eventName =
         validateEventName(
-
             eventName
-
         );
 
     diagnostics.published++;
 
-    const event=
-
+    const event =
         createEvent(
-
             eventName,
-
             payload,
-
             options
-
         );
 
     pushHistory({
@@ -1071,9 +1107,7 @@ async function publishAsync(
 
     });
 
-    await dispatch(event);
-
-    return event;
+    return await dispatchAsync(event);
 
 }
 
