@@ -2,6 +2,73 @@
 
 "use strict";
 
+/* ========================================================================
+   PAY54 ENTERPRISE EVENT BRIDGE
+======================================================================== */
+
+const EVENTS = window.PAY54_EVENTS || null;
+
+const SERVICE_EVENTS = Object.freeze({
+
+    OPEN:
+        "services.open",
+
+    CLOSED:
+        "services.closed",
+
+    ERROR:
+        "services.error"
+
+});
+
+function publishServiceEvent(
+
+    eventName,
+
+    payload = {}
+
+){
+
+    try{
+
+        if(
+
+            EVENTS &&
+
+            typeof EVENTS.publish === "function"
+
+        ){
+
+            EVENTS.publish(
+
+                eventName,
+
+                payload,
+
+                {
+
+                    source:"services"
+
+                }
+
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+
+            "[PAY54_SERVICES]",
+
+            error
+
+        );
+
+    }
+
+}
+
 function safeHandler(fnName){
 
   return async () => {
