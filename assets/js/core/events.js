@@ -1401,6 +1401,8 @@ const API = {
 
     clearHistory,
 
+    reset,
+
     getHistory,
 
     hasListeners,
