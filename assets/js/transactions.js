@@ -446,48 +446,171 @@ function processTransaction(entry, meta = {}){
     return null;
   }
 
-  try{
+try{
+
+    publishTransactionEvent(
+
+        TX_EVENTS.STARTED,
+
+        {
+
+            entry: {
+
+                ...entry
+
+            },
+
+            meta: {
+
+                ...meta
+
+            },
+
+            startedAt:
+
+                new Date().toISOString()
+
+        }
+
+    );
 
     entry.meta = {
-      ...(entry.meta || {}),
-      source: meta.source || "wallet",
-      route: "smart_engine",
-      fx_used: meta.fx || false,
-      fees: meta.fees || 0
+
+        ...(entry.meta || {}),
+
+        source:
+
+            meta.source || "wallet",
+
+        route:
+
+            "smart_engine",
+
+        fx_used:
+
+            meta.fx || false,
+
+        fees:
+
+            meta.fees || 0
+
     };
 
-    const tx = ledger.applyEntry(entry);
+    const tx =
+
+        ledger.applyEntry(entry);
+
+    publishTransactionEvent(
+
+        TX_EVENTS.COMPLETED,
+
+        {
+
+            transaction: {
+
+                ...tx
+
+            },
+
+            completedAt:
+
+                new Date().toISOString()
+
+        }
+
+    );
 
     if(window.prependTxToDOM){
-      window.prependTxToDOM(tx);
+
+        window.prependTxToDOM(tx);
+
     }
 
     if(window.refreshUI){
-      window.refreshUI();
+
+        window.refreshUI();
+
     }
 
     if(meta.showReceipt){
 
-      showPaymentReceipt(
-        tx,
-        meta.title || "Transaction",
-        Math.abs(tx.amount),
-        tx.currency
-      );
+        showPaymentReceipt(
+
+            tx,
+
+            meta.title || "Transaction",
+
+            Math.abs(tx.amount),
+
+            tx.currency
+
+        );
+
+        publishTransactionEvent(
+
+            TX_EVENTS.RECEIPT_CREATED,
+
+            {
+
+                transactionId:
+
+                    tx.id,
+
+                currency:
+
+                    tx.currency,
+
+                amount:
+
+                    tx.amount
+
+            }
+
+        );
 
     }
 
     return tx;
 
-  }catch(err){
+}catch(err){
 
-    console.error("🚨 TX FAILED:", err);
+    publishTransactionEvent(
 
-    showToast("Transaction failed");
+        TX_EVENTS.FAILED,
+
+        {
+
+            error:
+
+                err.message,
+
+            entry: {
+
+                ...entry
+
+            }
+
+        }
+
+    );
+
+    console.error(
+
+        "🚨 TX FAILED:",
+
+        err
+
+    );
+
+    showToast(
+
+        "Transaction failed"
+
+    );
 
     return null;
 
-  }
+}
 
 }
 
