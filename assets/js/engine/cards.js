@@ -1,5 +1,81 @@
 "use strict";
 
+/* ========================================================================
+   PAY54 ENTERPRISE EVENT BRIDGE
+======================================================================== */
+
+const EVENTS = window.PAY54_EVENTS || null;
+
+const CARD_EVENTS = Object.freeze({
+
+    CREATED:
+        "cards.created",
+
+    UPDATED:
+        "cards.updated",
+
+    DELETED:
+        "cards.deleted",
+
+    FROZEN:
+        "cards.frozen",
+
+    UNFROZEN:
+        "cards.unfrozen",
+
+    DEFAULT_CHANGED:
+        "cards.default.changed"
+
+});
+
+function publishCardEvent(
+
+    eventName,
+
+    payload = {}
+
+){
+
+    try{
+
+        if(
+
+            EVENTS &&
+
+            typeof EVENTS.publish === "function"
+
+        ){
+
+            EVENTS.publish(
+
+                eventName,
+
+                payload,
+
+                {
+
+                    source:"cards"
+
+                }
+
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+
+            "[PAY54_CARDS]",
+
+            error
+
+        );
+
+    }
+
+}
+
 /* =========================================
    PAY54 ENTERPRISE CARDS ENGINE
    Version 11.0.0
