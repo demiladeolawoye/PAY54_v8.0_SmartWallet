@@ -229,9 +229,29 @@ function addCard(card){
     newCard
   );
 
-  saveCards(cards);
+saveCards(cards);
 
-  return newCard;
+publishCardEvent(
+
+    CARD_EVENTS.CREATED,
+
+    {
+
+        card: {
+
+            ...newCard
+
+        },
+
+        createdAt:
+
+            now()
+
+    }
+
+);
+
+return newCard;
 
 }
 
@@ -249,6 +269,22 @@ function deleteCard(id){
     );
 
   saveCards(cards);
+
+publishCardEvent(
+
+    CARD_EVENTS.DELETED,
+
+    {
+
+        cardId: id,
+
+        deletedAt:
+
+            now()
+
+    }
+
+);
 
 }
 
@@ -273,6 +309,30 @@ function toggleFreeze(id){
 
   saveCards(cards);
 
+publishCardEvent(
+
+    card.frozen
+
+        ? CARD_EVENTS.FROZEN
+
+        : CARD_EVENTS.UNFROZEN,
+
+    {
+
+        card: {
+
+            ...card
+
+        },
+
+        updatedAt:
+
+            now()
+
+    }
+
+);
+
 }
 
 /* =========================================
@@ -292,6 +352,40 @@ function setDefault(id){
   });
 
   saveCards(cards);
+
+const defaultCard =
+
+    cards.find(
+
+        card => card.default
+
+    );
+
+publishCardEvent(
+
+    CARD_EVENTS.DEFAULT_CHANGED,
+
+    {
+
+        card:
+
+            defaultCard
+
+                ? {
+
+                    ...defaultCard
+
+                  }
+
+                : null,
+
+        updatedAt:
+
+            now()
+
+    }
+
+);
 
 }
 
@@ -346,9 +440,29 @@ function updateCardBalance(
   card.updated =
     now();
 
-  saveCards(cards);
+saveCards(cards);
 
-  return card;
+publishCardEvent(
+
+    CARD_EVENTS.UPDATED,
+
+    {
+
+        card: {
+
+            ...card
+
+        },
+
+        updatedAt:
+
+            now()
+
+    }
+
+);
+
+return card;
 
 }
 
