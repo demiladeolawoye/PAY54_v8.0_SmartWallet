@@ -1274,7 +1274,33 @@ function listenerCount(
     return total;
 
 }
+/* ========================================================================
+   RESET
+======================================================================== */
 
+function reset(){
+
+    listeners.clear();
+
+    wildcardListeners.clear();
+
+    history.length = 0;
+
+    diagnostics.published = 0;
+
+    diagnostics.delivered = 0;
+
+    diagnostics.failed = 0;
+
+    diagnostics.removed = 0;
+
+    diagnostics.subscriptions = 0;
+
+    diagnostics.namespaces.clear();
+
+    diagnostics.started = Date.now();
+
+}
    /* ========================================================================
    EVENT CONSTANTS
 ======================================================================== */
