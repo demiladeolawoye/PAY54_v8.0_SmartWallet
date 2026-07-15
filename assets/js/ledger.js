@@ -315,24 +315,93 @@ return payload;
    * - Updates balances atomically for entry.currency
    * - Stores entry in TX list
    */
-  function applyEntry(entry) {
+function applyEntry(entry) {
+
     const e = entry;
-    if (!e || !e.currency || !Number.isFinite(Number(e.amount))) return null;
+
+    if (
+
+        !e ||
+
+        !e.currency ||
+
+        !Number.isFinite(Number(e.amount))
+
+    ) {
+
+        publishLedgerEvent(
+
+            "ledger.error",
+
+            {
+
+                reason: "Invalid ledger entry",
+
+                entry
+
+            }
+
+        );
+
+        return null;
+
+    }
 
     const balances = getBalances();
-    balances[e.currency] = Number(balances[e.currency] ?? 0) + Number(e.amount);
 
-    // prevent negative wallet in demo (optional guard)
-    // if (balances[e.currency] < 0) balances[e.currency] = balances[e.currency]; // no-op
+    const previousBalance =
+
+        Number(
+
+            balances[e.currency] ?? 0
+
+        );
+
+    balances[e.currency] =
+
+        previousBalance +
+
+        Number(e.amount);
 
     setBalances(balances);
 
     const list = getTx();
+
     list.unshift(e);
+
     setTx(list);
 
+    publishLedgerEvent(
+
+        "ledger.entry.created",
+
+        {
+
+            entry: {
+
+                ...e
+
+            },
+
+            balanceBefore:
+
+                previousBalance,
+
+            balanceAfter:
+
+                balances[e.currency],
+
+            committedAt:
+
+                nowISO()
+
+        }
+
+    );
+
     return e;
-  }
+
+}
 
   // Expose API
 window.PAY54_LEDGER = {
