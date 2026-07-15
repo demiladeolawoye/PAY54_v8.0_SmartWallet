@@ -129,10 +129,51 @@
     return cleaned;
   }
 
-  function setBalances(bal) {
-    if (!isPlainObject(bal)) return;
-    localStorage.setItem(LS.BALANCES, JSON.stringify(bal));
-  }
+ function setBalances(bal) {
+
+    if (!isPlainObject(bal)) {
+
+        return;
+
+    }
+
+    const previousBalances = getBalances();
+
+    const updatedBalances = {
+
+        ...bal
+
+    };
+
+    localStorage.setItem(
+
+        LS.BALANCES,
+
+        JSON.stringify(updatedBalances)
+
+    );
+
+    publishLedgerEvent(
+
+        "ledger.balance.updated",
+
+        {
+
+            previous: previousBalances,
+
+            current: {
+
+                ...updatedBalances
+
+            },
+
+            updatedAt: nowISO()
+
+        }
+
+    );
+
+}
 
   function initRates() {
     const payload = { updated_at: nowISO(), table: DEFAULT_RATES };
