@@ -1,5 +1,86 @@
 "use strict";
 
+/* ========================================================================
+   PAY54 ENTERPRISE EVENT BRIDGE
+======================================================================== */
+
+const EVENTS = window.PAY54_EVENTS || null;
+
+/* ========================================================================
+   TRANSACTION EVENT CONSTANTS
+======================================================================== */
+
+const TX_EVENTS = Object.freeze({
+
+    STARTED:
+        "transaction.started",
+
+    COMPLETED:
+        "transaction.completed",
+
+    FAILED:
+        "transaction.failed",
+
+    REVERSED:
+        "transaction.reversed",
+
+    RECEIPT_CREATED:
+        "receipt.created"
+
+});
+
+/* ========================================================================
+   SAFE EVENT PUBLISHER
+======================================================================== */
+
+function publishTransactionEvent(
+
+    eventName,
+
+    payload = {}
+
+){
+
+    try{
+
+        if(
+
+            EVENTS &&
+
+            typeof EVENTS.publish === "function"
+
+        ){
+
+            EVENTS.publish(
+
+                eventName,
+
+                payload,
+
+                {
+
+                    source:"transactions"
+
+                }
+
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+
+            "[PAY54_TRANSACTIONS]",
+
+            error
+
+        );
+
+    }
+
+}
+
 /* =========================
    PAY54 TRANSACTION ENGINE
 ========================= */
