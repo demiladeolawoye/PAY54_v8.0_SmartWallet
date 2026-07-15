@@ -912,9 +912,7 @@ async function executeListener(
 function dispatch(event){
 
     const bucket =
-        collectListeners(
-            event.name
-        );
+        collectListeners(event.name);
 
     for(const listener of bucket){
 
@@ -945,9 +943,7 @@ function dispatch(event){
 
         if(listener.once){
 
-            unsubscribe(
-                listener.id
-            );
+            unsubscribe(listener.id);
 
         }
 
@@ -968,9 +964,7 @@ function dispatch(event){
 async function dispatchAsync(event){
 
     const bucket =
-        collectListeners(
-            event.name
-        );
+        collectListeners(event.name);
 
     for(const listener of bucket){
 
@@ -1003,9 +997,7 @@ async function dispatchAsync(event){
 
         if(listener.once){
 
-            unsubscribe(
-                listener.id
-            );
+            unsubscribe(listener.id);
 
         }
 
@@ -1027,16 +1019,14 @@ function publish(
 
     eventName,
 
-    payload={},
+    payload = {},
 
-    options={}
+    options = {}
 
 ){
 
     eventName =
-        validateEventName(
-            eventName
-        );
+        validateEventName(eventName);
 
     diagnostics.published++;
 
@@ -1073,16 +1063,14 @@ async function publishAsync(
 
     eventName,
 
-    payload={},
+    payload = {},
 
-    options={}
+    options = {}
 
 ){
 
     eventName =
-        validateEventName(
-            eventName
-        );
+        validateEventName(eventName);
 
     diagnostics.published++;
 
