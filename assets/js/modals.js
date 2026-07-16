@@ -207,22 +207,26 @@ window.PAY54_MODALS = (function(){
 
     document.body.classList.add("modal-open");
 
-    document.body.appendChild(backdrop);
+  document.body.appendChild(
+  backdrop
+);
 
-    if(typeof onMount === "function"){
-      onMount({
-        modal,
-        close
-      });
-    }
+publishModalEvent(
 
-    return { close };
+  MODAL_EVENTS.OPENED,
+
+  {
+
+    title,
+
+    openedAt:
+
+      new Date()
+        .toISOString()
 
   }
 
- window.PAY54_MODALS = {
-  openModal
-};
+);
 
 /* =========================================
    GLOBAL LEGACY SUPPORT
