@@ -3,6 +3,77 @@
 ========================= */
 
 "use strict";
+/* ========================================================================
+   PAY54 ENTERPRISE MODAL EVENT BRIDGE
+======================================================================== */
+
+const EVENTS =
+window.PAY54_EVENTS || null;
+
+const MODAL_EVENTS =
+Object.freeze({
+
+  OPENED:
+    "modal.opened",
+
+  CLOSED:
+    "modal.closed",
+
+  ERROR:
+    "modal.error",
+
+  SERVICE_CLOSED:
+    "services.closed"
+
+});
+
+function publishModalEvent(
+
+  eventName,
+
+  payload = {}
+
+){
+
+  try{
+
+    if(
+
+      EVENTS &&
+
+      typeof EVENTS.publish === "function"
+
+    ){
+
+      EVENTS.publish(
+
+        eventName,
+
+        payload,
+
+        {
+
+          source:"modals"
+
+        }
+
+      );
+
+    }
+
+  }catch(error){
+
+    console.error(
+
+      "[PAY54_MODALS]",
+
+      error
+
+    );
+
+  }
+
+}
 
 window.PAY54_MODALS = (function(){
 
