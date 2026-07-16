@@ -175,18 +175,63 @@ window.PAY54_MODALS = (function(){
 
     const modal = backdrop.querySelector(".p54-modal");
 
-    function close(){
+   function close(){
 
-      backdrop.remove();
+  backdrop.remove();
 
-      document.body.classList.remove("modal-open");
+  document.body.classList.remove(
+    "modal-open"
+  );
 
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
 
-      document.removeEventListener("keydown", escClose);
+  document.documentElement.style.overflow = "";
+
+  document.removeEventListener(
+
+    "keydown",
+
+    escClose
+
+  );
+
+  publishModalEvent(
+
+    MODAL_EVENTS.CLOSED,
+
+    {
+
+      title,
+
+      closedAt:
+
+        new Date()
+          .toISOString()
 
     }
+
+  );
+
+  publishModalEvent(
+
+    MODAL_EVENTS.SERVICE_CLOSED,
+
+    {
+
+      service:
+
+        title,
+
+      closedAt:
+
+        new Date()
+          .toISOString()
+
+    }
+
+  );
+
+}
 
     function escClose(e){
       if(e.key === "Escape"){
