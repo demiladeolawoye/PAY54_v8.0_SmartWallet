@@ -609,6 +609,8 @@ bindCurrencyPills();
 
 bindDashboardButtons();
 
+subscribeDashboardEvents();
+
 if(!window.PAY54_APP.walletListenerBound){
 
 document.addEventListener(
