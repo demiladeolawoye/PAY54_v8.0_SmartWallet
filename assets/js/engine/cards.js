@@ -577,9 +577,33 @@ function addCardTransaction(
   card.updated =
     now();
 
-  saveCards(cards);
+saveCards(cards);
 
-  return card;
+publishCardEvent(
+
+    CARD_EVENTS.UPDATED,
+
+    {
+
+        action: "transaction.added",
+
+        cardId: card.id,
+
+        transaction: {
+
+            ...card.transactions[0]
+
+        },
+
+        updatedAt:
+
+            now()
+
+    }
+
+);
+
+return card;
 
 }
 
