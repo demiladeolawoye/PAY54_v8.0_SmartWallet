@@ -24,6 +24,125 @@ window.PAY54_APP = {
 window.PAY54_UI =
 window.PAY54_UI || {};
 
+/* ========================================================================
+   PAY54 ENTERPRISE EVENT SUBSCRIBER
+======================================================================== */
+
+const EVENTS = window.PAY54_EVENTS || null;
+
+function subscribeDashboardEvents(){
+
+    if(
+
+        !EVENTS ||
+
+        typeof EVENTS.subscribe !== "function"
+
+    ){
+
+        return;
+
+    }
+
+    EVENTS.subscribe(
+
+        "ledger.balance.updated",
+
+        () => {
+
+            renderBalance();
+
+        }
+
+    );
+
+    EVENTS.subscribe(
+
+        "transaction.ui.refresh",
+
+        () => {
+
+            renderBalance();
+
+            if(
+
+                window.renderRecentTransactions
+
+            ){
+
+                window.renderRecentTransactions();
+
+            }
+
+        }
+
+    );
+
+    EVENTS.subscribe(
+
+        "cards.updated",
+
+        () => {
+
+            renderBalance();
+
+        }
+
+    );
+
+    EVENTS.subscribe(
+
+        "cards.created",
+
+        () => {
+
+            renderBalance();
+
+        }
+
+    );
+
+    EVENTS.subscribe(
+
+        "cards.deleted",
+
+        () => {
+
+            renderBalance();
+
+        }
+
+    );
+
+    EVENTS.subscribe(
+
+        "services.open",
+
+        event => {
+
+            console.debug(
+
+                "[Dashboard]",
+
+                "Service opened:",
+
+                event.payload.service
+
+            );
+
+        }
+
+    );
+
+    console.info(
+
+        "✅ Dashboard Event Subscribers Ready"
+
+    );
+
+}
+
+
 window.PAY54_UI.openAddWallet =
 function(){
 
