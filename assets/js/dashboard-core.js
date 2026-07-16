@@ -2816,11 +2816,33 @@ showReceipt:true
 );
 
 if(
-typeof renderBalance
-===
-"function"
+
+    window.PAY54_EVENTS &&
+
+    typeof window.PAY54_EVENTS.publish === "function"
+
 ){
-renderBalance();
+
+    window.PAY54_EVENTS.publish(
+
+        "transaction.ui.refresh",
+
+        {
+
+            source: "checkout",
+
+            refreshBalance: true,
+
+            refreshFeed: true,
+
+            occurredAt:
+
+                new Date().toISOString()
+
+        }
+
+    );
+
 }
 
 close();
