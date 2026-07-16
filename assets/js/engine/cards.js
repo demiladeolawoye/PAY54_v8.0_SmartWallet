@@ -500,9 +500,37 @@ function updateControls(
   card.updated =
     now();
 
-  saveCards(cards);
+saveCards(cards);
 
-  return card;
+publishCardEvent(
+
+    CARD_EVENTS.UPDATED,
+
+    {
+
+        action: "controls.updated",
+
+        card: {
+
+            ...card
+
+        },
+
+        controls: {
+
+            ...card.controls
+
+        },
+
+        updatedAt:
+
+            now()
+
+    }
+
+);
+
+return card;
 
 }
 
