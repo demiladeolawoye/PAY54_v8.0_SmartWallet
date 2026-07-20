@@ -177,6 +177,16 @@ window.PAY54_MODALS = (function(){
 
    function close(){
 
+  if(
+
+    !backdrop.isConnected
+
+  ){
+
+    return;
+
+  }
+
   backdrop.remove();
 
   document.body.classList.remove(
