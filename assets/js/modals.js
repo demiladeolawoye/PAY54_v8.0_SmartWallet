@@ -263,30 +263,83 @@ publishModalEvent(
     title,
 
     openedAt:
-
-      new Date()
-        .toISOString()
+      new Date().toISOString()
 
   }
 
 );
 
+if(typeof onMount === "function"){
+
+  try{
+
+    onMount({
+
+      modal,
+
+      close
+
+    });
+
+  }catch(error){
+
+    publishModalEvent(
+
+      MODAL_EVENTS.ERROR,
+
+      {
+
+        title,
+
+        error:
+          error.message,
+
+        occurredAt:
+          new Date().toISOString()
+
+      }
+
+    );
+
+    console.error(
+      "[PAY54_MODALS]",
+      error
+    );
+
+  }
+
+}
+
+return{
+
+  close
+
+};
+
+} // End openModal()
+
 /* =========================================
    GLOBAL LEGACY SUPPORT
 ========================================= */
 
-window.openModal = openModal;
+window.openModal =
+openModal;
 
-window.closeAllModals = function(){
+window.closeAllModals =
+function(){
 
   document
-    .querySelectorAll(".p54-modal-backdrop")
-    .forEach(el => el.remove());
+    .querySelectorAll(
+      ".p54-modal-backdrop"
+    )
+    .forEach(el=>el.remove());
 
 };
 
-return {
+return{
+
   openModal
+
 };
 
 })();
