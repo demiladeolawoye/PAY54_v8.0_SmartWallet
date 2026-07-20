@@ -36,10 +36,11 @@
 
     } catch (error) {
 
-      console.error(
-        "[PAY54_LEDGER]",
-        error
-      );
+     console.error(
+    "[PAY54_LEDGER]",
+    eventName,
+    error
+);
 
     }
 
