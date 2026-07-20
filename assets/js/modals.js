@@ -195,43 +195,41 @@ window.PAY54_MODALS = (function(){
 
   );
 
-  publishModalEvent(
+ publishModalEvent(
 
-    MODAL_EVENTS.CLOSED,
+  MODAL_EVENTS.CLOSED,
 
-    {
+  {
+
+    title,
+
+    closedAt:
+
+      new Date()
+        .toISOString()
+
+  }
+
+);
+
+publishModalEvent(
+
+  MODAL_EVENTS.SERVICE_CLOSED,
+
+  {
+
+    service:
 
       title,
 
-      closedAt:
+    closedAt:
 
-        new Date()
-          .toISOString()
+      new Date()
+        .toISOString()
 
-    }
+  }
 
-  );
-
-  publishModalEvent(
-
-    MODAL_EVENTS.SERVICE_CLOSED,
-
-    {
-
-      service:
-
-        title,
-
-      closedAt:
-
-        new Date()
-          .toISOString()
-
-    }
-
-  );
-
-}
+);
 
     function escClose(e){
       if(e.key === "Escape"){
