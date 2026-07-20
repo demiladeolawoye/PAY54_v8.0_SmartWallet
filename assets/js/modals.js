@@ -63,13 +63,15 @@ function publishModalEvent(
 
   }catch(error){
 
-    console.error(
+  console.error(
 
-      "[PAY54_MODALS]",
+    "[PAY54_MODALS]",
 
-      error
+    eventName,
 
-    );
+    error
+
+);
 
   }
 
