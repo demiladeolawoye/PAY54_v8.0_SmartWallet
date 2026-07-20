@@ -1,7 +1,7 @@
 /* =========================
-   PAY54 MODAL ENGINE v9.0
+   PAY54 MODAL ENGINE v11.0.0
+   Enterprise Event Bus
 ========================= */
-
 "use strict";
 /* ========================================================================
    PAY54 ENTERPRISE EVENT BRIDGE
