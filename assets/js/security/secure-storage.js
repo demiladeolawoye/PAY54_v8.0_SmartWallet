@@ -507,3 +507,602 @@ function verifyChecksum(record){
     );
 
 }
+/* ========================================================================
+   STORAGE WRITE
+======================================================================== */
+
+function set(
+
+    key,
+
+    value,
+
+    options = {}
+
+){
+
+    const ttl =
+
+        options.ttl ??
+
+        DEFAULT_TTL;
+
+    const record =
+
+        updateChecksum(
+
+            buildRecord(
+
+                key,
+
+                value,
+
+                ttl
+
+            )
+
+        );
+
+    localStorage.setItem(
+
+        storageKey(key),
+
+        JSON.stringify(record.data)
+
+    );
+
+    saveMetadata(
+
+        key,
+
+        record.metadata
+
+    );
+
+    publishStorageEvent(
+
+        STORAGE_EVENTS.SAVED,
+
+        {
+
+            key,
+
+            namespace:
+
+                STORAGE_NAMESPACE,
+
+            updatedAt:
+
+                nowISO()
+
+        }
+
+    );
+
+    return deepClone(
+
+        record.data
+
+    );
+
+}
+
+/* ========================================================================
+   STORAGE READ
+======================================================================== */
+
+function get(
+
+    key,
+
+    fallback = null
+
+){
+
+    if(
+
+        !exists(key)
+
+    ){
+
+        return fallback;
+
+    }
+
+    const data =
+
+        safeParse(
+
+            localStorage.getItem(
+
+                storageKey(key)
+
+            ),
+
+            null
+
+        );
+
+    const metadata =
+
+        getMetadata(
+
+            key
+
+        );
+
+    if(
+
+        !metadata
+
+    ){
+
+        removeRaw(key);
+
+        publishStorageEvent(
+
+            STORAGE_EVENTS.CORRUPTED,
+
+            {
+
+                key,
+
+                reason:
+
+                    "Metadata missing"
+
+            }
+
+        );
+
+        return fallback;
+
+    }
+
+    const record = {
+
+        metadata,
+
+        data
+
+    };
+
+    if(
+
+        !verifyChecksum(
+
+            record
+
+        )
+
+    ){
+
+        removeRaw(key);
+
+        publishStorageEvent(
+
+            STORAGE_EVENTS.CORRUPTED,
+
+            {
+
+                key,
+
+                reason:
+
+                    "Checksum mismatch"
+
+            }
+
+        );
+
+        return fallback;
+
+    }
+
+    if(
+
+        isExpired(
+
+            metadata
+
+        )
+
+    ){
+
+        removeRaw(key);
+
+        publishStorageEvent(
+
+            STORAGE_EVENTS.EXPIRED,
+
+            {
+
+                key
+
+            }
+
+        );
+
+        return fallback;
+
+    }
+
+    publishStorageEvent(
+
+        STORAGE_EVENTS.LOADED,
+
+        {
+
+            key,
+
+            loadedAt:
+
+                nowISO()
+
+        }
+
+    );
+
+    return deepClone(
+
+        data
+
+    );
+
+}
+
+/* ========================================================================
+   STORAGE REMOVE
+======================================================================== */
+
+function remove(
+
+    key
+
+){
+
+    if(
+
+        !exists(key)
+
+    ){
+
+        return;
+
+    }
+
+    removeRaw(
+
+        key
+
+    );
+
+    publishStorageEvent(
+
+        STORAGE_EVENTS.REMOVED,
+
+        {
+
+            key,
+
+            removedAt:
+
+                nowISO()
+
+        }
+
+    );
+
+}
+   /* ========================================================================
+   NAMESPACE MAINTENANCE
+======================================================================== */
+
+function clearNamespace(){
+
+    const prefix =
+        `${STORAGE_NAMESPACE}:`;
+
+    const keys = [];
+
+    for(
+
+        let i = 0;
+
+        i < localStorage.length;
+
+        i++
+
+    ){
+
+        const key =
+            localStorage.key(i);
+
+        if(
+
+            key &&
+            key.startsWith(prefix)
+
+        ){
+
+            keys.push(key);
+
+        }
+
+    }
+
+    keys.forEach(key=>{
+
+        localStorage.removeItem(key);
+
+    });
+
+    publishStorageEvent(
+
+        STORAGE_EVENTS.REMOVED,
+
+        {
+
+            namespace:
+                STORAGE_NAMESPACE,
+
+            action:
+                "clear"
+
+        }
+
+    );
+
+}
+
+/* ========================================================================
+   EXPIRY PURGE
+======================================================================== */
+
+function purgeExpired(){
+
+    const prefix =
+        `${STORAGE_NAMESPACE}:`;
+
+    let removed = 0;
+
+    for(
+
+        let i = 0;
+
+        i < localStorage.length;
+
+        i++
+
+    ){
+
+        const key =
+            localStorage.key(i);
+
+        if(
+
+            !key ||
+
+            !key.startsWith(prefix) ||
+
+            key.endsWith(META_SUFFIX)
+
+        ){
+
+            continue;
+
+        }
+
+        const logicalKey =
+            key.substring(
+
+                prefix.length
+
+            );
+
+        const metadata =
+            getMetadata(
+
+                logicalKey
+
+            );
+
+        if(
+
+            metadata &&
+
+            isExpired(metadata)
+
+        ){
+
+            removeRaw(
+
+                logicalKey
+
+            );
+
+            removed++;
+
+        }
+
+    }
+
+    if(
+
+        removed > 0
+
+    ){
+
+        publishStorageEvent(
+
+            STORAGE_EVENTS.EXPIRED,
+
+            {
+
+                removed
+
+            }
+
+        );
+
+    }
+
+    return removed;
+
+}
+
+/* ========================================================================
+   RECOVERY
+======================================================================== */
+
+function restore(
+
+    key,
+
+    value,
+
+    options = {}
+
+){
+
+    const restored =
+
+        set(
+
+            key,
+
+            value,
+
+            options
+
+        );
+
+    publishStorageEvent(
+
+        STORAGE_EVENTS.RESTORED,
+
+        {
+
+            key,
+
+            restoredAt:
+
+                nowISO()
+
+        }
+
+    );
+
+    return restored;
+
+}
+
+/* ========================================================================
+   EXPORT
+======================================================================== */
+
+function exportNamespace(){
+
+    const prefix =
+        `${STORAGE_NAMESPACE}:`;
+
+    const exported = {};
+
+    for(
+
+        let i = 0;
+
+        i < localStorage.length;
+
+        i++
+
+    ){
+
+        const key =
+            localStorage.key(i);
+
+        if(
+
+            key &&
+
+            key.startsWith(prefix)
+
+        ){
+
+            exported[key] =
+
+                localStorage.getItem(
+
+                    key
+
+                );
+
+        }
+
+    }
+
+    return deepClone(
+
+        exported
+
+    );
+
+}
+
+/* ========================================================================
+   IMPORT
+======================================================================== */
+
+function importNamespace(
+
+    payload = {}
+
+){
+
+    if(
+
+        !isObject(payload)
+
+    ){
+
+        return 0;
+
+    }
+
+    let imported = 0;
+
+    Object.entries(payload)
+
+    .forEach(
+
+        ([key,value])=>{
+
+            if(
+
+                key.startsWith(
+
+                    `${STORAGE_NAMESPACE}:`
+
+                )
+
+            ){
+
+                localStorage.setItem(
+
+                    key,
+
+                    value
+
+                );
+
+                imported++;
+
+            }
+
+        }
+
+    );
+
+    return imported;
+
+}
