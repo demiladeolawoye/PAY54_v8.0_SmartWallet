@@ -231,7 +231,9 @@ publishModalEvent(
 
 );
 
-    function escClose(e){
+} // End close()
+
+function escClose(e){
       if(e.key === "Escape"){
         close();
       }
