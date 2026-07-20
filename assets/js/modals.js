@@ -315,10 +315,11 @@ if(typeof onMount === "function"){
 
     );
 
-    console.error(
-      "[PAY54_MODALS]",
-      error
-    );
+   console.error(
+    "[PAY54_MODALS]",
+    MODAL_EVENTS.ERROR,
+    error
+);
 
   }
 
