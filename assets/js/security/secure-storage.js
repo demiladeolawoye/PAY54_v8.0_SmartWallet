@@ -1106,3 +1106,103 @@ function importNamespace(
     return imported;
 
 }
+/* ========================================================================
+   PUBLIC API
+======================================================================== */
+
+const storage = Object.freeze({
+
+    set,
+
+    get,
+
+    remove,
+
+    exists,
+
+    restore,
+
+    clearNamespace,
+
+    purgeExpired,
+
+    export: exportNamespace,
+
+    import: importNamespace,
+
+    getMetadata
+
+});
+
+/* ========================================================================
+   PAY54 SECURITY ROOT
+======================================================================== */
+
+window.PAY54_SECURITY =
+window.PAY54_SECURITY || {};
+
+Object.defineProperty(
+
+    window.PAY54_SECURITY,
+
+    "storage",
+
+    {
+
+        value: storage,
+
+        writable: false,
+
+        configurable: false,
+
+        enumerable: true
+
+    }
+
+);
+
+/* ========================================================================
+   STARTUP
+======================================================================== */
+
+try{
+
+    purgeExpired();
+
+}catch(error){
+
+    console.error(
+
+        "[PAY54_SECURITY]",
+
+        "Startup purge failed",
+
+        error
+
+    );
+
+}
+
+/* ========================================================================
+   MODULE READY
+======================================================================== */
+
+Object.freeze(
+
+    STORAGE_EVENTS
+
+);
+
+console.info(
+
+    "[PAY54]",
+
+    "Enterprise Secure Storage",
+
+    STORAGE_VERSION,
+
+    "loaded"
+
+);
+
+})();
