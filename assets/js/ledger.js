@@ -331,7 +331,17 @@ return payload;
       base_currency: base,
       base_equiv: Number(baseEquiv || 0),
       fx_rate_used: Number(fxRate || 1),
-      meta: isPlainObject(meta) ? meta : {},
+      meta:
+
+sanitizeMeta(
+
+    isPlainObject(meta)
+
+        ? meta
+
+        : {}
+
+),
       created_at
     };
   }
