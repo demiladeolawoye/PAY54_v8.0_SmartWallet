@@ -582,7 +582,7 @@ if(
 
                 reason:
 
-                    guardResult?.errors ||
+                    guardResult?.reason ||
 
                     [
 
