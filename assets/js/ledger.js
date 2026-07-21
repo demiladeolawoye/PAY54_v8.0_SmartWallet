@@ -14,6 +14,31 @@
   "use strict";
 
   const EVENTS = window.PAY54_EVENTS;
+/* ==========================================================
+   PAY54 ENTERPRISE SECURITY
+========================================================== */
+
+const SECURITY =
+window.PAY54_SECURITY || {};
+
+const STORAGE =
+SECURITY.storage || null;
+
+const VALIDATOR =
+SECURITY.validator || null;
+
+const SANITIZER =
+SECURITY.sanitizer || null;
+
+const SESSION =
+SECURITY.session || null;
+
+const TRANSACTION_GUARD =
+SECURITY.transactionGuard || null;
+
+const SECURITY_BOOTSTRAP =
+SECURITY.bootstrap || null;
+   
 
   function publishLedgerEvent(eventName, payload = {}) {
 
