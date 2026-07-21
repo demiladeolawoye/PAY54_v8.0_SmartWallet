@@ -138,7 +138,7 @@ SECURITY.bootstrap || null;
   }
 
   function initBalances() {
-    localStorage.setItem(LS.BALANCES, JSON.stringify(DEFAULT_BALANCES));
+    storageSet(LS.BALANCES, JSON.stringify(DEFAULT_BALANCES));
     return { ...DEFAULT_BALANCES };
   }
 
@@ -151,7 +151,7 @@ SECURITY.bootstrap || null;
       const v = stored[k];
       cleaned[k] = Number.isFinite(Number(v)) ? Number(v) : cleaned[k];
     }
-    localStorage.setItem(LS.BALANCES, JSON.stringify(cleaned));
+    storageSet(LS.BALANCES, JSON.stringify(cleaned));
     return cleaned;
   }
 
@@ -171,7 +171,7 @@ SECURITY.bootstrap || null;
 
     };
 
-    localStorage.setItem(
+    storageSet(
 
         LS.BALANCES,
 
@@ -209,7 +209,7 @@ SECURITY.bootstrap || null;
 
 };
 
-localStorage.setItem(
+storageSet(
 
     LS.RATES,
 
@@ -248,7 +248,7 @@ return payload;
 
         getBaseCurrency();
 
-    localStorage.setItem(
+    storageSet(
 
         LS.BASE_CUR,
 
@@ -302,7 +302,7 @@ return payload;
   }
 
   function setTx(list) {
-    localStorage.setItem(LS.TX, JSON.stringify(Array.isArray(list) ? list : []));
+    storageSet(LS.TX, JSON.stringify(Array.isArray(list) ? list : []));
   }
 
   /**
