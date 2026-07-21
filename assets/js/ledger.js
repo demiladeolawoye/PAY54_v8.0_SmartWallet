@@ -62,16 +62,140 @@ SECURITY.bootstrap || null;
     } catch (error) {
 
      console.error(
-    "[PAY54_LEDGER]",
-    eventName,
-    error
-);
+        "[PAY54_LEDGER]",
+        eventName,
+        error
+     );
 
     }
 
-  }
+}
 
-  const LS = {
+/* ==========================================================
+   SECURITY HELPERS
+========================================================== */
+
+function storageGet(
+
+    key
+
+){
+
+    if(
+
+        STORAGE &&
+
+        typeof STORAGE.get === "function"
+
+    ){
+
+        return STORAGE.get(
+
+            key
+
+        );
+
+    }
+
+    return localStorage.getItem(
+
+        key
+
+    );
+
+}
+
+function storageSet(
+
+    key,
+
+    value
+
+){
+
+    if(
+
+        STORAGE &&
+
+        typeof STORAGE.set === "function"
+
+    ){
+
+        STORAGE.set(
+
+            key,
+
+            value
+
+        );
+
+        return;
+
+    }
+
+    localStorage.setItem(
+
+        key,
+
+        value
+
+    );
+
+}
+
+function validateCurrency(
+
+    currency
+
+){
+
+    if(
+
+        !VALIDATOR ||
+
+        typeof VALIDATOR.currency !== "function"
+
+    ){
+
+        return true;
+
+    }
+
+    return VALIDATOR.currency(
+
+        currency
+
+    );
+
+}
+
+function sanitizeMeta(
+
+    meta
+
+){
+
+    if(
+
+        !SANITIZER ||
+
+        typeof SANITIZER.payload !== "function"
+
+    ){
+
+        return meta;
+
+    }
+
+    return SANITIZER.payload(
+
+        meta
+
+    );
+
+}
+
+const LS = {
     BALANCES: "pay54_balances",
     TX: "pay54_transactions",
     RATES: "pay54_fx_rates",
