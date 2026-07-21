@@ -143,7 +143,7 @@ SECURITY.bootstrap || null;
   }
 
   function getBalances() {
-    const stored = safeJSONParse(localStorage.getItem(LS.BALANCES), null);
+    const stored = safeJSONParse(storageGet(LS.BALANCES), null);
     if (!isPlainObject(stored)) return initBalances();
 
     const cleaned = { ...DEFAULT_BALANCES };
@@ -237,7 +237,7 @@ return payload;
   }
 
   function getRates() {
-    const stored = safeJSONParse(localStorage.getItem(LS.RATES), null);
+    const stored = safeJSONParse(storageGet(LS.RATES), null);
     if (!stored || !isPlainObject(stored) || !isPlainObject(stored.table)) return initRates();
     return stored;
   }
@@ -275,7 +275,7 @@ return payload;
 }
 
   function getBaseCurrency(fallback = "NGN") {
-    return localStorage.getItem(LS.BASE_CUR) || fallback;
+    return storageGet(LS.BASE_CUR) || fallback;
   }
 
   function rate(from, to) {
@@ -297,7 +297,7 @@ return payload;
   }
 
   function getTx() {
-    const v = safeJSONParse(localStorage.getItem(LS.TX), []);
+    const v = safeJSONParse(storageGet(LS.TX), []);
     return Array.isArray(v) ? v : [];
   }
 
