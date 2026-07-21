@@ -265,7 +265,53 @@ const LS = {
     storageSet(LS.BALANCES, JSON.stringify(DEFAULT_BALANCES));
     return { ...DEFAULT_BALANCES };
   }
+/* ==========================================================
+   FX INITIALIZATION
+========================================================== */
 
+function initRates() {
+
+    const payload = {
+
+        updated_at: nowISO(),
+
+        table: DEFAULT_RATES
+
+    };
+
+    storageSet(
+
+        LS.RATES,
+
+        JSON.stringify(payload)
+
+    );
+
+    publishLedgerEvent(
+
+        "ledger.fx.updated",
+
+        {
+
+            updated_at:
+
+                payload.updated_at,
+
+            currencies:
+
+                Object.keys(
+
+                    payload.table
+
+                )
+
+        }
+
+    );
+
+    return payload;
+
+}
   function getBalances() {
     const stored = safeJSONParse(storageGet(LS.BALANCES), null);
     if (!isPlainObject(stored)) return initBalances();
