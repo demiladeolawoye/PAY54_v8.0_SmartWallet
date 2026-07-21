@@ -564,11 +564,11 @@ if(
 
     if(
 
-        !guardResult ||
+    !guardResult ||
 
-        guardResult.success === false
+    !guardResult.approved
 
-    ){
+){
 
         publishLedgerEvent(
 
