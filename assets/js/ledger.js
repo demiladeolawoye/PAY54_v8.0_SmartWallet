@@ -354,7 +354,33 @@ sanitizeMeta(
 function applyEntry(entry) {
 
     const e = entry;
+if(
 
+    !validateCurrency(
+
+        e.currency
+
+    )
+
+){
+
+    publishLedgerEvent(
+
+        "ledger.security.validation.failed",
+
+        {
+
+            currency:
+
+                e.currency
+
+        }
+
+    );
+
+    return null;
+
+}
     if (
 
         !e ||
