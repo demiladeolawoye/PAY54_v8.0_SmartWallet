@@ -371,41 +371,6 @@ function initRates() {
 
 }
 
-  const payload = {
-
-    updated_at: nowISO(),
-
-    table: DEFAULT_RATES
-
-};
-
-storageSet(
-
-    LS.RATES,
-
-    JSON.stringify(payload)
-
-);
-
-publishLedgerEvent(
-
-    "ledger.fx.updated",
-
-    {
-
-        updated_at: payload.updated_at,
-
-        currencies:
-
-            Object.keys(payload.table)
-
-    }
-
-);
-
-return payload;
-  }
-
   function getRates() {
     const stored = safeJSONParse(storageGet(LS.RATES), null);
     if (!stored || !isPlainObject(stored) || !isPlainObject(stored.table)) return initRates();
