@@ -517,6 +517,125 @@ if(
 
 }
    /* ==========================================================
+   ENTERPRISE TRANSACTION GUARD
+========================================================== */
+
+if(
+
+    TRANSACTION_GUARD &&
+
+    typeof TRANSACTION_GUARD.evaluateTransaction === "function"
+
+){
+
+    const guardResult =
+
+        TRANSACTION_GUARD.evaluateTransaction({
+
+            id:
+
+                e.id,
+
+            walletId:
+
+                e.meta?.walletId ??
+
+                "",
+
+            beneficiary:
+
+                e.meta?.beneficiary ??
+
+                e.meta?.recipient ??
+
+                "",
+
+            currency:
+
+                e.currency,
+
+            amount:
+
+                Math.abs(
+
+                    Number(
+
+                        e.amount
+
+                    )
+
+                ),
+
+            type:
+
+                e.type,
+
+            meta:
+
+                e.meta
+
+        });
+
+    if(
+
+        !guardResult ||
+
+        !guardResult.approved
+
+    ){
+
+        publishLedgerEvent(
+
+            "ledger.security.guard.rejected",
+
+            {
+
+                transaction:
+
+                    e.id,
+
+                reason:
+
+                    guardResult?.reason ??
+
+                    "TRANSACTION_REJECTED",
+
+                timestamp:
+
+                    nowISO()
+
+            }
+
+        );
+
+        return null;
+
+    }
+
+    publishLedgerEvent(
+
+        "ledger.security.guard.approved",
+
+        {
+
+            transaction:
+
+                e.id,
+
+            reference:
+
+                guardResult.reference,
+
+            timestamp:
+
+                nowISO()
+
+        }
+
+    );
+
+}
+   /* ==========================================================
    TRANSACTION GUARD
 ========================================================== */
 
