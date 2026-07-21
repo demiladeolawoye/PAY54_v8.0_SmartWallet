@@ -516,6 +516,89 @@ if(
     return null;
 
 }
+   /* ==========================================================
+   TRANSACTION GUARD
+========================================================== */
+
+if(
+
+    TRANSACTION_GUARD &&
+
+    typeof TRANSACTION_GUARD.evaluateTransaction === "function"
+
+){
+
+    const guardResult =
+
+        TRANSACTION_GUARD.evaluateTransaction({
+
+            id:
+
+                e.id,
+
+            currency:
+
+                e.currency,
+
+            amount:
+
+                Math.abs(
+
+                    Number(
+
+                        e.amount
+
+                    )
+
+                ),
+
+            type:
+
+                e.type,
+
+            meta:
+
+                e.meta
+
+        });
+
+    if(
+
+        !guardResult ||
+
+        guardResult.success === false
+
+    ){
+
+        publishLedgerEvent(
+
+            "ledger.security.guard.rejected",
+
+            {
+
+                transaction:
+
+                    e.id,
+
+                reason:
+
+                    guardResult?.errors ||
+
+                    [
+
+                        "TRANSACTION_REJECTED"
+
+                    ]
+
+            }
+
+        );
+
+        return null;
+
+    }
+
+}
     if (
 
         !e ||
