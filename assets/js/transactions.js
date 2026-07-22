@@ -761,15 +761,29 @@ function processTransaction(entry, meta = {}){
     return null;
   }
 
-  if(!entry.amount || isNaN(entry.amount)){
-    showToast("Invalid transaction");
-    return null;
-  }
+const validation =
 
-  if(Math.abs(entry.amount) > 100000000){
-    showToast("Amount exceeds limit");
+    validateTransaction(
+
+        entry
+
+    );
+
+if(
+
+    !validation.valid
+
+){
+
+    showToast(
+
+        validation.message
+
+    );
+
     return null;
-  }
+
+}
 
 try{
 
