@@ -859,9 +859,15 @@ entry.meta =
 
     );
 
-    const tx =
+const tx =
 
-        ledger.applyEntry(entry);
+    executeTransaction(
+
+        ledger,
+
+        entry
+
+    );
 
     publishTransactionEvent(
 
