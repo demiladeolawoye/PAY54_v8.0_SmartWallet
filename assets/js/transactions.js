@@ -926,7 +926,55 @@ if(
     return null;
 
 }
+const policy =
 
+    evaluateTransactionPolicy(
+
+        entry,
+
+        meta
+
+    );
+
+if(
+
+    !policy.allowed
+
+){
+
+    publishTransactionEvent(
+
+        TX_EVENTS.FAILED,
+
+        {
+
+            reason:
+
+                policy.code,
+
+            message:
+
+                policy.message,
+
+            entry:{
+
+                ...entry
+
+            }
+
+        }
+
+    );
+
+    showToast(
+
+        policy.message
+
+    );
+
+    return null;
+
+}
 try{
 
     publishTransactionEvent(
