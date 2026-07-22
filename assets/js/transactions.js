@@ -749,6 +749,42 @@ function validateTransaction(
 
 }
 /* =========================
+   ENTERPRISE TRANSACTION
+   EXECUTION PIPELINE
+========================= */
+
+function executeTransaction(
+
+    ledger,
+
+    entry
+
+){
+
+    if(
+
+        !ledger ||
+
+        typeof ledger.applyEntry !== "function"
+
+    ){
+
+        throw new Error(
+
+            "Ledger unavailable"
+
+        );
+
+    }
+
+    return ledger.applyEntry(
+
+        entry
+
+    );
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
