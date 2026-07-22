@@ -263,7 +263,13 @@ function openCreatePinModal(callback){
 
 function requestPinVerification(callback){
 
-  const savedPin = localStorage.getItem("pay54_pin");
+    const STORAGE =
+
+        window.PAY54_SECURITY?.storage ||
+
+        null;
+
+    const savedPin =
 
   if(!savedPin){
     openCreatePinModal(callback);
