@@ -532,49 +532,121 @@ if(
 
         TRANSACTION_GUARD.evaluateTransaction({
 
-            id:
+    id:
 
-                e.id,
+        e.id,
 
-            walletId:
+    walletId:
 
-                e.meta?.walletId ??
+        e.meta?.walletId ??
 
-                "",
+        "",
 
-            beneficiary:
+    beneficiary:
 
-                e.meta?.beneficiary ??
+        e.meta?.beneficiary ??
 
-                e.meta?.recipient ??
+        e.meta?.recipient ??
 
-                "",
+        "",
 
-            currency:
+    recipient:
 
-                e.currency,
+        e.meta?.recipient ??
 
-            amount:
+        "",
 
-                Math.abs(
+    reference:
 
-                    Number(
+        e.meta?.reference ??
 
-                        e.amount
+        e.id,
 
-                    )
+    provider:
 
-                ),
+        e.meta?.provider ??
 
-            type:
+        "",
 
-                e.type,
+    route:
 
-            meta:
+        e.meta?.route ??
 
-                e.meta
+        "",
 
-        });
+    account_name:
+
+        e.meta?.account_name ??
+
+        "",
+
+    account_no:
+
+        e.meta?.account_no ??
+
+        "",
+
+    paymentMethod:
+
+        e.meta?.paymentMethod ??
+
+        e.meta?.method ??
+
+        "",
+
+    channel:
+
+        e.meta?.channel ??
+
+        "wallet",
+
+    country:
+
+        e.meta?.country ??
+
+        "",
+
+    deviceId:
+
+        e.meta?.deviceId ??
+
+        "",
+
+    ipAddress:
+
+        e.meta?.ipAddress ??
+
+        "",
+
+    userAgent:
+
+        navigator.userAgent,
+
+    currency:
+
+        e.currency,
+
+    amount:
+
+        Math.abs(
+
+            Number(
+
+                e.amount
+
+            )
+
+        ),
+
+    type:
+
+        e.type,
+
+    meta:
+
+        e.meta
+
+});
 
     if(
 
