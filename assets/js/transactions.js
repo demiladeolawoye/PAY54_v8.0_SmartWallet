@@ -213,7 +213,33 @@ function openCreatePinModal(callback){
             return;
           }
 
-          localStorage.setItem("pay54_pin", p1);
+          if(
+
+    STORAGE &&
+
+    typeof STORAGE.set === "function"
+
+){
+
+    STORAGE.set(
+
+        "pay54_pin",
+
+        p1
+
+    );
+
+}else{
+
+    localStorage.setItem(
+
+        "pay54_pin",
+
+        p1
+
+    );
+
+}
 
           showToast("PIN created successfully");
 
