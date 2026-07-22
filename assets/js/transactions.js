@@ -482,7 +482,146 @@ https://wa.me/?text=${encodeURIComponent(text)}
   });
 
 }
+/* =========================
+   ENTERPRISE TRANSACTION
+   CONTEXT BUILDER
+========================= */
 
+function buildTransactionContext(
+
+    entry,
+
+    meta = {}
+
+){
+
+    return {
+
+        ...(entry.meta || {}),
+
+        source:
+
+            meta.source ??
+
+            "wallet",
+
+        walletId:
+
+            meta.walletId ??
+
+            entry.meta?.walletId ??
+
+            "",
+
+        beneficiary:
+
+            meta.beneficiary ??
+
+            entry.meta?.beneficiary ??
+
+            "",
+
+        recipient:
+
+            meta.recipient ??
+
+            entry.meta?.recipient ??
+
+            "",
+
+        reference:
+
+            meta.reference ??
+
+            entry.meta?.reference ??
+
+            entry.id ??
+
+            "",
+
+        provider:
+
+            meta.provider ??
+
+            entry.meta?.provider ??
+
+            "",
+
+        route:
+
+            meta.route ??
+
+            "smart_engine",
+
+        paymentMethod:
+
+            meta.paymentMethod ??
+
+            entry.meta?.paymentMethod ??
+
+            "",
+
+        channel:
+
+            meta.channel ??
+
+            "wallet",
+
+        account_name:
+
+            meta.account_name ??
+
+            entry.meta?.account_name ??
+
+            "",
+
+        account_no:
+
+            meta.account_no ??
+
+            entry.meta?.account_no ??
+
+            "",
+
+        country:
+
+            meta.country ??
+
+            entry.meta?.country ??
+
+            "",
+
+        deviceId:
+
+            meta.deviceId ??
+
+            entry.meta?.deviceId ??
+
+            "",
+
+        ipAddress:
+
+            meta.ipAddress ??
+
+            entry.meta?.ipAddress ??
+
+            "",
+
+        fx_used:
+
+            meta.fx ??
+
+            false,
+
+        fees:
+
+            meta.fees ??
+
+            0
+
+    };
+
+}
 /* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
