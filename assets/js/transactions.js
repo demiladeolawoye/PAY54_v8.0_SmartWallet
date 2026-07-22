@@ -623,6 +623,132 @@ function buildTransactionContext(
 
 }
 /* =========================
+   ENTERPRISE TRANSACTION
+   VALIDATION PIPELINE
+========================= */
+
+function validateTransaction(
+
+    entry
+
+){
+
+    if(
+
+        !entry ||
+
+        typeof entry !== "object"
+
+    ){
+
+        return {
+
+            valid:false,
+
+            message:"Invalid transaction"
+
+        };
+
+    }
+
+    if(
+
+        typeof entry.amount !== "number" ||
+
+        Number.isNaN(entry.amount)
+
+    ){
+
+        return {
+
+            valid:false,
+
+            message:"Invalid transaction amount"
+
+        };
+
+    }
+
+    if(
+
+        entry.amount === 0
+
+    ){
+
+        return {
+
+            valid:false,
+
+            message:"Amount cannot be zero"
+
+        };
+
+    }
+
+    if(
+
+        Math.abs(entry.amount) >
+
+        100000000
+
+    ){
+
+        return {
+
+            valid:false,
+
+            message:"Amount exceeds limit"
+
+        };
+
+    }
+
+    if(
+
+        !entry.currency ||
+
+        typeof entry.currency !== "string"
+
+    ){
+
+        return {
+
+            valid:false,
+
+            message:"Currency is required"
+
+        };
+
+    }
+
+    if(
+
+        !entry.type ||
+
+        typeof entry.type !== "string"
+
+    ){
+
+        return {
+
+            valid:false,
+
+            message:"Transaction type is required"
+
+        };
+
+    }
+
+    return {
+
+        valid:true,
+
+        message:null
+
+    };
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
