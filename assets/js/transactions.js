@@ -136,7 +136,15 @@ function showToast(message){
 
 function openCreatePinModal(callback){
 
-  const openModal = window.PAY54_MODALS?.openModal;
+    const STORAGE =
+
+        window.PAY54_SECURITY?.storage ||
+
+        null;
+
+    const openModal =
+
+        window.PAY54_MODALS?.openModal;
 
   if(!openModal){
     console.error("Modal engine missing");
