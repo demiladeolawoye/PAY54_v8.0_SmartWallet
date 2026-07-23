@@ -1187,7 +1187,7 @@ function buildAuditRecord(
 
         status:
 
-            "PENDING"
+    TX_STATE.CREATED
 
     };
 
