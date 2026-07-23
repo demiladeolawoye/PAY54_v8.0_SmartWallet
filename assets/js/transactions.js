@@ -1627,21 +1627,12 @@ entry.meta =
     );
 
 const tx =
-    await retryExecution(
 
-        () =>
+    executeTransaction(
 
-            Promise.resolve(
+        ledger,
 
-                executeTransaction(
-
-                    ledger,
-
-                    entry
-
-                )
-
-            )
+        entry
 
     );
    updateTransactionLifecycle(
