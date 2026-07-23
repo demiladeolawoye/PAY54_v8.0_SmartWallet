@@ -1309,6 +1309,65 @@ const TX_LOCKS =
 
     new Set();
 /* =========================
+   ACQUIRE LOCK
+========================= */
+
+function acquireTransactionLock(
+
+    entry
+
+){
+
+    const key =
+
+        entry.id ||
+
+        `${entry.type}:${entry.currency}:${entry.amount}`;
+
+    if(
+
+        TX_LOCKS.has(key)
+
+    ){
+
+        return false;
+
+    }
+
+    TX_LOCKS.add(
+
+        key
+
+    );
+
+    return true;
+
+}
+
+/* =========================
+   RELEASE LOCK
+========================= */
+
+function releaseTransactionLock(
+
+    entry
+
+){
+
+    const key =
+
+        entry.id ||
+
+        `${entry.type}:${entry.currency}:${entry.amount}`;
+
+    TX_LOCKS.delete(
+
+        key
+
+    );
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
