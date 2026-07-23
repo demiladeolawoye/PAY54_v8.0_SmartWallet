@@ -1398,31 +1398,33 @@ if(
     );
 try{
 
-    publishTransactionEvent(
+   publishTransactionEvent(
 
-        TX_EVENTS.STARTED,
+    TX_EVENTS.STARTED,
 
-        {
+    {
 
-            entry: {
+        audit,
 
-                ...entry
+        entry: {
 
-            },
+            ...entry
 
-            meta: {
+        },
 
-                ...meta
+        meta: {
 
-            },
+            ...meta
 
-            startedAt:
+        },
 
-                new Date().toISOString()
+        startedAt:
 
-        }
+            new Date().toISOString()
 
-    );
+    }
+
+);
 
 entry.meta =
 
