@@ -1511,6 +1511,15 @@ if(
     "VALIDATED"
 
 );
+ const correlationId =
+
+    buildCorrelationId(
+
+        entry,
+
+        audit
+
+    );  
    const duplicate =
 
     checkTransactionIdempotency(
