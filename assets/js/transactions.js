@@ -1141,6 +1141,45 @@ const TX_STATE = Object.freeze({
 
 });
 /* =========================
+   STATE TRANSITIONS
+========================= */
+
+const TX_STATE_FLOW = Object.freeze({
+
+    CREATED: [
+
+        TX_STATE.VALIDATED,
+
+        TX_STATE.FAILED
+
+    ],
+
+    VALIDATED: [
+
+        TX_STATE.PROCESSING,
+
+        TX_STATE.FAILED
+
+    ],
+
+    PROCESSING: [
+
+        TX_STATE.COMPLETED,
+
+        TX_STATE.FAILED,
+
+        TX_STATE.REVERSED
+
+    ],
+
+    COMPLETED: [],
+
+    FAILED: [],
+
+    REVERSED: []
+
+});
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
