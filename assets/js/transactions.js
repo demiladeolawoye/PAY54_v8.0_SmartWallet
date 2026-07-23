@@ -1909,7 +1909,23 @@ releaseTransactionLock(
         "FAILED"
 
     );
+executePipelineHooks(
 
+    "onFailure",
+
+    {
+
+        error: err,
+
+        audit,
+
+        correlationId,
+
+        entry
+
+    }
+
+);
  publishTransactionEvent(
 
     TX_EVENTS.FAILED,
