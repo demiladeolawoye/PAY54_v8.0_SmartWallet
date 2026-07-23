@@ -1450,6 +1450,55 @@ if(
         meta
 
     );
+   const duplicate =
+
+    checkTransactionIdempotency(
+
+        entry
+
+    );
+
+if(
+
+    !duplicate.allowed
+
+){
+
+    publishTransactionEvent(
+
+        TX_EVENTS.FAILED,
+
+        {
+
+            reason:
+
+                "DUPLICATE",
+
+            message:
+
+                duplicate.reason,
+
+            audit,
+
+            entry:{
+
+                ...entry
+
+            }
+
+        }
+
+    );
+
+    showToast(
+
+        duplicate.reason
+
+    );
+
+    return null;
+
+}
 try{
 
    publishTransactionEvent(
