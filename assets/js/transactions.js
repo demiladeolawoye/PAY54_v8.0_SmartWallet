@@ -1121,6 +1121,26 @@ function evaluateFraudAndBehaviour(
 
 }
 /* =========================
+   ENTERPRISE TRANSACTION
+   STATES
+========================= */
+
+const TX_STATE = Object.freeze({
+
+    CREATED: "CREATED",
+
+    VALIDATED: "VALIDATED",
+
+    PROCESSING: "PROCESSING",
+
+    COMPLETED: "COMPLETED",
+
+    FAILED: "FAILED",
+
+    REVERSED: "REVERSED"
+
+});
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
