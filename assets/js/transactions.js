@@ -1529,7 +1529,13 @@ if(
 
 }
 try{
+updateTransactionLifecycle(
 
+    audit,
+
+    "PROCESSING"
+
+);
    publishTransactionEvent(
 
     TX_EVENTS.STARTED,
