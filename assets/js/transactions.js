@@ -1679,6 +1679,14 @@ const tx =
 
 }catch(err){
 
+    updateTransactionLifecycle(
+
+        audit,
+
+        "FAILED"
+
+    );
+
     publishTransactionEvent(
 
         TX_EVENTS.FAILED,
