@@ -1387,6 +1387,15 @@ if(
     return null;
 
 }
+   const audit =
+
+    buildAuditRecord(
+
+        entry,
+
+        meta
+
+    );
 try{
 
     publishTransactionEvent(
