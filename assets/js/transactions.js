@@ -1472,6 +1472,13 @@ if(
         meta
 
     );
+   updateTransactionLifecycle(
+
+    audit,
+
+    "VALIDATED"
+
+);
    const duplicate =
 
     checkTransactionIdempotency(
