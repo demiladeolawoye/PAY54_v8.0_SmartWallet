@@ -1857,7 +1857,11 @@ releaseTransactionLock(
         "Transaction failed"
 
     );
+releaseTransactionLock(
 
+    entry
+
+);
     return null;
 
 }
