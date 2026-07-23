@@ -1334,26 +1334,7 @@ function buildCorrelationId(
 const TX_LOCKS =
 
     new Set();
-/* =========================
-   ENTERPRISE TRANSACTION
-   STATES
-========================= */
 
-const TX_STATE = Object.freeze({
-
-    CREATED: "CREATED",
-
-    VALIDATED: "VALIDATED",
-
-    PROCESSING: "PROCESSING",
-
-    COMPLETED: "COMPLETED",
-
-    FAILED: "FAILED",
-
-    REVERSED: "REVERSED"
-
-});
 /* =========================
    ACQUIRE LOCK
 ========================= */
