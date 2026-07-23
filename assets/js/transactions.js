@@ -985,6 +985,70 @@ function evaluateTransactionPolicy(
 
 }
 /* =========================
+   ENTERPRISE COMPLIANCE
+   & RISK PIPELINE
+========================= */
+
+function evaluateComplianceAndRisk(
+
+    entry,
+
+    meta = {}
+
+){
+
+    const result = {
+
+        approved: true,
+
+        riskScore: 0,
+
+        amlStatus: "CLEAR",
+
+        sanctionsStatus: "CLEAR",
+
+        reason: null
+
+    };
+
+    if(
+
+        Math.abs(entry.amount) >= 1000000
+
+    ){
+
+        result.riskScore += 25;
+
+    }
+
+    if(
+
+        meta.highRiskCountry === true
+
+    ){
+
+        result.riskScore += 50;
+
+    }
+
+    if(
+
+        meta.manualReview === true
+
+    ){
+
+        result.approved = false;
+
+        result.reason =
+
+            "Transaction requires manual review";
+
+    }
+
+    return result;
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
