@@ -1259,6 +1259,32 @@ function updateTransactionLifecycle(
 
 ){
 
+    const current =
+
+        audit.status ||
+
+        TX_STATE.CREATED;
+
+    const allowed =
+
+        TX_STATE_FLOW[current] ||
+
+        [];
+
+    if(
+
+        !allowed.includes(status)
+
+    ){
+
+        throw new Error(
+
+            `Invalid transaction state transition: ${current} -> ${status}`
+
+        );
+
+    }
+
     audit.status = status;
 
     audit.updatedAt =
