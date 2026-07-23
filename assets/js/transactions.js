@@ -933,67 +933,43 @@ function evaluateTransactionPolicy(
 
     }
 
-    if(
+    const rules = [
 
-        Math.abs(entry.amount) >
+        checkAmountPolicy(
 
-        50000000
+            entry
 
-    ){
+        ),
 
-        return {
+        checkWalletPolicy(
 
-            allowed:false,
+            meta
 
-            code:"LIMIT_EXCEEDED",
+        ),
 
-            message:
+        checkAccountPolicy(
 
-                "Transaction exceeds PAY54 policy limit"
+            meta
 
-        };
+        )
 
-    }
+    ];
 
-    if(
+    for(
 
-        meta.accountStatus ===
-
-        "SUSPENDED"
+        const rule of rules
 
     ){
 
-        return {
+        if(
 
-            allowed:false,
+            !rule.allowed
 
-            code:"ACCOUNT_SUSPENDED",
+        ){
 
-            message:
+            return rule;
 
-                "Account is suspended"
-
-        };
-
-    }
-
-    if(
-
-        meta.walletLocked === true
-
-    ){
-
-        return {
-
-            allowed:false,
-
-            code:"WALLET_LOCKED",
-
-            message:
-
-                "Wallet is locked"
-
-        };
+        }
 
     }
 
