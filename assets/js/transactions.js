@@ -1269,6 +1269,38 @@ function updateTransactionLifecycle(
 
 }
 /* =========================
+   ENTERPRISE CORRELATION
+   ENGINE
+========================= */
+
+function buildCorrelationId(
+
+    entry,
+
+    audit
+
+){
+
+    return (
+
+        audit.auditId +
+
+        ":" +
+
+        (
+
+            entry.id ||
+
+            crypto?.randomUUID?.() ||
+
+            Date.now()
+
+        )
+
+    );
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
