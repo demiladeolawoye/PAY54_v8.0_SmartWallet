@@ -1301,6 +1301,17 @@ function buildCorrelationId(
 
 }
 /* =========================
+   ENTERPRISE RETRY CONFIG
+========================= */
+
+const TX_RETRY = Object.freeze({
+
+    maxAttempts: 3,
+
+    delay: 500
+
+});
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
