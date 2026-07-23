@@ -1257,7 +1257,64 @@ if(
 
     return null;
 
-}   
+}
+   const fraud =
+
+    evaluateFraudAndBehaviour(
+
+        entry,
+
+        meta
+
+    );
+
+if(
+
+    !fraud.approved
+
+){
+
+    publishTransactionEvent(
+
+        TX_EVENTS.FAILED,
+
+        {
+
+            reason:
+
+                "FRAUD",
+
+            message:
+
+                fraud.reason,
+
+            fraudScore:
+
+                fraud.fraudScore,
+
+            behaviouralScore:
+
+                fraud.behaviouralScore,
+
+            entry:{
+
+                ...entry
+
+            }
+
+        }
+
+    );
+
+    showToast(
+
+        fraud.reason
+
+    );
+
+    return null;
+
+}
 try{
 
     publishTransactionEvent(
