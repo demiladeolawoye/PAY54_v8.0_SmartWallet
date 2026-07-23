@@ -785,6 +785,124 @@ function executeTransaction(
 
 }
 /* =========================
+   POLICY RULE
+   AMOUNT
+========================= */
+
+function checkAmountPolicy(
+
+    entry
+
+){
+
+    if(
+
+        Math.abs(entry.amount) >
+
+        50000000
+
+    ){
+
+        return {
+
+            allowed:false,
+
+            code:"LIMIT_EXCEEDED",
+
+            message:
+
+                "Transaction exceeds PAY54 policy limit"
+
+        };
+
+    }
+
+    return {
+
+        allowed:true
+
+    };
+
+}
+/* =========================
+   POLICY RULE
+   WALLET
+========================= */
+
+function checkWalletPolicy(
+
+    meta = {}
+
+){
+
+    if(
+
+        meta.walletLocked === true
+
+    ){
+
+        return {
+
+            allowed:false,
+
+            code:"WALLET_LOCKED",
+
+            message:
+
+                "Wallet is locked"
+
+        };
+
+    }
+
+    return {
+
+        allowed:true
+
+    };
+
+}
+/* =========================
+   POLICY RULE
+   ACCOUNT
+========================= */
+
+function checkAccountPolicy(
+
+    meta = {}
+
+){
+
+    if(
+
+        meta.accountStatus ===
+
+        "SUSPENDED"
+
+    ){
+
+        return {
+
+            allowed:false,
+
+            code:"ACCOUNT_SUSPENDED",
+
+            message:
+
+                "Account is suspended"
+
+        };
+
+    }
+
+    return {
+
+        allowed:true
+
+    };
+
+}
+/* =========================
    ENTERPRISE TRANSACTION
    POLICY ENGINE
 ========================= */
