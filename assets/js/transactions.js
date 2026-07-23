@@ -1632,25 +1632,27 @@ const tx =
 
 );
 
-    publishTransactionEvent(
+publishTransactionEvent(
 
-        TX_EVENTS.COMPLETED,
+    TX_EVENTS.COMPLETED,
 
-        {
+    {
 
-            transaction: {
+        correlationId,
 
-                ...tx
+        transaction: {
 
-            },
+            ...tx
 
-            completedAt:
+        },
 
-                new Date().toISOString()
+        completedAt:
 
-        }
+            new Date().toISOString()
 
-    );
+    }
+
+);
 
  publishTransactionEvent(
 
