@@ -1049,6 +1049,78 @@ function evaluateComplianceAndRisk(
 
 }
 /* =========================
+   ENTERPRISE FRAUD &
+   BEHAVIOURAL ENGINE
+========================= */
+
+function evaluateFraudAndBehaviour(
+
+    entry,
+
+    meta = {}
+
+){
+
+    const result = {
+
+        approved:true,
+
+        fraudScore:0,
+
+        behaviouralScore:0,
+
+        reason:null
+
+    };
+
+    if(
+
+        meta.newDevice === true
+
+    ){
+
+        result.fraudScore += 25;
+
+    }
+
+    if(
+
+        meta.unusualLocation === true
+
+    ){
+
+        result.fraudScore += 25;
+
+    }
+
+    if(
+
+        meta.highVelocity === true
+
+    ){
+
+        result.behaviouralScore += 40;
+
+    }
+
+    if(
+
+        meta.fraudBlocked === true
+
+    ){
+
+        result.approved = false;
+
+        result.reason =
+
+            "Transaction blocked by fraud engine";
+
+    }
+
+    return result;
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
