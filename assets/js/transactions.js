@@ -1247,6 +1247,28 @@ function checkTransactionIdempotency(
 
 }
 /* =========================
+   ENTERPRISE TRANSACTION
+   LIFECYCLE MANAGER
+========================= */
+
+function updateTransactionLifecycle(
+
+    audit,
+
+    status
+
+){
+
+    audit.status = status;
+
+    audit.updatedAt =
+
+        new Date().toISOString();
+
+    return audit;
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
