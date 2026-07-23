@@ -1651,7 +1651,11 @@ if(
         duplicate.reason
 
     );
+releaseTransactionLock(
 
+    entry
+
+);
     return null;
 
 }
