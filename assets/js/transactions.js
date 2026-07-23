@@ -1301,6 +1301,14 @@ function buildCorrelationId(
 
 }
 /* =========================
+   ENTERPRISE TRANSACTION
+   LOCK MANAGER
+========================= */
+
+const TX_LOCKS =
+
+    new Set();
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
