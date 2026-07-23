@@ -1730,13 +1730,15 @@ publishTransactionEvent(
 
     );
 
-   publishTransactionEvent(
+ publishTransactionEvent(
 
     TX_EVENTS.FAILED,
 
     {
 
         correlationId,
+
+        audit,
 
         error:
 
