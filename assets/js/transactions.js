@@ -1803,7 +1803,11 @@ publishTransactionEvent(
         );
 
     }
+releaseTransactionLock(
 
+    entry
+
+);
     return tx;
 
 }catch(err){
