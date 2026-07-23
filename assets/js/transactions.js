@@ -1583,6 +1583,13 @@ const tx =
         entry
 
     );
+   updateTransactionLifecycle(
+
+    audit,
+
+    "COMPLETED"
+
+);
 
     publishTransactionEvent(
 
