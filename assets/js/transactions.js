@@ -1133,6 +1133,59 @@ if(
     return null;
 
 }
+const compliance =
+
+    evaluateComplianceAndRisk(
+
+        entry,
+
+        meta
+
+    );
+
+if(
+
+    !compliance.approved
+
+){
+
+    publishTransactionEvent(
+
+        TX_EVENTS.FAILED,
+
+        {
+
+            reason:
+
+                "COMPLIANCE",
+
+            message:
+
+                compliance.reason,
+
+            riskScore:
+
+                compliance.riskScore,
+
+            entry:{
+
+                ...entry
+
+            }
+
+        }
+
+    );
+
+    showToast(
+
+        compliance.reason
+
+    );
+
+    return null;
+
+}   
 try{
 
     publishTransactionEvent(
