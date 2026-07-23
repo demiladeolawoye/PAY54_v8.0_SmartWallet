@@ -1586,7 +1586,26 @@ if(
 
         audit
 
-    );  
+    );
+   if(
+
+    !acquireTransactionLock(
+
+        entry
+
+    )
+
+){
+
+    showToast(
+
+        "Transaction already in progress"
+
+    );
+
+    return null;
+
+}
    const duplicate =
 
     checkTransactionIdempotency(
