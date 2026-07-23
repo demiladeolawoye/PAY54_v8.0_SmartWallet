@@ -1121,6 +1121,78 @@ function evaluateFraudAndBehaviour(
 
 }
 /* =========================
+   ENTERPRISE MONITORING
+   & AUDIT PIPELINE
+========================= */
+
+function buildAuditRecord(
+
+    entry,
+
+    meta = {}
+
+){
+
+    return {
+
+        auditId:
+
+            crypto?.randomUUID?.() ||
+
+            ("AUD-" + Date.now()),
+
+        timestamp:
+
+            new Date().toISOString(),
+
+        transactionId:
+
+            entry.id || null,
+
+        type:
+
+            entry.type,
+
+        amount:
+
+            entry.amount,
+
+        currency:
+
+            entry.currency,
+
+        source:
+
+            meta.source || "wallet",
+
+        walletId:
+
+            meta.walletId || null,
+
+        userId:
+
+            meta.userId || null,
+
+        deviceId:
+
+            meta.deviceId || null,
+
+        ipAddress:
+
+            meta.ipAddress || null,
+
+        channel:
+
+            meta.channel || "wallet",
+
+        status:
+
+            "PENDING"
+
+    };
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
