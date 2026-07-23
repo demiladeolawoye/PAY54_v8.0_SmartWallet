@@ -1728,25 +1728,27 @@ const tx =
 
     );
 
-    publishTransactionEvent(
+   publishTransactionEvent(
 
-        TX_EVENTS.FAILED,
+    TX_EVENTS.FAILED,
 
-        {
+    {
 
-            error:
+        correlationId,
 
-                err.message,
+        error:
 
-            entry: {
+            err.message,
 
-                ...entry
+        entry: {
 
-            }
+            ...entry
 
         }
 
-    );
+    }
+
+);
 
     console.error(
 
