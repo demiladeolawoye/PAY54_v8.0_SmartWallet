@@ -1193,6 +1193,60 @@ function buildAuditRecord(
 
 }
 /* =========================
+   ENTERPRISE IDEMPOTENCY
+   ENGINE
+========================= */
+
+const TX_CACHE =
+
+    new Map();
+
+function checkTransactionIdempotency(
+
+    entry
+
+){
+
+    const key =
+
+        entry.id ||
+
+        `${entry.type}:${entry.currency}:${entry.amount}`;
+
+    if(
+
+        TX_CACHE.has(key)
+
+    ){
+
+        return {
+
+            allowed:false,
+
+            reason:
+
+                "Duplicate transaction detected"
+
+        };
+
+    }
+
+    TX_CACHE.set(
+
+        key,
+
+        Date.now()
+
+    );
+
+    return {
+
+        allowed:true
+
+    };
+
+}
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
