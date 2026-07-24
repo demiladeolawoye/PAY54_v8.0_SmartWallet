@@ -1896,11 +1896,13 @@ updateTransactionLifecycle(
     "PROCESSING"
 
 );
-   publishTransactionEvent(
+publishTransactionEvent(
 
     TX_EVENTS.STARTED,
 
     {
+
+        correlationId,
 
         audit,
 
