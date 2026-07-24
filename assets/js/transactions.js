@@ -2071,11 +2071,19 @@ executePipelineHooks(
    
 const tx =
 
-    executeTransaction(
+    orchestrateTransaction(
 
-        ledger,
+        pipelineContext,
 
-        entry
+        ()=>
+
+            executeTransaction(
+
+                ledger,
+
+                entry
+
+            )
 
     );
    executePipelineHooks(
