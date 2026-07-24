@@ -2284,7 +2284,7 @@ function publishRecoveryEvent(
    CORE TRANSACTION PIPELINE
 ========================= */
 
-function processTransaction(entry, meta = {}){
+async function processTransaction(entry, meta = {}){
 
   const ledger = txLedger();
 
