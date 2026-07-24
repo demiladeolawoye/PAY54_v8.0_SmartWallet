@@ -1865,7 +1865,23 @@ entry.meta =
         meta
 
     );
+executePipelineHooks(
 
+    "beforeExecution",
+
+    {
+
+        entry,
+
+        meta,
+
+        audit,
+
+        correlationId
+
+    }
+
+);
 const tx =
 
     executeTransaction(
