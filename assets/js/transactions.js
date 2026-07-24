@@ -1528,7 +1528,19 @@ function processTransaction(entry, meta = {}){
     showToast("System unavailable");
     return null;
   }
+executePipelineHooks(
 
+    "beforeValidation",
+
+    {
+
+        entry,
+
+        meta
+
+    }
+
+);
 const validation =
 
     validateTransaction(
