@@ -1744,6 +1744,126 @@ function getInstalledPlugins(){
 
 }
 /* =========================
+   FIND PLUGIN
+========================= */
+
+function findTransactionPlugin(
+
+    name
+
+){
+
+    return TX_PLUGINS.find(
+
+        plugin =>
+
+            plugin.name === name
+
+    ) || null;
+
+}
+/* =========================
+   ENABLE PLUGIN
+========================= */
+
+function enableTransactionPlugin(
+
+    name
+
+){
+
+    const plugin =
+
+        findTransactionPlugin(
+
+            name
+
+        );
+
+    if(
+
+        !plugin
+
+    ){
+
+        return false;
+
+    }
+
+    plugin.status =
+
+        TX_PLUGIN_STATUS.ENABLED;
+
+    return true;
+
+}
+/* =========================
+   DISABLE PLUGIN
+========================= */
+
+function disableTransactionPlugin(
+
+    name
+
+){
+
+    const plugin =
+
+        findTransactionPlugin(
+
+            name
+
+        );
+
+    if(
+
+        !plugin
+
+    ){
+
+        return false;
+
+    }
+
+    plugin.status =
+
+        TX_PLUGIN_STATUS.DISABLED;
+
+    return true;
+
+}
+/* =========================
+   PLUGIN HEALTH
+========================= */
+
+function getPluginHealth(){
+
+    return TX_PLUGINS.map(
+
+        plugin => ({
+
+            name:
+
+                plugin.name,
+
+            version:
+
+                plugin.version,
+
+            status:
+
+                plugin.status,
+
+            installedAt:
+
+                plugin.installedAt
+
+        })
+
+    );
+
+}
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
@@ -2659,6 +2779,14 @@ window.PAY54_TX = {
     installTransactionPlugin,
 
     getInstalledPlugins,
+
+    findTransactionPlugin,
+
+    enableTransactionPlugin,
+
+    disableTransactionPlugin,
+
+    getPluginHealth,
 
     showPaymentReceipt,
 
