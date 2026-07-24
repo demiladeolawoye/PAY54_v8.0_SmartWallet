@@ -1248,6 +1248,56 @@ function executePipelineHooks(
 
 const TX_MIDDLEWARE = [];
 /* =========================
+   REGISTER MIDDLEWARE
+========================= */
+
+function registerTransactionMiddleware(
+
+    middleware
+
+){
+
+    if(
+
+        typeof middleware === "function"
+
+    ){
+
+        TX_MIDDLEWARE.push(
+
+            middleware
+
+        );
+
+    }
+
+}
+/* =========================
+   EXECUTE MIDDLEWARE
+========================= */
+
+function executeTransactionMiddleware(
+
+    payload
+
+){
+
+    for(
+
+        const middleware of TX_MIDDLEWARE
+
+    ){
+
+        middleware(
+
+            payload
+
+        );
+
+    }
+
+}
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
