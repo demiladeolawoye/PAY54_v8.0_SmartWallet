@@ -1504,6 +1504,17 @@ function runTransactionPipeline(
 
 const TX_PLUGINS = [];
 /* =========================
+   PLUGIN STATUS
+========================= */
+
+const TX_PLUGIN_STATUS = Object.freeze({
+
+    ENABLED: "ENABLED",
+
+    DISABLED: "DISABLED"
+
+});
+/* =========================
    REGISTER PLUGIN
 ========================= */
 
