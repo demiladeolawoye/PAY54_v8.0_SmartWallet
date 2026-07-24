@@ -1554,11 +1554,25 @@ function registerTransactionPlugin(
 
     }
 
-    TX_PLUGINS.push(
+  TX_PLUGINS.push({
 
-        plugin
+    ...plugin,
 
-    );
+    version:
+
+        plugin.version ??
+
+        "1.0.0",
+
+    status:
+
+        TX_PLUGIN_STATUS.ENABLED,
+
+    installedAt:
+
+        new Date().toISOString()
+
+});
 
 }
 /* =========================
