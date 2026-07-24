@@ -2007,6 +2007,22 @@ executePipelineHooks(
     }
 
 );
+   executeTransactionInterceptors(
+
+    {
+
+        entry,
+
+        meta,
+
+        audit,
+
+        correlationId
+
+    }
+
+);
+   
 const tx =
 
     executeTransaction(
