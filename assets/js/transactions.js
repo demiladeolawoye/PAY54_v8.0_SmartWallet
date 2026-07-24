@@ -1353,6 +1353,39 @@ function executeTransactionInterceptors(
 
 }
 /* =========================
+   TRANSACTION ORCHESTRATOR
+========================= */
+
+function orchestrateTransaction(
+
+    context,
+
+    executor
+
+){
+
+    if(
+
+        typeof executor !== "function"
+
+    ){
+
+        throw new Error(
+
+            "Transaction executor is required"
+
+        );
+
+    }
+
+    return executor(
+
+        context
+
+    );
+
+}
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
