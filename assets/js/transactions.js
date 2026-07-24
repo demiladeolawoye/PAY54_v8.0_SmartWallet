@@ -2030,6 +2030,11 @@ if(
     ledger
 
 };
+  runTransactionPipeline(
+
+    pipelineContext
+
+); 
    if(
 
     !acquireTransactionLock(
