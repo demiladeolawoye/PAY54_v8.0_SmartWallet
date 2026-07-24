@@ -1737,6 +1737,19 @@ if(
         meta
 
     );
+   executeTransactionMiddleware(
+
+    {
+
+        entry,
+
+        meta,
+
+        audit
+
+    }
+
+);
    updateTransactionLifecycle(
 
     audit,
