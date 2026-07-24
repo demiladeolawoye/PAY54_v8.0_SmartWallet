@@ -1298,6 +1298,11 @@ function executeTransactionMiddleware(
 
 }
 /* =========================
+   TRANSACTION INTERCEPTORS
+========================= */
+
+const TX_INTERCEPTORS = [];
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
