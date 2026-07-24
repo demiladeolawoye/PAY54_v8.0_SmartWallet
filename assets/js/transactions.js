@@ -1180,6 +1180,22 @@ const TX_STATE_FLOW = Object.freeze({
 
 });
 /* =========================
+   ENTERPRISE PIPELINE
+   HOOK REGISTRY
+========================= */
+
+const TX_PIPELINE_HOOKS = Object.seal({
+
+    beforeValidation: [],
+
+    beforeExecution: [],
+
+    afterExecution: [],
+
+    onFailure: []
+
+});
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
