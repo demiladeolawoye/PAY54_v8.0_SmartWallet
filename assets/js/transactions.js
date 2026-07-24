@@ -1904,6 +1904,19 @@ if(
         audit
 
     );
+   const pipelineContext = {
+
+    entry,
+
+    meta,
+
+    audit,
+
+    correlationId,
+
+    ledger
+
+};
    if(
 
     !acquireTransactionLock(
