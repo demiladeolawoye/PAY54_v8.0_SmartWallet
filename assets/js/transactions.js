@@ -1499,6 +1499,11 @@ function runTransactionPipeline(
 
 }
 /* =========================
+   PLUGIN REGISTRY
+========================= */
+
+const TX_PLUGINS = [];
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
