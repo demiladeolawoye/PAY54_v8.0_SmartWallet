@@ -1891,6 +1891,21 @@ const tx =
         entry
 
     );
+   executePipelineHooks(
+
+    "afterExecution",
+
+    {
+
+        transaction: tx,
+
+        audit,
+
+        correlationId
+
+    }
+
+);
    updateTransactionLifecycle(
 
     audit,
