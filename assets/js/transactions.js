@@ -1414,6 +1414,12 @@ function buildPipelineResult(
     };
 
 }
+/* =========================
+   TRANSACTION PIPELINE
+   REGISTRY
+========================= */
+
+const TX_PIPELINE = [];
 
 /* =========================
    ENTERPRISE MONITORING
