@@ -1196,6 +1196,53 @@ const TX_PIPELINE_HOOKS = Object.seal({
 
 });
 /* =========================
+   EXECUTE PIPELINE HOOKS
+========================= */
+
+function executePipelineHooks(
+
+    stage,
+
+    payload
+
+){
+
+    const hooks =
+
+        TX_PIPELINE_HOOKS[stage] ||
+
+        [];
+
+    for(
+
+        const hook of hooks
+
+    ){
+
+        try{
+
+            hook(payload);
+
+        }
+
+        catch(error){
+
+            console.error(
+
+                "[PIPELINE HOOK]",
+
+                stage,
+
+                error
+
+            );
+
+        }
+
+    }
+
+}
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
