@@ -2138,6 +2138,149 @@ function releaseTransactionLock(
 
 }
 /* =========================
+   TRANSACTION RETRY
+   CONFIGURATION
+========================= */
+
+const TX_RETRY_CONFIG = Object.freeze({
+
+    maxAttempts: 3,
+
+    retryDelay: 500
+
+});
+/* =========================
+   SHOULD RETRY
+========================= */
+
+function shouldRetryTransaction(
+
+    error,
+
+    attempt
+
+){
+
+    if(
+
+        attempt >= TX_RETRY_CONFIG.maxAttempts
+
+    ){
+
+        return false;
+
+    }
+
+    if(
+
+        !error
+
+    ){
+
+        return false;
+
+    }
+
+    return true;
+
+}
+/* =========================
+   RETRY DELAY
+========================= */
+
+function waitForRetry(
+
+    milliseconds
+
+){
+
+    return new Promise(
+
+        resolve =>
+
+            setTimeout(
+
+                resolve,
+
+                milliseconds
+
+            )
+
+    );
+
+}
+/* =========================
+   RETRY EXECUTOR
+========================= */
+
+async function executeWithRetry(
+
+    executor
+
+){
+
+    let attempt = 0;
+
+    while(true){
+
+        try{
+
+            return await executor();
+
+        }
+
+        catch(error){
+
+            attempt++;
+
+            if(
+
+                !shouldRetryTransaction(
+
+                    error,
+
+                    attempt
+
+                )
+
+            ){
+
+                throw error;
+
+            }
+
+            await waitForRetry(
+
+                TX_RETRY_CONFIG.retryDelay
+
+            );
+
+        }
+
+    }
+
+}
+/* =========================
+   RECOVERY EVENT
+========================= */
+
+function publishRecoveryEvent(
+
+    payload
+
+){
+
+    publishTransactionEvent(
+
+        "transaction.recovery",
+
+        payload
+
+    );
+
+}
+
+/* =========================
    CORE TRANSACTION PIPELINE
 ========================= */
 
