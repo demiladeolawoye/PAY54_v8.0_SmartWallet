@@ -1504,6 +1504,221 @@ function runTransactionPipeline(
 
 const TX_PLUGINS = [];
 /* =========================
+   REGISTER PLUGIN
+========================= */
+
+function registerTransactionPlugin(
+
+    plugin
+
+){
+
+    if(
+
+        !plugin ||
+
+        typeof plugin !== "object"
+
+    ){
+
+        throw new Error(
+
+            "Invalid transaction plugin"
+
+        );
+
+    }
+
+    if(
+
+        !plugin.name
+
+    ){
+
+        throw new Error(
+
+            "Plugin name is required"
+
+        );
+
+    }
+
+    TX_PLUGINS.push(
+
+        plugin
+
+    );
+
+}
+/* =========================
+   INSTALL PLUGIN
+========================= */
+
+function installTransactionPlugin(
+
+    plugin
+
+){
+
+    registerTransactionPlugin(
+
+        plugin
+
+    );
+
+    if(
+
+        Array.isArray(
+
+            plugin.pipelineStages
+
+        )
+
+    ){
+
+        for(
+
+            const stage of plugin.pipelineStages
+
+        ){
+
+            registerPipelineStage(
+
+                stage.name,
+
+                stage.handler
+
+            );
+
+        }
+
+    }
+
+    if(
+
+        Array.isArray(
+
+            plugin.middleware
+
+        )
+
+    ){
+
+        for(
+
+            const middleware of plugin.middleware
+
+        ){
+
+            registerTransactionMiddleware(
+
+                middleware
+
+            );
+
+        }
+
+    }
+
+    if(
+
+        Array.isArray(
+
+            plugin.interceptors
+
+        )
+
+    ){
+
+        for(
+
+            const interceptor of plugin.interceptors
+
+        ){
+
+            registerTransactionInterceptor(
+
+                interceptor
+
+            );
+
+        }
+
+    }
+
+    if(
+
+        plugin.hooks
+
+    ){
+
+        for(
+
+            const [
+
+                stage,
+
+                handlers
+
+            ]
+
+            of
+
+            Object.entries(
+
+                plugin.hooks
+
+            )
+
+        ){
+
+            if(
+
+                !TX_PIPELINE_HOOKS[stage]
+
+            ){
+
+                continue;
+
+            }
+
+            for(
+
+                const handler of handlers
+
+            ){
+
+                TX_PIPELINE_HOOKS[stage]
+
+                .push(
+
+                    handler
+
+                );
+
+            }
+
+        }
+
+    }
+
+    return plugin;
+
+}
+/* =========================
+   GET PLUGINS
+========================= */
+
+function getInstalledPlugins(){
+
+    return [
+
+        ...TX_PLUGINS
+
+    ];
+
+}
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
@@ -2413,6 +2628,12 @@ window.PAY54_TX = {
     registerTransactionMiddleware,
 
     registerTransactionInterceptor,
+
+    registerTransactionPlugin,
+
+    installTransactionPlugin,
+
+    getInstalledPlugins,
 
     showPaymentReceipt,
 
