@@ -2313,6 +2313,8 @@ window.PAY54_TX = {
 
     processTransaction,
 
+    orchestrateTransaction,
+
     registerTransactionMiddleware,
 
     registerTransactionInterceptor,
