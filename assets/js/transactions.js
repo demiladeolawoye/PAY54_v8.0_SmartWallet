@@ -2697,17 +2697,23 @@ executePipelineHooks(
    
 const tx =
 
-    orchestrateTransaction(
-
-        pipelineContext,
+    await executeWithRetry(
 
         ()=>
 
-            executeTransaction(
+            orchestrateTransaction(
 
-                ledger,
+                pipelineContext,
 
-                entry
+                ()=>
+
+                    executeTransaction(
+
+                        ledger,
+
+                        entry
+
+                    )
 
             )
 
