@@ -1303,6 +1303,31 @@ function executeTransactionMiddleware(
 
 const TX_INTERCEPTORS = [];
 /* =========================
+   REGISTER INTERCEPTOR
+========================= */
+
+function registerTransactionInterceptor(
+
+    interceptor
+
+){
+
+    if(
+
+        typeof interceptor === "function"
+
+    ){
+
+        TX_INTERCEPTORS.push(
+
+            interceptor
+
+        );
+
+    }
+
+}
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
