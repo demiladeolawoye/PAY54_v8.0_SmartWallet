@@ -1328,6 +1328,31 @@ function registerTransactionInterceptor(
 
 }
 /* =========================
+   EXECUTE INTERCEPTORS
+========================= */
+
+function executeTransactionInterceptors(
+
+    payload
+
+){
+
+    for(
+
+        const interceptor of TX_INTERCEPTORS
+
+    ){
+
+        interceptor(
+
+            payload
+
+        );
+
+    }
+
+}
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
