@@ -2105,9 +2105,15 @@ releaseTransactionLock(
 window.PAY54_TX = {
 
   processTransaction,
+
+  registerTransactionMiddleware,
+
   showPaymentReceipt,
+
   showToast,
+
   requestPinVerification,
+
   openCreatePinModal
 
 };
