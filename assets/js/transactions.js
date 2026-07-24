@@ -1420,7 +1420,84 @@ function buildPipelineResult(
 ========================= */
 
 const TX_PIPELINE = [];
+/* =========================
+   REGISTER PIPELINE STAGE
+========================= */
 
+function registerPipelineStage(
+
+    name,
+
+    handler
+
+){
+
+    if(
+
+        typeof name !== "string" ||
+
+        !name.trim()
+
+    ){
+
+        throw new Error(
+
+            "Pipeline stage name is required"
+
+        );
+
+    }
+
+    if(
+
+        typeof handler !== "function"
+
+    ){
+
+        throw new Error(
+
+            "Pipeline handler must be a function"
+
+        );
+
+    }
+
+    TX_PIPELINE.push({
+
+        name,
+
+        handler
+
+    });
+
+}
+/* =========================
+   RUN PIPELINE
+========================= */
+
+function runTransactionPipeline(
+
+    context
+
+){
+
+    for(
+
+        const stage of TX_PIPELINE
+
+    ){
+
+        stage.handler(
+
+            context
+
+        );
+
+    }
+
+    return context;
+
+}
 /* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
