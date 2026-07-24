@@ -1243,6 +1243,11 @@ function executePipelineHooks(
 
 }
 /* =========================
+   TRANSACTION MIDDLEWARE
+========================= */
+
+const TX_MIDDLEWARE = [];
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
