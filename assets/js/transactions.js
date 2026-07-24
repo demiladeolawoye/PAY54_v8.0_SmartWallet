@@ -1386,6 +1386,36 @@ function orchestrateTransaction(
 
 }
 /* =========================
+   PIPELINE RESULT
+========================= */
+
+function buildPipelineResult(
+
+    success,
+
+    transaction = null,
+
+    error = null
+
+){
+
+    return {
+
+        success,
+
+        transaction,
+
+        error,
+
+        timestamp:
+
+            new Date().toISOString()
+
+    };
+
+}
+
+/* =========================
    ENTERPRISE MONITORING
    & AUDIT PIPELINE
 ========================= */
