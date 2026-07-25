@@ -1180,6 +1180,25 @@ const TX_STATE_FLOW = Object.freeze({
 
 });
 /* =========================
+   SAGA STATES
+========================= */
+
+const TX_SAGA_STATE = Object.freeze({
+
+    CREATED: "CREATED",
+
+    RUNNING: "RUNNING",
+
+    COMPLETED: "COMPLETED",
+
+    COMPENSATING: "COMPENSATING",
+
+    COMPENSATED: "COMPENSATED",
+
+    FAILED: "FAILED"
+
+});
+/* =========================
    ENTERPRISE PIPELINE
    HOOK REGISTRY
 ========================= */
