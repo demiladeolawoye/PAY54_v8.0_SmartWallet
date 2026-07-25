@@ -2468,6 +2468,27 @@ function publishRecoveryEvent(
     );
 
 }
+/* =========================
+   SAGA EVENT
+========================= */
+
+function publishSagaEvent(
+
+    event,
+
+    payload
+
+){
+
+    publishTransactionEvent(
+
+        `transaction.saga.${event}`,
+
+        payload
+
+    );
+
+}
 
 /* =========================
    CORE TRANSACTION PIPELINE
