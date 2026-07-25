@@ -3127,6 +3127,14 @@ window.PAY54_TX = {
 
     orchestrateTransaction,
 
+    createTransactionSaga,
+
+    registerSagaStep,
+
+    executeSaga,
+
+    getTransactionSaga,
+
     registerPipelineStage,
 
     registerTransactionMiddleware,
