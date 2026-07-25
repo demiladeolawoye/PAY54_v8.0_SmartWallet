@@ -1518,6 +1518,176 @@ function runTransactionPipeline(
 
 }
 /* =========================
+   CREATE SAGA
+========================= */
+
+function createTransactionSaga(
+
+    name
+
+){
+
+    const saga = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("SAGA-" + Date.now()),
+
+        name,
+
+        status:
+
+            TX_SAGA_STATE.CREATED,
+
+        steps: [],
+
+        compensation: []
+
+    };
+
+    TX_SAGAS.set(
+
+        saga.id,
+
+        saga
+
+    );
+
+    return saga;
+
+}
+/* =========================
+   REGISTER SAGA STEP
+========================= */
+
+function registerSagaStep(
+
+    saga,
+
+    execute,
+
+    compensate
+
+){
+
+    saga.steps.push({
+
+        execute,
+
+        compensate
+
+    });
+
+}
+/* =========================
+   EXECUTE SAGA
+========================= */
+
+async function executeSaga(
+
+    saga,
+
+    context
+
+){
+
+    saga.status =
+
+        TX_SAGA_STATE.RUNNING;
+
+    const completed = [];
+
+    try{
+
+        for(
+
+            const step of saga.steps
+
+        ){
+
+            await step.execute(
+
+                context
+
+            );
+
+            completed.push(
+
+                step
+
+            );
+
+        }
+
+        saga.status =
+
+            TX_SAGA_STATE.COMPLETED;
+
+        return true;
+
+    }
+
+    catch(error){
+
+        saga.status =
+
+            TX_SAGA_STATE.COMPENSATING;
+
+        while(
+
+            completed.length
+
+        ){
+
+            const step =
+
+                completed.pop();
+
+            if(
+
+                typeof step.compensate === "function"
+
+            ){
+
+                await step.compensate(
+
+                    context
+
+                );
+
+            }
+
+        }
+
+        saga.status =
+
+            TX_SAGA_STATE.COMPENSATED;
+
+        throw error;
+
+    }
+
+}
+/* =========================
+   GET SAGA
+========================= */
+
+function getTransactionSaga(
+
+    id
+
+){
+
+    return TX_SAGAS.get(
+
+        id
+
+    ) || null;
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
