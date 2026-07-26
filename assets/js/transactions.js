@@ -3212,6 +3212,7 @@ TX_METRICS.averageLatency =
     TX_METRICS.totalLatency /
 
     TX_METRICS.completed;
+   publishHealthEvent();
     return tx;
 
 }catch(err){
