@@ -2447,6 +2447,7 @@ async function executeWithRetry(
         catch(error){
 
             attempt++;
+           TX_METRICS.retries++;
 
             if(
 
