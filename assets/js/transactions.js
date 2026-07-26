@@ -3311,6 +3311,10 @@ window.PAY54_TX = {
 
     getTransactionMetrics,
 
+   getTransactionHealth,
+
+    resetTransactionMetrics,
+
     registerPipelineStage,
 
     registerTransactionMiddleware,
