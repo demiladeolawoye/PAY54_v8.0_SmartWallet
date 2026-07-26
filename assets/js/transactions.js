@@ -1440,6 +1440,11 @@ function buildPipelineResult(
 
 const TX_PIPELINE = [];
 /* =========================
+   SAGA REGISTRY
+========================= */
+
+const TX_SAGAS = new Map();
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
