@@ -2523,7 +2523,9 @@ function publishSagaEvent(
 async function processTransaction(entry, meta = {}){
 
   const ledger = txLedger();
+const transactionStart = performance.now();
 
+TX_METRICS.started++;
   if(!ledger){
     showToast("System unavailable");
     return null;
