@@ -3069,6 +3069,21 @@ releaseTransactionLock(
     entry
 
 );
+   const duration =
+
+    performance.now() -
+
+    transactionStart;
+
+TX_METRICS.completed++;
+
+TX_METRICS.totalLatency += duration;
+
+TX_METRICS.averageLatency =
+
+    TX_METRICS.totalLatency /
+
+    TX_METRICS.completed;
     return tx;
 
 }catch(err){
