@@ -1690,6 +1690,7 @@ async function executeSaga(
         saga.status =
 
             TX_SAGA_STATE.COMPENSATED;
+       TX_METRICS.compensated++;
 
         throw error;
 
