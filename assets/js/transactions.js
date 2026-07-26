@@ -3149,6 +3149,7 @@ executePipelineHooks(
         "Transaction failed"
 
     );
+   TX_METRICS.failed++;
 releaseTransactionLock(
 
     entry
