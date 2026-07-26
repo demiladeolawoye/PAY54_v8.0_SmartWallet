@@ -2628,6 +2628,21 @@ function publishSagaEvent(
     );
 
 }
+/* =========================
+   HEALTH EVENT
+========================= */
+
+function publishHealthEvent(){
+
+    publishTransactionEvent(
+
+        "transaction.health",
+
+        getTransactionHealth()
+
+    );
+
+}
 
 /* =========================
    CORE TRANSACTION PIPELINE
