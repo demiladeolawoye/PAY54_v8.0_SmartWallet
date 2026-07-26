@@ -1445,6 +1445,27 @@ const TX_PIPELINE = [];
 
 const TX_SAGAS = new Map();
 /* =========================
+   ENTERPRISE METRICS
+========================= */
+
+const TX_METRICS = {
+
+    started: 0,
+
+    completed: 0,
+
+    failed: 0,
+
+    retries: 0,
+
+    compensated: 0,
+
+    totalLatency: 0,
+
+    averageLatency: 0
+
+};
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
