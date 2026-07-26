@@ -1728,6 +1728,104 @@ function getTransactionMetrics(){
 
 }
 /* =========================
+   TRANSACTION HEALTH
+========================= */
+
+function getTransactionHealth(){
+
+    const successRate =
+
+        TX_METRICS.started === 0
+
+            ? 100
+
+            : (
+
+                (TX_METRICS.completed /
+
+                 TX_METRICS.started) * 100
+
+            );
+
+    return {
+
+        status:
+
+            successRate >= 95
+
+                ? "HEALTHY"
+
+                : successRate >= 80
+
+                    ? "DEGRADED"
+
+                    : "CRITICAL",
+
+        successRate,
+
+        metrics:
+
+            getTransactionMetrics(),
+
+        activeLocks:
+
+            TX_LOCKS.size,
+
+        activeSagas:
+
+            TX_SAGAS.size,
+
+        installedPlugins:
+
+            TX_PLUGINS.length,
+
+        pipelineStages:
+
+            TX_PIPELINE.length,
+
+        middleware:
+
+            TX_MIDDLEWARE.length,
+
+        interceptors:
+
+            TX_INTERCEPTORS.length
+
+    };
+
+}
+/* =========================
+   RESET METRICS
+========================= */
+
+function resetTransactionMetrics(){
+
+    Object.assign(
+
+        TX_METRICS,
+
+        {
+
+            started:0,
+
+            completed:0,
+
+            failed:0,
+
+            retries:0,
+
+            compensated:0,
+
+            totalLatency:0,
+
+            averageLatency:0
+
+        }
+
+    );
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
