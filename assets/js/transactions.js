@@ -1715,6 +1715,19 @@ function getTransactionSaga(
 
 }
 /* =========================
+   GET METRICS
+========================= */
+
+function getTransactionMetrics(){
+
+    return {
+
+        ...TX_METRICS
+
+    };
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
@@ -3180,6 +3193,8 @@ window.PAY54_TX = {
     executeSaga,
 
     getTransactionSaga,
+
+    getTransactionMetrics,
 
     registerPipelineStage,
 
