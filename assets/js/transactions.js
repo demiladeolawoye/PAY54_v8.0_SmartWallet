@@ -3284,6 +3284,7 @@ releaseTransactionLock(
     entry
 
 );
+   publishHealthEvent();
     return null;
 
 }
