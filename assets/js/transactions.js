@@ -1766,50 +1766,57 @@ function getTransactionHealth(){
 
     return {
 
-        status:
+    status:
 
-            successRate >= 95
+        successRate >= 95
 
-                ? "HEALTHY"
+            ? "HEALTHY"
 
-                : successRate >= 80
+            : successRate >= 80
 
-                    ? "DEGRADED"
+                ? "DEGRADED"
 
-                    : "CRITICAL",
+                : "CRITICAL",
 
-        successRate,
+    successRate,
 
-        metrics:
+    metrics:
 
-            getTransactionMetrics(),
+        getTransactionMetrics(),
 
-        activeLocks:
+    circuitState:
 
-            TX_LOCKS.size,
+        TX_CIRCUIT.state,
 
-        activeSagas:
+    circuitFailures:
 
-            TX_SAGAS.size,
+        TX_CIRCUIT.failures,
 
-        installedPlugins:
+    activeLocks:
 
-            TX_PLUGINS.length,
+        TX_LOCKS.size,
 
-        pipelineStages:
+    activeSagas:
 
-            TX_PIPELINE.length,
+        TX_SAGAS.size,
 
-        middleware:
+    installedPlugins:
 
-            TX_MIDDLEWARE.length,
+        TX_PLUGINS.length,
 
-        interceptors:
+    pipelineStages:
 
-            TX_INTERCEPTORS.length
+        TX_PIPELINE.length,
 
-    };
+    middleware:
 
+        TX_MIDDLEWARE.length,
+
+    interceptors:
+
+        TX_INTERCEPTORS.length
+
+};
 }
 /* =========================
    RESET METRICS
