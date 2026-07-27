@@ -1926,6 +1926,77 @@ function recordTransactionFailure(){
 
 }
 /* =========================
+   DEAD LETTER QUEUE
+========================= */
+
+function enqueueFailedTransaction(
+
+    entry,
+
+    meta,
+
+    audit,
+
+    error
+
+){
+
+    TX_DLQ.push({
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("DLQ-" + Date.now()),
+
+        timestamp:
+
+            new Date().toISOString(),
+
+        entry:
+
+            structuredClone(entry),
+
+        meta:
+
+            structuredClone(meta),
+
+        audit:
+
+            structuredClone(audit),
+
+        error:
+
+            error?.message ||
+
+            String(error)
+
+    });
+
+}
+/* =========================
+   DLQ SIZE
+========================= */
+
+function getDeadLetterQueueSize(){
+
+    return TX_DLQ.length;
+
+}
+/* =========================
+   GET DEAD LETTER QUEUE
+========================= */
+
+function getDeadLetterQueue(){
+
+    return [
+
+        ...TX_DLQ
+
+    ];
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
