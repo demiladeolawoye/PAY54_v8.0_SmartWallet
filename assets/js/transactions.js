@@ -2739,6 +2739,21 @@ function publishHealthEvent(){
 async function processTransaction(entry, meta = {}){
 
   const ledger = txLedger();
+if(
+
+    !isTransactionEngineAvailable()
+
+){
+
+    showToast(
+
+        "Transaction engine temporarily unavailable"
+
+    );
+
+    return null;
+
+}
 const transactionStart = performance.now();
 
 TX_METRICS.started++;
