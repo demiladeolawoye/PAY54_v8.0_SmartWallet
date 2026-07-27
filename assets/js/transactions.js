@@ -3471,6 +3471,17 @@ executePipelineHooks(
     );
    TX_METRICS.failed++;
    recordTransactionFailure();
+   enqueueFailedTransaction(
+
+    entry,
+
+    meta,
+
+    audit,
+
+    err
+
+);
 releaseTransactionLock(
 
     entry
@@ -3503,11 +3514,15 @@ window.PAY54_TX = {
 
    getTransactionMetrics,
 
-getTransactionHealth,
+   getTransactionHealth,
 
-isTransactionEngineAvailable,
+   isTransactionEngineAvailable,
 
-resetTransactionMetrics,
+   resetTransactionMetrics,
+   
+   getDeadLetterQueue,
+
+    getDeadLetterQueueSize,
 
     registerPipelineStage,
 
