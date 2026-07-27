@@ -3316,6 +3316,7 @@ TX_METRICS.averageLatency =
 
     TX_METRICS.completed;
    publishHealthEvent();
+   recordTransactionSuccess();
     return tx;
 
 }catch(err){
