@@ -1796,6 +1796,10 @@ function getTransactionHealth(){
     circuitFailures:
 
         TX_CIRCUIT.failures,
+       
+   deadLetterQueue:
+
+    TX_DLQ.length,
 
     activeLocks:
 
