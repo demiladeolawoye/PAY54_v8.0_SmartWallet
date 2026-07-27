@@ -1843,6 +1843,77 @@ function resetTransactionMetrics(){
 
 }
 /* =========================
+   CIRCUIT STATUS
+========================= */
+
+function isTransactionEngineAvailable(){
+
+    if(
+
+        TX_CIRCUIT.state === "CLOSED"
+
+    ){
+
+        return true;
+
+    }
+
+    if(
+
+        Date.now() -
+
+        TX_CIRCUIT.openedAt >=
+
+        TX_CIRCUIT.timeout
+
+    ){
+
+        TX_CIRCUIT.state = "HALF_OPEN";
+
+        return true;
+
+    }
+
+    return false;
+
+}
+/* =========================
+   CIRCUIT SUCCESS
+========================= */
+
+function recordTransactionSuccess(){
+
+    TX_CIRCUIT.failures = 0;
+
+    TX_CIRCUIT.state = "CLOSED";
+
+    TX_CIRCUIT.openedAt = null;
+
+}
+/* =========================
+   CIRCUIT FAILURE
+========================= */
+
+function recordTransactionFailure(){
+
+    TX_CIRCUIT.failures++;
+
+    if(
+
+        TX_CIRCUIT.failures >=
+
+        TX_CIRCUIT.threshold
+
+    ){
+
+        TX_CIRCUIT.state = "OPEN";
+
+        TX_CIRCUIT.openedAt = Date.now();
+
+    }
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
