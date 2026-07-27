@@ -1466,6 +1466,23 @@ const TX_METRICS = {
 
 };
 /* =========================
+   CIRCUIT BREAKER
+========================= */
+
+const TX_CIRCUIT = {
+
+    state: "CLOSED",
+
+    failures: 0,
+
+    threshold: 5,
+
+    openedAt: null,
+
+    timeout: 30000
+
+};
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
