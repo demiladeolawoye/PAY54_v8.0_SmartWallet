@@ -3421,11 +3421,13 @@ window.PAY54_TX = {
 
     getTransactionSaga,
 
-    getTransactionMetrics,
+   getTransactionMetrics,
 
-   getTransactionHealth,
+getTransactionHealth,
 
-    resetTransactionMetrics,
+isTransactionEngineAvailable,
+
+resetTransactionMetrics,
 
     registerPipelineStage,
 
