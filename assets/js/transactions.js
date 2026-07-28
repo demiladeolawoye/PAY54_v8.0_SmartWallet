@@ -2428,6 +2428,101 @@ function searchTransactions(
 
 }
 /* =========================
+   TRANSACTION ANALYTICS
+========================= */
+
+function getTransactionAnalytics(){
+
+    const transactions =
+
+        getProcessedTransactions();
+
+    const totalVolume =
+
+        transactions.reduce(
+
+            (sum, tx) =>
+
+                sum + Math.abs(tx.amount || 0),
+
+            0
+
+        );
+
+    return {
+
+        totalTransactions:
+
+            transactions.length,
+
+        totalVolume,
+
+        averageAmount:
+
+            transactions.length
+
+                ? totalVolume /
+
+                  transactions.length
+
+                : 0
+
+    };
+
+}
+/* =========================
+   VOLUME BY CURRENCY
+========================= */
+
+function getTransactionVolumeByCurrency(){
+
+    const totals = {};
+
+    for(
+
+        const tx of
+
+        getProcessedTransactions()
+
+    ){
+
+        totals[tx.currency] =
+
+            (totals[tx.currency] || 0) +
+
+            Math.abs(tx.amount || 0);
+
+    }
+
+    return totals;
+
+}
+/* =========================
+   COUNT BY TYPE
+========================= */
+
+function getTransactionCountByType(){
+
+    const counts = {};
+
+    for(
+
+        const tx of
+
+        getProcessedTransactions()
+
+    ){
+
+        counts[tx.type] =
+
+            (counts[tx.type] || 0) + 1;
+
+    }
+
+    return counts;
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
