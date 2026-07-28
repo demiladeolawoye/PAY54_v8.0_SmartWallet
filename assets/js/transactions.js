@@ -1861,6 +1861,10 @@ function getTransactionHealth(){
 
     TX_REGISTRY.size,
 
+       transactionRegistryHealthy:
+
+    TX_REGISTRY.size >= 0,
+
     activeLocks:
 
         TX_LOCKS.size,
