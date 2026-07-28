@@ -1493,6 +1493,11 @@ const TX_DLQ = [];
 
 const TX_SCHEDULED = [];
 /* =========================
+   TRANSACTION REGISTRY
+========================= */
+
+const TX_REGISTRY = new Map();
+/* =========================
    REPLAY STATES
 ========================= */
 
