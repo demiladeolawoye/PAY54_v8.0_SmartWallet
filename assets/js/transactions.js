@@ -1508,6 +1508,23 @@ const TX_REPLAY_STATUS = Object.freeze({
 
 });
 /* =========================
+   SCHEDULE STATES
+========================= */
+
+const TX_SCHEDULE_STATE = Object.freeze({
+
+    PENDING: "PENDING",
+
+    RUNNING: "RUNNING",
+
+    COMPLETED: "COMPLETED",
+
+    CANCELLED: "CANCELLED",
+
+    FAILED: "FAILED"
+
+});
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
