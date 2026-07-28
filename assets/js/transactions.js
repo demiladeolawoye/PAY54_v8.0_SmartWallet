@@ -2332,6 +2332,98 @@ function getProcessedTransactions(){
 
 }
 /* =========================
+   FIND TRANSACTIONS BY TYPE
+========================= */
+
+function findTransactionsByType(
+
+    type
+
+){
+
+    return getProcessedTransactions()
+
+        .filter(
+
+            transaction =>
+
+                transaction.type === type
+
+        );
+
+}
+/* =========================
+   FIND TRANSACTIONS BY CURRENCY
+========================= */
+
+function findTransactionsByCurrency(
+
+    currency
+
+){
+
+    return getProcessedTransactions()
+
+        .filter(
+
+            transaction =>
+
+                transaction.currency === currency
+
+        );
+
+}
+/* =========================
+   FIND TRANSACTIONS BY STATUS
+========================= */
+
+function findTransactionsByStatus(
+
+    status
+
+){
+
+    return getProcessedTransactions()
+
+        .filter(
+
+            transaction =>
+
+                transaction.status === status
+
+        );
+
+}
+/* =========================
+   SEARCH TRANSACTIONS
+========================= */
+
+function searchTransactions(
+
+    predicate
+
+){
+
+    if(
+
+        typeof predicate !== "function"
+
+    ){
+
+        return [];
+
+    }
+
+    return getProcessedTransactions()
+
+        .filter(
+
+            predicate
+
+        );
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
