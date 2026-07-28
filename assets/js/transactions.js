@@ -2271,6 +2271,63 @@ function getScheduledTransactions(){
 
 }
 /* =========================
+   REGISTER TRANSACTION
+========================= */
+
+function registerProcessedTransaction(
+
+    transaction
+
+){
+
+    if(
+
+        transaction?.id
+
+    ){
+
+        TX_REGISTRY.set(
+
+            transaction.id,
+
+            structuredClone(transaction)
+
+        );
+
+    }
+
+}
+/* =========================
+   GET TRANSACTION
+========================= */
+
+function getProcessedTransaction(
+
+    id
+
+){
+
+    return TX_REGISTRY.get(
+
+        id
+
+    ) || null;
+
+}
+/* =========================
+   GET ALL TRANSACTIONS
+========================= */
+
+function getProcessedTransactions(){
+
+    return [
+
+        ...TX_REGISTRY.values()
+
+    ];
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
