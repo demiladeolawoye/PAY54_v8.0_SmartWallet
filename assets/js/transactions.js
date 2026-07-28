@@ -4130,6 +4130,10 @@ searchTransactions,
 getTransactionVolumeByCurrency,
 
 getTransactionCountByType,
+
+   generateTransactionReport,
+
+exportTransactionRegistry,
    
     registerPipelineStage,
 
