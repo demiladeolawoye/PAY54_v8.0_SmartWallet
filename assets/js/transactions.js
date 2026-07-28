@@ -3653,6 +3653,10 @@ window.PAY54_TX = {
 
     getDeadLetterQueueSize,
 
+   replayFailedTransaction,
+
+   replayAllFailedTransactions,
+
     registerPipelineStage,
 
     registerTransactionMiddleware,
