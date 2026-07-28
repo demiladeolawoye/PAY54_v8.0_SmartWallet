@@ -2199,6 +2199,70 @@ function scheduleTransaction(
 
 }
 /* =========================
+   RUN SCHEDULES
+========================= */
+
+async function runScheduledTransactions(){
+
+    const now = Date.now();
+
+    for(const schedule of TX_SCHEDULED){
+
+        if(
+            schedule.status !==
+            TX_SCHEDULE_STATE.PENDING
+        ){
+            continue;
+        }
+
+        if(
+            new Date(
+                schedule.executeAt
+            ).getTime() > now
+        ){
+            continue;
+        }
+
+        schedule.status =
+            TX_SCHEDULE_STATE.RUNNING;
+
+        try{
+
+            const result =
+                await processTransaction(
+                    structuredClone(schedule.entry),
+                    structuredClone(schedule.meta)
+                );
+
+            schedule.status =
+                result
+                    ? TX_SCHEDULE_STATE.COMPLETED
+                    : TX_SCHEDULE_STATE.FAILED;
+
+        }catch{
+
+            schedule.status =
+                TX_SCHEDULE_STATE.FAILED;
+
+        }
+
+    }
+
+}
+/* =========================
+   GET SCHEDULES
+========================= */
+
+function getScheduledTransactions(){
+
+    return [
+
+        ...TX_SCHEDULED
+
+    ];
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
