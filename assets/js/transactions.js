@@ -1488,6 +1488,11 @@ const TX_CIRCUIT = {
 
 const TX_DLQ = [];
 /* =========================
+   TRANSACTION SCHEDULER
+========================= */
+
+const TX_SCHEDULED = [];
+/* =========================
    REPLAY STATES
 ========================= */
 
