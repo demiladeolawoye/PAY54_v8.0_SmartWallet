@@ -3870,6 +3870,13 @@ window.PAY54_TX = {
 
    getScheduledTransactions,
 
+   registerProcessedTransaction,
+
+getProcessedTransaction,
+
+getProcessedTransactions,
+   
+
     registerPipelineStage,
 
     registerTransactionMiddleware,
