@@ -2023,6 +2023,102 @@ function getDeadLetterQueue(){
 
 }
 /* =========================
+   REPLAY FAILED TRANSACTION
+========================= */
+
+async function replayFailedTransaction(
+
+    id
+
+){
+
+    const item =
+
+        TX_DLQ.find(
+
+            record => record.id === id
+
+        );
+
+    if(!item){
+
+        return false;
+
+    }
+
+    item.status =
+
+        TX_REPLAY_STATUS.REPLAYING;
+
+    item.replayAttempts++;
+
+    try{
+
+        const result =
+
+            await processTransaction(
+
+                structuredClone(item.entry),
+
+                structuredClone(item.meta)
+
+            );
+
+        item.status =
+
+            result
+
+                ? TX_REPLAY_STATUS.COMPLETED
+
+                : TX_REPLAY_STATUS.FAILED;
+
+        return !!result;
+
+    }
+
+    catch{
+
+        item.status =
+
+            TX_REPLAY_STATUS.FAILED;
+
+        return false;
+
+    }
+
+}
+/* =========================
+   REPLAY ALL
+========================= */
+
+async function replayAllFailedTransactions(){
+
+    for(
+
+        const item of TX_DLQ
+
+    ){
+
+        if(
+
+            item.status ===
+
+            TX_REPLAY_STATUS.PENDING
+
+        ){
+
+            await replayFailedTransaction(
+
+                item.id
+
+            );
+
+        }
+
+    }
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
