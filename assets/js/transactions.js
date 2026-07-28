@@ -1971,6 +1971,13 @@ function enqueueFailedTransaction(
         timestamp:
 
             new Date().toISOString(),
+       status:
+
+    TX_REPLAY_STATUS.PENDING,
+
+replayAttempts:
+
+    0,
 
         entry:
 
