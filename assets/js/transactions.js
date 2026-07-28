@@ -1864,6 +1864,9 @@ function getTransactionHealth(){
        transactionRegistryHealthy:
 
     TX_REGISTRY.size >= 0,
+       analyticsReady:
+
+    true,
 
     activeLocks:
 
