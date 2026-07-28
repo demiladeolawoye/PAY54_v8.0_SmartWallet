@@ -1815,6 +1815,17 @@ function getTransactionHealth(){
    deadLetterQueue:
 
     TX_DLQ.length,
+   pendingReplay:
+
+    TX_DLQ.filter(
+
+        item =>
+
+            item.status ===
+
+            TX_REPLAY_STATUS.PENDING
+
+    ).length,
 
     activeLocks:
 
