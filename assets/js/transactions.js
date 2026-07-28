@@ -2152,6 +2152,53 @@ async function replayAllFailedTransactions(){
 
 }
 /* =========================
+   SCHEDULE TRANSACTION
+========================= */
+
+function scheduleTransaction(
+
+    entry,
+
+    meta,
+
+    executeAt
+
+){
+
+    const schedule = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("SCH-" + Date.now()),
+
+        entry:
+
+            structuredClone(entry),
+
+        meta:
+
+            structuredClone(meta),
+
+        executeAt,
+
+        status:
+
+            TX_SCHEDULE_STATE.PENDING,
+
+        createdAt:
+
+            new Date().toISOString()
+
+    };
+
+    TX_SCHEDULED.push(schedule);
+
+    return schedule;
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
@@ -3678,6 +3725,12 @@ window.PAY54_TX = {
    replayFailedTransaction,
 
    replayAllFailedTransactions,
+
+   scheduleTransaction,
+
+   runScheduledTransactions,
+
+   getScheduledTransactions,
 
     registerPipelineStage,
 
