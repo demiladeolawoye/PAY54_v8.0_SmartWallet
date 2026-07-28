@@ -4077,6 +4077,12 @@ findTransactionsByCurrency,
 findTransactionsByStatus,
 
 searchTransactions,
+
+   getTransactionAnalytics,
+
+getTransactionVolumeByCurrency,
+
+getTransactionCountByType,
    
     registerPipelineStage,
 
