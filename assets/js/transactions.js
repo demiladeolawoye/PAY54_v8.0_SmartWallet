@@ -1848,6 +1848,9 @@ function getTransactionHealth(){
             TX_REPLAY_STATUS.PENDING
 
     ).length,
+       scheduledTransactions:
+
+    TX_SCHEDULED.length,
 
     activeLocks:
 
