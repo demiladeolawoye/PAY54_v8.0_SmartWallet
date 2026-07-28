@@ -3972,7 +3972,14 @@ getProcessedTransaction,
 
 getProcessedTransactions,
    
+findTransactionsByType,
 
+findTransactionsByCurrency,
+
+findTransactionsByStatus,
+
+searchTransactions,
+   
     registerPipelineStage,
 
     registerTransactionMiddleware,
