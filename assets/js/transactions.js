@@ -1857,6 +1857,10 @@ function getTransactionHealth(){
 
     TX_SCHEDULED.length,
 
+       registeredTransactions:
+
+    TX_REGISTRY.size,
+
     activeLocks:
 
         TX_LOCKS.size,
