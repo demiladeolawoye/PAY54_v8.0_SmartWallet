@@ -1488,6 +1488,21 @@ const TX_CIRCUIT = {
 
 const TX_DLQ = [];
 /* =========================
+   REPLAY STATES
+========================= */
+
+const TX_REPLAY_STATUS = Object.freeze({
+
+    PENDING: "PENDING",
+
+    REPLAYING: "REPLAYING",
+
+    COMPLETED: "COMPLETED",
+
+    FAILED: "FAILED"
+
+});
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
