@@ -2526,6 +2526,50 @@ function getTransactionCountByType(){
 
 }
 /* =========================
+   TRANSACTION REPORT
+========================= */
+
+function generateTransactionReport(){
+
+    return {
+
+        generatedAt:
+
+            new Date().toISOString(),
+
+        analytics:
+
+            getTransactionAnalytics(),
+
+        volumeByCurrency:
+
+            getTransactionVolumeByCurrency(),
+
+        countByType:
+
+            getTransactionCountByType(),
+
+        health:
+
+            getTransactionHealth()
+
+    };
+
+}
+/* =========================
+   REGISTRY SNAPSHOT
+========================= */
+
+function exportTransactionRegistry(){
+
+    return structuredClone(
+
+        getProcessedTransactions()
+
+    );
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
