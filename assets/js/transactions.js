@@ -1867,6 +1867,9 @@ function getTransactionHealth(){
        analyticsReady:
 
     true,
+       reportingReady:
+
+    true,
 
     activeLocks:
 
