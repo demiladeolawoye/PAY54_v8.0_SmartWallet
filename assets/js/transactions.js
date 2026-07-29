@@ -2578,6 +2578,60 @@ function exportTransactionRegistry(){
 
 }
 /* =========================
+   CREATE SETTLEMENT
+========================= */
+
+function createSettlement(transaction){
+
+    const settlement = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("SET-" + Date.now()),
+
+        transactionId:
+
+            transaction.id,
+
+        currency:
+
+            transaction.currency,
+
+        amount:
+
+            transaction.amount,
+
+        status:
+
+            TX_SETTLEMENT_STATE.PENDING,
+
+        createdAt:
+
+            new Date().toISOString()
+
+    };
+
+    TX_SETTLEMENTS.push(settlement);
+
+    return settlement;
+
+}
+/* =========================
+   GET SETTLEMENTS
+========================= */
+
+function getSettlements(){
+
+    return [
+
+        ...TX_SETTLEMENTS
+
+    ];
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
