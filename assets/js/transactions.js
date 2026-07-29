@@ -2708,6 +2708,86 @@ function getSettlements(){
 
 }
 /* =========================
+   PROCESS SETTLEMENT
+========================= */
+
+function processSettlement(settlementId){
+
+    const settlement =
+
+        TX_SETTLEMENTS.find(
+
+            item => item.id === settlementId
+
+        );
+
+    if(!settlement){
+
+        return null;
+
+    }
+
+    settlement.status =
+
+        TX_SETTLEMENT_STATE.PROCESSING;
+
+    settlement.processedAt =
+
+        new Date().toISOString();
+
+    settlement.status =
+
+        TX_SETTLEMENT_STATE.SETTLED;
+
+    settlement.settledAt =
+
+        new Date().toISOString();
+
+    return settlement;
+
+}
+/* =========================
+   PROCESS ALL SETTLEMENTS
+========================= */
+
+function processPendingSettlements(){
+
+    const processed = [];
+
+    for(
+
+        const settlement of TX_SETTLEMENTS
+
+    ){
+
+        if(
+
+            settlement.status !==
+
+            TX_SETTLEMENT_STATE.PENDING
+
+        ){
+
+            continue;
+
+        }
+
+        processed.push(
+
+            processSettlement(
+
+                settlement.id
+
+            )
+
+        );
+
+    }
+
+    return processed;
+
+}
+/* =========================
    CREATE CLEARING RECORD
 ========================= */
 
