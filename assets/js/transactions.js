@@ -1918,6 +1918,9 @@ function getTransactionHealth(){
        reportingReady:
 
     true,
+      pendingClearing:
+
+    TX_CLEARING.length,
        pendingSettlements:
 
     TX_SETTLEMENTS.length,
@@ -4301,6 +4304,10 @@ getTransactionCountByType,
    generateTransactionReport,
 
 exportTransactionRegistry,
+   
+   createClearingRecord,
+
+getClearingRecords,
    
    createSettlement,
 
