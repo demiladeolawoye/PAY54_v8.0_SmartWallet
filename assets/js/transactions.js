@@ -2866,6 +2866,86 @@ function getClearingRecords(){
 
 }
 /* =========================
+   PROCESS CLEARING
+========================= */
+
+function processClearingRecord(clearingId){
+
+    const clearing =
+
+        TX_CLEARING.find(
+
+            item => item.id === clearingId
+
+        );
+
+    if(!clearing){
+
+        return null;
+
+    }
+
+    clearing.status =
+
+        TX_CLEARING_STATE.PROCESSING;
+
+    clearing.processingStartedAt =
+
+        new Date().toISOString();
+
+    clearing.status =
+
+        TX_CLEARING_STATE.CLEARED;
+
+    clearing.clearedAt =
+
+        new Date().toISOString();
+
+    return clearing;
+
+}
+/* =========================
+   PROCESS ALL CLEARING
+========================= */
+
+function processPendingClearing(){
+
+    const processed = [];
+
+    for(
+
+        const clearing of TX_CLEARING
+
+    ){
+
+        if(
+
+            clearing.status !==
+
+            TX_CLEARING_STATE.PENDING
+
+        ){
+
+            continue;
+
+        }
+
+        processed.push(
+
+            processClearingRecord(
+
+                clearing.id
+
+            )
+
+        );
+
+    }
+
+    return processed;
+
+}
+/* =========================
    CREATE RECONCILIATION
 ========================= */
 
