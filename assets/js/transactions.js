@@ -1583,6 +1583,25 @@ const TX_CLEARING_STATE = Object.freeze({
 
 });
 /* =========================
+   RECONCILIATION STATES
+========================= */
+
+const TX_RECONCILIATION_STATE = Object.freeze({
+
+    PENDING:
+        "PENDING",
+
+    MATCHED:
+        "MATCHED",
+
+    MISMATCH:
+        "MISMATCH",
+
+    RESOLVED:
+        "RESOLVED"
+
+});
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
