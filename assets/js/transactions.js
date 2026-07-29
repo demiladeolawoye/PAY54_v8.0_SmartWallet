@@ -1948,6 +1948,18 @@ function getTransactionHealth(){
        pendingReconciliation:
 
     TX_RECONCILIATION.length,
+
+       matchedReconciliations:
+
+    TX_RECONCILIATION.filter(
+
+        reconciliation =>
+
+            reconciliation.status ===
+
+            TX_RECONCILIATION_STATE.MATCHED
+
+    ).length,
        pendingSettlements:
 
     TX_SETTLEMENTS.length,
@@ -4560,6 +4572,10 @@ getClearingRecords,
    createReconciliationRecord,
 
 getReconciliationRecords,
+
+   processReconciliationRecord,
+
+processPendingReconciliations,
    
    createSettlement,
 
