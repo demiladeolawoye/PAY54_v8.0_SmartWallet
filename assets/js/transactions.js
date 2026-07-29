@@ -1875,6 +1875,9 @@ function getTransactionHealth(){
        reportingReady:
 
     true,
+       pendingSettlements:
+
+    TX_SETTLEMENTS.length,
 
     activeLocks:
 
@@ -4198,6 +4201,10 @@ getTransactionCountByType,
    generateTransactionReport,
 
 exportTransactionRegistry,
+   
+   createSettlement,
+
+getSettlements,
    
     registerPipelineStage,
 
