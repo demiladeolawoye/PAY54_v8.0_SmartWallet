@@ -1498,6 +1498,11 @@ const TX_SCHEDULED = [];
 
 const TX_REGISTRY = new Map();
 /* =========================
+   SETTLEMENT REGISTRY
+========================= */
+
+const TX_SETTLEMENTS = [];
+/* =========================
    REPLAY STATES
 ========================= */
 
