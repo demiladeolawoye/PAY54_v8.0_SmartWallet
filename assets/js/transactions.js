@@ -2908,6 +2908,78 @@ function getReconciliationRecords(){
 
 }
 /* =========================
+   PROCESS RECONCILIATION
+========================= */
+
+function processReconciliationRecord(reconciliationId){
+
+    const reconciliation =
+
+        TX_RECONCILIATION.find(
+
+            item => item.id === reconciliationId
+
+        );
+
+    if(!reconciliation){
+
+        return null;
+
+    }
+
+    reconciliation.status =
+
+        TX_RECONCILIATION_STATE.MATCHED;
+
+    reconciliation.processedAt =
+
+        new Date().toISOString();
+
+    return reconciliation;
+
+}
+/* =========================
+   PROCESS ALL RECONCILIATIONS
+========================= */
+
+function processPendingReconciliations(){
+
+    const processed = [];
+
+    for(
+
+        const reconciliation of TX_RECONCILIATION
+
+    ){
+
+        if(
+
+            reconciliation.status !==
+
+            TX_RECONCILIATION_STATE.PENDING
+
+        ){
+
+            continue;
+
+        }
+
+        processed.push(
+
+            processReconciliationRecord(
+
+                reconciliation.id
+
+            )
+
+        );
+
+    }
+
+    return processed;
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
