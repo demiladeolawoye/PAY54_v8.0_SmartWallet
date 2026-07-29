@@ -1559,6 +1559,25 @@ const TX_SETTLEMENT_STATE = Object.freeze({
 
 });
 /* =========================
+   CLEARING STATES
+========================= */
+
+const TX_CLEARING_STATE = Object.freeze({
+
+    PENDING:
+        "PENDING",
+
+    PROCESSING:
+        "PROCESSING",
+
+    CLEARED:
+        "CLEARED",
+
+    FAILED:
+        "FAILED"
+
+});
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
