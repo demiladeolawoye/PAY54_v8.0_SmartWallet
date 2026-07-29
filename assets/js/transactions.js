@@ -1945,6 +1945,17 @@ function getTransactionHealth(){
       pendingClearing:
 
     TX_CLEARING.length,
+       clearedTransactions:
+
+    TX_CLEARING.filter(
+
+        clearing =>
+
+            clearing.status ===
+
+            TX_CLEARING_STATE.CLEARED
+
+    ).length,
        pendingReconciliation:
 
     TX_RECONCILIATION.length,
@@ -4648,6 +4659,10 @@ exportTransactionRegistry,
    createClearingRecord,
 
 getClearingRecords,
+
+   processClearingRecord,
+
+processPendingClearing,
 
    createReconciliationRecord,
 
