@@ -2759,6 +2759,60 @@ function getClearingRecords(){
 
 }
 /* =========================
+   CREATE RECONCILIATION
+========================= */
+
+function createReconciliationRecord(transaction){
+
+    const reconciliation = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("REC-" + Date.now()),
+
+        transactionId:
+
+            transaction.id,
+
+        currency:
+
+            transaction.currency,
+
+        amount:
+
+            transaction.amount,
+
+        status:
+
+            TX_RECONCILIATION_STATE.PENDING,
+
+        createdAt:
+
+            new Date().toISOString()
+
+    };
+
+    TX_RECONCILIATION.push(reconciliation);
+
+    return reconciliation;
+
+}
+/* =========================
+   GET RECONCILIATION
+========================= */
+
+function getReconciliationRecords(){
+
+    return [
+
+        ...TX_RECONCILIATION
+
+    ];
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
