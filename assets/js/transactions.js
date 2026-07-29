@@ -1535,6 +1535,25 @@ const TX_SCHEDULE_STATE = Object.freeze({
 
 });
 /* =========================
+   SETTLEMENT STATES
+========================= */
+
+const TX_SETTLEMENT_STATE = Object.freeze({
+
+    PENDING:
+        "PENDING",
+
+    PROCESSING:
+        "PROCESSING",
+
+    SETTLED:
+        "SETTLED",
+
+    FAILED:
+        "FAILED"
+
+});
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
