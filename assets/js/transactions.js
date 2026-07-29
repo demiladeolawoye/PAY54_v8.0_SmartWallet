@@ -1952,6 +1952,18 @@ function getTransactionHealth(){
 
     TX_SETTLEMENTS.length,
 
+       settledTransactions:
+
+    TX_SETTLEMENTS.filter(
+
+        settlement =>
+
+            settlement.status ===
+
+            TX_SETTLEMENT_STATE.SETTLED
+
+    ).length,
+
     activeLocks:
 
         TX_LOCKS.size,
