@@ -4492,6 +4492,10 @@ getReconciliationRecords,
    createSettlement,
 
 getSettlements,
+
+   processSettlement,
+
+processPendingSettlements,
    
     registerPipelineStage,
 
