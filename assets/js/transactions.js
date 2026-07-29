@@ -2678,6 +2678,60 @@ function getSettlements(){
 
 }
 /* =========================
+   CREATE CLEARING RECORD
+========================= */
+
+function createClearingRecord(transaction){
+
+    const clearing = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("CLR-" + Date.now()),
+
+        transactionId:
+
+            transaction.id,
+
+        currency:
+
+            transaction.currency,
+
+        amount:
+
+            transaction.amount,
+
+        status:
+
+            TX_CLEARING_STATE.PENDING,
+
+        createdAt:
+
+            new Date().toISOString()
+
+    };
+
+    TX_CLEARING.push(clearing);
+
+    return clearing;
+
+}
+/* =========================
+   GET CLEARING RECORDS
+========================= */
+
+function getClearingRecords(){
+
+    return [
+
+        ...TX_CLEARING
+
+    ];
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
