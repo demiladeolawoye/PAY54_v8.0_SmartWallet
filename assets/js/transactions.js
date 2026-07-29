@@ -1508,6 +1508,11 @@ const TX_SETTLEMENTS = [];
 
 const TX_CLEARING = [];
 /* =========================
+   RECONCILIATION REGISTRY
+========================= */
+
+const TX_RECONCILIATION = [];
+/* =========================
    REPLAY STATES
 ========================= */
 
