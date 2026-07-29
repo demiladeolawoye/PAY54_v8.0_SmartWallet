@@ -4040,6 +4040,11 @@ TX_METRICS.averageLatency =
     tx
 
 );
+   createSettlement(
+
+    tx
+
+);
     return tx;
 
 }catch(err){
