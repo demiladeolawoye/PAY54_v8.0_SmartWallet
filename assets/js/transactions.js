@@ -2081,6 +2081,16 @@ highPriorityExceptions:
             exception.escalated === true
 
     ).length,
+       notedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            Array.isArray(exception.notes) &&
+            exception.notes.length > 0
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5103,6 +5113,8 @@ getTransactionExceptions,
    setTransactionExceptionSLA,
 
    escalateTransactionException,
+
+   addTransactionExceptionNote,
 
    resolveTransactionException,
 
