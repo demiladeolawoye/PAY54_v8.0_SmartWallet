@@ -1613,6 +1613,25 @@ const TX_RECONCILIATION_STATE = Object.freeze({
 
 });
 /* =========================
+   EXCEPTION STATES
+========================= */
+
+const TX_EXCEPTION_STATE = Object.freeze({
+
+    OPEN:
+        "OPEN",
+
+    INVESTIGATING:
+        "INVESTIGATING",
+
+    RESOLVED:
+        "RESOLVED",
+
+    CLOSED:
+        "CLOSED"
+
+});
+/* =========================
    REGISTER PIPELINE STAGE
 ========================= */
 
