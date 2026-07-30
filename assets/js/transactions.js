@@ -3599,6 +3599,34 @@ function setTransactionExceptionRootCause(
 
 }
 /* =========================
+   SET EXCEPTION ROOT CAUSE
+========================= */
+
+function setTransactionExceptionRootCause(
+
+    exceptionId,
+
+    rootCause
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.rootCause = rootCause;
+
+    exception.rootCauseUpdatedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
