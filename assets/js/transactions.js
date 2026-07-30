@@ -4575,11 +4575,7 @@ TX_METRICS.averageLatency =
     tx
 
 );
-  createSettlement(
-
-    tx
-
-); 
+   
    createClearingRecord(
     tx
 );
