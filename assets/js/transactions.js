@@ -4911,6 +4911,8 @@ getTransactionExceptions,
 
    investigateTransactionException,
 
+   assignTransactionException,
+
    resolveTransactionException,
 
 closeTransactionException,
