@@ -2072,6 +2072,15 @@ highPriorityExceptions:
             !!exception.slaDueAt
 
     ).length,
+       escalatedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            exception.escalated === true
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5058,6 +5067,8 @@ getTransactionExceptions,
    setTransactionExceptionCategory,
 
    setTransactionExceptionSLA,
+
+   escalateTransactionException,
 
    resolveTransactionException,
 
