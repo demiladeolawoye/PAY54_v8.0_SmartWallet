@@ -3326,6 +3326,34 @@ function setTransactionExceptionCategory(
 
 }
 /* =========================
+   SET EXCEPTION SLA
+========================= */
+
+function setTransactionExceptionSLA(
+
+    exceptionId,
+
+    dueAt
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.slaDueAt = dueAt;
+
+    exception.slaUpdatedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
