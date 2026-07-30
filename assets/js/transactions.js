@@ -2036,6 +2036,16 @@ function getTransactionHealth(){
 
     ).length,
 
+       assignedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            !!exception.assignedTo
+
+    ).length,
+
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
