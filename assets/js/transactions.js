@@ -3215,6 +3215,12 @@ function resolveTransactionException(exceptionId){
     if(!exception){
         return null;
     }
+   if(
+    exception.state !==
+    TX_EXCEPTION_STATE.INVESTIGATING
+){
+    return null;
+}
 
     exception.state = TX_EXCEPTION_STATE.RESOLVED;
 
