@@ -3608,6 +3608,40 @@ function setTransactionExceptionRootCause(
 
 }
 /* =========================
+   ADD EXCEPTION OWNER HISTORY
+========================= */
+
+function addTransactionExceptionOwnershipHistory(
+
+    exceptionId,
+
+    owner
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.ownerHistory ??= [];
+
+    exception.ownerHistory.push({
+
+        owner,
+
+        assignedAt:
+            new Date().toISOString()
+
+    });
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
