@@ -3215,6 +3215,34 @@ function investigateTransactionException(exceptionId){
 
 }
 /* =========================
+   ASSIGN EXCEPTION
+========================= */
+
+function assignTransactionException(
+
+    exceptionId,
+
+    assignee
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.assignedTo = assignee;
+
+    exception.assignedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
