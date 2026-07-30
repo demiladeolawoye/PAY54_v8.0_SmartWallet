@@ -1517,6 +1517,12 @@ const TX_CLEARING = [];
 ========================= */
 
 const TX_RECONCILIATION = [];
+
+/* =========================
+   EXCEPTION REGISTRY
+========================= */
+
+const TX_EXCEPTIONS = [];
 /* =========================
    REPLAY STATES
 ========================= */
