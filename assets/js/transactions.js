@@ -3243,7 +3243,12 @@ function closeTransactionException(exceptionId){
     if(!exception){
         return null;
     }
-
+   if(
+    exception.state !==
+    TX_EXCEPTION_STATE.RESOLVED
+){
+    return null;
+}
     exception.state = TX_EXCEPTION_STATE.CLOSED;
 
     exception.closedAt =
