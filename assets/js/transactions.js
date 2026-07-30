@@ -2120,6 +2120,15 @@ highPriorityExceptions:
             !!exception.resolutionCode
 
     ).length,
+       rootCauseClassifiedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            !!exception.rootCause
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5274,6 +5283,8 @@ getTransactionExceptions,
    addTransactionExceptionActivity,
 
    setTransactionExceptionResolutionCode,
+
+   setTransactionExceptionRootCause,
 
    resolveTransactionException,
 
