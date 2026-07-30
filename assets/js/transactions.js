@@ -2091,6 +2091,16 @@ highPriorityExceptions:
             exception.notes.length > 0
 
     ).length,
+       attachmentExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            Array.isArray(exception.attachments) &&
+            exception.attachments.length > 0
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5149,6 +5159,8 @@ getTransactionExceptions,
    escalateTransactionException,
 
    addTransactionExceptionNote,
+
+   addTransactionExceptionAttachment,
 
    resolveTransactionException,
 
