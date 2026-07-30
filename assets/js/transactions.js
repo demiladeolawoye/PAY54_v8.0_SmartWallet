@@ -3446,6 +3446,40 @@ function addTransactionExceptionNote(
 
 }
 /* =========================
+   ADD EXCEPTION ATTACHMENT
+========================= */
+
+function addTransactionExceptionAttachment(
+
+    exceptionId,
+
+    attachment
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.attachments ??= [];
+
+    exception.attachments.push({
+
+        ...attachment,
+
+        addedAt:
+            new Date().toISOString()
+
+    });
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
