@@ -3253,6 +3253,34 @@ function assignTransactionException(
 
 }
 /* =========================
+   SET EXCEPTION PRIORITY
+========================= */
+
+function setTransactionExceptionPriority(
+
+    exceptionId,
+
+    priority
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.priority = priority;
+
+    exception.priorityUpdatedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
