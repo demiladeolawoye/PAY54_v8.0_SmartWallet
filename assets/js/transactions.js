@@ -2054,6 +2054,15 @@ highPriorityExceptions:
             exception.priority === "HIGH"
 
     ).length,
+       categorisedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            !!exception.category
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
