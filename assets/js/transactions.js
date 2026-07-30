@@ -3534,6 +3534,34 @@ function addTransactionExceptionActivity(
 
 }
 /* =========================
+   SET EXCEPTION RESOLUTION CODE
+========================= */
+
+function setTransactionExceptionResolutionCode(
+
+    exceptionId,
+
+    resolutionCode
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.resolutionCode = resolutionCode;
+
+    exception.resolutionCodeUpdatedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
