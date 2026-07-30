@@ -2045,7 +2045,15 @@ function getTransactionHealth(){
             !!exception.assignedTo
 
     ).length,
+highPriorityExceptions:
 
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            exception.priority === "HIGH"
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -4940,6 +4948,8 @@ getTransactionExceptions,
    investigateTransactionException,
 
    assignTransactionException,
+
+   setTransactionExceptionPriority,
 
    resolveTransactionException,
 
