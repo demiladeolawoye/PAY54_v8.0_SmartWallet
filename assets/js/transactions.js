@@ -2024,6 +2024,18 @@ function getTransactionHealth(){
 
     ).length,  
 
+       investigatingExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            exception.state ===
+
+            TX_EXCEPTION_STATE.INVESTIGATING
+
+    ).length,
+
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
