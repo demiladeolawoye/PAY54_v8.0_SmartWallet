@@ -2000,10 +2000,7 @@ function getTransactionHealth(){
             TX_RECONCILIATION_STATE.MATCHED
 
     ).length,
-       pendingSettlements:
-
-    TX_SETTLEMENTS.length,
-
+  
        settledTransactions:
 
     TX_SETTLEMENTS.filter(
