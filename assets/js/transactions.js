@@ -4744,10 +4744,6 @@ getTransactionCountByType,
    generateTransactionReport,
 
 exportTransactionRegistry,
-
-   createSettlement,
-
-getSettlements,
    
    createClearingRecord,
 
