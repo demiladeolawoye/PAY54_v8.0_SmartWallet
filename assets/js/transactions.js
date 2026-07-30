@@ -3117,6 +3117,50 @@ function processPendingReconciliations(){
 
 }
 /* =========================
+   CREATE EXCEPTION
+========================= */
+
+function createTransactionException(details){
+
+    const exception = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("EX-" + Date.now()),
+
+        state:
+
+            TX_EXCEPTION_STATE.OPEN,
+
+        createdAt:
+
+            new Date().toISOString(),
+
+        ...details
+
+    };
+
+    TX_EXCEPTIONS.push(exception);
+
+    return exception;
+
+}
+/* =========================
+   GET EXCEPTIONS
+========================= */
+
+function getTransactionExceptions(){
+
+    return [
+
+        ...TX_EXCEPTIONS
+
+    ];
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
