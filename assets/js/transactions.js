@@ -3164,6 +3164,50 @@ function getTransactionExceptions(){
 
 }
 /* =========================
+   RESOLVE EXCEPTION
+========================= */
+
+function resolveTransactionException(exceptionId){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.state = TX_EXCEPTION_STATE.RESOLVED;
+
+    exception.resolvedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
+   CLOSE EXCEPTION
+========================= */
+
+function closeTransactionException(exceptionId){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.state = TX_EXCEPTION_STATE.CLOSED;
+
+    exception.closedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
