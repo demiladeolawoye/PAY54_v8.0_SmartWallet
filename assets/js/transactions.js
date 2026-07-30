@@ -3402,6 +3402,40 @@ function escalateTransactionException(
 
 }
 /* =========================
+   ADD EXCEPTION NOTE
+========================= */
+
+function addTransactionExceptionNote(
+
+    exceptionId,
+
+    note
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.notes ??= [];
+
+    exception.notes.push({
+
+        note,
+
+        createdAt:
+            new Date().toISOString()
+
+    });
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
