@@ -1503,6 +1503,11 @@ const TX_REGISTRY = new Map();
 
 const TX_SETTLEMENTS = [];
 /* =========================
+   SETTLEMENT REGISTRY
+========================= */
+
+const TX_SETTLEMENTS = [];
+/* =========================
    CLEARING REGISTRY
 ========================= */
 
