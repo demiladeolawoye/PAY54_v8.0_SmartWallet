@@ -4988,6 +4988,8 @@ getTransactionExceptions,
 
    setTransactionExceptionPriority,
 
+   setTransactionExceptionCategory,
+
    resolveTransactionException,
 
 closeTransactionException,
