@@ -2024,6 +2024,22 @@ function getTransactionHealth(){
 
     ).length,  
 
+       resolvedExceptions:
+
+    TX_EXCEPTIONS.filter(
+        exception =>
+            exception.state ===
+            TX_EXCEPTION_STATE.RESOLVED
+    ).length,
+
+closedExceptions:
+
+    TX_EXCEPTIONS.filter(
+        exception =>
+            exception.state ===
+            TX_EXCEPTION_STATE.CLOSED
+    ).length,
+
     activeLocks:
 
         TX_LOCKS.size,
@@ -4808,6 +4824,10 @@ processPendingSettlements,
    createTransactionException,
 
 getTransactionExceptions,
+
+   resolveTransactionException,
+
+closeTransactionException,
    
     registerPipelineStage,
 
