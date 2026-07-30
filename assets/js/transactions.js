@@ -3363,6 +3363,36 @@ function setTransactionExceptionSLA(
 
 }
 /* =========================
+   ESCALATE EXCEPTION
+========================= */
+
+function escalateTransactionException(
+
+    exceptionId,
+
+    reason
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.escalated = true;
+
+    exception.escalationReason = reason;
+
+    exception.escalatedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
