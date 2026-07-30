@@ -4848,6 +4848,8 @@ processPendingSettlements,
 
 getTransactionExceptions,
 
+   investigateTransactionException,
+
    resolveTransactionException,
 
 closeTransactionException,
