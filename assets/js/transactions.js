@@ -3180,6 +3180,29 @@ function getTransactionExceptions(){
 
 }
 /* =========================
+   START INVESTIGATION
+========================= */
+
+function investigateTransactionException(exceptionId){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.state =
+        TX_EXCEPTION_STATE.INVESTIGATING;
+
+    exception.investigationStartedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
