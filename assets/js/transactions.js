@@ -4777,6 +4777,9 @@ getSettlements,
    processSettlement,
 
 processPendingSettlements,
+   createTransactionException,
+
+getTransactionExceptions,
    
     registerPipelineStage,
 
