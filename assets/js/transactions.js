@@ -2111,6 +2111,15 @@ highPriorityExceptions:
             exception.activity.length > 0
 
     ).length,
+       resolutionCodedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            !!exception.resolutionCode
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5235,6 +5244,8 @@ getTransactionExceptions,
    addTransactionExceptionAttachment,
 
    addTransactionExceptionActivity,
+
+   setTransactionExceptionResolutionCode,
 
    resolveTransactionException,
 
