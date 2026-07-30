@@ -2020,6 +2020,17 @@ function getTransactionHealth(){
             TX_SETTLEMENT_STATE.SETTLED
 
     ).length,
+     openExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            exception.state ===
+
+            TX_EXCEPTION_STATE.OPEN
+
+    ).length,  
 
     activeLocks:
 
