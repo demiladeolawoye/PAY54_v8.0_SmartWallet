@@ -3735,6 +3735,34 @@ function approveTransactionExceptionResolution(
 
 }
 /* =========================
+   VERIFY EXCEPTION RESOLUTION
+========================= */
+
+function verifyTransactionExceptionResolution(
+
+    exceptionId,
+
+    verifier
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.resolutionVerifiedBy = verifier;
+
+    exception.resolutionVerifiedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
