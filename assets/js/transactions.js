@@ -4971,6 +4971,8 @@ function publishSagaEvent(
 
 function publishHealthEvent(){
 
+    monitorTransactionExceptions();
+
     publishTransactionEvent(
 
         "transaction.health",
@@ -5777,6 +5779,8 @@ getTransactionExceptions,
    checkTransactionExceptionSLABreach,
 
    autoEscalateTransactionException,
+
+   monitorTransactionExceptions,
 
    escalateTransactionException,
 
