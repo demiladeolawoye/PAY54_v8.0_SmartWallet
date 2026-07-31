@@ -5848,6 +5848,10 @@ getTransactionExceptions,
 
    monitorTransactionExceptions,
 
+   startTransactionExceptionMonitor,
+   
+   stopTransactionExceptionMonitor,
+
    escalateTransactionException,
 
    addTransactionExceptionNote,
@@ -5907,7 +5911,7 @@ closeTransactionException,
     openCreatePinModal
 
 };
-
+startTransactionExceptionMonitor();
 console.log("✅ PAY54 TRANSACTION ENGINE LOADED");
 /* =========================================
    GLOBAL FEED EXPORTS
