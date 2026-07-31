@@ -2176,12 +2176,58 @@ highPriorityExceptions:
             exception.auditTrail.length > 0
 
     ).length,
+       averageResolutionDurationMs:
+
+    (() => {
+
+        const resolved =
+
+            TX_EXCEPTIONS.filter(
+
+                exception =>
+
+                    typeof exception.resolutionDurationMs === "number"
+
+            );
+
+        if(!resolved.length){
+
+            return 0;
+
+        }
+
+        return Math.round(
+
+            resolved.reduce(
+
+                (sum, exception) =>
+
+                    sum + exception.resolutionDurationMs,
+
+                0
+
+            ) / resolved.length
+
+        );
+
+    })(),
+       
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
         exception =>
             exception.state ===
             TX_EXCEPTION_STATE.RESOLVED
+    ).length,
+
+       timedResolutionExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            typeof exception.resolutionDurationMs === "number"
+
     ).length,
 
 closedExceptions:
