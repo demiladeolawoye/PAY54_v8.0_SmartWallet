@@ -3628,6 +3628,42 @@ function autoEscalateTransactionException(
     );
 
 }
+/* =========================
+   ENTERPRISE EXCEPTION
+   MONITOR
+========================= */
+
+function monitorTransactionExceptions(){
+
+    for(
+
+        const exception of TX_EXCEPTIONS
+
+    ){
+
+        if(
+
+            exception.state ===
+
+            TX_EXCEPTION_STATE.OPEN ||
+
+            exception.state ===
+
+            TX_EXCEPTION_STATE.INVESTIGATING
+
+        ){
+
+            autoEscalateTransactionException(
+
+                exception.id
+
+            );
+
+        }
+
+    }
+
+}
 
 /* =========================
    ESCALATE EXCEPTION
