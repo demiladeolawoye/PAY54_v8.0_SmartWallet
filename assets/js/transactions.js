@@ -3882,6 +3882,11 @@ function resolveTransactionException(exceptionId){
 
     exception.resolvedAt =
         new Date().toISOString();
+exception.resolutionDurationMs =
+
+    new Date(exception.resolvedAt).getTime() -
+
+    new Date(exception.createdAt).getTime();
 
     return exception;
 
