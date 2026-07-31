@@ -3698,6 +3698,34 @@ function setTransactionExceptionResolutionSummary(
 
 }
 /* =========================
+   APPROVE EXCEPTION RESOLUTION
+========================= */
+
+function approveTransactionExceptionResolution(
+
+    exceptionId,
+
+    approver
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.resolutionApprovedBy = approver;
+
+    exception.resolutionApprovedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
