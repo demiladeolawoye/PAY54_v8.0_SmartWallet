@@ -3763,6 +3763,39 @@ function verifyTransactionExceptionResolution(
 
 }
 /* =========================
+   VALIDATE EXCEPTION RESOLUTION
+========================= */
+
+function validateTransactionExceptionResolution(
+
+    exceptionId
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return false;
+    }
+
+    return Boolean(
+
+        exception.resolutionCode &&
+
+        exception.rootCause &&
+
+        exception.resolutionSummary &&
+
+        exception.resolutionApprovedBy &&
+
+        exception.resolutionVerifiedBy
+
+    );
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
