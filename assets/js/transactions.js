@@ -3796,6 +3796,40 @@ function validateTransactionExceptionResolution(
 
 }
 /* =========================
+   AUDIT EXCEPTION RESOLUTION
+========================= */
+
+function auditTransactionExceptionResolution(
+
+    exception
+
+){
+
+    exception.auditTrail ??= [];
+
+    exception.auditTrail.push({
+
+        action: "RESOLUTION_VALIDATED",
+
+        timestamp:
+            new Date().toISOString(),
+
+        resolutionCode:
+            exception.resolutionCode,
+
+        rootCause:
+            exception.rootCause,
+
+        approvedBy:
+            exception.resolutionApprovedBy,
+
+        verifiedBy:
+            exception.resolutionVerifiedBy
+
+    });
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
