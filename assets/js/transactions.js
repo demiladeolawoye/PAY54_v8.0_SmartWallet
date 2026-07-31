@@ -2148,6 +2148,15 @@ highPriorityExceptions:
             !!exception.resolutionSummary
 
     ).length,
+       resolutionApprovedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            !!exception.resolutionApprovedBy
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5370,6 +5379,8 @@ getTransactionExceptions,
    addTransactionExceptionOwnershipHistory,
 
    setTransactionExceptionResolutionSummary,
+
+   approveTransactionExceptionResolution,
 
    resolveTransactionException,
 
