@@ -2081,6 +2081,17 @@ highPriorityExceptions:
             exception.slaBreached === true
 
     ).length,
+       automaticEscalations:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            exception.escalated === true &&
+
+            exception.slaBreached === true
+
+    ).length,
        escalatedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5728,6 +5739,8 @@ getTransactionExceptions,
    setTransactionExceptionSLA,
 
    checkTransactionExceptionSLABreach,
+
+   autoEscalateTransactionException,
 
    escalateTransactionException,
 
