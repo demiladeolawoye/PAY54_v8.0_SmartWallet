@@ -3522,6 +3522,53 @@ function setTransactionExceptionSLA(
 
 }
 /* =========================
+   CHECK SLA BREACH
+========================= */
+
+function checkTransactionExceptionSLABreach(
+
+    exceptionId
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return false;
+    }
+
+    if(!exception.slaDueAt){
+        return false;
+    }
+
+    const breached =
+
+        Date.now() >
+
+        new Date(exception.slaDueAt).getTime();
+
+    exception.slaBreached = breached;
+
+    if(
+
+        breached &&
+
+        !exception.slaBreachedAt
+
+    ){
+
+        exception.slaBreachedAt =
+            new Date().toISOString();
+
+    }
+
+    return breached;
+
+}
+
+/* =========================
    ESCALATE EXCEPTION
 ========================= */
 
