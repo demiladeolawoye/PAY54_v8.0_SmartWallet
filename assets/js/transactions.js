@@ -2166,6 +2166,16 @@ highPriorityExceptions:
             !!exception.resolutionVerifiedBy
 
     ).length,
+       resolutionAuditedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            Array.isArray(exception.auditTrail) &&
+            exception.auditTrail.length > 0
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5527,6 +5537,8 @@ getTransactionExceptions,
    verifyTransactionExceptionResolution,
 
    validateTransactionExceptionResolution,
+
+   auditTransactionExceptionResolution,
 
    resolveTransactionException,
 
