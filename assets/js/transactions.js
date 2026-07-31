@@ -3576,6 +3576,47 @@ function checkTransactionExceptionSLABreach(
     return breached;
 
 }
+/* =========================
+   AUTO ESCALATE SLA BREACH
+========================= */
+
+function autoEscalateTransactionException(
+
+    exceptionId
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    if(
+        !checkTransactionExceptionSLABreach(
+            exceptionId
+        )
+    ){
+        return exception;
+    }
+
+    if(
+        exception.escalated === true
+    ){
+        return exception;
+    }
+
+    return escalateTransactionException(
+
+        exceptionId,
+
+        "Automatic SLA breach escalation"
+
+    );
+
+}
 
 /* =========================
    ESCALATE EXCEPTION
