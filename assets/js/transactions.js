@@ -3856,7 +3856,10 @@ function resolveTransactionException(exceptionId){
     return null;
 }
 
-    exception.state = TX_EXCEPTION_STATE.RESOLVED;
+   auditTransactionExceptionResolution(
+    exception
+);
+   exception.state = TX_EXCEPTION_STATE.RESOLVED;
 
     exception.resolvedAt =
         new Date().toISOString();
