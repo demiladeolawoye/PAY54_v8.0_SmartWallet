@@ -3664,6 +3664,72 @@ function monitorTransactionExceptions(){
     }
 
 }
+/* =========================
+   ENTERPRISE EXCEPTION
+   SCHEDULER
+========================= */
+
+let TX_EXCEPTION_MONITOR_TIMER = null;
+
+function startTransactionExceptionMonitor(
+
+    interval = 60000
+
+){
+
+    if(
+
+        TX_EXCEPTION_MONITOR_TIMER
+
+    ){
+
+        clearInterval(
+
+            TX_EXCEPTION_MONITOR_TIMER
+
+        );
+
+    }
+
+    TX_EXCEPTION_MONITOR_TIMER =
+
+        setInterval(
+
+            monitorTransactionExceptions,
+
+            interval
+
+        );
+
+    return TX_EXCEPTION_MONITOR_TIMER;
+
+}
+/* =========================
+   STOP EXCEPTION
+   MONITOR
+========================= */
+
+function stopTransactionExceptionMonitor(){
+
+    if(
+
+        !TX_EXCEPTION_MONITOR_TIMER
+
+    ){
+
+        return;
+
+    }
+
+    clearInterval(
+
+        TX_EXCEPTION_MONITOR_TIMER
+
+    );
+
+    TX_EXCEPTION_MONITOR_TIMER = null;
+
+}
 
 /* =========================
    ESCALATE EXCEPTION
