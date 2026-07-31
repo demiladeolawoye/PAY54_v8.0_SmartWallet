@@ -2129,6 +2129,16 @@ highPriorityExceptions:
             !!exception.rootCause
 
     ).length,
+       ownershipHistoryTrackedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            Array.isArray(exception.ownerHistory) &&
+            exception.ownerHistory.length > 0
+
+    ).length,
        resolvedExceptions:
 
     TX_EXCEPTIONS.filter(
@@ -5319,6 +5329,8 @@ getTransactionExceptions,
    setTransactionExceptionResolutionCode,
 
    setTransactionExceptionRootCause,
+
+   addTransactionExceptionOwnershipHistory,
 
    resolveTransactionException,
 
