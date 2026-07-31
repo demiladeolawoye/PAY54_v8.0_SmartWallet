@@ -3905,6 +3905,60 @@ function closeTransactionException(exceptionId){
 
 }
 /* =========================
+   REOPEN EXCEPTION
+========================= */
+
+function reopenTransactionException(
+
+    exceptionId,
+
+    reason
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    if(
+        exception.state !==
+        TX_EXCEPTION_STATE.RESOLVED &&
+        exception.state !==
+        TX_EXCEPTION_STATE.CLOSED
+    ){
+        return null;
+    }
+
+    exception.state =
+        TX_EXCEPTION_STATE.INVESTIGATING;
+
+    exception.reopenedReason =
+        reason;
+
+    exception.reopenedAt =
+        new Date().toISOString();
+
+    exception.auditTrail ??= [];
+
+    exception.auditTrail.push({
+
+        action: "REOPENED",
+
+        reason,
+
+        timestamp:
+            exception.reopenedAt
+
+    });
+
+    return exception;
+
+}
+/* =========================
    PLUGIN REGISTRY
 ========================= */
 
