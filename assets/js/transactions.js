@@ -3809,6 +3809,13 @@ function resolveTransactionException(exceptionId){
         return null;
     }
    if(
+    !validateTransactionExceptionResolution(
+        exceptionId
+    )
+){
+    return null;
+}
+   if(
     exception.state !==
     TX_EXCEPTION_STATE.INVESTIGATING
 ){
@@ -5481,6 +5488,8 @@ getTransactionExceptions,
    approveTransactionExceptionResolution,
 
    verifyTransactionExceptionResolution,
+
+   validateTransactionExceptionResolution,
 
    resolveTransactionException,
 
