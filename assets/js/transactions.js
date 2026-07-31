@@ -3652,6 +3652,34 @@ function addTransactionExceptionOwnershipHistory(
 
 }
 /* =========================
+   SET EXCEPTION RESOLUTION SUMMARY
+========================= */
+
+function setTransactionExceptionResolutionSummary(
+
+    exceptionId,
+
+    summary
+
+){
+
+    const exception = TX_EXCEPTIONS.find(
+        item => item.id === exceptionId
+    );
+
+    if(!exception){
+        return null;
+    }
+
+    exception.resolutionSummary = summary;
+
+    exception.resolutionSummaryUpdatedAt =
+        new Date().toISOString();
+
+    return exception;
+
+}
+/* =========================
    RESOLVE EXCEPTION
 ========================= */
 
