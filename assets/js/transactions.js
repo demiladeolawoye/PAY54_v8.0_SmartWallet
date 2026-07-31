@@ -2191,6 +2191,15 @@ closedExceptions:
             exception.state ===
             TX_EXCEPTION_STATE.CLOSED
     ).length,
+       reopenedExceptions:
+
+    TX_EXCEPTIONS.filter(
+
+        exception =>
+
+            !!exception.reopenedAt
+
+    ).length,
 
     activeLocks:
 
@@ -5597,6 +5606,8 @@ getTransactionExceptions,
    resolveTransactionException,
 
 closeTransactionException,
+
+   reopenTransactionException,
    
     registerPipelineStage,
 
