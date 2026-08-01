@@ -2635,12 +2635,19 @@ TX_RECOVERY_STATS.lastRunAt =
     }else{
 
         TX_RECOVERY_STATS.failedReplays++;
+       TX_RECOVERY_STATS.lastFailedReplayAt =
+    new Date().toISOString();
 
     }
 
 }catch(error){
 
     TX_RECOVERY_STATS.failedReplays++;
+       TX_RECOVERY_STATS.lastFailedReplayAt =
+    new Date().toISOString();
+
+TX_RECOVERY_STATS.lastError =
+    error?.message ?? String(error);
 
     console.error(
 
