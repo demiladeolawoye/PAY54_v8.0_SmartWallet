@@ -2724,7 +2724,28 @@ function createTransactionAlert(
     metadata = {}
 
 ){
+   
+const alertKey = `${level}:${title}`;
 
+if (
+
+    TX_ACTIVE_ALERT_KEYS.has(
+
+        alertKey
+
+    )
+
+){
+
+    return null;
+
+}
+
+TX_ACTIVE_ALERT_KEYS.add(
+
+    alertKey
+
+);
     const alert = {
 
         id:
