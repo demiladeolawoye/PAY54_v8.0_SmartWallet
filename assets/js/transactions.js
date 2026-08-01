@@ -2695,6 +2695,80 @@ lastError: null
 
 };
 /* =========================
+   ENTERPRISE ALERTS
+========================= */
+
+const TX_ALERTS = [];
+
+const TX_ALERT_LEVEL = Object.freeze({
+
+    INFO: "INFO",
+
+    WARNING: "WARNING",
+
+    CRITICAL: "CRITICAL"
+
+});
+/* =========================
+   CREATE ALERT
+========================= */
+
+function createTransactionAlert(
+
+    level,
+
+    title,
+
+    message,
+
+    metadata = {}
+
+){
+
+    const alert = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("ALT-" + Date.now()),
+
+        level,
+
+        title,
+
+        message,
+
+        metadata,
+
+        createdAt:
+
+            new Date().toISOString(),
+
+        acknowledged:
+
+            false
+
+    };
+
+    TX_ALERTS.push(alert);
+
+    publishTransactionEvent(
+
+        "transaction.alert",
+
+        {
+
+            ...alert
+
+        }
+
+    );
+
+    return alert;
+
+}
+/* =========================
    RECOVERY SCHEDULER
 ========================= */
 
