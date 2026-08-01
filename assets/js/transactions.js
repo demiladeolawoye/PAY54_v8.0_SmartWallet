@@ -2594,8 +2594,12 @@ async function runRecoveryOrchestrator(){
                 TX_REPLAY_STATUS.PENDING
 
         );
+   TX_RECOVERY_STATS.runs++;
 
-    for(
+TX_RECOVERY_STATS.lastRunAt =
+    new Date().toISOString();
+ 
+   for(
 
         const item of pending
 
@@ -2608,6 +2612,7 @@ async function runRecoveryOrchestrator(){
                 item.id
 
             );
+           TX_RECOVERY_STATS.successfulReplays++;
 
         }
 
