@@ -2621,14 +2621,14 @@ TX_RECOVERY_STATS.lastRunAt =
 
         try{
 
-            await replayFailedTransaction(
+           const recovered =
+    await replayFailedTransaction(item.id);
 
-                item.id
-
-            );
-           TX_RECOVERY_STATS.successfulReplays++;
-
-        }
+if (recovered) {
+    TX_RECOVERY_STATS.successfulReplays++;
+} else {
+    TX_RECOVERY_STATS.failedReplays++;
+}
 
         catch(error){
 
