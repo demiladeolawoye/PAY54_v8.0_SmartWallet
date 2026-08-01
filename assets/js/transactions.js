@@ -5571,6 +5571,89 @@ function publishHealthEvent(){
     );
 
 }
+/* =========================
+   HEALTH ALERT ENGINE
+========================= */
+
+function evaluateOperationalAlerts(){
+
+    const health =
+
+        getTransactionHealth();
+
+    if(
+
+        health.successRate < 95
+
+    ){
+
+        createTransactionAlert(
+
+            TX_ALERT_LEVEL.WARNING,
+
+            "Transaction Success Rate",
+
+            "Transaction success rate has fallen below enterprise threshold.",
+
+            {
+
+                successRate:
+
+                    health.successRate
+
+            }
+
+        );
+
+    }
+
+    if(
+
+        health.circuitState === "OPEN"
+
+    ){
+
+        createTransactionAlert(
+
+            TX_ALERT_LEVEL.CRITICAL,
+
+            "Circuit Breaker",
+
+            "Transaction circuit breaker is OPEN.",
+
+            {}
+
+        );
+
+    }
+
+    if(
+
+        health.deadLetterQueue > 25
+
+    ){
+
+        createTransactionAlert(
+
+            TX_ALERT_LEVEL.WARNING,
+
+            "Dead Letter Queue",
+
+            "Dead Letter Queue backlog exceeds operational threshold.",
+
+            {
+
+                backlog:
+
+                    health.deadLetterQueue
+
+            }
+
+        );
+
+    }
+
+}
 
 /* =========================
    CORE TRANSACTION PIPELINE
