@@ -1957,6 +1957,21 @@ function getTransactionHealth(){
         ? 1
 
         : 0,
+       recoveryRuns:
+
+    TX_RECOVERY_STATS.runs,
+
+successfulRecoveries:
+
+    TX_RECOVERY_STATS.successfulReplays,
+
+failedRecoveries:
+
+    TX_RECOVERY_STATS.failedReplays,
+
+lastRecoveryRun:
+
+    TX_RECOVERY_STATS.lastRunAt,
        scheduledTransactions:
 
     TX_SCHEDULED.length,
