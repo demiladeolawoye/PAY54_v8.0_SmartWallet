@@ -1950,6 +1950,13 @@ function getTransactionHealth(){
             TX_REPLAY_STATUS.PENDING
 
     ).length,
+       activeRecoveryJobs:
+
+    TX_RECOVERY_TIMER
+
+        ? 1
+
+        : 0,
        scheduledTransactions:
 
     TX_SCHEDULED.length,
@@ -5863,6 +5870,12 @@ window.PAY54_TX = {
    replayFailedTransaction,
 
    replayAllFailedTransactions,
+
+   runRecoveryOrchestrator,
+
+startRecoveryOrchestrator,
+
+stopRecoveryOrchestrator,
 
    scheduleTransaction,
 
