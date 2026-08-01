@@ -2666,6 +2666,31 @@ function startRecoveryOrchestrator(
 
 }
 /* =========================
+   STOP RECOVERY
+========================= */
+
+function stopRecoveryOrchestrator(){
+
+    if(
+
+        !TX_RECOVERY_TIMER
+
+    ){
+
+        return;
+
+    }
+
+    clearInterval(
+
+        TX_RECOVERY_TIMER
+
+    );
+
+    TX_RECOVERY_TIMER = null;
+
+}
+/* =========================
    SCHEDULE TRANSACTION
 ========================= */
 
