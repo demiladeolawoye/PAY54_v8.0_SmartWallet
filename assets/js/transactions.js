@@ -5936,6 +5936,9 @@ window.PAY54_TX = {
 startRecoveryOrchestrator,
 
 stopRecoveryOrchestrator,
+   getRecoveryStatistics: () => ({
+    ...TX_RECOVERY_STATS
+}),
 
    scheduleTransaction,
 
