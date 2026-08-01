@@ -2620,28 +2620,36 @@ TX_RECOVERY_STATS.lastRunAt =
 
     ){
 
-        try{
+    try{
 
-           const recovered =
-    await replayFailedTransaction(item.id);
+    const recovered =
+        await replayFailedTransaction(
+            item.id
+        );
 
-if (recovered) {
-    TX_RECOVERY_STATS.successfulReplays++;
-} else {
+    if(recovered){
+
+        TX_RECOVERY_STATS.successfulReplays++;
+
+    }else{
+
+        TX_RECOVERY_STATS.failedReplays++;
+
+    }
+
+}catch(error){
+
     TX_RECOVERY_STATS.failedReplays++;
+
+    console.error(
+
+        "[PAY54 RECOVERY]",
+
+        error
+
+    );
+
 }
-
-        catch(error){
-
-            console.error(
-
-                "[PAY54 RECOVERY]",
-
-                error
-
-            );
-
-        }
 
     }
 
