@@ -6001,6 +6001,7 @@ closeTransactionException,
 
 };
 startTransactionExceptionMonitor();
+startRecoveryOrchestrator();
 console.log("✅ PAY54 TRANSACTION ENGINE LOADED");
 /* =========================================
    GLOBAL FEED EXPORTS
