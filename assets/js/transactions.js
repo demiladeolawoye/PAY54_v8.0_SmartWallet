@@ -2699,7 +2699,7 @@ lastError: null
 ========================= */
 
 const TX_ALERTS = [];
-
+const TX_ACTIVE_ALERT_KEYS = new Set();
 const TX_ALERT_LEVEL = Object.freeze({
 
     INFO: "INFO",
