@@ -3389,6 +3389,23 @@ function getOperationsDashboard(){
                 ...TX_RECOVERY_STATS
 
             },
+       alerts: {
+
+    active:
+
+        TX_ALERTS.filter(
+
+            alert =>
+
+                !alert.acknowledged
+
+        ).length,
+
+    total:
+
+        TX_ALERTS.length
+
+},
 
         metrics:
 
@@ -6472,6 +6489,10 @@ getTransactionCountByType,
    generateEnterpriseAnalytics,
 
 getOperationsDashboard,
+   
+   getTransactionAlerts,
+
+acknowledgeTransactionAlert,
 
 generateExecutiveKPIReport,
 
