@@ -5562,6 +5562,8 @@ function publishHealthEvent(){
 
     monitorTransactionExceptions();
 
+    evaluateOperationalAlerts();
+
     publishTransactionEvent(
 
         "transaction.health",
