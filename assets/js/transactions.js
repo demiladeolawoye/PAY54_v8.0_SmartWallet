@@ -2665,7 +2665,13 @@ const TX_RECOVERY_STATS = {
 
     failedReplays: 0,
 
-    lastRunAt: null
+    lastRunAt: null,
+
+lastSuccessfulReplayAt: null,
+
+lastFailedReplayAt: null,
+
+lastError: null
 
 };
 /* =========================
