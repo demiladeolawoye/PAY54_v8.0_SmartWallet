@@ -2830,6 +2830,11 @@ function acknowledgeTransactionAlert(
     }
 
     alert.acknowledged = true;
+   TX_ACTIVE_ALERT_KEYS.delete(
+
+    `${alert.level}:${alert.title}`
+
+);
 
     alert.acknowledgedAt =
 
