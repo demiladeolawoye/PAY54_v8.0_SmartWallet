@@ -2769,6 +2769,55 @@ function createTransactionAlert(
 
 }
 /* =========================
+   GET ALERTS
+========================= */
+
+function getTransactionAlerts(){
+
+    return [
+
+        ...TX_ALERTS
+
+    ];
+
+}
+
+/* =========================
+   ACKNOWLEDGE ALERT
+========================= */
+
+function acknowledgeTransactionAlert(
+
+    alertId
+
+){
+
+    const alert =
+
+        TX_ALERTS.find(
+
+            item =>
+
+                item.id === alertId
+
+        );
+
+    if(!alert){
+
+        return null;
+
+    }
+
+    alert.acknowledged = true;
+
+    alert.acknowledgedAt =
+
+        new Date().toISOString();
+
+    return alert;
+
+}
+/* =========================
    RECOVERY SCHEDULER
 ========================= */
 
