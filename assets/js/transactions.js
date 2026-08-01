@@ -2629,6 +2629,8 @@ TX_RECOVERY_STATS.lastRunAt =
     if(recovered){
 
         TX_RECOVERY_STATS.successfulReplays++;
+       TX_RECOVERY_STATS.lastSuccessfulReplayAt =
+    new Date().toISOString();
 
     }else{
 
