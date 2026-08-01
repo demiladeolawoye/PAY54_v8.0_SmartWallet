@@ -3275,6 +3275,265 @@ function getOperationsDashboard(){
 
 }
 /* =========================
+   EXECUTIVE KPI REPORT
+========================= */
+
+function generateExecutiveKPIReport(){
+
+    return {
+
+        generatedAt:
+
+            new Date().toISOString(),
+
+        transactions:
+
+            {
+
+                started:
+
+                    TX_METRICS.started,
+
+                completed:
+
+                    TX_METRICS.completed,
+
+                failed:
+
+                    TX_METRICS.failed
+
+            },
+
+        settlements:
+
+            {
+
+                pending:
+
+                    TX_SETTLEMENTS.length,
+
+                completed:
+
+                    TX_SETTLEMENTS.filter(
+
+                        item =>
+
+                            item.status ===
+
+                            TX_SETTLEMENT_STATE.SETTLED
+
+                    ).length
+
+            },
+
+        clearing:
+
+            {
+
+                pending:
+
+                    TX_CLEARING.length,
+
+                completed:
+
+                    TX_CLEARING.filter(
+
+                        item =>
+
+                            item.status ===
+
+                            TX_CLEARING_STATE.CLEARED
+
+                    ).length
+
+            },
+
+        reconciliation:
+
+            {
+
+                pending:
+
+                    TX_RECONCILIATION.length,
+
+                matched:
+
+                    TX_RECONCILIATION.filter(
+
+                        item =>
+
+                            item.status ===
+
+                            TX_RECONCILIATION_STATE.MATCHED
+
+                    ).length
+
+            },
+
+        exceptions:
+
+            {
+
+                open:
+
+                    TX_EXCEPTIONS.filter(
+
+                        item =>
+
+                            item.state ===
+
+                            TX_EXCEPTION_STATE.OPEN
+
+                    ).length,
+
+                resolved:
+
+                    TX_EXCEPTIONS.filter(
+
+                        item =>
+
+                            item.state ===
+
+                            TX_EXCEPTION_STATE.RESOLVED
+
+                    ).length
+
+            }
+
+    };
+
+}
+/* =========================
+   ENTERPRISE ANALYTICS
+========================= */
+
+function generateEnterpriseAnalytics(){
+
+    const totalTransactions =
+
+        TX_METRICS.started;
+
+    const successfulTransactions =
+
+        TX_METRICS.completed;
+
+    const failedTransactions =
+
+        TX_METRICS.failed;
+
+    const recoveryAttempts =
+
+        TX_RECOVERY_STATS.successfulReplays +
+
+        TX_RECOVERY_STATS.failedReplays;
+
+    return {
+
+        transactionSuccessRate:
+
+            totalTransactions
+
+                ? Number(
+
+                    (
+
+                        successfulTransactions /
+
+                        totalTransactions
+
+                    ) * 100
+
+                ).toFixed(2)
+
+                : "100.00",
+
+        recoverySuccessRate:
+
+            recoveryAttempts
+
+                ? Number(
+
+                    (
+
+                        TX_RECOVERY_STATS.successfulReplays /
+
+                        recoveryAttempts
+
+                    ) * 100
+
+                ).toFixed(2)
+
+                : "100.00",
+
+        averageReplayAttempts:
+
+            recoveryAttempts
+
+                ? Number(
+
+                    TX_DLQ.reduce(
+
+                        (
+
+                            total,
+
+                            item
+
+                        ) =>
+
+                            total +
+
+                            (item.replayAttempts || 0),
+
+                        0
+
+                    ) /
+
+                    recoveryAttempts
+
+                ).toFixed(2)
+
+                : "0.00"
+
+    };
+
+}
+/* =========================
+   OPERATIONS DASHBOARD
+========================= */
+
+function getOperationsDashboard(){
+
+    return {
+
+        generatedAt:
+
+            new Date().toISOString(),
+
+        analytics:
+
+            generateEnterpriseAnalytics(),
+
+        health:
+
+            getTransactionHealth(),
+
+        recovery:
+
+            {
+
+                ...TX_RECOVERY_STATS
+
+            },
+
+        metrics:
+
+            getTransactionMetrics()
+
+    };
+
+}
+/* =========================
    REGISTRY SNAPSHOT
 ========================= */
 
@@ -6130,6 +6389,12 @@ getTransactionVolumeByCurrency,
 getTransactionCountByType,
 
    generateTransactionReport,
+
+   generateEnterpriseAnalytics,
+
+getOperationsDashboard,
+
+generateExecutiveKPIReport,
 
 exportTransactionRegistry,
    
