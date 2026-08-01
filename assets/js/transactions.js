@@ -1971,6 +1971,17 @@ failedRecoveries:
 lastRecoveryRun:
 
     TX_RECOVERY_STATS.lastRunAt,
+       lastSuccessfulRecovery:
+
+    TX_RECOVERY_STATS.lastSuccessfulReplayAt,
+
+lastFailedRecovery:
+
+    TX_RECOVERY_STATS.lastFailedReplayAt,
+
+lastRecoveryError:
+
+    TX_RECOVERY_STATS.lastError,
        scheduledTransactions:
 
     TX_SCHEDULED.length,
