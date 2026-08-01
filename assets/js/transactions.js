@@ -2570,6 +2570,95 @@ async function replayAllFailedTransactions(){
 
 }
 /* =========================
+   ENTERPRISE RECOVERY
+   ORCHESTRATOR
+========================= */
+
+async function runRecoveryOrchestrator(){
+
+    const pending =
+
+        TX_DLQ.filter(
+
+            item =>
+
+                item.status ===
+
+                TX_REPLAY_STATUS.PENDING
+
+        );
+
+    for(
+
+        const item of pending
+
+    ){
+
+        try{
+
+            await replayFailedTransaction(
+
+                item.id
+
+            );
+
+        }
+
+        catch(error){
+
+            console.error(
+
+                "[PAY54 RECOVERY]",
+
+                error
+
+            );
+
+        }
+
+    }
+
+}
+/* =========================
+   RECOVERY SCHEDULER
+========================= */
+
+let TX_RECOVERY_TIMER = null;
+
+function startRecoveryOrchestrator(
+
+    interval = 120000
+
+){
+
+    if(
+
+        TX_RECOVERY_TIMER
+
+    ){
+
+        clearInterval(
+
+            TX_RECOVERY_TIMER
+
+        );
+
+    }
+
+    TX_RECOVERY_TIMER =
+
+        setInterval(
+
+            runRecoveryOrchestrator,
+
+            interval
+
+        );
+
+    return TX_RECOVERY_TIMER;
+
+}
+/* =========================
    SCHEDULE TRANSACTION
 ========================= */
 
