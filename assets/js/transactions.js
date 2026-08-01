@@ -2627,6 +2627,21 @@ async function runRecoveryOrchestrator(){
 
 }
 /* =========================
+   RECOVERY STATISTICS
+========================= */
+
+const TX_RECOVERY_STATS = {
+
+    runs: 0,
+
+    successfulReplays: 0,
+
+    failedReplays: 0,
+
+    lastRunAt: null
+
+};
+/* =========================
    RECOVERY SCHEDULER
 ========================= */
 
