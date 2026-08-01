@@ -68,7 +68,6 @@ function publishTransactionEvent(
         }
 
     }catch(error){
-TX_RECOVERY_STATS.failedReplays++;
         console.error(
 
             "[PAY54_TRANSACTIONS]",
