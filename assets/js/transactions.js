@@ -3403,41 +3403,7 @@ function generateExecutiveKPIReport(){
     };
 
 }
-/* =========================
-   OPERATIONS DASHBOARD
-========================= */
 
-function getOperationsDashboard(){
-
-    return {
-
-        generatedAt:
-
-            new Date().toISOString(),
-
-        analytics:
-
-            generateEnterpriseAnalytics(),
-
-        health:
-
-            getTransactionHealth(),
-
-        recovery:
-
-            {
-
-                ...TX_RECOVERY_STATS
-
-            },
-
-        metrics:
-
-            getTransactionMetrics()
-
-    };
-
-}
 /* =========================
    REGISTRY SNAPSHOT
 ========================= */
