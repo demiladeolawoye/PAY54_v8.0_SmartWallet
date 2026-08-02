@@ -2820,6 +2820,77 @@ TX_ACTIVE_ALERT_KEYS.add(
 
 }
 /* =========================
+   CREATE INCIDENT
+========================= */
+
+function createTransactionIncident(
+
+    alert,
+
+    owner = null
+
+){
+
+    const incident = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("INC-" + Date.now()),
+
+        alertId:
+
+            alert.id,
+
+        level:
+
+            alert.level,
+
+        title:
+
+            alert.title,
+
+        message:
+
+            alert.message,
+
+        owner,
+
+        state:
+
+            TX_INCIDENT_STATE.OPEN,
+
+        createdAt:
+
+            new Date().toISOString(),
+
+        history: []
+
+    };
+
+    incident.history.push({
+
+        action:
+
+            "CREATED",
+
+        timestamp:
+
+            incident.createdAt
+
+    });
+
+    TX_INCIDENTS.push(
+
+        incident
+
+    );
+
+    return incident;
+
+}
+/* =========================
    GET ALERTS
 ========================= */
 
