@@ -292,6 +292,19 @@ Object.freeze({
     };
 
 }
+   /* =========================
+   GET QUEUE
+========================= */
+
+function getQueuedNotifications(){
+
+    return [
+
+        ...NOTIFICATION_QUEUE
+
+    ];
+
+}
   window.PAY54_NOTIFICATIONS = {
 
     getNotificationHealth
