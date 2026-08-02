@@ -3053,6 +3053,65 @@ function resolveTransactionIncident(
 
 }
 /* =========================
+   CLOSE INCIDENT
+========================= */
+
+function closeTransactionIncident(
+
+    incidentId
+
+){
+
+    const incident =
+
+        TX_INCIDENTS.find(
+
+            item =>
+
+                item.id === incidentId
+
+        );
+
+    if(!incident){
+
+        return null;
+
+    }
+
+    if(
+
+        incident.state !==
+
+        TX_INCIDENT_STATE.RESOLVED
+
+    ){
+
+        return null;
+
+    }
+
+    incident.state =
+
+        TX_INCIDENT_STATE.CLOSED;
+
+    incident.closedAt =
+
+        new Date().toISOString();
+
+    incident.history.push({
+
+        action: "CLOSED",
+
+        timestamp:
+
+            incident.closedAt
+
+    });
+
+    return incident;
+
+}
+/* =========================
    RECOVERY SCHEDULER
 ========================= */
 
