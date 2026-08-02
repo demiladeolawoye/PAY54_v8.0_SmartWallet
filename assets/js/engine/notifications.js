@@ -305,7 +305,14 @@ function getQueuedNotifications(){
     ];
 
 }
+   loadQueue();
+
+loadHistory();
   window.PAY54_NOTIFICATIONS = {
+
+    queueNotification,
+
+    getQueuedNotifications,
 
     getNotificationHealth
 
