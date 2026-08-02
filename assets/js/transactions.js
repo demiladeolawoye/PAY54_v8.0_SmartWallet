@@ -3641,6 +3641,45 @@ function getOperationsDashboard(){
         TX_ALERTS.length
 
 },
+       incidents:{
+
+    open:
+
+        TX_INCIDENTS.filter(
+
+            item =>
+
+                item.state ===
+
+                TX_INCIDENT_STATE.OPEN
+
+        ).length,
+
+    assigned:
+
+        TX_INCIDENTS.filter(
+
+            item =>
+
+                item.state ===
+
+                TX_INCIDENT_STATE.ASSIGNED
+
+        ).length,
+
+    resolved:
+
+        TX_INCIDENTS.filter(
+
+            item =>
+
+                item.state ===
+
+                TX_INCIDENT_STATE.RESOLVED
+
+        ).length
+
+},
 
         metrics:
 
@@ -6728,6 +6767,12 @@ getOperationsDashboard,
    getTransactionAlerts,
 
 acknowledgeTransactionAlert,
+
+   createTransactionIncident,
+
+assignTransactionIncident,
+
+resolveTransactionIncident,
 
 generateExecutiveKPIReport,
 
