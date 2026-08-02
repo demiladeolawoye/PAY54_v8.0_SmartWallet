@@ -2803,7 +2803,9 @@ TX_ACTIVE_ALERT_KEYS.add(
     };
 
     TX_ALERTS.push(alert);
-
+   createTransactionIncident(
+    alert
+);
     publishTransactionEvent(
 
         "transaction.alert",
