@@ -2996,6 +2996,61 @@ function assignTransactionIncident(
 
 }
 /* =========================
+   RESOLVE INCIDENT
+========================= */
+
+function resolveTransactionIncident(
+
+    incidentId,
+
+    summary
+
+){
+
+    const incident =
+
+        TX_INCIDENTS.find(
+
+            item =>
+
+                item.id === incidentId
+
+        );
+
+    if(!incident){
+
+        return null;
+
+    }
+
+    incident.state =
+
+        TX_INCIDENT_STATE.RESOLVED;
+
+    incident.summary =
+
+        summary;
+
+    incident.resolvedAt =
+
+        new Date().toISOString();
+
+    incident.history.push({
+
+        action:
+
+            "RESOLVED",
+
+        timestamp:
+
+            incident.resolvedAt
+
+    });
+
+    return incident;
+
+}
+/* =========================
    RECOVERY SCHEDULER
 ========================= */
 
