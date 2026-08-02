@@ -2699,6 +2699,11 @@ lastError: null
 ========================= */
 
 const TX_ALERTS = [];
+/* =========================
+   INCIDENT REGISTRY
+========================= */
+
+const TX_INCIDENTS = [];
 const TX_ACTIVE_ALERT_KEYS = new Set();
 const TX_ALERT_LEVEL = Object.freeze({
 
@@ -2707,6 +2712,31 @@ const TX_ALERT_LEVEL = Object.freeze({
     WARNING: "WARNING",
 
     CRITICAL: "CRITICAL"
+
+});
+/* =========================
+   INCIDENT STATES
+========================= */
+
+const TX_INCIDENT_STATE = Object.freeze({
+
+    OPEN:
+        "OPEN",
+
+    ASSIGNED:
+        "ASSIGNED",
+
+    INVESTIGATING:
+        "INVESTIGATING",
+
+    ESCALATED:
+        "ESCALATED",
+
+    RESOLVED:
+        "RESOLVED",
+
+    CLOSED:
+        "CLOSED"
 
 });
 /* =========================
