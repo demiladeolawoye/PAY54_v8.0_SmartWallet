@@ -2945,6 +2945,57 @@ function acknowledgeTransactionAlert(
 
 }
 /* =========================
+   ASSIGN INCIDENT
+========================= */
+
+function assignTransactionIncident(
+
+    incidentId,
+
+    owner
+
+){
+
+    const incident =
+
+        TX_INCIDENTS.find(
+
+            item =>
+
+                item.id === incidentId
+
+        );
+
+    if(!incident){
+
+        return null;
+
+    }
+
+    incident.owner = owner;
+
+    incident.state =
+
+        TX_INCIDENT_STATE.ASSIGNED;
+
+    incident.history.push({
+
+        action:
+
+            "ASSIGNED",
+
+        owner,
+
+        timestamp:
+
+            new Date().toISOString()
+
+    });
+
+    return incident;
+
+}
+/* =========================
    RECOVERY SCHEDULER
 ========================= */
 
