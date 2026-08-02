@@ -6833,6 +6833,8 @@ assignTransactionIncident,
 
 resolveTransactionIncident,
 
+closeTransactionIncident,
+
 generateExecutiveKPIReport,
 
 exportTransactionRegistry,
