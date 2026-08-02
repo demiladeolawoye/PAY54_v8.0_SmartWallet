@@ -22,6 +22,182 @@
   const NOTIFICATION_QUEUE = [];
 
 const NOTIFICATION_HISTORY = [];
+ /* =========================
+   STORAGE HELPERS
+========================= */
+
+function saveQueue(){
+
+    localStorage.setItem(
+
+        LS.QUEUE,
+
+        JSON.stringify(
+
+            NOTIFICATION_QUEUE
+
+        )
+
+    );
+
+}
+
+function saveHistory(){
+
+    localStorage.setItem(
+
+        LS.HISTORY,
+
+        JSON.stringify(
+
+            NOTIFICATION_HISTORY
+
+        )
+
+    );
+
+}
+
+function loadQueue(){
+
+    try{
+
+        const queue = JSON.parse(
+
+            localStorage.getItem(
+
+                LS.QUEUE
+
+            )
+
+        );
+
+        if(Array.isArray(queue)){
+
+            NOTIFICATION_QUEUE.push(
+
+                ...queue
+
+            );
+
+        }
+
+    }catch(error){
+
+        console.warn(
+
+            "[PAY54 Notifications]",
+
+            error
+
+        );
+
+    }
+
+}
+
+function loadHistory(){
+
+    try{
+
+        const history = JSON.parse(
+
+            localStorage.getItem(
+
+                LS.HISTORY
+
+            )
+
+        );
+
+        if(Array.isArray(history)){
+
+            NOTIFICATION_HISTORY.push(
+
+                ...history
+
+            );
+
+        }
+
+    }catch(error){
+
+        console.warn(
+
+            "[PAY54 Notifications]",
+
+            error
+
+        );
+
+    }
+
+}  
+ /* =========================
+   QUEUE NOTIFICATION
+========================= */
+
+function queueNotification({
+
+    channel,
+
+    priority =
+
+        NOTIFICATION_PRIORITY.NORMAL,
+
+    recipient,
+
+    title,
+
+    message,
+
+    payload = {}
+
+}){
+
+    const notification = {
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("NTF-" + Date.now()),
+
+        channel,
+
+        priority,
+
+        recipient,
+
+        title,
+
+        message,
+
+        payload,
+
+        status:
+
+            NOTIFICATION_STATUS.QUEUED,
+
+        createdAt:
+
+            new Date().toISOString()
+
+    };
+
+    NOTIFICATION_QUEUE.push(
+
+        notification
+
+    );
+
+    NOTIFICATION_METRICS.queued++;
+
+    saveQueue();
+
+    return notification;
+
+}  
   const NOTIFICATION_STATUS =
 Object.freeze({
 
