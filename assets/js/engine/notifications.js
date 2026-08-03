@@ -358,6 +358,37 @@ if(
     continue;
 
 }
+  const delivered =
+
+    dispatchNotification(
+
+        notification
+
+    );
+
+if(
+
+    delivered
+
+){
+
+    completeNotification(
+
+        notification.id
+
+    );
+
+}else{
+
+    failNotification(
+
+        notification.id,
+
+        "Delivery provider failed."
+
+    );
+
+}     
 
     }
 
