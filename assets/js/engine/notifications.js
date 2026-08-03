@@ -436,6 +436,21 @@ if(
     saveQueue();
 
 }
+  /* =========================
+   NOTIFICATION SCHEDULER
+========================= */
+
+function startNotificationScheduler(){
+
+    setInterval(
+
+        processNotificationQueue,
+
+        SCHEDULER_CONFIG.POLL_INTERVAL_MS
+
+    );
+
+} 
    /* =========================
    CHANNEL ROUTER
 ========================= */
