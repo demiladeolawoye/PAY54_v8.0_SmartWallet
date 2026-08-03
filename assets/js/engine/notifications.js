@@ -294,6 +294,161 @@ function queueNotification({
 
 }
    /* =========================
+   PROCESS QUEUE
+========================= */
+
+function processNotificationQueue(){
+
+    for(
+
+        const notification of
+
+        NOTIFICATION_QUEUE
+
+    ){
+
+        if(
+
+            notification.status !==
+
+            NOTIFICATION_STATUS.QUEUED
+
+        ){
+
+            continue;
+
+        }
+
+        notification.status =
+
+            NOTIFICATION_STATUS.PROCESSING;
+
+    }
+
+    saveQueue();
+
+}
+   /* =========================
+   COMPLETE NOTIFICATION
+========================= */
+
+function completeNotification(
+
+    notificationId
+
+){
+
+    const notification =
+
+        NOTIFICATION_QUEUE.find(
+
+            item =>
+
+                item.id ===
+
+                notificationId
+
+        );
+
+    if(!notification){
+
+        return null;
+
+    }
+
+    notification.status =
+
+        NOTIFICATION_STATUS.SENT;
+
+    notification.sentAt =
+
+        new Date().toISOString();
+
+    NOTIFICATION_HISTORY.push(
+
+        notification
+
+    );
+
+    const index =
+
+        NOTIFICATION_QUEUE.indexOf(
+
+            notification
+
+        );
+
+    if(index > -1){
+
+        NOTIFICATION_QUEUE.splice(
+
+            index,
+
+            1
+
+        );
+
+    }
+
+    NOTIFICATION_METRICS.sent++;
+
+    saveQueue();
+
+    saveHistory();
+
+    return notification;
+
+}
+   /* =========================
+   FAIL NOTIFICATION
+========================= */
+
+function failNotification(
+
+    notificationId,
+
+    reason
+
+){
+
+    const notification =
+
+        NOTIFICATION_QUEUE.find(
+
+            item =>
+
+                item.id ===
+
+                notificationId
+
+        );
+
+    if(!notification){
+
+        return null;
+
+    }
+
+    notification.status =
+
+        NOTIFICATION_STATUS.FAILED;
+
+    notification.failureReason =
+
+        reason;
+
+    notification.failedAt =
+
+        new Date().toISOString();
+
+    NOTIFICATION_METRICS.failed++;
+
+    saveQueue();
+
+    return notification;
+
+}
+   /* =========================
    GET QUEUE
 ========================= */
 
