@@ -370,9 +370,9 @@ if(
     continue;
 
 }
-  const delivered =
+const delivered =
 
-    dispatchNotification(
+    retryNotification(
 
         notification
 
