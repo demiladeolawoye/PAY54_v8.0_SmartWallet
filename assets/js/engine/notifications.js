@@ -304,6 +304,9 @@ function queueNotification({
         DELIVERY_PROVIDERS
 
     ).length,
+       retryLimit:
+
+    RETRY_CONFIG.MAX_ATTEMPTS,
 
         metrics:
 
