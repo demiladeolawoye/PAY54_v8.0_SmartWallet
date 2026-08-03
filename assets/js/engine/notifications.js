@@ -391,6 +391,15 @@ function completeNotification(
     }
 
     NOTIFICATION_METRICS.sent++;
+   if(
+
+    NOTIFICATION_METRICS.queued > 0
+
+){
+
+    NOTIFICATION_METRICS.queued--;
+
+}
 
     saveQueue();
 
