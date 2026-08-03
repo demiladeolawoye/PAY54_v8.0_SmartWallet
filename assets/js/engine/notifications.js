@@ -597,6 +597,61 @@ const DELIVERY_PROVIDERS = Object.freeze({
 
 });
    /* =========================
+   NOTIFICATION TEMPLATES
+========================= */
+
+const NOTIFICATION_TEMPLATES = Object.freeze({
+
+    PAYMENT_SUCCESS: {
+
+        title:
+
+            "Payment Successful",
+
+        message:
+
+            "{amount} has been sent to {recipient}."
+
+    },
+
+    PAYMENT_FAILED: {
+
+        title:
+
+            "Payment Failed",
+
+        message:
+
+            "Unable to send {amount} to {recipient}."
+
+    },
+
+    CARD_FROZEN: {
+
+        title:
+
+            "Card Frozen",
+
+        message:
+
+            "Your PAY54 card has been frozen."
+
+    },
+
+    CARD_UNFROZEN: {
+
+        title:
+
+            "Card Activated",
+
+        message:
+
+            "Your PAY54 card is active again."
+
+    }
+
+});
+   /* =========================
    DISPATCH DELIVERY
 ========================= */
 
