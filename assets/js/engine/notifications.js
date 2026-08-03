@@ -258,8 +258,9 @@ function queueNotification({
 
         createdAt:
 
-            new Date().toISOString()
+    new Date().toISOString(),
 
+attempts: 0,
     };
 
     NOTIFICATION_QUEUE.push(
