@@ -333,8 +333,15 @@ function processNotificationQueue(){
         notification.status =
 
             NOTIFICATION_STATUS.PROCESSING;
-       notification.route =
-          if(
+     notification.route =
+
+    routeNotification(
+
+        notification
+
+    );
+
+if(
 
     !notification.route
 
@@ -348,13 +355,9 @@ function processNotificationQueue(){
 
     );
 
+    continue;
+
 }
-
-    routeNotification(
-
-        notification
-
-    );
 
     }
 
