@@ -98,6 +98,11 @@ Object.freeze({
     MAX_ATTEMPTS: 3
 
 });
+   const SCHEDULER_CONFIG = Object.freeze({
+
+    POLL_INTERVAL_MS: 1000
+
+});
    
  /* =========================
    STORAGE HELPERS
