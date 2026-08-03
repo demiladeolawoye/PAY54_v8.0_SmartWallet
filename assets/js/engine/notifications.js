@@ -233,7 +233,9 @@ function queueNotification({
 
     message,
 
-    payload = {}
+    payload = {},
+
+scheduledFor = null
 
 }){
 
