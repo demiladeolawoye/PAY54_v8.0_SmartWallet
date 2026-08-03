@@ -366,6 +366,13 @@ templates:
         NOTIFICATION_TEMPLATES
 
     ).length,
+       categories:
+
+    Object.keys(
+
+        NOTIFICATION_CATEGORY
+
+    ).length,
 
 retryLimit:
 
