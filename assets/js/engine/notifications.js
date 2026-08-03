@@ -292,6 +292,13 @@ function queueNotification({
             NOTIFICATION_STATUS.PROCESSING
 
     ).length,
+       providers:
+
+    Object.keys(
+
+        DELIVERY_PROVIDERS
+
+    ).length,
 
         metrics:
 
