@@ -1008,6 +1008,10 @@ loadHistory();
 
      retryNotification,
 
+     resolveTemplate,
+
+sendTemplate,
+
     completeNotification,
 
     failNotification,
