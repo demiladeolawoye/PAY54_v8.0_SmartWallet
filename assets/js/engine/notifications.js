@@ -341,6 +341,23 @@ function processNotificationQueue(){
         NOTIFICATION_QUEUE
 
     ){
+       if(
+
+    notification.scheduledFor &&
+
+    new Date(
+
+        notification.scheduledFor
+
+    ) >
+
+    new Date()
+
+){
+
+    continue;
+
+}
 
         if(
 
