@@ -322,6 +322,13 @@ function processNotificationQueue(){
         notification.status =
 
             NOTIFICATION_STATUS.PROCESSING;
+       notification.route =
+
+    routeNotification(
+
+        notification
+
+    );
 
     }
 
