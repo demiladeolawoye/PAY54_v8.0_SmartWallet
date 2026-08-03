@@ -451,6 +451,15 @@ function failNotification(
         new Date().toISOString();
 
     NOTIFICATION_METRICS.failed++;
+   if(
+
+    NOTIFICATION_METRICS.queued > 0
+
+){
+
+    NOTIFICATION_METRICS.queued--;
+
+}
 
     saveQueue();
 
