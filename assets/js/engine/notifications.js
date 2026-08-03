@@ -464,6 +464,7 @@ function getQueuedNotifications(){
    loadQueue();
 
 loadHistory();
+   processNotificationQueue();
   window.PAY54_NOTIFICATIONS = {
 
     queueNotification,
