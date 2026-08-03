@@ -818,6 +818,8 @@ loadHistory();
 
      startNotificationScheduler,
 
+     stopNotificationScheduler,
+
      routeNotification,
 
      dispatchNotification,
