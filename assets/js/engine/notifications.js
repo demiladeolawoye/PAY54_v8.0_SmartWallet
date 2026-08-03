@@ -447,7 +447,17 @@ if(
 
 function startNotificationScheduler(){
 
-    setInterval(
+    if(
+
+        notificationScheduler
+
+    ){
+
+        return notificationScheduler;
+
+    }
+
+    notificationScheduler = setInterval(
 
         processNotificationQueue,
 
@@ -455,7 +465,9 @@ function startNotificationScheduler(){
 
     );
 
-} 
+    return notificationScheduler;
+
+}
 /* =========================
    STOP NOTIFICATION SCHEDULER
 ========================= */
