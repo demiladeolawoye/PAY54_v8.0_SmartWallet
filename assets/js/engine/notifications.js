@@ -268,6 +268,7 @@ scheduledFor = null
     new Date().toISOString(),
 
 attempts: 0,
+scheduledFor,
     };
 
     NOTIFICATION_QUEUE.push(
