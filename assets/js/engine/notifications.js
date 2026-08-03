@@ -292,13 +292,17 @@ scheduledFor = null
 
             ("NTF-" + Date.now()),
 
-        channel,
+     channel,
 
-        priority,
+category,
 
-        recipient,
+tags,
 
-        title,
+priority,
+
+recipient,
+
+title,
 
         message,
 
