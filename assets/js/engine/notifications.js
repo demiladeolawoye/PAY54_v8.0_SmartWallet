@@ -321,6 +321,9 @@ scheduledFor,
        schedulerInterval:
 
     SCHEDULER_CONFIG.POLL_INTERVAL_MS,
+       schedulerRunning:
+
+    notificationScheduler !== null,
 
         metrics:
 
