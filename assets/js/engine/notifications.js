@@ -469,6 +469,12 @@ loadHistory();
 
     queueNotification,
 
+    processNotificationQueue,
+
+    completeNotification,
+
+    failNotification,
+
     getQueuedNotifications,
 
     getNotificationHealth
