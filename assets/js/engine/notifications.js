@@ -456,6 +456,31 @@ function startNotificationScheduler(){
     );
 
 } 
+/* =========================
+   STOP NOTIFICATION SCHEDULER
+========================= */
+
+function stopNotificationScheduler(){
+
+    if(
+
+        !notificationScheduler
+
+    ){
+
+        return;
+
+    }
+
+    clearInterval(
+
+        notificationScheduler
+
+    );
+
+    notificationScheduler = null;
+
+}   
    /* =========================
    CHANNEL ROUTER
 ========================= */
