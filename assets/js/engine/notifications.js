@@ -281,6 +281,17 @@ function queueNotification({
         history:
 
             NOTIFICATION_HISTORY.length,
+       processing:
+
+    NOTIFICATION_QUEUE.filter(
+
+        item =>
+
+            item.status ===
+
+            NOTIFICATION_STATUS.PROCESSING
+
+    ).length,
 
         metrics:
 
