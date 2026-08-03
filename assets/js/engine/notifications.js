@@ -103,6 +103,8 @@ Object.freeze({
     POLL_INTERVAL_MS: 1000
 
 });
+
+   let notificationScheduler = null;
    
  /* =========================
    STORAGE HELPERS
