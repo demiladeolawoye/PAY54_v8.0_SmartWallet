@@ -573,6 +573,8 @@ loadHistory();
 
     processNotificationQueue,
 
+     routeNotification,
+
     completeNotification,
 
     failNotification,
