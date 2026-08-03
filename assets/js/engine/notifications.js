@@ -693,6 +693,8 @@ loadHistory();
 
      routeNotification,
 
+     dispatchNotification,
+
     completeNotification,
 
     failNotification,
