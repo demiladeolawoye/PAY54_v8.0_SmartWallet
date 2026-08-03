@@ -93,6 +93,11 @@ Object.freeze({
     cancelled: 0
 
 };
+   const RETRY_CONFIG = Object.freeze({
+
+    MAX_ATTEMPTS: 3
+
+});
    
  /* =========================
    STORAGE HELPERS
