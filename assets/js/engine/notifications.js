@@ -416,6 +416,90 @@ function routeNotification(
 
 }
    /* =========================
+   DELIVERY PROVIDERS
+========================= */
+
+const DELIVERY_PROVIDERS = Object.freeze({
+
+    IN_APP(notification){
+
+        return true;
+
+    },
+
+    EMAIL(notification){
+
+        return true;
+
+    },
+
+    PUSH(notification){
+
+        return true;
+
+    },
+
+    SMS(notification){
+
+        return true;
+
+    },
+
+    WEBHOOK(notification){
+
+        return true;
+
+    },
+
+    SLACK(notification){
+
+        return true;
+
+    },
+
+    TEAMS(notification){
+
+        return true;
+
+    }
+
+});
+   /* =========================
+   DISPATCH DELIVERY
+========================= */
+
+function dispatchNotification(
+
+    notification
+
+){
+
+    const provider =
+
+        DELIVERY_PROVIDERS[
+
+            notification.route
+
+        ];
+
+    if(
+
+        !provider
+
+    ){
+
+        return false;
+
+    }
+
+    return provider(
+
+        notification
+
+    );
+
+}
+   /* =========================
    COMPLETE NOTIFICATION
 ========================= */
 
