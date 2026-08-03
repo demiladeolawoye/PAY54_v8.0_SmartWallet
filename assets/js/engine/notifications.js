@@ -323,6 +323,21 @@ function processNotificationQueue(){
 
             NOTIFICATION_STATUS.PROCESSING;
        notification.route =
+          if(
+
+    !notification.route
+
+){
+
+    failNotification(
+
+        notification.id,
+
+        "Unsupported notification channel."
+
+    );
+
+}
 
     routeNotification(
 
