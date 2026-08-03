@@ -82,6 +82,43 @@ Object.freeze({
         "TEAMS"
 
 });
+   /* =========================
+   NOTIFICATION CATEGORIES
+========================= */
+
+const NOTIFICATION_CATEGORY = Object.freeze({
+
+    SYSTEM:
+        "SYSTEM",
+
+    TRANSACTIONS:
+        "TRANSACTIONS",
+
+    CARDS:
+        "CARDS",
+
+    SECURITY:
+        "SECURITY",
+
+    COMPLIANCE:
+        "COMPLIANCE",
+
+    WALLET:
+        "WALLET",
+
+    SAVINGS:
+        "SAVINGS",
+
+    PAYMENTS:
+        "PAYMENTS",
+
+    MARKETING:
+        "MARKETING",
+
+    SUPPORT:
+        "SUPPORT"
+
+});
    const NOTIFICATION_METRICS = {
 
     queued: 0,
