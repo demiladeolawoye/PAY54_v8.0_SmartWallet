@@ -329,6 +329,57 @@ function processNotificationQueue(){
 
 }
    /* =========================
+   CHANNEL ROUTER
+========================= */
+
+function routeNotification(
+
+    notification
+
+){
+
+    switch(
+
+        notification.channel
+
+    ){
+
+        case NOTIFICATION_CHANNEL.IN_APP:
+
+            return "IN_APP";
+
+        case NOTIFICATION_CHANNEL.EMAIL:
+
+            return "EMAIL";
+
+        case NOTIFICATION_CHANNEL.PUSH:
+
+            return "PUSH";
+
+        case NOTIFICATION_CHANNEL.SMS:
+
+            return "SMS";
+
+        case NOTIFICATION_CHANNEL.WEBHOOK:
+
+            return "WEBHOOK";
+
+        case NOTIFICATION_CHANNEL.SLACK:
+
+            return "SLACK";
+
+        case NOTIFICATION_CHANNEL.TEAMS:
+
+            return "TEAMS";
+
+        default:
+
+            return null;
+
+    }
+
+}
+   /* =========================
    COMPLETE NOTIFICATION
 ========================= */
 
