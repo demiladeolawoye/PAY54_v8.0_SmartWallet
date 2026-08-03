@@ -308,30 +308,41 @@ scheduledFor,
             NOTIFICATION_STATUS.PROCESSING
 
     ).length,
-       providers:
+    providers:
 
     Object.keys(
 
         DELIVERY_PROVIDERS
 
     ).length,
-       retryLimit:
+
+templates:
+
+    Object.keys(
+
+        NOTIFICATION_TEMPLATES
+
+    ).length,
+
+retryLimit:
 
     RETRY_CONFIG.MAX_ATTEMPTS,
-       schedulerInterval:
+
+schedulerInterval:
 
     SCHEDULER_CONFIG.POLL_INTERVAL_MS,
-       schedulerRunning:
+
+schedulerRunning:
 
     notificationScheduler !== null,
 
-        metrics:
+metrics:
 
-            {
+    {
 
-                ...NOTIFICATION_METRICS
+        ...NOTIFICATION_METRICS
 
-            }
+    }
 
     };
 
