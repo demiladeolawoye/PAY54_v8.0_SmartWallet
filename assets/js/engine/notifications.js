@@ -543,6 +543,45 @@ function dispatchNotification(
 
 }
    /* =========================
+   RETRY DELIVERY
+========================= */
+
+function retryNotification(
+
+    notification
+
+){
+
+    notification.attempts++;
+
+    if(
+
+        notification.attempts >
+
+        RETRY_CONFIG.MAX_ATTEMPTS
+
+    ){
+
+        failNotification(
+
+            notification.id,
+
+            "Maximum retry attempts exceeded."
+
+        );
+
+        return false;
+
+    }
+
+    return dispatchNotification(
+
+        notification
+
+    );
+
+}
+   /* =========================
    COMPLETE NOTIFICATION
 ========================= */
 
