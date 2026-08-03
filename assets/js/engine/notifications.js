@@ -749,6 +749,8 @@ loadHistory();
 
      dispatchNotification,
 
+     retryNotification,
+
     completeNotification,
 
     failNotification,
