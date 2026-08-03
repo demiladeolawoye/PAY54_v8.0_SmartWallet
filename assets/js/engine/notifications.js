@@ -316,6 +316,9 @@ scheduledFor,
        retryLimit:
 
     RETRY_CONFIG.MAX_ATTEMPTS,
+       schedulerInterval:
+
+    SCHEDULER_CONFIG.POLL_INTERVAL_MS,
 
         metrics:
 
@@ -785,6 +788,8 @@ loadHistory();
     queueNotification,
 
     processNotificationQueue,
+
+     startNotificationScheduler,
 
      routeNotification,
 
