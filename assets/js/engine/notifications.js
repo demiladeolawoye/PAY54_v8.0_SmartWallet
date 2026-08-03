@@ -779,7 +779,7 @@ function getQueuedNotifications(){
    loadQueue();
 
 loadHistory();
-   processNotificationQueue();
+   startNotificationScheduler();
   window.PAY54_NOTIFICATIONS = {
 
     queueNotification,
