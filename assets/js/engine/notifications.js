@@ -652,6 +652,118 @@ const NOTIFICATION_TEMPLATES = Object.freeze({
 
 });
    /* =========================
+   TEMPLATE RESOLVER
+========================= */
+
+function resolveTemplate(
+
+    template,
+
+    values = {}
+
+){
+
+    const definition =
+
+        NOTIFICATION_TEMPLATES[
+
+            template
+
+        ];
+
+    if(
+
+        !definition
+
+    ){
+
+        return null;
+
+    }
+
+    let message =
+
+        definition.message;
+
+    Object.entries(
+
+        values
+
+    ).forEach(
+
+        ([key,value])=>{
+
+            message = message.replaceAll(
+
+                `{${key}}`,
+
+                value
+
+            );
+
+        }
+
+    );
+
+    return {
+
+        title:
+
+            definition.title,
+
+        message
+
+    };
+
+}
+   /* =========================
+   SEND TEMPLATE
+========================= */
+
+function sendTemplate(
+
+    template,
+
+    options = {}
+
+){
+
+    const resolved =
+
+        resolveTemplate(
+
+            template,
+
+            options.values
+
+        );
+
+    if(
+
+        !resolved
+
+    ){
+
+        return null;
+
+    }
+
+    return queueNotification({
+
+        ...options,
+
+        title:
+
+            resolved.title,
+
+        message:
+
+            resolved.message
+
+    });
+
+}
+   /* =========================
    DISPATCH DELIVERY
 ========================= */
 
