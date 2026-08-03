@@ -260,19 +260,25 @@ function loadHistory(){
 
 function queueNotification({
 
-    channel,
+  channel,
 
-    priority =
+category =
 
-        NOTIFICATION_PRIORITY.NORMAL,
+    NOTIFICATION_CATEGORY.SYSTEM,
 
-    recipient,
+tags = [],
 
-    title,
+priority =
 
-    message,
+    NOTIFICATION_PRIORITY.NORMAL,
 
-    payload = {},
+recipient,
+
+title,
+
+message,
+
+payload = {},
 
 scheduledFor = null
 
