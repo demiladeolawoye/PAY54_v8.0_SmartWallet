@@ -1089,3 +1089,24 @@ sendTemplate,
 );
 
 })();
+/* =========================
+   FILTER BY CATEGORY
+========================= */
+
+function getNotificationsByCategory(
+
+    category
+
+){
+
+    return NOTIFICATION_QUEUE.filter(
+
+        notification =>
+
+            notification.category ===
+
+            category
+
+    );
+
+}
