@@ -1614,6 +1614,186 @@ function getNotificationAudit(){
 
 }
    /* =========================
+   ANALYTICS SUMMARY
+========================= */
+
+function getNotificationAnalytics(){
+
+    return {
+
+        queued:
+
+            NOTIFICATION_QUEUE.length,
+
+        history:
+
+            NOTIFICATION_HISTORY.length,
+
+        audit:
+
+            NOTIFICATION_AUDIT.length,
+
+        sent:
+
+            NOTIFICATION_HISTORY.filter(
+
+                item =>
+
+                    item.status ===
+
+                    NOTIFICATION_STATUS.SENT
+
+            ).length,
+
+        delivered:
+
+            NOTIFICATION_HISTORY.filter(
+
+                item =>
+
+                    item.status ===
+
+                    NOTIFICATION_STATUS.DELIVERED
+
+            ).length,
+
+        read:
+
+            NOTIFICATION_HISTORY.filter(
+
+                item =>
+
+                    item.status ===
+
+                    NOTIFICATION_STATUS.READ
+
+            ).length,
+
+        failed:
+
+            NOTIFICATION_HISTORY.filter(
+
+                item =>
+
+                    item.status ===
+
+                    NOTIFICATION_STATUS.FAILED
+
+            ).length
+
+    };
+
+}
+   /* =========================
+   CATEGORY ANALYTICS
+========================= */
+
+function getCategoryAnalytics(){
+
+    const analytics = {};
+
+    Object.values(
+
+        NOTIFICATION_CATEGORY
+
+    ).forEach(category=>{
+
+        analytics[category] =
+
+            NOTIFICATION_HISTORY.filter(
+
+                item =>
+
+                    item.category ===
+
+                    category
+
+            ).length;
+
+    });
+
+    return analytics;
+
+}
+   /* =========================
+   CHANNEL ANALYTICS
+========================= */
+
+function getChannelAnalytics(){
+
+    const analytics = {};
+
+    Object.values(
+
+        NOTIFICATION_CHANNEL
+
+    ).forEach(channel=>{
+
+        analytics[channel] =
+
+            NOTIFICATION_HISTORY.filter(
+
+                item =>
+
+                    item.channel ===
+
+                    channel
+
+            ).length;
+
+    });
+
+    return analytics;
+
+}
+   /* =========================
+   AUDIT STATISTICS
+========================= */
+
+function getAuditStatistics(){
+
+    const statistics = {};
+
+    NOTIFICATION_AUDIT.forEach(event=>{
+
+        statistics[event.event] =
+
+            (statistics[event.event] || 0) + 1;
+
+    });
+
+    return statistics;
+
+}
+   /* =========================
+   COMPLIANCE DASHBOARD
+========================= */
+
+function getComplianceDashboard(){
+
+    return {
+
+        analytics:
+
+            getNotificationAnalytics(),
+
+        categories:
+
+            getCategoryAnalytics(),
+
+        channels:
+
+            getChannelAnalytics(),
+
+        audit:
+
+            getAuditStatistics()
+
+    };
+
+}
+   
+   /* =========================
    FILTER BY CATEGORY
 ========================= */
 
