@@ -1324,6 +1324,28 @@ function dispatchNotification(
 
 }
 
+const selectedProvider =
+
+    getAvailableProvider(
+
+        notification
+
+    );
+
+if(
+
+    !selectedProvider
+
+){
+
+    return false;
+
+}
+
+notification.provider =
+
+    selectedProvider;
+
 return provider(
 
     notification
@@ -1331,6 +1353,37 @@ return provider(
 );
 
 }
+  /* =========================
+   SELECT PROVIDER
+========================= */
+
+function getAvailableProvider(
+
+    notification
+
+){
+
+    const providers =
+
+        PROVIDER_REGISTRY[
+
+            notification.route
+
+        ] || [];
+
+    return providers.find(
+
+        provider =>
+
+            PROVIDER_HEALTH[
+
+                provider
+
+            ]
+
+    ) || null;
+
+} 
    /* =========================
    CHECK USER PREFERENCE
 ========================= */
