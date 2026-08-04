@@ -1337,4 +1337,60 @@ getNotificationHealth
 );
 
 })();
+/* =========================
+   GET PREFERENCES
+========================= */
 
+function getNotificationPreferences(){
+
+    return structuredClone(
+
+        notificationPreferences
+
+    );
+
+}
+
+/* =========================
+   UPDATE PREFERENCES
+========================= */
+
+function updateNotificationPreference(
+
+    category,
+
+    channel,
+
+    enabled
+
+){
+
+    if(
+
+        !notificationPreferences[
+
+            category
+
+        ]
+
+    ){
+
+        return false;
+
+    }
+
+    notificationPreferences[
+
+        category
+
+    ][
+
+        channel
+
+    ] = enabled;
+
+    saveNotificationPreferences();
+
+    return true;
+
+}
