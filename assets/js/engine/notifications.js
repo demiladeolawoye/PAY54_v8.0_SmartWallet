@@ -1295,50 +1295,7 @@ function getNotificationsByCategory(
     );
 
 }
-   loadNotificationPreferences();
-   loadQueue();
-
-loadHistory();
-   startNotificationScheduler();
-  window.PAY54_NOTIFICATIONS = {
-
-    queueNotification,
-
-    processNotificationQueue,
-
-     startNotificationScheduler,
-
-     stopNotificationScheduler,
-
-     routeNotification,
-
-     dispatchNotification,
-
-     retryNotification,
-
-     resolveTemplate,
-
-sendTemplate,
-
-    completeNotification,
-
-    failNotification,
-
-   getQueuedNotifications,
-
-getNotificationsByCategory,
-
-getNotificationHealth
-
-};
-  console.log(
-
-    "✅ PAY54 Notification Engine Loaded"
-
-);
-
-})();
-/* =========================
+   /* =========================
    GET PREFERENCES
 ========================= */
 
@@ -1395,3 +1352,51 @@ function updateNotificationPreference(
     return true;
 
 }
+
+   loadNotificationPreferences();
+   loadQueue();
+
+loadHistory();
+   startNotificationScheduler();
+  window.PAY54_NOTIFICATIONS = {
+
+    queueNotification,
+
+    processNotificationQueue,
+
+     startNotificationScheduler,
+
+     stopNotificationScheduler,
+
+     routeNotification,
+
+     dispatchNotification,
+
+     retryNotification,
+
+     resolveTemplate,
+
+sendTemplate,
+
+    completeNotification,
+
+    failNotification,
+
+   getQueuedNotifications,
+
+getNotificationsByCategory,
+
+getNotificationPreferences,
+
+updateNotificationPreference,
+
+getNotificationHealth
+
+};
+  console.log(
+
+    "✅ PAY54 Notification Engine Loaded"
+
+);
+
+})();
