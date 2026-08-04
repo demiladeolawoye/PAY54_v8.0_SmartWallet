@@ -1381,6 +1381,14 @@ markNotificationDelivered(
 
 );
 
+writeAuditEvent(
+
+    notification,
+
+    "SENT"
+
+);
+
 return notification;
 
 }
