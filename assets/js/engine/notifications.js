@@ -567,7 +567,42 @@ schedulerRunning:
 
     notificationScheduler !== null,
 
-metrics:
+delivered:
+
+    NOTIFICATION_HISTORY.filter(
+
+        item =>
+
+            item.status ===
+
+            NOTIFICATION_STATUS.DELIVERED
+
+    ).length,
+
+read:
+
+    NOTIFICATION_HISTORY.filter(
+
+        item =>
+
+            item.status ===
+
+            NOTIFICATION_STATUS.READ
+
+    ).length,
+
+unread:
+
+    NOTIFICATION_HISTORY.filter(
+
+        item =>
+
+            item.status !==
+
+            NOTIFICATION_STATUS.READ
+
+    ).length,
+       metrics:
 
     {
 
