@@ -737,6 +737,13 @@ unread:
             NOTIFICATION_STATUS.READ
 
     ).length,
+       auditEvents:
+
+    NOTIFICATION_AUDIT.length,
+
+analyticsReady:
+
+    true,
        metrics:
 
     {
@@ -1911,6 +1918,16 @@ loadHistory();
      getUnreadNotifications,
      
      getNotificationAudit,
+
+     getNotificationAnalytics,
+
+getCategoryAnalytics,
+
+getChannelAnalytics,
+
+getAuditStatistics,
+
+getComplianceDashboard,
 
     getNotificationsByCategory,
 
