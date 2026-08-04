@@ -1028,11 +1028,60 @@ function dispatchNotification(
 
     }
 
-    return provider(
+ if(
+
+    !isNotificationEnabled(
 
         notification
 
-    );
+    )
+
+){
+
+    return false;
+
+}
+
+return provider(
+
+    notification
+
+);
+
+}
+   /* =========================
+   CHECK USER PREFERENCE
+========================= */
+
+function isNotificationEnabled(
+
+    notification
+
+){
+
+    const category =
+
+        notificationPreferences[
+
+            notification.category
+
+        ];
+
+    if(
+
+        !category
+
+    ){
+
+        return true;
+
+    }
+
+    return category[
+
+        notification.route
+
+    ] !== false;
 
 }
    /* =========================
