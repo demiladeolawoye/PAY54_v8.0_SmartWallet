@@ -1053,6 +1053,27 @@ function getQueuedNotifications(){
     ];
 
 }
+   /* =========================
+   FILTER BY CATEGORY
+========================= */
+
+function getNotificationsByCategory(
+
+    category
+
+){
+
+    return NOTIFICATION_QUEUE.filter(
+
+        notification =>
+
+            notification.category ===
+
+            category
+
+    );
+
+}
    loadQueue();
 
 loadHistory();
@@ -1081,9 +1102,11 @@ sendTemplate,
 
     failNotification,
 
-    getQueuedNotifications,
+   getQueuedNotifications,
 
-    getNotificationHealth
+getNotificationsByCategory,
+
+getNotificationHealth
 
 };
   console.log(
@@ -1093,24 +1116,4 @@ sendTemplate,
 );
 
 })();
-/* =========================
-   FILTER BY CATEGORY
-========================= */
 
-function getNotificationsByCategory(
-
-    category
-
-){
-
-    return NOTIFICATION_QUEUE.filter(
-
-        notification =>
-
-            notification.category ===
-
-            category
-
-    );
-
-}
