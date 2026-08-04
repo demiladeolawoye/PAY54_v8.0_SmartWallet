@@ -1555,6 +1555,19 @@ function getUnreadNotifications(){
 
 }
    /* =========================
+   GET AUDIT
+========================= */
+
+function getNotificationAudit(){
+
+    return [
+
+        ...NOTIFICATION_AUDIT
+
+    ];
+
+}
+   /* =========================
    FILTER BY CATEGORY
 ========================= */
 
