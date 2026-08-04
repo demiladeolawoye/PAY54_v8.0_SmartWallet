@@ -1236,11 +1236,17 @@ function completeNotification(
 
 }
 
-    saveQueue();
+   saveQueue();
 
-    saveHistory();
+saveHistory();
 
-    return notification;
+markNotificationDelivered(
+
+    notification.id
+
+);
+
+return notification;
 
 }
    /* =========================
