@@ -369,6 +369,63 @@ function loadHistory(){
     }
 
 }  
+   /* =========================
+   LOAD PREFERENCES
+========================= */
+
+function loadNotificationPreferences(){
+
+    try{
+
+        const saved = JSON.parse(
+
+            localStorage.getItem(
+
+                LS.SETTINGS
+
+            )
+
+        );
+
+        if(saved){
+
+            notificationPreferences = saved;
+
+        }
+
+    }catch(error){
+
+        console.warn(
+
+            "[PAY54 Notifications]",
+
+            error
+
+        );
+
+    }
+
+}
+
+/* =========================
+   SAVE PREFERENCES
+========================= */
+
+function saveNotificationPreferences(){
+
+    localStorage.setItem(
+
+        LS.SETTINGS,
+
+        JSON.stringify(
+
+            notificationPreferences
+
+        )
+
+    );
+
+}
  /* =========================
    QUEUE NOTIFICATION
 ========================= */
