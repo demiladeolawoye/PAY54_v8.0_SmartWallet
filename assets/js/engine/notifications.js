@@ -1370,6 +1370,23 @@ function getQueuedNotifications(){
 
 }
    /* =========================
+   GET UNREAD
+========================= */
+
+function getUnreadNotifications(){
+
+    return NOTIFICATION_HISTORY.filter(
+
+        notification =>
+
+            notification.status !==
+
+            NOTIFICATION_STATUS.READ
+
+    );
+
+}
+   /* =========================
    FILTER BY CATEGORY
 ========================= */
 
