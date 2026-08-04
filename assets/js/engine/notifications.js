@@ -632,9 +632,17 @@ scheduledFor,
 
     NOTIFICATION_METRICS.queued++;
 
-    saveQueue();
+saveQueue();
 
-    return notification;
+writeAuditEvent(
+
+    notification,
+
+    "QUEUED"
+
+);
+
+return notification;
 
 }  
   function getNotificationHealth(){
