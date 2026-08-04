@@ -144,6 +144,25 @@ const NOTIFICATION_CATEGORY = Object.freeze({
     MAX_ATTEMPTS: 3
 
 });
+  /* =========================
+   POLICY CONFIGURATION
+========================= */
+
+const POLICY_CONFIG = Object.freeze({
+
+    ENABLE_POLICIES: true,
+
+    ENABLE_QUIET_HOURS: true,
+
+    QUIET_HOURS_START: 22,
+
+    QUIET_HOURS_END: 7,
+
+    ENABLE_RATE_LIMITING: true,
+
+    MAX_NOTIFICATIONS_PER_MINUTE: 30
+
+}); 
    /* =========================
    USER NOTIFICATION
    PREFERENCES
@@ -2052,6 +2071,12 @@ loadHistory();
      dispatchNotification,
 
      retryNotification,
+
+     evaluateNotificationPolicy,
+
+isQuietHours,
+
+canSendNotification,
 
      resolveTemplate,
 
