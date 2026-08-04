@@ -1646,6 +1646,7 @@ function updateNotificationPreference(
 
 }
 
+   loadAudit();
    loadNotificationPreferences();
    loadQueue();
 
@@ -1682,6 +1683,8 @@ loadHistory();
    getQueuedNotifications,
 
      getUnreadNotifications,
+     
+     getNotificationAudit,
 
     getNotificationsByCategory,
 
