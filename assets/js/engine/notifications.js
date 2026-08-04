@@ -33,6 +33,11 @@ Object.freeze({
 
     SENT:
         "SENT",
+   DELIVERED:
+    "DELIVERED",
+
+READ:
+    "READ",
 
     FAILED:
         "FAILED",
