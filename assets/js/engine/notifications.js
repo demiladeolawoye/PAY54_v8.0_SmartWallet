@@ -744,6 +744,17 @@ unread:
 analyticsReady:
 
     true,
+       policiesEnabled:
+
+    POLICY_CONFIG.ENABLE_POLICIES,
+
+quietHours:
+
+    POLICY_CONFIG.ENABLE_QUIET_HOURS,
+
+rateLimit:
+
+    POLICY_CONFIG.MAX_NOTIFICATIONS_PER_MINUTE,
        metrics:
 
     {
