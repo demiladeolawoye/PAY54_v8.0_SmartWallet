@@ -774,6 +774,21 @@ quietHours:
 rateLimit:
 
     POLICY_CONFIG.MAX_NOTIFICATIONS_PER_MINUTE,
+       providerRegistry:
+
+    Object.keys(
+
+        PROVIDER_REGISTRY
+
+    ).length,
+
+healthyProviders:
+
+    Object.values(
+
+        PROVIDER_HEALTH
+
+    ).filter(Boolean).length,
        metrics:
 
     {
@@ -2254,6 +2269,8 @@ getChannelAnalytics,
 getAuditStatistics,
 
 getComplianceDashboard,
+
+     getProviderStatus,
 
     getNotificationsByCategory,
 
