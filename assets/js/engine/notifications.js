@@ -302,6 +302,25 @@ function saveHistory(){
     );
 
 }
+   /* =========================
+   SAVE AUDIT
+========================= */
+
+function saveAudit(){
+
+    localStorage.setItem(
+
+        LS.AUDIT,
+
+        JSON.stringify(
+
+            NOTIFICATION_AUDIT
+
+        )
+
+    );
+
+}
 
 function loadQueue(){
 
