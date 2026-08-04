@@ -321,6 +321,61 @@ function saveAudit(){
     );
 
 }
+/* =========================
+   WRITE AUDIT EVENT
+========================= */
+
+function writeAuditEvent(
+
+    notification,
+
+    event,
+
+    metadata = {}
+
+){
+
+    NOTIFICATION_AUDIT.push({
+
+        id:
+
+            crypto?.randomUUID?.() ||
+
+            ("AUD-" + Date.now()),
+
+        notificationId:
+
+            notification.id,
+
+        event,
+
+        status:
+
+            notification.status,
+
+        category:
+
+            notification.category,
+
+        channel:
+
+            notification.channel,
+
+        recipient:
+
+            notification.recipient,
+
+        timestamp:
+
+            new Date().toISOString(),
+
+        metadata
+
+    });
+
+    saveAudit();
+
+}   
 
 function loadQueue(){
 
