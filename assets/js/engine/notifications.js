@@ -1046,6 +1046,63 @@ const DELIVERY_PROVIDERS = Object.freeze({
 
 });
    /* =========================
+   PROVIDER REGISTRY
+========================= */
+
+const PROVIDER_REGISTRY = Object.freeze({
+
+    EMAIL: [
+
+        "PRIMARY",
+
+        "SECONDARY",
+
+        "TERTIARY"
+
+    ],
+
+    SMS: [
+
+        "PRIMARY",
+
+        "SECONDARY"
+
+    ],
+
+    PUSH: [
+
+        "PRIMARY"
+
+    ],
+
+    IN_APP: [
+
+        "PRIMARY"
+
+    ],
+
+    WEBHOOK: [
+
+        "PRIMARY",
+
+        "SECONDARY"
+
+    ],
+
+    SLACK: [
+
+        "PRIMARY"
+
+    ],
+
+    TEAMS: [
+
+        "PRIMARY"
+
+    ]
+
+});
+   /* =========================
    NOTIFICATION TEMPLATES
 ========================= */
 
