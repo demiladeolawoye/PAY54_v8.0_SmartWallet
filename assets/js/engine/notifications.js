@@ -2093,7 +2093,33 @@ function getComplianceDashboard(){
     };
 
 }
-   
+/* =========================
+   PROVIDER STATUS
+========================= */
+
+function getProviderStatus(){
+
+    return {
+
+        registry:
+
+            structuredClone(
+
+                PROVIDER_REGISTRY
+
+            ),
+
+        health:
+
+            structuredClone(
+
+                PROVIDER_HEALTH
+
+            )
+
+    };
+
+}   
    /* =========================
    FILTER BY CATEGORY
 ========================= */
