@@ -14,6 +14,9 @@
 
     HISTORY:
         "pay54_notification_history",
+     
+     AUDIT:
+    "pay54_notification_audit",
 
     SETTINGS:
         "pay54_notification_settings"
