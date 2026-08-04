@@ -1209,6 +1209,96 @@ function completeNotification(
 
 }
    /* =========================
+   MARK DELIVERED
+========================= */
+
+function markNotificationDelivered(
+
+    notificationId
+
+){
+
+    const notification =
+
+        NOTIFICATION_HISTORY.find(
+
+            item =>
+
+                item.id ===
+
+                notificationId
+
+        );
+
+    if(
+
+        !notification
+
+    ){
+
+        return null;
+
+    }
+
+    notification.status =
+
+        NOTIFICATION_STATUS.DELIVERED;
+
+    notification.deliveredAt =
+
+        new Date().toISOString();
+
+    saveHistory();
+
+    return notification;
+
+}
+   /* =========================
+   MARK READ
+========================= */
+
+function markNotificationRead(
+
+    notificationId
+
+){
+
+    const notification =
+
+        NOTIFICATION_HISTORY.find(
+
+            item =>
+
+                item.id ===
+
+                notificationId
+
+        );
+
+    if(
+
+        !notification
+
+    ){
+
+        return null;
+
+    }
+
+    notification.status =
+
+        NOTIFICATION_STATUS.READ;
+
+    notification.readAt =
+
+        new Date().toISOString();
+
+    saveHistory();
+
+    return notification;
+
+}
+   /* =========================
    FAIL NOTIFICATION
 ========================= */
 
