@@ -135,6 +135,114 @@ const NOTIFICATION_CATEGORY = Object.freeze({
     MAX_ATTEMPTS: 3
 
 });
+   /* =========================
+   USER NOTIFICATION
+   PREFERENCES
+========================= */
+
+const DEFAULT_NOTIFICATION_PREFERENCES = Object.freeze({
+
+    TRANSACTIONS: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: false
+
+    },
+
+    CARDS: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: false
+
+    },
+
+    SECURITY: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: true
+
+    },
+
+    COMPLIANCE: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: true
+
+    },
+
+    WALLET: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: false
+
+    },
+
+    SAVINGS: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: false
+
+    },
+
+    PAYMENTS: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: false
+
+    },
+
+    MARKETING: {
+
+        EMAIL: false,
+
+        PUSH: false,
+
+        SMS: false
+
+    },
+
+    SUPPORT: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: false
+
+    },
+
+    SYSTEM: {
+
+        EMAIL: true,
+
+        PUSH: true,
+
+        SMS: false
+
+    }
+
+});
    const SCHEDULER_CONFIG = Object.freeze({
 
     POLL_INTERVAL_MS: 1000
