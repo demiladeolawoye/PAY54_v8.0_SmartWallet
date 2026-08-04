@@ -1223,7 +1223,7 @@ function dispatchNotification(
 
  if(
 
-    !isNotificationEnabled(
+    !evaluateNotificationPolicy(
 
         notification
 
