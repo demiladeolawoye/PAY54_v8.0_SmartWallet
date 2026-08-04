@@ -250,6 +250,13 @@ const DEFAULT_NOTIFICATION_PREFERENCES = Object.freeze({
 });
 
    let notificationScheduler = null;
+   let notificationPreferences =
+
+    structuredClone(
+
+        DEFAULT_NOTIFICATION_PREFERENCES
+
+    );
    
  /* =========================
    STORAGE HELPERS
