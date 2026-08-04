@@ -396,7 +396,56 @@ function loadHistory(){
 
     }
 
-}  
+}
+   /* =========================
+   LOAD AUDIT
+========================= */
+
+function loadAudit(){
+
+    try{
+
+        const audit = JSON.parse(
+
+            localStorage.getItem(
+
+                LS.AUDIT
+
+            )
+
+        );
+
+        if(
+
+            Array.isArray(
+
+                audit
+
+            )
+
+        ){
+
+            NOTIFICATION_AUDIT.push(
+
+                ...audit
+
+            );
+
+        }
+
+    }catch(error){
+
+        console.warn(
+
+            "[PAY54 Notifications]",
+
+            error
+
+        );
+
+    }
+
+}
    /* =========================
    LOAD PREFERENCES
 ========================= */
