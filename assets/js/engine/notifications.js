@@ -1432,9 +1432,17 @@ function markNotificationDelivered(
 
         new Date().toISOString();
 
-    saveHistory();
+saveHistory();
 
-    return notification;
+writeAuditEvent(
+
+    notification,
+
+    "DELIVERED"
+
+);
+
+return notification;
 
 }
    /* =========================
@@ -1477,9 +1485,17 @@ function markNotificationRead(
 
         new Date().toISOString();
 
-    saveHistory();
+  saveHistory();
 
-    return notification;
+writeAuditEvent(
+
+    notification,
+
+    "READ"
+
+);
+
+return notification;
 
 }
    /* =========================
@@ -1535,9 +1551,23 @@ function failNotification(
 
 }
 
-    saveQueue();
+saveQueue();
 
-    return notification;
+writeAuditEvent(
+
+    notification,
+
+    "FAILED",
+
+    {
+
+        reason
+
+    }
+
+);
+
+return notification;
 
 }
    /* =========================
