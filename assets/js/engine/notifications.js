@@ -1523,19 +1523,25 @@ loadHistory();
 
      resolveTemplate,
 
-sendTemplate,
+    sendTemplate,
 
     completeNotification,
+
+     markNotificationDelivered,
+
+    markNotificationRead,
 
     failNotification,
 
    getQueuedNotifications,
 
-getNotificationsByCategory,
+     getUnreadNotifications,
 
-getNotificationPreferences,
+    getNotificationsByCategory,
 
-updateNotificationPreference,
+     getNotificationPreferences,
+
+     updateNotificationPreference,
 
 getNotificationHealth
 
