@@ -1278,6 +1278,147 @@ function isNotificationEnabled(
 
 }
    /* =========================
+   QUIET HOURS
+========================= */
+
+function isQuietHours(){
+
+    if(
+
+        !POLICY_CONFIG.ENABLE_QUIET_HOURS
+
+    ){
+
+        return false;
+
+    }
+
+    const hour =
+
+        new Date().getHours();
+
+    return (
+
+        hour >=
+
+        POLICY_CONFIG.QUIET_HOURS_START ||
+
+        hour <
+
+        POLICY_CONFIG.QUIET_HOURS_END
+
+    );
+
+}
+   /* =========================
+   RATE LIMITER
+========================= */
+
+function canSendNotification(){
+
+    if(
+
+        !POLICY_CONFIG.ENABLE_RATE_LIMITING
+
+    ){
+
+        return true;
+
+    }
+
+    const oneMinuteAgo =
+
+        Date.now() - 60000;
+
+    const recent =
+
+        NOTIFICATION_HISTORY.filter(
+
+            notification =>
+
+                notification.sentAt &&
+
+                new Date(
+
+                    notification.sentAt
+
+                ).getTime() >
+
+                oneMinuteAgo
+
+        );
+
+    return (
+
+        recent.length <
+
+        POLICY_CONFIG.MAX_NOTIFICATIONS_PER_MINUTE
+
+    );
+
+}
+   /* =========================
+   POLICY ENGINE
+========================= */
+
+function evaluateNotificationPolicy(
+
+    notification
+
+){
+
+    if(
+
+        !POLICY_CONFIG.ENABLE_POLICIES
+
+    ){
+
+        return true;
+
+    }
+
+    if(
+
+        !isNotificationEnabled(
+
+            notification
+
+        )
+
+    ){
+
+        return false;
+
+    }
+
+    if(
+
+        isQuietHours() &&
+
+        notification.priority !==
+
+        NOTIFICATION_PRIORITY.CRITICAL
+
+    ){
+
+        return false;
+
+    }
+
+    if(
+
+        !canSendNotification()
+
+    ){
+
+        return false;
+
+    }
+
+    return true;
+
+}
+   /* =========================
    RETRY DELIVERY
 ========================= */
 
