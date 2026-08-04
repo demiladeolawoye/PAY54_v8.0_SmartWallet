@@ -22,6 +22,7 @@
   const NOTIFICATION_QUEUE = [];
 
 const NOTIFICATION_HISTORY = [];
+   const NOTIFICATION_AUDIT = [];
    const NOTIFICATION_STATUS =
 Object.freeze({
 
