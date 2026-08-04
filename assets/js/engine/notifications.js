@@ -1103,6 +1103,19 @@ const PROVIDER_REGISTRY = Object.freeze({
 
 });
    /* =========================
+   PROVIDER HEALTH
+========================= */
+
+const PROVIDER_HEALTH = {
+
+    PRIMARY: true,
+
+    SECONDARY: true,
+
+    TERTIARY: true
+
+};
+   /* =========================
    NOTIFICATION TEMPLATES
 ========================= */
 
