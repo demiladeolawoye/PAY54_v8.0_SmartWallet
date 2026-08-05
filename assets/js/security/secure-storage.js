@@ -21,6 +21,21 @@
 (() => {
 
 "use strict";
+/* =========================================
+   PAY54 ENTERPRISE
+   SECURE STORAGE
+   Version: 11.0.0
+========================================= */
+
+const SECURE_STORAGE_CONFIG = Object.freeze({
+
+    ENABLE_ENCRYPTION: true,
+
+    STORAGE_PREFIX: "pay54_secure_",
+
+    VERSION: "11.0.0"
+
+});
 
 /* ========================================================================
    EVENT BUS
