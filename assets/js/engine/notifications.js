@@ -817,6 +817,9 @@ healthyProviders:
         PROVIDER_HEALTH
 
     ).filter(Boolean).length,
+       administration:
+
+    ADMIN_CONFIG.ENABLE_ADMIN,
        metrics:
 
     {
@@ -2411,6 +2414,18 @@ getAuditStatistics,
 getComplianceDashboard,
 
      getProviderStatus,
+
+     getAdministrationDashboard,
+
+clearNotificationQueue,
+
+clearNotificationHistory,
+
+clearNotificationAudit,
+
+updateProviderHealth,
+
+restartNotificationScheduler,
 
     getNotificationsByCategory,
 
