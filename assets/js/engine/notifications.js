@@ -164,6 +164,34 @@ const POLICY_CONFIG = Object.freeze({
 
 }); 
    /* =========================
+   ADMINISTRATION
+   CONFIGURATION
+========================= */
+
+const ADMIN_CONFIG = Object.freeze({
+
+    ENABLE_ADMIN:
+
+        true,
+
+    ENABLE_PROVIDER_CONTROL:
+
+        true,
+
+    ENABLE_QUEUE_CONTROL:
+
+        true,
+
+    ENABLE_AUDIT_BROWSER:
+
+        true,
+
+    ENABLE_ANALYTICS:
+
+        true
+
+});
+   /* =========================
    USER NOTIFICATION
    PREFERENCES
 ========================= */
