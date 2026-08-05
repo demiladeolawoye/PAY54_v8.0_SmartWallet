@@ -1172,11 +1172,11 @@ const storage = Object.freeze({
 
     export: exportNamespace,
 
-    import: importNamespace,
+ import: importNamespace,
 
-    getMetadata
+getMetadata,
 
-    getSecureStorageHealth
+getSecureStorageHealth
 
 });
 
