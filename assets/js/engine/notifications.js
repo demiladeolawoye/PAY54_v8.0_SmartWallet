@@ -2195,6 +2195,59 @@ function clearNotificationHistory(){
     saveHistory();
 
 } 
+   /* =========================
+   CLEAR AUDIT
+========================= */
+
+function clearNotificationAudit(){
+
+    NOTIFICATION_AUDIT.length = 0;
+
+    saveAudit();
+
+}
+   /* =========================
+   UPDATE PROVIDER HEALTH
+========================= */
+
+function updateProviderHealth(
+
+    provider,
+
+    healthy
+
+){
+
+    if(
+
+        !(provider in PROVIDER_HEALTH)
+
+    ){
+
+        return false;
+
+    }
+
+    PROVIDER_HEALTH[
+
+        provider
+
+    ] = healthy;
+
+    return true;
+
+}
+   /* =========================
+   RESTART SCHEDULER
+========================= */
+
+function restartNotificationScheduler(){
+
+    stopNotificationScheduler();
+
+    return startNotificationScheduler();
+
+}
 /* =========================
    PROVIDER STATUS
 ========================= */
