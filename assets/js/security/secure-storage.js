@@ -803,9 +803,13 @@ function get(
 
     return deepClone(
 
+    decryptValue(
+
         data
 
-    );
+    )
+
+);
 
 }
 
