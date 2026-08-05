@@ -1121,6 +1121,35 @@ function importNamespace(
     return imported;
 
 }
+   /* ========================================================================
+   STORAGE HEALTH
+======================================================================== */
+
+function getSecureStorageHealth(){
+
+    return {
+
+        version:
+            STORAGE_VERSION,
+
+        namespace:
+            STORAGE_NAMESPACE,
+
+        encryptionEnabled:
+            SECURE_STORAGE_CONFIG.ENABLE_ENCRYPTION,
+
+        ttlEnabled:
+            DEFAULT_TTL !== null,
+
+        eventBusAvailable:
+            !!EVENTS,
+
+        timestamp:
+            nowISO()
+
+    };
+
+}
 /* ========================================================================
    PUBLIC API
 ======================================================================== */
@@ -1146,6 +1175,8 @@ const storage = Object.freeze({
     import: importNamespace,
 
     getMetadata
+
+    getSecureStorageHealth
 
 });
 
