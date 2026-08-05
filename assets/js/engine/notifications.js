@@ -2136,6 +2136,41 @@ function getComplianceDashboard(){
     };
 
 }
+  /* =========================
+   ADMIN DASHBOARD
+========================= */
+
+function getAdministrationDashboard(){
+
+    return {
+
+        queue:
+
+            getQueuedNotifications(),
+
+        unread:
+
+            getUnreadNotifications(),
+
+        analytics:
+
+            getNotificationAnalytics(),
+
+        compliance:
+
+            getComplianceDashboard(),
+
+        providers:
+
+            getProviderStatus(),
+
+        health:
+
+            getNotificationHealth()
+
+    };
+
+} 
 /* =========================
    PROVIDER STATUS
 ========================= */
