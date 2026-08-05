@@ -522,6 +522,49 @@ function verifyChecksum(record){
     );
 
 }
+   /* ========================================================================
+   ENCRYPTION ENGINE
+======================================================================== */
+
+function encryptValue(
+
+    value
+
+){
+
+    if(
+
+        !SECURE_STORAGE_CONFIG.ENABLE_ENCRYPTION
+
+    ){
+
+        return value;
+
+    }
+
+    return value;
+
+}
+
+function decryptValue(
+
+    value
+
+){
+
+    if(
+
+        !SECURE_STORAGE_CONFIG.ENABLE_ENCRYPTION
+
+    ){
+
+        return value;
+
+    }
+
+    return value;
+
+}
 /* ========================================================================
    STORAGE WRITE
 ======================================================================== */
