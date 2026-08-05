@@ -593,7 +593,7 @@ function set(
 
                 key,
 
-                value,
+                encryptValue(value),
 
                 ttl
 
