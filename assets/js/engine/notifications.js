@@ -2171,6 +2171,30 @@ function getAdministrationDashboard(){
     };
 
 } 
+
+  /* =========================
+   CLEAR QUEUE
+========================= */
+
+function clearNotificationQueue(){
+
+    NOTIFICATION_QUEUE.length = 0;
+
+    saveQueue();
+
+}
+
+/* =========================
+   CLEAR HISTORY
+========================= */
+
+function clearNotificationHistory(){
+
+    NOTIFICATION_HISTORY.length = 0;
+
+    saveHistory();
+
+} 
 /* =========================
    PROVIDER STATUS
 ========================= */
