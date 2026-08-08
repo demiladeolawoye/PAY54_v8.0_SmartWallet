@@ -1280,7 +1280,19 @@ function getSecureStorageHealth(){
 
         eventBusAvailable:
             !!EVENTS,
+       activeKey:
+    getActiveKey(),
 
+encryptionProvider:
+    SECURE_STORAGE_CONFIG
+        .ENABLE_WEB_CRYPTO
+
+            ? "WEB_CRYPTO"
+
+            : "FALLBACK",
+
+keyManagerVersion:
+    KEY_MANAGER.VERSION,
         timestamp:
             nowISO()
 
