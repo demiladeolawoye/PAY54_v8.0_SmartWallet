@@ -541,16 +541,6 @@ const ENCRYPTION_PROVIDER = Object.freeze({
     }
 
 });
-
-/* ========================================================================
-   ENCRYPTION ENGINE
-======================================================================== */
-
-function encryptValue(
-
-    value
-
-){
    /* ========================================================================
    ENCRYPTION ENGINE
 ======================================================================== */
@@ -571,7 +561,11 @@ function encryptValue(
 
     }
 
-    return value;
+    return ENCRYPTION_PROVIDER.encrypt(
+
+        value
+
+    );
 
 }
 
