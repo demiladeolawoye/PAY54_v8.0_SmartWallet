@@ -552,6 +552,9 @@ const ENCRYPTION_PROVIDER = Object.freeze({
 
         algorithm: "PAY54-V1",
 
+        key:
+
+    getActiveKey(),
         provider:
 
             SECURE_STORAGE_CONFIG
