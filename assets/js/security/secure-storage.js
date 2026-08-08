@@ -525,6 +525,23 @@ function verifyChecksum(record){
 
 }
    /* ========================================================================
+   KEY MANAGEMENT
+======================================================================== */
+
+const KEY_MANAGER = Object.freeze({
+
+    VERSION: "PAY54-KEY-V1",
+
+    ACTIVE_KEY: "PRIMARY"
+
+});
+
+function getActiveKey(){
+
+    return KEY_MANAGER.ACTIVE_KEY;
+
+}
+   /* ========================================================================
    ENCRYPTION PROVIDER
 ======================================================================== */
 const ENCRYPTION_PROVIDER = Object.freeze({
