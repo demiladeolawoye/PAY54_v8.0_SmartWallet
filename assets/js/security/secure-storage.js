@@ -591,7 +591,11 @@ function decryptValue(
 
     }
 
-    return value;
+    return ENCRYPTION_PROVIDER.encrypt(
+
+    value
+
+);
 
 }
 /* ========================================================================
