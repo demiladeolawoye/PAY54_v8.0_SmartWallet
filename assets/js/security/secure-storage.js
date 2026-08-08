@@ -31,6 +31,8 @@ const SECURE_STORAGE_CONFIG = Object.freeze({
 
     ENABLE_ENCRYPTION: true,
 
+   ENABLE_WEB_CRYPTO: !!window.crypto?.subtle,
+
     STORAGE_PREFIX: "pay54_secure_",
 
     VERSION: "11.0.0"
