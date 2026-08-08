@@ -918,6 +918,19 @@ function logout(
     currentSession =
 
         null;
+   if(
+
+    sessionId
+
+){
+
+    unregisterSession(
+
+        sessionId
+
+    );
+
+}
 
     publishSessionEvent(
 
