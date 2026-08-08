@@ -1299,6 +1299,10 @@ const storage = Object.freeze({
 
     remove,
 
+   getActiveKey,
+
+rotateActiveKey,
+
     exists,
 
     restore,
