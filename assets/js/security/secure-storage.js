@@ -528,15 +528,28 @@ function verifyChecksum(record){
    KEY MANAGEMENT
 ======================================================================== */
 
-const KEY_MANAGER = Object.freeze({
+const KEY_MANAGER = {
 
     VERSION: "PAY54-KEY-V1",
 
     ACTIVE_KEY: "PRIMARY"
 
-});
+};
 
 function getActiveKey(){
+
+    return KEY_MANAGER.ACTIVE_KEY;
+
+}
+   function rotateActiveKey(
+
+    keyId
+
+){
+
+    KEY_MANAGER.ACTIVE_KEY =
+
+        keyId;
 
     return KEY_MANAGER.ACTIVE_KEY;
 
