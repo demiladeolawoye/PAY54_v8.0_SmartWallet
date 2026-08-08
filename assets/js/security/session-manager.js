@@ -53,6 +53,9 @@ if(!STORAGE){
 const STORAGE_KEY =
 "session";
 
+const SESSION_REGISTRY_KEY =
+"session_registry";
+
 const SESSION_VERSION =
 "11.0.0";
 
