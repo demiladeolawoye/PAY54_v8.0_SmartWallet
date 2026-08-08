@@ -525,16 +525,35 @@ function verifyChecksum(record){
    /* ========================================================================
    ENCRYPTION PROVIDER
 ======================================================================== */
-
 const ENCRYPTION_PROVIDER = Object.freeze({
 
     encrypt(value){
 
-        return value;
+        return {
+
+            algorithm: "PAY54-V1",
+
+            payload: value
+
+        };
 
     },
 
     decrypt(value){
+
+        if(
+
+            value &&
+
+            typeof value === "object" &&
+
+            value.algorithm === "PAY54-V1"
+
+        ){
+
+            return value.payload;
+
+        }
 
         return value;
 
