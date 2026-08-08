@@ -345,7 +345,125 @@ function createSession(
     };
 
 }
+/* ========================================================================
+   SESSION REGISTRY
+======================================================================== */
 
+function getSessionRegistry(){
+
+    return STORAGE.get(
+
+        SESSION_REGISTRY_KEY,
+
+        []
+
+    );
+
+}
+
+function saveSessionRegistry(
+
+    registry
+
+){
+
+    STORAGE.set(
+
+        SESSION_REGISTRY_KEY,
+
+        registry
+
+    );
+
+}
+
+function registerSession(
+
+    session
+
+){
+
+    const registry =
+
+        getSessionRegistry();
+
+    const exists =
+
+        registry.some(
+
+            item =>
+
+                item.id ===
+
+                session.id
+
+        );
+
+    if(
+
+        exists
+
+    ){
+
+        return;
+
+    }
+
+    registry.push({
+
+        id:
+
+            session.id,
+
+        userId:
+
+            session.userId,
+
+        created:
+
+            session.created,
+
+        fingerprint:
+
+            session.fingerprint
+
+    });
+
+    saveSessionRegistry(
+
+        registry
+
+    );
+
+}
+
+function unregisterSession(
+
+    sessionId
+
+){
+
+    const registry =
+
+        getSessionRegistry()
+
+        .filter(
+
+            item =>
+
+                item.id !==
+
+                sessionId
+
+        );
+
+    saveSessionRegistry(
+
+        registry
+
+    );
+
+}
 /* ========================================================================
    SESSION PERSISTENCE
 ======================================================================== */
