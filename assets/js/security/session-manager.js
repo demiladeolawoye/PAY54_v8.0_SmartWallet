@@ -963,6 +963,12 @@ function startSession(
 
     );
 
+   registerSession(
+
+    session
+
+);
+
     scheduleIdleTimeout();
 
     publishSessionEvent(
