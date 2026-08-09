@@ -1404,9 +1404,13 @@ const session = Object.freeze({
 
     restore: restoreSession,
 
-  trustCurrentDevice,
+    trustCurrentDevice,
 
-getTrustedDevices, 
+   getTrustedDevices, 
+
+   getRefreshToken,
+
+    revokeRefreshToken,
 
     rotate: rotateSession,
 
