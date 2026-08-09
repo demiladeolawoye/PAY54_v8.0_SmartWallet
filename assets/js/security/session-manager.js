@@ -1448,6 +1448,27 @@ function checkSessionHealth(){
         return false;
 
     }
+   const logoutPolicy =
+
+    evaluateLogoutPolicy();
+
+if(
+
+    logoutPolicy !==
+
+    LOGOUT_POLICY.NONE
+
+){
+
+    logout(
+
+        logoutPolicy
+
+    );
+
+    return false;
+
+}
     currentSession.risk =
 
     calculateSessionRisk();
