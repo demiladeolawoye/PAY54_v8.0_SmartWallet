@@ -655,6 +655,89 @@ function revokeRefreshToken(){
 
 }
 /* ========================================================================
+   SESSION AUDIT
+======================================================================== */
+
+function getSessionAudit(){
+
+    return STORAGE.get(
+
+        SESSION_AUDIT_KEY,
+
+        []
+
+    );
+
+}
+
+function saveSessionAudit(
+
+    audit
+
+){
+
+    STORAGE.set(
+
+        SESSION_AUDIT_KEY,
+
+        audit
+
+    );
+
+}
+
+function recordSessionAudit(
+
+    action,
+
+    details = {}
+
+){
+
+    const audit =
+
+        getSessionAudit();
+
+    audit.push({
+
+        id:
+
+            uuid(),
+
+        action,
+
+        timestamp:
+
+            nowISO(),
+
+        sessionId:
+
+            currentSession
+
+                ? currentSession.id
+
+                : null,
+
+        userId:
+
+            currentSession
+
+                ? currentSession.userId
+
+                : null,
+
+        details
+
+    });
+
+    saveSessionAudit(
+
+        audit
+
+    );
+
+}   
+/* ========================================================================
    SESSION PERSISTENCE
 ======================================================================== */
 
