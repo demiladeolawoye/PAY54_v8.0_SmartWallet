@@ -1387,7 +1387,9 @@ function checkSessionHealth(){
         return false;
 
     }
+    currentSession.risk =
 
+    calculateSessionRisk();
     return true;
 
 }
