@@ -1267,6 +1267,11 @@ saveRefreshToken(
 
     scheduleIdleTimeout();
 
+    recordSessionAudit(
+
+    "SESSION_CREATED"
+
+);
     publishSessionEvent(
 
         SESSION_EVENTS.CREATED,
