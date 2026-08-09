@@ -59,6 +59,9 @@ const SESSION_REGISTRY_KEY =
 const TRUSTED_DEVICE_KEY =
 "trusted_devices";
 
+const REFRESH_TOKEN_KEY =
+"refresh_token";
+
 const SESSION_VERSION =
 "11.0.0";
 
