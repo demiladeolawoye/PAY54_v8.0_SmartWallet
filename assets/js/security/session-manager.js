@@ -70,7 +70,18 @@ const DEFAULT_IDLE_TIMEOUT =
 
 const DEFAULT_MAX_SESSION =
 8 * 60 * 60 * 1000;
+const SESSION_RISK = Object.freeze({
 
+    LOW:
+        "LOW",
+
+    MEDIUM:
+        "MEDIUM",
+
+    HIGH:
+        "HIGH"
+
+});
 /* ========================================================================
    SESSION EVENTS
 ======================================================================== */
