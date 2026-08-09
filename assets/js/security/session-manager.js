@@ -1370,6 +1370,49 @@ function getSessionRisk(){
     return calculateSessionRisk();
 
 }
+   /* ========================================================================
+   LOGOUT POLICIES
+======================================================================== */
+
+function evaluateLogoutPolicy(){
+
+    if(
+
+        !currentSession
+
+    ){
+
+        return LOGOUT_POLICY.INVALID;
+
+    }
+
+    if(
+
+        currentSession.expires <=
+
+        now()
+
+    ){
+
+        return LOGOUT_POLICY.EXPIRED;
+
+    }
+
+    if(
+
+        calculateSessionRisk() ===
+
+        SESSION_RISK.HIGH
+
+    ){
+
+        return LOGOUT_POLICY.HIGH_RISK;
+
+    }
+
+    return LOGOUT_POLICY.NONE;
+
+}
 /* ========================================================================
    SESSION HEALTH
 ======================================================================== */
