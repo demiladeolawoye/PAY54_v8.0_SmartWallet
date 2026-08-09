@@ -1196,6 +1196,17 @@ function logout(
         :
 
         null;
+   const userId =
+
+    currentSession
+
+    ?
+
+    currentSession.userId
+
+    :
+
+    null;
 
     currentSession =
 
