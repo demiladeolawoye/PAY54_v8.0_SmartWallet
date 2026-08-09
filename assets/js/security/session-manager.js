@@ -62,6 +62,9 @@ const TRUSTED_DEVICE_KEY =
 const REFRESH_TOKEN_KEY =
 "refresh_token";
 
+const SESSION_AUDIT_KEY =
+"session_audit";
+
 const SESSION_VERSION =
 "11.0.0";
 
