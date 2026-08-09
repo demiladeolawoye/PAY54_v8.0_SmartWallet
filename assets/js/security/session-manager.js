@@ -1060,6 +1060,7 @@ function logout(
         STORAGE_KEY
 
     );
+   revokeRefreshToken();
 
     const sessionId =
 
