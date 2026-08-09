@@ -1491,6 +1491,8 @@ const session = Object.freeze({
 
     validate: checkSessionHealth,
 
+    getSessionRisk,
+
     getCurrent(){
 
         return currentSession
