@@ -467,6 +467,95 @@ function unregisterSession(
     );
 
 }
+   /* ========================================================================
+   TRUSTED DEVICES
+======================================================================== */
+
+function getTrustedDevices(){
+
+    return STORAGE.get(
+
+        TRUSTED_DEVICE_KEY,
+
+        []
+
+    );
+
+}
+
+function saveTrustedDevices(
+
+    devices
+
+){
+
+    STORAGE.set(
+
+        TRUSTED_DEVICE_KEY,
+
+        devices
+
+    );
+
+}
+
+function trustCurrentDevice(){
+
+    if(
+
+        !currentSession
+
+    ){
+
+        return;
+
+    }
+
+    const devices =
+
+        getTrustedDevices();
+
+    const exists =
+
+        devices.some(
+
+            item =>
+
+                item.fingerprint ===
+
+                currentSession.fingerprint
+
+        );
+
+    if(
+
+        exists
+
+    ){
+
+        return;
+
+    }
+
+    devices.push({
+
+        fingerprint:
+
+            currentSession.fingerprint,
+
+        trustedAt:
+
+            nowISO()
+
+    });
+
+    saveTrustedDevices(
+
+        devices
+
+    );
+
+}
 /* ========================================================================
    SESSION PERSISTENCE
 ======================================================================== */
