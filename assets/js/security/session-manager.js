@@ -1224,11 +1224,15 @@ function logout(
     );
 
 }
-    recordSessionAudit(
+  recordSessionAudit(
 
     "SESSION_LOGOUT",
 
     {
+
+        sessionId,
+
+        userId,
 
         reason
 
