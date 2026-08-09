@@ -1129,7 +1129,11 @@ function rotateSession(){
         currentSession
 
     );
+recordSessionAudit(
 
+    "SESSION_ROTATED"
+
+);
     publishSessionEvent(
 
         SESSION_EVENTS.ROTATED,
