@@ -1205,7 +1205,17 @@ function logout(
     );
 
 }
+    recordSessionAudit(
 
+    "SESSION_LOGOUT",
+
+    {
+
+        reason
+
+    }
+
+);
     publishSessionEvent(
 
         SESSION_EVENTS.LOGOUT,
