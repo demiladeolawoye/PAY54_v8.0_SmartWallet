@@ -1293,7 +1293,65 @@ function handleStorageEvent(
     );
 
 }
+/* ========================================================================
+   SESSION RISK
+======================================================================== */
 
+function calculateSessionRisk(){
+
+    if(
+
+        !currentSession
+
+    ){
+
+        return SESSION_RISK.HIGH;
+
+    }
+
+    if(
+
+        !currentSession.authenticated
+
+    ){
+
+        return SESSION_RISK.HIGH;
+
+    }
+
+    const trusted =
+
+        getTrustedDevices()
+
+        .some(
+
+            device =>
+
+                device.fingerprint ===
+
+                currentSession.fingerprint
+
+        );
+
+    if(
+
+        !trusted
+
+    ){
+
+        return SESSION_RISK.MEDIUM;
+
+    }
+
+    return SESSION_RISK.LOW;
+
+}
+
+function getSessionRisk(){
+
+    return calculateSessionRisk();
+
+}
 /* ========================================================================
    SESSION HEALTH
 ======================================================================== */
