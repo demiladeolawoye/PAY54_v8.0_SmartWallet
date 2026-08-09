@@ -1684,6 +1684,8 @@ const session = Object.freeze({
 
     getSessionRisk,
 
+   getSessionAudit,
+
    evaluateLogoutPolicy,
 
     getCurrent(){
