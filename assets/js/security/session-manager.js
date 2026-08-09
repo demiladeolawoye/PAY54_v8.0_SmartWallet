@@ -1133,6 +1133,15 @@ function startSession(
         session
 
     );
+   const refreshToken =
+
+    createRefreshToken();
+
+saveRefreshToken(
+
+    refreshToken
+
+);
 
    registerSession(
 
