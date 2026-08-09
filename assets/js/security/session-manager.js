@@ -970,7 +970,11 @@ function restoreSession(){
         return null;
 
     }
+recordSessionAudit(
 
+    "SESSION_RESTORED"
+
+);
     publishSessionEvent(
 
         SESSION_EVENTS.RESTORED,
