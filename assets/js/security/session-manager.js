@@ -559,6 +559,69 @@ function trustCurrentDevice(){
     );
 
 }
+   /* ========================================================================
+   REFRESH TOKEN
+======================================================================== */
+
+function createRefreshToken(){
+
+    return {
+
+        id:
+
+            uuid(),
+
+        created:
+
+            now(),
+
+        expires:
+
+            now() +
+
+            (30 * 24 * 60 * 60 * 1000)
+
+    };
+
+}
+
+function saveRefreshToken(
+
+    token
+
+){
+
+    STORAGE.set(
+
+        REFRESH_TOKEN_KEY,
+
+        token
+
+    );
+
+}
+
+function getRefreshToken(){
+
+    return STORAGE.get(
+
+        REFRESH_TOKEN_KEY,
+
+        null
+
+    );
+
+}
+
+function revokeRefreshToken(){
+
+    STORAGE.remove(
+
+        REFRESH_TOKEN_KEY
+
+    );
+
+}
 /* ========================================================================
    SESSION PERSISTENCE
 ======================================================================== */
