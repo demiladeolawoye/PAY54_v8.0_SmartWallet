@@ -56,6 +56,9 @@ const STORAGE_KEY =
 const SESSION_REGISTRY_KEY =
 "session_registry";
 
+const TRUSTED_DEVICE_KEY =
+"trusted_devices";
+
 const SESSION_VERSION =
 "11.0.0";
 
