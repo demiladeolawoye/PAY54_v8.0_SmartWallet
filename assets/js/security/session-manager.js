@@ -82,6 +82,24 @@ const SESSION_RISK = Object.freeze({
         "HIGH"
 
 });
+   const LOGOUT_POLICY = Object.freeze({
+
+    NONE:
+        "NONE",
+
+    IDLE:
+        "IDLE",
+
+    EXPIRED:
+        "EXPIRED",
+
+    INVALID:
+        "INVALID",
+
+    HIGH_RISK:
+        "HIGH_RISK"
+
+});
 /* ========================================================================
    SESSION EVENTS
 ======================================================================== */
