@@ -639,49 +639,48 @@ async function getCryptoKey(){
 ======================================================================== */
 const ENCRYPTION_PROVIDER = Object.freeze({
 
-  encrypt(value){
+async encrypt(value){
+
+    if(
+
+        !SECURE_STORAGE_CONFIG
+            .ENABLE_WEB_CRYPTO
+
+    ){
+
+        return {
+
+            algorithm:
+
+                "PAY54-V1",
+
+            payload:
+
+                value
+
+        };
+
+    }
 
     return {
 
-        algorithm: "PAY54-V1",
+        algorithm:
 
-        key:
+            "AES-GCM",
 
-    getActiveKey(),
-        provider:
+        payload:
 
-            SECURE_STORAGE_CONFIG
-            .ENABLE_WEB_CRYPTO
-
-                ? "WEB_CRYPTO"
-
-                : "FALLBACK",
-
-        payload: value
+            value
 
     };
 
 },
 
-    decrypt(value){
+   async decrypt(value){
 
-        if(
+    return value?.payload ?? value;
 
-            value &&
-
-            typeof value === "object" &&
-
-            value.algorithm === "PAY54-V1"
-
-        ){
-
-            return value.payload;
-
-        }
-
-        return value;
-
-    }
+}
 
 });
    /* ========================================================================
