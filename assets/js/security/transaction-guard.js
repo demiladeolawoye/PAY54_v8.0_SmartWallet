@@ -1951,7 +1951,16 @@ function selfTest(){
 
                 EVENTS
 
-            )
+            ),
+      sessionMFA:
+
+    Boolean(
+
+        SESSION_MANAGER &&
+
+        typeof SESSION_MANAGER.requestMFA === "function"
+
+    ), 
 
     };
 
