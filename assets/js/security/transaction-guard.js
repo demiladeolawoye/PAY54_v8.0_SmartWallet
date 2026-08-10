@@ -133,7 +133,75 @@ function publish(
     }
 
 }
+/* ========================================================================
+   TRANSACTION AUDIT
+======================================================================== */
 
+function getTransactionAudit(){
+
+    return STORAGE?.get(
+
+        TRANSACTION_AUDIT_KEY,
+
+        []
+
+    ) || [];
+
+}
+
+function saveTransactionAudit(
+
+    audit
+
+){
+
+    STORAGE?.set(
+
+        TRANSACTION_AUDIT_KEY,
+
+        audit
+
+    );
+
+}
+
+function recordTransactionAudit(
+
+    action,
+
+    details = {}
+
+){
+
+    const audit =
+
+        getTransactionAudit();
+
+    audit.push({
+
+        id:
+
+            uuid(),
+
+        action,
+
+        timestamp:
+
+            new Date()
+
+                .toISOString(),
+
+        details
+
+    });
+
+    saveTransactionAudit(
+
+        audit
+
+    );
+
+}
 /* ========================================================================
    DEFAULT POLICY
 ======================================================================== */
