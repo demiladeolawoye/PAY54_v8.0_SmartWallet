@@ -1757,6 +1757,21 @@ function getDiagnostics(){
     };
 
 } 
+   function checkDiagnostics(){
+
+    return {
+
+        healthy:
+
+            true,
+
+        diagnostics:
+
+            getDiagnostics()
+
+    };
+
+}
 /* ========================================================================
    SESSION HEALTH
 ======================================================================== */
