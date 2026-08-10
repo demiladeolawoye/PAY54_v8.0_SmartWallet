@@ -1372,6 +1372,15 @@ encryptionProvider:
 
 keyManagerVersion:
     KEY_MANAGER.VERSION,
+       webCryptoEnabled:
+
+    SECURE_STORAGE_CONFIG
+        .ENABLE_WEB_CRYPTO,
+
+cryptoAlgorithm:
+
+    SECURE_STORAGE_CONFIG
+        .CRYPTO_ALGORITHM,
         timestamp:
             nowISO()
 
@@ -1393,6 +1402,8 @@ const storage = Object.freeze({
    getActiveKey,
 
 rotateActiveKey,
+
+   getCryptoKey,
 
     exists,
 
