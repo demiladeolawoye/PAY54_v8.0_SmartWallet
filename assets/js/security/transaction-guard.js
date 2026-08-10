@@ -1331,22 +1331,6 @@ Object.freeze({
         "CRITICAL"
 
 });
-   const TRANSACTION_RISK =
-Object.freeze({
-
-    LOW:
-        "LOW",
-
-    MEDIUM:
-        "MEDIUM",
-
-    HIGH:
-        "HIGH",
-
-    CRITICAL:
-        "CRITICAL"
-
-});
  /* ========================================================================
    RISK POLICY
 ======================================================================== */
