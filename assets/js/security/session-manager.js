@@ -1632,7 +1632,12 @@ function requiresMFA(){
 
 function requestMFA(){
 
-    publishSessionEvent(
+   recordSessionAudit(
+
+    "SESSION_MFA_REQUIRED"
+
+); 
+   publishSessionEvent(
 
         "session.mfa.required",
 
