@@ -589,6 +589,51 @@ function getActiveKey(){
     return KEY_MANAGER.ACTIVE_KEY;
 
 }
+async function getCryptoKey(){
+
+    if(
+
+        KEY_MANAGER.CRYPTO_KEY
+
+    ){
+
+        return KEY_MANAGER.CRYPTO_KEY;
+
+    }
+
+    KEY_MANAGER.CRYPTO_KEY =
+
+        await crypto.subtle.generateKey(
+
+            {
+
+                name:
+
+                    SECURE_STORAGE_CONFIG
+                        .CRYPTO_ALGORITHM,
+
+                length:
+
+                    SECURE_STORAGE_CONFIG
+                        .CRYPTO_KEY_LENGTH
+
+            },
+
+            true,
+
+            [
+
+                "encrypt",
+
+                "decrypt"
+
+            ]
+
+        );
+
+    return KEY_MANAGER.CRYPTO_KEY;
+
+}
    /* ========================================================================
    ENCRYPTION PROVIDER
 ======================================================================== */
