@@ -2093,6 +2093,8 @@ try{
 
         restoreSession();
 
+   checkDiagnostics();
+
     if(
 
         restored
