@@ -1817,7 +1817,19 @@ function evaluateAML(
     context
 
 ){
+recordTransactionAudit(
 
+    "TRANSACTION_AML_CHECK",
+
+    {
+
+        reference:
+
+            context.reference
+
+    }
+
+);
     publish(
 
         GUARD_EVENTS.WARNING,
