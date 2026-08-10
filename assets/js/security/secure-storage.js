@@ -1426,6 +1426,8 @@ rotateActiveKey,
 
    getCryptoKey,
 
+   getCryptoProvider,
+
     exists,
 
     restore,
