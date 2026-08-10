@@ -1798,11 +1798,11 @@ function checkSessionHealth(){
 
     ){
 
-        logout(
+       logout(
 
-            "Session validation failed"
+    LOGOUT_POLICY.INVALID
 
-        );
+);
 
         return false;
 
