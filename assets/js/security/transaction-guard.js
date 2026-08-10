@@ -35,6 +35,9 @@ window.PAY54_SECURITY?.session || null;
 const SESSION_MANAGER =
 window.PAY54_SECURITY?.session || null;
 
+const STORAGE =
+window.PAY54_SECURITY?.storage || null;
+
 const VALIDATOR =
 window.PAY54_SECURITY?.validator || null;
 
