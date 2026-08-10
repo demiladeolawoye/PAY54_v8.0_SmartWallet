@@ -1485,13 +1485,21 @@ function calculateRiskScore(
 
     }
 
-    return {
+ return {
 
-        score,
+    score,
 
-        reasons
+    level:
 
-    };
+        classifyRisk(
+
+            score
+
+        ),
+
+    reasons
+
+};
 
 }
 
