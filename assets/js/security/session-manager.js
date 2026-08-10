@@ -1964,7 +1964,10 @@ const session = Object.freeze({
 getBiometricProvider,
 
 requestBiometricAuthentication,
-   
+
+   getDiagnostics,
+
+checkDiagnostics,
    
     getCurrent(){
 
