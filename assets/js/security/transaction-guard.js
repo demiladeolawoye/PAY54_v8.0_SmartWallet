@@ -1371,7 +1371,49 @@ Object.freeze({
         70
 
 });
+/* ========================================================================
+   RISK CLASSIFICATION
+======================================================================== */
 
+function classifyRisk(
+
+    score
+
+){
+
+    if(
+
+        score >= 100
+
+    ){
+
+        return TRANSACTION_RISK.CRITICAL;
+
+    }
+
+    if(
+
+        score >= 70
+
+    ){
+
+        return TRANSACTION_RISK.HIGH;
+
+    }
+
+    if(
+
+        score >= 30
+
+    ){
+
+        return TRANSACTION_RISK.MEDIUM;
+
+    }
+
+    return TRANSACTION_RISK.LOW;
+
+}
 /* ========================================================================
    RISK SCORE
 ======================================================================== */
