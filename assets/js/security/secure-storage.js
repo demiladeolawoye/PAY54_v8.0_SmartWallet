@@ -697,6 +697,16 @@ Object.freeze({
     }
 
 });
+   function getCryptoProvider(){
+
+    return ENCRYPTION_PROVIDERS[
+
+        SECURE_STORAGE_CONFIG
+            .ACTIVE_PROVIDER
+
+    ];
+
+}
    /* ========================================================================
    ENCRYPTION ENGINE
 ======================================================================== */
