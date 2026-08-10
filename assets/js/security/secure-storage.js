@@ -566,7 +566,9 @@ const KEY_MANAGER = {
     VERSION: "PAY54-KEY-V1",
 
     ACTIVE_KEY: "PRIMARY"
-
+       
+   CRYPTO_KEY:
+    null,
 };
 
 function getActiveKey(){
