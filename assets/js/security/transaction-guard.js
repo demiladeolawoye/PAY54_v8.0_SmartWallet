@@ -48,6 +48,9 @@ window.PAY54_SECURITY?.sanitizer || null;
 const VERSION =
 "11.0.0";
 
+const TRANSACTION_AUDIT_KEY =
+"transaction_audit";
+
 /* ========================================================================
    TRANSACTION EVENTS
 ======================================================================== */
