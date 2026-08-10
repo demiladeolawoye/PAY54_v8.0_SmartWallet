@@ -1363,7 +1363,19 @@ function authorizeTransaction(
         return replay;
 
     }
+recordTransactionAudit(
 
+    "TRANSACTION_AUTHORISED",
+
+    {
+
+        reference:
+
+            context.reference
+
+    }
+
+);
     publish(
 
         GUARD_EVENTS.APPROVED,
