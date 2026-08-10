@@ -751,10 +751,10 @@ function decryptValue(
 
     }
 
-    return ENCRYPTION_PROVIDER.decrypt(
+    return getCryptoProvider()
 
+    .decrypt(
         value
-
     );
 
 }
