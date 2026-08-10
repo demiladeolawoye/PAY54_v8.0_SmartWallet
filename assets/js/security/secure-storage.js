@@ -33,8 +33,11 @@ const SECURE_STORAGE_CONFIG = Object.freeze({
 
    ENABLE_WEB_CRYPTO: !!window.crypto?.subtle,
 
-   CRYPTO_ALGORITHM:
+ CRYPTO_ALGORITHM:
     "AES-GCM",
+
+ACTIVE_PROVIDER:
+    "PAY54_LEGACY",
 
 CRYPTO_KEY_LENGTH:
     256,
