@@ -1627,7 +1627,13 @@ function evaluateFraud(
         )
 
     ){
+requestTransactionMFA(
 
+    context,
+
+    risk
+
+);
         publish(
 
             GUARD_EVENTS.WARNING,
