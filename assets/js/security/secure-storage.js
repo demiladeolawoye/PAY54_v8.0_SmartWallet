@@ -33,6 +33,15 @@ const SECURE_STORAGE_CONFIG = Object.freeze({
 
    ENABLE_WEB_CRYPTO: !!window.crypto?.subtle,
 
+   CRYPTO_ALGORITHM:
+    "AES-GCM",
+
+CRYPTO_KEY_LENGTH:
+    256,
+
+CRYPTO_IV_LENGTH:
+    12,
+
     STORAGE_PREFIX: "pay54_secure_",
 
     VERSION: "11.0.0"
@@ -520,6 +529,30 @@ function verifyChecksum(record){
         ) ===
 
         record.metadata.checksum
+
+    );
+
+}
+   /* ========================================================================
+   WEB CRYPTO HELPERS
+======================================================================== */
+
+const TEXT_ENCODER =
+new TextEncoder();
+
+const TEXT_DECODER =
+new TextDecoder();
+
+async function generateInitializationVector(){
+
+    return crypto.getRandomValues(
+
+        new Uint8Array(
+
+            SECURE_STORAGE_CONFIG
+                .CRYPTO_IV_LENGTH
+
+        )
 
     );
 
