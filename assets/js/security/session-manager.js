@@ -2128,6 +2128,35 @@ Object.freeze(
     SESSION_EVENTS
 
 );
+   Object.freeze(
+
+    SESSION_RISK
+
+);
+
+Object.freeze(
+
+    LOGOUT_POLICY
+
+);
+
+Object.freeze(
+
+    MFA_CONFIG
+
+);
+
+Object.freeze(
+
+    BIOMETRIC_CONFIG
+
+);
+
+Object.freeze(
+
+    SESSION_DIAGNOSTICS
+
+);
 
 console.info(
 
