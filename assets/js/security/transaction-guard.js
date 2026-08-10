@@ -1952,6 +1952,7 @@ const GUARD = Object.freeze({
     preventReplay,
 
     calculateRiskScore,
+    classifyRisk,
     evaluateFraud,
     evaluateAML,
 
