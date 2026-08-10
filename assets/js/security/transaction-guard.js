@@ -32,6 +32,9 @@ window.PAY54_EVENTS || null;
 const SESSION =
 window.PAY54_SECURITY?.session || null;
 
+const SESSION_MANAGER =
+window.PAY54_SECURITY?.session || null;
+
 const VALIDATOR =
 window.PAY54_SECURITY?.validator || null;
 
