@@ -639,7 +639,7 @@ async function getCryptoKey(){
 ======================================================================== */
 const ENCRYPTION_PROVIDER = Object.freeze({
 
-async encrypt(value){
+encrypt(value){
 
     if(
 
