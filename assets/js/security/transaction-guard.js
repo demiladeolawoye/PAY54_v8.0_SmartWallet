@@ -1670,7 +1670,27 @@ function evaluateFraud(
         risk.score >= 100
 
     ){
+recordTransactionAudit(
 
+    "TRANSACTION_FRAUD_BLOCKED",
+
+    {
+
+        reference:
+
+            context.reference,
+
+        score:
+
+            risk.score,
+
+        level:
+
+            risk.level
+
+    }
+
+);
         publish(
 
             GUARD_EVENTS.FRAUD,
@@ -1715,6 +1735,27 @@ requestTransactionMFA(
     context,
 
     risk
+
+);
+       recordTransactionAudit(
+
+    "TRANSACTION_STEP_UP",
+
+    {
+
+        reference:
+
+            context.reference,
+
+        score:
+
+            risk.score,
+
+        level:
+
+            risk.level
+
+    }
 
 );
         publish(
