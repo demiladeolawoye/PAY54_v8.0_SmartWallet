@@ -543,7 +543,7 @@ new TextEncoder();
 const TEXT_DECODER =
 new TextDecoder();
 
-async function generateInitializationVector(){
+function generateInitializationVector(){
 
     return crypto.getRandomValues(
 
