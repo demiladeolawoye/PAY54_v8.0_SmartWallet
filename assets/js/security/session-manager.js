@@ -112,6 +112,15 @@ const SESSION_RISK = Object.freeze({
         SESSION_RISK.HIGH
 
 });
+   const BIOMETRIC_CONFIG = Object.freeze({
+
+    ENABLED:
+        false,
+
+    PROVIDER:
+        "NONE"
+
+});
 /* ========================================================================
    SESSION EVENTS
 ======================================================================== */
