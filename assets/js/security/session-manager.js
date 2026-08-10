@@ -1537,6 +1537,59 @@ function evaluateLogoutPolicy(){
     return LOGOUT_POLICY.NONE;
 
 }
+   /* ========================================================================
+   MFA
+======================================================================== */
+
+function requiresMFA(){
+
+    if(
+
+        !MFA_CONFIG.ENABLED
+
+    ){
+
+        return false;
+
+    }
+
+    return (
+
+        calculateSessionRisk() ===
+
+        MFA_CONFIG.REQUIRED_RISK
+
+    );
+
+}
+
+function requestMFA(){
+
+    publishSessionEvent(
+
+        "session.mfa.required",
+
+        {
+
+            sessionId:
+
+                currentSession
+
+                    ? currentSession.id
+
+                    : null,
+
+            requestedAt:
+
+                nowISO()
+
+        }
+
+    );
+
+    return true;
+
+}
 /* ========================================================================
    SESSION HEALTH
 ======================================================================== */
