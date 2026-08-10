@@ -676,7 +676,7 @@ encrypt(value){
 
 },
 
-   async decrypt(value){
+   decrypt(value){
 
     return value?.payload ?? value;
 
