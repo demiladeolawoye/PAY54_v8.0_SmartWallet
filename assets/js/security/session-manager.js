@@ -1608,6 +1608,63 @@ function requestMFA(){
     return true;
 
 }
+   /* ========================================================================
+   BIOMETRIC AUTHENTICATION
+======================================================================== */
+
+function isBiometricEnabled(){
+
+    return BIOMETRIC_CONFIG.ENABLED;
+
+}
+
+function getBiometricProvider(){
+
+    return BIOMETRIC_CONFIG.PROVIDER;
+
+}
+
+function requestBiometricAuthentication(){
+
+    if(
+
+        !isBiometricEnabled()
+
+    ){
+
+        return false;
+
+    }
+
+    publishSessionEvent(
+
+        "session.biometric.required",
+
+        {
+
+            sessionId:
+
+                currentSession
+
+                    ? currentSession.id
+
+                    : null,
+
+            provider:
+
+                getBiometricProvider(),
+
+            requestedAt:
+
+                nowISO()
+
+        }
+
+    );
+
+    return true;
+
+}
 /* ========================================================================
    SESSION HEALTH
 ======================================================================== */
@@ -1676,9 +1733,16 @@ if(
     requestMFA();
 
 }
-    return true;
+   if(
+
+    isBiometricEnabled()
+
+){
+
+    requestBiometricAuthentication();
 
 }
+    return true;
 
 /* ========================================================================
    KEEP-ALIVE
