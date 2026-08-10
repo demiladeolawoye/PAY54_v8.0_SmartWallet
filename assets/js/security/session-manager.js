@@ -1649,6 +1649,15 @@ if(
     currentSession.risk =
 
     calculateSessionRisk();
+   if(
+
+    requiresMFA()
+
+){
+
+    requestMFA();
+
+}
     return true;
 
 }
