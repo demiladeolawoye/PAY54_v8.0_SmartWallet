@@ -1765,6 +1765,10 @@ const session = Object.freeze({
 
    evaluateLogoutPolicy,
 
+   requiresMFA,
+
+   requestMFA,
+   
     getCurrent(){
 
         return currentSession
