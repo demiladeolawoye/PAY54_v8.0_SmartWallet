@@ -1742,7 +1742,9 @@ if(
     requestBiometricAuthentication();
 
 }
-    return true;
+   return true;
+
+}
 
 /* ========================================================================
    KEEP-ALIVE
