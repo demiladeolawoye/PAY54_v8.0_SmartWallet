@@ -1593,19 +1593,23 @@ function evaluateFraud(
 
             {
 
-                reference:
+    reference:
 
-                    context.reference,
+        context.reference,
 
-                score:
+    score:
 
-                    risk.score,
+        risk.score,
 
-                action:
+    level:
 
-                    "STEP_UP"
+        risk.level,
 
-            }
+    action:
+
+        "STEP_UP"
+
+}
 
         );
 
