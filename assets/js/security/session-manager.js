@@ -112,6 +112,15 @@ const SESSION_RISK = Object.freeze({
         SESSION_RISK.HIGH
 
 });
+   const SESSION_DIAGNOSTICS = Object.freeze({
+
+    VERSION:
+        SESSION_VERSION,
+
+    MODULE:
+        "Enterprise Session Manager"
+
+});
    const BIOMETRIC_CONFIG = Object.freeze({
 
     ENABLED:
@@ -1665,6 +1674,89 @@ function requestBiometricAuthentication(){
     return true;
 
 }
+  /* ========================================================================
+   DIAGNOSTICS
+======================================================================== */
+
+function getDiagnostics(){
+
+    return {
+
+        version:
+
+            SESSION_DIAGNOSTICS.VERSION,
+
+        module:
+
+            SESSION_DIAGNOSTICS.MODULE,
+
+        authenticated:
+
+            Boolean(
+
+                currentSession &&
+
+                currentSession.authenticated
+
+            ),
+
+        activeSession:
+
+            currentSession
+
+                ? currentSession.id
+
+                : null,
+
+        risk:
+
+            currentSession
+
+                ? calculateSessionRisk()
+
+                : SESSION_RISK.HIGH,
+
+        trustedDevices:
+
+            getTrustedDevices()
+
+            .length,
+
+        registeredSessions:
+
+            getSessionRegistry()
+
+            .length,
+
+        auditEntries:
+
+            getSessionAudit()
+
+            .length,
+
+        refreshToken:
+
+            Boolean(
+
+                getRefreshToken()
+
+            ),
+
+        mfaEnabled:
+
+            MFA_CONFIG.ENABLED,
+
+        biometricEnabled:
+
+            BIOMETRIC_CONFIG.ENABLED,
+
+        timestamp:
+
+            nowISO()
+
+    };
+
+} 
 /* ========================================================================
    SESSION HEALTH
 ======================================================================== */
