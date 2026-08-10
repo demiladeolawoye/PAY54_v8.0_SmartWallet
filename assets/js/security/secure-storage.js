@@ -646,50 +646,55 @@ async function getCryptoKey(){
    /* ========================================================================
    ENCRYPTION PROVIDER
 ======================================================================== */
-const ENCRYPTION_PROVIDER = Object.freeze({
+const ENCRYPTION_PROVIDERS =
+Object.freeze({
 
-encrypt(value){
+    PAY54_LEGACY:{
 
-    if(
+        encrypt(value){
 
-        !SECURE_STORAGE_CONFIG
-            .ENABLE_WEB_CRYPTO
+            if(
 
-    ){
+                !SECURE_STORAGE_CONFIG
+                    .ENABLE_WEB_CRYPTO
 
-        return {
+            ){
 
-            algorithm:
+                return{
 
-                "PAY54-V1",
+                    algorithm:
 
-            payload:
+                        "PAY54-V1",
 
-                value
+                    payload:
 
-        };
+                        value
+
+                };
+
+            }
+
+            return{
+
+                algorithm:
+
+                    "AES-GCM",
+
+                payload:
+
+                    value
+
+            };
+
+        },
+
+        decrypt(value){
+
+            return value?.payload ?? value;
+
+        }
 
     }
-
-    return {
-
-        algorithm:
-
-            "AES-GCM",
-
-        payload:
-
-            value
-
-    };
-
-},
-
-   decrypt(value){
-
-    return value?.payload ?? value;
-
-}
 
 });
    /* ========================================================================
