@@ -2041,7 +2041,12 @@ function status(){
 
             TRANSACTION_CACHE.size,
 
-        velocityCache:
+       auditEntries:
+
+    getTransactionAudit()
+
+        .length, 
+       velocityCache:
 
             VELOCITY_CACHE.size,
        mfaAvailable:
