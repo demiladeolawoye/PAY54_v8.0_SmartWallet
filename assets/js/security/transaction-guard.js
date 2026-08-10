@@ -1509,7 +1509,61 @@ function requiresStepUp(
     );
 
 }
+/* ========================================================================
+   MFA ESCALATION
+======================================================================== */
 
+function requestTransactionMFA(
+
+    context,
+
+    risk
+
+){
+
+    if(
+
+        !SESSION_MANAGER ||
+
+        typeof SESSION_MANAGER.requestMFA !== "function"
+
+    ){
+
+        return false;
+
+    }
+
+    SESSION_MANAGER.requestMFA();
+
+    publish(
+
+        GUARD_EVENTS.WARNING,
+
+        {
+
+            reference:
+
+                context.reference,
+
+            score:
+
+                risk.score,
+
+            level:
+
+                risk.level,
+
+            action:
+
+                "MFA_REQUIRED"
+
+        }
+
+    );
+
+    return true;
+
+}
 /* ========================================================================
    FRAUD EVALUATION
 ======================================================================== */
