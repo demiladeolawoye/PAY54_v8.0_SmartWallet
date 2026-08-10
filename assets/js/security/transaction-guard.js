@@ -2267,7 +2267,7 @@ const api = Object.freeze({
     status,
 
     selfTest,
-
+   getTransactionAudit,
     getPolicy,
     updatePolicy,
 
