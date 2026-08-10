@@ -1799,7 +1799,23 @@ function getDiagnostics(){
 
             BIOMETRIC_CONFIG.ENABLED,
 
-        timestamp:
+        storageAvailable:
+
+    Boolean(
+
+        STORAGE
+
+    ),
+
+eventBusAvailable:
+
+    Boolean(
+
+        EVENTS
+
+    ),
+       
+       timestamp:
 
             nowISO()
 
