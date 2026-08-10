@@ -1115,9 +1115,9 @@ function scheduleIdleTimeout(){
 
                 logout(
 
-                    "Idle timeout"
+    LOGOUT_POLICY.IDLE
 
-                );
+);
 
             },
 
