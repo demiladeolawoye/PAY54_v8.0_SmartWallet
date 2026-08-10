@@ -1386,13 +1386,10 @@ function getSecureStorageHealth(){
        activeKey:
     getActiveKey(),
 
-encryptionProvider:
+activeProvider:
+
     SECURE_STORAGE_CONFIG
-        .ENABLE_WEB_CRYPTO
-
-            ? "WEB_CRYPTO"
-
-            : "FALLBACK",
+        .ACTIVE_PROVIDER,
 
 keyManagerVersion:
     KEY_MANAGER.VERSION,
