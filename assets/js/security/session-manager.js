@@ -1689,7 +1689,11 @@ function requestBiometricAuthentication(){
         return false;
 
     }
+recordSessionAudit(
 
+    "SESSION_BIOMETRIC_REQUIRED"
+
+);
     publishSessionEvent(
 
         "session.biometric.required",
