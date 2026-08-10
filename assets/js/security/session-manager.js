@@ -1850,6 +1850,12 @@ const session = Object.freeze({
    requiresMFA,
 
    requestMFA,
+   isBiometricEnabled,
+
+getBiometricProvider,
+
+requestBiometricAuthentication,
+   
    
     getCurrent(){
 
