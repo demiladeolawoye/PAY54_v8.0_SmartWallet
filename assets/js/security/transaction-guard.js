@@ -2294,6 +2294,7 @@ const api = Object.freeze({
     preventReplay,
 
     calculateRiskScore,
+    classifyRisk,
     evaluateFraud,
     evaluateAML
 
