@@ -557,6 +557,15 @@ function generateInitializationVector(){
     );
 
 }
+   const CRYPTO_PROVIDER = Object.freeze({
+
+    LEGACY:
+        "PAY54_LEGACY",
+
+    AES_GCM:
+        "AES_GCM"
+
+});
    /* ========================================================================
    KEY MANAGEMENT
 ======================================================================== */
