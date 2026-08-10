@@ -103,6 +103,15 @@ const SESSION_RISK = Object.freeze({
         "HIGH_RISK"
 
 });
+   const MFA_CONFIG = Object.freeze({
+
+    ENABLED:
+        false,
+
+    REQUIRED_RISK:
+        SESSION_RISK.HIGH
+
+});
 /* ========================================================================
    SESSION EVENTS
 ======================================================================== */
