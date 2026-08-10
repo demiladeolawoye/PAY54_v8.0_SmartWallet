@@ -727,10 +727,10 @@ function encryptValue(
 
     }
 
-    return ENCRYPTION_PROVIDER.encrypt(
+ return getCryptoProvider()
 
+    .encrypt(
         value
-
     );
 
 }
