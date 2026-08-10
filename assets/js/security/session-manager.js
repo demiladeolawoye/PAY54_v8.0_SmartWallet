@@ -626,21 +626,61 @@ function createRefreshToken(){
 
     return {
 
-        id:
+    id:
 
-            uuid(),
+        uuid(),
 
-        created:
+    sessionId:
 
-            now(),
+        currentSession
 
-        expires:
+            ?
 
-            now() +
+            currentSession.id
 
-            (30 * 24 * 60 * 60 * 1000)
+            :
 
-    };
+            null,
+
+    userId:
+
+        currentSession
+
+            ?
+
+            currentSession.userId
+
+            :
+
+            null,
+
+    fingerprint:
+
+        currentSession
+
+            ?
+
+            currentSession.fingerprint
+
+            :
+
+            null,
+
+    created:
+
+        now(),
+
+    expires:
+
+        now() +
+
+        (30 * 24 * 60 * 60 * 1000),
+
+    version:
+
+        SESSION_VERSION
+
+};
 
 }
 
