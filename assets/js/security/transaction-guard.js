@@ -1907,7 +1907,16 @@ function status(){
 
         velocityCache:
 
-            VELOCITY_CACHE.size
+            VELOCITY_CACHE.size,
+       mfaAvailable:
+
+    Boolean(
+
+        SESSION_MANAGER &&
+
+        typeof SESSION_MANAGER.requestMFA === "function"
+
+    ),
 
     });
 
