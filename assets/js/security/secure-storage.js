@@ -1470,6 +1470,8 @@ rotateActiveKey,
 
    getCryptoProvider,
 
+   getAvailableCryptoProviders,
+
     exists,
 
     restore,
