@@ -1754,7 +1754,23 @@ Object.freeze(
     STORAGE_EVENTS
 
 );
+try{
 
+    getCryptoProvider();
+
+}catch(error){
+
+    console.error(
+
+        "[PAY54_SECURITY]",
+
+        "Crypto provider validation failed",
+
+        error
+
+    );
+
+}
 console.info(
 
     "[PAY54]",
