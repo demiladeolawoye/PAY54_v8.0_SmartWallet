@@ -733,6 +733,15 @@ Object.freeze({
     ];
 
 }
+function getAvailableCryptoProviders(){
+
+    return Object.keys(
+
+        ENCRYPTION_PROVIDERS
+
+    );
+
+}
    /* ========================================================================
    ENCRYPTION ENGINE
 ======================================================================== */
