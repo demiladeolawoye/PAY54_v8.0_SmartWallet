@@ -618,6 +618,8 @@ function rotateActiveKey(
 
 ){
 
+    KEY_MANAGER.KEY_HISTORY.forEach(
+
     key=>{
 
         if(
