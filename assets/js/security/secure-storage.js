@@ -835,7 +835,21 @@ if(
     );
 
 }
+if(
 
+    typeof provider.encrypt !== "function" ||
+
+    typeof provider.decrypt !== "function"
+
+){
+
+    throw new Error(
+
+        "Invalid crypto provider implementation."
+
+    );
+
+}
 return provider;
       
 }
