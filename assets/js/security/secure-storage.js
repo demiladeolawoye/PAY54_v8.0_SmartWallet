@@ -867,8 +867,11 @@ function migrateEncryptionProvider(
 
     }
 
-    SECURE_STORAGE_CONFIG.ACTIVE_PROVIDER =
-        provider;
+    throw new Error(
+
+    "Runtime provider switching is not yet supported."
+
+);
 
     return provider;
 
