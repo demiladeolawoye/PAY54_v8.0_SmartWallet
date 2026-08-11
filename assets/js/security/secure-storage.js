@@ -612,9 +612,11 @@ function getActiveKey(){
     return KEY_MANAGER.ACTIVE_KEY;
 
 }
-   function rotateActiveKey(
+function rotateActiveKey(
 
-   KEY_MANAGER.KEY_HISTORY.forEach(
+    keyId
+
+){
 
     key=>{
 
@@ -654,8 +656,29 @@ KEY_MANAGER.KEY_HISTORY.push({
         nowISO()
 
 });
+publishStorageEvent(
 
+    STORAGE_EVENTS.RESTORED,
+
+    {
+
+        action:
+            "KEY_ROTATED",
+
+        activeKey:
+
+            KEY_MANAGER.ACTIVE_KEY,
+
+        timestamp:
+
+            nowISO()
+
+    }
+
+);
 return KEY_MANAGER.ACTIVE_KEY;
+
+}
    function getKeyHistory(){
 
     return deepClone(
