@@ -748,6 +748,17 @@ if(
 }
 
 return provider;
+      
+}
+
+   function getAvailableCryptoProviders(){
+
+    return Object.keys(
+
+        ENCRYPTION_PROVIDERS
+
+    );
+
 }
    /* ========================================================================
    ENCRYPTION ENGINE
