@@ -1646,7 +1646,9 @@ migrateEncryptionProvider,
 
 getMetadata,
 
-getSecureStorageHealth
+getSecureStorageHealth,
+
+selfTest,
 
 });
 
