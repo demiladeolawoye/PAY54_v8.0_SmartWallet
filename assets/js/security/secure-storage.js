@@ -690,6 +690,29 @@ Object.freeze({
             };
 
         },
+       AES_GCM:{
+
+    encrypt(value){
+
+        throw new Error(
+
+            "AES_GCM provider requires asynchronous crypto pipeline."
+
+        );
+
+    },
+
+    decrypt(value){
+
+        throw new Error(
+
+            "AES_GCM provider requires asynchronous crypto pipeline."
+
+        );
+
+    }
+
+}
 
         decrypt(value){
 
