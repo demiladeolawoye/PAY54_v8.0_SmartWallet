@@ -1559,10 +1559,8 @@ activeProvider:
 
     SECURE_STORAGE_CONFIG
         .ACTIVE_PROVIDER,
-       availableProviders:
-          keyHistory:
 
-    getKeyHistory(),
+availableProviders:
 
     Object.keys(
 
@@ -1570,7 +1568,12 @@ activeProvider:
 
     ),
 
+keyHistory:
+
+    getKeyHistory(),
+
 keyManagerVersion:
+
     KEY_MANAGER.VERSION,
        webCryptoEnabled:
 
