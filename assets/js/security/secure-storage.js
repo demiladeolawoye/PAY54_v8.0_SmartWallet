@@ -646,9 +646,10 @@ async function getCryptoKey(){
     return KEY_MANAGER.CRYPTO_KEY;
 
 }
-   /* ========================================================================
+/* ========================================================================
    ENCRYPTION PROVIDER
 ======================================================================== */
+
 const ENCRYPTION_PROVIDERS =
 Object.freeze({
 
@@ -663,56 +664,29 @@ Object.freeze({
 
             ){
 
-                return{
+                return {
 
                     algorithm:
-
                         "PAY54-V1",
 
                     payload:
-
                         value
 
                 };
 
             }
 
-            return{
+            return {
 
                 algorithm:
-
                     "AES-GCM",
 
                 payload:
-
                     value
 
             };
 
         },
-       AES_GCM:{
-
-    encrypt(value){
-
-        throw new Error(
-
-            "AES_GCM provider requires asynchronous crypto pipeline."
-
-        );
-
-    },
-
-    decrypt(value){
-
-        throw new Error(
-
-            "AES_GCM provider requires asynchronous crypto pipeline."
-
-        );
-
-    }
-
-}
 
         decrypt(value){
 
@@ -720,9 +694,34 @@ Object.freeze({
 
         }
 
+    },
+
+    AES_GCM:{
+
+        encrypt(value){
+
+            throw new Error(
+
+                "AES_GCM provider requires asynchronous crypto pipeline."
+
+            );
+
+        },
+
+        decrypt(value){
+
+            throw new Error(
+
+                "AES_GCM provider requires asynchronous crypto pipeline."
+
+            );
+
+        }
+
     }
 
 });
+   
    function getCryptoProvider(){
 
   const provider =
