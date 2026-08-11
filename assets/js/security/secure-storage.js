@@ -1534,6 +1534,9 @@ activeProvider:
     SECURE_STORAGE_CONFIG
         .ACTIVE_PROVIDER,
        availableProviders:
+          keyHistory:
+
+    getKeyHistory(),
 
     Object.keys(
 
