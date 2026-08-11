@@ -889,8 +889,6 @@ function migrateEncryptionProvider(
 
 );
 
-    return provider;
-
 }
    /* ========================================================================
    ENCRYPTION ENGINE
