@@ -1416,6 +1416,13 @@ activeProvider:
 
     SECURE_STORAGE_CONFIG
         .ACTIVE_PROVIDER,
+       availableProviders:
+
+    Object.keys(
+
+        ENCRYPTION_PROVIDERS
+
+    ),
 
 keyManagerVersion:
     KEY_MANAGER.VERSION,
