@@ -575,12 +575,36 @@ function generateInitializationVector(){
 
 const KEY_MANAGER = {
 
-    VERSION: "PAY54-KEY-V1",
+    VERSION:
+        "PAY54-KEY-V1",
 
-    ACTIVE_KEY: "PRIMARY",
-       
-   CRYPTO_KEY:
-    null,
+    ACTIVE_KEY:
+        "PRIMARY",
+
+    CRYPTO_KEY:
+        null,
+
+    KEY_HISTORY:
+        [
+
+            {
+
+                id:
+                    "PRIMARY",
+
+                version:
+                    1,
+
+                status:
+                    "ACTIVE",
+
+                activated:
+                    nowISO()
+
+            }
+
+        ]
+
 };
 
 function getActiveKey(){
@@ -590,15 +614,55 @@ function getActiveKey(){
 }
    function rotateActiveKey(
 
-    keyId
+   KEY_MANAGER.KEY_HISTORY.forEach(
 
-){
+    key=>{
 
-    KEY_MANAGER.ACTIVE_KEY =
+        if(
 
-        keyId;
+            key.status === "ACTIVE"
 
-    return KEY_MANAGER.ACTIVE_KEY;
+        ){
+
+            key.status =
+
+                "RETIRED";
+
+        }
+
+    }
+
+);
+
+KEY_MANAGER.ACTIVE_KEY =
+
+    keyId;
+
+KEY_MANAGER.KEY_HISTORY.push({
+
+    id:
+        keyId,
+
+    version:
+
+        KEY_MANAGER.KEY_HISTORY.length + 1,
+
+    status:
+        "ACTIVE",
+
+    activated:
+        nowISO()
+
+});
+
+return KEY_MANAGER.ACTIVE_KEY;
+   function getKeyHistory(){
+
+    return deepClone(
+
+        KEY_MANAGER.KEY_HISTORY
+
+    );
 
 }
 async function getCryptoKey(){
