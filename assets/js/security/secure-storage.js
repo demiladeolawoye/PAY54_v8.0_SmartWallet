@@ -1577,6 +1577,10 @@ const storage = Object.freeze({
 
 rotateActiveKey,
 
+   getKeyHistory,
+
+migrateEncryptionProvider,
+
    getCryptoKey,
 
    getCryptoProvider,
