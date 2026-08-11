@@ -725,23 +725,30 @@ Object.freeze({
 });
    function getCryptoProvider(){
 
-    return ENCRYPTION_PROVIDERS[
+  const provider =
+
+    ENCRYPTION_PROVIDERS[
 
         SECURE_STORAGE_CONFIG
             .ACTIVE_PROVIDER
 
     ];
 
-}
-function getAvailableCryptoProviders(){
+if(
 
-    return Object.keys(
+    !provider
 
-        ENCRYPTION_PROVIDERS
+){
+
+    throw new Error(
+
+        "Unknown crypto provider."
 
     );
 
 }
+
+return provider;
    /* ========================================================================
    ENCRYPTION ENGINE
 ======================================================================== */
