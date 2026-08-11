@@ -824,6 +824,32 @@ return provider;
     );
 
 }
+function migrateEncryptionProvider(
+
+    provider
+
+){
+
+    if(
+
+        !ENCRYPTION_PROVIDERS[provider]
+
+    ){
+
+        throw new Error(
+
+            "Unknown crypto provider."
+
+        );
+
+    }
+
+    SECURE_STORAGE_CONFIG.ACTIVE_PROVIDER =
+        provider;
+
+    return provider;
+
+}
    /* ========================================================================
    ENCRYPTION ENGINE
 ======================================================================== */
