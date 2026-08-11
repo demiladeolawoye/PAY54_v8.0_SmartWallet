@@ -1698,6 +1698,52 @@ try{
     );
 
 }
+   function selfTest(){
+
+    return Object.freeze({
+
+        provider:
+
+            SECURE_STORAGE_CONFIG
+                .ACTIVE_PROVIDER,
+
+        providers:
+
+            getAvailableCryptoProviders(),
+
+        keyManager:
+
+            KEY_MANAGER.VERSION,
+
+        activeKey:
+
+            getActiveKey(),
+
+        encryption:
+
+            SECURE_STORAGE_CONFIG
+                .ENABLE_ENCRYPTION,
+
+        webCrypto:
+
+            SECURE_STORAGE_CONFIG
+                .ENABLE_WEB_CRYPTO,
+
+        checksum:
+
+            true,
+
+        namespace:
+
+            STORAGE_NAMESPACE,
+
+        timestamp:
+
+            nowISO()
+
+    });
+
+}
 
 /* ========================================================================
    MODULE READY
