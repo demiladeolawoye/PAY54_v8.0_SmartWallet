@@ -744,7 +744,8 @@ async function getCryptoKey(){
 const ENCRYPTION_PROVIDERS =
 Object.freeze({
 
-    PAY54_LEGACY:{
+   PAY54_LEGACY:
+Object.freeze({
 
         encrypt(value){
 
@@ -787,7 +788,8 @@ Object.freeze({
 
     },
 
-    AES_GCM:{
+    AES_GCM:
+Object.freeze({
 
         encrypt(value){
 
