@@ -137,25 +137,33 @@ function uuid(){
 
 function getCards(){
 
-  try{
+    try{
 
-    return STORAGE
+        if(STORAGE){
 
-    ? STORAGE.get(
-        STORAGE_KEY
-      )
+            return STORAGE.get(
 
-    : JSON.parse(
-        localStorage.getItem(
-            STORAGE_KEY
-        )
-      ) || [];
+                STORAGE_KEY
 
-  }catch{
+            ) || [];
 
-    return [];
+        }
 
-  }
+        return JSON.parse(
+
+            localStorage.getItem(
+
+                STORAGE_KEY
+
+            )
+
+        ) || [];
+
+    }catch{
+
+        return [];
+
+    }
 
 }
 
