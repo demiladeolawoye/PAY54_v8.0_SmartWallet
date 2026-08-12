@@ -489,6 +489,43 @@ sanitizeMeta(
 function applyEntry(entry) {
 
     const e = entry;
+   /* ==========================================================
+   ENTERPRISE SESSION VALIDATION
+========================================================== */
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        publishLedgerEvent(
+
+            "ledger.security.session.invalid",
+
+            {
+
+                timestamp:
+
+                    nowISO()
+
+            }
+
+        );
+
+        return null;
+
+    }
+
+}
 if(
 
     !validateCurrency(
@@ -791,7 +828,25 @@ if(
     return e;
 
 }
+/* ==========================================================
+   SECURITY BOOTSTRAP VERIFICATION
+========================================================== */
 
+if(
+
+    SECURITY_BOOTSTRAP &&
+
+    typeof SECURITY_BOOTSTRAP.verify === "function"
+
+){
+
+    SECURITY_BOOTSTRAP.verify(
+
+        "ledger"
+
+    );
+
+}
   // Expose API
 window.PAY54_LEDGER = {
   LS,
