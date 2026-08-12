@@ -173,35 +173,65 @@ function getCards(){
 
 function saveCards(cards){
 
-  localStorage.setItem(
+    if(STORAGE){
 
-    STORAGE_KEY,
+        STORAGE.set(
 
-    JSON.stringify(cards)
+            STORAGE_KEY,
 
-  );
+            cards
 
-  localStorage.setItem(
+        );
 
-    STORAGE_META_KEY,
+    }else{
 
-    JSON.stringify({
+        localStorage.setItem(
 
-      version:
-        ENGINE_VERSION,
+            STORAGE_KEY,
 
-      engine:
-        ENGINE_NAME,
+            JSON.stringify(cards)
 
-      updated:
-        now(),
+        );
 
-      cards:
-        cards.length
+    }
 
-    })
+    const metadata = {
 
-  );
+        version:
+            ENGINE_VERSION,
+
+        engine:
+            ENGINE_NAME,
+
+        updated:
+            now(),
+
+        cards:
+            cards.length
+
+    };
+
+    if(STORAGE){
+
+        STORAGE.set(
+
+            STORAGE_META_KEY,
+
+            metadata
+
+        );
+
+    }else{
+
+        localStorage.setItem(
+
+            STORAGE_META_KEY,
+
+            JSON.stringify(metadata)
+
+        );
+
+    }
 
 }
 
