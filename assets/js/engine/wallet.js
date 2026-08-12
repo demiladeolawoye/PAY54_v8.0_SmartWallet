@@ -405,7 +405,36 @@ if(
 
 window.PAY54_CARDS
 .addCard(card);
+window.PAY54_EVENTS
+?.publish(
 
+    "wallet.card.added",
+
+    {
+
+        cardId:
+
+            card.id,
+
+        scheme:
+
+            card.scheme,
+
+        timestamp:
+
+            new Date().toISOString()
+
+    },
+
+    {
+
+        source:
+
+            "wallet"
+
+    }
+
+);
 window.PAY54_TOAST
 ?.showToast(
 "Card added"
