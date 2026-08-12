@@ -6747,7 +6747,74 @@ releaseTransactionLock(
 }
 
 }
+/* ==========================================================
+   ENTERPRISE SESSION VALIDATION
+========================================================== */
 
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        showToast(
+
+            "Your session has expired."
+
+        );
+
+        publishTransactionEvent(
+
+            "transaction.security.session.invalid",
+
+            {
+
+                timestamp:
+
+                    new Date().toISOString()
+
+            }
+
+        );
+
+        return null;
+
+    }
+
+}
+/* ==========================================================
+   SECURITY BOOTSTRAP VERIFICATION
+========================================================== */
+
+const SECURITY_BOOTSTRAP =
+window.PAY54_SECURITY?.bootstrap;
+
+if(
+
+    SECURITY_BOOTSTRAP &&
+
+    typeof SECURITY_BOOTSTRAP.verify === "function"
+
+){
+
+    SECURITY_BOOTSTRAP.verify(
+
+        "transactions"
+
+    );
+
+}
 /* =========================
    GLOBAL EXPORT
 ========================= */
