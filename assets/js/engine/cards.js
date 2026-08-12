@@ -95,6 +95,9 @@ const ENGINE_VERSION =
 const ENGINE_NAME =
   "PAY54 Enterprise Cards Engine";
 
+   const STORAGE =
+window.PAY54_SECURITY?.storage;
+
 function now(){
 
   return new Date()
