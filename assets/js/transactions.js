@@ -2298,30 +2298,51 @@ closedExceptions:
             !!exception.reopenedAt
 
     ).length,
+activeLocks:
 
-    activeLocks:
+    TX_LOCKS.size,
 
-        TX_LOCKS.size,
+activeSagas:
 
-    activeSagas:
+    TX_SAGAS.size,
 
-        TX_SAGAS.size,
+installedPlugins:
 
-    installedPlugins:
+    TX_PLUGINS.length,
 
-        TX_PLUGINS.length,
+securityIntegration:
 
-    pipelineStages:
+{
 
-        TX_PIPELINE.length,
+    sessionManager:
 
-    middleware:
+        !!window.PAY54_SECURITY?.session,
 
-        TX_MIDDLEWARE.length,
+    secureStorage:
 
-    interceptors:
+        !!window.PAY54_SECURITY?.storage,
 
-        TX_INTERCEPTORS.length
+    transactionGuard:
+
+        !!window.PAY54_SECURITY?.transactionGuard,
+
+    bootstrap:
+
+        !!window.PAY54_SECURITY?.bootstrap
+
+},
+
+pipelineStages:
+
+    TX_PIPELINE.length,
+
+middleware:
+
+    TX_MIDDLEWARE.length,
+
+interceptors:
+
+    TX_INTERCEPTORS.length
 
 };
 }
