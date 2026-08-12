@@ -6061,7 +6061,52 @@ function evaluateOperationalAlerts(){
 ========================= */
 
 async function processTransaction(entry, meta = {}){
+/* ==========================================================
+   ENTERPRISE SESSION VALIDATION
+========================================================== */
 
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        showToast(
+
+            "Your session has expired."
+
+        );
+
+        publishTransactionEvent(
+
+            "transaction.security.session.invalid",
+
+            {
+
+                timestamp:
+
+                    new Date().toISOString()
+
+            }
+
+        );
+
+        return null;
+
+    }
+
+}
   const ledger = txLedger();
 if(
 
@@ -6771,52 +6816,6 @@ releaseTransactionLock(
     return null;
 
 }
-
-}
-/* ==========================================================
-   ENTERPRISE SESSION VALIDATION
-========================================================== */
-
-const SESSION =
-window.PAY54_SECURITY?.session;
-
-if(
-
-    SESSION &&
-
-    typeof SESSION.isAuthenticated === "function"
-
-){
-
-    if(
-
-        !SESSION.isAuthenticated()
-
-    ){
-
-        showToast(
-
-            "Your session has expired."
-
-        );
-
-        publishTransactionEvent(
-
-            "transaction.security.session.invalid",
-
-            {
-
-                timestamp:
-
-                    new Date().toISOString()
-
-            }
-
-        );
-
-        return null;
-
-    }
 
 }
 /* ==========================================================
