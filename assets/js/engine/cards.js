@@ -139,11 +139,17 @@ function getCards(){
 
   try{
 
-    return JSON.parse(
-      localStorage.getItem(
+    return STORAGE
+
+    ? STORAGE.get(
         STORAGE_KEY
       )
-    ) || [];
+
+    : JSON.parse(
+        localStorage.getItem(
+            STORAGE_KEY
+        )
+      ) || [];
 
   }catch{
 
