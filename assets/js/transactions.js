@@ -6555,7 +6555,33 @@ publishTransactionEvent(
     }
 
 );
+publishTransactionEvent(
 
+    "transaction.security.audit",
+
+    {
+
+        transactionId:
+
+            tx.id,
+
+        correlationId,
+
+        amount:
+
+            tx.amount,
+
+        currency:
+
+            tx.currency,
+
+        timestamp:
+
+            new Date().toISOString()
+
+    }
+
+);
  publishTransactionEvent(
 
     "transaction.ui.refresh",
