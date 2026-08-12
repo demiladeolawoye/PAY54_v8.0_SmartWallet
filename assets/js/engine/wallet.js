@@ -357,7 +357,32 @@ return;
 
 const card = {
 
-    ...
+    id:
+        crypto.randomUUID(),
+
+    scheme:
+        modal.querySelector(
+            "#cardScheme"
+        ).value,
+
+    nickname:
+        modal.querySelector(
+            "#cardNickname"
+        ).value,
+
+    last4:
+        number.slice(-4),
+
+    expiry:
+        modal.querySelector(
+            "#cardExpiry"
+        ).value,
+
+    frozen:
+        false,
+
+    default:
+        false
 
 };
 
