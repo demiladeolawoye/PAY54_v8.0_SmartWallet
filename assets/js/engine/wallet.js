@@ -9,6 +9,40 @@ window.PAY54_UI || {};
 
 window.PAY54_UI.openCards = function(){
 
+/* ==========================================================
+   ENTERPRISE SESSION VALIDATION
+========================================================== */
+
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        window.PAY54_TOAST
+        ?.showToast(
+
+            "Your session has expired."
+
+        );
+
+        return;
+
+    }
+
+}
+
 const openModal =
 window.PAY54_MODALS?.openModal;
 
