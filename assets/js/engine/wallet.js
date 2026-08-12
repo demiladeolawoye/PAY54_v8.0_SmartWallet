@@ -555,7 +555,64 @@ window.PAY54_TOAST
 });
 
 }
+/* ==========================================================
+   WALLET HEALTH
+========================================================== */
 
+window.PAY54_UI.getWalletHealth =
+function(){
+
+    return {
+
+        sessionManager:
+
+            !!window.PAY54_SECURITY?.session,
+
+        transactionGuard:
+
+            !!window.PAY54_SECURITY?.transactionGuard,
+
+        secureStorage:
+
+            !!window.PAY54_SECURITY?.storage,
+
+        bootstrap:
+
+            !!window.PAY54_SECURITY?.bootstrap,
+
+        cardsEngine:
+
+            !!window.PAY54_CARDS,
+
+        modalEngine:
+
+            !!window.PAY54_MODALS
+
+    };
+
+};
+/* ==========================================================
+   SECURITY BOOTSTRAP VERIFICATION
+========================================================== */
+
+const SECURITY_BOOTSTRAP =
+window.PAY54_SECURITY?.bootstrap;
+
+if(
+
+    SECURITY_BOOTSTRAP &&
+
+    typeof SECURITY_BOOTSTRAP.verify === "function"
+
+){
+
+    SECURITY_BOOTSTRAP.verify(
+
+        "wallet"
+
+    );
+
+}
 console.log(
 "✅ PAY54 CARDS PREMIUM READY"
 );
