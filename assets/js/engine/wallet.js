@@ -357,32 +357,51 @@ return;
 
 const card = {
 
-id:
-crypto.randomUUID(),
-
-scheme:
-modal.querySelector(
-"#cardScheme"
-).value,
-
-nickname:
-modal.querySelector(
-"#cardNickname"
-).value,
-
-last4:
-number.slice(-4),
-
-expiry:
-modal.querySelector(
-"#cardExpiry"
-).value,
-
-frozen:false,
-
-default:false
+    ...
 
 };
+
+const TRANSACTION_GUARD =
+window.PAY54_SECURITY?.transactionGuard;
+
+if(
+
+    TRANSACTION_GUARD &&
+
+    typeof TRANSACTION_GUARD.validate === "function"
+
+){
+
+    const allowed =
+
+        TRANSACTION_GUARD.validate({
+
+            type:
+                "CARD_ADD",
+
+            payload:
+                card
+
+        });
+
+    if(
+
+        allowed === false
+
+    ){
+
+        window.PAY54_TOAST
+        ?.showToast(
+
+            "Card operation blocked."
+
+        );
+
+        return;
+
+    }
+
+}
 
 window.PAY54_CARDS
 .addCard(card);
