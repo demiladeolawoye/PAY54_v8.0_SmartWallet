@@ -193,7 +193,60 @@ publishReceiptAudit(
       }
     });
   }
+/* ==========================================================
+   RECEIPTS HEALTH
+========================================================== */
 
-  window.PAY54_RECEIPTS = { openReceiptModal };
+function getReceiptsHealth(){
+
+    return {
+
+        sessionManager:
+
+            !!SESSION,
+
+        bootstrap:
+
+            !!SECURITY_BOOTSTRAP,
+
+        eventBus:
+
+            !!EVENTS,
+
+        ledger:
+
+            !!window.PAY54_LEDGER
+
+    };
+
+}
+  window.PAY54_RECEIPTS = {
+
+    openReceiptModal,
+
+    health:
+
+        getReceiptsHealth
+
+};
+  /* ==========================================================
+   SECURITY BOOTSTRAP VERIFICATION
+========================================================== */
+
+if(
+
+    SECURITY_BOOTSTRAP &&
+
+    typeof SECURITY_BOOTSTRAP.verify === "function"
+
+){
+
+    SECURITY_BOOTSTRAP.verify(
+
+        "receipts"
+
+    );
+
+} 
 })();
 
