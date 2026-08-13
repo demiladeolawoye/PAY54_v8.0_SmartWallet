@@ -637,7 +637,45 @@ case "pos":
 
 }
 
-  }catch(err){
+/* ==========================================================
+   DASHBOARD SECURITY AUDIT
+========================================================== */
+
+if (
+
+    window.PAY54_EVENTS &&
+
+    typeof window.PAY54_EVENTS.publish === "function"
+
+){
+
+    window.PAY54_EVENTS.publish(
+
+        "dashboard.security.audit",
+
+        {
+
+            action,
+
+            executedAt:
+
+                new Date().toISOString()
+
+        },
+
+        {
+
+            source:
+
+                "dashboard-core"
+
+        }
+
+    );
+
+}
+
+}catch(err){
 
     console.error("ROUTER FAILED", err);
 
