@@ -605,7 +605,36 @@ case "pos":
 ========================================= */
 
 function initDashboard(){
+/* ==========================================================
+   ENTERPRISE SESSION VALIDATION
+========================================================== */
 
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        window.PAY54_TOAST
+        ?.showToast(
+
+            "Your session has expired."
+
+        );
+
+        return;
+
+    }
+
+}
   if(window.PAY54_APP.initialized){
 
     console.warn(
