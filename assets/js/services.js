@@ -347,7 +347,29 @@ merchantqr:{
 Object.freeze(
   window.PAY54_SERVICES
 );
-  
+ function getServicesHealth(){
+
+    return {
+
+        sessionManager:
+
+            !!window.PAY54_SECURITY?.session,
+
+        bootstrap:
+
+            !!window.PAY54_SECURITY?.bootstrap,
+
+        services:
+
+            listServices().length,
+
+        version:
+
+            VERSION
+
+    };
+
+} 
 window.PAY54_SERVICE_REGISTRY = Object.freeze({
 
   version:
