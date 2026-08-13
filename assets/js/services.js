@@ -399,7 +399,28 @@ getServicesHealth,
   }
 
 });
+/* ==========================================================
+   SECURITY BOOTSTRAP VERIFICATION
+========================================================== */
 
+const SECURITY_BOOTSTRAP =
+window.PAY54_SECURITY?.bootstrap;
+
+if(
+
+    SECURITY_BOOTSTRAP &&
+
+    typeof SECURITY_BOOTSTRAP.verify === "function"
+
+){
+
+    SECURITY_BOOTSTRAP.verify(
+
+        "services"
+
+    );
+
+}
 console.info(
 
   "✅ PAY54 Services",
