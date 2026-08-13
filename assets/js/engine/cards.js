@@ -241,8 +241,31 @@ function saveCards(cards){
 
 function addCard(card){
 
-  const cards =
-    getCards();
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        return null;
+
+    }
+
+}
+
+const cards =
+getCards();
 
   const newCard = {
 
@@ -308,9 +331,32 @@ return newCard;
 
 function deleteCard(id){
 
-  const cards =
-    getCards()
-    .filter(
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        return;
+
+    }
+
+}
+
+const cards =
+getCards()
+.filter(
       card =>
       card.id !== id
     );
@@ -341,8 +387,31 @@ publishCardEvent(
 
 function toggleFreeze(id){
 
-  const cards =
-    getCards();
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        return;
+
+    }
+
+}
+
+const cards =
+getCards();
 
   const card =
     cards.find(
@@ -388,8 +457,31 @@ publishCardEvent(
 
 function setDefault(id){
 
-  const cards =
-    getCards();
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        return;
+
+    }
+
+}
+
+const cards =
+getCards();
 
   cards.forEach(card=>{
 
