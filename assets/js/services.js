@@ -73,6 +73,59 @@ function safeHandler(fnName){
 
     return () => {
 
+        /* ==========================================================
+           ENTERPRISE SESSION VALIDATION
+        ========================================================== */
+
+        const SESSION =
+        window.PAY54_SECURITY?.session;
+
+        if(
+
+            SESSION &&
+
+            typeof SESSION.isAuthenticated === "function"
+
+        ){
+
+            if(
+
+                !SESSION.isAuthenticated()
+
+            ){
+
+                publishServiceEvent(
+
+                    SERVICE_EVENTS.ERROR,
+
+                    {
+
+                        service: fnName,
+
+                        error:
+                            "Session expired",
+
+                        occurredAt:
+
+                            new Date().toISOString()
+
+                    }
+
+                );
+
+                window.PAY54_TOAST
+                ?.showToast(
+
+                    "Your session has expired."
+
+                );
+
+                return;
+
+            }
+
+        }
+
         publishServiceEvent(
 
             SERVICE_EVENTS.OPEN,
