@@ -6,7 +6,19 @@
 
 (() => {
   "use strict";
+/* ==========================================================
+   ENTERPRISE SECURITY
+========================================================== */
 
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+const SECURITY_BOOTSTRAP =
+window.PAY54_SECURITY?.bootstrap;
+
+const EVENTS =
+window.PAY54_EVENTS || null;
+   
   function escapeHtml(s) {
     return String(s || "")
       .replaceAll("&", "&amp;")
