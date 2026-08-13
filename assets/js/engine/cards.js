@@ -872,10 +872,10 @@ if(
 }
 console.info(
 
-  "✅ PAY54 Enterprise Cards Engine",
+    "✅ PAY54 Enterprise Cards Engine",
 
-  ENGINE_VERSION,
+    window.PAY54_CARDS.version,
 
-  "loaded."
+    "loaded."
 
 );
