@@ -4501,3 +4501,22 @@ req.paymentLink;
   });
 
 };
+/* ==========================================================
+   SECURITY BOOTSTRAP VERIFICATION
+========================================================== */
+
+if (
+
+    SECURITY_BOOTSTRAP &&
+
+    typeof SECURITY_BOOTSTRAP.verify === "function"
+
+){
+
+    SECURITY_BOOTSTRAP.verify(
+
+        "dashboard-core"
+
+    );
+
+}
