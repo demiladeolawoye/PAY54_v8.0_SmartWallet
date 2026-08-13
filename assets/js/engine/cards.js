@@ -294,7 +294,40 @@ getCards();
     ...card
 
   };
+  const TRANSACTION_GUARD =
+window.PAY54_SECURITY?.transactionGuard;
 
+if(
+
+    TRANSACTION_GUARD &&
+
+    typeof TRANSACTION_GUARD.validate === "function"
+
+){
+
+    const allowed =
+
+        TRANSACTION_GUARD.validate({
+
+            type:
+                "CARD_CREATE",
+
+            payload:
+                newCard
+
+        });
+
+    if(
+
+        allowed === false
+
+    ){
+
+        return null;
+
+    }
+
+}
   cards.push(
     newCard
   );
