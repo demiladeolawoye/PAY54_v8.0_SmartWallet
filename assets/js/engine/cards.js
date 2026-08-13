@@ -848,7 +848,28 @@ return{
 };
 
 })();
+/* ==========================================================
+   SECURITY BOOTSTRAP VERIFICATION
+========================================================== */
 
+const SECURITY_BOOTSTRAP =
+window.PAY54_SECURITY?.bootstrap;
+
+if(
+
+    SECURITY_BOOTSTRAP &&
+
+    typeof SECURITY_BOOTSTRAP.verify === "function"
+
+){
+
+    SECURITY_BOOTSTRAP.verify(
+
+        "cards"
+
+    );
+
+}
 console.info(
 
   "✅ PAY54 Enterprise Cards Engine",
