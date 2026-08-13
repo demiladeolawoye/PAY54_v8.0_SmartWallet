@@ -374,7 +374,9 @@ window.PAY54_SERVICE_REGISTRY = Object.freeze({
 
   version:
     VERSION,
-
+   
+health:
+getServicesHealth,
   get:
     getService,
 
