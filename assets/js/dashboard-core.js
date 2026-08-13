@@ -551,135 +551,39 @@ if(
       return;
     }
 
-    switch(action){
+   const handlerName = ACTION_REGISTRY[action];
 
-/* =========================================
-   MONEY MOVES
-========================================= */
-
-case "send":
-
-  if(typeof UI.openSend === "function"){
-
-    UI.openSend();
-
-  }else{
+if(!handlerName){
 
     console.warn(
-      "openSend unavailable"
+
+        "Unknown action:",
+
+        action
+
     );
 
-  }
-
-  break;
-
-case "receive":
-  UI.openReceive();
-  break;
-
-/* SCAN & PAY */
-case "scan_pay":
-  UI.openScanAndPay();
-  break;
-
-/* ADD MONEY */
-case "add_money":
-  UI.openAddMoney();
-  break;
-
-/* WITHDRAW */
-case "withdraw":
-  UI.openWithdraw();
-  break;
-
-/* BANK TRANSFER */
-case "bank_transfer":
-  UI.openBankTransfer();
-  break;
-
-/* FX / GLOBAL TRANSFER */
-case "fx":
-  UI.openGlobalTransfer();
-  break;
-
-  case "bills":
-    UI.openBills();
-    break;
-
-  case "savings":
-    UI.openSavings();
-    break;
-
-  case "cards":
-
-  console.log(
-    "CARDS ENGINE:",
-    window.PAY54_CARDS
-  );
-
-  UI.openCards();
-
-  break;
-
-  case "checkout":
-    UI.openCheckout();
-    break;
-
-  case "shop":
-  UI.openShop();
-  break;
-
-case "refer":
-
-  UI.openReferEarn();
-
-  break;
-
-  case "merchantqr":
-    UI.openMerchantQR();
-    break;
-
-case "request":
-  UI.openRequestMoney();
-  break;
-
-  case "trading":
-    UI.openTrading();
-    break;
-
-  case "agent":
-    UI.openAgent();
-    break;
-
-   case "bet":
-  UI.openBetFunding();
-  break;
-          
-  case "risk":
-    UI.openRisk();
-    break;
-          
-/* ATM FINDER */
-case "atm":
-
-  if(window.openATMFinder){
-    window.openATMFinder();
-  }
-
-  break;
-
-/* POS FINDER */
-case "pos":
-
-  if(window.openPOSFinder){
-    window.openPOSFinder();
-  }
-
-  break;
-  default:
-    console.warn("Unknown action:", action);
+    return;
 
 }
+
+const handler = UI[handlerName];
+
+if(typeof handler !== "function"){
+
+    console.warn(
+
+        handlerName,
+
+        "not implemented."
+
+    );
+
+    return;
+
+}
+
+handler();
 
 /* ==========================================================
    DASHBOARD SECURITY AUDIT
