@@ -452,7 +452,52 @@ function bindDashboardButtons(){
    ROUTER
 ========================================= */
 function routeAction(action){
+/* ==========================================================
+   TRANSACTION GUARD
+========================================================== */
 
+if(
+
+    TRANSACTION_GUARD &&
+
+    typeof TRANSACTION_GUARD.validate === "function"
+
+){
+
+    const allowed =
+
+        TRANSACTION_GUARD.validate({
+
+            type:
+
+                "DASHBOARD_ACTION",
+
+            payload:{
+
+                action
+
+            }
+
+        });
+
+    if(
+
+        allowed === false
+
+    ){
+
+        window.PAY54_TOAST
+        ?.showToast(
+
+            "Operation blocked."
+
+        );
+
+        return;
+
+    }
+
+}
   try{
 
     const UI = window.PAY54_UI;
