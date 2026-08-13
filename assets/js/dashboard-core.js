@@ -447,7 +447,51 @@ function bindDashboardButtons(){
   console.log("✅ Dashboard buttons bound");
 
 }
+/* ==========================================================
+   ENTERPRISE ACTION REGISTRY
+========================================================== */
 
+const ACTION_REGISTRY = Object.freeze({
+
+    send: "openSend",
+
+    receive: "openReceive",
+
+    scan_pay: "openScanAndPay",
+
+    add_money: "openAddMoney",
+
+    withdraw: "openWithdraw",
+
+    bank_transfer: "openBankTransfer",
+
+    fx: "openGlobalTransfer",
+
+    bills: "openBills",
+
+    savings: "openSavings",
+
+    cards: "openCards",
+
+    checkout: "openCheckout",
+
+    shop: "openShop",
+
+    refer: "openReferEarn",
+
+    merchantqr: "openMerchantQR",
+
+    request: "openRequestMoney",
+
+    trading: "openTrading",
+
+    bet: "openBetFunding",
+
+    agent: "openAgent",
+
+    risk: "openRisk"
+
+});
 /* =========================================
    ROUTER
 ========================================= */
