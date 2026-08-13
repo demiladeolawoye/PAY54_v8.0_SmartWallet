@@ -492,6 +492,41 @@ const ACTION_REGISTRY = Object.freeze({
     risk: "openRisk"
 
 });
+window.PAY54_ACTIONS = Object.freeze({
+
+    get(action){
+
+        return ACTION_REGISTRY[action];
+
+    },
+
+    has(action){
+
+        return action in ACTION_REGISTRY;
+
+    },
+
+    list(){
+
+        return Object.keys(
+
+            ACTION_REGISTRY
+
+        );
+
+    },
+
+    count(){
+
+        return Object.keys(
+
+            ACTION_REGISTRY
+
+        ).length;
+
+    }
+
+});
 /* =========================================
    ROUTER
 ========================================= */
