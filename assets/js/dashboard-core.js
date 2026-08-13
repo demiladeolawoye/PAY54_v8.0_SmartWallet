@@ -23,7 +23,18 @@ window.PAY54_APP = {
 
 window.PAY54_UI =
 window.PAY54_UI || {};
+/* ==========================================================
+   ENTERPRISE SECURITY
+========================================================== */
 
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+const TRANSACTION_GUARD =
+window.PAY54_SECURITY?.transactionGuard;
+
+const SECURITY_BOOTSTRAP =
+window.PAY54_SECURITY?.bootstrap;
 /* ========================================================================
    PAY54 ENTERPRISE EVENT SUBSCRIBER
 ======================================================================== */
