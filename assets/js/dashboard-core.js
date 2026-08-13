@@ -776,7 +776,42 @@ if(scanFab){
   );
 
 }
+/* ==========================================================
+   DASHBOARD HEALTH
+========================================================== */
 
+window.PAY54_UI.getDashboardHealth =
+function(){
+
+    return{
+
+        sessionManager:
+
+            !!SESSION,
+
+        transactionGuard:
+
+            !!TRANSACTION_GUARD,
+
+        bootstrap:
+
+            !!SECURITY_BOOTSTRAP,
+
+        eventBus:
+
+            !!window.PAY54_EVENTS,
+
+        services:
+
+            !!window.PAY54_SERVICES,
+
+        ledger:
+
+            !!window.PAY54_LEDGER
+
+    };
+
+};
 /* =========================================
    SAFE BOOTSTRAP
 ========================================= */
