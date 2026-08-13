@@ -47,7 +47,64 @@ window.PAY54_EVENTS || null;
   }
 
   const JOIN_URL = "signup.html";
+/* ==========================================================
+   ENTERPRISE RECEIPT AUDIT
+========================================================== */
 
+function publishReceiptAudit(
+    action,
+    tx
+){
+
+    if(
+
+        !EVENTS ||
+
+        typeof EVENTS.publish !== "function"
+
+    ){
+
+        return;
+
+    }
+
+    EVENTS.publish(
+
+        "receipt.security.audit",
+
+        {
+
+            action,
+
+            transactionId:
+
+                tx?.id || null,
+
+            currency:
+
+                tx?.currency || null,
+
+            amount:
+
+                tx?.amount || null,
+
+            occurredAt:
+
+                new Date().toISOString()
+
+        },
+
+        {
+
+            source:
+
+                "receipts"
+
+        }
+
+    );
+
+}
   function openReceiptModal({ openModal, title, tx, lines }) {
     const PAY54 = window.PAY54_LEDGER;
     const base = tx.base_currency;
