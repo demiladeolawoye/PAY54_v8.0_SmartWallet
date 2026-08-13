@@ -106,7 +106,37 @@ function publishReceiptAudit(
 
 }
   function openReceiptModal({ openModal, title, tx, lines }) {
-    const PAY54 = window.PAY54_LEDGER;
+   /* ==========================================================
+   ENTERPRISE SESSION VALIDATION
+========================================================== */
+
+if(
+
+    SESSION &&
+
+    typeof SESSION.isAuthenticated === "function"
+
+){
+
+    if(
+
+        !SESSION.isAuthenticated()
+
+    ){
+
+        window.PAY54_TOAST
+        ?.showToast(
+
+            "Your session has expired."
+
+        );
+
+        return;
+
+    }
+
+}
+   const PAY54 = window.PAY54_LEDGER;
     const base = tx.base_currency;
     const equiv = tx.base_equiv;
     const fx = tx.fx_rate_used;
