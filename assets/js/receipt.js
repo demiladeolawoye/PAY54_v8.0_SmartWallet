@@ -155,7 +155,13 @@ if(
       "Join PAY54 — Earn rewards:",
       `${location.origin}/${JOIN_URL}`
     ].filter(Boolean));
+publishReceiptAudit(
 
+    "receipt.open",
+
+    tx
+
+);
     openModal({
       title: "Receipt",
       bodyHTML: `
