@@ -171,7 +171,23 @@ function safeHandler(fnName){
             }
 
             UI[fnName]();
+publishServiceEvent(
 
+    "services.security.audit",
+
+    {
+
+        service:
+
+            fnName,
+
+        executedAt:
+
+            new Date().toISOString()
+
+    }
+
+);
         }catch(err){
 
             publishServiceEvent(
