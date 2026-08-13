@@ -822,13 +822,17 @@ function(){
 
             !!window.PAY54_EVENTS,
 
-        services:
+       services:
 
-            !!window.PAY54_SERVICES,
+    !!window.PAY54_SERVICES,
 
-        ledger:
+actionDispatcher:
 
-            !!window.PAY54_LEDGER
+    !!window.PAY54_ACTIONS,
+
+ledger:
+
+    !!window.PAY54_LEDGER
 
     };
 
