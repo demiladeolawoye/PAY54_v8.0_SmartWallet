@@ -2033,6 +2033,120 @@ function getTrustedRecipients(){
     );
 
 }
+/* ==========================================================
+   RECIPIENT STATISTICS ENGINE
+========================================================== */
+function getRecentRecipients(
+    limit = 10
+){
+
+    return getRecipients()
+
+        .filter(
+
+            recipient =>
+
+                recipient.lastUsed
+
+        )
+
+        .sort(
+
+            (a,b)=>
+
+                new Date(b.lastUsed) -
+
+                new Date(a.lastUsed)
+
+        )
+
+        .slice(
+
+            0,
+
+            limit
+
+        );
+
+}
+function getMostUsedRecipients(
+    limit = 10
+){
+
+    return getRecipients()
+
+        .slice()
+
+        .sort(
+
+            (a,b)=>
+
+                b.transferCount -
+
+                a.transferCount
+
+        )
+
+        .slice(
+
+            0,
+
+            limit
+
+        );
+
+}
+function getSuggestedRecipients(
+    limit = 5
+){
+
+    return getRecipients()
+
+        .slice()
+
+        .sort(
+
+            (a,b)=>{
+
+                const scoreA =
+
+                    (a.favourite ? 1000 : 0)
+
+                    +
+
+                    (a.trusted ? 500 : 0)
+
+                    +
+
+                    (a.transferCount || 0);
+
+                const scoreB =
+
+                    (b.favourite ? 1000 : 0)
+
+                    +
+
+                    (b.trusted ? 500 : 0)
+
+                    +
+
+                    (b.transferCount || 0);
+
+                return scoreB - scoreA;
+
+            }
+
+        )
+
+        .slice(
+
+            0,
+
+            limit
+
+        );
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
