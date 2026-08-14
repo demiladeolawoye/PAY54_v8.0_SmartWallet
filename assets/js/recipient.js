@@ -4297,7 +4297,15 @@ getRecentRecipients,
 getMostUsedRecipients,
 
 getSuggestedRecipients,
+/* Search */
 
+searchRecipients,
+
+searchFavouriteRecipients,
+
+searchTrustedRecipients,
+
+searchRecentRecipients,
     /* Diagnostics */
 
     health:
