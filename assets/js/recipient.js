@@ -1931,6 +1931,57 @@ function deleteRecipient(
     return true;
 
 }
+/* ==========================================================
+   RECIPIENT FAVOURITES
+========================================================== */
+
+function toggleFavourite(
+
+    identifier
+
+){
+
+    const recipient =
+
+        findRecipient(
+
+            identifier
+
+        );
+
+    if(!recipient){
+
+        return null;
+
+    }
+
+    return updateRecipient(
+
+        recipient.id,
+
+        {
+
+            favourite:
+
+                !recipient.favourite
+
+        }
+
+    );
+
+}
+
+function getFavouriteRecipients(){
+
+    return getRecipients().filter(
+
+        recipient =>
+
+            recipient.favourite === true
+
+    );
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
