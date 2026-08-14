@@ -132,6 +132,47 @@ function publishRecipientAudit(
     );
 
 }
+/* ==========================================================
+   RECIPIENT EVENT PUBLISHER
+========================================================== */
+
+function publishRecipientEvent(
+
+    eventName,
+
+    payload = {}
+
+){
+
+    if(
+
+        !EVENTS ||
+
+        typeof EVENTS.publish !== "function"
+
+    ){
+
+        return;
+
+    }
+
+    EVENTS.publish(
+
+        eventName,
+
+        payload,
+
+        {
+
+            source:
+
+                "recipient"
+
+        }
+
+    );
+
+}
 /* =========================
    🚨 GLOBAL ERROR GUARD (PRODUCTION SAFETY)
 ========================= */
