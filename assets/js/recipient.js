@@ -53,7 +53,16 @@ const RECIPIENT_EVENTS = Object.freeze({
         "recipient.favourite",
 
     SELECTED:
-        "recipient.selected"
+        "recipient.selected",
+   
+   SYNC_STARTED:
+    "recipient.sync.started",
+
+SYNC_COMPLETED:
+    "recipient.sync.completed",
+
+SYNC_FAILED:
+    "recipient.sync.failed"
 
 });
 
