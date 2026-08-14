@@ -2076,7 +2076,34 @@ function openMerchantQR(){
 
 function openGlobalTransfer(){
 
-  openModal({
+    if(
+
+        SESSION &&
+
+        typeof SESSION.isAuthenticated === "function"
+
+    ){
+
+        if(
+
+            !SESSION.isAuthenticated()
+
+        ){
+
+            window.PAY54_TOAST
+            ?.showToast(
+
+                "Your session has expired."
+
+            );
+
+            return;
+
+        }
+
+    }
+
+    openModal({
 
     title:"PAY54 Global Transfer",
 
