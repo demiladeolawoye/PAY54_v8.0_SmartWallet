@@ -1754,9 +1754,36 @@ else if(funding.source === "card"){
   });
 
 }
- function openReceive(){
+function openReceive(){
 
-  const userTag = localStorage.getItem("pay54_name") || "pay54-user";
+    if(
+
+        SESSION &&
+
+        typeof SESSION.isAuthenticated === "function"
+
+    ){
+
+        if(
+
+            !SESSION.isAuthenticated()
+
+        ){
+
+            window.PAY54_TOAST
+            ?.showToast(
+
+                "Your session has expired."
+
+            );
+
+            return;
+
+        }
+
+    }
+
+    const userTag = localStorage.getItem("pay54_name") || "pay54-user";
   const accountNo = "3001234567";
 
   openModal({
