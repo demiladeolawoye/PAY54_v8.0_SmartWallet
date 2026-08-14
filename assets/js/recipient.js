@@ -4764,6 +4764,11 @@ function getRecipientHealth(){
     typeof validateRecipient ===
     "function",
 
+       duplicateEngine:
+
+    typeof isDuplicateRecipient ===
+    "function",
+
 recipientCount:
 
     getRecipients().length,
