@@ -1751,7 +1751,7 @@ function importRecipients(
             data.recipients
 
         );
-
+synchroniseRecipients();
         return true;
 
     }
