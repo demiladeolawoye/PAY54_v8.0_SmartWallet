@@ -3503,27 +3503,29 @@ else{
 
 }
 
-updateRecipientUsage(
-    recipient.tag
-);
+if(recipient){
 
-publishRecipientAudit(
+    updateRecipientUsage(
+        recipient.tag
+    );
 
-    "recipient.selected",
+    publishRecipientAudit(
 
-    {
+        "recipient.selected",
 
-        recipientId:
+        {
 
-            recipient.id,
+            recipientId:
+                recipient.id,
 
-        transferType:
+            transferType:
+                "global"
 
-            "global"
+        }
 
-    }
+    );
 
-);
+}
            prependTxToDOM(tx);
           refreshUI();
 
