@@ -1619,6 +1619,179 @@ function openWithdraw(){
   });
 
 }
+/* ==========================================================
+   ENTERPRISE RECIPIENT REPOSITORY
+========================================================== */
+
+function getRecipients(){
+
+    try{
+
+        return JSON.parse(
+
+            localStorage.getItem(
+
+                RECIPIENT_STORAGE_KEY
+
+            )
+
+        ) || [];
+
+    }
+
+    catch{
+
+        return [];
+
+    }
+
+}
+
+function saveRecipients(
+
+    recipients
+
+){
+
+    localStorage.setItem(
+
+        RECIPIENT_STORAGE_KEY,
+
+        JSON.stringify(
+
+            recipients
+
+        )
+
+    );
+
+}
+
+function addRecipient(
+
+    recipient
+
+){
+
+    const recipients =
+
+        getRecipients();
+
+    const exists =
+
+        recipients.find(
+
+            r =>
+
+                r.tag === recipient.tag
+
+        );
+
+    if(exists){
+
+        return exists;
+
+    }
+
+    const newRecipient = {
+
+        id:
+
+            recipientUuid(),
+
+        created:
+
+            new Date().toISOString(),
+
+        favourite:
+
+            false,
+
+        trusted:
+
+            false,
+
+        lastUsed:
+
+            null,
+
+        transferCount:
+
+            0,
+
+        ...recipient
+
+    };
+
+    recipients.push(
+
+        newRecipient
+
+    );
+
+    saveRecipients(
+
+        recipients
+
+    );
+
+    publishRecipientEvent(
+
+        RECIPIENT_EVENTS.CREATED,
+
+        {
+
+            recipient:
+
+                newRecipient
+
+        }
+
+    );
+
+    return newRecipient;
+
+}
+
+function updateRecipientUsage(
+
+    tag
+
+){
+
+    const recipients =
+
+        getRecipients();
+
+    const recipient =
+
+        recipients.find(
+
+            r =>
+
+                r.tag === tag
+
+        );
+
+    if(!recipient){
+
+        return;
+
+    }
+
+    recipient.lastUsed =
+
+        new Date().toISOString();
+
+    recipient.transferCount++;
+
+    saveRecipients(
+
+        recipients
+
+    );
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
