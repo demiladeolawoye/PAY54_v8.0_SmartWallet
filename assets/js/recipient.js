@@ -2281,7 +2281,34 @@ recBox.addEventListener("input", (e)=>{
 }
 function openBankTransfer(){
 
-  openModal({
+    if(
+
+        SESSION &&
+
+        typeof SESSION.isAuthenticated === "function"
+
+    ){
+
+        if(
+
+            !SESSION.isAuthenticated()
+
+        ){
+
+            window.PAY54_TOAST
+            ?.showToast(
+
+                "Your session has expired."
+
+            );
+
+            return;
+
+        }
+
+    }
+
+    openModal({
     title:"Bank Transfer",
 
     bodyHTML:`
