@@ -2507,6 +2507,139 @@ function getRecipientsByGroup(
     );
 
 }
+/* ==========================================================
+   RECIPIENT VALIDATION ENGINE
+========================================================== */
+
+function validateRecipient(recipient){
+
+    const errors = [];
+
+    if(
+
+        !recipient ||
+
+        typeof recipient !== "object"
+
+    ){
+
+        errors.push(
+            "Recipient data missing."
+        );
+
+    }
+
+    if(
+
+        !recipient.type
+
+    ){
+
+        errors.push(
+            "Recipient type required."
+        );
+
+    }
+
+    if(
+
+        !recipient.displayName ||
+
+        !recipient.displayName.trim()
+
+    ){
+
+        errors.push(
+            "Display name required."
+        );
+
+    }
+
+    if(
+
+        recipient.type === "pay54"
+
+    ){
+
+        if(
+
+            !recipient.tag ||
+
+            recipient.tag.length < 2
+
+        ){
+
+            errors.push(
+                "Invalid PAY54 Tag."
+            );
+
+        }
+
+    }
+
+    if(
+
+        recipient.type === "bank"
+
+    ){
+
+        if(
+
+            !recipient.bank ||
+
+            !recipient.bank.trim()
+
+        ){
+
+            errors.push(
+                "Bank name required."
+            );
+
+        }
+
+        if(
+
+            !recipient.accountNumber ||
+
+            !/^[0-9]{10}$/.test(
+                recipient.accountNumber
+            )
+
+        ){
+
+            errors.push(
+                "Account number must contain exactly 10 digits."
+            );
+
+        }
+
+        if(
+
+            !recipient.accountName ||
+
+            !recipient.accountName.trim()
+
+        ){
+
+            errors.push(
+                "Account name required."
+            );
+
+        }
+
+    }
+
+    return {
+
+        valid:
+
+            errors.length === 0,
+
+        errors
+
+    };
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
