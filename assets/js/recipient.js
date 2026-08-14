@@ -13,6 +13,69 @@
 ========================= */
 
 "use strict";
+/* ==========================================================
+   ENTERPRISE SECURITY
+========================================================== */
+
+const SESSION =
+window.PAY54_SECURITY?.session;
+
+const SECURITY_BOOTSTRAP =
+window.PAY54_SECURITY?.bootstrap;
+
+const TRANSACTION_GUARD =
+window.PAY54_SECURITY?.transactionGuard;
+
+const EVENTS =
+window.PAY54_EVENTS || null;
+/* ==========================================================
+   RECIPIENT SECURITY AUDIT
+========================================================== */
+
+function publishRecipientAudit(
+    action,
+    payload = {}
+){
+
+    if(
+
+        !EVENTS ||
+
+        typeof EVENTS.publish !== "function"
+
+    ){
+
+        return;
+
+    }
+
+    EVENTS.publish(
+
+        "recipient.security.audit",
+
+        {
+
+            action,
+
+            occurredAt:
+
+                new Date().toISOString(),
+
+            ...payload
+
+        },
+
+        {
+
+            source:
+
+                "recipient"
+
+        }
+
+    );
+
+}
 /* =========================
    🚨 GLOBAL ERROR GUARD (PRODUCTION SAFETY)
 ========================= */
