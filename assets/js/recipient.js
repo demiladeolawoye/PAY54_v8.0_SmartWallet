@@ -3699,29 +3699,31 @@ function openBankTransfer(){
 
 });
 
-updateRecipientUsage(
+if(recipient){
 
-    recipient.tag
+    updateRecipientUsage(
 
-);
+        recipient.tag
 
-publishRecipientAudit(
+    );
 
-    "recipient.selected",
+    publishRecipientAudit(
 
-    {
+        "recipient.selected",
 
-        recipientId:
+        {
 
-            recipient.id,
+            recipientId:
+                recipient.id,
 
-        type:
+            type:
+                "bank"
 
-            "bank"
+        }
 
-    }
+    );
 
-);
+}
            processTransaction(entry,{
             showReceipt:true,
             title:"Bank Transfer"
