@@ -3255,6 +3255,39 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
+/* ==========================================================
+   RECIPIENT HEALTH
+========================================================== */
+
+function getRecipientHealth(){
+
+    return {
+
+        sessionManager:
+            !!SESSION,
+
+        bootstrap:
+            !!SECURITY_BOOTSTRAP,
+
+        transactionGuard:
+            !!TRANSACTION_GUARD,
+
+        eventBus:
+            !!EVENTS,
+
+        ledger:
+            !!window.PAY54_LEDGER
+
+    };
+
+}
+
+window.PAY54_RECIPIENT = {
+
+    health:
+        getRecipientHealth
+
+};
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
@@ -3282,5 +3315,23 @@ window.PAY54_UI = {
   openLedger
 
 };
+/* ==========================================================
+   SECURITY BOOTSTRAP VERIFICATION
+========================================================== */
 
+if(
+
+    SECURITY_BOOTSTRAP &&
+
+    typeof SECURITY_BOOTSTRAP.verify === "function"
+
+){
+
+    SECURITY_BOOTSTRAP.verify(
+
+        "recipient"
+
+    );
+
+}
 console.log("✅ PAY54 UI ENGINE READY");
