@@ -3961,15 +3961,38 @@ function getRecipientHealth(){
 
 window.PAY54_RECIPIENT = {
 
+    /* Repository */
+
     getRecipients,
 
     saveRecipients,
 
     addRecipient,
 
+    findRecipient,
+
+    updateRecipient,
+
+    deleteRecipient,
+
     updateRecipientUsage,
 
+    /* Favourite */
+
+    toggleFavourite,
+
+    getFavouriteRecipients,
+
+    /* Trusted */
+
+    toggleTrusted,
+
+    getTrustedRecipients,
+
+    /* Diagnostics */
+
     health:
+
         getRecipientHealth
 
 };
