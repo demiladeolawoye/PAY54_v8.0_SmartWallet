@@ -2568,7 +2568,87 @@ recBox.addEventListener("input", (e)=>{
             icon:"🌍"
           }));
 
-          prependTxToDOM(tx);
+          const recipientType =
+    modal.querySelector("#gtType").value;
+
+let recipient;
+
+if(recipientType === "pay54"){
+
+    const tag =
+        modal
+        .querySelector("#gtRecipient input")
+        .value
+        .trim();
+
+    recipient = addRecipient({
+
+        type: "pay54",
+
+        tag,
+
+        displayName: tag,
+
+        currency: toCurrency
+
+    });
+
+}
+else{
+
+    const inputs =
+        modal.querySelectorAll(
+            "#gtRecipient input"
+        );
+
+    recipient = addRecipient({
+
+        type: "bank",
+
+        accountName:
+            inputs[0].value,
+
+        accountNumber:
+            inputs[1].value,
+
+        bank:
+            inputs[2].value,
+
+        tag:
+            inputs[1].value,
+
+        displayName:
+            inputs[0].value,
+
+        currency:
+            toCurrency
+
+    });
+
+}
+
+updateRecipientUsage(
+    recipient.tag
+);
+
+publishRecipientAudit(
+
+    "recipient.selected",
+
+    {
+
+        recipientId:
+
+            recipient.id,
+
+        transferType:
+
+            "global"
+
+    }
+
+);
+           prependTxToDOM(tx);
           refreshUI();
 
           showPaymentReceipt(tx,"Global Transfer",amount,fromCurrency);
