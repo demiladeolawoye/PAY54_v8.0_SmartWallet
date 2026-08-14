@@ -1791,7 +1791,7 @@ function importRecipients(
         existing
 
     );
-
+synchroniseRecipients();
     return true;
 
 }
