@@ -1792,6 +1792,145 @@ function updateRecipientUsage(
     );
 
 }
+/* ==========================================================
+   ENTERPRISE RECIPIENT MANAGER
+========================================================== */
+
+function findRecipient(identifier){
+
+    return getRecipients().find(
+
+        recipient =>
+
+            recipient.id === identifier ||
+
+            recipient.tag === identifier
+
+    ) || null;
+
+}
+
+function updateRecipient(
+
+    identifier,
+
+    updates = {}
+
+){
+
+    const recipients =
+
+        getRecipients();
+
+    const recipient =
+
+        recipients.find(
+
+            r =>
+
+                r.id === identifier ||
+
+                r.tag === identifier
+
+        );
+
+    if(!recipient){
+
+        return null;
+
+    }
+
+    Object.assign(
+
+        recipient,
+
+        updates,
+
+        {
+
+            updated:
+
+                new Date().toISOString()
+
+        }
+
+    );
+
+    saveRecipients(
+
+        recipients
+
+    );
+
+    publishRecipientEvent(
+
+        RECIPIENT_EVENTS.UPDATED,
+
+        {
+
+            recipient
+
+        }
+
+    );
+
+    return recipient;
+
+}
+
+function deleteRecipient(
+
+    identifier
+
+){
+
+    const recipients =
+
+        getRecipients();
+
+    const filtered =
+
+        recipients.filter(
+
+            recipient =>
+
+                recipient.id !== identifier &&
+
+                recipient.tag !== identifier
+
+        );
+
+    if(
+
+        filtered.length === recipients.length
+
+    ){
+
+        return false;
+
+    }
+
+    saveRecipients(
+
+        filtered
+
+    );
+
+    publishRecipientEvent(
+
+        RECIPIENT_EVENTS.DELETED,
+
+        {
+
+            identifier
+
+        }
+
+    );
+
+    return true;
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
