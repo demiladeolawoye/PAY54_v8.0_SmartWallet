@@ -1982,6 +1982,57 @@ function getFavouriteRecipients(){
     );
 
 }
+/* ==========================================================
+   TRUSTED RECIPIENTS
+========================================================== */
+
+function toggleTrusted(
+
+    identifier
+
+){
+
+    const recipient =
+
+        findRecipient(
+
+            identifier
+
+        );
+
+    if(!recipient){
+
+        return null;
+
+    }
+
+    return updateRecipient(
+
+        recipient.id,
+
+        {
+
+            trusted:
+
+                !recipient.trusted
+
+        }
+
+    );
+
+}
+
+function getTrustedRecipients(){
+
+    return getRecipients().filter(
+
+        recipient =>
+
+            recipient.trusted === true
+
+    );
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
