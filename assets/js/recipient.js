@@ -5010,6 +5010,10 @@ exportEngine:
 
     typeof exportRecipients ===
     "function",
+       synchronisationEngine:
+
+    typeof synchroniseRecipients ===
+    "function",
 
     };
 
@@ -5082,6 +5086,8 @@ removeRecipientGroup,
 getRecipientGroups,
 
 getRecipientsByGroup,
+
+   synchroniseRecipients,
     /* Diagnostics */
 
     health:
