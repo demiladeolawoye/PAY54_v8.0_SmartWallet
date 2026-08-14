@@ -2897,25 +2897,29 @@ const recipient = addRecipient({
 
 });
 
-updateRecipientUsage(
+if(recipient){
 
-    recipient.tag
+    updateRecipientUsage(
+        recipient.tag
+    );
 
-);
+    publishRecipientAudit(
 
-publishRecipientAudit(
+        "recipient.selected",
 
-    "recipient.selected",
+        {
 
-    {
+            recipientId:
+                recipient.id,
 
-        recipientId: recipient.id,
+            tag:
+                recipient.tag
 
-        tag: recipient.tag
+        }
 
-    }
+    );
 
-);
+}
            prependTxToDOM(tx);
           refreshUI();
           showPaymentReceipt(tx, user, amount, currency);
