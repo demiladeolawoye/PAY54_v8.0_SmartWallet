@@ -1696,6 +1696,53 @@ if(
     return null;
 
 }
+  /* ==========================================================
+   DUPLICATE CHECK
+========================================================== */
+
+const duplicate =
+
+    isDuplicateRecipient(
+
+        recipient
+
+    );
+
+if(
+
+    duplicate
+
+){
+
+    publishRecipientAudit(
+
+        "recipient.duplicate",
+
+        {
+
+            recipientId:
+
+                duplicate.id,
+
+            tag:
+
+                duplicate.tag ||
+
+                null,
+
+            accountNumber:
+
+                duplicate.accountNumber ||
+
+                null
+
+        }
+
+    );
+
+    return duplicate;
+
+}
 
     const recipients =
 
@@ -4748,6 +4795,10 @@ window.PAY54_RECIPIENT = {
     addRecipient,
 
    validateRecipient,
+
+   normaliseRecipient,
+
+isDuplicateRecipient,
 
     findRecipient,
 
