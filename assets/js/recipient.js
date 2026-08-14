@@ -1671,7 +1671,31 @@ function addRecipient(
 
     recipient
 
+){const validation =
+
+    validateRecipient(
+
+        recipient
+
+    );
+
+if(
+
+    !validation.valid
+
 ){
+
+    console.warn(
+
+        "Recipient validation failed",
+
+        validation.errors
+
+    );
+
+    return null;
+
+}
 
     const recipients =
 
@@ -4591,6 +4615,8 @@ window.PAY54_RECIPIENT = {
     saveRecipients,
 
     addRecipient,
+
+   validateRecipient,
 
     findRecipient,
 
