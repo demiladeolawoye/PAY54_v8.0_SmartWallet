@@ -2009,7 +2009,42 @@ else if(funding.source === "card"){
   tx = LEDGER.applyEntry(entry);
 
 }
-          prependTxToDOM(tx);
+          /* ==========================================================
+   AUTOMATIC RECIPIENT REGISTRATION
+========================================================== */
+
+const recipient = addRecipient({
+
+    type: "pay54",
+
+    tag: user,
+
+    displayName: user,
+
+    currency
+
+});
+
+updateRecipientUsage(
+
+    recipient.tag
+
+);
+
+publishRecipientAudit(
+
+    "recipient.selected",
+
+    {
+
+        recipientId: recipient.id,
+
+        tag: recipient.tag
+
+    }
+
+);
+           prependTxToDOM(tx);
           refreshUI();
           showPaymentReceipt(tx, user, amount, currency);
 
