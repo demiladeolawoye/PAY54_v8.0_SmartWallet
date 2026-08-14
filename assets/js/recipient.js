@@ -4067,7 +4067,19 @@ function getRecipientHealth(){
             !!EVENTS,
 
         ledger:
-            !!window.PAY54_LEDGER
+            !!window.PAY54_LEDGER,
+
+recipientCount:
+
+    getRecipients().length,
+
+favourites:
+
+    getFavouriteRecipients().length,
+
+trusted:
+
+    getTrustedRecipients().length
 
     };
 
