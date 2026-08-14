@@ -2322,6 +2322,191 @@ function searchRecentRecipients(
     );
 
 }
+/* ==========================================================
+   RECIPIENT GROUPS
+========================================================== */
+function assignRecipientGroup(
+
+    identifier,
+
+    group
+
+){
+
+    const recipient =
+
+        findRecipient(
+
+            identifier
+
+        );
+
+    if(!recipient){
+
+        return null;
+
+    }
+
+    const groups =
+
+        Array.isArray(
+
+            recipient.groups
+
+        )
+
+        ? recipient.groups
+
+        : [];
+
+    if(
+
+        !groups.includes(
+
+            group
+
+        )
+
+    ){
+
+        groups.push(
+
+            group
+
+        );
+
+    }
+
+    return updateRecipient(
+
+        recipient.id,
+
+        {
+
+            groups
+
+        }
+
+    );
+
+}
+function removeRecipientGroup(
+
+    identifier,
+
+    group
+
+){
+
+    const recipient =
+
+        findRecipient(
+
+            identifier
+
+        );
+
+    if(!recipient){
+
+        return null;
+
+    }
+
+    const groups =
+
+        (
+
+            recipient.groups ||
+
+            []
+
+        ).filter(
+
+            value =>
+
+                value !== group
+
+        );
+
+    return updateRecipient(
+
+        recipient.id,
+
+        {
+
+            groups
+
+        }
+
+    );
+
+}
+function getRecipientGroups(){
+
+    const groups =
+
+        new Set();
+
+    getRecipients()
+
+        .forEach(
+
+            recipient =>{
+
+                (
+
+                    recipient.groups ||
+
+                    []
+
+                ).forEach(
+
+                    group =>
+
+                        groups.add(
+
+                            group
+
+                        )
+
+                );
+
+            }
+
+        );
+
+    return [
+
+        ...groups
+
+    ].sort();
+
+}
+function getRecipientsByGroup(
+
+    group
+
+){
+
+    return getRecipients().filter(
+
+        recipient =>
+
+            (
+
+                recipient.groups ||
+
+                []
+
+            ).includes(
+
+                group
+
+            )
+
+    );
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
@@ -4306,6 +4491,15 @@ searchFavouriteRecipients,
 searchTrustedRecipients,
 
 searchRecentRecipients,
+   /* Groups */
+
+assignRecipientGroup,
+
+removeRecipientGroup,
+
+getRecipientGroups,
+
+getRecipientsByGroup,
     /* Diagnostics */
 
     health:
