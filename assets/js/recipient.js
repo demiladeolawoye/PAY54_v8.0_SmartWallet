@@ -1666,6 +1666,126 @@ function saveRecipients(
     );
 
 }
+/* ==========================================================
+   RECIPIENT IMPORT / EXPORT ENGINE
+========================================================== */
+
+function exportRecipients(){
+
+    return {
+
+        exportedAt:
+
+            new Date().toISOString(),
+
+        version:
+
+            "2H",
+
+        recipients:
+
+            getRecipients()
+
+    };
+
+}
+
+function exportRecipientsAsJson(){
+
+    return JSON.stringify(
+
+        exportRecipients(),
+
+        null,
+
+        2
+
+    );
+
+}
+function importRecipients(
+
+    data,
+
+    options = {}
+
+){
+
+    if(
+
+        !data ||
+
+        !Array.isArray(
+
+            data.recipients
+
+        )
+
+    ){
+
+        return false;
+
+    }
+
+    const replace =
+
+        options.replace === true;
+
+    if(
+
+        replace
+
+    ){
+
+        saveRecipients(
+
+            data.recipients
+
+        );
+
+        return true;
+
+    }
+
+    const existing =
+
+        getRecipients();
+
+    data.recipients.forEach(
+
+        recipient=>{
+
+            if(
+
+                !isDuplicateRecipient(
+
+                    recipient
+
+                )
+
+            ){
+
+                existing.push(
+
+                    recipient
+
+                );
+
+            }
+
+        }
+
+    );
+
+    saveRecipients(
+
+        existing
+
+    );
+
+    return true;
+
+}
 
 function addRecipient(
 
@@ -4796,6 +4916,12 @@ window.PAY54_RECIPIENT = {
     getRecipients,
 
     saveRecipients,
+
+   exportRecipients,
+
+exportRecipientsAsJson,
+
+importRecipients,
 
     addRecipient,
 
