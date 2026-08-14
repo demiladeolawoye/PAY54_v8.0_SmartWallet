@@ -2664,6 +2664,124 @@ function validateRecipient(recipient){
     };
 
 }
+/* ==========================================================
+   RECIPIENT DUPLICATE DETECTION ENGINE
+========================================================== */
+
+function normaliseRecipient(recipient){
+
+    return {
+
+        type:
+
+            String(
+                recipient.type || ""
+            )
+            .trim()
+            .toLowerCase(),
+
+        tag:
+
+            String(
+                recipient.tag || ""
+            )
+            .trim()
+            .toLowerCase(),
+
+        accountNumber:
+
+            String(
+                recipient.accountNumber || ""
+            )
+            .replace(/\D/g,""),
+
+        bank:
+
+            String(
+                recipient.bank || ""
+            )
+            .trim()
+            .toLowerCase(),
+
+        accountName:
+
+            String(
+                recipient.accountName || ""
+            )
+            .trim()
+            .toLowerCase()
+
+    };
+
+}
+
+function isDuplicateRecipient(recipient){
+
+    const incoming =
+        normaliseRecipient(
+            recipient
+        );
+
+    return getRecipients().find(
+
+        existing=>{
+
+            const current =
+                normaliseRecipient(
+                    existing
+                );
+
+            /* PAY54 TAG */
+
+            if(
+
+                incoming.type === "pay54"
+
+            ){
+
+                return (
+
+                    current.type === "pay54"
+
+                    &&
+
+                    current.tag === incoming.tag
+
+                );
+
+            }
+
+            /* BANK ACCOUNT */
+
+            if(
+
+                incoming.type === "bank"
+
+            ){
+
+                return (
+
+                    current.type === "bank"
+
+                    &&
+
+                    current.bank === incoming.bank
+
+                    &&
+
+                    current.accountNumber === incoming.accountNumber
+
+                );
+
+            }
+
+            return false;
+
+        }
+
+    ) || null;
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
