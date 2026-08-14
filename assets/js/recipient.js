@@ -29,6 +29,62 @@ window.PAY54_SECURITY?.transactionGuard;
 const EVENTS =
 window.PAY54_EVENTS || null;
 /* ==========================================================
+   ENTERPRISE RECIPIENT REGISTRY
+========================================================== */
+
+const RECIPIENT_STORAGE_KEY =
+    "pay54_recipients";
+
+const RECIPIENT_EVENTS = Object.freeze({
+
+    CREATED:
+        "recipient.created",
+
+    UPDATED:
+        "recipient.updated",
+
+    DELETED:
+        "recipient.deleted",
+
+    TRUSTED:
+        "recipient.trusted",
+
+    FAVOURITE:
+        "recipient.favourite",
+
+    SELECTED:
+        "recipient.selected"
+
+});
+
+function recipientUuid(){
+
+    if(
+
+        window.crypto &&
+
+        crypto.randomUUID
+
+    ){
+
+        return crypto.randomUUID();
+
+    }
+
+    return (
+
+        Date.now().toString(36)
+
+        +
+
+        Math.random()
+        .toString(36)
+        .substring(2)
+
+    );
+
+}
+/* ==========================================================
    RECIPIENT SECURITY AUDIT
 ========================================================== */
 
