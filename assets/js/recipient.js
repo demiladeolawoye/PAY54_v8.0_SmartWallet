@@ -2147,6 +2147,102 @@ function getSuggestedRecipients(
         );
 
 }
+/* ==========================================================
+   RECIPIENT SEARCH ENGINE
+========================================================== */
+function searchRecipients(
+
+    query = ""
+
+){
+
+    const search =
+
+        query
+            .trim()
+            .toLowerCase();
+
+    if(!search){
+
+        return getRecipients();
+
+    }
+
+    return getRecipients().filter(
+
+        recipient =>
+
+            (
+
+                recipient.displayName ||
+
+                ""
+
+            )
+
+            .toLowerCase()
+
+            .includes(search)
+
+            ||
+
+            (
+
+                recipient.tag ||
+
+                ""
+
+            )
+
+            .toLowerCase()
+
+            .includes(search)
+
+            ||
+
+            (
+
+                recipient.accountNumber ||
+
+                ""
+
+            )
+
+            .toLowerCase()
+
+            .includes(search)
+
+            ||
+
+            (
+
+                recipient.bank ||
+
+                ""
+
+            )
+
+            .toLowerCase()
+
+            .includes(search)
+
+            ||
+
+            (
+
+                recipient.accountName ||
+
+                ""
+
+            )
+
+            .toLowerCase()
+
+            .includes(search)
+
+    );
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
