@@ -2713,7 +2713,58 @@ function openBankTransfer(){
             }
           });
 
-          processTransaction(entry,{
+          const recipient = addRecipient({
+
+    type: "bank",
+
+    bank:
+
+        modal.querySelector("#btBank").value,
+
+    accountNumber:
+
+        modal.querySelector("#btAcc").value,
+
+    accountName:
+
+        modal.querySelector("#btName").value,
+
+    tag:
+
+        modal.querySelector("#btAcc").value,
+
+    displayName:
+
+        modal.querySelector("#btName").value,
+
+    currency
+
+});
+
+updateRecipientUsage(
+
+    recipient.tag
+
+);
+
+publishRecipientAudit(
+
+    "recipient.selected",
+
+    {
+
+        recipientId:
+
+            recipient.id,
+
+        type:
+
+            "bank"
+
+    }
+
+);
+           processTransaction(entry,{
             showReceipt:true,
             title:"Bank Transfer"
           });
