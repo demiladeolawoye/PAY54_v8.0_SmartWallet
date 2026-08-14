@@ -1571,11 +1571,38 @@ function resolveSmartPayment(amount, currency){
   return null;
 }
 
- function openSendUnified(){
+function openSendUnified(){
 
-  openModal({
+    if(
 
-    title:"Send Money",
+        SESSION &&
+
+        typeof SESSION.isAuthenticated === "function"
+
+    ){
+
+        if(
+
+            !SESSION.isAuthenticated()
+
+        ){
+
+            window.PAY54_TOAST
+            ?.showToast(
+
+                "Your session has expired."
+
+            );
+
+            return;
+
+        }
+
+    }
+
+    openModal({
+
+        title:"Send Money",
 
     bodyHTML:`
 
