@@ -4103,6 +4103,14 @@ window.PAY54_RECIPIENT = {
 
     getTrustedRecipients,
 
+    /* Statistics */
+
+getRecentRecipients,
+
+getMostUsedRecipients,
+
+getSuggestedRecipients,
+
     /* Diagnostics */
 
     health:
