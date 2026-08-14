@@ -2243,6 +2243,85 @@ function searchRecipients(
     );
 
 }
+function searchFavouriteRecipients(
+
+    query = ""
+
+){
+
+    return searchRecipients(
+
+        query
+
+    ).filter(
+
+        recipient =>
+
+            recipient.favourite
+
+    );
+
+}
+function searchTrustedRecipients(
+
+    query = ""
+
+){
+
+    return searchRecipients(
+
+        query
+
+    ).filter(
+
+        recipient =>
+
+            recipient.trusted
+
+    );
+
+}
+function searchRecentRecipients(
+
+    query = ""
+
+){
+
+    const results =
+
+        searchRecipients(
+
+            query
+
+        );
+
+    return results.sort(
+
+        (
+
+            a,
+
+            b
+
+        )=>
+
+            new Date(
+
+                b.lastUsed || 0
+
+            )
+
+            -
+
+            new Date(
+
+                a.lastUsed || 0
+
+            )
+
+    );
+
+}
 function resolveSmartPayment(amount, currency){
 
   const ledger = safeLedger();
