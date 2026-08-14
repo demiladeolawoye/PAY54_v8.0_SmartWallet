@@ -32,10 +32,21 @@ window.PAY54_EVENTS || null;
     return (lines || []).filter(Boolean).join("\n");
   }
 
-  function shareWhatsApp(text) {
-    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(wa, "_blank");
-  }
+function shareWhatsApp(text){
+
+    const wa =
+        "https://wa.me/?text=" +
+        encodeURIComponent(text);
+
+    window.open(
+
+        wa,
+
+        "_blank"
+
+    );
+
+}
 
   async function copyToClipboard(text) {
     try {
