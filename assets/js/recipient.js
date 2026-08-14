@@ -2073,7 +2073,7 @@ function updateRecipient(
         }
 
     );
-
+synchroniseRecipients();
     return recipient;
 
 }
@@ -2127,7 +2127,7 @@ function deleteRecipient(
         }
 
     );
-
+synchroniseRecipients();
     return true;
 
 }
