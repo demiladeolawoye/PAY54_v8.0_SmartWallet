@@ -2634,7 +2634,34 @@ function openBills(){
 /* 🏦 SAVINGS */
 function openSavings(){
 
-  const goals = JSON.parse(localStorage.getItem(LS.GOALS) || "[]");
+    if(
+
+        SESSION &&
+
+        typeof SESSION.isAuthenticated === "function"
+
+    ){
+
+        if(
+
+            !SESSION.isAuthenticated()
+
+        ){
+
+            window.PAY54_TOAST
+            ?.showToast(
+
+                "Your session has expired."
+
+            );
+
+            return;
+
+        }
+
+    }
+
+    const goals =JSON.parse(localStorage.getItem(LS.GOALS) || "[]");
 
   openModal({
     title:"Savings & Goals",
