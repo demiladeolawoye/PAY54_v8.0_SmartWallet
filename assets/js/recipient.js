@@ -2708,6 +2708,93 @@ function getRecipientsByGroup(
 
 }
 /* ==========================================================
+   RECIPIENT SYNCHRONISATION ENGINE
+========================================================== */
+
+function synchroniseRecipients(){
+
+    publishRecipientEvent(
+
+        RECIPIENT_EVENTS.SYNC_STARTED,
+
+        {
+
+            startedAt:
+
+                new Date().toISOString()
+
+        }
+
+    );
+
+    try{
+
+        const recipients =
+
+            getRecipients();
+
+        publishRecipientAudit(
+
+            "recipient.sync",
+
+            {
+
+                recipients:
+
+                    recipients.length
+
+            }
+
+        );
+
+        publishRecipientEvent(
+
+            RECIPIENT_EVENTS.SYNC_COMPLETED,
+
+            {
+
+                completedAt:
+
+                    new Date().toISOString(),
+
+                recipients:
+
+                    recipients.length
+
+            }
+
+        );
+
+        return recipients;
+
+    }
+
+    catch(error){
+
+        publishRecipientEvent(
+
+            RECIPIENT_EVENTS.SYNC_FAILED,
+
+            {
+
+                error:
+
+                    error.message,
+
+                occurredAt:
+
+                    new Date().toISOString()
+
+            }
+
+        );
+
+        return [];
+
+    }
+
+}
+/* ==========================================================
    RECIPIENT VALIDATION ENGINE
 ========================================================== */
 
