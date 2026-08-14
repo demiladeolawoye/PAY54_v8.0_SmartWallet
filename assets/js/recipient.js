@@ -3720,6 +3720,14 @@ function getRecipientHealth(){
 
 window.PAY54_RECIPIENT = {
 
+    getRecipients,
+
+    saveRecipients,
+
+    addRecipient,
+
+    updateRecipientUsage,
+
     health:
         getRecipientHealth
 
