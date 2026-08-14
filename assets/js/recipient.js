@@ -4903,7 +4903,17 @@ trusted:
 
 groups:
 
-    getRecipientGroups().length
+    getRecipientGroups().length,
+
+       importEngine:
+
+    typeof importRecipients ===
+    "function",
+
+exportEngine:
+
+    typeof exportRecipients ===
+    "function",
 
     };
 
