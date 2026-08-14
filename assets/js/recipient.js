@@ -1948,7 +1948,7 @@ if(
         }
 
     );
-
+  synchroniseRecipients();
     return newRecipient;
 
 }
