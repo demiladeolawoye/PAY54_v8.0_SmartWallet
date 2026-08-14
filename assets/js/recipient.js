@@ -4439,7 +4439,11 @@ favourites:
 
 trusted:
 
-    getTrustedRecipients().length
+    getTrustedRecipients().length,
+
+groups:
+
+    getRecipientGroups().length
 
     };
 
