@@ -4586,6 +4586,11 @@ function getRecipientHealth(){
         ledger:
             !!window.PAY54_LEDGER,
 
+       validationEngine:
+
+    typeof validateRecipient ===
+    "function",
+
 recipientCount:
 
     getRecipients().length,
