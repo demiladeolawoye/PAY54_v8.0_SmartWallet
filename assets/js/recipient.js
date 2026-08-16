@@ -5211,6 +5211,20 @@ exportEngine:
 
     typeof synchroniseRecipients ===
     "function",
+       intelligenceEngine:
+
+    typeof calculateRecipientScore ===
+    "function",
+
+rankingEngine:
+
+    typeof getRecipientRanking ===
+    "function",
+
+insightsEngine:
+
+    typeof getRecipientInsights ===
+    "function",
 
     };
 
@@ -5285,6 +5299,16 @@ getRecipientGroups,
 getRecipientsByGroup,
 
    synchroniseRecipients,
+
+   calculateRecipientScore,
+
+getRecipientRanking,
+
+getInactiveRecipients,
+
+getTopRecipient,
+
+getRecipientInsights,
     /* Diagnostics */
 
     health:
