@@ -2800,6 +2800,197 @@ function synchroniseRecipients(){
 function calculateRecipientScore(
     recipient
 ){
+
+    let score = 0;
+
+    if(
+        recipient.favourite
+    ){
+        score += 1000;
+    }
+
+    if(
+        recipient.trusted
+    ){
+        score += 500;
+    }
+
+    score += Number(
+        recipient.transferCount || 0
+    );
+
+    if(
+        recipient.lastUsed
+    ){
+
+        const days =
+
+            Math.floor(
+
+                (
+
+                    Date.now()
+
+                    -
+
+                    new Date(
+                        recipient.lastUsed
+                    ).getTime()
+
+                )
+
+                /
+
+                86400000
+
+            );
+
+        if(days <= 7){
+
+            score += 250;
+
+        }
+        else if(days <= 30){
+
+            score += 100;
+
+        }
+
+    }
+
+    return score;
+
+}
+function getRecipientRanking(){
+
+    return getRecipients()
+
+        .slice()
+
+        .sort(
+
+            (
+
+                a,
+
+                b
+
+            ) =>
+
+                calculateRecipientScore(b)
+
+                -
+
+                calculateRecipientScore(a)
+
+        );
+
+}
+function getInactiveRecipients(
+
+    days = 90
+
+){
+
+    return getRecipients()
+
+        .filter(
+
+            recipient=>{
+
+                if(
+
+                    !recipient.lastUsed
+
+                ){
+
+                    return true;
+
+                }
+
+                const inactiveDays =
+
+                    Math.floor(
+
+                        (
+
+                            Date.now()
+
+                            -
+
+                            new Date(
+
+                                recipient.lastUsed
+
+                            ).getTime()
+
+                        )
+
+                        /
+
+                        86400000
+
+                    );
+
+                return inactiveDays > days;
+
+            }
+
+        );
+
+}
+function getTopRecipient(){
+
+    const ranking =
+
+        getRecipientRanking();
+
+    if(
+
+        ranking.length === 0
+
+    ){
+
+        return null;
+
+    }
+
+    return ranking[0];
+
+}
+function getRecipientInsights(){
+
+    return {
+
+        total:
+
+            getRecipients().length,
+
+        favourites:
+
+            getFavouriteRecipients().length,
+
+        trusted:
+
+            getTrustedRecipients().length,
+
+        inactive:
+
+            getInactiveRecipients().length,
+
+        topRecipient:
+
+            getTopRecipient(),
+
+        rankingGeneratedAt:
+
+            new Date()
+
+            .toISOString()
+
+    };
+
+}
 /* ==========================================================
    RECIPIENT VALIDATION ENGINE
 ========================================================== */
