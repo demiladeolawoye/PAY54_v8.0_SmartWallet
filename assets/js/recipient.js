@@ -5315,6 +5315,11 @@ insightsEngine:
 
     typeof getRecipientInsights ===
     "function",
+analyticsEngine:
+
+    typeof getRecipientAnalytics ===
+    "function",
+       
 
     };
 
@@ -5399,6 +5404,8 @@ getInactiveRecipients,
 getTopRecipient,
 
 getRecipientInsights,
+
+   getRecipientAnalytics,
     /* Diagnostics */
 
     health:
