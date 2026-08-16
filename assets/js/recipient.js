@@ -2992,6 +2992,96 @@ function getRecipientInsights(){
 
 }
 /* ==========================================================
+   RECIPIENT ANALYTICS ENGINE
+========================================================== */
+function getRecipientAnalytics(){
+
+    const recipients =
+        getRecipients();
+
+    const analytics = {
+
+        generatedAt:
+            new Date().toISOString(),
+
+        totalRecipients:
+            recipients.length,
+
+        pay54Recipients: 0,
+
+        bankRecipients: 0,
+
+        favouriteRecipients: 0,
+
+        trustedRecipients: 0,
+
+        inactiveRecipients: 0,
+
+        currencies: {},
+
+        banks: {},
+
+        groups: {}
+
+    };
+
+    recipients.forEach(recipient=>{
+
+        if(recipient.type === "pay54"){
+
+            analytics.pay54Recipients++;
+
+        }
+
+        if(recipient.type === "bank"){
+
+            analytics.bankRecipients++;
+
+        }
+
+        if(recipient.favourite){
+
+            analytics.favouriteRecipients++;
+
+        }
+
+        if(recipient.trusted){
+
+            analytics.trustedRecipients++;
+
+        }
+
+        if(!recipient.lastUsed){
+
+            analytics.inactiveRecipients++;
+
+        }
+
+        const currency =
+            recipient.currency || "UNKNOWN";
+
+        analytics.currencies[currency] =
+            (analytics.currencies[currency] || 0) + 1;
+
+        const bank =
+            recipient.bank || "PAY54";
+
+        analytics.banks[bank] =
+            (analytics.banks[bank] || 0) + 1;
+
+        (recipient.groups || []).forEach(group=>{
+
+            analytics.groups[group] =
+                (analytics.groups[group] || 0) + 1;
+
+        });
+
+    });
+
+    return analytics;
+
+}
+/* ==========================================================
    RECIPIENT VALIDATION ENGINE
 ========================================================== */
 
