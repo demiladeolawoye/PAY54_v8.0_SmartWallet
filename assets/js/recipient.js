@@ -2795,6 +2795,12 @@ function synchroniseRecipients(){
 
 }
 /* ==========================================================
+   RECIPIENT INTELLIGENCE ENGINE
+========================================================== */
+function calculateRecipientScore(
+    recipient
+){
+/* ==========================================================
    RECIPIENT VALIDATION ENGINE
 ========================================================== */
 
