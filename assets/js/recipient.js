@@ -3082,6 +3082,90 @@ function getRecipientAnalytics(){
 
 }
 /* ==========================================================
+   RECIPIENT RISK & BEHAVIOUR ENGINE
+========================================================== */
+function calculateRecipientRisk(
+    recipient
+){
+
+    let score = 0;
+
+    if(!recipient){
+
+        return score;
+
+    }
+
+    if(recipient.trusted){
+
+        score += 100;
+
+    }
+
+    if(recipient.favourite){
+
+        score += 50;
+
+    }
+
+    const transferCount =
+
+        Number(
+            recipient.transferCount || 0
+        );
+
+    if(transferCount > 25){
+
+        score += 150;
+
+    }
+
+    if(transferCount > 100){
+
+        score += 250;
+
+    }
+
+    if(!recipient.lastUsed){
+
+        score -= 150;
+
+    }else{
+
+        const inactiveDays =
+
+            Math.floor(
+
+                (
+
+                    Date.now()
+
+                    -
+
+                    new Date(
+                        recipient.lastUsed
+                    ).getTime()
+
+                )
+
+                /
+
+                86400000
+
+            );
+
+        if(inactiveDays > 180){
+
+            score -= 100;
+
+        }
+
+    }
+
+    return score;
+
+}
+/* ==========================================================
    RECIPIENT VALIDATION ENGINE
 ========================================================== */
 
