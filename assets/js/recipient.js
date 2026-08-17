@@ -3190,6 +3190,36 @@ function getRecipientRiskLevel(
     return "HIGH";
 
 }
+function getHighRiskRecipients(){
+
+    return getRecipients()
+
+        .filter(
+
+            recipient =>
+
+                getRecipientRiskLevel(
+                    recipient
+                ) === "HIGH"
+
+        );
+
+}
+function getLowRiskRecipients(){
+
+    return getRecipients()
+
+        .filter(
+
+            recipient =>
+
+                getRecipientRiskLevel(
+                    recipient
+                ) === "LOW"
+
+        );
+
+}
 /* ==========================================================
    RECIPIENT VALIDATION ENGINE
 ========================================================== */
