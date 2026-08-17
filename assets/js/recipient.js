@@ -3165,6 +3165,31 @@ function calculateRecipientRisk(
     return score;
 
 }
+function getRecipientRiskLevel(
+    recipient
+){
+
+    const score =
+
+        calculateRecipientRisk(
+            recipient
+        );
+
+    if(score >= 500){
+
+        return "LOW";
+
+    }
+
+    if(score >= 250){
+
+        return "MEDIUM";
+
+    }
+
+    return "HIGH";
+
+}
 /* ==========================================================
    RECIPIENT VALIDATION ENGINE
 ========================================================== */
