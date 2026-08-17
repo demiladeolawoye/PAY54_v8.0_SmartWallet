@@ -5501,7 +5501,15 @@ analyticsEngine:
 
     typeof getRecipientAnalytics ===
     "function",
-       
+    riskEngine:
+
+    typeof calculateRecipientRisk ===
+    "function",
+
+riskSummaryEngine:
+
+    typeof getRecipientBehaviourSummary ===
+    "function",   
 
     };
 
@@ -5588,6 +5596,16 @@ getTopRecipient,
 getRecipientInsights,
 
    getRecipientAnalytics,
+
+   calculateRecipientRisk,
+
+getRecipientRiskLevel,
+
+getHighRiskRecipients,
+
+getLowRiskRecipients,
+
+getRecipientBehaviourSummary,
     /* Diagnostics */
 
     health:
