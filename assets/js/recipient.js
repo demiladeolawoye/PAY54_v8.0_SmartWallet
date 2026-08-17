@@ -3220,6 +3220,49 @@ function getLowRiskRecipients(){
         );
 
 }
+function getRecipientBehaviourSummary(){
+
+    return {
+
+        generatedAt:
+
+            new Date().toISOString(),
+
+        highRiskRecipients:
+
+            getHighRiskRecipients().length,
+
+        mediumRiskRecipients:
+
+            getRecipients().filter(
+
+                recipient =>
+
+                    getRecipientRiskLevel(
+                        recipient
+                    ) === "MEDIUM"
+
+            ).length,
+
+        lowRiskRecipients:
+
+            getLowRiskRecipients().length,
+
+        inactiveRecipients:
+
+            getInactiveRecipients().length,
+
+        trustedRecipients:
+
+            getTrustedRecipients().length,
+
+        favouriteRecipients:
+
+            getFavouriteRecipients().length
+
+    };
+
+}
 /* ==========================================================
    RECIPIENT VALIDATION ENGINE
 ========================================================== */
