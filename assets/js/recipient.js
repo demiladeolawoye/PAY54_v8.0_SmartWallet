@@ -5673,6 +5673,12 @@ id="recipientRefresh">
 Refresh
 </button>
 
+<button
+class="p54-btn"
+id="recipientSelectAll">
+Select All
+</button>
+
 </div>
 
 <div
