@@ -1949,7 +1949,10 @@ if(
 
     );
   synchroniseRecipients();
-    return newRecipient;
+
+renderRecipientDashboard();
+
+return newRecipient;
 
 }
 
