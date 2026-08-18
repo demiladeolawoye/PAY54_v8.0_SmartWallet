@@ -5902,6 +5902,20 @@ Duplicate
 </button>
 
 <button
+class="p54-btn sm"
+data-action="share"
+data-id="${recipient.id}">
+Share
+</button>
+
+<button
+class="p54-btn sm"
+data-action="copy"
+data-id="${recipient.id}">
+Copy
+</button>
+
+<button
 class="p54-btn sm danger"
 data-action="delete"
 data-id="${recipient.id}">
@@ -5984,6 +5998,28 @@ case "risk":
 showRecipientRisk(recipientId);
 break;
 
+case "duplicate":
+
+duplicateRecipient(recipientId);
+
+renderRecipientManager(
+document.querySelector(".p54-modal"),
+getRecipients()
+);
+
+break;
+
+case "share":
+
+shareRecipient(recipientId);
+
+break;
+
+case "copy":
+
+copyRecipient(recipientId);
+
+break;      
 case "delete":
 
 if(confirm(
