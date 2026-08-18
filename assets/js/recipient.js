@@ -6109,6 +6109,24 @@ break;
 }
 
 }
+function getSelectedRecipients(){
+
+return [
+
+...document.querySelectorAll(
+
+".recipient-selector:checked"
+
+)
+
+].map(
+
+box=>box.value
+
+);
+
+}
+
 function viewRecipient(id){
 
     const recipient = findRecipient(id);
@@ -6116,7 +6134,6 @@ function viewRecipient(id){
     if(!recipient){
         return;
     }
-
     openModal({
 
         title: "Recipient Details",
