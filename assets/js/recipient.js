@@ -6410,6 +6410,85 @@ Close
     );
 
 }
+function duplicateRecipient(id){
+
+    const recipient = findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    const copy = {
+
+        ...recipient,
+
+        id: undefined,
+
+        displayName:
+            recipient.displayName + " Copy"
+
+    };
+
+    delete copy.id;
+    delete copy.created;
+    delete copy.updated;
+
+    addRecipient(copy);
+
+}
+function copyRecipient(id){
+
+    const recipient = findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    const text = recipient.type === "pay54"
+
+        ? recipient.tag
+
+        : recipient.accountNumber;
+
+    navigator.clipboard.writeText(text);
+
+    alert("Recipient copied.");
+
+}
+function shareRecipient(id){
+
+    const recipient = findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    const text =
+
+`${recipient.displayName}
+${recipient.bank || ""}
+${recipient.accountNumber || ""}
+${recipient.tag || ""}`;
+
+    if(navigator.share){
+
+        navigator.share({
+
+            title:"Recipient",
+
+            text
+
+        });
+
+        return;
+
+    }
+
+    navigator.clipboard.writeText(text);
+
+    alert("Recipient details copied.");
+
+}
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
