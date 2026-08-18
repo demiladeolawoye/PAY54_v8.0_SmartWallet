@@ -2129,6 +2129,7 @@ function deleteRecipient(
 
     );
 synchroniseRecipients();
+   renderRecipientDashboard();
     return true;
 
 }
