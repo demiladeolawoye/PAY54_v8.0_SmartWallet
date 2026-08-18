@@ -5549,6 +5549,16 @@ typeof bulkTrustedRecipients ===
 bulkDelete:
 
 typeof bulkDeleteRecipients ===
+"function",
+
+recipientDashboard:
+
+typeof renderRecipientDashboard ===
+"function",
+
+quickSendRecipient:
+
+typeof quickSendRecipient ===
 "function"
 
 };
