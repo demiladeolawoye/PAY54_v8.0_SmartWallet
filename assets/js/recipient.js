@@ -5946,12 +5946,18 @@ break;
 
 case "fav":
 toggleFavourite(recipientId);
-openRecipientManager();
+renderRecipientManager(
+document.querySelector(".p54-modal"),
+getRecipients()
+);
 break;
 
 case "trust":
 toggleTrusted(recipientId);
-openRecipientManager();
+renderRecipientManager(
+document.querySelector(".p54-modal"),
+getRecipients()
+);
 break;
 
 case "groups":
@@ -5974,7 +5980,10 @@ if(confirm(
 
 deleteRecipient(recipientId);
 
-openRecipientManager();
+renderRecipientManager(
+document.querySelector(".p54-modal"),
+getRecipients()
+);
 
 }
 
