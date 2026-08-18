@@ -5803,11 +5803,14 @@ stats.innerHTML = `
 </div>
 
 `;
-  list.innerHTML =
+ list.innerHTML =
 recipients.map(recipient=>`
 
 <div
-class="p54-recipient-card">
+class="p54-recipient-card"
+data-id="${recipient.id}">
+
+<div class="recipient-header">
 
 <div>
 
@@ -5835,8 +5838,98 @@ ${recipient.trusted ? "🛡️" : ""}
 
 </div>
 
+<div class="recipient-actions">
+
+<button
+class="p54-btn sm"
+data-action="view"
+data-id="${recipient.id}">
+View
+</button>
+
+<button
+class="p54-btn sm"
+data-action="edit"
+data-id="${recipient.id}">
+Edit
+</button>
+
+<button
+class="p54-btn sm"
+data-action="fav"
+data-id="${recipient.id}">
+Favourite
+</button>
+
+<button
+class="p54-btn sm"
+data-action="trust"
+data-id="${recipient.id}">
+Trusted
+</button>
+
+<button
+class="p54-btn sm"
+data-action="groups"
+data-id="${recipient.id}">
+Groups
+</button>
+
+<button
+class="p54-btn sm"
+data-action="analytics"
+data-id="${recipient.id}">
+Analytics
+</button>
+
+<button
+class="p54-btn sm"
+data-action="risk"
+data-id="${recipient.id}">
+Risk
+</button>
+
+<button
+class="p54-btn sm danger"
+data-action="delete"
+data-id="${recipient.id}">
+Delete
+</button>
+
+</div>
+
+</div>
+
 `).join("");
+  
   }
+list
+.querySelectorAll(
+"[data-action]"
+)
+.forEach(button=>{
+
+button.addEventListener(
+"click",
+
+()=>{
+
+const id =
+button.dataset.id;
+
+const action =
+button.dataset.action;
+
+handleRecipientAction(
+action,
+id
+);
+
+}
+
+);
+
+});
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
