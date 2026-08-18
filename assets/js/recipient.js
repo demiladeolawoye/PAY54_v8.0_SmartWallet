@@ -5613,33 +5613,68 @@ getRecipientBehaviourSummary,
         getRecipientHealth
 
 };
+/* ==========================================================
+   RECIPIENT UI
+========================================================== */
+
+window.PAY54_RECIPIENT_UI = {
+
+    open:
+        openRecipientManager
+
+};
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
 
-window.PAY54_UI = {
+window.PAY54_UI =
+window.PAY54_UI || {};
 
-  openSend: openSendUnified,
-  openReceive,
-  openScanAndPay,
-  openAddMoney,
-  openWithdraw,
-  openBankTransfer,
-  openGlobalTransfer,
-  openBills,
-  openSavings,
-  openCards,
-  openCheckout,
-  openShop,
-  openMerchantQR,
-  openRequestMoney,
-  openTrading,
-  openBetFunding,
-  openAgent,
-  openRisk,
-  openLedger
+Object.assign(
+    window.PAY54_UI,
+    {
 
-};
+        openSend:
+            openSendUnified,
+
+        openReceive,
+
+        openScanAndPay,
+
+        openAddMoney,
+
+        openWithdraw,
+
+        openBankTransfer,
+
+        openGlobalTransfer,
+
+        openBills,
+
+        openSavings,
+
+        openCards,
+
+        openCheckout,
+
+        openShop,
+
+        openMerchantQR,
+
+        openRequestMoney,
+
+        openTrading,
+
+        openBetFunding,
+
+        openAgent,
+
+        openRisk,
+
+        openLedger
+
+    }
+);
 /* ==========================================================
    SECURITY BOOTSTRAP VERIFICATION
 ========================================================== */
