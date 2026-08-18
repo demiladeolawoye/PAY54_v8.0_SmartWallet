@@ -5625,6 +5625,93 @@ window.PAY54_RECIPIENT_UI = {
 
 };
 */
+/* ==========================================================
+   ENTERPRISE RECIPIENT MANAGER UI
+========================================================== */
+
+function openRecipientManager(){
+
+    const recipients =
+        getRecipients();
+
+    openModal({
+
+        title:
+            "Recipient Manager",
+
+        bodyHTML: `
+
+<div class="p54-recipient-manager">
+
+<div class="p54-row">
+
+<input
+class="p54-input"
+id="recipientSearch"
+placeholder="Search recipients">
+
+<button
+class="p54-btn"
+id="recipientRefresh">
+Refresh
+</button>
+
+</div>
+
+<div
+id="recipientStatistics"
+class="p54-recipient-summary">
+</div>
+
+<div
+id="recipientList"
+class="p54-recipient-list">
+</div>
+
+<div class="p54-actions">
+
+<button
+class="p54-btn"
+id="recipientClose">
+Close
+</button>
+
+</div>
+
+</div>
+
+        `,
+
+        onMount:({
+
+            modal,
+
+            close
+
+        })=>{
+
+            renderRecipientManager(
+
+                modal,
+
+                recipients
+
+            );
+
+            modal
+            .querySelector(
+                "#recipientClose"
+            )
+            .addEventListener(
+                "click",
+                close
+            );
+
+        }
+
+    );
+
+}
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
