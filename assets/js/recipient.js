@@ -5901,8 +5901,6 @@ Delete
 </div>
 
 `).join("");
-  
-  }
 list
 .querySelectorAll(
 "[data-action]"
@@ -5930,6 +5928,105 @@ id
 );
 
 });
+   }
+function handleRecipientAction(
+action,
+recipientId
+){
+
+switch(action){
+
+case "view":
+viewRecipient(recipientId);
+break;
+
+case "edit":
+editRecipient(recipientId);
+break;
+
+case "fav":
+toggleFavourite(recipientId);
+openRecipientManager();
+break;
+
+case "trust":
+toggleTrusted(recipientId);
+openRecipientManager();
+break;
+
+case "groups":
+manageRecipientGroups(recipientId);
+break;
+
+case "analytics":
+showRecipientAnalytics(recipientId);
+break;
+
+case "risk":
+showRecipientRisk(recipientId);
+break;
+
+case "delete":
+
+if(confirm(
+"Delete this recipient?"
+)){
+
+deleteRecipient(recipientId);
+
+openRecipientManager();
+
+}
+
+break;
+
+}
+
+}
+function viewRecipient(id){
+
+console.log(
+"Recipient View",
+id
+);
+
+}
+
+function editRecipient(id){
+
+console.log(
+"Recipient Edit",
+id
+);
+
+}
+
+function manageRecipientGroups(id){
+
+console.log(
+"Recipient Groups",
+id
+);
+
+}
+
+function showRecipientAnalytics(id){
+
+console.log(
+"Recipient Analytics",
+id
+);
+
+}
+
+function showRecipientRisk(id){
+
+console.log(
+"Recipient Risk",
+id
+);
+
+}
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
