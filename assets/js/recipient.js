@@ -2074,6 +2074,7 @@ function updateRecipient(
 
     );
 synchroniseRecipients();
+   renderRecipientDashboard();
     return recipient;
 
 }
