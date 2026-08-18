@@ -5509,9 +5509,14 @@ analyticsEngine:
 riskSummaryEngine:
 
     typeof getRecipientBehaviourSummary ===
-    "function",   
+    "function",
 
-    };
+recipientActionsUI:
+
+    typeof handleRecipientAction ===
+    "function"
+
+};
 
 }
 
