@@ -6656,6 +6656,129 @@ ${recipient.tag || ""}`;
     alert("Recipient details copied.");
 
 }
+function renderRecipientDashboard(){
+
+    const widget =
+        document.getElementById(
+            "recipientDashboardWidget"
+        );
+
+    if(!widget){
+        return;
+    }
+
+    const favourites =
+        getFavouriteRecipients().slice(0,5);
+
+    const recent =
+        getRecentRecipients(5);
+
+    const top =
+        getTopRecipient();
+
+    widget.innerHTML = `
+
+<div class="p54-widget">
+
+<h3>Recipients</h3>
+
+<p><b>Total:</b> ${getRecipients().length}</p>
+
+<p><b>Favourite:</b> ${favourites.length}</p>
+
+<p><b>Recent:</b> ${recent.length}</p>
+
+${
+top
+?
+`<p><b>Top:</b> ${top.displayName}</p>`
+:
+""
+}
+
+<div class="p54-divider"></div>
+
+${
+
+favourites.map(r=>`
+
+<button
+class="p54-btn sm"
+data-recipient="${r.id}">
+
+${r.displayName}
+
+</button>
+
+`).join("")
+
+}
+
+</div>
+
+`;
+
+    widget
+
+    .querySelectorAll(
+        "[data-recipient]"
+    )
+
+    .forEach(button=>{
+
+        button.addEventListener(
+
+            "click",
+
+            ()=>{
+
+                quickSendRecipient(
+
+                    button.dataset.recipient
+
+                );
+
+            }
+
+        );
+
+    });
+
+}
+function quickSendRecipient(id){
+
+    const recipient =
+        findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    openSendUnified();
+
+    setTimeout(()=>{
+
+        const input =
+
+        document.getElementById(
+            "sendUser"
+        );
+
+        if(input){
+
+            input.value =
+
+                recipient.tag ||
+
+                recipient.accountNumber ||
+
+                "";
+
+        }
+
+    },200);
+
+}
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
