@@ -6126,6 +6126,67 @@ box=>box.value
 );
 
 }
+function bulkFavouriteRecipients(){
+
+getSelectedRecipients()
+
+.forEach(toggleFavourite);
+
+renderRecipientManager(
+
+document.querySelector(".p54-modal"),
+
+getRecipients()
+
+);
+
+}
+
+function bulkTrustedRecipients(){
+
+getSelectedRecipients()
+
+.forEach(toggleTrusted);
+
+renderRecipientManager(
+
+document.querySelector(".p54-modal"),
+
+getRecipients()
+
+);
+
+}
+
+function bulkDeleteRecipients(){
+
+if(
+
+!confirm(
+
+"Delete selected recipients?"
+
+)
+
+){
+
+return;
+
+}
+
+getSelectedRecipients()
+
+.forEach(deleteRecipient);
+
+renderRecipientManager(
+
+document.querySelector(".p54-modal"),
+
+getRecipients()
+
+);
+
+}
 
 function viewRecipient(id){
 
