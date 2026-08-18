@@ -5766,6 +5766,39 @@ stats.innerHTML = `
 </div>
 
 `;
+  list.innerHTML =
+recipients.map(recipient=>`
+
+<div
+class="p54-recipient-card">
+
+<div>
+
+<div class="recipient-name">
+
+${recipient.displayName}
+
+</div>
+
+<div class="recipient-tag">
+
+${recipient.tag || recipient.accountNumber}
+
+</div>
+
+</div>
+
+<div>
+
+${recipient.favourite ? "⭐" : ""}
+
+${recipient.trusted ? "🛡️" : ""}
+
+</div>
+
+</div>
+
+`).join("");
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
