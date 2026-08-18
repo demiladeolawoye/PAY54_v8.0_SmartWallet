@@ -5779,6 +5779,31 @@ Close
 
     }
 );  
+       modal
+.querySelector("#recipientSelectAll")
+.addEventListener("click",()=>{
+
+modal
+.querySelectorAll(".recipient-selector")
+.forEach(box=>{
+
+box.checked = true;
+
+});
+
+});
+
+modal
+.querySelector("#bulkFavourite")
+.addEventListener("click",bulkFavouriteRecipients);
+
+modal
+.querySelector("#bulkTrusted")
+.addEventListener("click",bulkTrustedRecipients);
+
+modal
+.querySelector("#bulkDelete")
+.addEventListener("click",bulkDeleteRecipients);    
             modal
             .querySelector(
                 "#recipientClose"
