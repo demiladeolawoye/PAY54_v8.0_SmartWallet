@@ -5885,9 +5885,11 @@ Object.assign(
 
         openAgent,
 
-        openRisk,
+       openRisk,
 
-        openLedger
+openLedger,
+
+openRecipientManager
 
     }
 );
