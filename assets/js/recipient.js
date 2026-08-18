@@ -5697,12 +5697,52 @@ Close
                 recipients
 
             );
+           modal
+.querySelector(
+    "#recipientSearch"
+)
+.addEventListener(
+    "input",
+    e=>{
 
+        const results =
+            searchRecipients(
+                e.target.value
+            );
+
+        renderRecipientManager(
+
+            modal,
+
+            results
+
+        );
+
+    }
+);
+ modal
+.querySelector(
+    "#recipientRefresh"
+)
+.addEventListener(
+    "click",
+    ()=>{
+
+        renderRecipientManager(
+
+            modal,
+
+            getRecipients()
+
+        );
+
+    }
+);  
             modal
             .querySelector(
                 "#recipientClose"
             )
-            .addEventListener(
+             .addEventListener(
                 "click",
                 close
             );
