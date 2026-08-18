@@ -6077,37 +6077,294 @@ Close
 
 function editRecipient(id){
 
-console.log(
-"Recipient Edit",
-id
-);
+    const recipient = findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    openModal({
+
+        title:"Edit Recipient",
+
+        bodyHTML:`
+
+<form
+class="p54-form"
+id="recipientEditForm">
+
+<input
+class="p54-input"
+id="editDisplayName"
+value="${recipient.displayName}">
+
+<input
+class="p54-input"
+id="editBank"
+value="${recipient.bank || ""}">
+
+<input
+class="p54-input"
+id="editAccountName"
+value="${recipient.accountName || ""}">
+
+<div class="p54-actions">
+
+<button
+class="p54-btn"
+type="button"
+id="cancelRecipientEdit">
+
+Cancel
+
+</button>
+
+<button
+class="p54-btn primary">
+
+Save
+
+</button>
+
+</div>
+
+</form>
+
+`,
+
+        onMount:({modal,close})=>{
+
+            modal
+            .querySelector("#cancelRecipientEdit")
+            .addEventListener("click",close);
+
+            modal
+            .querySelector("#recipientEditForm")
+            .addEventListener("submit",(e)=>{
+
+                e.preventDefault();
+
+                updateRecipient(
+
+                    recipient.id,
+
+                    {
+
+                        displayName:
+
+                        modal.querySelector("#editDisplayName").value,
+
+                        bank:
+
+                        modal.querySelector("#editBank").value,
+
+                        accountName:
+
+                        modal.querySelector("#editAccountName").value
+
+                    }
+
+                );
+
+                renderRecipientManager(
+
+                    document.querySelector(".p54-modal"),
+
+                    getRecipients()
+
+                );
+
+                close();
+
+            });
+
+        }
+
+    });
 
 }
 
 function manageRecipientGroups(id){
 
-console.log(
-"Recipient Groups",
-id
-);
+    const recipient = findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    const current = (recipient.groups || []).join(", ");
+
+    const groups = prompt(
+
+        "Recipient Groups (comma separated)",
+
+        current
+
+    );
+
+    if(groups === null){
+        return;
+    }
+
+    updateRecipient(
+
+        recipient.id,
+
+        {
+
+            groups:
+
+            groups
+
+            .split(",")
+
+            .map(
+
+                g=>g.trim()
+
+            )
+
+            .filter(Boolean)
+
+        }
+
+    );
+
+    renderRecipientManager(
+
+        document.querySelector(".p54-modal"),
+
+        getRecipients()
+
+    );
 
 }
 
 function showRecipientAnalytics(id){
 
-console.log(
-"Recipient Analytics",
-id
-);
+    const recipient = findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    openModal({
+
+        title:"Recipient Analytics",
+
+        bodyHTML:`
+
+<p><b>Transfer Count:</b>
+
+${recipient.transferCount}
+
+</p>
+
+<p><b>Ranking Score:</b>
+
+${calculateRecipientScore(recipient)}
+
+</p>
+
+<p><b>Favourite:</b>
+
+${recipient.favourite ? "Yes":"No"}
+
+</p>
+
+<p><b>Trusted:</b>
+
+${recipient.trusted ? "Yes":"No"}
+
+</p>
+
+<div class="p54-actions">
+
+<button
+class="p54-btn primary"
+id="closeAnalytics">
+
+Close
+
+</button>
+
+</div>
+
+`,
+
+        onMount:({modal,close})=>{
+
+            modal
+            .querySelector("#closeAnalytics")
+            .addEventListener("click",close);
+
+        }
+
+    );
 
 }
 
 function showRecipientRisk(id){
 
-console.log(
-"Recipient Risk",
-id
-);
+    const recipient = findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    openModal({
+
+        title:"Recipient Risk",
+
+        bodyHTML:`
+
+<p>
+
+<b>Risk Level:</b>
+
+${getRecipientRiskLevel(recipient)}
+
+</p>
+
+<p>
+
+<b>Risk Score:</b>
+
+${calculateRecipientRisk(recipient)}
+
+</p>
+
+<p>
+
+<b>Last Used:</b>
+
+${recipient.lastUsed || "Never"}
+
+</p>
+
+<div class="p54-actions">
+
+<button
+class="p54-btn primary"
+id="closeRiskRecipient">
+
+Close
+
+</button>
+
+</div>
+
+`,
+
+        onMount:({modal,close})=>{
+
+            modal
+            .querySelector("#closeRiskRecipient")
+            .addEventListener("click",close);
+
+        }
+
+    );
 
 }
 /* =========================
