@@ -5999,10 +5999,79 @@ break;
 }
 function viewRecipient(id){
 
-console.log(
-"Recipient View",
-id
-);
+    const recipient = findRecipient(id);
+
+    if(!recipient){
+        return;
+    }
+
+    openModal({
+
+        title: "Recipient Details",
+
+        bodyHTML: `
+
+<div class="p54-recipient-details">
+
+<div class="p54-ledger-item">
+
+<div>
+
+<div class="p54-ledger-title">
+${recipient.displayName}
+</div>
+
+<div class="p54-small">
+${recipient.tag || ""}
+</div>
+
+</div>
+
+</div>
+
+<div class="p54-divider"></div>
+
+<p><b>Type:</b> ${recipient.type}</p>
+
+<p><b>Bank:</b> ${recipient.bank || "-"}</p>
+
+<p><b>Account:</b> ${recipient.accountNumber || "-"}</p>
+
+<p><b>Currency:</b> ${recipient.currency || "-"}</p>
+
+<p><b>Favourite:</b> ${recipient.favourite ? "Yes" : "No"}</p>
+
+<p><b>Trusted:</b> ${recipient.trusted ? "Yes" : "No"}</p>
+
+<p><b>Transfers:</b> ${recipient.transferCount}</p>
+
+<p><b>Last Used:</b> ${recipient.lastUsed || "Never"}</p>
+
+<div class="p54-actions">
+
+<button
+class="p54-btn primary"
+id="recipientClose">
+
+Close
+
+</button>
+
+</div>
+
+</div>
+
+`,
+
+        onMount:({modal,close})=>{
+
+            modal
+            .querySelector("#recipientClose")
+            .addEventListener("click",close);
+
+        }
+
+    });
 
 }
 
