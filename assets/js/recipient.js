@@ -5513,8 +5513,23 @@ riskSummaryEngine:
 
 recipientActionsUI:
 
-    typeof handleRecipientAction ===
-    "function"
+typeof handleRecipientAction ===
+"function",
+
+duplicateRecipient:
+
+typeof duplicateRecipient ===
+"function",
+
+copyRecipient:
+
+typeof copyRecipient ===
+"function",
+
+shareRecipient:
+
+typeof shareRecipient ===
+"function"
 
 };
 
