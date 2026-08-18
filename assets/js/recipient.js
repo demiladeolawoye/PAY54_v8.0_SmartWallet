@@ -5895,6 +5895,13 @@ Risk
 </button>
 
 <button
+class="p54-btn sm"
+data-action="duplicate"
+data-id="${recipient.id}">
+Duplicate
+</button>
+
+<button
 class="p54-btn sm danger"
 data-action="delete"
 data-id="${recipient.id}">
