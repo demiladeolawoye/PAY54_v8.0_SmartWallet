@@ -5617,12 +5617,14 @@ getRecipientBehaviourSummary,
    RECIPIENT UI
 ========================================================== */
 
+/*
 window.PAY54_RECIPIENT_UI = {
 
     open:
         openRecipientManager
 
 };
+*/
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
