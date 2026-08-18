@@ -5836,6 +5836,11 @@ recipients.map(recipient=>`
 class="p54-recipient-card"
 data-id="${recipient.id}">
 
+<input
+type="checkbox"
+class="recipient-selector"
+value="${recipient.id}">
+
 <div class="recipient-header">
 
 <div>
