@@ -5712,6 +5712,60 @@ Close
     );
 
 }
+function renderRecipientManager(
+    modal,
+    recipients
+){const stats =
+    modal.querySelector(
+        "#recipientStatistics"
+    );
+
+const list =
+    modal.querySelector(
+        "#recipientList"
+    );
+  const analytics =
+    getRecipientAnalytics();
+
+stats.innerHTML = `
+
+<div class="p54-grid-4">
+
+<div>
+
+<b>${analytics.totalRecipients}</b>
+
+<div>Total</div>
+
+</div>
+
+<div>
+
+<b>${analytics.favouriteRecipients}</b>
+
+<div>Favourites</div>
+
+</div>
+
+<div>
+
+<b>${analytics.trustedRecipients}</b>
+
+<div>Trusted</div>
+
+</div>
+
+<div>
+
+<b>${analytics.inactiveRecipients}</b>
+
+<div>Inactive</div>
+
+</div>
+
+</div>
+
+`;
 /* =========================
    PAY54 UI EXPORT ENGINE
 ========================= */
