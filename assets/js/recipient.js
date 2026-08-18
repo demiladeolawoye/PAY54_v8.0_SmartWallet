@@ -5529,6 +5529,26 @@ typeof copyRecipient ===
 shareRecipient:
 
 typeof shareRecipient ===
+"function",
+
+bulkSelection:
+
+typeof getSelectedRecipients ===
+"function",
+
+bulkFavourite:
+
+typeof bulkFavouriteRecipients ===
+"function",
+
+bulkTrusted:
+
+typeof bulkTrustedRecipients ===
+"function",
+
+bulkDelete:
+
+typeof bulkDeleteRecipients ===
 "function"
 
 };
