@@ -5695,6 +5695,24 @@ class="p54-recipient-list">
 
 <button
 class="p54-btn"
+id="bulkFavourite">
+Favourite Selected
+</button>
+
+<button
+class="p54-btn"
+id="bulkTrusted">
+Trust Selected
+</button>
+
+<button
+class="p54-btn"
+id="bulkDelete">
+Delete Selected
+</button>
+
+<button
+class="p54-btn"
 id="recipientClose">
 Close
 </button>
