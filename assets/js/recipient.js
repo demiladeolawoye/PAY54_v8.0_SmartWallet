@@ -757,7 +757,135 @@ availableEl.innerHTML = `
       renderAlerts();
     });
   }
+function renderRecipientDashboardWidget(){
 
+    const container =
+        document.getElementById(
+            "recipientDashboardWidget"
+        );
+
+    if(!container){
+        return;
+    }
+
+    const recipientApi =
+        window.PAY54_RECIPIENT;
+
+    if(!recipientApi){
+        return;
+    }
+
+    const favourites =
+        recipientApi
+        .getFavouriteRecipients()
+        .slice(0,5);
+
+    const top =
+        recipientApi
+        .getTopRecipient();
+
+    container.innerHTML = `
+
+<div class="dashboard-card">
+
+<h3>Recipients</h3>
+
+<p>Total:
+${recipientApi.getRecipients().length}</p>
+
+<p>Favourites:
+${favourites.length}</p>
+
+${
+top
+?
+`<p>Top Recipient:
+<b>${top.displayName}</b></p>`
+:
+""
+}
+
+<div class="recipient-shortcuts">
+
+${
+
+favourites.map(r=>`
+
+<button
+class="p54-btn sm"
+data-recipient="${r.id}">
+
+${r.displayName}
+
+</button>
+
+`).join("")
+
+}
+
+</div>
+
+<div class="p54-actions">
+
+<button
+class="p54-btn"
+id="openRecipientManager">
+
+Recipient Manager
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+    container
+
+    .querySelectorAll("[data-recipient]")
+
+    .forEach(button=>{
+
+        button.addEventListener(
+
+            "click",
+
+            ()=>{
+
+                window.PAY54_RECIPIENT
+                .quickSendRecipient(
+
+                    button.dataset.recipient
+
+                );
+
+            }
+
+        );
+
+    });
+
+    container
+
+    .querySelector(
+        "#openRecipientManager"
+    )
+
+    .addEventListener(
+
+        "click",
+
+        ()=>{
+
+            window.PAY54_UI
+            .openRecipientManager();
+
+        }
+
+    );
+
+}
   /* ---------------------------
      Recent transactions
   --------------------------- */
