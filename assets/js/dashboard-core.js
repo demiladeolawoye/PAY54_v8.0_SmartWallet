@@ -883,9 +883,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if(window.renderRecentTransactions){
         window.renderRecentTransactions();
       }
-if(window.renderRecipientDashboardWidget){
+if(
+    window.PAY54_RECIPIENT?.renderDashboard
+){
 
-window.renderRecipientDashboardWidget();
+    window.PAY54_RECIPIENT.renderDashboard();
 
 }
       console.log("✅ PAY54 FEEDS INITIALIZED");
