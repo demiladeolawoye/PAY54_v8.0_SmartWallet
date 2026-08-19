@@ -5779,6 +5779,9 @@ getTopRecipient,
 getRecipientInsights,
 
    quickSendRecipient,
+
+   renderDashboard:
+    renderRecipientDashboard,
   
    getRecipientAnalytics,
 
