@@ -80,7 +80,13 @@ function subscribeDashboardEvents(){
                 window.renderRecentTransactions
 
             ){
+if(
+window.renderRecipientDashboardWidget
+){
 
+window.renderRecipientDashboardWidget();
+
+}
                 window.renderRecentTransactions();
 
             }
