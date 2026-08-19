@@ -73,23 +73,19 @@ function subscribeDashboardEvents(){
 
     () => {
 
-        renderBalance();
+       renderBalance();
 
-        if(
-            window.renderRecentTransactions
-        ){
+if(
+    window.PAY54_RECIPIENT?.renderDashboard
+){
+    window.PAY54_RECIPIENT.renderDashboard();
+}
 
-            if(
-                window.PAY54_RECIPIENT?.renderDashboard
-            ){
-
-                window.PAY54_RECIPIENT.renderDashboard();
-
-            }
-
-            window.renderRecentTransactions();
-
-        }
+if(
+    window.renderRecentTransactions
+){
+    window.renderRecentTransactions();
+}
 
     }
 
