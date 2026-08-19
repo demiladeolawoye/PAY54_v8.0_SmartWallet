@@ -763,10 +763,10 @@ if(scanFab){
 
   }
 if(
-window.renderRecipientDashboardWidget
+    window.PAY54_RECIPIENT?.renderDashboard
 ){
 
-window.renderRecipientDashboardWidget();
+    window.PAY54_RECIPIENT.renderDashboard();
 
 }
   /* =========================
