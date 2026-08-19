@@ -69,31 +69,31 @@ function subscribeDashboardEvents(){
 
     EVENTS.subscribe(
 
-        "transaction.ui.refresh",
+    "transaction.ui.refresh",
 
-        () => {
+    () => {
 
-            renderBalance();
+        renderBalance();
+
+        if(
+            window.renderRecentTransactions
+        ){
 
             if(
-
-                window.renderRecentTransactions
-
+                window.PAY54_RECIPIENT?.renderDashboard
             ){
-if(
-window.renderRecipientDashboardWidget
-){
 
-window.renderRecipientDashboardWidget();
-
-}
-                window.renderRecentTransactions();
+                window.PAY54_RECIPIENT.renderDashboard();
 
             }
 
+            window.renderRecentTransactions();
+
         }
 
-    );
+    }
+
+);
 
     EVENTS.subscribe(
 
