@@ -760,7 +760,13 @@ if(scanFab){
     window.renderRecentTransactions();
 
   }
+if(
+window.renderRecipientDashboardWidget
+){
 
+window.renderRecipientDashboardWidget();
+
+}
   /* =========================
      VIEW ALL TRANSACTIONS
   ========================= */
