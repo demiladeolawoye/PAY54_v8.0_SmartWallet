@@ -5778,6 +5778,8 @@ getTopRecipient,
 
 getRecipientInsights,
 
+   quickSendRecipient,
+  
    getRecipientAnalytics,
 
    calculateRecipientRisk,
