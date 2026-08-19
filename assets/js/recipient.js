@@ -757,7 +757,7 @@ availableEl.innerHTML = `
       renderAlerts();
     });
   }
-function renderRecipientDashboardWidget(){
+function renderRecipientDashboard(){
 
     const container =
         document.getElementById(
