@@ -183,6 +183,17 @@ function count(){
     return registry.size;
 
 }
+   function entries(){
+
+    return Object.freeze(
+
+        Array.from(
+            registry.entries()
+        )
+
+    );
+
+}
 
 /* ========================================================================
    HEALTH
