@@ -98,6 +98,16 @@ function register(name,module){
 
     validateModule(module);
 
+   if(locked){
+
+    throw new Error(
+
+        "PAY54 Constants Registry is locked."
+
+    );
+
+}
+
     if(registry.has(name)){
 
         console.warn(
