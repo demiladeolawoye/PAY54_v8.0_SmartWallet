@@ -212,7 +212,7 @@ function count(){
 
 function health(){
 
-    return {
+    return Object.freeze({
 
         engine: ENGINE,
 
@@ -226,7 +226,7 @@ function health(){
 
         startedAt
 
-    };
+    });
 
 }
 
