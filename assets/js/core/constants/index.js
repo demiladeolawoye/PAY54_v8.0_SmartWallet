@@ -224,9 +224,7 @@ function health(){
 
         healthy: true,
 
-        generatedAt:
-
-            new Date().toISOString()
+        startedAt
 
     };
 
