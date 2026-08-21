@@ -236,25 +236,35 @@ function health(){
 
 const CONSTANTS = Object.freeze({
 
-    register,
+   register,
 
-    unregister,
+unregister,
 
-    get,
+get,
 
-    has,
+has,
 
-    list,
+list,
 
-    count,
+entries,
 
-    version(){
+snapshot,
 
-        return VERSION;
+count,
 
-    },
+version(){
 
-    health
+    return VERSION;
+
+},
+
+health,
+
+lock(){
+
+    locked = true;
+
+}
 
 });
 
