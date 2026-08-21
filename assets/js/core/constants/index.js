@@ -42,7 +42,12 @@ const VERSION = "12.0.0";
 
 const ENGINE = "PAY54 Constants Registry";
 
+const startedAt =
+new Date().toISOString();
+
 const registry = new Map();
+
+let locked = false;
 
 /* ========================================================================
    VALIDATION
