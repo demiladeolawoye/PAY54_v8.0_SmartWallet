@@ -194,6 +194,17 @@ function count(){
     );
 
 }
+   function snapshot(){
+
+    return Object.freeze(
+
+        Object.fromEntries(
+            registry
+        )
+
+    );
+
+}
 
 /* ========================================================================
    HEALTH
