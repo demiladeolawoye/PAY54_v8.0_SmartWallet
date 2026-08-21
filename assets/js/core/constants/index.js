@@ -274,23 +274,27 @@ lock(){
 
 });
 
-Object.defineProperty(
+if(!window.PAY54_CONSTANTS){
 
-    window,
+    Object.defineProperty(
 
-    "PAY54_CONSTANTS",
+        window,
 
-    {
+        "PAY54_CONSTANTS",
 
-        value: CONSTANTS,
+        {
 
-        writable: false,
+            value: CONSTANTS,
 
-        configurable: false
+            writable: false,
 
-    }
+            configurable: false
 
-);
+        }
+
+    );
+
+}
 
 /* ========================================================================
    STARTUP
