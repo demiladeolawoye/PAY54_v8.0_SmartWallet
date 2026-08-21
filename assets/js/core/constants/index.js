@@ -264,6 +264,12 @@ lock(){
 
     locked = true;
 
+    console.info(
+
+        "[PAY54_CONSTANTS] Registry locked."
+
+    );
+
 }
 
 });
