@@ -71,6 +71,8 @@ const MODULES = Object.freeze({
 
     CONSTANTS:
         "CONSTANTS",
+   VERSIONS:
+    "VERSIONS",
 
     /* ===============================================================
        FOUNDATION
