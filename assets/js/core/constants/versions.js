@@ -89,7 +89,7 @@ const VERSIONS = Object.freeze({
 
 window.PAY54_CONSTANTS.register(
 
-    MODULES.CONSTANTS + "_VERSIONS",
+    MODULES.VERSIONS,
 
     VERSIONS
 
