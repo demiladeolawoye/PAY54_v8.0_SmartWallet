@@ -3,43 +3,71 @@
 /* ==========================================================================
    PAY54 ENTERPRISE CONTACTS STORAGE
    File: assets/js/engine/contacts/core/storage.js
-   Version: v12.0.0
+   Version: v1.0.0
+   Work Package: WP-010A
 
    Purpose
    -------
-   Enterprise persistence and repository layer for PAY54 Contacts.
+   Enterprise persistence and repository layer for the PAY54 Contacts domain.
 
    Responsibilities
    ----------------
-   • Canonical contacts persistence
-   • Repository CRUD operations
-   • Schema normalisation
+   • Contacts repository
+   • CRUD persistence
    • Storage migrations
-   • Data integrity verification
+   • Repository integrity verification
+   • Controlled corruption recovery
+   • Atomic-style staged persistence
    • Repository health reporting
    • Event Bus integration
    • Security bootstrap verification
    • Registry integration
-   • Backward-compatible browser persistence
-   • Defensive recovery from malformed storage
+   • Legacy Contacts storage compatibility
+   • Public Contacts Storage API
+
+   Dependencies
+   ------------
+   assets/js/core/constants/index.js
+   assets/js/core/constants/modules.js
+   assets/js/core/constants/versions.js
+   assets/js/core/constants/contacts.js
+
+   Progressive Dependencies
+   ------------------------
+   PAY54 Event Bus
+   PAY54 Security
+   PAY54 Platform Registry
 
    Architecture
    ------------
    Core Constants
         ↓
-   Security Bootstrap
+   Security / Infrastructure
         ↓
-   Contacts Storage Repository
+   Contacts Core Storage
         ↓
-   Contacts Services / Engines
+   Contacts Repository / Services
         ↓
-   Contacts UI
+   Contacts Engine
+        ↓
+   UI / Dashboard / Mobile
 
-   Security
-   --------
-   This module never stores credentials, PINs, authentication tokens,
-   CVVs, card secrets or other payment authentication material.
-
+   Enterprise Guarantees
+   ---------------------
+   • No monetary business logic
+   • No UI logic
+   • No DOM dependency
+   • Defensive validation
+   • Immutable outward-facing records
+   • Schema-controlled persistence
+   • Duplicate identity protection
+   • Staged writes
+   • Backup recovery
+   • Migration verification
+   • Security-sensitive field rejection
+   • Event publication is non-blocking
+   • Backward-compatible public aliases
+   • Zero-regression legacy Contacts key support
 ========================================================================== */
 
 (() => {
@@ -47,261 +75,324 @@
     "use strict";
 
     /* ======================================================================
-       GLOBAL DEPENDENCIES
+       GLOBAL
     ====================================================================== */
 
     const GLOBAL = window;
 
-    const CONSTANTS =
-        GLOBAL.PAY54_CONSTANTS || null;
-
-    if (!CONSTANTS) {
-        throw new Error(
-            "[PAY54_CONTACTS_STORAGE] PAY54 Constants Registry must load before contacts storage."
-        );
-    }
-
-    /* ======================================================================
-       MODULE IDENTITY
-    ====================================================================== */
-
-    const MODULE_NAME =
-        "contacts-storage";
-
-    const MODULE_PATH =
+    const FILE_PATH =
         "assets/js/engine/contacts/core/storage.js";
 
-    const DEFAULT_VERSION =
-        "12.0.0";
-
-    const SCHEMA_VERSION =
-        1;
-
     /* ======================================================================
-       CONSTANT RESOLUTION
+       CONSTANT DEPENDENCIES
     ====================================================================== */
 
-    function getConstant(key, fallback = undefined) {
+    const CONSTANTS =
+        GLOBAL.PAY54_CONSTANTS;
 
-        try {
-
-            if (
-                CONSTANTS &&
-                typeof CONSTANTS.get === "function"
-            ) {
-
-                const value =
-                    CONSTANTS.get(key);
-
-                if (value !== undefined && value !== null) {
-                    return value;
-                }
-
-            }
-
-        } catch (error) {
-
-            console.warn(
-                `[PAY54_CONTACTS_STORAGE] Unable to resolve constant "${key}".`,
-                error
-            );
-
-        }
-
-        return fallback;
-
+    if (
+        !CONSTANTS ||
+        typeof CONSTANTS.get !== "function" ||
+        typeof CONSTANTS.has !== "function"
+    ) {
+        throw new Error(
+            "[PAY54 Contacts Storage] PAY54 Constants Registry is unavailable."
+        );
     }
 
     const MODULES =
-        getConstant(
-            "MODULES",
-            Object.freeze({})
+        CONSTANTS.get("MODULES");
+
+    if (
+        !MODULES ||
+        typeof MODULES !== "object"
+    ) {
+        throw new Error(
+            "[PAY54 Contacts Storage] MODULES constants are unavailable."
         );
+    }
 
     const VERSIONS =
-        getConstant(
-            "VERSIONS",
-            Object.freeze({})
+        CONSTANTS.get(
+            MODULES.VERSIONS
         );
 
-    const CONTACTS_CONSTANTS =
-        getConstant(
-            "CONTACTS",
-            getConstant(
-                "CONTACT_CONSTANTS",
-                Object.freeze({})
-            )
+    if (
+        !VERSIONS ||
+        typeof VERSIONS !== "object"
+    ) {
+        throw new Error(
+            "[PAY54 Contacts Storage] VERSIONS constants are unavailable."
+        );
+    }
+
+    const CONTACTS =
+        CONSTANTS.get(
+            MODULES.CONTACTS
         );
 
-    /* ======================================================================
-       VERSION RESOLUTION
-    ====================================================================== */
-
-    function resolveVersion() {
-
-        const candidates = [
-            VERSIONS?.CONTACTS_STORAGE,
-            VERSIONS?.CONTACTS?.STORAGE,
-            VERSIONS?.CONTACTS,
-            DEFAULT_VERSION
-        ];
-
-        for (const value of candidates) {
-
-            if (
-                typeof value === "string" &&
-                value.trim()
-            ) {
-                return value.trim();
-            }
-
-        }
-
-        return DEFAULT_VERSION;
-
+    if (
+        !CONTACTS ||
+        typeof CONTACTS !== "object"
+    ) {
+        throw new Error(
+            "[PAY54 Contacts Storage] CONTACTS constants are unavailable."
+        );
     }
 
-    const VERSION =
-        resolveVersion();
-
     /* ======================================================================
-       MODULE IDENTIFIER RESOLUTION
+       CANONICAL MODULE METADATA
     ====================================================================== */
 
-    function resolveModuleId() {
-
-        const candidates = [
-            MODULES?.CONTACTS_STORAGE,
-            MODULES?.CONTACTS?.STORAGE,
-            MODULES?.CONTACTS,
-            MODULE_NAME
-        ];
-
-        for (const value of candidates) {
-
-            if (
-                typeof value === "string" &&
-                value.trim()
-            ) {
-                return value.trim();
-            }
-
-        }
-
-        return MODULE_NAME;
-
-    }
+    const MODULE_NAME =
+        CONTACTS.MODULE?.STORAGE ??
+        MODULES.DOMAIN?.CONTACTS?.STORAGE ??
+        "contacts-storage";
 
     const MODULE_ID =
-        resolveModuleId();
+        MODULES.DOMAIN?.CONTACTS?.STORAGE ??
+        MODULE_NAME;
+
+    const VERSION =
+        VERSIONS.DOMAIN?.CONTACTS?.STORAGE ??
+        CONTACTS.VERSION ??
+        VERSIONS.CONTACTS ??
+        "1.0.0";
+
+    const SCHEMA_VERSION =
+        CONTACTS.SCHEMA?.CURRENT_VERSION ??
+        CONTACTS.STORAGE?.SCHEMA_VERSION ??
+        1;
+
+    const MIN_SCHEMA_VERSION =
+        CONTACTS.SCHEMA?.MIN_SUPPORTED_VERSION ??
+        CONTACTS.MIGRATIONS?.MIN_SUPPORTED_SCHEMA_VERSION ??
+        0;
 
     /* ======================================================================
        STORAGE CONFIGURATION
     ====================================================================== */
 
-    function resolveStorageKey() {
+    const STORAGE_KEYS =
+        CONTACTS.STORAGE_KEYS;
 
-        const candidates = [
-            CONTACTS_CONSTANTS?.STORAGE_KEY,
-            CONTACTS_CONSTANTS?.STORAGE?.KEY,
-            CONTACTS_CONSTANTS?.KEYS?.CONTACTS,
-            CONTACTS_CONSTANTS?.KEYS?.STORAGE,
-            "pay54_contacts"
-        ];
-
-        for (const value of candidates) {
-
-            if (
-                typeof value === "string" &&
-                value.trim()
-            ) {
-                return value.trim();
-            }
-
-        }
-
-        return "pay54_contacts";
-
+    if (
+        !STORAGE_KEYS ||
+        typeof STORAGE_KEYS !== "object"
+    ) {
+        throw new Error(
+            "[PAY54 Contacts Storage] CONTACTS.STORAGE_KEYS is unavailable."
+        );
     }
 
-    function resolveMetadataKey() {
+    const STORAGE_CONFIG =
+        CONTACTS.STORAGE ?? {};
 
-        const candidates = [
-            CONTACTS_CONSTANTS?.METADATA_KEY,
-            CONTACTS_CONSTANTS?.STORAGE?.METADATA_KEY,
-            CONTACTS_CONSTANTS?.KEYS?.METADATA,
-            "pay54_contacts_meta"
-        ];
+    const PRIMARY_KEY =
+        STORAGE_CONFIG.PRIMARY_KEY ??
+        STORAGE_KEYS.CONTACTS;
 
-        for (const value of candidates) {
+    const META_KEY =
+        STORAGE_CONFIG.META_KEY ??
+        STORAGE_KEYS.META;
 
-            if (
-                typeof value === "string" &&
-                value.trim()
-            ) {
-                return value.trim();
-            }
+    const STAGING_KEY =
+        STORAGE_CONFIG.STAGING_KEY ??
+        STORAGE_KEYS.STAGING ??
+        "pay54_contacts_staging";
 
-        }
+    const BACKUP_KEY =
+        STORAGE_CONFIG.BACKUP_KEY ??
+        STORAGE_KEYS.BACKUP ??
+        "pay54_contacts_backup";
 
-        return "pay54_contacts_meta";
+    const QUARANTINE_KEY =
+        STORAGE_CONFIG.QUARANTINE_KEY ??
+        STORAGE_KEYS.QUARANTINE ??
+        "pay54_contacts_quarantine";
 
-    }
-
-    const STORAGE_KEY =
-        resolveStorageKey();
-
-    const METADATA_KEY =
-        resolveMetadataKey();
+    const MIGRATION_KEY =
+        STORAGE_CONFIG.MIGRATION_KEY ??
+        STORAGE_KEYS.MIGRATION ??
+        "pay54_contacts_migration";
 
     /* ======================================================================
-       EVENT DEFINITIONS
+       CONTACT CONFIGURATION
     ====================================================================== */
 
+    const VALIDATION =
+        CONTACTS.VALIDATION ?? {};
+
+    const SEARCH_CONFIG =
+        CONTACTS.SEARCH ?? {};
+
+    const REPOSITORY_CONFIG =
+        CONTACTS.REPOSITORY ?? {};
+
+    const SECURITY_CONFIG =
+        CONTACTS.SECURITY ?? {};
+
+    const INTEGRITY_CONFIG =
+        CONTACTS.INTEGRITY ?? {};
+
+    const MIGRATION_CONFIG =
+        CONTACTS.MIGRATIONS ?? {};
+
     const EVENTS =
-        Object.freeze({
+        CONTACTS.EVENTS ?? {};
 
-            READY:
-                CONTACTS_CONSTANTS?.EVENTS?.STORAGE_READY ||
-                "contacts.storage.ready",
+    const MAX_CONTACTS =
+        Number.isInteger(
+            VALIDATION.MAX_CONTACTS
+        )
+            ? VALIDATION.MAX_CONTACTS
+            : 5000;
 
-            CREATED:
-                CONTACTS_CONSTANTS?.EVENTS?.CREATED ||
-                "contacts.created",
+    const MAX_NAME_LENGTH =
+        Number.isInteger(
+            VALIDATION.MAX_NAME_LENGTH
+        )
+            ? VALIDATION.MAX_NAME_LENGTH
+            : 100;
 
-            UPDATED:
-                CONTACTS_CONSTANTS?.EVENTS?.UPDATED ||
-                "contacts.updated",
+    const MAX_ALIAS_LENGTH =
+        Number.isInteger(
+            VALIDATION.MAX_ALIAS_LENGTH
+        )
+            ? VALIDATION.MAX_ALIAS_LENGTH
+            : 50;
 
-            DELETED:
-                CONTACTS_CONSTANTS?.EVENTS?.DELETED ||
-                "contacts.deleted",
+    const MAX_NOTE_LENGTH =
+        Number.isInteger(
+            VALIDATION.MAX_NOTE_LENGTH
+        )
+            ? VALIDATION.MAX_NOTE_LENGTH
+            : 250;
 
-            CLEARED:
-                CONTACTS_CONSTANTS?.EVENTS?.CLEARED ||
-                "contacts.cleared",
+    const MAX_EMAIL_LENGTH =
+        Number.isInteger(
+            VALIDATION.MAX_EMAIL_LENGTH
+        )
+            ? VALIDATION.MAX_EMAIL_LENGTH
+            : 254;
 
-            MIGRATED:
-                CONTACTS_CONSTANTS?.EVENTS?.MIGRATED ||
-                "contacts.storage.migrated",
+    const MAX_PHONE_LENGTH =
+        Number.isInteger(
+            VALIDATION.MAX_PHONE_LENGTH
+        )
+            ? VALIDATION.MAX_PHONE_LENGTH
+            : 32;
 
-            RECOVERED:
-                CONTACTS_CONSTANTS?.EVENTS?.RECOVERED ||
-                "contacts.storage.recovered",
+    const MAX_PAY54_ID_LENGTH =
+        Number.isInteger(
+            VALIDATION.MAX_PAY54_ID_LENGTH
+        )
+            ? VALIDATION.MAX_PAY54_ID_LENGTH
+            : 100;
 
-            INTEGRITY_FAILED:
-                CONTACTS_CONSTANTS?.EVENTS?.INTEGRITY_FAILED ||
-                "contacts.storage.integrity_failed",
+    const MAX_TAGS =
+        Number.isInteger(
+            VALIDATION.MAX_TAGS
+        )
+            ? VALIDATION.MAX_TAGS
+            : 25;
 
-            HEALTH_CHANGED:
-                CONTACTS_CONSTANTS?.EVENTS?.HEALTH_CHANGED ||
-                "contacts.storage.health_changed",
+    const MAX_TAG_LENGTH =
+        Number.isInteger(
+            VALIDATION.MAX_TAG_LENGTH
+        )
+            ? VALIDATION.MAX_TAG_LENGTH
+            : 50;
 
-            ERROR:
-                CONTACTS_CONSTANTS?.EVENTS?.ERROR ||
-                "contacts.storage.error"
+    const MAX_METADATA_KEYS =
+        Number.isInteger(
+            VALIDATION.MAX_METADATA_KEYS
+        )
+            ? VALIDATION.MAX_METADATA_KEYS
+            : 32;
 
-        });
+    const MAX_SEARCH_QUERY_LENGTH =
+        Number.isInteger(
+            VALIDATION.MAX_SEARCH_QUERY_LENGTH
+        )
+            ? VALIDATION.MAX_SEARCH_QUERY_LENGTH
+            : 200;
+
+    const MAX_SEARCH_RESULTS =
+        Number.isInteger(
+            SEARCH_CONFIG.MAX_RESULTS
+        )
+            ? SEARCH_CONFIG.MAX_RESULTS
+            : 100;
+
+    const MIN_SEARCH_QUERY_LENGTH =
+        Number.isInteger(
+            SEARCH_CONFIG.MIN_QUERY_LENGTH
+        )
+            ? SEARCH_CONFIG.MIN_QUERY_LENGTH
+            : 2;
+
+    /* ======================================================================
+       SECURITY POLICY
+    ====================================================================== */
+
+    const FORBIDDEN_FIELDS =
+        new Set(
+            (
+                Array.isArray(
+                    SECURITY_CONFIG.FORBIDDEN_FIELDS
+                )
+                    ? SECURITY_CONFIG.FORBIDDEN_FIELDS
+                    : [
+                        "pin",
+                        "password",
+                        "passcode",
+                        "secret",
+                        "token",
+                        "accessToken",
+                        "refreshToken",
+                        "cvv",
+                        "cvc",
+                        "cardNumber",
+                        "privateKey",
+                        "seedPhrase",
+                        "otp"
+                    ]
+            ).map(
+                field =>
+                    String(field)
+                        .trim()
+                        .toLowerCase()
+            )
+        );
+
+    const ALLOWED_METADATA_FIELDS =
+        new Set(
+            (
+                Array.isArray(
+                    SECURITY_CONFIG.ALLOWED_METADATA_FIELDS
+                )
+                    ? SECURITY_CONFIG.ALLOWED_METADATA_FIELDS
+                    : [
+                        "source",
+                        "relationship",
+                        "country",
+                        "currency",
+                        "bankName",
+                        "accountName",
+                        "accountNumberMasked",
+                        "lastUsedAt",
+                        "useCount"
+                    ]
+            ).map(String)
+        );
+
+    const PROHIBITED_OBJECT_KEYS =
+        new Set([
+            "__proto__",
+            "prototype",
+            "constructor"
+        ]);
 
     /* ======================================================================
        INTERNAL STATE
@@ -309,40 +400,72 @@
 
     const state = {
 
-        initialized: false,
+        initialized:
+            false,
 
-        storageAvailable: false,
+        initializing:
+            false,
 
-        securityVerified: false,
+        storageAvailable:
+            false,
 
-        registryRegistered: false,
+        securityVerified:
+            false,
 
-        migrationPerformed: false,
+        securityMode:
+            "unknown",
 
-        recovered: false,
+        registryRegistered:
+            false,
 
-        lastError: null,
+        eventBusAvailable:
+            false,
 
-        initializedAt: null,
+        recovered:
+            false,
 
-        lastIntegrityCheck: null
+        lastMigration:
+            null,
+
+        lastIntegrityCheck:
+            null,
+
+        lastHealthStatus:
+            null,
+
+        lastError:
+            null,
+
+        initializedAt:
+            null,
+
+        lastReadAt:
+            null,
+
+        lastWriteAt:
+            null
 
     };
 
     /* ======================================================================
-       GENERIC UTILITIES
+       BASIC UTILITIES
     ====================================================================== */
 
     function nowISO() {
         return new Date().toISOString();
     }
 
+    function isObject(value) {
+
+        return (
+            value !== null &&
+            typeof value === "object"
+        );
+    }
+
     function isPlainObject(value) {
 
-        if (
-            value === null ||
-            typeof value !== "object"
-        ) {
+        if (!isObject(value)) {
             return false;
         }
 
@@ -353,296 +476,449 @@
             prototype === Object.prototype ||
             prototype === null
         );
-
     }
 
-    function clone(value) {
-
-        if (value === undefined) {
-            return undefined;
-        }
+    function assertSafeObjectKey(
+        key,
+        path
+    ) {
 
         if (
-            typeof structuredClone === "function"
+            PROHIBITED_OBJECT_KEYS.has(
+                key
+            )
         ) {
-
-            try {
-                return structuredClone(value);
-            } catch {
-                /* Continue to JSON-safe clone. */
-            }
-
+            throw new Error(
+                `[PAY54 Contacts Storage] Unsafe property "${key}" rejected at ${path}.`
+            );
         }
-
-        return JSON.parse(
-            JSON.stringify(value)
-        );
-
     }
 
-    function deepFreeze(value) {
-
-        if (
-            !value ||
-            typeof value !== "object" ||
-            Object.isFrozen(value)
-        ) {
-            return value;
-        }
-
-        Object.freeze(value);
-
-        for (
-            const property
-            of Object.getOwnPropertyNames(value)
-        ) {
-
-            const child =
-                value[property];
-
-            if (
-                child &&
-                typeof child === "object"
-            ) {
-                deepFreeze(child);
-            }
-
-        }
-
-        return value;
-
-    }
-
-    function cleanString(
+    function cloneValue(
         value,
-        maximumLength = 256
+        seen = new WeakMap()
     ) {
 
         if (
             value === null ||
-            value === undefined
+            typeof value !== "object"
+        ) {
+            return value;
+        }
+
+        if (
+            seen.has(value)
+        ) {
+            return seen.get(value);
+        }
+
+        if (
+            Array.isArray(value)
+        ) {
+
+            const result = [];
+
+            seen.set(
+                value,
+                result
+            );
+
+            for (
+                const item of value
+            ) {
+                result.push(
+                    cloneValue(
+                        item,
+                        seen
+                    )
+                );
+            }
+
+            return result;
+        }
+
+        const result =
+            Object.create(null);
+
+        seen.set(
+            value,
+            result
+        );
+
+        for (
+            const key of Object.keys(value)
+        ) {
+
+            assertSafeObjectKey(
+                key,
+                "clone"
+            );
+
+            result[key] =
+                cloneValue(
+                    value[key],
+                    seen
+                );
+        }
+
+        return result;
+    }
+
+    function deepFreeze(
+        value,
+        seen = new WeakSet()
+    ) {
+
+        if (
+            value === null ||
+            typeof value !== "object"
+        ) {
+            return value;
+        }
+
+        if (
+            seen.has(value)
+        ) {
+            return value;
+        }
+
+        seen.add(value);
+
+        for (
+            const key of Object.keys(value)
+        ) {
+
+            assertSafeObjectKey(
+                key,
+                "freeze"
+            );
+
+            deepFreeze(
+                value[key],
+                seen
+            );
+        }
+
+        return Object.freeze(value);
+    }
+
+    function immutableClone(value) {
+
+        return deepFreeze(
+            cloneValue(value)
+        );
+    }
+
+    function cleanString(
+        value,
+        maximumLength = Number.MAX_SAFE_INTEGER
+    ) {
+
+        if (
+            value === null ||
+            typeof value === "undefined"
         ) {
             return "";
         }
 
         return String(value)
-            .replace(/[\u0000-\u001F\u007F]/gu, "")
             .trim()
-            .slice(0, maximumLength);
-
+            .slice(
+                0,
+                maximumLength
+            );
     }
 
-    function normaliseEmail(value) {
+    function normalizeBoolean(value) {
 
-        return cleanString(value, 320)
-            .toLowerCase();
-
+        return (
+            value === true ||
+            value === 1 ||
+            value === "1" ||
+            value === "true"
+        );
     }
 
-    function normalisePhone(value) {
+    function normalizeEmail(value) {
 
-        const source =
-            cleanString(value, 64);
+        return cleanString(
+            value,
+            MAX_EMAIL_LENGTH
+        ).toLowerCase();
+    }
 
-        if (!source) {
+    function normalizePhone(value) {
+
+        const input =
+            cleanString(
+                value,
+                MAX_PHONE_LENGTH
+            );
+
+        if (!input) {
             return "";
         }
 
-        const hasLeadingPlus =
-            source.startsWith("+");
+        const hasPlus =
+            input.startsWith("+");
 
         const digits =
-            source.replace(/\D/gu, "");
+            input.replace(
+                /\D/g,
+                ""
+            );
 
         if (!digits) {
             return "";
         }
 
         return (
-            hasLeadingPlus
+            hasPlus
                 ? `+${digits}`
                 : digits
+        ).slice(
+            0,
+            MAX_PHONE_LENGTH
         );
-
     }
 
-    function normalisePay54Id(value) {
+    function normalizePay54Id(value) {
 
-        return cleanString(value, 128)
-            .replace(/^@/u, "")
-            .toLowerCase();
-
+        return cleanString(
+            value,
+            MAX_PAY54_ID_LENGTH
+        ).toLowerCase();
     }
 
-    function normaliseBoolean(value) {
-        return value === true;
-    }
+    function normalizeTimestamp(
+        value,
+        fallback = null
+    ) {
 
-    function normaliseTags(value) {
+        if (
+            typeof value === "string" &&
+            value.trim()
+        ) {
 
-        if (!Array.isArray(value)) {
-            return [];
+            const timestamp =
+                Date.parse(value);
+
+            if (
+                Number.isFinite(timestamp)
+            ) {
+                return new Date(
+                    timestamp
+                ).toISOString();
+            }
         }
 
-        return [
-            ...new Set(
-                value
-                    .map(item =>
-                        cleanString(item, 64)
-                            .toLowerCase()
-                    )
-                    .filter(Boolean)
-            )
-        ].slice(0, 50);
-
+        return fallback;
     }
 
     function generateId() {
 
         if (
             GLOBAL.crypto &&
-            typeof GLOBAL.crypto.randomUUID === "function"
+            typeof GLOBAL.crypto.randomUUID ===
+                "function"
         ) {
-
-            return `contact_${GLOBAL.crypto.randomUUID()}`;
-
+            return GLOBAL.crypto.randomUUID();
         }
 
         if (
             GLOBAL.crypto &&
-            typeof GLOBAL.crypto.getRandomValues === "function"
+            typeof GLOBAL.crypto.getRandomValues ===
+                "function"
         ) {
 
             const bytes =
                 new Uint8Array(16);
 
-            GLOBAL.crypto.getRandomValues(bytes);
+            GLOBAL.crypto.getRandomValues(
+                bytes
+            );
 
             bytes[6] =
-                (bytes[6] & 0x0f) | 0x40;
+                (bytes[6] & 0x0f) |
+                0x40;
 
             bytes[8] =
-                (bytes[8] & 0x3f) | 0x80;
+                (bytes[8] & 0x3f) |
+                0x80;
 
             const hex =
-                [...bytes]
-                    .map(byte =>
+                Array.from(
+                    bytes,
+                    byte =>
                         byte
                             .toString(16)
                             .padStart(2, "0")
-                    )
-                    .join("");
-
-            return (
-                "contact_" +
-                `${hex.slice(0, 8)}-` +
-                `${hex.slice(8, 12)}-` +
-                `${hex.slice(12, 16)}-` +
-                `${hex.slice(16, 20)}-` +
-                `${hex.slice(20)}`
-            );
-
-        }
-
-        const entropy =
-            `${Date.now()}_${performance?.now?.() || 0}`;
-
-        let hash =
-            2166136261;
-
-        for (
-            let index = 0;
-            index < entropy.length;
-            index += 1
-        ) {
-
-            hash ^=
-                entropy.charCodeAt(index);
-
-            hash =
-                Math.imul(
-                    hash,
-                    16777619
                 );
 
+            return [
+                hex.slice(0, 4).join(""),
+                hex.slice(4, 6).join(""),
+                hex.slice(6, 8).join(""),
+                hex.slice(8, 10).join(""),
+                hex.slice(10, 16).join("")
+            ].join("-");
         }
 
-        return (
-            `contact_${Date.now().toString(36)}_` +
-            `${(hash >>> 0).toString(36)}`
-        );
+        /*
+         * Browsers supported by PAY54 are expected to expose Web Crypto.
+         * This final fallback preserves legacy operation without pretending
+         * to provide cryptographic randomness.
+         */
 
+        return [
+            "legacy",
+            Date.now().toString(36),
+            Math.random()
+                .toString(36)
+                .slice(2, 12)
+        ].join("-");
+    }
+
+    function recordError(
+        operation,
+        error
+    ) {
+
+        const message =
+            error instanceof Error
+                ? error.message
+                : String(error);
+
+        state.lastError = {
+            operation,
+            message,
+            timestamp:
+                nowISO()
+        };
+
+        return message;
     }
 
     /* ======================================================================
-       SECURITY
+       EVENT BUS
     ====================================================================== */
 
-    const FORBIDDEN_FIELDS =
-        Object.freeze([
-            "pin",
-            "password",
-            "passcode",
-            "secret",
-            "token",
-            "accessToken",
-            "refreshToken",
-            "cvv",
-            "cvc",
-            "cardNumber",
-            "privateKey",
-            "seedPhrase",
-            "otp"
-        ]);
+    function publishEvent(
+        eventName,
+        payload = {}
+    ) {
 
-    function assertSafePayload(payload) {
-
-        if (!isPlainObject(payload)) {
-
-            throw new TypeError(
-                "[PAY54_CONTACTS_STORAGE] Contact payload must be an object."
-            );
-
+        if (
+            typeof eventName !== "string" ||
+            !eventName
+        ) {
+            return false;
         }
 
-        for (
-            const forbidden
-            of FORBIDDEN_FIELDS
+        try {
+
+            const eventBus =
+                GLOBAL.PAY54_EVENTS;
+
+            if (
+                !eventBus ||
+                typeof eventBus.publish !== "function"
+            ) {
+                state.eventBusAvailable =
+                    false;
+
+                return false;
+            }
+
+            state.eventBusAvailable =
+                true;
+
+            eventBus.publish(
+                eventName,
+                Object.freeze({
+                    ...payload,
+                    module:
+                        MODULE_NAME,
+                    version:
+                        VERSION,
+                    timestamp:
+                        nowISO()
+                }),
+                {
+                    source:
+                        MODULE_NAME
+                }
+            );
+
+            return true;
+
+        } catch (error) {
+
+            recordError(
+                "event.publish",
+                error
+            );
+
+            return false;
+        }
+    }
+
+    /* ======================================================================
+       SECURITY BOOTSTRAP VERIFICATION
+    ====================================================================== */
+
+    function interpretSecurityResult(
+        result
+    ) {
+
+        if (
+            result === false
+        ) {
+            return false;
+        }
+
+        if (
+            result === true ||
+            typeof result === "undefined" ||
+            result === null
+        ) {
+            return true;
+        }
+
+        if (
+            isObject(result)
         ) {
 
             if (
-                Object.prototype.hasOwnProperty.call(
-                    payload,
-                    forbidden
-                )
+                result.ready === false ||
+                result.healthy === false ||
+                result.secure === false ||
+                result.ok === false
             ) {
-
-                throw new Error(
-                    `[PAY54_CONTACTS_STORAGE] Sensitive field "${forbidden}" cannot be persisted in contacts storage.`
-                );
-
+                return false;
             }
 
+            return true;
         }
 
+        return Boolean(result);
     }
 
     function verifySecurityBootstrap() {
 
-        const securityCandidates = [
-            GLOBAL.PAY54_SECURITY,
-            GLOBAL.PAY54_SECURITY_BOOTSTRAP,
-            GLOBAL.PAY54_SECURITY_SHIELD
-        ];
-
         const security =
-            securityCandidates.find(Boolean);
+            GLOBAL.PAY54_SECURITY ??
+            GLOBAL.PAY54_SECURITY_BOOTSTRAP ??
+            GLOBAL.PAY54_SECURITY_SHIELD ??
+            null;
 
         /*
-         * Security modules are permitted to be absent during legacy
-         * migration/bootstrap so this storage layer remains zero-regression.
-         * If a security runtime exists and explicitly reports an unsafe
-         * state, storage initialisation is rejected.
+         * PAY54 currently supports progressive bootstrap. Contacts storage
+         * therefore remains compatible with legacy deployments where the
+         * Security Shield has not yet exposed a public bootstrap API.
+         *
+         * Once a security implementation is present, an explicit unsafe or
+         * failed state is treated as fatal.
          */
 
         if (!security) {
@@ -650,118 +926,203 @@
             state.securityVerified =
                 true;
 
+            state.securityMode =
+                "legacy-compatible";
+
             return true;
-
         }
 
-        const explicitUnsafe =
-            security.ready === false ||
-            security.initialized === false ||
-            security.secure === false ||
-            security.compromised === true;
-
-        if (explicitUnsafe) {
-
-            state.securityVerified =
-                false;
-
-            throw new Error(
-                "[PAY54_CONTACTS_STORAGE] PAY54 security bootstrap reported an unsafe state."
-            );
-
-        }
-
-        const verificationMethods = [
-            "isReady",
-            "isSecure",
+        const probes = [
+            "verifyBootstrap",
             "verify",
-            "verifyBootstrap"
+            "isReady",
+            "isSecure"
         ];
 
+        let probed = false;
+
         for (
-            const method
-            of verificationMethods
+            const method of probes
         ) {
 
             if (
-                typeof security[method] === "function"
+                typeof security[method] !==
+                "function"
             ) {
-
-                try {
-
-                    const result =
-                        security[method]();
-
-                    if (
-                        result === false ||
-                        (
-                            isPlainObject(result) &&
-                            (
-                                result.ok === false ||
-                                result.secure === false ||
-                                result.ready === false
-                            )
-                        )
-                    ) {
-
-                        state.securityVerified =
-                            false;
-
-                        throw new Error(
-                            "[PAY54_CONTACTS_STORAGE] PAY54 security bootstrap verification failed."
-                        );
-
-                    }
-
-                } catch (error) {
-
-                    state.securityVerified =
-                        false;
-
-                    throw error;
-
-                }
-
-                break;
-
+                continue;
             }
 
+            probed = true;
+
+            const result =
+                security[method]();
+
+            if (
+                result &&
+                typeof result.then === "function"
+            ) {
+                throw new Error(
+                    `[PAY54 Contacts Storage] Security method "${method}" is asynchronous; synchronous Contacts bootstrap cannot safely consume it.`
+                );
+            }
+
+            if (
+                !interpretSecurityResult(
+                    result
+                )
+            ) {
+                throw new Error(
+                    `[PAY54 Contacts Storage] Security bootstrap verification failed via ${method}().`
+                );
+            }
+        }
+
+        if (
+            security.ready === false ||
+            security.secure === false ||
+            security.healthy === false
+        ) {
+            throw new Error(
+                "[PAY54 Contacts Storage] Security bootstrap reports an unsafe state."
+            );
         }
 
         state.securityVerified =
             true;
 
-        return true;
+        state.securityMode =
+            probed
+                ? "verified"
+                : "present";
 
+        return true;
+    }
+
+    /* ======================================================================
+       PAYLOAD SECURITY
+    ====================================================================== */
+
+    function assertSafePayload(
+        value,
+        path = "contact",
+        seen = new WeakSet()
+    ) {
+
+        if (
+            value === null ||
+            typeof value === "undefined"
+        ) {
+            return true;
+        }
+
+        if (
+            typeof value !== "object"
+        ) {
+            return true;
+        }
+
+        if (
+            seen.has(value)
+        ) {
+            throw new Error(
+                `[PAY54 Contacts Storage] Circular payload rejected at ${path}.`
+            );
+        }
+
+        seen.add(value);
+
+        if (
+            Array.isArray(value)
+        ) {
+
+            for (
+                let index = 0;
+                index < value.length;
+                index += 1
+            ) {
+                assertSafePayload(
+                    value[index],
+                    `${path}[${index}]`,
+                    seen
+                );
+            }
+
+            seen.delete(value);
+
+            return true;
+        }
+
+        if (
+            !isPlainObject(value)
+        ) {
+            throw new TypeError(
+                `[PAY54 Contacts Storage] Non-plain object rejected at ${path}.`
+            );
+        }
+
+        for (
+            const [key, child]
+            of Object.entries(value)
+        ) {
+
+            assertSafeObjectKey(
+                key,
+                path
+            );
+
+            if (
+                FORBIDDEN_FIELDS.has(
+                    key.toLowerCase()
+                )
+            ) {
+                throw new Error(
+                    `[PAY54 Contacts Storage] Security-sensitive field "${key}" is not permitted in Contacts persistence.`
+                );
+            }
+
+            assertSafePayload(
+                child,
+                `${path}.${key}`,
+                seen
+            );
+        }
+
+        seen.delete(value);
+
+        return true;
     }
 
     /* ======================================================================
        STORAGE AVAILABILITY
     ====================================================================== */
 
-    function getStorage() {
+    function getLocalStorage() {
 
-        if (!GLOBAL.localStorage) {
+        try {
+
+            return GLOBAL.localStorage;
+
+        } catch (error) {
 
             throw new Error(
-                "[PAY54_CONTACTS_STORAGE] Browser storage is unavailable."
+                `[PAY54 Contacts Storage] Browser storage is inaccessible: ${
+                    error instanceof Error
+                        ? error.message
+                        : String(error)
+                }`
             );
-
         }
-
-        return GLOBAL.localStorage;
-
     }
 
     function verifyStorageAvailability() {
 
+        const storage =
+            getLocalStorage();
+
         const probeKey =
-            `__pay54_contacts_probe_${Date.now()}`;
+            `${PRIMARY_KEY}.__probe__`;
 
         try {
-
-            const storage =
-                getStorage();
 
             storage.setItem(
                 probeKey,
@@ -782,47 +1143,36 @@
             state.storageAvailable =
                 false;
 
-            state.lastError =
-                error;
-
-            return false;
-
+            throw new Error(
+                `[PAY54 Contacts Storage] localStorage is unavailable: ${
+                    error instanceof Error
+                        ? error.message
+                        : String(error)
+                }`
+            );
         }
-
     }
 
     /* ======================================================================
-       SAFE STORAGE OPERATIONS
+       RAW STORAGE OPERATIONS
     ====================================================================== */
 
     function readRaw(key) {
 
         try {
 
-            return getStorage()
+            return getLocalStorage()
                 .getItem(key);
 
         } catch (error) {
 
-            state.lastError =
-                error;
-
-            publishEvent(
-                EVENTS.ERROR,
-                {
-                    operation: "read",
-                    key,
-                    message:
-                        error instanceof Error
-                            ? error.message
-                            : String(error)
-                }
+            recordError(
+                `storage.read:${key}`,
+                error
             );
 
             throw error;
-
         }
-
     }
 
     function writeRaw(
@@ -832,7 +1182,7 @@
 
         try {
 
-            getStorage()
+            getLocalStorage()
                 .setItem(
                     key,
                     value
@@ -842,335 +1192,635 @@
 
         } catch (error) {
 
-            state.lastError =
-                error;
-
-            publishEvent(
-                EVENTS.ERROR,
-                {
-                    operation: "write",
-                    key,
-                    message:
-                        error instanceof Error
-                            ? error.message
-                            : String(error)
-                }
+            recordError(
+                `storage.write:${key}`,
+                error
             );
 
             throw error;
-
         }
-
     }
 
     function removeRaw(key) {
 
         try {
 
-            getStorage()
+            getLocalStorage()
                 .removeItem(key);
 
             return true;
 
         } catch (error) {
 
-            state.lastError =
-                error;
-
-            publishEvent(
-                EVENTS.ERROR,
-                {
-                    operation: "remove",
-                    key,
-                    message:
-                        error instanceof Error
-                            ? error.message
-                            : String(error)
-                }
+            recordError(
+                `storage.remove:${key}`,
+                error
             );
 
             throw error;
-
         }
-
     }
 
     function parseJSON(
         raw,
-        fallback
+        key
     ) {
-
-        if (
-            raw === null ||
-            raw === "" ||
-            raw === "null" ||
-            raw === "undefined"
-        ) {
-            return clone(fallback);
-        }
 
         try {
 
             return JSON.parse(raw);
 
-        } catch {
+        } catch (error) {
 
-            return clone(fallback);
-
+            throw new Error(
+                `[PAY54 Contacts Storage] Invalid JSON in "${key}": ${
+                    error instanceof Error
+                        ? error.message
+                        : String(error)
+                }`
+            );
         }
-
     }
 
     /* ======================================================================
-       CONTACT SCHEMA
+       NORMALISATION
     ====================================================================== */
 
-    function normaliseContact(
-        input,
-        existing = null
-    ) {
+    function normalizeTags(value) {
 
-        assertSafePayload(input);
-
-        const timestamp =
-            nowISO();
-
-        const source =
-            existing
-                ? {
-                    ...existing,
-                    ...input
-                }
-                : {
-                    ...input
-                };
-
-        const id =
-            cleanString(
-                existing?.id ||
-                source.id,
-                160
-            ) ||
-            generateId();
-
-        const displayName =
-            cleanString(
-                source.displayName ??
-                source.name ??
-                source.fullName,
-                160
-            );
-
-        const firstName =
-            cleanString(
-                source.firstName,
-                80
-            );
-
-        const lastName =
-            cleanString(
-                source.lastName,
-                80
-            );
-
-        const phone =
-            normalisePhone(
-                source.phone ??
-                source.phoneNumber ??
-                source.mobile
-            );
-
-        const email =
-            normaliseEmail(
-                source.email
-            );
-
-        const pay54Id =
-            normalisePay54Id(
-                source.pay54Id ??
-                source.pay54Tag ??
-                source.username
-            );
-
-        const resolvedDisplayName =
-            displayName ||
-            [firstName, lastName]
-                .filter(Boolean)
-                .join(" ") ||
-            pay54Id ||
-            phone ||
-            email ||
-            "PAY54 Contact";
-
-        const createdAt =
-            cleanString(
-                existing?.createdAt ||
-                source.createdAt,
-                64
-            ) ||
-            timestamp;
-
-        const updatedAt =
-            timestamp;
-
-        const contact =
-            {
-                id,
-                displayName:
-                    resolvedDisplayName,
-                firstName,
-                lastName,
-                phone,
-                email,
-                pay54Id,
-                avatar:
-                    cleanString(
-                        source.avatar,
-                        2048
-                    ),
-                favourite:
-                    normaliseBoolean(
-                        source.favourite ??
-                        source.favorite
-                    ),
-                tags:
-                    normaliseTags(
-                        source.tags
-                    ),
-                notes:
-                    cleanString(
-                        source.notes,
-                        1000
-                    ),
-                metadata:
-                    normaliseMetadata(
-                        source.metadata
-                    ),
-                createdAt,
-                updatedAt
-            };
-
-        return contact;
-
-    }
-
-    function normaliseMetadata(value) {
-
-        if (!isPlainObject(value)) {
-            return {};
+        if (
+            !Array.isArray(value)
+        ) {
+            return [];
         }
 
-        const result = {};
-
-        const allowedKeys = [
-            "source",
-            "relationship",
-            "country",
-            "currency",
-            "bankName",
-            "accountName",
-            "accountNumberMasked",
-            "lastUsedAt",
-            "useCount"
-        ];
+        const result = [];
+        const seen = new Set();
 
         for (
-            const key
-            of allowedKeys
+            const item of value
+        ) {
+
+            const tag =
+                cleanString(
+                    item,
+                    MAX_TAG_LENGTH
+                );
+
+            if (!tag) {
+                continue;
+            }
+
+            const identity =
+                tag.toLowerCase();
+
+            if (
+                seen.has(identity)
+            ) {
+                continue;
+            }
+
+            seen.add(identity);
+
+            result.push(tag);
+
+            if (
+                result.length >=
+                MAX_TAGS
+            ) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    function normalizeGroups(value) {
+
+        if (
+            !Array.isArray(value)
+        ) {
+            return [];
+        }
+
+        const result = [];
+        const seen = new Set();
+
+        for (
+            const item of value
+        ) {
+
+            const group =
+                cleanString(
+                    item,
+                    MAX_NAME_LENGTH
+                );
+
+            if (!group) {
+                continue;
+            }
+
+            const identity =
+                group.toLowerCase();
+
+            if (
+                seen.has(identity)
+            ) {
+                continue;
+            }
+
+            seen.add(identity);
+            result.push(group);
+        }
+
+        return result;
+    }
+
+    function normalizeMetadata(value) {
+
+        if (
+            !isPlainObject(value)
+        ) {
+            return Object.create(null);
+        }
+
+        assertSafePayload(
+            value,
+            "contact.metadata"
+        );
+
+        const metadata =
+            Object.create(null);
+
+        let count = 0;
+
+        for (
+            const [key, rawValue]
+            of Object.entries(value)
         ) {
 
             if (
-                !Object.prototype.hasOwnProperty.call(
-                    value,
+                !ALLOWED_METADATA_FIELDS.has(
                     key
                 )
             ) {
                 continue;
             }
 
-            const item =
-                value[key];
-
             if (
-                key === "useCount"
+                count >=
+                MAX_METADATA_KEYS
             ) {
-
-                const numeric =
-                    Number(item);
-
-                result[key] =
-                    Number.isFinite(numeric) &&
-                    numeric >= 0
-                        ? Math.floor(numeric)
-                        : 0;
-
-                continue;
-
+                break;
             }
 
-            result[key] =
-                cleanString(
-                    item,
-                    256
-                );
+            if (
+                rawValue === null ||
+                typeof rawValue === "undefined"
+            ) {
+                continue;
+            }
 
+            switch (key) {
+
+                case "useCount": {
+
+                    const numeric =
+                        Number(rawValue);
+
+                    metadata[key] =
+                        Number.isFinite(numeric)
+                            ? Math.max(
+                                0,
+                                Math.floor(numeric)
+                            )
+                            : 0;
+
+                    break;
+                }
+
+                case "lastUsedAt": {
+
+                    const timestamp =
+                        normalizeTimestamp(
+                            rawValue,
+                            null
+                        );
+
+                    if (timestamp) {
+                        metadata[key] =
+                            timestamp;
+                    }
+
+                    break;
+                }
+
+                default: {
+
+                    metadata[key] =
+                        cleanString(
+                            rawValue,
+                            250
+                        );
+
+                    break;
+                }
+            }
+
+            count += 1;
         }
 
-        return result;
-
+        return metadata;
     }
 
-    function validateContact(contact) {
+    function normalizeType(value) {
 
-        if (!isPlainObject(contact)) {
+        const type =
+            cleanString(value)
+                .toUpperCase();
 
-            return {
-                valid: false,
-                errors: [
-                    "Contact must be an object."
-                ]
-            };
-
-        }
-
-        const errors = [];
+        const allowed =
+            Object.values(
+                CONTACTS.TYPES ?? {}
+            );
 
         if (
-            typeof contact.id !== "string" ||
-            !contact.id.trim()
+            allowed.includes(type)
         ) {
-            errors.push(
-                "Contact ID is required."
+            return type;
+        }
+
+        return (
+            CONTACTS.TYPES?.PERSONAL ??
+            "PERSONAL"
+        );
+    }
+
+    function normalizeStatus(value) {
+
+        const status =
+            cleanString(value)
+                .toUpperCase();
+
+        const allowed =
+            Object.values(
+                CONTACTS.STATUS ?? {}
+            );
+
+        if (
+            allowed.includes(status)
+        ) {
+            return status;
+        }
+
+        return (
+            CONTACTS.STATUS?.ACTIVE ??
+            "ACTIVE"
+        );
+    }
+
+    function buildDisplayName(
+        input
+    ) {
+
+        const explicit =
+            cleanString(
+                input.displayName ??
+                input.name,
+                MAX_NAME_LENGTH
+            );
+
+        if (explicit) {
+            return explicit;
+        }
+
+        const firstName =
+            cleanString(
+                input.firstName ??
+                input.first_name,
+                MAX_NAME_LENGTH
+            );
+
+        const lastName =
+            cleanString(
+                input.lastName ??
+                input.last_name,
+                MAX_NAME_LENGTH
+            );
+
+        const combined =
+            `${firstName} ${lastName}`
+                .trim();
+
+        if (combined) {
+            return combined.slice(
+                0,
+                MAX_NAME_LENGTH
+            );
+        }
+
+        return (
+            normalizePay54Id(
+                input.pay54Id ??
+                input.pay54Tag ??
+                input.username
+            ) ||
+            normalizePhone(
+                input.phone ??
+                input.phoneNumber ??
+                input.mobile
+            ) ||
+            normalizeEmail(
+                input.email
+            )
+        ).slice(
+            0,
+            MAX_NAME_LENGTH
+        );
+    }
+
+    function normalizeContact(
+        input,
+        options = {}
+    ) {
+
+        if (
+            !isPlainObject(input)
+        ) {
+            throw new TypeError(
+                "[PAY54 Contacts Storage] Contact must be a plain object."
+            );
+        }
+
+        assertSafePayload(
+            input
+        );
+
+        const currentTime =
+            nowISO();
+
+        const existing =
+            options.existing &&
+            isPlainObject(
+                options.existing
+            )
+                ? options.existing
+                : null;
+
+        const preserveTimestamps =
+            options.preserveTimestamps ===
+            true;
+
+        const id =
+            cleanString(
+                input.id ??
+                existing?.id
+            ) ||
+            generateId();
+
+        const firstName =
+            cleanString(
+                input.firstName ??
+                input.first_name ??
+                existing?.firstName,
+                MAX_NAME_LENGTH
+            );
+
+        const lastName =
+            cleanString(
+                input.lastName ??
+                input.last_name ??
+                existing?.lastName,
+                MAX_NAME_LENGTH
+            );
+
+        const displayName =
+            buildDisplayName({
+                ...existing,
+                ...input,
+                firstName,
+                lastName
+            });
+
+        const alias =
+            cleanString(
+                input.alias ??
+                existing?.alias,
+                MAX_ALIAS_LENGTH
+            );
+
+        const phone =
+            normalizePhone(
+                input.phone ??
+                input.phoneNumber ??
+                input.mobile ??
+                existing?.phone
+            );
+
+        const email =
+            normalizeEmail(
+                input.email ??
+                existing?.email
+            );
+
+        const pay54Id =
+            normalizePay54Id(
+                input.pay54Id ??
+                input.pay54Tag ??
+                input.username ??
+                existing?.pay54Id
+            );
+
+        const createdAt =
+            preserveTimestamps
+                ? (
+                    normalizeTimestamp(
+                        input.createdAt ??
+                        input.created_at ??
+                        existing?.createdAt,
+                        currentTime
+                    )
+                )
+                : (
+                    normalizeTimestamp(
+                        existing?.createdAt,
+                        currentTime
+                    )
+                );
+
+        const updatedAt =
+            preserveTimestamps
+                ? (
+                    normalizeTimestamp(
+                        input.updatedAt ??
+                        input.updated_at ??
+                        existing?.updatedAt,
+                        createdAt
+                    )
+                )
+                : currentTime;
+
+        const favourite =
+            normalizeBoolean(
+                input.favourite ??
+                input.favorite ??
+                existing?.favourite
+            );
+
+        const record = {
+
+            id,
+
+            displayName,
+
+            firstName,
+
+            lastName,
+
+            alias,
+
+            phone,
+
+            email,
+
+            pay54Id,
+
+            type:
+                normalizeType(
+                    input.type ??
+                    existing?.type
+                ),
+
+            status:
+                normalizeStatus(
+                    input.status ??
+                    existing?.status
+                ),
+
+            avatar:
+                cleanString(
+                    input.avatar ??
+                    existing?.avatar,
+                    2048
+                ),
+
+            favourite,
+
+            tags:
+                normalizeTags(
+                    input.tags ??
+                    existing?.tags
+                ),
+
+            groups:
+                normalizeGroups(
+                    input.groups ??
+                    existing?.groups
+                ),
+
+            notes:
+                cleanString(
+                    input.notes ??
+                    input.note ??
+                    existing?.notes,
+                    MAX_NOTE_LENGTH
+                ),
+
+            metadata:
+                normalizeMetadata(
+                    input.metadata ??
+                    existing?.metadata
+                ),
+
+            createdAt,
+
+            updatedAt
+        };
+
+        validateContact(
+            record
+        );
+
+        return record;
+    }
+
+    /* ======================================================================
+       CONTACT VALIDATION
+    ====================================================================== */
+
+    function isValidEmail(value) {
+
+        if (!value) {
+            return true;
+        }
+
+        if (
+            value.length >
+            MAX_EMAIL_LENGTH
+        ) {
+            return false;
+        }
+
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            .test(value);
+    }
+
+    function validateContact(
+        contact
+    ) {
+
+        if (
+            !isPlainObject(contact)
+        ) {
+            throw new TypeError(
+                "[PAY54 Contacts Storage] Invalid Contact record."
+            );
+        }
+
+        assertSafePayload(
+            contact
+        );
+
+        if (
+            !cleanString(
+                contact.id
+            )
+        ) {
+            throw new Error(
+                "[PAY54 Contacts Storage] Contact id is required."
             );
         }
 
         if (
-            typeof contact.displayName !== "string" ||
-            !contact.displayName.trim()
+            !cleanString(
+                contact.displayName,
+                MAX_NAME_LENGTH
+            )
         ) {
-            errors.push(
-                "Contact display name is required."
+            throw new Error(
+                "[PAY54 Contacts Storage] Contact display name is required."
             );
         }
 
         if (
+            REPOSITORY_CONFIG.REQUIRE_IDENTIFIER !==
+                false &&
             !contact.phone &&
             !contact.email &&
             !contact.pay54Id
         ) {
-            errors.push(
-                "Contact requires at least one contact identifier."
+            throw new Error(
+                "[PAY54 Contacts Storage] Contact requires a phone number, email address or PAY54 ID."
             );
         }
 
         if (
-            contact.email &&
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(
+            !isValidEmail(
                 contact.email
             )
         ) {
-            errors.push(
-                "Contact email is invalid."
+            throw new Error(
+                "[PAY54 Contacts Storage] Contact email address is invalid."
             );
         }
 
@@ -1179,8 +1829,18 @@
                 contact.tags
             )
         ) {
-            errors.push(
-                "Contact tags must be an array."
+            throw new Error(
+                "[PAY54 Contacts Storage] Contact tags must be an array."
+            );
+        }
+
+        if (
+            !Array.isArray(
+                contact.groups
+            )
+        ) {
+            throw new Error(
+                "[PAY54 Contacts Storage] Contact groups must be an array."
             );
         }
 
@@ -1189,17 +1849,12 @@
                 contact.metadata
             )
         ) {
-            errors.push(
-                "Contact metadata must be an object."
+            throw new Error(
+                "[PAY54 Contacts Storage] Contact metadata must be a plain object."
             );
         }
 
-        return {
-            valid:
-                errors.length === 0,
-            errors
-        };
-
+        return true;
     }
 
     /* ======================================================================
@@ -1212,533 +1867,178 @@
             nowISO();
 
         return {
+
             schemaVersion:
                 SCHEMA_VERSION,
-            contacts: [],
+
+            contacts:
+                [],
+
             metadata: {
+
                 createdAt:
                     timestamp,
+
                 updatedAt:
                     timestamp,
+
                 recordCount:
                     0
             }
         };
-
     }
 
-    function normaliseRepository(
-        repository
+    function normalizeRepositoryMetadata(
+        metadata,
+        contacts,
+        fallbackCreatedAt = null
     ) {
 
+        const timestamp =
+            nowISO();
+
+        const source =
+            isPlainObject(metadata)
+                ? metadata
+                : {};
+
+        return {
+
+            createdAt:
+                normalizeTimestamp(
+                    source.createdAt,
+                    fallbackCreatedAt ??
+                    timestamp
+                ),
+
+            updatedAt:
+                normalizeTimestamp(
+                    source.updatedAt,
+                    timestamp
+                ),
+
+            recordCount:
+                contacts.length
+        };
+    }
+
+    function normalizeRepository(
+        input
+    ) {
+
+        /*
+         * Legacy PAY54 Contacts storage may contain a raw array.
+         */
+
         if (
-            Array.isArray(repository)
+            Array.isArray(input)
         ) {
 
-            repository = {
-                schemaVersion: 0,
-                contacts: repository,
-                metadata: {}
+            const contacts =
+                normalizeLegacyContacts(
+                    input
+                );
+
+            return {
+
+                schemaVersion:
+                    0,
+
+                contacts,
+
+                metadata:
+                    normalizeRepositoryMetadata(
+                        null,
+                        contacts
+                    )
             };
-
         }
 
-        if (!isPlainObject(repository)) {
-
-            return createEmptyRepository();
-
+        if (
+            !isPlainObject(input)
+        ) {
+            throw new Error(
+                "[PAY54 Contacts Storage] Repository document is invalid."
+            );
         }
 
-        const rawContacts =
-            Array.isArray(
-                repository.contacts
+        const schemaVersion =
+            Number.isInteger(
+                input.schemaVersion
             )
-                ? repository.contacts
+                ? input.schemaVersion
+                : 0;
+
+        const sourceContacts =
+            Array.isArray(
+                input.contacts
+            )
+                ? input.contacts
                 : [];
 
-        const contacts = [];
+        const contacts =
+            normalizeLegacyContacts(
+                sourceContacts
+            );
 
-        const ids =
-            new Set();
+        return {
+
+            schemaVersion,
+
+            contacts,
+
+            metadata:
+                normalizeRepositoryMetadata(
+                    input.metadata,
+                    contacts
+                )
+        };
+    }
+
+    function normalizeLegacyContacts(
+        contacts
+    ) {
+
+        const normalized = [];
 
         for (
-            const candidate
-            of rawContacts
+            const source of contacts
         ) {
+
+            if (
+                !isPlainObject(source)
+            ) {
+                continue;
+            }
 
             try {
 
-                if (!isPlainObject(candidate)) {
-                    continue;
-                }
-
-                const contact =
-                    normaliseContactForRecovery(
-                        candidate
-                    );
-
-                const validation =
-                    validateContact(contact);
-
-                if (
-                    !validation.valid ||
-                    ids.has(contact.id)
-                ) {
-                    continue;
-                }
-
-                ids.add(contact.id);
-                contacts.push(contact);
-
-            } catch {
-                /* Invalid records are excluded during repository recovery. */
-            }
-
-        }
-
-        const createdAt =
-            cleanString(
-                repository.metadata?.createdAt,
-                64
-            ) ||
-            nowISO();
-
-        const updatedAt =
-            cleanString(
-                repository.metadata?.updatedAt,
-                64
-            ) ||
-            nowISO();
-
-        return {
-            schemaVersion:
-                Number.isInteger(
-                    repository.schemaVersion
-                )
-                    ? repository.schemaVersion
-                    : 0,
-            contacts,
-            metadata: {
-                createdAt,
-                updatedAt,
-                recordCount:
-                    contacts.length
-            }
-        };
-
-    }
-
-    function normaliseContactForRecovery(
-        source
-    ) {
-
-        assertSafePayload(source);
-
-        const id =
-            cleanString(
-                source.id,
-                160
-            ) ||
-            generateId();
-
-        const createdAt =
-            cleanString(
-                source.createdAt ??
-                source.created_at,
-                64
-            ) ||
-            nowISO();
-
-        const updatedAt =
-            cleanString(
-                source.updatedAt ??
-                source.updated_at,
-                64
-            ) ||
-            createdAt;
-
-        const firstName =
-            cleanString(
-                source.firstName ??
-                source.first_name,
-                80
-            );
-
-        const lastName =
-            cleanString(
-                source.lastName ??
-                source.last_name,
-                80
-            );
-
-        const phone =
-            normalisePhone(
-                source.phone ??
-                source.phoneNumber ??
-                source.mobile
-            );
-
-        const email =
-            normaliseEmail(
-                source.email
-            );
-
-        const pay54Id =
-            normalisePay54Id(
-                source.pay54Id ??
-                source.pay54Tag ??
-                source.username
-            );
-
-        const displayName =
-            cleanString(
-                source.displayName ??
-                source.name ??
-                source.fullName,
-                160
-            ) ||
-            [firstName, lastName]
-                .filter(Boolean)
-                .join(" ") ||
-            pay54Id ||
-            phone ||
-            email ||
-            "PAY54 Contact";
-
-        return {
-            id,
-            displayName,
-            firstName,
-            lastName,
-            phone,
-            email,
-            pay54Id,
-            avatar:
-                cleanString(
-                    source.avatar,
-                    2048
-                ),
-            favourite:
-                normaliseBoolean(
-                    source.favourite ??
-                    source.favorite
-                ),
-            tags:
-                normaliseTags(
-                    source.tags
-                ),
-            notes:
-                cleanString(
-                    source.notes,
-                    1000
-                ),
-            metadata:
-                normaliseMetadata(
-                    source.metadata
-                ),
-            createdAt,
-            updatedAt
-        };
-
-    }
-
-    /* ======================================================================
-       MIGRATIONS
-    ====================================================================== */
-
-    const MIGRATIONS =
-        new Map();
-
-    MIGRATIONS.set(
-        0,
-        repository => {
-
-            const normalised =
-                normaliseRepository(
-                    repository
+                normalized.push(
+                    normalizeContact(
+                        source,
+                        {
+                            preserveTimestamps:
+                                true
+                        }
+                    )
                 );
 
-            normalised.schemaVersion =
-                1;
+            } catch (error) {
 
-            normalised.metadata.updatedAt =
-                nowISO();
-
-            return normalised;
-
-        }
-    );
-
-    function migrateRepository(
-        repository
-    ) {
-
-        let working =
-            normaliseRepository(
-                repository
-            );
-
-        let currentVersion =
-            Number.isInteger(
-                working.schemaVersion
-            )
-                ? working.schemaVersion
-                : 0;
-
-        if (
-            currentVersion >
-            SCHEMA_VERSION
-        ) {
-
-            throw new Error(
-                `[PAY54_CONTACTS_STORAGE] Unsupported contacts schema version ${currentVersion}. Runtime supports schema ${SCHEMA_VERSION}.`
-            );
-
-        }
-
-        const originalVersion =
-            currentVersion;
-
-        while (
-            currentVersion <
-            SCHEMA_VERSION
-        ) {
-
-            const migration =
-                MIGRATIONS.get(
-                    currentVersion
-                );
-
-            if (
-                typeof migration !== "function"
-            ) {
-
-                throw new Error(
-                    `[PAY54_CONTACTS_STORAGE] Missing migration from schema ${currentVersion}.`
-                );
-
-            }
-
-            working =
-                migration(
-                    working
-                );
-
-            currentVersion =
-                Number(
-                    working.schemaVersion
-                );
-
-            if (
-                !Number.isInteger(
-                    currentVersion
-                )
-            ) {
-
-                throw new Error(
-                    "[PAY54_CONTACTS_STORAGE] Migration produced an invalid schema version."
-                );
-
-            }
-
-        }
-
-        if (
-            originalVersion !==
-            currentVersion
-        ) {
-
-            state.migrationPerformed =
-                true;
-
-            publishEvent(
-                EVENTS.MIGRATED,
-                {
-                    fromVersion:
-                        originalVersion,
-                    toVersion:
-                        currentVersion,
-                    migratedAt:
-                        nowISO()
-                }
-            );
-
-        }
-
-        return working;
-
-    }
-
-    /* ======================================================================
-       INTEGRITY
-    ====================================================================== */
-
-    function verifyRepositoryIntegrity(
-        repository
-    ) {
-
-        const errors = [];
-
-        if (!isPlainObject(repository)) {
-
-            errors.push(
-                "Repository document is invalid."
-            );
-
-            return {
-                valid: false,
-                errors,
-                recordCount: 0,
-                checkedAt:
-                    nowISO()
-            };
-
-        }
-
-        if (
-            repository.schemaVersion !==
-            SCHEMA_VERSION
-        ) {
-
-            errors.push(
-                `Unexpected schema version: ${repository.schemaVersion}.`
-            );
-
-        }
-
-        if (
-            !Array.isArray(
-                repository.contacts
-            )
-        ) {
-
-            errors.push(
-                "Repository contacts collection is invalid."
-            );
-
-        }
-
-        const ids =
-            new Set();
-
-        const identifiers =
-            new Set();
-
-        const contacts =
-            Array.isArray(
-                repository.contacts
-            )
-                ? repository.contacts
-                : [];
-
-        for (
-            const contact
-            of contacts
-        ) {
-
-            const validation =
-                validateContact(contact);
-
-            if (!validation.valid) {
-
-                errors.push(
-                    `Invalid contact "${contact?.id || "unknown"}": ${validation.errors.join(" ")}`
-                );
+                /*
+                 * Invalid legacy records are not silently converted into
+                 * valid records. Recovery policy handles them separately.
+                 */
 
                 continue;
-
             }
-
-            if (
-                ids.has(contact.id)
-            ) {
-
-                errors.push(
-                    `Duplicate contact ID "${contact.id}".`
-                );
-
-            }
-
-            ids.add(contact.id);
-
-            const identityKeys =
-                buildIdentityKeys(
-                    contact
-                );
-
-            for (
-                const key
-                of identityKeys
-            ) {
-
-                if (
-                    identifiers.has(key)
-                ) {
-
-                    /*
-                     * Duplicate identifiers are reported by integrity
-                     * verification but do not destroy records automatically.
-                     */
-                    errors.push(
-                        `Duplicate contact identifier "${key}".`
-                    );
-
-                } else {
-
-                    identifiers.add(key);
-
-                }
-
-            }
-
         }
 
-        const expectedCount =
-            contacts.length;
-
-        if (
-            repository.metadata &&
-            Number.isInteger(
-                repository.metadata.recordCount
-            ) &&
-            repository.metadata.recordCount !==
-                expectedCount
-        ) {
-
-            errors.push(
-                "Repository record count metadata does not match stored contacts."
-            );
-
-        }
-
-        const result = {
-            valid:
-                errors.length === 0,
-            errors,
-            recordCount:
-                expectedCount,
-            checkedAt:
-                nowISO()
-        };
-
-        state.lastIntegrityCheck =
-            result;
-
-        if (!result.valid) {
-
-            publishEvent(
-                EVENTS.INTEGRITY_FAILED,
-                clone(result)
-            );
-
-        }
-
-        return result;
-
+        return normalized;
     }
 
     /* ======================================================================
-       DUPLICATE DETECTION
+       IDENTITY / DUPLICATE PROTECTION
     ====================================================================== */
 
     function buildIdentityKeys(
@@ -1747,32 +2047,37 @@
 
         const keys = [];
 
-        if (contact.pay54Id) {
-
+        if (
+            contact.pay54Id
+        ) {
             keys.push(
-                `pay54:${normalisePay54Id(contact.pay54Id)}`
+                `pay54:${normalizePay54Id(
+                    contact.pay54Id
+                )}`
             );
-
         }
 
-        if (contact.phone) {
-
+        if (
+            contact.phone
+        ) {
             keys.push(
-                `phone:${normalisePhone(contact.phone)}`
+                `phone:${normalizePhone(
+                    contact.phone
+                )}`
             );
-
         }
 
-        if (contact.email) {
-
+        if (
+            contact.email
+        ) {
             keys.push(
-                `email:${normaliseEmail(contact.email)}`
+                `email:${normalizeEmail(
+                    contact.email
+                )}`
             );
-
         }
 
         return keys;
-
     }
 
     function findDuplicate(
@@ -1794,43 +2099,999 @@
             return null;
         }
 
-        return (
-            contacts.find(contact => {
+        for (
+            const contact of contacts
+        ) {
+
+            if (
+                excludedId &&
+                contact.id ===
+                    excludedId
+            ) {
+                continue;
+            }
+
+            for (
+                const identity of
+                buildIdentityKeys(
+                    contact
+                )
+            ) {
 
                 if (
-                    excludedId &&
-                    contact.id === excludedId
+                    candidateKeys.has(
+                        identity
+                    )
                 ) {
-                    return false;
+                    return contact;
                 }
+            }
+        }
 
-                return buildIdentityKeys(
-                    contact
-                ).some(key =>
-                    candidateKeys.has(key)
-                );
-
-            }) ||
-            null
-        );
-
+        return null;
     }
 
     /* ======================================================================
-       PERSISTENCE
+       INTEGRITY VERIFICATION
+    ====================================================================== */
+
+    function verifyRepositoryIntegrity(
+        repository
+    ) {
+
+        const errors = [];
+
+        if (
+            !isPlainObject(
+                repository
+            )
+        ) {
+
+            errors.push(
+                "Repository is not a plain object."
+            );
+
+        } else {
+
+            if (
+                !Number.isInteger(
+                    repository.schemaVersion
+                )
+            ) {
+                errors.push(
+                    "Repository schemaVersion is invalid."
+                );
+            }
+
+            if (
+                repository.schemaVersion >
+                SCHEMA_VERSION
+            ) {
+                errors.push(
+                    `Repository schema ${repository.schemaVersion} is newer than supported schema ${SCHEMA_VERSION}.`
+                );
+            }
+
+            if (
+                !Array.isArray(
+                    repository.contacts
+                )
+            ) {
+
+                errors.push(
+                    "Repository contacts collection is invalid."
+                );
+
+            } else {
+
+                if (
+                    repository.contacts.length >
+                    MAX_CONTACTS
+                ) {
+                    errors.push(
+                        `Repository exceeds maximum Contact capacity of ${MAX_CONTACTS}.`
+                    );
+                }
+
+                const ids =
+                    new Set();
+
+                const identities =
+                    new Map();
+
+                for (
+                    let index = 0;
+                    index <
+                    repository.contacts.length;
+                    index += 1
+                ) {
+
+                    const contact =
+                        repository.contacts[index];
+
+                    try {
+
+                        validateContact(
+                            contact
+                        );
+
+                    } catch (error) {
+
+                        errors.push(
+                            `Invalid Contact at index ${index}: ${
+                                error instanceof Error
+                                    ? error.message
+                                    : String(error)
+                            }`
+                        );
+
+                        continue;
+                    }
+
+                    if (
+                        ids.has(
+                            contact.id
+                        )
+                    ) {
+
+                        errors.push(
+                            `Duplicate Contact id detected: ${contact.id}.`
+                        );
+
+                    } else {
+
+                        ids.add(
+                            contact.id
+                        );
+                    }
+
+                    for (
+                        const identity of
+                        buildIdentityKeys(
+                            contact
+                        )
+                    ) {
+
+                        if (
+                            identities.has(
+                                identity
+                            )
+                        ) {
+
+                            errors.push(
+                                `Duplicate Contact identity detected: ${identity}.`
+                            );
+
+                        } else {
+
+                            identities.set(
+                                identity,
+                                contact.id
+                            );
+                        }
+                    }
+                }
+            }
+
+            if (
+                !isPlainObject(
+                    repository.metadata
+                )
+            ) {
+
+                errors.push(
+                    "Repository metadata is invalid."
+                );
+
+            } else if (
+                Array.isArray(
+                    repository.contacts
+                ) &&
+                repository.metadata.recordCount !==
+                    repository.contacts.length
+            ) {
+
+                errors.push(
+                    "Repository metadata recordCount does not match Contacts collection."
+                );
+            }
+        }
+
+        const result =
+            Object.freeze({
+
+                ok:
+                    errors.length === 0,
+
+                schemaVersion:
+                    repository?.schemaVersion ??
+                    null,
+
+                recordCount:
+                    Array.isArray(
+                        repository?.contacts
+                    )
+                        ? repository.contacts.length
+                        : 0,
+
+                errors:
+                    Object.freeze(
+                        errors
+                    ),
+
+                checkedAt:
+                    nowISO()
+            });
+
+        state.lastIntegrityCheck =
+            result;
+
+        return result;
+    }
+
+    /* ======================================================================
+       QUARANTINE
+    ====================================================================== */
+
+    function quarantinePayload(
+        raw,
+        reason
+    ) {
+
+        if (
+            INTEGRITY_CONFIG.QUARANTINE_INVALID_DATA ===
+            false
+        ) {
+            return false;
+        }
+
+        /*
+         * Contact data can contain personal information. Quarantine is
+         * therefore bounded to one recovery payload rather than producing
+         * timestamped copies indefinitely.
+         */
+
+        const payload = {
+
+            reason:
+                cleanString(
+                    reason,
+                    500
+                ),
+
+            quarantinedAt:
+                nowISO(),
+
+            sourceKey:
+                PRIMARY_KEY,
+
+            payload:
+                typeof raw === "string"
+                    ? raw
+                    : JSON.stringify(raw)
+        };
+
+        writeRaw(
+            QUARANTINE_KEY,
+            JSON.stringify(
+                payload
+            )
+        );
+
+        return true;
+    }
+
+    /* ======================================================================
+       REPOSITORY REPAIR
+    ====================================================================== */
+
+    function repairRepository(
+        repository
+    ) {
+
+        const repaired =
+            createEmptyRepository();
+
+        const sourceContacts =
+            Array.isArray(
+                repository?.contacts
+            )
+                ? repository.contacts
+                : [];
+
+        const acceptedIds =
+            new Set();
+
+        const acceptedIdentities =
+            new Set();
+
+        for (
+            const source of sourceContacts
+        ) {
+
+            try {
+
+                const contact =
+                    normalizeContact(
+                        source,
+                        {
+                            preserveTimestamps:
+                                true
+                        }
+                    );
+
+                if (
+                    acceptedIds.has(
+                        contact.id
+                    )
+                ) {
+                    continue;
+                }
+
+                const identities =
+                    buildIdentityKeys(
+                        contact
+                    );
+
+                if (
+                    identities.some(
+                        identity =>
+                            acceptedIdentities.has(
+                                identity
+                            )
+                    )
+                ) {
+                    continue;
+                }
+
+                acceptedIds.add(
+                    contact.id
+                );
+
+                for (
+                    const identity of identities
+                ) {
+                    acceptedIdentities.add(
+                        identity
+                    );
+                }
+
+                repaired.contacts.push(
+                    contact
+                );
+
+                if (
+                    repaired.contacts.length >=
+                    MAX_CONTACTS
+                ) {
+                    break;
+                }
+
+            } catch (error) {
+
+                continue;
+            }
+        }
+
+        repaired.metadata =
+            normalizeRepositoryMetadata(
+                repository?.metadata,
+                repaired.contacts,
+                repository?.metadata
+                    ?.createdAt
+            );
+
+        repaired.schemaVersion =
+            SCHEMA_VERSION;
+
+        return repaired;
+    }
+
+    /* ======================================================================
+       MIGRATIONS
+    ====================================================================== */
+
+    const MIGRATIONS =
+        new Map();
+
+    MIGRATIONS.set(
+        0,
+        repository => {
+
+            const migrated =
+                createEmptyRepository();
+
+            migrated.contacts =
+                normalizeLegacyContacts(
+                    repository.contacts
+                );
+
+            migrated.metadata =
+                normalizeRepositoryMetadata(
+                    repository.metadata,
+                    migrated.contacts,
+                    repository.metadata
+                        ?.createdAt
+                );
+
+            migrated.schemaVersion =
+                1;
+
+            return migrated;
+        }
+    );
+
+    function migrateRepository(
+        repository
+    ) {
+
+        let current =
+            normalizeRepository(
+                repository
+            );
+
+        const fromVersion =
+            current.schemaVersion;
+
+        if (
+            fromVersion >
+            SCHEMA_VERSION
+        ) {
+            throw new Error(
+                `[PAY54 Contacts Storage] Repository schema ${fromVersion} is newer than supported schema ${SCHEMA_VERSION}.`
+            );
+        }
+
+        if (
+            fromVersion <
+            MIN_SCHEMA_VERSION
+        ) {
+            throw new Error(
+                `[PAY54 Contacts Storage] Repository schema ${fromVersion} is older than minimum supported schema ${MIN_SCHEMA_VERSION}.`
+            );
+        }
+
+        let migrated =
+            false;
+
+        const applied = [];
+
+        while (
+            current.schemaVersion <
+            SCHEMA_VERSION
+        ) {
+
+            const migration =
+                MIGRATIONS.get(
+                    current.schemaVersion
+                );
+
+            if (
+                typeof migration !==
+                "function"
+            ) {
+                throw new Error(
+                    `[PAY54 Contacts Storage] Missing migration from schema ${current.schemaVersion}.`
+                );
+            }
+
+            const previousVersion =
+                current.schemaVersion;
+
+            current =
+                migration(
+                    current
+                );
+
+            if (
+                !isPlainObject(
+                    current
+                ) ||
+                !Number.isInteger(
+                    current.schemaVersion
+                ) ||
+                current.schemaVersion <=
+                    previousVersion
+            ) {
+                throw new Error(
+                    `[PAY54 Contacts Storage] Migration from schema ${previousVersion} produced an invalid result.`
+                );
+            }
+
+            applied.push({
+                from:
+                    previousVersion,
+                to:
+                    current.schemaVersion
+            });
+
+            migrated =
+                true;
+        }
+
+        const result = {
+
+            repository:
+                current,
+
+            migrated,
+
+            fromVersion,
+
+            toVersion:
+                current.schemaVersion,
+
+            applied
+        };
+
+        if (migrated) {
+
+            state.lastMigration = {
+                fromVersion,
+                toVersion:
+                    current.schemaVersion,
+                applied:
+                    immutableClone(
+                        applied
+                    ),
+                migratedAt:
+                    nowISO()
+            };
+        }
+
+        return result;
+    }
+
+    /* ======================================================================
+       ATOMIC-STYLE STAGED PERSISTENCE
+    ====================================================================== */
+
+    function buildMetadataDocument(
+        repository
+    ) {
+
+        return {
+
+            schemaVersion:
+                repository.schemaVersion,
+
+            recordCount:
+                repository.contacts.length,
+
+            module:
+                MODULE_NAME,
+
+            version:
+                VERSION,
+
+            updatedAt:
+                repository.metadata
+                    .updatedAt,
+
+            integrityCheckedAt:
+                state.lastIntegrityCheck
+                    ?.checkedAt ??
+                null
+        };
+    }
+
+    function commitRepository(
+        repository,
+        options = {}
+    ) {
+
+        const normalized =
+            normalizeRepository(
+                repository
+            );
+
+        normalized.schemaVersion =
+            SCHEMA_VERSION;
+
+        normalized.metadata =
+            normalizeRepositoryMetadata(
+                normalized.metadata,
+                normalized.contacts,
+                normalized.metadata
+                    ?.createdAt
+            );
+
+        normalized.metadata.updatedAt =
+            nowISO();
+
+        normalized.metadata.recordCount =
+            normalized.contacts.length;
+
+        const integrity =
+            verifyRepositoryIntegrity(
+                normalized
+            );
+
+        if (!integrity.ok) {
+            throw new Error(
+                `[PAY54 Contacts Storage] Repository integrity verification failed before persistence: ${integrity.errors.join(" | ")}`
+            );
+        }
+
+        const serialized =
+            JSON.stringify(
+                normalized
+            );
+
+        const previousRaw =
+            readRaw(
+                PRIMARY_KEY
+            );
+
+        const useStaging =
+            STORAGE_CONFIG.USE_STAGING_WRITES !==
+            false;
+
+        try {
+
+            if (useStaging) {
+
+                writeRaw(
+                    STAGING_KEY,
+                    serialized
+                );
+
+                const stagedRaw =
+                    readRaw(
+                        STAGING_KEY
+                    );
+
+                if (
+                    stagedRaw !==
+                    serialized
+                ) {
+                    throw new Error(
+                        "[PAY54 Contacts Storage] Staging verification failed."
+                    );
+                }
+
+                const stagedDocument =
+                    parseJSON(
+                        stagedRaw,
+                        STAGING_KEY
+                    );
+
+                const stagedIntegrity =
+                    verifyRepositoryIntegrity(
+                        stagedDocument
+                    );
+
+                if (
+                    !stagedIntegrity.ok
+                ) {
+                    throw new Error(
+                        `[PAY54 Contacts Storage] Staged repository failed integrity verification: ${stagedIntegrity.errors.join(" | ")}`
+                    );
+                }
+            }
+
+            if (
+                previousRaw !== null &&
+                STORAGE_CONFIG.PRESERVE_BACKUP !==
+                    false
+            ) {
+
+                writeRaw(
+                    BACKUP_KEY,
+                    previousRaw
+                );
+            }
+
+            writeRaw(
+                PRIMARY_KEY,
+                serialized
+            );
+
+            if (
+                STORAGE_CONFIG.VERIFY_AFTER_WRITE !==
+                false
+            ) {
+
+                const committedRaw =
+                    readRaw(
+                        PRIMARY_KEY
+                    );
+
+                if (
+                    committedRaw !==
+                    serialized
+                ) {
+                    throw new Error(
+                        "[PAY54 Contacts Storage] Committed storage verification failed."
+                    );
+                }
+
+                const committedDocument =
+                    parseJSON(
+                        committedRaw,
+                        PRIMARY_KEY
+                    );
+
+                const committedIntegrity =
+                    verifyRepositoryIntegrity(
+                        committedDocument
+                    );
+
+                if (
+                    !committedIntegrity.ok
+                ) {
+                    throw new Error(
+                        `[PAY54 Contacts Storage] Committed repository failed integrity verification: ${committedIntegrity.errors.join(" | ")}`
+                    );
+                }
+            }
+
+            writeRaw(
+                META_KEY,
+                JSON.stringify(
+                    buildMetadataDocument(
+                        normalized
+                    )
+                )
+            );
+
+            if (
+                options.migration === true
+            ) {
+
+                writeRaw(
+                    MIGRATION_KEY,
+                    JSON.stringify({
+                        schemaVersion:
+                            normalized
+                                .schemaVersion,
+                        migratedAt:
+                            nowISO(),
+                        module:
+                            MODULE_NAME,
+                        version:
+                            VERSION
+                    })
+                );
+            }
+
+            if (useStaging) {
+                removeRaw(
+                    STAGING_KEY
+                );
+            }
+
+            state.lastWriteAt =
+                nowISO();
+
+            return normalized;
+
+        } catch (error) {
+
+            /*
+             * If the primary write was changed but verification failed,
+             * restore the last known payload where possible.
+             */
+
+            try {
+
+                if (
+                    previousRaw !== null
+                ) {
+
+                    writeRaw(
+                        PRIMARY_KEY,
+                        previousRaw
+                    );
+
+                } else {
+
+                    removeRaw(
+                        PRIMARY_KEY
+                    );
+                }
+
+            } catch (rollbackError) {
+
+                recordError(
+                    "repository.rollback",
+                    rollbackError
+                );
+            }
+
+            try {
+                removeRaw(
+                    STAGING_KEY
+                );
+            } catch (cleanupError) {
+                recordError(
+                    "repository.staging.cleanup",
+                    cleanupError
+                );
+            }
+
+            throw error;
+        }
+    }
+
+    /* ======================================================================
+       RECOVERY
+    ====================================================================== */
+
+    function recoverFromBackup(
+        reason
+    ) {
+
+        const backupRaw =
+            readRaw(
+                BACKUP_KEY
+            );
+
+        if (
+            backupRaw === null
+        ) {
+            return null;
+        }
+
+        try {
+
+            const backup =
+                parseJSON(
+                    backupRaw,
+                    BACKUP_KEY
+                );
+
+            const migration =
+                migrateRepository(
+                    backup
+                );
+
+            let repository =
+                migration.repository;
+
+            let integrity =
+                verifyRepositoryIntegrity(
+                    repository
+                );
+
+            if (
+                !integrity.ok &&
+                INTEGRITY_CONFIG.REPAIR_INVALID_RECORDS !==
+                    false
+            ) {
+
+                repository =
+                    repairRepository(
+                        repository
+                    );
+
+                integrity =
+                    verifyRepositoryIntegrity(
+                        repository
+                    );
+            }
+
+            if (!integrity.ok) {
+                return null;
+            }
+
+            const committed =
+                commitRepository(
+                    repository,
+                    {
+                        migration:
+                            migration.migrated
+                    }
+                );
+
+            state.recovered =
+                true;
+
+            publishEvent(
+                EVENTS.STORAGE_RECOVERED ??
+                "contacts.storage.recovered",
+                {
+                    reason,
+                    source:
+                        "backup",
+                    recordCount:
+                        committed.contacts.length
+                }
+            );
+
+            return committed;
+
+        } catch (error) {
+
+            recordError(
+                "repository.backup.recovery",
+                error
+            );
+
+            return null;
+        }
+    }
+
+    function recoverRepository(
+        raw,
+        reason
+    ) {
+
+        try {
+
+            quarantinePayload(
+                raw,
+                reason
+            );
+
+        } catch (error) {
+
+            recordError(
+                "repository.quarantine",
+                error
+            );
+        }
+
+        const backup =
+            recoverFromBackup(
+                reason
+            );
+
+        if (backup) {
+            return backup;
+        }
+
+        const empty =
+            createEmptyRepository();
+
+        const committed =
+            commitRepository(
+                empty
+            );
+
+        state.recovered =
+            true;
+
+        publishEvent(
+            EVENTS.STORAGE_RECOVERED ??
+            "contacts.storage.recovered",
+            {
+                reason,
+                source:
+                    "empty-repository",
+                recordCount:
+                    0
+            }
+        );
+
+        return committed;
+    }
+
+    /* ======================================================================
+       REPOSITORY READ
     ====================================================================== */
 
     function readRepository() {
 
         const raw =
             readRaw(
-                STORAGE_KEY
+                PRIMARY_KEY
             );
 
-        if (raw === null) {
+        state.lastReadAt =
+            nowISO();
 
-            return createEmptyRepository();
+        if (
+            raw === null ||
+            raw === ""
+        ) {
 
+            const empty =
+                createEmptyRepository();
+
+            return commitRepository(
+                empty
+            );
         }
 
         let parsed;
@@ -1838,362 +3099,207 @@
         try {
 
             parsed =
-                JSON.parse(raw);
+                parseJSON(
+                    raw,
+                    PRIMARY_KEY
+                );
 
         } catch (error) {
 
-            state.recovered =
-                true;
-
-            state.lastError =
-                error;
-
-            backupCorruptPayload(
-                raw
-            );
-
-            const recovered =
-                createEmptyRepository();
-
-            writeRepository(
-                recovered,
-                {
-                    skipIntegrity:
-                        false
-                }
-            );
-
             publishEvent(
-                EVENTS.RECOVERED,
+                EVENTS.STORAGE_INTEGRITY_FAILED ??
+                "contacts.storage.integrity_failed",
                 {
                     reason:
-                        "malformed_json",
-                    recoveredAt:
-                        nowISO()
+                        "invalid-json",
+                    message:
+                        error.message
                 }
             );
 
-            return recovered;
-
+            return recoverRepository(
+                raw,
+                error.message
+            );
         }
 
-        const migrated =
-            migrateRepository(
-                parsed
-            );
-
-        const integrity =
-            verifyRepositoryIntegrity(
-                migrated
-            );
-
-        if (!integrity.valid) {
-
-            const repaired =
-                repairRepository(
-                    migrated
-                );
-
-            const repairedIntegrity =
-                verifyRepositoryIntegrity(
-                    repaired
-                );
-
-            if (!repairedIntegrity.valid) {
-
-                throw new Error(
-                    `[PAY54_CONTACTS_STORAGE] Repository integrity failure: ${repairedIntegrity.errors.join(" ")}`
-                );
-
-            }
-
-            state.recovered =
-                true;
-
-            writeRepository(
-                repaired
-            );
-
-            publishEvent(
-                EVENTS.RECOVERED,
-                {
-                    reason:
-                        "integrity_repair",
-                    recoveredAt:
-                        nowISO()
-                }
-            );
-
-            return repaired;
-
-        }
-
-        if (
-            state.migrationPerformed
-        ) {
-
-            writeRepository(
-                migrated
-            );
-
-        }
-
-        return migrated;
-
-    }
-
-    function writeRepository(
-        repository,
-        {
-            skipIntegrity = false
-        } = {}
-    ) {
-
-        const working =
-            normaliseRepository(
-                repository
-            );
-
-        working.schemaVersion =
-            SCHEMA_VERSION;
-
-        working.metadata =
-            {
-                ...working.metadata,
-                updatedAt:
-                    nowISO(),
-                recordCount:
-                    working.contacts.length
-            };
-
-        if (!skipIntegrity) {
-
-            const integrity =
-                verifyRepositoryIntegrity(
-                    working
-                );
-
-            if (!integrity.valid) {
-
-                throw new Error(
-                    `[PAY54_CONTACTS_STORAGE] Refusing to persist invalid repository: ${integrity.errors.join(" ")}`
-                );
-
-            }
-
-        }
-
-        const serialised =
-            JSON.stringify(
-                working
-            );
-
-        writeRaw(
-            STORAGE_KEY,
-            serialised
-        );
-
-        writeMetadata(
-            working
-        );
-
-        return working;
-
-    }
-
-    function writeMetadata(
-        repository
-    ) {
-
-        const metadata = {
-            module:
-                MODULE_ID,
-            moduleVersion:
-                VERSION,
-            schemaVersion:
-                SCHEMA_VERSION,
-            recordCount:
-                repository.contacts.length,
-            updatedAt:
-                repository.metadata.updatedAt,
-            integrity:
-                state.lastIntegrityCheck?.valid ??
-                true
-        };
-
-        writeRaw(
-            METADATA_KEY,
-            JSON.stringify(metadata)
-        );
-
-    }
-
-    function backupCorruptPayload(
-        raw
-    ) {
-
-        if (
-            typeof raw !== "string" ||
-            !raw
-        ) {
-            return;
-        }
-
-        const backupKey =
-            `${STORAGE_KEY}_corrupt_${Date.now()}`;
+        let migration;
 
         try {
 
-            writeRaw(
-                backupKey,
-                raw
+            migration =
+                migrateRepository(
+                    parsed
+                );
+
+        } catch (error) {
+
+            publishEvent(
+                EVENTS.STORAGE_INTEGRITY_FAILED ??
+                "contacts.storage.integrity_failed",
+                {
+                    reason:
+                        "migration-failed",
+                    message:
+                        error.message
+                }
             );
 
-        } catch {
-
-            /*
-             * Recovery must continue even when backup persistence
-             * cannot be completed because of storage quota/security.
-             */
-
+            return recoverRepository(
+                raw,
+                error.message
+            );
         }
 
-    }
+        let repository =
+            migration.repository;
 
-    function repairRepository(
-        repository
-    ) {
-
-        const normalised =
-            normaliseRepository(
+        let integrity =
+            verifyRepositoryIntegrity(
                 repository
             );
 
-        const contacts = [];
+        let repaired =
+            false;
 
-        const ids =
-            new Set();
-
-        const identityKeys =
-            new Set();
-
-        for (
-            const contact
-            of normalised.contacts
+        if (
+            !integrity.ok &&
+            INTEGRITY_CONFIG.REPAIR_INVALID_RECORDS !==
+                false
         ) {
 
-            const validation =
-                validateContact(
-                    contact
+            try {
+
+                quarantinePayload(
+                    raw,
+                    integrity.errors.join(
+                        " | "
+                    )
                 );
 
-            if (!validation.valid) {
-                continue;
+            } catch (error) {
+
+                recordError(
+                    "repository.integrity.quarantine",
+                    error
+                );
             }
 
-            if (
-                ids.has(contact.id)
-            ) {
-                continue;
-            }
-
-            const keys =
-                buildIdentityKeys(
-                    contact
+            repository =
+                repairRepository(
+                    repository
                 );
 
-            const duplicateIdentity =
-                keys.some(key =>
-                    identityKeys.has(key)
+            integrity =
+                verifyRepositoryIntegrity(
+                    repository
                 );
 
-            if (duplicateIdentity) {
-                continue;
-            }
-
-            ids.add(contact.id);
-
-            for (
-                const key
-                of keys
-            ) {
-                identityKeys.add(key);
-            }
-
-            contacts.push(contact);
-
+            repaired =
+                integrity.ok;
         }
 
-        return {
-            schemaVersion:
-                SCHEMA_VERSION,
-            contacts,
-            metadata: {
-                createdAt:
-                    normalised.metadata.createdAt ||
-                    nowISO(),
-                updatedAt:
-                    nowISO(),
-                recordCount:
-                    contacts.length
-            }
-        };
+        if (!integrity.ok) {
 
+            publishEvent(
+                EVENTS.STORAGE_INTEGRITY_FAILED ??
+                "contacts.storage.integrity_failed",
+                {
+                    reason:
+                        "integrity-failed",
+                    errors:
+                        integrity.errors
+                }
+            );
+
+            return recoverRepository(
+                raw,
+                integrity.errors.join(
+                    " | "
+                )
+            );
+        }
+
+        /*
+         * Migration persistence is intentionally local to this read.
+         *
+         * Unlike the previous WP-010A implementation, no permanent
+         * migrationPerformed flag is retained. Therefore subsequent reads do
+         * not repeatedly rewrite an already migrated repository.
+         */
+
+        if (
+            migration.migrated ||
+            repaired
+        ) {
+
+            const committed =
+                commitRepository(
+                    repository,
+                    {
+                        migration:
+                            migration.migrated
+                    }
+                );
+
+            if (
+                migration.migrated
+            ) {
+
+                publishEvent(
+                    EVENTS.STORAGE_MIGRATED ??
+                    "contacts.storage.migrated",
+                    {
+                        fromVersion:
+                            migration.fromVersion,
+                        toVersion:
+                            migration.toVersion,
+                        applied:
+                            migration.applied
+                    }
+                );
+            }
+
+            if (repaired) {
+
+                state.recovered =
+                    true;
+
+                publishEvent(
+                    EVENTS.STORAGE_RECOVERED ??
+                    "contacts.storage.recovered",
+                    {
+                        reason:
+                            "integrity-repair",
+                        source:
+                            "primary",
+                        recordCount:
+                            committed.contacts.length
+                    }
+                );
+            }
+
+            return committed;
+        }
+
+        return repository;
     }
 
     /* ======================================================================
-       EVENT BUS
+       REPOSITORY WRITE
     ====================================================================== */
 
-    function publishEvent(
-        eventName,
-        payload = {}
+    function writeRepository(
+        repository
     ) {
 
-        try {
-
-            const eventBus =
-                GLOBAL.PAY54_EVENTS;
-
-            if (
-                !eventBus ||
-                typeof eventBus.publish !== "function"
-            ) {
-                return false;
-            }
-
-            eventBus.publish(
-                eventName,
-                {
-                    ...clone(payload),
-                    module:
-                        MODULE_ID,
-                    timestamp:
-                        nowISO()
-                },
-                {
-                    source:
-                        MODULE_NAME
-                }
-            );
-
-            return true;
-
-        } catch (error) {
-
-            console.error(
-                "[PAY54_CONTACTS_STORAGE] Event publication failed.",
-                error
-            );
-
-            return false;
-
-        }
-
+        return commitRepository(
+            repository
+        );
     }
 
     /* ======================================================================
-       REPOSITORY CRUD
+       CRUD
     ====================================================================== */
 
     function getAll() {
@@ -2201,21 +3307,17 @@
         const repository =
             readRepository();
 
-        return clone(
+        return immutableClone(
             repository.contacts
         );
-
     }
 
     function getById(id) {
 
-        const safeId =
-            cleanString(
-                id,
-                160
-            );
+        const normalizedId =
+            cleanString(id);
 
-        if (!safeId) {
+        if (!normalizedId) {
             return null;
         }
 
@@ -2225,40 +3327,46 @@
         const contact =
             repository.contacts.find(
                 item =>
-                    item.id === safeId
+                    item.id ===
+                    normalizedId
             );
 
         return contact
-            ? clone(contact)
+            ? immutableClone(contact)
             : null;
-
     }
 
-    function create(payload) {
+    function create(input) {
 
-        assertSafePayload(
-            payload
-        );
+        ensureInitialized();
 
         const repository =
             readRepository();
 
-        const contact =
-            normaliseContact(
-                payload
-            );
-
-        const validation =
-            validateContact(
-                contact
-            );
-
-        if (!validation.valid) {
-
+        if (
+            repository.contacts.length >=
+            MAX_CONTACTS
+        ) {
             throw new Error(
-                `[PAY54_CONTACTS_STORAGE] Invalid contact: ${validation.errors.join(" ")}`
+                `[PAY54 Contacts Storage] Maximum Contact capacity of ${MAX_CONTACTS} has been reached.`
+            );
+        }
+
+        const contact =
+            normalizeContact(
+                input
             );
 
+        if (
+            repository.contacts.some(
+                item =>
+                    item.id ===
+                    contact.id
+            )
+        ) {
+            throw new Error(
+                `[PAY54 Contacts Storage] Contact id "${contact.id}" already exists.`
+            );
         }
 
         const duplicate =
@@ -2268,40 +3376,42 @@
             );
 
         if (duplicate) {
-
             throw new Error(
-                `[PAY54_CONTACTS_STORAGE] Contact already exists as "${duplicate.id}".`
+                `[PAY54 Contacts Storage] Contact duplicates an existing PAY54 ID, phone number or email address. Existing contact: ${duplicate.id}.`
             );
-
         }
 
         repository.contacts.push(
             contact
         );
 
-        const persisted =
-            writeRepository(
-                repository
-            );
-
-        const created =
-            persisted.contacts.find(
-                item =>
-                    item.id === contact.id
-            );
+        writeRepository(
+            repository
+        );
 
         publishEvent(
-            EVENTS.CREATED,
+            EVENTS.CREATED ??
+            "contacts.created",
             {
-                contact:
-                    clone(created)
+                contactId:
+                    contact.id
             }
         );
 
-        return clone(
-            created
+        publishEvent(
+            EVENTS.REPOSITORY_CHANGED ??
+            "contacts.repository.changed",
+            {
+                operation:
+                    "create",
+                contactId:
+                    contact.id
+            }
         );
 
+        return immutableClone(
+            contact
+        );
     }
 
     function update(
@@ -2309,22 +3419,28 @@
         changes
     ) {
 
-        const safeId =
-            cleanString(
-                id,
-                160
+        ensureInitialized();
+
+        const normalizedId =
+            cleanString(id);
+
+        if (!normalizedId) {
+            throw new Error(
+                "[PAY54 Contacts Storage] Contact id is required for update."
             );
+        }
 
-        if (!safeId) {
-
+        if (
+            !isPlainObject(changes)
+        ) {
             throw new TypeError(
-                "[PAY54_CONTACTS_STORAGE] Contact ID is required."
+                "[PAY54 Contacts Storage] Contact update must be a plain object."
             );
-
         }
 
         assertSafePayload(
-            changes
+            changes,
+            "contact.update"
         );
 
         const repository =
@@ -2333,99 +3449,95 @@
         const index =
             repository.contacts.findIndex(
                 contact =>
-                    contact.id === safeId
+                    contact.id ===
+                    normalizedId
             );
 
-        if (index < 0) {
-            return null;
+        if (
+            index < 0
+        ) {
+            throw new Error(
+                `[PAY54 Contacts Storage] Contact "${normalizedId}" was not found.`
+            );
         }
 
         const existing =
             repository.contacts[index];
 
+        /*
+         * Identity and creation timestamp are repository-owned.
+         */
+
+        const merged = {
+            ...existing,
+            ...changes,
+            id:
+                existing.id,
+            createdAt:
+                existing.createdAt
+        };
+
         const updated =
-            normaliseContact(
+            normalizeContact(
+                merged,
                 {
-                    ...changes,
-                    id:
-                        existing.id,
-                    createdAt:
-                        existing.createdAt
-                },
-                existing
+                    existing
+                }
             );
-
-        updated.id =
-            existing.id;
-
-        updated.createdAt =
-            existing.createdAt;
-
-        const validation =
-            validateContact(
-                updated
-            );
-
-        if (!validation.valid) {
-
-            throw new Error(
-                `[PAY54_CONTACTS_STORAGE] Invalid contact update: ${validation.errors.join(" ")}`
-            );
-
-        }
 
         const duplicate =
             findDuplicate(
                 repository.contacts,
                 updated,
-                safeId
+                existing.id
             );
 
         if (duplicate) {
-
             throw new Error(
-                `[PAY54_CONTACTS_STORAGE] Updated contact conflicts with "${duplicate.id}".`
+                `[PAY54 Contacts Storage] Contact update duplicates another PAY54 ID, phone number or email address. Existing contact: ${duplicate.id}.`
             );
-
         }
 
         repository.contacts[index] =
             updated;
 
-        const persisted =
-            writeRepository(
-                repository
-            );
-
-        const result =
-            persisted.contacts.find(
-                contact =>
-                    contact.id === safeId
-            );
+        writeRepository(
+            repository
+        );
 
         publishEvent(
-            EVENTS.UPDATED,
+            EVENTS.UPDATED ??
+            "contacts.updated",
             {
-                contact:
-                    clone(result)
+                contactId:
+                    updated.id
             }
         );
 
-        return clone(
-            result
+        publishEvent(
+            EVENTS.REPOSITORY_CHANGED ??
+            "contacts.repository.changed",
+            {
+                operation:
+                    "update",
+                contactId:
+                    updated.id
+            }
         );
 
+        return immutableClone(
+            updated
+        );
     }
 
     function remove(id) {
 
-        const safeId =
-            cleanString(
-                id,
-                160
-            );
+        ensureInitialized();
 
-        if (!safeId) {
+        const normalizedId =
+            cleanString(id);
+
+        if (!normalizedId) {
             return false;
         }
 
@@ -2435,10 +3547,13 @@
         const index =
             repository.contacts.findIndex(
                 contact =>
-                    contact.id === safeId
+                    contact.id ===
+                    normalizedId
             );
 
-        if (index < 0) {
+        if (
+            index < 0
+        ) {
             return false;
         }
 
@@ -2453,18 +3568,31 @@
         );
 
         publishEvent(
-            EVENTS.DELETED,
+            EVENTS.DELETED ??
+            "contacts.deleted",
             {
-                contact:
-                    clone(removed)
+                contactId:
+                    removed.id
+            }
+        );
+
+        publishEvent(
+            EVENTS.REPOSITORY_CHANGED ??
+            "contacts.repository.changed",
+            {
+                operation:
+                    "delete",
+                contactId:
+                    removed.id
             }
         );
 
         return true;
-
     }
 
     function clear() {
+
+        ensureInitialized();
 
         const repository =
             readRepository();
@@ -2480,18 +3608,28 @@
         );
 
         publishEvent(
-            EVENTS.CLEARED,
+            EVENTS.CLEARED ??
+            "contacts.cleared",
             {
                 previousCount
             }
         );
 
-        return true;
+        publishEvent(
+            EVENTS.REPOSITORY_CHANGED ??
+            "contacts.repository.changed",
+            {
+                operation:
+                    "clear",
+                previousCount
+            }
+        );
 
+        return previousCount;
     }
 
     /* ======================================================================
-       QUERY OPERATIONS
+       QUERY API
     ====================================================================== */
 
     function count() {
@@ -2499,93 +3637,85 @@
         return readRepository()
             .contacts
             .length;
-
     }
 
     function exists(id) {
 
-        return getById(id) !== null;
-
+        return (
+            getById(id) !==
+            null
+        );
     }
 
     function findByPhone(phone) {
 
-        const target =
-            normalisePhone(
-                phone
-            );
+        const normalized =
+            normalizePhone(phone);
 
-        if (!target) {
+        if (!normalized) {
             return null;
         }
 
         const contact =
             readRepository()
                 .contacts
-                .find(item =>
-                    normalisePhone(
-                        item.phone
-                    ) === target
+                .find(
+                    item =>
+                        item.phone ===
+                        normalized
                 );
 
         return contact
-            ? clone(contact)
+            ? immutableClone(contact)
             : null;
-
     }
 
     function findByEmail(email) {
 
-        const target =
-            normaliseEmail(
-                email
-            );
+        const normalized =
+            normalizeEmail(email);
 
-        if (!target) {
+        if (!normalized) {
             return null;
         }
 
         const contact =
             readRepository()
                 .contacts
-                .find(item =>
-                    normaliseEmail(
-                        item.email
-                    ) === target
+                .find(
+                    item =>
+                        item.email ===
+                        normalized
                 );
 
         return contact
-            ? clone(contact)
+            ? immutableClone(contact)
             : null;
-
     }
 
-    function findByPay54Id(
-        pay54Id
-    ) {
+    function findByPay54Id(pay54Id) {
 
-        const target =
-            normalisePay54Id(
+        const normalized =
+            normalizePay54Id(
                 pay54Id
             );
 
-        if (!target) {
+        if (!normalized) {
             return null;
         }
 
         const contact =
             readRepository()
                 .contacts
-                .find(item =>
-                    normalisePay54Id(
-                        item.pay54Id
-                    ) === target
+                .find(
+                    item =>
+                        item.pay54Id ===
+                        normalized
                 );
 
         return contact
-            ? clone(contact)
+            ? immutableClone(contact)
             : null;
-
     }
 
     function search(
@@ -2593,94 +3723,110 @@
         options = {}
     ) {
 
-        const needle =
+        const normalizedQuery =
             cleanString(
                 query,
-                256
-            )
-                .toLocaleLowerCase();
+                MAX_SEARCH_QUERY_LENGTH
+            ).toLowerCase();
 
-        const limitValue =
-            Number(
-                options?.limit
-            );
+        if (
+            normalizedQuery.length <
+            MIN_SEARCH_QUERY_LENGTH
+        ) {
+            return Object.freeze([]);
+        }
+
+        const requestedLimit =
+            Number.isInteger(
+                options.limit
+            )
+                ? options.limit
+                : MAX_SEARCH_RESULTS;
 
         const limit =
-            Number.isFinite(
-                limitValue
-            )
-                ? Math.max(
-                    1,
-                    Math.min(
-                        Math.floor(limitValue),
-                        500
-                    )
+            Math.max(
+                1,
+                Math.min(
+                    requestedLimit,
+                    MAX_SEARCH_RESULTS
                 )
-                : 100;
+            );
 
-        const favouritesOnly =
-            options?.favouritesOnly === true ||
-            options?.favoritesOnly === true;
-
-        let contacts =
+        const contacts =
             readRepository()
                 .contacts;
 
-        if (favouritesOnly) {
+        const results = [];
 
-            contacts =
-                contacts.filter(
-                    contact =>
-                        contact.favourite === true
+        for (
+            const contact of contacts
+        ) {
+
+            const searchable = [
+                contact.displayName,
+                contact.firstName,
+                contact.lastName,
+                contact.alias,
+                contact.phone,
+                contact.email,
+                contact.pay54Id,
+                contact.type,
+                contact.status,
+                ...(contact.tags ?? []),
+                ...(contact.groups ?? [])
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            if (
+                searchable.includes(
+                    normalizedQuery
+                )
+            ) {
+                results.push(
+                    contact
                 );
+            }
 
-        }
-
-        if (needle) {
-
-            contacts =
-                contacts.filter(contact => {
-
-                    const haystack = [
-                        contact.displayName,
-                        contact.firstName,
-                        contact.lastName,
-                        contact.phone,
-                        contact.email,
-                        contact.pay54Id,
-                        ...(contact.tags || [])
-                    ]
-                        .join(" ")
-                        .toLocaleLowerCase();
-
-                    return haystack.includes(
-                        needle
-                    );
-
-                });
-
-        }
-
-        return clone(
-            contacts.slice(
-                0,
+            if (
+                results.length >=
                 limit
-            )
+            ) {
+                break;
+            }
+        }
+
+        publishEvent(
+            EVENTS.SEARCHED ??
+            "contacts.searched",
+            {
+                queryLength:
+                    normalizedQuery.length,
+                resultCount:
+                    results.length
+            }
         );
 
+        return immutableClone(
+            results
+        );
     }
 
     function getFavourites() {
 
-        return clone(
+        const contacts =
             readRepository()
                 .contacts
                 .filter(
                     contact =>
-                        contact.favourite === true
-                )
-        );
+                        contact.favourite ===
+                        true
+                );
 
+        return immutableClone(
+            contacts
+        );
     }
 
     function setFavourite(
@@ -2692,329 +3838,713 @@
             id,
             {
                 favourite:
-                    favourite === true
+                    Boolean(favourite)
             }
         );
-
     }
 
     /* ======================================================================
-       INTEGRITY PUBLIC OPERATIONS
+       PUBLIC INTEGRITY API
     ====================================================================== */
 
     function verifyIntegrity() {
 
+        ensureInitialized();
+
+        const raw =
+            readRaw(
+                PRIMARY_KEY
+            );
+
+        if (
+            raw === null
+        ) {
+
+            const result =
+                verifyRepositoryIntegrity(
+                    createEmptyRepository()
+                );
+
+            return result;
+        }
+
         try {
 
-            const repository =
-                readRepository();
+            const parsed =
+                parseJSON(
+                    raw,
+                    PRIMARY_KEY
+                );
 
-            return clone(
-                verifyRepositoryIntegrity(
-                    repository
-                )
+            const normalized =
+                normalizeRepository(
+                    parsed
+                );
+
+            return verifyRepositoryIntegrity(
+                normalized
             );
 
         } catch (error) {
 
-            state.lastError =
-                error;
+            const result =
+                Object.freeze({
 
-            return {
-                valid: false,
-                errors: [
-                    error instanceof Error
-                        ? error.message
-                        : String(error)
-                ],
-                recordCount: 0,
-                checkedAt:
-                    nowISO()
-            };
+                    ok:
+                        false,
 
+                    schemaVersion:
+                        null,
+
+                    recordCount:
+                        0,
+
+                    errors:
+                        Object.freeze([
+                            error instanceof Error
+                                ? error.message
+                                : String(error)
+                        ]),
+
+                    checkedAt:
+                        nowISO()
+                });
+
+            state.lastIntegrityCheck =
+                result;
+
+            return result;
         }
-
     }
 
     /* ======================================================================
-       REPOSITORY HEALTH
+       EXPLICIT MIGRATION API
     ====================================================================== */
 
-    function health() {
+    function migrate() {
 
-        const storageAvailable =
-            verifyStorageAvailability();
+        ensureInitialized();
 
-        let repositoryIntegrity = {
-            valid: false,
-            errors: [
-                "Repository not checked."
-            ],
-            recordCount: 0,
-            checkedAt:
-                nowISO()
-        };
+        const raw =
+            readRaw(
+                PRIMARY_KEY
+            );
 
-        if (storageAvailable) {
+        if (
+            raw === null
+        ) {
 
-            try {
+            const repository =
+                commitRepository(
+                    createEmptyRepository()
+                );
 
-                const repository =
-                    readRepository();
+            return Object.freeze({
 
-                repositoryIntegrity =
-                    verifyRepositoryIntegrity(
-                        repository
-                    );
+                migrated:
+                    false,
 
-            } catch (error) {
+                fromVersion:
+                    SCHEMA_VERSION,
 
-                state.lastError =
-                    error;
+                toVersion:
+                    SCHEMA_VERSION,
 
-                repositoryIntegrity = {
-                    valid: false,
-                    errors: [
-                        error instanceof Error
-                            ? error.message
-                            : String(error)
-                    ],
-                    recordCount: 0,
-                    checkedAt:
-                        nowISO()
-                };
-
-            }
-
+                recordCount:
+                    repository.contacts.length
+            });
         }
 
-        const healthy =
-            state.initialized &&
-            storageAvailable &&
-            state.securityVerified &&
-            repositoryIntegrity.valid;
+        const parsed =
+            parseJSON(
+                raw,
+                PRIMARY_KEY
+            );
 
-        return deepFreeze({
-            healthy,
-            status:
-                healthy
-                    ? "healthy"
-                    : "degraded",
+        const result =
+            migrateRepository(
+                parsed
+            );
+
+        const integrity =
+            verifyRepositoryIntegrity(
+                result.repository
+            );
+
+        if (!integrity.ok) {
+            throw new Error(
+                `[PAY54 Contacts Storage] Migrated repository failed integrity verification: ${integrity.errors.join(" | ")}`
+            );
+        }
+
+        if (
+            result.migrated
+        ) {
+
+            commitRepository(
+                result.repository,
+                {
+                    migration:
+                        true
+                }
+            );
+
+            publishEvent(
+                EVENTS.STORAGE_MIGRATED ??
+                "contacts.storage.migrated",
+                {
+                    fromVersion:
+                        result.fromVersion,
+                    toVersion:
+                        result.toVersion,
+                    applied:
+                        result.applied
+                }
+            );
+        }
+
+        return Object.freeze({
+
+            migrated:
+                result.migrated,
+
+            fromVersion:
+                result.fromVersion,
+
+            toVersion:
+                result.toVersion,
+
+            recordCount:
+                result.repository
+                    .contacts
+                    .length,
+
+            applied:
+                immutableClone(
+                    result.applied
+                )
+        });
+    }
+
+    /* ======================================================================
+       METADATA
+    ====================================================================== */
+
+    function getMetadata() {
+
+        ensureInitialized();
+
+        const repository =
+            readRepository();
+
+        return immutableClone({
+
             module:
+                MODULE_NAME,
+
+            moduleId:
                 MODULE_ID,
+
             version:
                 VERSION,
+
+            schemaVersion:
+                repository.schemaVersion,
+
+            recordCount:
+                repository.contacts.length,
+
+            repository:
+                repository.metadata,
+
+            lastMigration:
+                state.lastMigration,
+
+            lastIntegrityCheck:
+                state.lastIntegrityCheck
+        });
+    }
+
+    /* ======================================================================
+       HEALTH
+    ====================================================================== */
+
+    function calculateHealth() {
+
+        let integrity = null;
+        let recordCount = 0;
+        let status = "ready";
+        let healthy = true;
+
+        try {
+
+            const raw =
+                readRaw(
+                    PRIMARY_KEY
+                );
+
+            if (
+                raw === null
+            ) {
+
+                integrity =
+                    verifyRepositoryIntegrity(
+                        createEmptyRepository()
+                    );
+
+            } else {
+
+                const parsed =
+                    parseJSON(
+                        raw,
+                        PRIMARY_KEY
+                    );
+
+                const normalized =
+                    normalizeRepository(
+                        parsed
+                    );
+
+                integrity =
+                    verifyRepositoryIntegrity(
+                        normalized
+                    );
+
+                recordCount =
+                    normalized.contacts.length;
+            }
+
+            if (
+                !integrity.ok
+            ) {
+
+                healthy =
+                    false;
+
+                status =
+                    "error";
+            }
+
+        } catch (error) {
+
+            healthy =
+                false;
+
+            status =
+                "error";
+
+            integrity =
+                Object.freeze({
+
+                    ok:
+                        false,
+
+                    errors:
+                        Object.freeze([
+                            error instanceof Error
+                                ? error.message
+                                : String(error)
+                        ]),
+
+                    checkedAt:
+                        nowISO()
+                });
+        }
+
+        if (
+            healthy &&
+            state.lastError
+        ) {
+            status =
+                "degraded";
+        }
+
+        return Object.freeze({
+
+            healthy,
+
+            ok:
+                healthy,
+
+            status,
+
+            module:
+                MODULE_NAME,
+
+            moduleId:
+                MODULE_ID,
+
+            path:
+                FILE_PATH,
+
+            version:
+                VERSION,
+
             schemaVersion:
                 SCHEMA_VERSION,
-            storageKey:
-                STORAGE_KEY,
-            storageAvailable,
-            securityVerified:
-                state.securityVerified,
-            registryRegistered:
-                state.registryRegistered,
+
             initialized:
                 state.initialized,
-            migrationPerformed:
-                state.migrationPerformed,
+
+            storageAvailable:
+                state.storageAvailable,
+
+            securityVerified:
+                state.securityVerified,
+
+            securityMode:
+                state.securityMode,
+
+            eventBusAvailable:
+                Boolean(
+                    GLOBAL.PAY54_EVENTS &&
+                    typeof GLOBAL
+                        .PAY54_EVENTS
+                        .publish === "function"
+                ),
+
+            registryRegistered:
+                state.registryRegistered,
+
             recovered:
                 state.recovered,
-            recordCount:
-                repositoryIntegrity.recordCount,
-            integrity:
-                clone(
-                    repositoryIntegrity
-                ),
+
+            recordCount,
+
+            integrity,
+
             initializedAt:
                 state.initializedAt,
-            lastError:
-                state.lastError
-                    ? (
-                        state.lastError instanceof Error
-                            ? state.lastError.message
-                            : String(state.lastError)
+
+            lastReadAt:
+                state.lastReadAt,
+
+            lastWriteAt:
+                state.lastWriteAt,
+
+            lastMigration:
+                state.lastMigration
+                    ? immutableClone(
+                        state.lastMigration
                     )
                     : null,
+
+            lastError:
+                state.lastError
+                    ? immutableClone(
+                        state.lastError
+                    )
+                    : null,
+
             checkedAt:
                 nowISO()
         });
+    }
 
+    function health() {
+
+        const result =
+            calculateHealth();
+
+        const healthSignature =
+            [
+                result.status,
+                result.storageAvailable,
+                result.securityVerified,
+                result.integrity?.ok
+            ].join(":");
+
+        if (
+            state.lastHealthStatus !==
+            null &&
+            state.lastHealthStatus !==
+            healthSignature
+        ) {
+
+            publishEvent(
+                EVENTS.STORAGE_HEALTH_CHANGED ??
+                "contacts.storage.health_changed",
+                {
+                    status:
+                        result.status,
+                    healthy:
+                        result.healthy
+                }
+            );
+        }
+
+        state.lastHealthStatus =
+            healthSignature;
+
+        return result;
     }
 
     /* ======================================================================
-       REGISTRY INTEGRATION
+       PLATFORM REGISTRY INTEGRATION
     ====================================================================== */
 
-    function registerWithRegistry(
+    function integrateRegistry(
         publicAPI
     ) {
 
         const registry =
-            GLOBAL.PAY54_REGISTRY ||
-            GLOBAL.PAY54_MODULE_REGISTRY ||
+            GLOBAL.PAY54_REGISTRY ??
+            GLOBAL.PAY54_MODULE_REGISTRY ??
             null;
 
         if (!registry) {
-
-            /*
-             * Registry may initialise after this infrastructure module.
-             * The global API remains available and bootstrap can register it
-             * later without breaking legacy script loading.
-             */
-
-            state.registryRegistered =
-                false;
-
             return false;
-
         }
 
-        const descriptor = {
-            id:
-                MODULE_ID,
-            name:
-                MODULE_NAME,
-            path:
-                MODULE_PATH,
-            version:
-                VERSION,
-            schemaVersion:
-                SCHEMA_VERSION,
-            type:
-                "repository",
-            domain:
-                "contacts",
-            api:
-                publicAPI,
-            health:
-                () => health()
-        };
+        const descriptor =
+            Object.freeze({
 
-        const methods = [
-            "register",
-            "registerModule",
-            "set"
-        ];
+                id:
+                    MODULE_ID,
 
-        for (
-            const method
-            of methods
-        ) {
+                name:
+                    MODULE_NAME,
+
+                path:
+                    FILE_PATH,
+
+                version:
+                    VERSION,
+
+                schemaVersion:
+                    SCHEMA_VERSION,
+
+                type:
+                    "engine-core",
+
+                domain:
+                    MODULES.CONTACTS,
+
+                layer:
+                    MODULES.LAYERS
+                        ?.ENGINES ??
+                    "layer.engines",
+
+                api:
+                    publicAPI,
+
+                health
+            });
+
+        try {
 
             if (
-                typeof registry[method] !==
+                typeof registry.registerModule ===
                 "function"
             ) {
-                continue;
+
+                registry.registerModule(
+                    MODULE_ID,
+                    descriptor
+                );
+
+                state.registryRegistered =
+                    true;
+
+                return true;
             }
 
-            try {
+            if (
+                typeof registry.register ===
+                "function"
+            ) {
 
-                if (method === "set") {
+                try {
 
-                    registry.set(
+                    registry.register(
                         MODULE_ID,
-                        publicAPI
+                        descriptor
                     );
 
-                } else {
+                } catch (firstError) {
 
-                    try {
-
-                        registry[method](
-                            MODULE_ID,
-                            publicAPI,
-                            descriptor
-                        );
-
-                    } catch {
-
-                        registry[method](
-                            descriptor
-                        );
-
-                    }
-
+                    registry.register(
+                        descriptor
+                    );
                 }
 
                 state.registryRegistered =
                     true;
 
                 return true;
-
-            } catch (error) {
-
-                state.lastError =
-                    error;
-
             }
 
+            if (
+                typeof registry.set ===
+                "function"
+            ) {
+
+                registry.set(
+                    MODULE_ID,
+                    descriptor
+                );
+
+                state.registryRegistered =
+                    true;
+
+                return true;
+            }
+
+        } catch (error) {
+
+            recordError(
+                "registry.integration",
+                error
+            );
+
+            return false;
         }
 
-        state.registryRegistered =
-            false;
-
         return false;
-
     }
 
     /* ======================================================================
-       INITIALISATION
+       INITIALIZATION
     ====================================================================== */
 
-    function initialiseRepository() {
+    function ensureInitialized() {
 
-        if (state.initialized) {
+        if (
+            state.initialized
+        ) {
             return true;
         }
 
-        verifySecurityBootstrap();
+        return initialize();
+    }
+
+    function initialize() {
 
         if (
-            !verifyStorageAvailability()
+            state.initialized
         ) {
-
-            throw new Error(
-                "[PAY54_CONTACTS_STORAGE] Persistent browser storage is unavailable."
-            );
-
+            return true;
         }
 
-        const repository =
-            readRepository();
-
-        const integrity =
-            verifyRepositoryIntegrity(
-                repository
-            );
-
-        if (!integrity.valid) {
-
-            throw new Error(
-                `[PAY54_CONTACTS_STORAGE] Repository failed initial integrity verification: ${integrity.errors.join(" ")}`
-            );
-
+        if (
+            state.initializing
+        ) {
+            return false;
         }
 
-        writeRepository(
-            repository
-        );
-
-        state.initialized =
+        state.initializing =
             true;
 
-        state.initializedAt =
-            nowISO();
+        try {
 
-        state.lastError =
-            null;
+            verifySecurityBootstrap();
 
-        return true;
+            verifyStorageAvailability();
 
+            /*
+             * readRepository performs migration/recovery only when required.
+             */
+
+            const repository =
+                readRepository();
+
+            const integrity =
+                verifyRepositoryIntegrity(
+                    repository
+                );
+
+            if (!integrity.ok) {
+                throw new Error(
+                    `[PAY54 Contacts Storage] Initialization integrity verification failed: ${integrity.errors.join(" | ")}`
+                );
+            }
+
+            state.initialized =
+                true;
+
+            state.initializedAt =
+                nowISO();
+
+            state.initializing =
+                false;
+
+            publishEvent(
+                EVENTS.STORAGE_READY ??
+                "contacts.storage.ready",
+                {
+                    schemaVersion:
+                        repository
+                            .schemaVersion,
+                    recordCount:
+                        repository
+                            .contacts
+                            .length,
+                    securityMode:
+                        state.securityMode
+                }
+            );
+
+            publishEvent(
+                EVENTS.REPOSITORY_READY ??
+                "contacts.repository.ready",
+                {
+                    schemaVersion:
+                        repository
+                            .schemaVersion,
+                    recordCount:
+                        repository
+                            .contacts
+                            .length
+                }
+            );
+
+            return true;
+
+        } catch (error) {
+
+            state.initializing =
+                false;
+
+            state.initialized =
+                false;
+
+            const message =
+                recordError(
+                    "initialize",
+                    error
+                );
+
+            publishEvent(
+                EVENTS.STORAGE_ERROR ??
+                "contacts.storage.error",
+                {
+                    operation:
+                        "initialize",
+                    message
+                }
+            );
+
+            publishEvent(
+                EVENTS.ERROR ??
+                "contacts.error",
+                {
+                    operation:
+                        "storage.initialize",
+                    message
+                }
+            );
+
+            console.error(
+                "[PAY54 Contacts Storage] Initialization failed:",
+                error
+            );
+
+            throw error;
+        }
     }
 
     /* ======================================================================
-       PUBLIC REPOSITORY API
+       REPOSITORY API
     ====================================================================== */
 
     const repositoryAPI =
@@ -3029,9 +4559,6 @@
             update,
 
             remove,
-
-            delete:
-                remove,
 
             clear,
 
@@ -3049,167 +4576,261 @@
 
             getFavourites,
 
+            setFavourite,
+
+            verifyIntegrity,
+
+            migrate,
+
+            getMetadata,
+
+            health
+        });
+
+    /* ======================================================================
+       PUBLIC API
+    ====================================================================== */
+
+    const publicAPI =
+        Object.freeze({
+
+            version:
+                VERSION,
+
+            schemaVersion:
+                SCHEMA_VERSION,
+
+            module:
+                MODULE_NAME,
+
+            moduleId:
+                MODULE_ID,
+
+            repository:
+                repositoryAPI,
+
+            initialize,
+
+            initialise:
+                initialize,
+
+            getAll,
+
+            getContacts:
+                getAll,
+
+            getById,
+
+            getContactById:
+                getById,
+
+            create,
+
+            createContact:
+                create,
+
+            add:
+                create,
+
+            addContact:
+                create,
+
+            update,
+
+            updateContact:
+                update,
+
+            remove,
+
+            removeContact:
+                remove,
+
+            delete:
+                remove,
+
+            deleteContact:
+                remove,
+
+            clear,
+
+            clearContacts:
+                clear,
+
+            count,
+
+            exists,
+
+            findByPhone,
+
+            findByEmail,
+
+            findByPay54Id,
+
+            search,
+
+            searchContacts:
+                search,
+
+            getFavourites,
+
             getFavorites:
                 getFavourites,
 
             setFavourite,
 
             setFavorite:
-                setFavourite
+                setFavourite,
+
+            verifyIntegrity,
+
+            migrate,
+
+            getMetadata,
+
+            health,
+
+            getHealth:
+                health,
+
+            register() {
+
+                return integrateRegistry(
+                    publicAPI
+                );
+            }
 
         });
 
     /* ======================================================================
-       PUBLIC STORAGE API
+       GLOBAL INSTALLATION
     ====================================================================== */
 
-    const publicAPI = {
+    function installGlobalAPI() {
 
-        MODULE_ID,
+        const existing =
+            GLOBAL.PAY54_CONTACTS_STORAGE;
 
-        MODULE_NAME,
+        if (
+            existing &&
+            existing !== publicAPI
+        ) {
 
-        MODULE_PATH,
+            if (
+                typeof existing.getAll ===
+                    "function" &&
+                typeof existing.create ===
+                    "function" &&
+                typeof existing.update ===
+                    "function" &&
+                typeof existing.remove ===
+                    "function"
+            ) {
 
-        VERSION,
+                /*
+                 * Never replace a live compatible repository because other
+                 * modules may already hold references to it.
+                 */
 
-        SCHEMA_VERSION,
+                return existing;
+            }
 
-        STORAGE_KEY,
-
-        METADATA_KEY,
-
-        EVENTS,
-
-        repository:
-            repositoryAPI,
-
-        initialize:
-            initialiseRepository,
-
-        initialise:
-            initialiseRepository,
-
-        getAll,
-
-        getContacts:
-            getAll,
-
-        getById,
-
-        getContactById:
-            getById,
-
-        create,
-
-        createContact:
-            create,
-
-        add:
-            create,
-
-        addContact:
-            create,
-
-        update,
-
-        updateContact:
-            update,
-
-        remove,
-
-        removeContact:
-            remove,
-
-        delete:
-            remove,
-
-        deleteContact:
-            remove,
-
-        clear,
-
-        clearContacts:
-            clear,
-
-        count,
-
-        exists,
-
-        findByPhone,
-
-        findByEmail,
-
-        findByPay54Id,
-
-        search,
-
-        searchContacts:
-            search,
-
-        getFavourites,
-
-        getFavorites:
-            getFavourites,
-
-        setFavourite,
-
-        setFavorite:
-            setFavourite,
-
-        verifyIntegrity,
-
-        health,
-
-        getHealth:
-            health,
-
-        migrate() {
-
-            const repository =
-                readRepository();
-
-            const migrated =
-                migrateRepository(
-                    repository
-                );
-
-            const persisted =
-                writeRepository(
-                    migrated
-                );
-
-            return clone(
-                persisted
+            throw new Error(
+                "[PAY54 Contacts Storage] window.PAY54_CONTACTS_STORAGE already exists with an incompatible implementation."
             );
-
-        },
-
-        getMetadata() {
-
-            const raw =
-                readRaw(
-                    METADATA_KEY
-                );
-
-            return clone(
-                parseJSON(
-                    raw,
-                    {}
-                )
-            );
-
-        },
-
-        register() {
-
-            return registerWithRegistry(
-                publicAPI
-            );
-
         }
 
-    };
+        if (!existing) {
+
+            Object.defineProperty(
+                GLOBAL,
+                "PAY54_CONTACTS_STORAGE",
+                {
+                    value:
+                        publicAPI,
+                    enumerable:
+                        true,
+                    configurable:
+                        false,
+                    writable:
+                        false
+                }
+            );
+        }
+
+        return GLOBAL
+            .PAY54_CONTACTS_STORAGE;
+    }
+
+    function installContactsNamespace(
+        api
+    ) {
+
+        let namespace =
+            GLOBAL.PAY54_CONTACTS;
+
+        if (!namespace) {
+
+            namespace = {};
+
+            GLOBAL.PAY54_CONTACTS =
+                namespace;
+        }
+
+        if (
+            !isObject(namespace) ||
+            Object.isFrozen(namespace)
+        ) {
+            return false;
+        }
+
+        if (
+            !Object.prototype
+                .hasOwnProperty.call(
+                    namespace,
+                    "STORAGE"
+                )
+        ) {
+            Object.defineProperty(
+                namespace,
+                "STORAGE",
+                {
+                    value:
+                        api,
+                    enumerable:
+                        true,
+                    configurable:
+                        false,
+                    writable:
+                        false
+                }
+            );
+        }
+
+        if (
+            !Object.prototype
+                .hasOwnProperty.call(
+                    namespace,
+                    "storage"
+                )
+        ) {
+            Object.defineProperty(
+                namespace,
+                "storage",
+                {
+                    value:
+                        api,
+                    enumerable:
+                        true,
+                    configurable:
+                        false,
+                    writable:
+                        false
+                }
+            );
+        }
+
+        return true;
+    }
 
     /* ======================================================================
        BOOTSTRAP
@@ -3217,92 +4838,65 @@
 
     try {
 
-        initialiseRepository();
+        const installedAPI =
+            installGlobalAPI();
 
-        GLOBAL.PAY54_CONTACTS_STORAGE =
-            Object.freeze(
-                publicAPI
-            );
-
-        /*
-         * Domain namespace support allows later contacts modules to use
-         * PAY54_CONTACTS.STORAGE without removing the canonical legacy-safe
-         * PAY54_CONTACTS_STORAGE global.
-         */
-
-        const contactsNamespace =
-            (
-                GLOBAL.PAY54_CONTACTS &&
-                typeof GLOBAL.PAY54_CONTACTS === "object"
-            )
-                ? GLOBAL.PAY54_CONTACTS
-                : {};
-
-        if (
-            !Object.isFrozen(
-                contactsNamespace
-            )
-        ) {
-
-            contactsNamespace.STORAGE =
-                GLOBAL.PAY54_CONTACTS_STORAGE;
-
-            contactsNamespace.storage =
-                GLOBAL.PAY54_CONTACTS_STORAGE;
-
-            GLOBAL.PAY54_CONTACTS =
-                contactsNamespace;
-
-        }
-
-        registerWithRegistry(
-            GLOBAL.PAY54_CONTACTS_STORAGE
+        installContactsNamespace(
+            installedAPI
         );
 
-        publishEvent(
-            EVENTS.READY,
-            {
-                version:
-                    VERSION,
-                schemaVersion:
-                    SCHEMA_VERSION,
-                storageKey:
-                    STORAGE_KEY,
-                recordCount:
-                    count(),
-                securityVerified:
-                    state.securityVerified,
-                registryRegistered:
-                    state.registryRegistered,
-                readyAt:
-                    nowISO()
-            }
+        if (
+            installedAPI ===
+            publicAPI
+        ) {
+
+            initialize();
+
+            integrateRegistry(
+                publicAPI
+            );
+        }
+
+        console.info(
+            "✅ PAY54 Contacts Storage",
+            VERSION,
+            "loaded."
         );
 
     } catch (error) {
 
-        state.lastError =
-            error;
+        const message =
+            recordError(
+                "bootstrap",
+                error
+            );
 
         publishEvent(
-            EVENTS.ERROR,
+            EVENTS.STORAGE_ERROR ??
+            "contacts.storage.error",
             {
                 operation:
                     "bootstrap",
-                message:
-                    error instanceof Error
-                        ? error.message
-                        : String(error)
+                message
+            }
+        );
+
+        publishEvent(
+            EVENTS.ERROR ??
+            "contacts.error",
+            {
+                operation:
+                    "storage.bootstrap",
+                message
             }
         );
 
         console.error(
-            "[PAY54_CONTACTS_STORAGE] Bootstrap failed.",
+            "[PAY54 Contacts Storage] Bootstrap failed:",
             error
         );
 
         throw error;
-
     }
 
 })();
