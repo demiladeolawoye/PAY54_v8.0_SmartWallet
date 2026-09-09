@@ -708,54 +708,75 @@
     /* ======================================================================
        CROSS-CATALOGUE VERIFICATION
     ====================================================================== */
+function verifyModuleCatalogue() {
 
-    function verifyModuleCatalogue() {
+    /*
+     * Only module identifiers that have canonical top-level entries in the
+     * Version Catalogue belong in this verification set.
+     *
+     * MODULES.VERSIONS identifies the Version Catalogue itself and therefore
+     * intentionally does not require a VERSIONS.VERSIONS property.
+     */
 
-        const required =
-            Object.freeze([
-                "CONSTANTS",
-                "VERSIONS",
-                "LEDGER",
-                "TRANSACTIONS",
-                "SERVICES",
-                "RECIPIENTS",
-                "CONTACTS",
-                "CARDS",
-                "WALLET",
-                "MERCHANT",
-                "SECURITY",
-                "SAVINGS",
-                "TRADING",
-                "INVEST",
-                "CHECKOUT",
-                "AGENT",
-                "RISK"
-            ]);
+    const required =
+        Object.freeze([
+            "CONSTANTS",
+            "LEDGER",
+            "TRANSACTIONS",
+            "SERVICES",
+            "RECIPIENTS",
+            "CONTACTS",
+            "CARDS",
+            "WALLET",
+            "MERCHANT",
+            "SECURITY",
+            "SAVINGS",
+            "TRADING",
+            "INVEST",
+            "CHECKOUT",
+            "AGENT",
+            "RISK"
+        ]);
 
-        for (
-            const key of required
+    for (
+        const key of required
+    ) {
+
+        if (
+            typeof MODULES[key] !== "string" ||
+            !MODULES[key]
         ) {
-
-            if (
-                typeof MODULES[key] !== "string" ||
-                !MODULES[key]
-            ) {
-                throw new Error(
-                    `[PAY54] Required MODULES.${key} identifier is unavailable.`
-                );
-            }
-
-            if (
-                typeof VERSIONS[key] !== "string"
-            ) {
-                throw new Error(
-                    `[PAY54] Required VERSIONS.${key} entry is unavailable.`
-                );
-            }
+            throw new Error(
+                `[PAY54] Required MODULES.${key} identifier is unavailable.`
+            );
         }
 
-        return true;
+        if (
+            typeof VERSIONS[key] !== "string" ||
+            !VERSIONS[key]
+        ) {
+            throw new Error(
+                `[PAY54] Required VERSIONS.${key} entry is unavailable.`
+            );
+        }
+
     }
+
+    /*
+     * The Version Catalogue identifier itself is validated independently.
+     */
+
+    if (
+        MODULES.VERSIONS !== "VERSIONS"
+    ) {
+        throw new Error(
+            "[PAY54] MODULES.VERSIONS compatibility verification failed."
+        );
+    }
+
+    return true;
+
+}
 
     /* ======================================================================
        REGISTRATION
