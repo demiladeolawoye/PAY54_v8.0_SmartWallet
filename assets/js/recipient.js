@@ -5972,20 +5972,21 @@ modal
 modal
 .querySelector("#bulkDelete")
 .addEventListener("click",bulkDeleteRecipients);    
-            modal
+                       modal
             .querySelector(
                 "#recipientClose"
             )
-             .addEventListener(
+            .addEventListener(
                 "click",
                 close
             );
 
         }
 
-    );
+    });
 
 }
+
 function renderRecipientManager(
     modal,
     recipients
