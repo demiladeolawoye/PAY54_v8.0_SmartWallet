@@ -6659,7 +6659,7 @@ Close
 
         }
 
-    );
+       });
 
 }
 
@@ -6723,7 +6723,7 @@ Close
 
         }
 
-    );
+        });
 
 }
 function duplicateRecipient(id){
