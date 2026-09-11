@@ -27,19 +27,17 @@ window.PAY54_UI || {};
    ENTERPRISE SECURITY
 ========================================================== */
 
-const SESSION =
-window.PAY54_SECURITY?.session;
+/*
+ * Security and Event Bus dependencies are resolved at point of use.
+ *
+ * This prevents classic-script global lexical collisions with other
+ * PAY54 engines and ensures Dashboard Core always uses the current
+ * runtime dependency instance.
+ */
 
-const TRANSACTION_GUARD =
-window.PAY54_SECURITY?.transactionGuard;
-
-const SECURITY_BOOTSTRAP =
-window.PAY54_SECURITY?.bootstrap;
 /* ========================================================================
    PAY54 ENTERPRISE EVENT SUBSCRIBER
 ======================================================================== */
-
-const EVENTS = window.PAY54_EVENTS || null;
 
 function subscribeDashboardEvents(){
 
