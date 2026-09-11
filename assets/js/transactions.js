@@ -4,7 +4,13 @@
    PAY54 ENTERPRISE EVENT BRIDGE
 ======================================================================== */
 
-const EVENTS = window.PAY54_EVENTS || null;
+/*
+ * The Enterprise Event Bus is resolved at publish time rather than stored
+ * in a global lexical constant.
+ *
+ * This prevents classic-script scope collisions with other PAY54 engines
+ * while also allowing the Event Bus to be replaced/recovered at runtime.
+ */
 
 /* ========================================================================
    TRANSACTION EVENT CONSTANTS
@@ -43,15 +49,18 @@ function publishTransactionEvent(
 
     try{
 
+        const eventBus =
+            window.PAY54_EVENTS || null;
+
         if(
 
-            EVENTS &&
+            eventBus &&
 
-            typeof EVENTS.publish === "function"
+            typeof eventBus.publish === "function"
 
         ){
 
-            EVENTS.publish(
+            eventBus.publish(
 
                 eventName,
 
@@ -68,7 +77,8 @@ function publishTransactionEvent(
         }
 
     }catch(error){
-       console.error(
+
+        console.error(
 
             "[PAY54_TRANSACTIONS]",
 
