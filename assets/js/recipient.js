@@ -5565,7 +5565,7 @@ function getRecipientHealth(){
             !!TRANSACTION_GUARD,
 
         eventBus:
-            !!EVENTS,
+    !!window.PAY54_EVENTS,
 
         ledger:
             !!window.PAY54_LEDGER,
