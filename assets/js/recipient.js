@@ -140,40 +140,39 @@ function publishRecipientAudit(
 ========================================================== */
 
 function publishRecipientEvent(
-
     eventName,
-
     payload = {}
-
 ){
 
-    if(
+    try{
 
-        !EVENTS ||
+        const eventBus =
+            window.PAY54_EVENTS || null;
 
-        typeof EVENTS.publish !== "function"
-
-    ){
-
-        return;
-
-    }
-
-    EVENTS.publish(
-
-        eventName,
-
-        payload,
-
-        {
-
-            source:
-
-                "recipient"
-
+        if(
+            !eventBus ||
+            typeof eventBus.publish !== "function"
+        ){
+            return;
         }
 
-    );
+        eventBus.publish(
+            eventName,
+            payload,
+            {
+                source:
+                    "recipient"
+            }
+        );
+
+    }catch(error){
+
+        console.error(
+            "[PAY54_RECIPIENTS] Event publication failed.",
+            error
+        );
+
+    }
 
 }
 /* =========================
