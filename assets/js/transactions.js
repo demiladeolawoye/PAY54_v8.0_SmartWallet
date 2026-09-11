@@ -6853,24 +6853,28 @@ releaseTransactionLock(
    SECURITY BOOTSTRAP VERIFICATION
 ========================================================== */
 
-const SECURITY_BOOTSTRAP =
-window.PAY54_SECURITY?.bootstrap;
+(() => {
 
-if(
+    const securityBootstrap =
+        window.PAY54_SECURITY?.bootstrap;
 
-    SECURITY_BOOTSTRAP &&
+    if(
 
-    typeof SECURITY_BOOTSTRAP.verify === "function"
+        securityBootstrap &&
 
-){
+        typeof securityBootstrap.verify === "function"
 
-    SECURITY_BOOTSTRAP.verify(
+    ){
 
-        "transactions"
+        securityBootstrap.verify(
 
-    );
+            "transactions"
 
-}
+        );
+
+    }
+
+})();
 /* =========================
    GLOBAL EXPORT
 ========================= */
