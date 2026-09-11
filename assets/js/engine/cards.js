@@ -4,8 +4,6 @@
    PAY54 ENTERPRISE EVENT BRIDGE
 ======================================================================== */
 
-const EVENTS = window.PAY54_EVENTS || null;
-
 const CARD_EVENTS = Object.freeze({
 
     CREATED:
@@ -29,35 +27,26 @@ const CARD_EVENTS = Object.freeze({
 });
 
 function publishCardEvent(
-
     eventName,
-
     payload = {}
-
 ){
 
     try{
 
+        const eventBus =
+            window.PAY54_EVENTS || null;
+
         if(
-
-            EVENTS &&
-
-            typeof EVENTS.publish === "function"
-
+            eventBus &&
+            typeof eventBus.publish === "function"
         ){
 
-            EVENTS.publish(
-
+            eventBus.publish(
                 eventName,
-
                 payload,
-
                 {
-
-                    source:"cards"
-
+                    source: "cards"
                 }
-
             );
 
         }
@@ -65,17 +54,13 @@ function publishCardEvent(
     }catch(error){
 
         console.error(
-
             "[PAY54_CARDS]",
-
             error
-
         );
 
     }
 
 }
-
 /* =========================================
    PAY54 ENTERPRISE CARDS ENGINE
    Version 11.0.0
