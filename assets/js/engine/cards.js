@@ -837,24 +837,23 @@ return{
    SECURITY BOOTSTRAP VERIFICATION
 ========================================================== */
 
-const SECURITY_BOOTSTRAP =
-window.PAY54_SECURITY?.bootstrap;
+(() => {
 
-if(
+    const securityBootstrap =
+        window.PAY54_SECURITY?.bootstrap;
 
-    SECURITY_BOOTSTRAP &&
+    if(
+        securityBootstrap &&
+        typeof securityBootstrap.verify === "function"
+    ){
 
-    typeof SECURITY_BOOTSTRAP.verify === "function"
+        securityBootstrap.verify(
+            "cards"
+        );
 
-){
+    }
 
-    SECURITY_BOOTSTRAP.verify(
-
-        "cards"
-
-    );
-
-}
+})();
 console.info(
 
     "✅ PAY54 Enterprise Cards Engine",
