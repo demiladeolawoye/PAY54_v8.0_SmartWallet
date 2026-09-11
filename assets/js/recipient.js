@@ -99,43 +99,40 @@ function publishRecipientAudit(
     payload = {}
 ){
 
-    if(
+    try{
 
-        !EVENTS ||
+        const eventBus =
+            window.PAY54_EVENTS || null;
 
-        typeof EVENTS.publish !== "function"
-
-    ){
-
-        return;
-
-    }
-
-    EVENTS.publish(
-
-        "recipient.security.audit",
-
-        {
-
-            action,
-
-            occurredAt:
-
-                new Date().toISOString(),
-
-            ...payload
-
-        },
-
-        {
-
-            source:
-
-                "recipient"
-
+        if(
+            !eventBus ||
+            typeof eventBus.publish !== "function"
+        ){
+            return;
         }
 
-    );
+        eventBus.publish(
+            "recipient.security.audit",
+            {
+                action,
+                occurredAt:
+                    new Date().toISOString(),
+                ...payload
+            },
+            {
+                source:
+                    "recipient"
+            }
+        );
+
+    }catch(error){
+
+        console.error(
+            "[PAY54_RECIPIENTS] Security audit event failed.",
+            error
+        );
+
+    }
 
 }
 /* ==========================================================
