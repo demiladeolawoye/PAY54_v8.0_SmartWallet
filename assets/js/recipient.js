@@ -25,9 +25,6 @@ window.PAY54_SECURITY?.bootstrap;
 
 const TRANSACTION_GUARD =
 window.PAY54_SECURITY?.transactionGuard;
-
-const EVENTS =
-window.PAY54_EVENTS || null;
 /* ==========================================================
    ENTERPRISE RECIPIENT REGISTRY
 ========================================================== */
