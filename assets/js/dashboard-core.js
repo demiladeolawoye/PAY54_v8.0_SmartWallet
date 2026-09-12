@@ -811,18 +811,14 @@ window.PAY54_UI.getDashboardHealth =
 function(){
 
     return{
+sessionManager:
+    !!window.PAY54_SECURITY?.session,
 
-        sessionManager:
+transactionGuard:
+    !!window.PAY54_SECURITY?.transactionGuard,
 
-            !!SESSION,
-
-        transactionGuard:
-
-            !!TRANSACTION_GUARD,
-
-        bootstrap:
-
-            !!SECURITY_BOOTSTRAP,
+bootstrap:
+    !!window.PAY54_SECURITY?.bootstrap,
 
         eventBus:
 
