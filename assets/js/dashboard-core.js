@@ -4537,18 +4537,25 @@ req.paymentLink;
    SECURITY BOOTSTRAP VERIFICATION
 ========================================================== */
 
-if (
+(() => {
 
-    SECURITY_BOOTSTRAP &&
+    const securityBootstrap =
+        window.PAY54_SECURITY?.bootstrap;
 
-    typeof SECURITY_BOOTSTRAP.verify === "function"
+    if(
 
-){
+        securityBootstrap &&
 
-    SECURITY_BOOTSTRAP.verify(
+        typeof securityBootstrap.verify === "function"
 
-        "dashboard-core"
+    ){
 
-    );
+        securityBootstrap.verify(
 
-}
+            "dashboard-core"
+
+        );
+
+    }
+
+})();
