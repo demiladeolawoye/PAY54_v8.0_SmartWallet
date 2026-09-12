@@ -41,17 +41,12 @@ window.PAY54_UI || {};
 
 function subscribeDashboardEvents(){
 
-    if(
-
-        !EVENTS ||
-
-        typeof EVENTS.subscribe !== "function"
-
-    ){
-
-        return;
-
-    }
+   if(
+    !eventBus ||
+    typeof eventBus.subscribe !== "function"
+){
+    return;
+}
 
     EVENTS.subscribe(
 
