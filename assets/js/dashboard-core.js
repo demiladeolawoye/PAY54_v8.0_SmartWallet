@@ -667,21 +667,25 @@ if (
 ========================================= */
 
 function initDashboard(){
+
+const session =
+window.PAY54_SECURITY?.session;
+
 /* ==========================================================
    ENTERPRISE SESSION VALIDATION
 ========================================================== */
 
 if(
 
-    SESSION &&
+    session &&
 
-    typeof SESSION.isAuthenticated === "function"
+    typeof session.isAuthenticated === "function"
 
 ){
 
     if(
 
-        !SESSION.isAuthenticated()
+        !session.isAuthenticated()
 
     ){
 
