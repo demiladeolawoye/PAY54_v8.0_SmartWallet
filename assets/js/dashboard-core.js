@@ -526,30 +526,31 @@ window.PAY54_ACTIONS = Object.freeze({
    ROUTER
 ========================================= */
 function routeAction(action){
+
+const transactionGuard =
+window.PAY54_SECURITY?.transactionGuard;
+
 /* ==========================================================
    TRANSACTION GUARD
 ========================================================== */
 
 if(
 
-    TRANSACTION_GUARD &&
+    transactionGuard &&
 
-    typeof TRANSACTION_GUARD.validate === "function"
+    typeof transactionGuard.validate === "function"
 
 ){
 
     const allowed =
 
-        TRANSACTION_GUARD.validate({
+        transactionGuard.validate({
 
             type:
-
                 "DASHBOARD_ACTION",
 
             payload:{
-
                 action
-
             }
 
         });
