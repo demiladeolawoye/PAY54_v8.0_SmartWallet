@@ -40,6 +40,8 @@ window.PAY54_UI || {};
 ======================================================================== */
 
 function subscribeDashboardEvents(){
+       const eventBus =
+        window.PAY54_EVENTS || null;
 
    if(
     !eventBus ||
@@ -48,7 +50,7 @@ function subscribeDashboardEvents(){
     return;
 }
 
-    EVENTS.subscribe(
+    eventBus.subscribe(
 
         "ledger.balance.updated",
 
@@ -60,7 +62,7 @@ function subscribeDashboardEvents(){
 
     );
 
-    EVENTS.subscribe(
+    eventBus.subscribe(
 
     "transaction.ui.refresh",
 
@@ -84,7 +86,7 @@ if(
 
 );
 
-    EVENTS.subscribe(
+    eventBus.subscribe(
 
         "cards.updated",
 
@@ -96,7 +98,7 @@ if(
 
     );
 
-    EVENTS.subscribe(
+    eventBus.subscribe(
 
         "cards.created",
 
@@ -108,7 +110,7 @@ if(
 
     );
 
-    EVENTS.subscribe(
+    eventBus.subscribe(
 
         "cards.deleted",
 
@@ -120,7 +122,7 @@ if(
 
     );
 
-    EVENTS.subscribe(
+    eventBus.subscribe(
 
         "services.open",
 
