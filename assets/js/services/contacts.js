@@ -1694,88 +1694,15 @@
     }
 
     /* ======================================================================
-       EXISTING PAY54 SERVICES CATALOGUE INTEGRATION
-    ====================================================================== */
-
-    function integrateWithServiceCatalogue() {
-
-        const catalogue =
-            GLOBAL.PAY54_SERVICES;
-
-        if (
-            !catalogue ||
-            typeof catalogue !== "object"
-        ) {
-
-            return false;
-
-        }
-
-        /*
-         * Existing PAY54_SERVICES entries are UI routing descriptors.
-         *
-         * Contacts is attached additively. No existing service entry is
-         * replaced and the existing catalogue object is preserved.
-         */
-
-        if (
-            Object.prototype
-                .hasOwnProperty
-                .call(
-                    catalogue,
-                    "contacts"
-                )
-        ) {
-
-            return true;
-
-        }
-
-        try {
-
-            catalogue.contacts = {
-
-                title:
-                    "Contacts",
-
-                service:
-                    API
-
-            };
-
-            return (
-                catalogue.contacts
-                    ?.service ===
-                API
-            );
-
-        } catch (
-            error
-        ) {
-
-            console.warn(
-                "[PAY54_CONTACTS_SERVICE] PAY54_SERVICES integration skipped.",
-                error
-            );
-
-            return false;
-
-        }
-
-    }
-
-    /* ======================================================================
        BOOT
     ====================================================================== */
 
-    initialise();
+  initialise();
 
-    registerWithPlatform();
+registerWithPlatform();
 
-    integrateWithServiceCatalogue();
-
-    console.info(
-        `✅ ${ENGINE_NAME} ${VERSION} loaded.`
-    );
+console.info(
+    `✅ ${ENGINE_NAME} ${VERSION} loaded.`
+);
 
 })();
