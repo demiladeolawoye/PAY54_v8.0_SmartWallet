@@ -17,6 +17,7 @@
    • Provide component-level version information
    • Support diagnostics and release management
    • Support Contacts Engine component versioning
+   • Support Beneficiary Engine component versioning
    • Provide immutable version information
    • Maintain zero-regression compatibility
 
@@ -24,34 +25,6 @@
    ------------
    assets/js/core/constants/index.js
    assets/js/core/constants/modules.js
-
-   Compatibility
-   -------------
-   Existing identifiers are intentionally preserved:
-
-   VERSIONS.CORE
-   VERSIONS.CONSTANTS
-   VERSIONS.LEDGER
-   VERSIONS.TRANSACTIONS
-   VERSIONS.SERVICES
-   VERSIONS.RECIPIENTS
-   VERSIONS.CONTACTS
-   VERSIONS.CARDS
-   VERSIONS.WALLET
-   VERSIONS.MERCHANT
-   VERSIONS.SECURITY
-   VERSIONS.SAVINGS
-   VERSIONS.TRADING
-   VERSIONS.INVEST
-   VERSIONS.CHECKOUT
-   VERSIONS.AGENT
-   VERSIONS.RISK
-
-   Enterprise component versions are additive and exposed through:
-
-   VERSIONS.COMPONENTS
-   VERSIONS.DOMAIN
-   VERSIONS.PLATFORM
 
 ========================================================================== */
 
@@ -63,11 +36,14 @@
        GLOBAL
     ====================================================================== */
 
-    const GLOBAL = window;
+    const GLOBAL =
+        window;
 
-    const CATALOGUE_NAME = "VERSIONS";
+    const CATALOGUE_NAME =
+        "VERSIONS";
 
-    const VERSION = "12.0.0";
+    const VERSION =
+        "12.0.0";
 
     const ENGINE =
         "PAY54 Version Catalogue";
@@ -85,29 +61,49 @@
         typeof constants.get !== "function" ||
         typeof constants.has !== "function"
     ) {
+
         throw new Error(
             "[PAY54] Constants Registry must load before versions.js."
         );
+
     }
 
     const MODULES =
-        constants.get("MODULES");
+        constants.get(
+            "MODULES"
+        );
 
     if (
         !MODULES ||
         typeof MODULES !== "object"
     ) {
+
         throw new Error(
             "[PAY54] Module identifiers must load before versions.js."
         );
+
     }
 
     if (
-        MODULES.VERSIONS !== "VERSIONS"
+        MODULES.VERSIONS !==
+        "VERSIONS"
     ) {
+
         throw new Error(
             "[PAY54] MODULES.VERSIONS compatibility verification failed."
         );
+
+    }
+
+    if (
+        MODULES.BENEFICIARIES !==
+        "BENEFICIARIES"
+    ) {
+
+        throw new Error(
+            "[PAY54] MODULES.BENEFICIARIES must be available before versions.js."
+        );
+
     }
 
     /* ======================================================================
@@ -115,12 +111,9 @@
 
        IMPORTANT
        ---------
-       The top-level values preserve the version identifiers from the
-       existing PAY54 v12 catalogue.
+       Existing top-level version properties remain strings.
 
-       Component-level versioning is additive. Existing top-level properties
-       are never converted into nested objects because downstream modules may
-       already rely on them being strings.
+       BENEFICIARIES is additive and does not alter RECIPIENTS or CONTACTS.
     ====================================================================== */
 
     const VERSIONS = {
@@ -152,10 +145,13 @@
             "11.0.0",
 
         /* ------------------------------------------------------------------
-           ENGINES
+           DOMAIN / ENGINES
         ------------------------------------------------------------------ */
 
         CONTACTS:
+            "1.0.0",
+
+        BENEFICIARIES:
             "1.0.0",
 
         CARDS:
@@ -190,8 +186,6 @@
 
         /* ==================================================================
            PLATFORM RELEASE INFORMATION
-
-           Additive metadata for diagnostics and release governance.
         ================================================================== */
 
         PLATFORM: {
@@ -206,15 +200,15 @@
                 "12.0.0",
 
             CONTACTS:
+                "1.0.0",
+
+            BENEFICIARIES:
                 "1.0.0"
 
         },
 
         /* ==================================================================
            COMPONENT VERSION CATALOGUE
-
-           Provides independently addressable versions without changing the
-           established top-level public API.
         ================================================================== */
 
         COMPONENTS: {
@@ -235,6 +229,9 @@
                     "12.0.0",
 
                 CONTACT_CONSTANTS:
+                    "1.0.0",
+
+                BENEFICIARY_CONSTANTS:
                     "1.0.0",
 
                 CONFIG:
@@ -269,6 +266,7 @@
 
                 HEALTH:
                     "12.0.0"
+
             },
 
             /* --------------------------------------------------------------
@@ -291,6 +289,33 @@
 
                 RECIPIENTS:
                     "11.0.0"
+
+            },
+
+            /* --------------------------------------------------------------
+               BENEFICIARIES
+            -------------------------------------------------------------- */
+
+            BENEFICIARIES: {
+
+                CONSTANTS:
+                    "1.0.0",
+
+                STORAGE:
+                    "1.0.0",
+
+                ENGINE:
+                    "1.0.0",
+
+                SERVICE:
+                    "1.0.0",
+
+                MIGRATION:
+                    "1.0.0",
+
+                LEGACY_FACADE:
+                    "1.0.0"
+
             },
 
             /* --------------------------------------------------------------
@@ -322,6 +347,7 @@
 
                 XSS:
                     "11.0.0"
+
             },
 
             /* --------------------------------------------------------------
@@ -341,6 +367,7 @@
 
                 LINKED:
                     "11.0.0"
+
             },
 
             /* --------------------------------------------------------------
@@ -360,6 +387,7 @@
 
                 FUNDING:
                     "11.0.0"
+
             }
 
         },
@@ -373,11 +401,7 @@
             /* --------------------------------------------------------------
                CONTACTS
 
-               WP-010A begins component-level Contacts version governance.
-
-               STORAGE is intentionally independently versioned so future
-               storage migrations can evolve without falsely implying that
-               the entire Contacts domain changed at the same time.
+               Existing WP-010 version governance is preserved.
             -------------------------------------------------------------- */
 
             CONTACTS: {
@@ -438,6 +462,57 @@
 
                 SETTINGS:
                     "1.0.0"
+
+            },
+
+            /* --------------------------------------------------------------
+               BENEFICIARIES
+
+               Independent payment-relationship domain.
+
+               Contacts owns person identity.
+               Beneficiaries owns payment destinations, trust, usage and
+               beneficiary lifecycle.
+            -------------------------------------------------------------- */
+
+            BENEFICIARIES: {
+
+                ROOT:
+                    "1.0.0",
+
+                CONSTANTS:
+                    "1.0.0",
+
+                ENGINE:
+                    "1.0.0",
+
+                CORE:
+                    "1.0.0",
+
+                STORAGE:
+                    "1.0.0",
+
+                REPOSITORY:
+                    "1.0.0",
+
+                SERVICE:
+                    "1.0.0",
+
+                VALIDATOR:
+                    "1.0.0",
+
+                NORMALIZER:
+                    "1.0.0",
+
+                EVENTS:
+                    "1.0.0",
+
+                MIGRATION:
+                    "1.0.0",
+
+                LEGACY_FACADE:
+                    "1.0.0"
+
             },
 
             /* --------------------------------------------------------------
@@ -466,6 +541,7 @@
 
                 MERCHANT_QR:
                     "11.0.0"
+
             },
 
             /* --------------------------------------------------------------
@@ -491,6 +567,7 @@
 
                 INVEST:
                     "11.0.0"
+
             },
 
             /* --------------------------------------------------------------
@@ -510,6 +587,7 @@
 
                 MERCHANT:
                     "11.0.0"
+
             },
 
             /* --------------------------------------------------------------
@@ -535,6 +613,7 @@
 
                 TRANSACTION_MONITORING:
                     "11.0.0"
+
             }
 
         }
@@ -554,7 +633,9 @@
             value === null ||
             typeof value !== "object"
         ) {
+
             return false;
+
         }
 
         const prototype =
@@ -564,6 +645,7 @@
             prototype === Object.prototype ||
             prototype === null
         );
+
     }
 
     function validateVersion(
@@ -575,10 +657,13 @@
             typeof value !== "string" ||
             !VERSION_PATTERN.test(value)
         ) {
+
             throw new Error(
                 `[PAY54] Invalid semantic version "${String(value)}" at ${path}.`
             );
+
         }
+
     }
 
     function validateNode(
@@ -596,12 +681,17 @@
             );
 
             return;
+
         }
 
-        if (!isPlainObject(value)) {
+        if (
+            !isPlainObject(value)
+        ) {
+
             throw new TypeError(
                 `[PAY54] Invalid version catalogue node at ${path}.`
             );
+
         }
 
         for (
@@ -614,20 +704,28 @@
                 key === "prototype" ||
                 key === "constructor"
             ) {
+
                 throw new Error(
                     `[PAY54] Unsafe version catalogue property rejected at ${path}.${key}.`
                 );
+
             }
 
             validateNode(
                 child,
                 `${path}.${key}`
             );
+
         }
+
     }
 
     /* ======================================================================
        LEGACY COMPATIBILITY VERIFICATION
+
+       This remains the original PAY54 compatibility contract.
+       BENEFICIARIES is intentionally verified separately as an additive
+       WP-011 domain.
     ====================================================================== */
 
     function verifyLegacyCompatibility() {
@@ -694,89 +792,201 @@
         ) {
 
             if (
-                VERSIONS[key] !== version
+                VERSIONS[key] !==
+                version
             ) {
+
                 throw new Error(
                     `[PAY54] Version compatibility regression detected for VERSIONS.${key}. Expected "${version}".`
                 );
+
             }
+
         }
 
         return true;
+
+    }
+
+    /* ======================================================================
+       BENEFICIARY VERSION VERIFICATION
+    ====================================================================== */
+
+    function verifyBeneficiaryVersions() {
+
+        if (
+            VERSIONS.BENEFICIARIES !==
+            "1.0.0"
+        ) {
+
+            throw new Error(
+                "[PAY54] VERSIONS.BENEFICIARIES must be 1.0.0."
+            );
+
+        }
+
+        const required =
+            Object.freeze([
+
+                VERSIONS.PLATFORM
+                    ?.BENEFICIARIES,
+
+                VERSIONS.COMPONENTS
+                    ?.CORE
+                    ?.BENEFICIARY_CONSTANTS,
+
+                VERSIONS.COMPONENTS
+                    ?.BENEFICIARIES
+                    ?.CONSTANTS,
+
+                VERSIONS.COMPONENTS
+                    ?.BENEFICIARIES
+                    ?.STORAGE,
+
+                VERSIONS.COMPONENTS
+                    ?.BENEFICIARIES
+                    ?.ENGINE,
+
+                VERSIONS.COMPONENTS
+                    ?.BENEFICIARIES
+                    ?.SERVICE,
+
+                VERSIONS.COMPONENTS
+                    ?.BENEFICIARIES
+                    ?.MIGRATION,
+
+                VERSIONS.COMPONENTS
+                    ?.BENEFICIARIES
+                    ?.LEGACY_FACADE,
+
+                VERSIONS.DOMAIN
+                    ?.BENEFICIARIES
+                    ?.ROOT,
+
+                VERSIONS.DOMAIN
+                    ?.BENEFICIARIES
+                    ?.STORAGE,
+
+                VERSIONS.DOMAIN
+                    ?.BENEFICIARIES
+                    ?.ENGINE,
+
+                VERSIONS.DOMAIN
+                    ?.BENEFICIARIES
+                    ?.SERVICE
+
+            ]);
+
+        for (
+            const version
+            of required
+        ) {
+
+            if (
+                version !==
+                "1.0.0"
+            ) {
+
+                throw new Error(
+                    "[PAY54] Beneficiary component version catalogue is incomplete or inconsistent."
+                );
+
+            }
+
+        }
+
+        return true;
+
     }
 
     /* ======================================================================
        CROSS-CATALOGUE VERIFICATION
     ====================================================================== */
-function verifyModuleCatalogue() {
 
-    /*
-     * Only module identifiers that have canonical top-level entries in the
-     * Version Catalogue belong in this verification set.
-     *
-     * MODULES.VERSIONS identifies the Version Catalogue itself and therefore
-     * intentionally does not require a VERSIONS.VERSIONS property.
-     */
+    function verifyModuleCatalogue() {
 
-    const required =
-        Object.freeze([
-            "CONSTANTS",
-            "LEDGER",
-            "TRANSACTIONS",
-            "SERVICES",
-            "RECIPIENTS",
-            "CONTACTS",
-            "CARDS",
-            "WALLET",
-            "MERCHANT",
-            "SECURITY",
-            "SAVINGS",
-            "TRADING",
-            "INVEST",
-            "CHECKOUT",
-            "AGENT",
-            "RISK"
-        ]);
+        /*
+         * Only identifiers with canonical top-level version entries belong
+         * in this verification set.
+         */
 
-    for (
-        const key of required
-    ) {
+        const required =
+            Object.freeze([
 
-        if (
-            typeof MODULES[key] !== "string" ||
-            !MODULES[key]
+                "CONSTANTS",
+                "LEDGER",
+                "TRANSACTIONS",
+                "SERVICES",
+                "RECIPIENTS",
+                "CONTACTS",
+                "BENEFICIARIES",
+                "CARDS",
+                "WALLET",
+                "MERCHANT",
+                "SECURITY",
+                "SAVINGS",
+                "TRADING",
+                "INVEST",
+                "CHECKOUT",
+                "AGENT",
+                "RISK"
+
+            ]);
+
+        for (
+            const key
+            of required
         ) {
-            throw new Error(
-                `[PAY54] Required MODULES.${key} identifier is unavailable.`
-            );
+
+            if (
+                typeof MODULES[key] !== "string" ||
+                !MODULES[key]
+            ) {
+
+                throw new Error(
+                    `[PAY54] Required MODULES.${key} identifier is unavailable.`
+                );
+
+            }
+
+            if (
+                typeof VERSIONS[key] !== "string" ||
+                !VERSIONS[key]
+            ) {
+
+                throw new Error(
+                    `[PAY54] Required VERSIONS.${key} entry is unavailable.`
+                );
+
+            }
+
         }
 
         if (
-            typeof VERSIONS[key] !== "string" ||
-            !VERSIONS[key]
+            MODULES.VERSIONS !==
+            "VERSIONS"
         ) {
+
             throw new Error(
-                `[PAY54] Required VERSIONS.${key} entry is unavailable.`
+                "[PAY54] MODULES.VERSIONS compatibility verification failed."
             );
+
         }
 
+        if (
+            MODULES.BENEFICIARIES !==
+            "BENEFICIARIES"
+        ) {
+
+            throw new Error(
+                "[PAY54] MODULES.BENEFICIARIES compatibility verification failed."
+            );
+
+        }
+
+        return true;
+
     }
-
-    /*
-     * The Version Catalogue identifier itself is validated independently.
-     */
-
-    if (
-        MODULES.VERSIONS !== "VERSIONS"
-    ) {
-        throw new Error(
-            "[PAY54] MODULES.VERSIONS compatibility verification failed."
-        );
-    }
-
-    return true;
-
-}
 
     /* ======================================================================
        REGISTRATION
@@ -790,6 +1000,8 @@ function verifyModuleCatalogue() {
 
         verifyLegacyCompatibility();
 
+        verifyBeneficiaryVersions();
+
         verifyModuleCatalogue();
 
         constants.register(
@@ -802,20 +1014,32 @@ function verifyModuleCatalogue() {
                 MODULES.VERSIONS
             );
 
-        if (!registered) {
+        if (
+            !registered
+        ) {
+
             throw new Error(
                 "[PAY54] Failed to register Version Catalogue."
             );
+
         }
 
         if (
             registered.CORE !== "12.0.0" ||
             registered.CONTACTS !== "1.0.0" ||
-            registered.DOMAIN?.CONTACTS?.STORAGE !== "1.0.0"
+            registered.BENEFICIARIES !== "1.0.0" ||
+            registered.DOMAIN
+                ?.CONTACTS
+                ?.STORAGE !== "1.0.0" ||
+            registered.DOMAIN
+                ?.BENEFICIARIES
+                ?.STORAGE !== "1.0.0"
         ) {
+
             throw new Error(
                 "[PAY54] Version Catalogue post-registration verification failed."
             );
+
         }
 
     } catch (error) {
@@ -826,6 +1050,7 @@ function verifyModuleCatalogue() {
         );
 
         throw error;
+
     }
 
     /* ======================================================================
