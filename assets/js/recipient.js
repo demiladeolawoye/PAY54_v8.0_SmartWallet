@@ -3692,24 +3692,17 @@ function resolveSmartPayment(amount, currency){
 function openSendUnified(){
 
     if(
-
         SESSION &&
-
         typeof SESSION.isAuthenticated === "function"
-
     ){
 
         if(
-
             !SESSION.isAuthenticated()
-
         ){
 
             window.PAY54_TOAST
             ?.showToast(
-
                 "Your session has expired."
-
             );
 
             return;
@@ -3718,197 +3711,980 @@ function openSendUnified(){
 
     }
 
+    const CONTACTS_PICKER =
+        window.PAY54_CONTACTS_PICKER || null;
+
+    let selectedContact =
+        null;
+
     openModal({
 
-        title:"Send Money",
+        title:
+            "Send Money",
 
-    bodyHTML:`
+        bodyHTML: `
 
-      <form class="p54-form" id="sendForm">
+<form
+    class="p54-form"
+    id="sendForm"
+    novalidate
+>
 
-        <div>
-          <div class="p54-label">Recipient (PAY54 Tag)</div>
-          <input class="p54-input" id="sendUser" placeholder="@username" required>
+    <div>
+
+        <div class="p54-label">
+            Recipient
         </div>
 
-        <div>
-          <div class="p54-label">Amount</div>
-          <input class="p54-input" id="sendAmount" type="number" step="0.01" placeholder="0.00" required>
+        <div
+            style="
+                display:flex;
+                gap:10px;
+                align-items:stretch;
+            "
+        >
+
+            <input
+                class="p54-input"
+                id="sendUser"
+                name="recipient"
+                type="text"
+                placeholder="@username"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                aria-label="PAY54 recipient"
+                required
+                style="flex:1;min-width:0;"
+            >
+
+            ${
+                CONTACTS_PICKER &&
+                typeof CONTACTS_PICKER.open ===
+                    "function"
+
+                    ? `
+
+            <button
+                class="p54-btn"
+                type="button"
+                id="chooseSendContact"
+                aria-label="Choose recipient from contacts"
+                title="Choose from contacts"
+                style="
+                    flex:0 0 auto;
+                    white-space:nowrap;
+                "
+            >
+                Contacts
+            </button>
+
+                    `
+
+                    : ""
+            }
+
         </div>
 
-        <div>
-          <div class="p54-label">Reference (optional)</div>
-          <input class="p54-input" id="sendNote" placeholder="Optional note">
+        <div
+            id="sendRecipientStatus"
+            aria-live="polite"
+            style="
+                min-height:18px;
+                margin-top:7px;
+                font-size:12px;
+                opacity:.75;
+            "
+        >
+            Enter a PAY54 tag or choose from Contacts.
         </div>
 
-        <div class="p54-actions">
-          <button class="p54-btn" type="button" id="cancelSend">Cancel</button>
-          <button class="p54-btn primary" type="submit">Send</button>
+    </div>
+
+    <div>
+
+        <div class="p54-label">
+            Amount
         </div>
 
-      </form>
+        <input
+            class="p54-input"
+            id="sendAmount"
+            name="amount"
+            type="number"
+            inputmode="decimal"
+            min="0.01"
+            max="100000000"
+            step="0.01"
+            placeholder="0.00"
+            autocomplete="off"
+            aria-label="Amount to send"
+            required
+        >
 
-    `,
+    </div>
 
-    onMount: ({modal, close}) => {
+    <div>
 
-      const form = modal.querySelector("#sendForm");
+        <div class="p54-label">
+            Reference (optional)
+        </div>
 
-      modal.querySelector("#cancelSend").addEventListener("click", close);
+        <input
+            class="p54-input"
+            id="sendNote"
+            name="reference"
+            type="text"
+            maxlength="140"
+            placeholder="Optional note"
+            autocomplete="off"
+            aria-label="Payment reference"
+        >
 
-      form.addEventListener("submit",(e)=>{
+    </div>
 
-        e.preventDefault();
+    <div class="p54-actions">
 
-        const user = modal.querySelector("#sendUser").value.trim();
-        const amount = Number(parseFloat(modal.querySelector("#sendAmount").value).toFixed(2));
-        const note = modal.querySelector("#sendNote").value.trim();
+        <button
+            class="p54-btn"
+            type="button"
+            id="cancelSend"
+        >
+            Cancel
+        </button>
 
-        const currency = getSelectedCurrency();
+        <button
+            class="p54-btn primary"
+            type="submit"
+            id="confirmSend"
+        >
+            Send
+        </button>
 
-        if(!user || user.length < 2){
-          alert("Enter valid recipient");
-          return;
+    </div>
+
+</form>
+
+        `,
+
+        onMount: ({
+            modal,
+            close
+        }) => {
+
+            const form =
+                modal.querySelector(
+                    "#sendForm"
+                );
+
+            const recipientInput =
+                modal.querySelector(
+                    "#sendUser"
+                );
+
+            const amountInput =
+                modal.querySelector(
+                    "#sendAmount"
+                );
+
+            const noteInput =
+                modal.querySelector(
+                    "#sendNote"
+                );
+
+            const recipientStatus =
+                modal.querySelector(
+                    "#sendRecipientStatus"
+                );
+
+            const chooseContactButton =
+                modal.querySelector(
+                    "#chooseSendContact"
+                );
+
+            const cancelButton =
+                modal.querySelector(
+                    "#cancelSend"
+                );
+
+            const submitButton =
+                modal.querySelector(
+                    "#confirmSend"
+                );
+
+            if(
+                !form ||
+                !recipientInput ||
+                !amountInput ||
+                !noteInput ||
+                !cancelButton ||
+                !submitButton
+            ){
+
+                console.error(
+                    "[PAY54_SEND] Send Money UI failed to initialise."
+                );
+
+                window.PAY54_TOAST
+                ?.showToast(
+                    "Send Money is temporarily unavailable."
+                );
+
+                close();
+
+                return;
+
+            }
+
+            const cleanString = (
+                value
+            ) => {
+
+                if(
+                    value === null ||
+                    value === undefined
+                ){
+
+                    return "";
+
+                }
+
+                return String(
+                    value
+                ).trim();
+
+            };
+
+            const normalisePay54Tag = (
+                value
+            ) => {
+
+                const cleaned =
+                    cleanString(
+                        value
+                    );
+
+                if(
+                    !cleaned
+                ){
+
+                    return "";
+
+                }
+
+                return cleaned.startsWith(
+                    "@"
+                )
+                    ? cleaned
+                    : `@${cleaned}`;
+
+            };
+
+            const resolveContactTag = (
+                contact
+            ) => {
+
+                if(
+                    !contact ||
+                    typeof contact !== "object"
+                ){
+
+                    return "";
+
+                }
+
+                const candidates = [
+
+                    contact.tag,
+
+                    contact.pay54Tag,
+
+                    contact.pay54_tag,
+
+                    contact.username,
+
+                    contact.handle,
+
+                    contact.identity?.tag,
+
+                    contact.identity?.pay54Tag,
+
+                    contact.identities?.pay54,
+
+                    contact.identities?.tag
+
+                ];
+
+                for(
+                    const candidate
+                    of candidates
+                ){
+
+                    const value =
+                        cleanString(
+                            candidate
+                        );
+
+                    if(
+                        value
+                    ){
+
+                        return normalisePay54Tag(
+                            value
+                        );
+
+                    }
+
+                }
+
+                return "";
+
+            };
+
+            const resolveContactName = (
+                contact
+            ) => {
+
+                if(
+                    !contact ||
+                    typeof contact !== "object"
+                ){
+
+                    return "";
+
+                }
+
+                return cleanString(
+
+                    contact.displayName ||
+
+                    contact.name ||
+
+                    contact.fullName ||
+
+                    contact.accountName
+
+                );
+
+            };
+
+            const clearSelectedContact =
+                () => {
+
+                    selectedContact =
+                        null;
+
+                    if(
+                        recipientStatus
+                    ){
+
+                        recipientStatus.textContent =
+                            "Enter a PAY54 tag or choose from Contacts.";
+
+                    }
+
+                };
+
+            const setSelectedContact = (
+                contact
+            ) => {
+
+                const tag =
+                    resolveContactTag(
+                        contact
+                    );
+
+                if(
+                    !tag
+                ){
+
+                    window.PAY54_TOAST
+                    ?.showToast(
+                        "This contact does not have a PAY54 tag."
+                    );
+
+                    return false;
+
+                }
+
+                selectedContact = {
+                    ...contact,
+                    tag
+                };
+
+                recipientInput.value =
+                    tag;
+
+                const displayName =
+                    resolveContactName(
+                        contact
+                    );
+
+                if(
+                    recipientStatus
+                ){
+
+                    recipientStatus.textContent =
+                        displayName
+                            ? `${displayName} • ${tag}`
+                            : tag;
+
+                }
+
+                recipientInput.focus();
+
+                return true;
+
+            };
+
+            recipientInput
+            .addEventListener(
+                "input",
+                () => {
+
+                    if(
+                        !selectedContact
+                    ){
+
+                        return;
+
+                    }
+
+                    const currentValue =
+                        normalisePay54Tag(
+                            recipientInput.value
+                        );
+
+                    const selectedValue =
+                        normalisePay54Tag(
+                            selectedContact.tag
+                        );
+
+                    if(
+                        currentValue !==
+                        selectedValue
+                    ){
+
+                        clearSelectedContact();
+
+                    }
+
+                }
+            );
+
+            cancelButton
+            .addEventListener(
+                "click",
+                close
+            );
+
+            if(
+                chooseContactButton &&
+                CONTACTS_PICKER &&
+                typeof CONTACTS_PICKER.open ===
+                    "function"
+            ){
+
+                chooseContactButton
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        try{
+
+                            CONTACTS_PICKER.open({
+
+                                title:
+                                    "Choose recipient",
+
+                                subtitle:
+                                    "Select a PAY54 contact to send money to.",
+
+                                closeOnSelect:
+                                    true,
+
+                                onSelect:
+                                    contact => {
+
+                                        setSelectedContact(
+                                            contact
+                                        );
+
+                                    }
+
+                            });
+
+                        }catch(error){
+
+                            console.error(
+                                "[PAY54_SEND] Contacts Picker failed.",
+                                error
+                            );
+
+                            window.PAY54_TOAST
+                            ?.showToast(
+                                "Contacts are temporarily unavailable. You can still enter a PAY54 tag."
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+            form.addEventListener(
+                "submit",
+                e => {
+
+                    e.preventDefault();
+
+                    const rawUser =
+                        cleanString(
+                            recipientInput.value
+                        );
+
+                    const user =
+                        normalisePay54Tag(
+                            rawUser
+                        );
+
+                    const rawAmount =
+                        Number.parseFloat(
+                            amountInput.value
+                        );
+
+                    const amount =
+                        Number.isFinite(
+                            rawAmount
+                        )
+                            ? Number(
+                                rawAmount.toFixed(
+                                    2
+                                )
+                            )
+                            : 0;
+
+                    const note =
+                        cleanString(
+                            noteInput.value
+                        );
+
+                    const currency =
+                        getSelectedCurrency();
+
+                    if(
+                        !user ||
+                        user.length < 2
+                    ){
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Enter a valid recipient."
+                        );
+
+                        recipientInput.focus();
+
+                        return;
+
+                    }
+
+                    if(
+                        !Number.isFinite(
+                            amount
+                        ) ||
+                        amount <= 0
+                    ){
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Enter a valid amount."
+                        );
+
+                        amountInput.focus();
+
+                        return;
+
+                    }
+
+                    if(
+                        amount >
+                        100000000
+                    ){
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Amount exceeds the transaction limit."
+                        );
+
+                        amountInput.focus();
+
+                        return;
+
+                    }
+
+                    const funding =
+                        resolveSmartPayment(
+                            amount,
+                            currency
+                        );
+
+                    if(
+                        !funding
+                    ){
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Insufficient funds across all wallets."
+                        );
+
+                        return;
+
+                    }
+
+                    submitButton.disabled =
+                        true;
+
+                    submitButton.setAttribute(
+                        "aria-busy",
+                        "true"
+                    );
+
+                    const restoreSubmitState =
+                        () => {
+
+                            submitButton.disabled =
+                                false;
+
+                            submitButton.removeAttribute(
+                                "aria-busy"
+                            );
+
+                        };
+
+                    try{
+
+                        requestPinVerification(
+                            () => {
+
+                                try{
+
+                                    let tx;
+
+                                    const transactionMeta = {
+
+                                        recipient:
+                                            user,
+
+                                        note
+
+                                    };
+
+                                    if(
+                                        selectedContact?.id
+                                    ){
+
+                                        transactionMeta.contactId =
+                                            selectedContact.id;
+
+                                    }
+
+                                    if(
+                                        funding.source ===
+                                        "wallet"
+                                    ){
+
+                                        const entry =
+                                            LEDGER.createEntry({
+
+                                                type:
+                                                    "send",
+
+                                                title:
+                                                    `Sent to ${user}`,
+
+                                                currency,
+
+                                                amount:
+                                                    -amount,
+
+                                                icon:
+                                                    "📤",
+
+                                                meta:
+                                                    transactionMeta
+
+                                            });
+
+                                        tx =
+                                            LEDGER.applyEntry(
+                                                entry
+                                            );
+
+                                    }
+
+                                    else if(
+                                        funding.source ===
+                                        "wallet_fx"
+                                    ){
+
+                                        const rate =
+                                            LEDGER.getRate(
+                                                funding.from,
+                                                funding.to
+                                            );
+
+                                        const converted =
+                                            LEDGER.convert(
+                                                funding.from,
+                                                funding.to,
+                                                funding.amount
+                                            );
+
+                                        LEDGER.applyEntry(
+
+                                            LEDGER.createEntry({
+
+                                                type:
+                                                    "fx_debit",
+
+                                                title:
+                                                    `FX Conversion (${funding.from} → ${funding.to})`,
+
+                                                currency:
+                                                    funding.from,
+
+                                                amount:
+                                                    -converted,
+
+                                                icon:
+                                                    "💱"
+
+                                            })
+
+                                        );
+
+                                        LEDGER.applyEntry(
+
+                                            LEDGER.createEntry({
+
+                                                type:
+                                                    "fx_credit",
+
+                                                title:
+                                                    "FX Conversion",
+
+                                                currency:
+                                                    funding.to,
+
+                                                amount,
+
+                                                icon:
+                                                    "💱"
+
+                                            })
+
+                                        );
+
+                                        const entry =
+                                            LEDGER.createEntry({
+
+                                                type:
+                                                    "send",
+
+                                                title:
+                                                    `Sent to ${user}`,
+
+                                                currency,
+
+                                                amount:
+                                                    -amount,
+
+                                                icon:
+                                                    "📤",
+
+                                                meta: {
+                                                    ...transactionMeta,
+                                                    fx_used:
+                                                        true,
+                                                    rate
+                                                }
+
+                                            });
+
+                                        tx =
+                                            LEDGER.applyEntry(
+                                                entry
+                                            );
+
+                                    }
+
+                                    else if(
+                                        funding.source ===
+                                        "card"
+                                    ){
+
+                                        const entry =
+                                            LEDGER.createEntry({
+
+                                                type:
+                                                    "card_payment",
+
+                                                title:
+                                                    `Paid ${user} (Card)`,
+
+                                                currency,
+
+                                                amount:
+                                                    -amount,
+
+                                                icon:
+                                                    "💳",
+
+                                                meta:
+                                                    transactionMeta
+
+                                            });
+
+                                        tx =
+                                            LEDGER.applyEntry(
+                                                entry
+                                            );
+
+                                    }
+
+                                    if(
+                                        !tx
+                                    ){
+
+                                        throw new Error(
+                                            "Transaction engine did not return a transaction."
+                                        );
+
+                                    }
+
+                                    /*
+                                     * Legacy recipient compatibility.
+                                     *
+                                     * The Contacts domain is now the
+                                     * canonical contact-selection boundary,
+                                     * but the existing recipient repository
+                                     * remains populated until its consumers
+                                     * have been fully migrated.
+                                     */
+
+                                    const legacyRecipient =
+                                        addRecipient({
+
+                                            type:
+                                                "pay54",
+
+                                            tag:
+                                                user,
+
+                                            displayName:
+                                                resolveContactName(
+                                                    selectedContact
+                                                ) ||
+                                                user,
+
+                                            currency
+
+                                        });
+
+                                    if(
+                                        legacyRecipient
+                                    ){
+
+                                        updateRecipientUsage(
+                                            legacyRecipient.tag
+                                        );
+
+                                        publishRecipientAudit(
+
+                                            "recipient.selected",
+
+                                            {
+
+                                                recipientId:
+                                                    legacyRecipient.id,
+
+                                                tag:
+                                                    legacyRecipient.tag,
+
+                                                contactId:
+                                                    selectedContact?.id ||
+                                                    null,
+
+                                                source:
+                                                    selectedContact
+                                                        ? "contacts_picker"
+                                                        : "manual"
+
+                                            }
+
+                                        );
+
+                                    }
+
+                                    prependTxToDOM(
+                                        tx
+                                    );
+
+                                    refreshUI();
+
+                                    showPaymentReceipt(
+                                        tx,
+                                        user,
+                                        amount,
+                                        currency
+                                    );
+
+                                    close();
+
+                                }catch(error){
+
+                                    restoreSubmitState();
+
+                                    console.error(
+                                        "[PAY54_SEND] Transaction failed.",
+                                        error
+                                    );
+
+                                    window.PAY54_TOAST
+                                    ?.showToast(
+                                        "We could not complete this payment."
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }catch(error){
+
+                        restoreSubmitState();
+
+                        console.error(
+                            "[PAY54_SEND] PIN verification failed to initialise.",
+                            error
+                        );
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Payment verification is temporarily unavailable."
+                        );
+
+                    }
+
+                }
+            );
+
+            recipientInput.focus();
+
         }
 
-        if(!amount || amount <= 0){
-          alert("Enter valid amount");
-          return;
-        }
-
-        if(amount > 100000000){
-          alert("Amount too large");
-          return;
-        }
-
-        const funding = resolveSmartPayment(amount, currency);
-
-        if(!funding){
-          alert(`Insufficient funds across all wallets`);
-          return;
-        }
-
-        requestPinVerification(() => {
-
-          let tx;
-
-          if(funding.source === "wallet"){
-
-  const entry = LEDGER.createEntry({
-    type:"send",
-    title:`Sent to ${user}`,
-    currency,
-    amount:-amount,
-    icon:"📤",
-    meta:{ recipient:user, note }
-  });
-
-  tx = LEDGER.applyEntry(entry);
-
-}
-else if(funding.source === "wallet_fx"){
-
-  const rate = LEDGER.getRate(funding.from, funding.to);
-
-  const converted = LEDGER.convert(funding.from, funding.to, funding.amount);
-
-  LEDGER.applyEntry(
-    LEDGER.createEntry({
-      type:"fx_debit",
-      title:`FX Conversion (${funding.from} → ${funding.to})`,
-      currency: funding.from,
-      amount:-converted,
-      icon:"💱"
-    })
-  );
-
-  LEDGER.applyEntry(
-    LEDGER.createEntry({
-      type:"fx_credit",
-      title:`FX Conversion`,
-      currency: funding.to,
-      amount: amount,
-      icon:"💱"
-    })
-  );
-
-  const entry = LEDGER.createEntry({
-    type:"send",
-    title:`Sent to ${user}`,
-    currency,
-    amount:-amount,
-    icon:"📤",
-    meta:{ recipient:user, note, fx_used:true, rate }
-  });
-
-  tx = LEDGER.applyEntry(entry);
-
-}
-else if(funding.source === "card"){
-
-  const entry = LEDGER.createEntry({
-    type:"card_payment",
-    title:`Paid ${user} (Card)`,
-    currency,
-    amount:-amount,
-    icon:"💳"
-  });
-
-  tx = LEDGER.applyEntry(entry);
-
-}
-          /* ==========================================================
-   AUTOMATIC RECIPIENT REGISTRATION
-========================================================== */
-
-const recipient = addRecipient({
-
-    type: "pay54",
-
-    tag: user,
-
-    displayName: user,
-
-    currency
-
-});
-
-if(recipient){
-
-    updateRecipientUsage(
-        recipient.tag
-    );
-
-    publishRecipientAudit(
-
-        "recipient.selected",
-
-        {
-
-            recipientId:
-                recipient.id,
-
-            tag:
-                recipient.tag
-
-        }
-
-    );
-
-}
-           prependTxToDOM(tx);
-          refreshUI();
-          showPaymentReceipt(tx, user, amount, currency);
-
-          close();
-
-        });
-
-      });
-
-    }
-
-  });
+    });
 
 }
 function openReceive(){
