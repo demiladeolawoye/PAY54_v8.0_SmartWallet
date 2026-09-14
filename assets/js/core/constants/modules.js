@@ -17,50 +17,13 @@
    • Support diagnostics, telemetry and Event Bus source identification
    • Introduce non-breaking enterprise submodule identifiers
    • Provide canonical Contacts component identifiers
+   • Provide canonical Beneficiary component identifiers
    • Support progressive PAY54 modularisation
    • Maintain zero-regression compatibility
 
    Dependency
    ----------
    assets/js/core/constants/index.js
-
-   Compatibility
-   -------------
-   Existing identifiers are intentionally preserved, including:
-
-   MODULES.CONFIG
-   MODULES.EVENTS
-   MODULES.STATE
-   MODULES.ROUTER
-   MODULES.REGISTRY
-   MODULES.BOOTSTRAP
-   MODULES.CONSTANTS
-   MODULES.VERSIONS
-   MODULES.LEDGER
-   MODULES.TRANSACTIONS
-   MODULES.RECEIPTS
-   MODULES.SERVICES
-   MODULES.RECIPIENTS
-   MODULES.CONTACTS
-   MODULES.CARDS
-   MODULES.WALLET
-   MODULES.MERCHANT
-   MODULES.SECURITY
-   MODULES.SAVINGS
-   MODULES.TRADING
-   MODULES.CHECKOUT
-   MODULES.INVEST
-   MODULES.AGENT
-   MODULES.RISK
-   MODULES.DASHBOARD
-   MODULES.MODALS
-   MODULES.UI_ENGINE
-
-   Enterprise extensions are exposed under:
-
-   MODULES.DOMAIN
-   MODULES.COMPONENTS
-   MODULES.LAYERS
 
    Architecture
    ------------
@@ -84,12 +47,11 @@
 
     const GLOBAL = window;
 
-    const CATALOGUE_NAME = "MODULES";
+    const CATALOGUE_NAME =
+        "MODULES";
 
-    const VERSION = "12.0.0";
-
-    const ENGINE =
-        "PAY54 Module Identifiers";
+    const VERSION =
+        "12.0.0";
 
     /* ======================================================================
        DEPENDENCY VERIFICATION
@@ -104,28 +66,18 @@
         typeof constants.get !== "function" ||
         typeof constants.has !== "function"
     ) {
+
         throw new Error(
             "[PAY54] Constants Registry must load before modules.js."
         );
+
     }
 
     /* ======================================================================
        CANONICAL MODULE IDENTIFIERS
 
-       IMPORTANT
-       ---------
-       The top-level identifiers below are the established PAY54 public API.
-
-       Their names and values MUST remain stable because existing modules may
-       already use expressions such as:
-
-           MODULES.CONTACTS
-           MODULES.VERSIONS
-           MODULES.LEDGER
-           MODULES.CARDS
-
-       Enterprise expansion therefore occurs through additional namespaces
-       rather than changing existing string identifiers into objects.
+       Existing top-level identifiers are compatibility contracts.
+       Enterprise additions are additive.
     ====================================================================== */
 
     const MODULES = {
@@ -159,7 +111,7 @@
             "VERSIONS",
 
         /* ==================================================================
-           EXISTING FOUNDATION IDENTIFIERS
+           FOUNDATION IDENTIFIERS
         ================================================================== */
 
         LEDGER:
@@ -180,8 +132,11 @@
         CONTACTS:
             "CONTACTS",
 
+        BENEFICIARIES:
+            "BENEFICIARIES",
+
         /* ==================================================================
-           EXISTING ENGINE IDENTIFIERS
+           ENGINE IDENTIFIERS
         ================================================================== */
 
         CARDS:
@@ -215,7 +170,7 @@
             "RISK",
 
         /* ==================================================================
-           EXISTING UI IDENTIFIERS
+           UI IDENTIFIERS
         ================================================================== */
 
         DASHBOARD:
@@ -228,10 +183,7 @@
             "UI_ENGINE",
 
         /* ==================================================================
-           ENTERPRISE ARCHITECTURE LAYERS
-
-           These identifiers describe architectural ownership. They do not
-           replace the existing public identifiers above.
+           ARCHITECTURE LAYERS
         ================================================================== */
 
         LAYERS: {
@@ -267,16 +219,9 @@
 
         /* ==================================================================
            ENTERPRISE COMPONENT IDENTIFIERS
-
-           Used for modules that need independently diagnosable identities
-           without modifying legacy top-level identifiers.
         ================================================================== */
 
         COMPONENTS: {
-
-            /* --------------------------------------------------------------
-               CORE
-            -------------------------------------------------------------- */
 
             CORE: {
 
@@ -291,6 +236,9 @@
 
                 CONTACT_CONSTANTS:
                     "core.constants.contacts",
+
+                BENEFICIARY_CONSTANTS:
+                    "core.constants.beneficiaries",
 
                 CONFIG:
                     "core.config",
@@ -327,10 +275,6 @@
 
             },
 
-            /* --------------------------------------------------------------
-               SECURITY
-            -------------------------------------------------------------- */
-
             SECURITY: {
 
                 ROOT:
@@ -359,10 +303,6 @@
 
             },
 
-            /* --------------------------------------------------------------
-               INFRASTRUCTURE
-            -------------------------------------------------------------- */
-
             INFRASTRUCTURE: {
 
                 ROOT:
@@ -382,10 +322,6 @@
 
             },
 
-            /* --------------------------------------------------------------
-               MONEY FOUNDATION
-            -------------------------------------------------------------- */
-
             MONEY: {
 
                 LEDGER:
@@ -402,10 +338,6 @@
 
             },
 
-            /* --------------------------------------------------------------
-               SERVICES
-            -------------------------------------------------------------- */
-
             SERVICES: {
 
                 CATALOGUE:
@@ -420,6 +352,9 @@
                 CONTACTS:
                     "services.contacts",
 
+                BENEFICIARIES:
+                    "services.beneficiaries",
+
                 CARDS:
                     "services.cards",
 
@@ -427,10 +362,6 @@
                     "services.fx"
 
             },
-
-            /* --------------------------------------------------------------
-               ENGINES
-            -------------------------------------------------------------- */
 
             ENGINES: {
 
@@ -456,13 +387,12 @@
                     "engine.cards",
 
                 CONTACTS:
-                    "engine.contacts"
+                    "engine.contacts",
+
+                BENEFICIARIES:
+                    "engine.beneficiaries"
 
             },
-
-            /* --------------------------------------------------------------
-               UI
-            -------------------------------------------------------------- */
 
             UI: {
 
@@ -480,11 +410,8 @@
 
                 NAVIGATION:
                     "ui.navigation"
-            },
 
-            /* --------------------------------------------------------------
-               DASHBOARD
-            -------------------------------------------------------------- */
+            },
 
             DASHBOARD: {
 
@@ -499,11 +426,8 @@
 
                 ACTIVITY:
                     "dashboard.activity"
-            },
 
-            /* --------------------------------------------------------------
-               MOBILE
-            -------------------------------------------------------------- */
+            },
 
             MOBILE: {
 
@@ -515,24 +439,16 @@
 
                 IOS:
                     "mobile.ios"
+
             }
 
         },
 
         /* ==================================================================
            DOMAIN IDENTIFIERS
-
-           DOMAIN contains fine-grained domain ownership.
-
-           This namespace is intentionally additive and does not alter the
-           legacy MODULES.CONTACTS / MODULES.CARDS / MODULES.WALLET APIs.
         ================================================================== */
 
         DOMAIN: {
-
-            /* --------------------------------------------------------------
-               CONTACTS
-            -------------------------------------------------------------- */
 
             CONTACTS: {
 
@@ -596,8 +512,45 @@
             },
 
             /* --------------------------------------------------------------
-               WALLET
+               ENTERPRISE BENEFICIARY DOMAIN
             -------------------------------------------------------------- */
+
+            BENEFICIARIES: {
+
+                ROOT:
+                    "beneficiaries",
+
+                ENGINE:
+                    "beneficiaries.engine",
+
+                CORE:
+                    "beneficiaries.core",
+
+                STORAGE:
+                    "beneficiaries-storage",
+
+                REPOSITORY:
+                    "beneficiaries.repository",
+
+                SERVICE:
+                    "beneficiaries.service",
+
+                VALIDATOR:
+                    "beneficiaries.validator",
+
+                NORMALIZER:
+                    "beneficiaries.normalizer",
+
+                EVENTS:
+                    "beneficiaries.events",
+
+                MIGRATION:
+                    "beneficiaries.migration",
+
+                LEGACY_FACADE:
+                    "beneficiaries.legacy-facade"
+
+            },
 
             WALLET: {
 
@@ -615,11 +568,8 @@
 
                 FUNDING:
                     "wallet.funding"
-            },
 
-            /* --------------------------------------------------------------
-               CARDS
-            -------------------------------------------------------------- */
+            },
 
             CARDS: {
 
@@ -637,11 +587,8 @@
 
                 LINKED:
                     "cards.linked"
-            },
 
-            /* --------------------------------------------------------------
-               PAYMENTS
-            -------------------------------------------------------------- */
+            },
 
             PAYMENTS: {
 
@@ -665,11 +612,8 @@
 
                 MERCHANT_QR:
                     "payments.merchant-qr"
-            },
 
-            /* --------------------------------------------------------------
-               MONEY MANAGEMENT
-            -------------------------------------------------------------- */
+            },
 
             MONEY: {
 
@@ -690,11 +634,8 @@
 
                 INVEST:
                     "money.invest"
-            },
 
-            /* --------------------------------------------------------------
-               COMMERCE
-            -------------------------------------------------------------- */
+            },
 
             COMMERCE: {
 
@@ -709,11 +650,8 @@
 
                 MERCHANT:
                     "commerce.merchant"
-            },
 
-            /* --------------------------------------------------------------
-               RISK / COMPLIANCE
-            -------------------------------------------------------------- */
+            },
 
             RISK: {
 
@@ -734,6 +672,7 @@
 
                 TRANSACTION_MONITORING:
                     "risk.transaction-monitoring"
+
             }
 
         }
@@ -760,6 +699,7 @@
             prototype === Object.prototype ||
             prototype === null
         );
+
     }
 
     function validateNode(
@@ -772,18 +712,23 @@
         ) {
 
             if (!value.trim()) {
+
                 throw new Error(
                     `[PAY54] Empty module identifier detected at ${path}.`
                 );
+
             }
 
             return;
+
         }
 
         if (!isPlainObject(value)) {
+
             throw new TypeError(
                 `[PAY54] Invalid module catalogue node at ${path}.`
             );
+
         }
 
         for (
@@ -796,17 +741,28 @@
                 key === "prototype" ||
                 key === "constructor"
             ) {
+
                 throw new Error(
                     `[PAY54] Unsafe module catalogue property rejected at ${path}.${key}.`
                 );
+
             }
 
             validateNode(
                 child,
                 `${path}.${key}`
             );
+
         }
+
     }
+
+    /* ======================================================================
+       LEGACY COMPATIBILITY VERIFICATION
+
+       BENEFICIARIES is deliberately NOT placed in this legacy set because
+       it is a new additive WP-011 identifier.
+    ====================================================================== */
 
     function validateLegacyCompatibility() {
 
@@ -906,13 +862,98 @@
             if (
                 MODULES[key] !== expected
             ) {
+
                 throw new Error(
                     `[PAY54] Legacy module identifier regression detected for MODULES.${key}. Expected "${expected}".`
                 );
+
             }
+
         }
 
         return true;
+
+    }
+
+    function validateEnterpriseExtensions() {
+
+        if (
+            MODULES.BENEFICIARIES !==
+            "BENEFICIARIES"
+        ) {
+
+            throw new Error(
+                "[PAY54] Beneficiary module identifier verification failed."
+            );
+
+        }
+
+        const requiredBeneficiaryIdentifiers = [
+
+            MODULES.COMPONENTS?.CORE
+                ?.BENEFICIARY_CONSTANTS,
+
+            MODULES.COMPONENTS?.SERVICES
+                ?.BENEFICIARIES,
+
+            MODULES.COMPONENTS?.ENGINES
+                ?.BENEFICIARIES,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.ROOT,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.ENGINE,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.CORE,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.STORAGE,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.REPOSITORY,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.SERVICE,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.VALIDATOR,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.NORMALIZER,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.EVENTS,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.MIGRATION,
+
+            MODULES.DOMAIN?.BENEFICIARIES
+                ?.LEGACY_FACADE
+
+        ];
+
+        for (
+            const identifier
+            of requiredBeneficiaryIdentifiers
+        ) {
+
+            if (
+                typeof identifier !== "string" ||
+                !identifier.trim()
+            ) {
+
+                throw new Error(
+                    "[PAY54] Beneficiary enterprise module identifiers are incomplete."
+                );
+
+            }
+
+        }
+
+        return true;
+
     }
 
     function validateCatalogue() {
@@ -923,7 +964,10 @@
 
         validateLegacyCompatibility();
 
+        validateEnterpriseExtensions();
+
         return true;
+
     }
 
     /* ======================================================================
@@ -933,11 +977,6 @@
     try {
 
         validateCatalogue();
-
-        /*
-         * The enterprise constants registry performs deep cloning,
-         * immutability enforcement and incompatible duplicate detection.
-         */
 
         constants.register(
             CATALOGUE_NAME,
@@ -950,23 +989,41 @@
             );
 
         if (!registered) {
+
             throw new Error(
                 "[PAY54] Failed to register MODULES catalogue."
             );
-        }
 
-        /*
-         * Explicitly verify the identifiers required by the existing PAY54
-         * constants dependency chain.
-         */
+        }
 
         if (
             registered.VERSIONS !== "VERSIONS" ||
-            registered.CONTACTS !== "CONTACTS"
+            registered.CONTACTS !== "CONTACTS" ||
+            registered.BENEFICIARIES !==
+                "BENEFICIARIES"
         ) {
+
             throw new Error(
                 "[PAY54] MODULES catalogue compatibility verification failed."
             );
+
+        }
+
+        if (
+            registered.DOMAIN
+                ?.BENEFICIARIES
+                ?.STORAGE !==
+                    "beneficiaries-storage" ||
+            registered.COMPONENTS
+                ?.SERVICES
+                ?.BENEFICIARIES !==
+                    "services.beneficiaries"
+        ) {
+
+            throw new Error(
+                "[PAY54] Beneficiary module registration verification failed."
+            );
+
         }
 
     } catch (error) {
@@ -977,6 +1034,7 @@
         );
 
         throw error;
+
     }
 
     /* ======================================================================
