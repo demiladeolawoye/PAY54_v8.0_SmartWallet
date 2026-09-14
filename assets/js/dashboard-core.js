@@ -4281,7 +4281,117 @@ window.PAY54_UI.openRequestMoney = function(){
   const openModal =
     window.PAY54_MODALS?.openModal;
 
-  if(!openModal) return;
+  if(!openModal){
+
+    console.error(
+      "[PAY54_REQUESTS] Modal engine unavailable."
+    );
+
+    return;
+  }
+
+  const contactsPicker =
+    window.PAY54_CONTACTS_PICKER || null;
+
+  let selectedContact = null;
+
+  function cleanString(value){
+
+    if(
+      value === null ||
+      value === undefined
+    ){
+      return "";
+    }
+
+    return String(value).trim();
+  }
+
+  function getContactName(contact){
+
+    if(
+      !contact ||
+      typeof contact !== "object"
+    ){
+      return "";
+    }
+
+    return cleanString(
+      contact.displayName ||
+      contact.name ||
+      contact.fullName ||
+      contact.accountName
+    );
+  }
+
+  function getContactPhone(contact){
+
+    if(
+      !contact ||
+      typeof contact !== "object"
+    ){
+      return "";
+    }
+
+    const candidates = [
+      contact.phone,
+      contact.phoneNumber,
+      contact.mobile,
+      contact.mobileNumber,
+      contact.identity?.phone,
+      contact.identities?.phone,
+      contact.identities?.mobile
+    ];
+
+    for(const candidate of candidates){
+
+      const value =
+        cleanString(candidate);
+
+      if(value){
+        return value;
+      }
+    }
+
+    return "";
+  }
+
+  function getContactTag(contact){
+
+    if(
+      !contact ||
+      typeof contact !== "object"
+    ){
+      return "";
+    }
+
+    const candidates = [
+      contact.tag,
+      contact.pay54Tag,
+      contact.pay54_tag,
+      contact.username,
+      contact.handle,
+      contact.identity?.tag,
+      contact.identity?.pay54Tag,
+      contact.identities?.pay54,
+      contact.identities?.tag
+    ];
+
+    for(const candidate of candidates){
+
+      const value =
+        cleanString(candidate);
+
+      if(value){
+
+        return value.startsWith("@")
+          ? value
+          : `@${value}`;
+      }
+    }
+
+    return "";
+  }
 
   openModal({
 
@@ -4291,16 +4401,79 @@ window.PAY54_UI.openRequestMoney = function(){
 
       <div class="p54-form">
 
-        <input
-          id="reqRecipient"
-          class="p54-input"
-          placeholder="Recipient Name"
-        >
+        <div>
+
+          <div
+            style="
+              display:flex;
+              gap:10px;
+              align-items:stretch;
+            "
+          >
+
+            <input
+              id="reqRecipient"
+              class="p54-input"
+              type="text"
+              placeholder="Recipient Name"
+              autocomplete="off"
+              aria-label="Recipient name"
+              style="
+                flex:1;
+                min-width:0;
+              "
+            >
+
+            ${
+              contactsPicker &&
+              typeof contactsPicker.open === "function"
+
+                ? `
+
+                  <button
+                    id="requestContactBtn"
+                    class="p54-btn"
+                    type="button"
+                    aria-label="Choose from contacts"
+                    title="Choose from contacts"
+                    style="
+                      flex:0 0 auto;
+                      white-space:nowrap;
+                    "
+                  >
+                    Contacts
+                  </button>
+
+                `
+
+                : ""
+            }
+
+          </div>
+
+          <div
+            id="requestContactStatus"
+            aria-live="polite"
+            style="
+              min-height:18px;
+              margin-top:7px;
+              font-size:12px;
+              opacity:.75;
+            "
+          >
+            Enter recipient details or choose from Contacts.
+          </div>
+
+        </div>
 
         <input
           id="reqPhone"
           class="p54-input"
+          type="tel"
+          inputmode="tel"
           placeholder="Phone Number"
+          autocomplete="tel"
+          aria-label="Recipient phone number"
           style="margin-top:12px"
         >
 
@@ -4308,14 +4481,23 @@ window.PAY54_UI.openRequestMoney = function(){
           id="reqAmount"
           class="p54-input"
           type="number"
+          inputmode="decimal"
+          min="0.01"
+          step="0.01"
           placeholder="Amount"
+          autocomplete="off"
+          aria-label="Amount to request"
           style="margin-top:12px"
         >
 
         <input
           id="reqReason"
           class="p54-input"
+          type="text"
+          maxlength="140"
           placeholder="Reason"
+          autocomplete="off"
+          aria-label="Reason for request"
           style="margin-top:12px"
         >
 
@@ -4324,6 +4506,7 @@ window.PAY54_UI.openRequestMoney = function(){
           <button
             class="p54-btn"
             id="whatsappRequestBtn"
+            type="button"
           >
             WhatsApp
           </button>
@@ -4331,6 +4514,7 @@ window.PAY54_UI.openRequestMoney = function(){
           <button
             class="p54-btn"
             id="smsRequestBtn"
+            type="button"
           >
             SMS
           </button>
@@ -4338,6 +4522,7 @@ window.PAY54_UI.openRequestMoney = function(){
           <button
             class="p54-btn primary"
             id="copyRequestBtn"
+            type="button"
           >
             Copy Link
           </button>
@@ -4351,31 +4536,286 @@ window.PAY54_UI.openRequestMoney = function(){
     onMount: ({ modal, close }) => {
 
       const whatsappBtn =
-        modal.querySelector("#whatsappRequestBtn");
+        modal.querySelector(
+          "#whatsappRequestBtn"
+        );
 
       const smsBtn =
-        modal.querySelector("#smsRequestBtn");
+        modal.querySelector(
+          "#smsRequestBtn"
+        );
 
       const copyBtn =
-        modal.querySelector("#copyRequestBtn");
+        modal.querySelector(
+          "#copyRequestBtn"
+        );
+
+      const contactBtn =
+        modal.querySelector(
+          "#requestContactBtn"
+        );
 
       const recipient =
-        modal.querySelector("#reqRecipient");
+        modal.querySelector(
+          "#reqRecipient"
+        );
 
       const phone =
-        modal.querySelector("#reqPhone");
+        modal.querySelector(
+          "#reqPhone"
+        );
 
       const amount =
-        modal.querySelector("#reqAmount");
+        modal.querySelector(
+          "#reqAmount"
+        );
 
       const reason =
-        modal.querySelector("#reqReason");
+        modal.querySelector(
+          "#reqReason"
+        );
+
+      const contactStatus =
+        modal.querySelector(
+          "#requestContactStatus"
+        );
+
+      if(
+        !recipient ||
+        !phone ||
+        !amount ||
+        !reason
+      ){
+
+        console.error(
+          "[PAY54_REQUESTS] Request Money UI failed to initialise."
+        );
+
+        window.PAY54_TOAST
+          ?.showToast(
+            "Request Money is temporarily unavailable."
+          );
+
+        close();
+
+        return;
+      }
+
+      function clearSelectedContact(){
+
+        selectedContact = null;
+
+        if(contactStatus){
+
+          contactStatus.textContent =
+            "Enter recipient details or choose from Contacts.";
+        }
+      }
+
+      function applySelectedContact(contact){
+
+        if(
+          !contact ||
+          typeof contact !== "object"
+        ){
+
+          window.PAY54_TOAST
+            ?.showToast(
+              "Unable to use this contact."
+            );
+
+          return;
+        }
+
+        const name =
+          getContactName(contact);
+
+        const contactPhone =
+          getContactPhone(contact);
+
+        const tag =
+          getContactTag(contact);
+
+        /*
+         * Request Money currently delivers
+         * requests through SMS / WhatsApp.
+         * Therefore a telephone number remains
+         * required for a selected contact.
+         */
+        if(!contactPhone){
+
+          window.PAY54_TOAST
+            ?.showToast(
+              "This contact does not have a phone number."
+            );
+
+          return;
+        }
+
+        selectedContact = contact;
+
+        recipient.value =
+          name ||
+          tag ||
+          contactPhone;
+
+        phone.value =
+          contactPhone;
+
+        if(contactStatus){
+
+          const displayIdentity =
+            tag && name
+              ? `${name} • ${tag}`
+              : recipient.value;
+
+          contactStatus.textContent =
+            `${displayIdentity} • ${contactPhone}`;
+        }
+
+        amount.focus();
+      }
+
+      /*
+       * CONTACTS PICKER INTEGRATION
+       *
+       * Contacts owns people.
+       * Request Money owns payment requests.
+       * No Contacts storage access occurs here.
+       */
+      contactBtn?.addEventListener(
+        "click",
+        () => {
+
+          if(
+            !contactsPicker ||
+            typeof contactsPicker.open !== "function"
+          ){
+
+            window.PAY54_TOAST
+              ?.showToast(
+                "Contacts are temporarily unavailable."
+              );
+
+            return;
+          }
+
+          try{
+
+            contactsPicker.open({
+
+              title:
+                "Choose Contact",
+
+              subtitle:
+                "Select who you want to request money from.",
+
+              closeOnSelect:
+                true,
+
+              onSelect:
+                contact => {
+
+                  applySelectedContact(
+                    contact
+                  );
+                }
+
+            });
+
+          }catch(error){
+
+            console.error(
+              "[PAY54_REQUESTS] Contacts Picker failed.",
+              error
+            );
+
+            window.PAY54_TOAST
+              ?.showToast(
+                "Contacts are temporarily unavailable. Enter the recipient manually."
+              );
+          }
+        }
+      );
+
+      /*
+       * If a selected contact is manually
+       * changed, remove the contact association.
+       */
+      recipient.addEventListener(
+        "input",
+        () => {
+
+          if(!selectedContact){
+            return;
+          }
+
+          const expected =
+            getContactName(
+              selectedContact
+            ) ||
+            getContactTag(
+              selectedContact
+            ) ||
+            getContactPhone(
+              selectedContact
+            );
+
+          if(
+            cleanString(recipient.value) !==
+            cleanString(expected)
+          ){
+            clearSelectedContact();
+          }
+        }
+      );
+
+      phone.addEventListener(
+        "input",
+        () => {
+
+          if(!selectedContact){
+            return;
+          }
+
+          if(
+            cleanString(phone.value) !==
+            cleanString(
+              getContactPhone(
+                selectedContact
+              )
+            )
+          ){
+            clearSelectedContact();
+          }
+        }
+      );
 
       function createRequestPayload(){
 
+        const recipientValue =
+          cleanString(
+            recipient.value
+          );
+
+        const phoneValue =
+          cleanString(
+            phone.value
+          );
+
+        const reasonValue =
+          cleanString(
+            reason.value
+          );
+
+        const amountValue =
+          Number(
+            amount.value
+          );
+
         if(
-          !recipient.value.trim() ||
-          !phone.value.trim() ||
+          !recipientValue ||
+          !phoneValue ||
           !amount.value.trim()
         ){
 
@@ -4385,58 +4825,106 @@ window.PAY54_UI.openRequestMoney = function(){
             );
 
           return null;
-
         }
 
-     const requestId =
-  "REQ-" + Date.now();
+        if(
+          !Number.isFinite(amountValue) ||
+          amountValue <= 0
+        ){
 
-const paymentLink =
+          window.PAY54_TOAST
+            ?.showToast(
+              "Enter a valid amount"
+            );
 
-`${location.origin}/dashboard.html?request=${requestId}`;
+          amount.focus();
+
+          return null;
+        }
+
+        const requestId =
+          "REQ-" + Date.now();
+
+        /*
+         * IMPORTANT:
+         * Preserve the existing PAY54 request
+         * route. Do not change this to
+         * request.html.
+         */
+        const paymentLink =
+          `${location.origin}/dashboard.html?request=${requestId}`;
 
         const payload = {
 
-  id: requestId,
+          id:
+            requestId,
 
-  paymentLink,
+          paymentLink,
 
-  recipient:
-    recipient.value.trim(),
+          recipient:
+            recipientValue,
 
-  phone:
-    phone.value.trim(),
+          phone:
+            phoneValue,
 
-  amount:
-    Number(amount.value),
+          amount:
+            amountValue,
 
-  reason:
-    reason.value.trim(),
+          reason:
+            reasonValue,
 
-  status:"pending",
+          status:
+            "pending",
 
-  created_at:
-    new Date().toISOString()
+          created_at:
+            new Date().toISOString()
 
-};
+        };
+
+        /*
+         * Add contact metadata only when
+         * Request Money was populated from
+         * Contacts.
+         */
+        if(
+          selectedContact &&
+          selectedContact.id
+        ){
+
+          payload.contactId =
+            selectedContact.id;
+        }
+
+        const pay54Tag =
+          getContactTag(
+            selectedContact
+          );
+
+        if(pay54Tag){
+
+          payload.pay54Tag =
+            pay54Tag;
+        }
 
         if(
-          window.PAY54_REQUESTS?.createRequest
+          window.PAY54_REQUESTS
+            ?.createRequest
         ){
 
           window.PAY54_REQUESTS
-            .createRequest(payload);
-
+            .createRequest(
+              payload
+            );
         }
 
-        if(window.renderAlerts){
+        if(
+          window.renderAlerts
+        ){
 
           window.renderAlerts();
-
         }
 
         return payload;
-
       }
 
       whatsappBtn?.addEventListener(
@@ -4446,9 +4934,11 @@ const paymentLink =
           const req =
             createRequestPayload();
 
-          if(!req) return;
+          if(!req){
+            return;
+          }
 
-const text =
+          const text =
 
 `💳 PAY54 Payment Request
 
@@ -4467,11 +4957,11 @@ ${req.paymentLink}`;
 
           window.open(
             `https://wa.me/?text=${encodeURIComponent(text)}`,
-            "_blank"
+            "_blank",
+            "noopener,noreferrer"
           );
 
           close();
-
         }
       );
 
@@ -4482,7 +4972,9 @@ ${req.paymentLink}`;
           const req =
             createRequestPayload();
 
-          if(!req) return;
+          if(!req){
+            return;
+          }
 
           const text =
 
@@ -4501,7 +4993,6 @@ ${req.paymentLink}`;
             `sms:${req.phone}?body=${encodeURIComponent(text)}`;
 
           close();
-
         }
       );
 
@@ -4512,21 +5003,36 @@ ${req.paymentLink}`;
           const req =
             createRequestPayload();
 
-          if(!req) return;
+          if(!req){
+            return;
+          }
 
-         const link =
-req.paymentLink;
+          try{
 
-          await navigator.clipboard
-            .writeText(link);
+            await navigator.clipboard
+              .writeText(
+                req.paymentLink
+              );
 
-          window.PAY54_TOAST
-            ?.showToast(
-              "Request link copied"
+            window.PAY54_TOAST
+              ?.showToast(
+                "Request link copied"
+              );
+
+            close();
+
+          }catch(error){
+
+            console.error(
+              "[PAY54_REQUESTS] Clipboard write failed.",
+              error
             );
 
-          close();
-
+            window.PAY54_TOAST
+              ?.showToast(
+                "Unable to copy request link."
+              );
+          }
         }
       );
 
