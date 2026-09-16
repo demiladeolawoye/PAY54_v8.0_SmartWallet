@@ -4563,66 +4563,292 @@ function openSendUnified(){
 
                                     }
 
-                                    /*
-                                     * Legacy recipient compatibility.
+                                                                        /*
+                                     * ==========================================================
+                                     * PAY54 SEND — POST-TRANSACTION RECIPIENT ENRICHMENT
+                                     * WP-011B.6B
+                                     * ==========================================================
                                      *
-                                     * The Contacts domain is now the
-                                     * canonical contact-selection boundary,
-                                     * but the existing recipient repository
-                                     * remains populated until its consumers
-                                     * have been fully migrated.
+                                     * The ledger transaction has already completed successfully
+                                     * before this point.
+                                     *
+                                     * Architectural ownership:
+                                     *
+                                     * Contacts
+                                     *   -> canonical person / identity
+                                     *
+                                     * Beneficiaries
+                                     *   -> canonical payment relationship / destination
+                                     *
+                                     * PAY54_RECIPIENT
+                                     *   -> temporary legacy compatibility repository
+                                     *
+                                     * IMPORTANT:
+                                     * Failure of Beneficiary or legacy-recipient enrichment MUST
+                                     * NEVER convert a successful financial transaction into a
+                                     * displayed payment failure.
+                                     * ==========================================================
                                      */
 
-                                    const legacyRecipient =
-                                        addRecipient({
+                                    let canonicalBeneficiary =
+                                        null;
 
-                                            type:
-                                                "pay54",
+                                    /*
+                                     * ----------------------------------------------------------
+                                     * CANONICAL BENEFICIARY SYNCHRONISATION
+                                     * ----------------------------------------------------------
+                                     *
+                                     * Resolve the service at point-of-use because recipient.js
+                                     * loads before services/beneficiaries.js in the current
+                                     * progressive PAY54 boot sequence.
+                                     */
 
-                                            tag:
-                                                user,
+                                    try{
 
-                                            displayName:
-                                                resolveContactName(
-                                                    selectedContact
-                                                ) ||
-                                                user,
+                                        const beneficiaryService =
+                                            window
+                                                .PAY54_BENEFICIARIES_SERVICE ||
+                                            null;
 
-                                            currency
+                                        if(
+                                            beneficiaryService &&
+                                            typeof beneficiaryService
+                                                .resolveRecipient ===
+                                                "function" &&
+                                            typeof beneficiaryService
+                                                .createBeneficiary ===
+                                                "function" &&
+                                            typeof beneficiaryService
+                                                .recordUsage ===
+                                                "function"
+                                        ){
 
-                                        });
+                                            canonicalBeneficiary =
+                                                beneficiaryService
+                                                    .resolveRecipient({
+                                                        pay54Id:
+                                                            user
+                                                    });
 
-                                    if(
-                                        legacyRecipient
-                                    ){
+                                            /*
+                                             * Create the canonical Beneficiary only after
+                                             * successful transaction posting.
+                                             *
+                                             * Manual PAY54 sends are valid Beneficiaries even
+                                             * when there is no corresponding Contact.
+                                             */
 
-                                        updateRecipientUsage(
-                                            legacyRecipient.tag
-                                        );
+                                            if(
+                                                !canonicalBeneficiary
+                                            ){
 
-                                        publishRecipientAudit(
+                                                canonicalBeneficiary =
+                                                    beneficiaryService
+                                                        .createBeneficiary({
 
-                                            "recipient.selected",
+                                                            contactId:
+                                                                selectedContact?.id ||
+                                                                null,
 
-                                            {
+                                                            type:
+                                                                "PAY54",
 
-                                                recipientId:
-                                                    legacyRecipient.id,
+                                                            destinations: [
+                                                                {
+                                                                    type:
+                                                                        "PAY54",
 
-                                                tag:
-                                                    legacyRecipient.tag,
+                                                                    pay54Id:
+                                                                        user,
 
-                                                contactId:
-                                                    selectedContact?.id ||
-                                                    null,
+                                                                    currency,
 
-                                                source:
-                                                    selectedContact
-                                                        ? "contacts_picker"
-                                                        : "manual"
+                                                                    metadata: {
+                                                                        source:
+                                                                            selectedContact
+                                                                                ? "contacts_picker"
+                                                                                : "send_money"
+                                                                    }
+                                                                }
+                                                            ],
+
+                                                            metadata: {
+                                                                source:
+                                                                    "send_money",
+
+                                                                relationship:
+                                                                    selectedContact
+                                                                        ? "contact"
+                                                                        : "manual",
+
+                                                                currency
+                                                            }
+
+                                                        });
 
                                             }
 
+                                            /*
+                                             * A Beneficiary may already exist from a previous
+                                             * manual payment and later become associated with a
+                                             * canonical Contact.
+                                             *
+                                             * We only establish a missing relationship.
+                                             * An existing contactId is never silently replaced.
+                                             */
+
+                                            else if(
+                                                selectedContact?.id &&
+                                                !canonicalBeneficiary
+                                                    .contactId &&
+                                                typeof beneficiaryService
+                                                    .linkContact ===
+                                                    "function"
+                                            ){
+
+                                                canonicalBeneficiary =
+                                                    beneficiaryService
+                                                        .linkContact(
+                                                            canonicalBeneficiary
+                                                                .id,
+                                                            selectedContact
+                                                                .id
+                                                        );
+
+                                            }
+
+                                            /*
+                                             * Record exactly one canonical usage increment for
+                                             * this successful Send transaction.
+                                             */
+
+                                            if(
+                                                canonicalBeneficiary?.id
+                                            ){
+
+                                                canonicalBeneficiary =
+                                                    beneficiaryService
+                                                        .recordUsage(
+                                                            canonicalBeneficiary
+                                                                .id,
+                                                            {
+                                                                increment:
+                                                                    1,
+
+                                                                lastUsedAt:
+                                                                    new Date()
+                                                                        .toISOString()
+                                                            }
+                                                        );
+
+                                            }
+
+                                        }
+
+                                    }catch(
+                                        beneficiaryError
+                                    ){
+
+                                        /*
+                                         * Beneficiary persistence is post-transaction
+                                         * enrichment.
+                                         *
+                                         * The financial transaction has already succeeded,
+                                         * therefore this failure is deliberately isolated.
+                                         */
+
+                                        console.warn(
+                                            "[PAY54_SEND] Beneficiary post-transaction enrichment failed.",
+                                            beneficiaryError
+                                        );
+
+                                    }
+
+                                    /*
+                                     * ----------------------------------------------------------
+                                     * LEGACY RECIPIENT COMPATIBILITY
+                                     * ----------------------------------------------------------
+                                     *
+                                     * pay54_recipients remains operational while Recipient
+                                     * Manager, Quick Send, favourites, groups, analytics and
+                                     * other legacy consumers are progressively migrated.
+                                     *
+                                     * This is deliberately isolated from the canonical
+                                     * Beneficiary operation above.
+                                     */
+
+                                    try{
+
+                                        const legacyRecipient =
+                                            addRecipient({
+
+                                                type:
+                                                    "pay54",
+
+                                                tag:
+                                                    user,
+
+                                                displayName:
+                                                    resolveContactName(
+                                                        selectedContact
+                                                    ) ||
+                                                    user,
+
+                                                currency
+
+                                            });
+
+                                        if(
+                                            legacyRecipient
+                                        ){
+
+                                            updateRecipientUsage(
+                                                legacyRecipient.tag
+                                            );
+
+                                            publishRecipientAudit(
+
+                                                "recipient.selected",
+
+                                                {
+                                                    recipientId:
+                                                        legacyRecipient.id,
+
+                                                    tag:
+                                                        legacyRecipient.tag,
+
+                                                    contactId:
+                                                        selectedContact?.id ||
+                                                        null,
+
+                                                    beneficiaryId:
+                                                        canonicalBeneficiary?.id ||
+                                                        null,
+
+                                                    source:
+                                                        selectedContact
+                                                            ? "contacts_picker"
+                                                            : "manual"
+                                                }
+
+                                            );
+
+                                        }
+
+                                    }catch(
+                                        legacyRecipientError
+                                    ){
+
+                                        /*
+                                         * The transaction has already succeeded.
+                                         *
+                                         * A compatibility-repository problem must therefore
+                                         * never make PAY54 report the payment itself as failed.
+                                         */
+
+                                        console.warn(
+                                            "[PAY54_SEND] Legacy recipient post-transaction enrichment failed.",
+                                            legacyRecipientError
                                         );
 
                                     }
