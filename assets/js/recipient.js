@@ -3877,7 +3877,99 @@ function openSendUnified(){
         </div>
 
     </div>
+    <div>
 
+        <div class="p54-label">
+            Funding source
+        </div>
+
+        <div
+            id="sendFundingSource"
+            role="group"
+            aria-label="Funding source"
+            style="
+                border:1px solid rgba(127,127,127,.22);
+                border-radius:14px;
+                padding:14px;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:14px;
+                min-height:68px;
+            "
+        >
+
+            <div
+                style="
+                    min-width:0;
+                    display:flex;
+                    flex-direction:column;
+                    gap:4px;
+                "
+            >
+
+                <strong
+                    style="
+                        font-size:14px;
+                        line-height:1.3;
+                    "
+                >
+                    ${paymentCurrency} Wallet
+                </strong>
+
+                <span
+                    id="sendFundingBalance"
+                    style="
+                        font-size:12px;
+                        opacity:.72;
+                        line-height:1.35;
+                    "
+                >
+                    Available:
+                    ${formatFundingBalance(
+                        paymentCurrency,
+                        selectedWalletBalance
+                    )}
+                </span>
+
+            </div>
+
+            <div
+                aria-hidden="true"
+                style="
+                    flex:0 0 auto;
+                    font-size:12px;
+                    font-weight:700;
+                    padding:6px 10px;
+                    border-radius:999px;
+                    background:rgba(127,127,127,.12);
+                "
+            >
+                Selected
+            </div>
+
+        </div>
+
+        <div
+            id="sendFundingStatus"
+            aria-live="polite"
+            style="
+                min-height:18px;
+                margin-top:7px;
+                font-size:12px;
+                opacity:.75;
+            "
+        >
+            Payment will be funded from your ${paymentCurrency} wallet.
+        </div>
+
+    </div>
+
+    <div>
+
+        <div class="p54-label">
+            Amount
+        </div>
     <div>
 
         <div class="p54-label">
