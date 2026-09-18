@@ -4510,24 +4510,92 @@ function openSendUnified(){
 
                     }
 
-                    const funding =
-                        resolveSmartPayment(
-                            amount,
-                            currency
-                        );
+                                        /*
+                     * ----------------------------------------------------------
+                     * EXPLICIT FUNDING VALIDATION
+                     * ----------------------------------------------------------
+                     *
+                     * WP-011B.6E.2 does NOT use resolveSmartPayment().
+                     *
+                     * Send Money may debit only the wallet explicitly displayed
+                     * to the customer.
+                     *
+                     * Balance is re-read immediately before PIN verification so
+                     * the UI snapshot cannot be relied upon as financial state.
+                     */
+
+                    const ledger =
+                        safeLedger();
 
                     if(
-                        !funding
+                        !ledger ||
+                        typeof ledger.getBalances !==
+                            "function"
                     ){
 
                         window.PAY54_TOAST
                         ?.showToast(
-                            "Insufficient funds across all wallets."
+                            "Wallet balances are temporarily unavailable."
                         );
 
                         return;
 
                     }
+
+                    const liveBalances =
+                        ledger.getBalances() || {};
+
+                    const liveBalance =
+                        Number(
+                            liveBalances[
+                                currency
+                            ] || 0
+                        );
+
+                    fundingBalance.textContent =
+                        `Available: ${formatFundingBalance(
+                            currency,
+                            liveBalance
+                        )}`;
+
+                    const funding = {
+
+                        source:
+                            "wallet",
+
+                        currency,
+
+                        amount,
+
+                        availableBalance:
+                            liveBalance,
+
+                        explicit:
+                            true
+
+                    };
+
+                    if(
+                        liveBalance <
+                        amount
+                    ){
+
+                        fundingStatus.textContent =
+                            `Insufficient ${currency} wallet balance.`;
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            `Insufficient ${currency} wallet balance.`
+                        );
+
+                        amountInput.focus();
+
+                        return;
+
+                    }
+
+                    fundingStatus.textContent =
+                        `Funding confirmed from your ${currency} wallet.`;
 
                     submitButton.disabled =
                         true;
