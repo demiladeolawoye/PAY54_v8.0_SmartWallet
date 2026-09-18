@@ -4051,9 +4051,24 @@ function openSendUnified(){
                     "#sendUser"
                 );
 
-            const amountInput =
+                     const amountInput =
                 modal.querySelector(
                     "#sendAmount"
+                );
+
+            const fundingSource =
+                modal.querySelector(
+                    "#sendFundingSource"
+                );
+
+            const fundingBalance =
+                modal.querySelector(
+                    "#sendFundingBalance"
+                );
+
+            const fundingStatus =
+                modal.querySelector(
+                    "#sendFundingStatus"
                 );
 
             const noteInput =
