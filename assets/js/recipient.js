@@ -4626,12 +4626,27 @@ function openSendUnified(){
 
                                     let tx;
 
-                                    const transactionMeta = {
+                                                                       const transactionMeta = {
 
                                         recipient:
                                             user,
 
-                                        note
+                                        note,
+
+                                        fundingSource:
+                                            "wallet",
+
+                                        fundingCurrency:
+                                            funding.currency,
+
+                                        paymentCurrency:
+                                            currency,
+
+                                        fundingMode:
+                                            "explicit",
+
+                                        fundingSourceVersion:
+                                            "WP-011B.6E.2"
 
                                     };
 
