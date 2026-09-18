@@ -3714,8 +3714,85 @@ function openSendUnified(){
     const CONTACTS_PICKER =
         window.PAY54_CONTACTS_PICKER || null;
 
-    let selectedContact =
+       let selectedContact =
         null;
+
+    /*
+     * ==========================================================
+     * PAY54 SEND — EXPLICIT WALLET FUNDING
+     * WP-011B.6E.2
+     * ==========================================================
+     *
+     * Stage 1 intentionally supports SAME-CURRENCY wallet funding
+     * only.
+     *
+     * Cross-currency FX funding and linked-card funding remain
+     * separate controlled work packages.
+     *
+     * The ledger remains the canonical source of wallet balances.
+     * No funding balance is persisted by this UI.
+     * ==========================================================
+     */
+
+    const paymentCurrency =
+        getSelectedCurrency();
+
+    const fundingLedger =
+        safeLedger();
+
+    if(
+        !fundingLedger ||
+        typeof fundingLedger.getBalances !==
+            "function"
+    ){
+
+        window.PAY54_TOAST
+        ?.showToast(
+            "Wallet balances are temporarily unavailable."
+        );
+
+        return;
+
+    }
+
+    const fundingBalances =
+        fundingLedger.getBalances() || {};
+
+    const selectedWalletBalance =
+        Number(
+            fundingBalances[
+                paymentCurrency
+            ] || 0
+        );
+
+    const formatFundingBalance = (
+        currency,
+        amount
+    ) => {
+
+        if(
+            typeof fundingLedger.moneyFmt ===
+                "function"
+        ){
+
+            return fundingLedger.moneyFmt(
+                currency,
+                amount
+            );
+
+        }
+
+        return `${currency} ${Number(
+            amount || 0
+        ).toLocaleString(
+            undefined,
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        )}`;
+
+    };
 
     openModal({
 
