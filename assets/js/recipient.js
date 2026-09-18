@@ -1508,7 +1508,66 @@ function resolveSmartPayment(amount, currency){
   return null;
 }
 
- function openSendUnified(){
+function openSendUnified(){
+
+  const ledger = safeLedger();
+
+  if(!ledger){
+    alert("PAY54 wallet service is temporarily unavailable.");
+    return;
+  }
+
+  const balances = ledger.getBalances() || {};
+  const paymentCurrency = getSelectedCurrency();
+
+  const walletCurrencies = Object.keys(balances)
+    .filter(currency => {
+      const value = Number(balances[currency]);
+      return currency && Number.isFinite(value);
+    });
+
+  if(
+    paymentCurrency &&
+    !walletCurrencies.includes(paymentCurrency)
+  ){
+    walletCurrencies.unshift(paymentCurrency);
+  }
+
+  const formatMoney = (currency, amount) => {
+
+    try{
+      return ledger.moneyFmt(
+        currency,
+        Number(amount || 0)
+      );
+    }catch(error){
+      return `${currency} ${Number(amount || 0).toFixed(2)}`;
+    }
+
+  };
+
+  const walletOptions = walletCurrencies
+    .map(currency => {
+
+      const balance =
+        Number(balances[currency] || 0);
+
+      const selected =
+        currency === paymentCurrency
+          ? " selected"
+          : "";
+
+      return `
+        <option
+          value="${currency}"
+          ${selected}
+        >
+          ${currency} Wallet — ${formatMoney(currency, balance)}
+        </option>
+      `;
+
+    })
+    .join("");
 
   openModal({
 
@@ -1516,26 +1575,130 @@ function resolveSmartPayment(amount, currency){
 
     bodyHTML:`
 
-      <form class="p54-form" id="sendForm">
+      <form
+        class="p54-form"
+        id="sendForm"
+        novalidate
+      >
 
         <div>
-          <div class="p54-label">Recipient (PAY54 Tag)</div>
-          <input class="p54-input" id="sendUser" placeholder="@username" required>
+
+          <div class="p54-label">
+            Recipient (PAY54 Tag)
+          </div>
+
+          <input
+            class="p54-input"
+            id="sendUser"
+            name="recipient"
+            placeholder="@username"
+            autocomplete="off"
+            spellcheck="false"
+            required
+            aria-required="true"
+          >
+
         </div>
 
         <div>
-          <div class="p54-label">Amount</div>
-          <input class="p54-input" id="sendAmount" type="number" step="0.01" placeholder="0.00" required>
+
+          <div class="p54-label">
+            Amount
+          </div>
+
+          <input
+            class="p54-input"
+            id="sendAmount"
+            name="amount"
+            type="number"
+            inputmode="decimal"
+            step="0.01"
+            min="0.01"
+            max="100000000"
+            placeholder="0.00"
+            required
+            aria-required="true"
+          >
+
         </div>
 
         <div>
-          <div class="p54-label">Reference (optional)</div>
-          <input class="p54-input" id="sendNote" placeholder="Optional note">
+
+          <label
+            class="p54-label"
+            for="sendFundingSource"
+          >
+            Pay From
+          </label>
+
+          <select
+            class="p54-select"
+            id="sendFundingSource"
+            name="fundingSource"
+            required
+            aria-describedby="sendFundingSummary sendFundingMessage"
+          >
+            ${walletOptions}
+          </select>
+
+          <div
+            id="sendFundingSummary"
+            class="p54-note"
+            style="
+              margin-top:8px;
+              padding:10px 12px;
+              border-radius:12px;
+            "
+            aria-live="polite"
+          ></div>
+
+          <div
+            id="sendFundingMessage"
+            class="p54-small"
+            style="
+              margin-top:6px;
+              min-height:18px;
+            "
+            aria-live="polite"
+          ></div>
+
+        </div>
+
+        <div>
+
+          <div class="p54-label">
+            Reference (optional)
+          </div>
+
+          <input
+            class="p54-input"
+            id="sendNote"
+            name="reference"
+            maxlength="140"
+            placeholder="Optional note"
+            autocomplete="off"
+          >
+
         </div>
 
         <div class="p54-actions">
-          <button class="p54-btn" type="button" id="cancelSend">Cancel</button>
-          <button class="p54-btn primary" type="submit">Send</button>
+
+          <button
+            class="p54-btn"
+            type="button"
+            id="cancelSend"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="p54-btn primary"
+            type="submit"
+            id="confirmSend"
+          >
+            Send
+          </button>
+
         </div>
 
       </form>
@@ -1544,120 +1707,482 @@ function resolveSmartPayment(amount, currency){
 
     onMount: ({modal, close}) => {
 
-      const form = modal.querySelector("#sendForm");
+      const form =
+        modal.querySelector("#sendForm");
 
-      modal.querySelector("#cancelSend").addEventListener("click", close);
+      const recipientInput =
+        modal.querySelector("#sendUser");
 
-      form.addEventListener("submit",(e)=>{
+      const amountInput =
+        modal.querySelector("#sendAmount");
 
-        e.preventDefault();
+      const noteInput =
+        modal.querySelector("#sendNote");
 
-        const user = modal.querySelector("#sendUser").value.trim();
-        const amount = Number(parseFloat(modal.querySelector("#sendAmount").value).toFixed(2));
-        const note = modal.querySelector("#sendNote").value.trim();
+      const fundingSelect =
+        modal.querySelector("#sendFundingSource");
 
-        const currency = getSelectedCurrency();
+      const fundingSummary =
+        modal.querySelector("#sendFundingSummary");
 
-        if(!user || user.length < 2){
-          alert("Enter valid recipient");
-          return;
+      const fundingMessage =
+        modal.querySelector("#sendFundingMessage");
+
+      const submitButton =
+        modal.querySelector("#confirmSend");
+
+      const cancelButton =
+        modal.querySelector("#cancelSend");
+
+      let submitting = false;
+
+      function getCurrentBalances(){
+
+        const currentLedger =
+          safeLedger();
+
+        if(!currentLedger){
+          return {};
         }
 
-        if(!amount || amount <= 0){
-          alert("Enter valid amount");
-          return;
+        return currentLedger.getBalances() || {};
+
+      }
+
+      function getFundingCurrency(){
+
+        return String(
+          fundingSelect?.value || ""
+        )
+          .trim()
+          .toUpperCase();
+
+      }
+
+      function getAmount(){
+
+        const raw =
+          String(amountInput?.value || "")
+            .trim();
+
+        if(!raw){
+          return 0;
         }
 
-        if(amount > 100000000){
-          alert("Amount too large");
-          return;
+        const amount =
+          Number(raw);
+
+        if(!Number.isFinite(amount)){
+          return 0;
         }
 
-        const funding = resolveSmartPayment(amount, currency);
+        return Number(
+          amount.toFixed(2)
+        );
 
-        if(!funding){
-          alert(`Insufficient funds across all wallets`);
-          return;
+      }
+
+      function renderFundingState(){
+
+        const sourceCurrency =
+          getFundingCurrency();
+
+        const currentBalances =
+          getCurrentBalances();
+
+        const available =
+          Number(
+            currentBalances[sourceCurrency] || 0
+          );
+
+        const amount =
+          getAmount();
+
+        fundingSummary.textContent =
+          `Available: ${formatMoney(
+            sourceCurrency,
+            available
+          )}`;
+
+        fundingMessage.textContent = "";
+
+        fundingMessage.removeAttribute(
+          "data-status"
+        );
+
+        if(
+          sourceCurrency !== paymentCurrency
+        ){
+
+          fundingMessage.textContent =
+            `Cross-currency funding from ${sourceCurrency} to ${paymentCurrency} is being protected while PAY54 completes FX execution verification. Select your ${paymentCurrency} Wallet for this payment.`;
+
+          fundingMessage.dataset.status =
+            "blocked";
+
+          return {
+            valid:false,
+            reason:"cross_currency",
+            sourceCurrency,
+            available,
+            amount
+          };
+
         }
 
-        requestPinVerification(() => {
+        if(
+          amount > 0 &&
+          amount > available
+        ){
 
-          let tx;
+          fundingMessage.textContent =
+            `Insufficient ${sourceCurrency} wallet balance.`;
 
-          if(funding.source === "wallet"){
+          fundingMessage.dataset.status =
+            "insufficient";
 
-  const entry = LEDGER.createEntry({
-    type:"send",
-    title:`Sent to ${user}`,
-    currency,
-    amount:-amount,
-    icon:"📤",
-    meta:{ recipient:user, note }
-  });
+          return {
+            valid:false,
+            reason:"insufficient_funds",
+            sourceCurrency,
+            available,
+            amount
+          };
 
-  tx = LEDGER.applyEntry(entry);
+        }
 
-}
-else if(funding.source === "wallet_fx"){
+        if(amount > 0){
 
-  const rate = LEDGER.getRate(funding.from, funding.to);
+          const remaining =
+            available - amount;
 
-  const converted = LEDGER.convert(funding.from, funding.to, funding.amount);
+          fundingMessage.textContent =
+            `Balance after payment: ${formatMoney(
+              sourceCurrency,
+              remaining
+            )}`;
 
-  LEDGER.applyEntry(
-    LEDGER.createEntry({
-      type:"fx_debit",
-      title:`FX Conversion (${funding.from} → ${funding.to})`,
-      currency: funding.from,
-      amount:-converted,
-      icon:"💱"
-    })
-  );
+          fundingMessage.dataset.status =
+            "ready";
 
-  LEDGER.applyEntry(
-    LEDGER.createEntry({
-      type:"fx_credit",
-      title:`FX Conversion`,
-      currency: funding.to,
-      amount: amount,
-      icon:"💱"
-    })
-  );
+        }else{
 
-  const entry = LEDGER.createEntry({
-    type:"send",
-    title:`Sent to ${user}`,
-    currency,
-    amount:-amount,
-    icon:"📤",
-    meta:{ recipient:user, note, fx_used:true, rate }
-  });
+          fundingMessage.textContent =
+            `Payment currency: ${paymentCurrency}`;
 
-  tx = LEDGER.applyEntry(entry);
+        }
 
-}
-else if(funding.source === "card"){
+        return {
+          valid:true,
+          reason:null,
+          sourceCurrency,
+          available,
+          amount
+        };
 
-  const entry = LEDGER.createEntry({
-    type:"card_payment",
-    title:`Paid ${user} (Card)`,
-    currency,
-    amount:-amount,
-    icon:"💳"
-  });
+      }
 
-  tx = LEDGER.applyEntry(entry);
+      function setSubmitting(value){
 
-}
-          prependTxToDOM(tx);
-          refreshUI();
-          showPaymentReceipt(tx, user, amount, currency);
+        submitting =
+          Boolean(value);
+
+        submitButton.disabled =
+          submitting;
+
+        fundingSelect.disabled =
+          submitting;
+
+        recipientInput.disabled =
+          submitting;
+
+        amountInput.disabled =
+          submitting;
+
+        noteInput.disabled =
+          submitting;
+
+        cancelButton.disabled =
+          submitting;
+
+        submitButton.textContent =
+          submitting
+            ? "Processing…"
+            : "Send";
+
+      }
+
+      cancelButton.addEventListener(
+        "click",
+        () => {
+
+          if(submitting){
+            return;
+          }
 
           close();
 
-        });
+        }
+      );
 
-      });
+      fundingSelect.addEventListener(
+        "change",
+        renderFundingState
+      );
+
+      amountInput.addEventListener(
+        "input",
+        renderFundingState
+      );
+
+      renderFundingState();
+
+      form.addEventListener(
+        "submit",
+        (event) => {
+
+          event.preventDefault();
+
+          if(submitting){
+            return;
+          }
+
+          const user =
+            recipientInput.value.trim();
+
+          const amount =
+            getAmount();
+
+          const note =
+            noteInput.value.trim();
+
+          const funding =
+            renderFundingState();
+
+          if(
+            !user ||
+            user.length < 2
+          ){
+            alert(
+              "Enter valid recipient"
+            );
+
+            recipientInput.focus();
+
+            return;
+          }
+
+          if(
+            !amount ||
+            amount <= 0
+          ){
+            alert(
+              "Enter valid amount"
+            );
+
+            amountInput.focus();
+
+            return;
+          }
+
+          if(
+            amount > 100000000
+          ){
+            alert(
+              "Amount too large"
+            );
+
+            amountInput.focus();
+
+            return;
+          }
+
+          if(
+            !funding.valid
+          ){
+
+            if(
+              funding.reason ===
+              "cross_currency"
+            ){
+              alert(
+                `Please select your ${paymentCurrency} Wallet. Cross-currency Send funding is not enabled until PAY54 FX verification is complete.`
+              );
+            }else{
+              alert(
+                `Insufficient ${funding.sourceCurrency} wallet balance`
+              );
+            }
+
+            fundingSelect.focus();
+
+            return;
+          }
+
+          /*
+           * Re-check the balance immediately
+           * before PIN verification.
+           *
+           * The earlier UI balance is informative;
+           * this is the transaction-time guard.
+           */
+
+          const prePinBalances =
+            getCurrentBalances();
+
+          const prePinAvailable =
+            Number(
+              prePinBalances[
+                funding.sourceCurrency
+              ] || 0
+            );
+
+          if(
+            prePinAvailable < amount
+          ){
+            alert(
+              `Insufficient ${funding.sourceCurrency} wallet balance`
+            );
+
+            renderFundingState();
+
+            return;
+          }
+
+          requestPinVerification(
+            () => {
+
+              if(submitting){
+                return;
+              }
+
+              setSubmitting(true);
+
+              try{
+
+                const activeLedger =
+                  safeLedger();
+
+                if(!activeLedger){
+                  throw new Error(
+                    "Ledger unavailable"
+                  );
+                }
+
+                /*
+                 * Re-check again after PIN.
+                 *
+                 * The customer may have had another
+                 * transaction update the wallet while
+                 * the PIN modal was open.
+                 */
+
+                const executionBalances =
+                  activeLedger.getBalances() || {};
+
+                const executionAvailable =
+                  Number(
+                    executionBalances[
+                      funding.sourceCurrency
+                    ] || 0
+                  );
+
+                if(
+                  executionAvailable < amount
+                ){
+                  alert(
+                    `Insufficient ${funding.sourceCurrency} wallet balance`
+                  );
+
+                  setSubmitting(false);
+
+                  renderFundingState();
+
+                  return;
+                }
+
+                const entry =
+                  activeLedger.createEntry({
+
+                    type:"send",
+
+                    title:
+                      `Sent to ${user}`,
+
+                    currency:
+                      paymentCurrency,
+
+                    amount:
+                      -amount,
+
+                    icon:"📤",
+
+                    meta:{
+
+                      recipient:
+                        user,
+
+                      note,
+
+                      funding_source:
+                        "wallet",
+
+                      funding_currency:
+                        funding.sourceCurrency,
+
+                      payment_currency:
+                        paymentCurrency
+
+                    }
+
+                  });
+
+                const tx =
+                  activeLedger.applyEntry(
+                    entry
+                  );
+
+                if(!tx){
+                  throw new Error(
+                    "Ledger did not return a transaction"
+                  );
+                }
+
+                prependTxToDOM(tx);
+
+                refreshUI();
+
+                showPaymentReceipt(
+                  tx,
+                  user,
+                  amount,
+                  paymentCurrency
+                );
+
+                close();
+
+              }catch(error){
+
+                console.error(
+                  "[PAY54_SEND] Transaction failed:",
+                  error
+                );
+
+                alert(
+                  "Payment could not be completed. Please try again."
+                );
+
+                setSubmitting(false);
+
+                renderFundingState();
+
+              }
+
+            }
+          );
+
+        }
+      );
 
     }
 
