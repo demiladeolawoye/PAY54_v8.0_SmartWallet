@@ -4097,9 +4097,12 @@ function openSendUnified(){
                 );
 
             if(
-                !form ||
+                                !form ||
                 !recipientInput ||
                 !amountInput ||
+                !fundingSource ||
+                !fundingBalance ||
+                !fundingStatus ||
                 !noteInput ||
                 !cancelButton ||
                 !submitButton
