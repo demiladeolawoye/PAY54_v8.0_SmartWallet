@@ -3967,32 +3967,26 @@ function openSendUnified(){
 
     <div>
 
-        <div class="p54-label">
-            Amount
-        </div>
-    <div>
-
-        <div class="p54-label">
-            Amount
-        </div>
-
-        <input
-            class="p54-input"
-            id="sendAmount"
-            name="amount"
-            type="number"
-            inputmode="decimal"
-            min="0.01"
-            max="100000000"
-            step="0.01"
-            placeholder="0.00"
-            autocomplete="off"
-            aria-label="Amount to send"
-            required
-        >
-
+    <div class="p54-label">
+        Amount
     </div>
 
+    <input
+        class="p54-input"
+        id="sendAmount"
+        name="amount"
+        type="number"
+        inputmode="decimal"
+        min="0.01"
+        max="100000000"
+        step="0.01"
+        placeholder="0.00"
+        autocomplete="off"
+        aria-label="Amount to send"
+        required
+    >
+
+</div>
     <div>
 
         <div class="p54-label">
