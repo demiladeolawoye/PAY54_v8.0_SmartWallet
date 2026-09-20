@@ -3734,11 +3734,35 @@ function openSendUnified(){
      * ==========================================================
      */
 
-    const paymentCurrency =
-        getSelectedCurrency();
+  const paymentCurrency =
+    String(
+        getSelectedCurrency() || "NGN"
+    )
+    .trim()
+    .toUpperCase();
 
-    const fundingLedger =
-        safeLedger();
+if(
+    !/^[A-Z]{3}$/.test(
+        paymentCurrency
+    )
+){
+
+    console.error(
+        "[PAY54_SEND] Invalid payment currency.",
+        paymentCurrency
+    );
+
+    window.PAY54_TOAST
+    ?.showToast(
+        "The selected payment currency is invalid."
+    );
+
+    return;
+
+}
+
+const fundingLedger =
+    safeLedger();
 
     if(
         !fundingLedger ||
@@ -4017,7 +4041,230 @@ function openSendUnified(){
                 modal.querySelector(
                     "#sendFundingStatus"
                 );
+const getLiveFundingBalances =
+    () => {
 
+        const ledger =
+            safeLedger();
+
+        if(
+            !ledger ||
+            typeof ledger.getBalances !==
+                "function"
+        ){
+
+            return {};
+
+        }
+
+        const balances =
+            ledger.getBalances() || {};
+
+        const safeBalances = {};
+
+        Object.entries(
+            balances
+        ).forEach(
+            ([currency, balance]) => {
+
+                const code =
+                    String(
+                        currency || ""
+                    )
+                    .trim()
+                    .toUpperCase();
+
+                const amount =
+                    Number(
+                        balance || 0
+                    );
+
+                if(
+                    /^[A-Z]{3}$/.test(
+                        code
+                    ) &&
+                    Number.isFinite(
+                        amount
+                    ) &&
+                    amount >= 0
+                ){
+
+                    safeBalances[
+                        code
+                    ] = amount;
+
+                }
+
+            }
+        );
+
+        if(
+            !Object.prototype.hasOwnProperty.call(
+                safeBalances,
+                paymentCurrency
+            )
+        ){
+
+            safeBalances[
+                paymentCurrency
+            ] = 0;
+
+        }
+
+        return safeBalances;
+
+    };
+
+const populateFundingSources =
+    () => {
+
+        const balances =
+            getLiveFundingBalances();
+
+        fundingSource.innerHTML =
+            "";
+
+        const currencies =
+            Object.keys(
+                balances
+            );
+
+        currencies.sort(
+            (a, b) => {
+
+                if(
+                    a === paymentCurrency
+                ){
+                    return -1;
+                }
+
+                if(
+                    b === paymentCurrency
+                ){
+                    return 1;
+                }
+
+                return a.localeCompare(
+                    b
+                );
+
+            }
+        );
+
+        currencies.forEach(
+            currency => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    currency;
+
+                option.textContent =
+                    `${currency} Wallet — ${formatFundingBalance(
+                        currency,
+                        balances[
+                            currency
+                        ]
+                    )}`;
+
+                if(
+                    currency ===
+                    paymentCurrency
+                ){
+
+                    option.selected =
+                        true;
+
+                }
+
+                fundingSource.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    };
+
+const renderFundingState =
+    () => {
+
+        const selectedCurrency =
+            String(
+                fundingSource.value ||
+                paymentCurrency
+            )
+            .trim()
+            .toUpperCase();
+
+        const balances =
+            getLiveFundingBalances();
+
+        const balance =
+            Number(
+                balances[
+                    selectedCurrency
+                ] || 0
+            );
+
+        fundingBalance.textContent =
+            `Available: ${formatFundingBalance(
+                selectedCurrency,
+                balance
+            )}`;
+
+        if(
+            selectedCurrency !==
+            paymentCurrency
+        ){
+
+            fundingStatus.textContent =
+                `Cross-currency funding from ${selectedCurrency} to ${paymentCurrency} is temporarily unavailable while PAY54 completes FX funding verification.`;
+
+            return;
+
+        }
+
+        const enteredAmount =
+            Number.parseFloat(
+                amountInput.value
+            );
+
+        if(
+            Number.isFinite(
+                enteredAmount
+            ) &&
+            enteredAmount > balance
+        ){
+
+            fundingStatus.textContent =
+                `Insufficient ${selectedCurrency} wallet balance.`;
+
+            return;
+
+        }
+
+        fundingStatus.textContent =
+            `Payment will be funded from your ${selectedCurrency} wallet.`;
+
+    };
+
+populateFundingSources();
+
+renderFundingState();
+
+fundingSource.addEventListener(
+    "change",
+    renderFundingState
+);
+
+amountInput.addEventListener(
+    "input",
+    renderFundingState
+);
             const noteInput =
                 modal.querySelector(
                     "#sendNote"
