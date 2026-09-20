@@ -4652,7 +4652,7 @@ amountInput.addEventListener(
                         );
 
                     const currency =
-                        getSelectedCurrency();
+    paymentCurrency;
 
                     if(
                         !user ||
