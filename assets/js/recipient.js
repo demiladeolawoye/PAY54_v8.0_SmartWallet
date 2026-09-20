@@ -4618,20 +4618,20 @@ if(
 
                                         note,
 
-                                        fundingSource:
-                                            "wallet",
+                                      funding_source:
+    "wallet",
 
-                                        fundingCurrency:
-                                            funding.currency,
+funding_currency:
+    selectedFundingCurrency,
 
-                                        paymentCurrency:
-                                            currency,
+payment_currency:
+    currency,
 
-                                        fundingMode:
-                                            "explicit",
+funding_mode:
+    "explicit",
 
-                                        fundingSourceVersion:
-                                            "WP-011B.6E.2"
+funding_contract:
+    "WP-011B.6E.2"
 
                                     };
 
