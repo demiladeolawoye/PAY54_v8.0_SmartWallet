@@ -4619,6 +4619,44 @@ function openSendUnified(){
                                 try{
 
                                     let tx;
+                                   const executionLedger =
+    safeLedger();
+
+if(
+    !executionLedger ||
+    typeof executionLedger.getBalances !==
+        "function"
+){
+
+    throw new Error(
+        "Wallet ledger unavailable during transaction execution."
+    );
+
+}
+
+const executionBalances =
+    executionLedger.getBalances() || {};
+
+const executionBalance =
+    Number(
+        executionBalances[
+            currency
+        ] || 0
+    );
+
+if(
+    executionBalance <
+    amount
+){
+
+    fundingStatus.textContent =
+        `Insufficient ${currency} wallet balance.`;
+
+    throw new Error(
+        "Insufficient wallet balance at transaction execution."
+    );
+
+}
 
                                                                        const transactionMeta = {
 
