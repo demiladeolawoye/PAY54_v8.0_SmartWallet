@@ -4659,174 +4659,45 @@ function openSendUnified(){
 
                                     }
 
-                                    if(
-                                        funding.source ===
-                                        "wallet"
-                                    ){
+                                   if(
+    funding.source !==
+        "wallet" ||
+    funding.currency !==
+        currency
+){
 
-                                        const entry =
-                                            LEDGER.createEntry({
+    throw new Error(
+        "Unsupported Send Money funding source."
+    );
 
-                                                type:
-                                                    "send",
+}
 
-                                                title:
-                                                    `Sent to ${user}`,
+const entry =
+    LEDGER.createEntry({
 
-                                                currency,
+        type:
+            "send",
 
-                                                amount:
-                                                    -amount,
+        title:
+            `Sent to ${user}`,
 
-                                                icon:
-                                                    "📤",
+        currency,
 
-                                                meta:
-                                                    transactionMeta
+        amount:
+            -amount,
 
-                                            });
+        icon:
+            "📤",
 
-                                        tx =
-                                            LEDGER.applyEntry(
-                                                entry
-                                            );
+        meta:
+            transactionMeta
 
-                                    }
+    });
 
-                                    else if(
-                                        funding.source ===
-                                        "wallet_fx"
-                                    ){
-
-                                        const rate =
-                                            LEDGER.getRate(
-                                                funding.from,
-                                                funding.to
-                                            );
-
-                                        const converted =
-                                            LEDGER.convert(
-                                                funding.from,
-                                                funding.to,
-                                                funding.amount
-                                            );
-
-                                        LEDGER.applyEntry(
-
-                                            LEDGER.createEntry({
-
-                                                type:
-                                                    "fx_debit",
-
-                                                title:
-                                                    `FX Conversion (${funding.from} → ${funding.to})`,
-
-                                                currency:
-                                                    funding.from,
-
-                                                amount:
-                                                    -converted,
-
-                                                icon:
-                                                    "💱"
-
-                                            })
-
-                                        );
-
-                                        LEDGER.applyEntry(
-
-                                            LEDGER.createEntry({
-
-                                                type:
-                                                    "fx_credit",
-
-                                                title:
-                                                    "FX Conversion",
-
-                                                currency:
-                                                    funding.to,
-
-                                                amount,
-
-                                                icon:
-                                                    "💱"
-
-                                            })
-
-                                        );
-
-                                        const entry =
-                                            LEDGER.createEntry({
-
-                                                type:
-                                                    "send",
-
-                                                title:
-                                                    `Sent to ${user}`,
-
-                                                currency,
-
-                                                amount:
-                                                    -amount,
-
-                                                icon:
-                                                    "📤",
-
-                                                meta: {
-                                                    ...transactionMeta,
-                                                    fx_used:
-                                                        true,
-                                                    rate
-                                                }
-
-                                            });
-
-                                        tx =
-                                            LEDGER.applyEntry(
-                                                entry
-                                            );
-
-                                    }
-
-                                    else if(
-                                        funding.source ===
-                                        "card"
-                                    ){
-
-                                        const entry =
-                                            LEDGER.createEntry({
-
-                                                type:
-                                                    "card_payment",
-
-                                                title:
-                                                    `Paid ${user} (Card)`,
-
-                                                currency,
-
-                                                amount:
-                                                    -amount,
-
-                                                icon:
-                                                    "💳",
-
-                                                meta:
-                                                    transactionMeta
-
-                                            });
-
-                                        tx =
-                                            LEDGER.applyEntry(
-                                                entry
-                                            );
-
-                                    }
-
-                                    if(
-                                        !tx
-                                    ){
-
+tx =
+    LEDGER.applyEntry(
+        entry
+    );
                                         throw new Error(
                                             "Transaction engine did not return a transaction."
                                         );
