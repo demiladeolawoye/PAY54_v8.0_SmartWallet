@@ -4736,15 +4736,58 @@ amountInput.addEventListener(
 
                     }
 
-                    const liveBalances =
-                        ledger.getBalances() || {};
+                  const selectedFundingCurrency =
+    String(
+        fundingSource.value || ""
+    )
+    .trim()
+    .toUpperCase();
 
-                    const liveBalance =
-                        Number(
-                            liveBalances[
-                                currency
-                            ] || 0
-                        );
+if(
+    !/^[A-Z]{3}$/.test(
+        selectedFundingCurrency
+    )
+){
+
+    window.PAY54_TOAST
+    ?.showToast(
+        "Select a valid funding wallet."
+    );
+
+    fundingSource.focus();
+
+    return;
+
+}
+
+if(
+    selectedFundingCurrency !==
+    currency
+){
+
+    fundingStatus.textContent =
+        `Cross-currency funding from ${selectedFundingCurrency} to ${currency} is not available yet.`;
+
+    window.PAY54_TOAST
+    ?.showToast(
+        `Please select your ${currency} wallet for this payment.`
+    );
+
+    fundingSource.focus();
+
+    return;
+
+}
+
+const liveBalances =
+    ledger.getBalances() || {};
+
+const liveBalance =
+    Number(
+        liveBalances[
+            selectedFundingCurrency
+        ] || 0
+    );
 
                     fundingBalance.textContent =
                         `Available: ${formatFundingBalance(
@@ -4754,20 +4797,24 @@ amountInput.addEventListener(
 
                     const funding = {
 
-                        source:
-                            "wallet",
+    source:
+        "wallet",
 
-                        currency,
+    currency:
+        selectedFundingCurrency,
 
-                        amount,
+    paymentCurrency:
+        currency,
 
-                        availableBalance:
-                            liveBalance,
+    amount,
 
-                        explicit:
-                            true
+    availableBalance:
+        liveBalance,
 
-                    };
+    explicit:
+        true
+
+};
 
                     if(
                         liveBalance <
@@ -4840,7 +4887,7 @@ const executionBalances =
 const executionBalance =
     Number(
         executionBalances[
-            currency
+            selectedFundingCurrency
         ] || 0
     );
 
