@@ -4705,7 +4705,7 @@ if(
 }
 
 const entry =
-    LEDGER.createEntry({
+    executionLedger.createEntry({
 
         type:
             "send",
@@ -4727,7 +4727,7 @@ const entry =
     });
 
 tx =
-    LEDGER.applyEntry(
+    executionLedger.applyEntry(
         entry
     );
 
