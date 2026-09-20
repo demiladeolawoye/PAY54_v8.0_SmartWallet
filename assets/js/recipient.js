@@ -4692,11 +4692,16 @@ tx =
     LEDGER.applyEntry(
         entry
     );
-                                        throw new Error(
-                                            "Transaction engine did not return a transaction."
-                                        );
 
-                                    }
+if(
+    !tx
+){
+
+    throw new Error(
+        "Transaction engine did not return a transaction."
+    );
+
+}
 
                                                                         /*
                                      * ==========================================================
