@@ -4189,6 +4189,382 @@ const populateFundingSources =
 
     };
 
+const getCanonicalFxRate =
+    (
+        ledger,
+        fromCurrency,
+        toCurrency
+    ) => {
+
+        const from =
+            String(
+                fromCurrency || ""
+            )
+            .trim()
+            .toUpperCase();
+
+        const to =
+            String(
+                toCurrency || ""
+            )
+            .trim()
+            .toUpperCase();
+
+        if(
+            !/^[A-Z]{3}$/.test(from) ||
+            !/^[A-Z]{3}$/.test(to)
+        ){
+
+            return null;
+
+        }
+
+        if(
+            from === to
+        ){
+
+            return 1;
+
+        }
+
+        if(
+            !ledger ||
+            typeof ledger.getRates !==
+                "function"
+        ){
+
+            return null;
+
+        }
+
+        let ratesPayload;
+
+        try{
+
+            ratesPayload =
+                ledger.getRates();
+
+        }catch(error){
+
+            console.warn(
+                "[PAY54_SEND] FX rate catalogue unavailable.",
+                error
+            );
+
+            return null;
+
+        }
+
+        const table =
+            ratesPayload &&
+            typeof ratesPayload ===
+                "object" &&
+            ratesPayload.table &&
+            typeof ratesPayload.table ===
+                "object"
+                ? ratesPayload.table
+                : null;
+
+        if(
+            !table
+        ){
+
+            return null;
+
+        }
+
+        const directRate =
+            Number(
+                table?.[from]?.[to]
+            );
+
+        if(
+            Number.isFinite(
+                directRate
+            ) &&
+            directRate > 0
+        ){
+
+            return directRate;
+
+        }
+
+        const inverseRate =
+            Number(
+                table?.[to]?.[from]
+            );
+
+        if(
+            Number.isFinite(
+                inverseRate
+            ) &&
+            inverseRate > 0
+        ){
+
+            const resolvedRate =
+                1 / inverseRate;
+
+            return Number.isFinite(
+                resolvedRate
+            ) &&
+            resolvedRate > 0
+                ? resolvedRate
+                : null;
+
+        }
+
+        return null;
+
+    };
+
+const resolveWalletFundingQuote =
+    ({
+        ledger,
+        paymentCurrency:
+            requestedPaymentCurrency,
+        fundingCurrency:
+            requestedFundingCurrency,
+        paymentAmount
+    }) => {
+
+        const resolvedPaymentCurrency =
+            String(
+                requestedPaymentCurrency ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+        const resolvedFundingCurrency =
+            String(
+                requestedFundingCurrency ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+        const resolvedPaymentAmount =
+            Number(
+                paymentAmount
+            );
+
+        if(
+            !ledger ||
+            typeof ledger.getBalances !==
+                "function" ||
+            typeof ledger.convert !==
+                "function"
+        ){
+
+            return {
+                ok:
+                    false,
+                reason:
+                    "LEDGER_UNAVAILABLE"
+            };
+
+        }
+
+        if(
+            !/^[A-Z]{3}$/.test(
+                resolvedPaymentCurrency
+            ) ||
+            !/^[A-Z]{3}$/.test(
+                resolvedFundingCurrency
+            ) ||
+            !Number.isFinite(
+                resolvedPaymentAmount
+            ) ||
+            resolvedPaymentAmount <= 0
+        ){
+
+            return {
+                ok:
+                    false,
+                reason:
+                    "INVALID_REQUEST"
+            };
+
+        }
+
+        let balances;
+
+        try{
+
+            balances =
+                ledger.getBalances() ||
+                {};
+
+        }catch(error){
+
+            console.warn(
+                "[PAY54_SEND] Funding balances unavailable.",
+                error
+            );
+
+            return {
+                ok:
+                    false,
+                reason:
+                    "BALANCE_UNAVAILABLE"
+            };
+
+        }
+
+        const sourceBalance =
+            Number(
+                balances[
+                    resolvedFundingCurrency
+                ] ?? 0
+            );
+
+        if(
+            !Number.isFinite(
+                sourceBalance
+            ) ||
+            sourceBalance < 0
+        ){
+
+            return {
+                ok:
+                    false,
+                reason:
+                    "INVALID_BALANCE"
+            };
+
+        }
+
+        if(
+            resolvedFundingCurrency ===
+            resolvedPaymentCurrency
+        ){
+
+            return {
+                ok:
+                    sourceBalance >=
+                    resolvedPaymentAmount,
+                reason:
+                    sourceBalance >=
+                    resolvedPaymentAmount
+                        ? null
+                        : "INSUFFICIENT_FUNDS",
+                mode:
+                    "same_currency",
+                paymentCurrency:
+                    resolvedPaymentCurrency,
+                fundingCurrency:
+                    resolvedFundingCurrency,
+                paymentAmount:
+                    resolvedPaymentAmount,
+                sourceDebit:
+                    resolvedPaymentAmount,
+                sourceBalance,
+                fxRate:
+                    1
+            };
+
+        }
+
+        const canonicalRate =
+            getCanonicalFxRate(
+                ledger,
+                resolvedPaymentCurrency,
+                resolvedFundingCurrency
+            );
+
+        if(
+            !Number.isFinite(
+                canonicalRate
+            ) ||
+            canonicalRate <= 0
+        ){
+
+            return {
+                ok:
+                    false,
+                reason:
+                    "FX_PAIR_UNAVAILABLE",
+                paymentCurrency:
+                    resolvedPaymentCurrency,
+                fundingCurrency:
+                    resolvedFundingCurrency,
+                paymentAmount:
+                    resolvedPaymentAmount,
+                sourceBalance
+            };
+
+        }
+
+        let sourceDebit;
+
+        try{
+
+            sourceDebit =
+                Number(
+                    ledger.convert(
+                        resolvedPaymentCurrency,
+                        resolvedFundingCurrency,
+                        resolvedPaymentAmount
+                    )
+                );
+
+        }catch(error){
+
+            console.warn(
+                "[PAY54_SEND] FX conversion failed.",
+                error
+            );
+
+            return {
+                ok:
+                    false,
+                reason:
+                    "FX_CONVERSION_FAILED"
+            };
+
+        }
+
+        if(
+            !Number.isFinite(
+                sourceDebit
+            ) ||
+            sourceDebit <= 0
+        ){
+
+            return {
+                ok:
+                    false,
+                reason:
+                    "INVALID_FX_QUOTE"
+            };
+
+        }
+
+        return {
+            ok:
+                sourceBalance >=
+                sourceDebit,
+            reason:
+                sourceBalance >=
+                sourceDebit
+                    ? null
+                    : "INSUFFICIENT_FUNDS",
+            mode:
+                "cross_currency",
+            paymentCurrency:
+                resolvedPaymentCurrency,
+            fundingCurrency:
+                resolvedFundingCurrency,
+            paymentAmount:
+                resolvedPaymentAmount,
+            sourceDebit,
+            sourceBalance,
+            fxRate:
+                canonicalRate
+        };
+
+    };
+
 const renderFundingState =
     () => {
 
@@ -4216,39 +4592,125 @@ const renderFundingState =
                 balance
             )}`;
 
-        if(
-            selectedCurrency !==
-            paymentCurrency
-        ){
-
-            fundingStatus.textContent =
-                `Cross-currency funding from ${selectedCurrency} to ${paymentCurrency} is temporarily unavailable while PAY54 completes FX funding verification.`;
-
-            return;
-
-        }
-
         const enteredAmount =
             Number.parseFloat(
                 amountInput.value
             );
 
         if(
-            Number.isFinite(
+            !Number.isFinite(
                 enteredAmount
-            ) &&
-            enteredAmount > balance
+            ) ||
+            enteredAmount <= 0
+        ){
+
+            if(
+                selectedCurrency ===
+                paymentCurrency
+            ){
+
+                fundingStatus.textContent =
+                    `Payment will be funded from your ${selectedCurrency} wallet.`;
+
+                return;
+
+            }
+
+            const fxRate =
+                getCanonicalFxRate(
+                    fundingLedger,
+                    paymentCurrency,
+                    selectedCurrency
+                );
+
+            fundingStatus.textContent =
+                fxRate
+                    ? `Enter an amount to view the ${selectedCurrency} funding requirement.`
+                    : `FX funding from ${selectedCurrency} to ${paymentCurrency} is currently unavailable.`;
+
+            return;
+
+        }
+
+        const quote =
+            resolveWalletFundingQuote({
+                ledger:
+                    fundingLedger,
+                paymentCurrency,
+                fundingCurrency:
+                    selectedCurrency,
+                paymentAmount:
+                    enteredAmount
+            });
+
+        if(
+            quote.reason ===
+            "FX_PAIR_UNAVAILABLE"
         ){
 
             fundingStatus.textContent =
-                `Insufficient ${selectedCurrency} wallet balance.`;
+                `FX funding from ${selectedCurrency} to ${paymentCurrency} is currently unavailable.`;
+
+            return;
+
+        }
+
+        if(
+            !quote.ok &&
+            quote.reason ===
+                "INSUFFICIENT_FUNDS"
+        ){
+
+            const requiredAmount =
+                Number(
+                    quote.sourceDebit
+                );
+
+            fundingStatus.textContent =
+                Number.isFinite(
+                    requiredAmount
+                )
+                    ? `Insufficient ${selectedCurrency} wallet balance. Required: ${formatFundingBalance(
+                        selectedCurrency,
+                        requiredAmount
+                    )}.`
+                    : `Insufficient ${selectedCurrency} wallet balance.`;
+
+            return;
+
+        }
+
+        if(
+            !quote.ok
+        ){
+
+            fundingStatus.textContent =
+                "Funding quote is temporarily unavailable.";
+
+            return;
+
+        }
+
+        if(
+            quote.mode ===
+            "same_currency"
+        ){
+
+            fundingStatus.textContent =
+                `Payment will be funded from your ${selectedCurrency} wallet.`;
 
             return;
 
         }
 
         fundingStatus.textContent =
-            `Payment will be funded from your ${selectedCurrency} wallet.`;
+            `${formatFundingBalance(
+                paymentCurrency,
+                quote.paymentAmount
+            )} will use approximately ${formatFundingBalance(
+                selectedCurrency,
+                quote.sourceDebit
+            )} from your ${selectedCurrency} wallet.`;
 
     };
 
