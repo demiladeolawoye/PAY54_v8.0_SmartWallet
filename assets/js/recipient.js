@@ -5399,12 +5399,32 @@ if(
 
                     try{
 
-                        requestPinVerification(
-                            () => {
+                    requestPinVerification(
+    () => {
 
-                                try{
+        /*
+         * ----------------------------------------------------------
+         * TRANSACTION EXECUTION LOCK
+         * ----------------------------------------------------------
+         *
+         * Lock Send only after successful PIN verification.
+         *
+         * This deliberately occurs inside the PIN callback so
+         * cancelling or closing the PIN modal does not leave the
+         * underlying Send Money form permanently disabled.
+         */
 
-                                    let tx;
+        submitButton.disabled =
+            true;
+
+        submitButton.setAttribute(
+            "aria-busy",
+            "true"
+        );
+
+        try{
+
+            let tx;
                                    const executionLedger =
     safeLedger();
 
