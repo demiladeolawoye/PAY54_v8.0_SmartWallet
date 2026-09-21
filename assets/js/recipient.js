@@ -5180,25 +5180,29 @@ amountInput.addEventListener(
                      * the UI snapshot cannot be relied upon as financial state.
                      */
 
-                    const ledger =
-                        safeLedger();
+                   const ledger =
+    safeLedger();
 
-                    if(
-                        !ledger ||
-                        typeof ledger.getBalances !==
-                            "function"
-                    ){
+if(
+    !ledger ||
+    typeof ledger.getBalances !==
+        "function" ||
+    typeof ledger.getRates !==
+        "function" ||
+    typeof ledger.convert !==
+        "function"
+){
 
-                        window.PAY54_TOAST
-                        ?.showToast(
-                            "Wallet balances are temporarily unavailable."
-                        );
+    window.PAY54_TOAST
+    ?.showToast(
+        "Wallet funding is temporarily unavailable."
+    );
 
-                        return;
+    return;
 
-                    }
+}
 
-                  const selectedFundingCurrency =
+const selectedFundingCurrency =
     String(
         fundingSource.value || ""
     )
@@ -5222,45 +5226,120 @@ if(
 
 }
 
+/*
+ * ----------------------------------------------------------
+ * CANONICAL FUNDING QUOTE
+ * ----------------------------------------------------------
+ *
+ * The quote is resolved through the verified wallet-funding
+ * resolver introduced by WP-011B.6E.4B.
+ *
+ * Cross-currency funding is permitted only when PAY54 can
+ * prove the currency pair exists in the canonical FX table.
+ *
+ * Unsupported pairs fail closed.
+ */
+
+const fundingQuote =
+    resolveWalletFundingQuote({
+
+        ledger,
+
+        paymentCurrency:
+            currency,
+
+        fundingCurrency:
+            selectedFundingCurrency,
+
+        paymentAmount:
+            amount
+
+    });
+
 if(
-    selectedFundingCurrency !==
-    currency
+    !fundingQuote ||
+    !fundingQuote.ok
 ){
 
+    const reason =
+        fundingQuote?.reason ||
+        "FUNDING_UNAVAILABLE";
+
+    if(
+        reason ===
+        "FX_PAIR_UNAVAILABLE"
+    ){
+
+        fundingStatus.textContent =
+            `FX funding from ${selectedFundingCurrency} to ${currency} is currently unavailable.`;
+
+        window.PAY54_TOAST
+        ?.showToast(
+            "This currency pair is currently unavailable."
+        );
+
+        fundingSource.focus();
+
+        return;
+
+    }
+
+    if(
+        reason ===
+        "INSUFFICIENT_FUNDS"
+    ){
+
+        const requiredAmount =
+            Number(
+                fundingQuote?.sourceDebit
+            );
+
+        fundingStatus.textContent =
+            Number.isFinite(
+                requiredAmount
+            )
+                ? `Insufficient ${selectedFundingCurrency} wallet balance. Required: ${formatFundingBalance(
+                    selectedFundingCurrency,
+                    requiredAmount
+                )}.`
+                : `Insufficient ${selectedFundingCurrency} wallet balance.`;
+
+        window.PAY54_TOAST
+        ?.showToast(
+            `Insufficient ${selectedFundingCurrency} wallet balance.`
+        );
+
+        amountInput.focus();
+
+        return;
+
+    }
+
     fundingStatus.textContent =
-        `Cross-currency funding from ${selectedFundingCurrency} to ${currency} is not available yet.`;
+        "Funding quote is temporarily unavailable.";
 
     window.PAY54_TOAST
     ?.showToast(
-        `Please select your ${currency} wallet for this payment.`
+        "We could not verify this funding source."
     );
-
-    fundingSource.focus();
 
     return;
 
 }
 
-const liveBalances =
-    ledger.getBalances() || {};
+fundingBalance.textContent =
+    `Available: ${formatFundingBalance(
+        selectedFundingCurrency,
+        fundingQuote.sourceBalance
+    )}`;
 
-const liveBalance =
-    Number(
-        liveBalances[
-            selectedFundingCurrency
-        ] || 0
-    );
-
-                    fundingBalance.textContent =
-                        `Available: ${formatFundingBalance(
-                            currency,
-                            liveBalance
-                        )}`;
-
-                    const funding = {
+const funding = {
 
     source:
         "wallet",
+
+    mode:
+        fundingQuote.mode,
 
     currency:
         selectedFundingCurrency,
@@ -5268,45 +5347,43 @@ const liveBalance =
     paymentCurrency:
         currency,
 
-    amount,
+    paymentAmount:
+        amount,
+
+    sourceDebit:
+        fundingQuote.sourceDebit,
+
+    fxRate:
+        fundingQuote.fxRate,
 
     availableBalance:
-        liveBalance,
+        fundingQuote.sourceBalance,
 
     explicit:
         true
 
 };
 
-                    if(
-                        liveBalance <
-                        amount
-                    ){
+if(
+    fundingQuote.mode ===
+    "cross_currency"
+){
 
-                        fundingStatus.textContent =
-                            `Insufficient ${currency} wallet balance.`;
+    fundingStatus.textContent =
+        `Funding confirmed: ${formatFundingBalance(
+            currency,
+            amount
+        )} requires ${formatFundingBalance(
+            selectedFundingCurrency,
+            fundingQuote.sourceDebit
+        )} from your ${selectedFundingCurrency} wallet.`;
 
-                        window.PAY54_TOAST
-                        ?.showToast(
-                            `Insufficient ${currency} wallet balance.`
-                        );
+}else{
 
-                        amountInput.focus();
+    fundingStatus.textContent =
+        `Funding confirmed from your ${selectedFundingCurrency} wallet.`;
 
-                        return;
-
-                    }
-
-                    fundingStatus.textContent =
-                        `Funding confirmed from your ${currency} wallet.`;
-
-                    submitButton.disabled =
-                        true;
-
-                    submitButton.setAttribute(
-                        "aria-busy",
-                        "true"
-                    );
+}
 
                     const restoreSubmitState =
                         () => {
