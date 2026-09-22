@@ -5722,18 +5722,30 @@ if(
 
                                     }
 
-                                   if(
-    funding.source !==
-        "wallet" ||
-    funding.currency !==
-        currency
-){
-
-    throw new Error(
-        "Unsupported Send Money funding source."
-    );
-
-}
+                        /*
+ * ==========================================================
+ * PAY54 SEND — FX-AWARE SOURCE-WALLET LEDGER POSTING
+ * WP-011B.6E.4B
+ * ==========================================================
+ *
+ * Financial contract:
+ *
+ * • The selected funding wallet is the wallet being debited.
+ * • Same-currency Send:
+ *      source debit === payment amount.
+ *
+ * • Cross-currency Send:
+ *      source debit === canonical execution-time FX quote.
+ *
+ * • The recipient payment amount/currency remains recorded
+ *   separately in transaction metadata.
+ *
+ * • No synthetic destination-wallet FX credit is created.
+ *
+ * • The ledger remains the single source of truth for the
+ *   actual wallet balance mutation.
+ * ==========================================================
+ */
 
 const entry =
     executionLedger.createEntry({
@@ -5744,10 +5756,24 @@ const entry =
         title:
             `Sent to ${user}`,
 
-        currency,
+        /*
+         * The ledger entry MUST use the source wallet
+         * currency because this is the wallet whose balance
+         * is actually being reduced.
+         */
+
+        currency:
+            selectedFundingCurrency,
+
+        /*
+         * executionSourceDebit was recalculated and
+         * validated immediately before this posting.
+         *
+         * Ledger debits are represented as negative values.
+         */
 
         amount:
-            -amount,
+            -executionSourceDebit,
 
         icon:
             "📤",
