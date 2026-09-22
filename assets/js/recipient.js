@@ -5595,30 +5595,6 @@ if(
 
 }
 
-const executionBalances =
-    executionLedger.getBalances() || {};
-
-const executionBalance =
-    Number(
-        executionBalances[
-            selectedFundingCurrency
-        ] || 0
-    );
-
-if(
-    executionBalance <
-    amount
-){
-
-    fundingStatus.textContent =
-        `Insufficient ${currency} wallet balance.`;
-
-    throw new Error(
-        "Insufficient wallet balance at transaction execution."
-    );
-
-}
-
                                                                        const transactionMeta = {
 
                                         recipient:
