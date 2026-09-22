@@ -5425,17 +5425,172 @@ if(
         try{
 
             let tx;
-                                   const executionLedger =
+           const executionLedger =
     safeLedger();
 
 if(
     !executionLedger ||
     typeof executionLedger.getBalances !==
+        "function" ||
+    typeof executionLedger.getRates !==
+        "function" ||
+    typeof executionLedger.convert !==
+        "function" ||
+    typeof executionLedger.createEntry !==
+        "function" ||
+    typeof executionLedger.applyEntry !==
         "function"
 ){
 
     throw new Error(
         "Wallet ledger unavailable during transaction execution."
+    );
+
+}
+
+/*
+ * ----------------------------------------------------------
+ * EXECUTION-TIME FUNDING REVALIDATION
+ * ----------------------------------------------------------
+ *
+ * The quote displayed before PIN is informational only.
+ *
+ * After successful PIN verification PAY54 must obtain a fresh
+ * balance and FX quote before any ledger mutation occurs.
+ *
+ * This protects the transaction from:
+ *
+ * • balance changes while PIN was open
+ * • FX-rate changes while PIN was open
+ * • unsupported/missing FX pairs
+ * • stale pre-PIN funding state
+ *
+ * No ledger entry has been created at this point.
+ */
+
+const executionFunding =
+    resolveWalletFundingQuote({
+
+        ledger:
+            executionLedger,
+
+        paymentCurrency:
+            currency,
+
+        fundingCurrency:
+            selectedFundingCurrency,
+
+        paymentAmount:
+            amount
+
+    });
+
+if(
+    !executionFunding ||
+    !executionFunding.ok
+){
+
+    const executionFailureReason =
+        executionFunding?.reason ||
+        "FUNDING_UNAVAILABLE";
+
+    if(
+        executionFailureReason ===
+        "FX_PAIR_UNAVAILABLE"
+    ){
+
+        fundingStatus.textContent =
+            `FX funding from ${selectedFundingCurrency} to ${currency} is no longer available.`;
+
+        throw new Error(
+            "FX pair unavailable at transaction execution."
+        );
+
+    }
+
+    if(
+        executionFailureReason ===
+        "INSUFFICIENT_FUNDS"
+    ){
+
+        fundingStatus.textContent =
+            `Insufficient ${selectedFundingCurrency} wallet balance.`;
+
+        throw new Error(
+            "Insufficient wallet balance at transaction execution."
+        );
+
+    }
+
+    throw new Error(
+        "Funding source could not be verified at transaction execution."
+    );
+
+}
+
+const executionBalance =
+    Number(
+        executionFunding.sourceBalance
+    );
+
+const executionSourceDebit =
+    Number(
+        executionFunding.sourceDebit
+    );
+
+const executionFxRate =
+    Number(
+        executionFunding.fxRate
+    );
+
+/*
+ * ----------------------------------------------------------
+ * FINANCIAL VALUE INTEGRITY
+ * ----------------------------------------------------------
+ *
+ * Fail closed if any value required for ledger posting is
+ * malformed, zero, negative or non-finite.
+ */
+
+if(
+    !Number.isFinite(
+        executionBalance
+    ) ||
+    executionBalance < 0 ||
+    !Number.isFinite(
+        executionSourceDebit
+    ) ||
+    executionSourceDebit <= 0 ||
+    !Number.isFinite(
+        executionFxRate
+    ) ||
+    executionFxRate <= 0
+){
+
+    throw new Error(
+        "Invalid funding state at transaction execution."
+    );
+
+}
+
+/*
+ * Defence in depth.
+ *
+ * resolveWalletFundingQuote() has already checked this, but
+ * execution performs an explicit final balance comparison
+ * before ledger entry construction.
+ */
+
+if(
+    executionBalance <
+    executionSourceDebit
+){
+
+    fundingStatus.textContent =
+        `Insufficient ${selectedFundingCurrency} wallet balance.`;
+
+    throw new Error(
+        "Insufficient wallet balance at transaction execution."
     );
 
 }
