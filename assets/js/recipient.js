@@ -5595,29 +5595,123 @@ if(
 
 }
 
-                                                                       const transactionMeta = {
+                                                                     const transactionMeta = {
 
-                                        recipient:
-                                            user,
+    /*
+     * ------------------------------------------------------
+     * RECIPIENT CONTEXT
+     * ------------------------------------------------------
+     */
 
-                                        note,
+    recipient:
+        user,
 
-                                      funding_source:
-    "wallet",
+    note,
 
-funding_currency:
-    selectedFundingCurrency,
+    /*
+     * ------------------------------------------------------
+     * FUNDING SOURCE
+     * ------------------------------------------------------
+     *
+     * "wallet"
+     *     Payment and funding currencies are identical.
+     *
+     * "wallet_fx"
+     *     A different PAY54 wallet currency funds the
+     *     payment through the canonical ledger FX engine.
+     */
 
-payment_currency:
-    currency,
+    funding_source:
+        selectedFundingCurrency === currency
+            ? "wallet"
+            : "wallet_fx",
 
-funding_mode:
-    "explicit",
+    funding_currency:
+        selectedFundingCurrency,
 
-funding_contract:
-    "WP-011B.6E.2"
+    payment_currency:
+        currency,
 
-                                    };
+    /*
+     * ------------------------------------------------------
+     * FINANCIAL AMOUNTS
+     * ------------------------------------------------------
+     *
+     * payment_amount
+     *     Amount the recipient is being paid.
+     *
+     * funding_amount
+     *     Actual amount debited from the selected source
+     *     wallet.
+     *
+     * These values are deliberately separate for FX-funded
+     * payments.
+     */
+
+    payment_amount:
+        amount,
+
+    funding_amount:
+        executionSourceDebit,
+
+    /*
+     * ------------------------------------------------------
+     * FUNDING CONTRACT
+     * ------------------------------------------------------
+     */
+
+    funding_mode:
+        selectedFundingCurrency === currency
+            ? "explicit"
+            : "explicit_fx",
+
+    funding_contract:
+        "WP-011B.6E.4B",
+
+    /*
+     * ------------------------------------------------------
+     * FX AUDIT DATA
+     * ------------------------------------------------------
+     */
+
+    fx_used:
+        selectedFundingCurrency !== currency,
+
+    fx_rate:
+        executionFxRate,
+
+    fx_route:
+        executionFunding.fxRoute || "same_currency",
+
+    /*
+     * ------------------------------------------------------
+     * COMPATIBILITY ALIASES
+     * ------------------------------------------------------
+     *
+     * Preserve compatibility for existing PAY54 consumers
+     * that may use camelCase transaction metadata.
+     */
+
+    fundingSource:
+        selectedFundingCurrency === currency
+            ? "wallet"
+            : "wallet_fx",
+
+    fundingCurrency:
+        selectedFundingCurrency,
+
+    paymentCurrency:
+        currency,
+
+    fundingMode:
+        selectedFundingCurrency === currency
+            ? "explicit"
+            : "explicit_fx",
+
+    fundingSourceVersion:
+        "WP-011B.6E.4B"
+
+};
 
                                     if(
                                         selectedContact?.id
