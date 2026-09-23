@@ -550,6 +550,45 @@
 
             },
 
+                       /* --------------------------------------------------------------
+               FUNDING
+
+               Enterprise funding-source orchestration domain.
+
+               Wallet owns wallet state.
+               Cards owns card lifecycle.
+               Funding owns source discovery, quoting, authorisation,
+               commitment and reversal orchestration.
+            -------------------------------------------------------------- */
+
+            FUNDING: {
+
+                ROOT:
+                    "1.0.0",
+
+                CONSTANTS:
+                    "1.0.0",
+
+                ENGINE:
+                    "1.0.0",
+
+                SERVICE:
+                    "1.0.0",
+
+                REGISTRY:
+                    "1.0.0",
+
+                WALLET_ADAPTER:
+                    "1.0.0",
+
+                LINKED_CARD_ADAPTER:
+                    "1.0.0",
+
+                EVENTS:
+                    "1.0.0"
+
+            },
+
             /* --------------------------------------------------------------
                PAYMENTS
             -------------------------------------------------------------- */
