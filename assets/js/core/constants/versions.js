@@ -205,7 +205,10 @@
             CONTACTS:
                 "1.0.0",
 
-            BENEFICIARIES:
+                       BENEFICIARIES:
+                "1.0.0",
+
+            FUNDING:
                 "1.0.0"
 
         },
