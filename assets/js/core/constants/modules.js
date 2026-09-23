@@ -238,9 +238,11 @@
 
                 CONTACT_CONSTANTS:
                     "core.constants.contacts",
-
                 BENEFICIARY_CONSTANTS:
                     "core.constants.beneficiaries",
+
+                FUNDING_CONSTANTS:
+                    "core.constants.funding",
 
                 CONFIG:
                     "core.config",
