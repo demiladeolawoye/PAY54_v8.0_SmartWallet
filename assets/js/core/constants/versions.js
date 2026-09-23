@@ -1111,7 +1111,7 @@
                 "CONTACTS",
                 "BENEFICIARIES",
                 "FUNDING",
-                "CARDS",,
+                "CARDS",
                 "WALLET",
                 "MERCHANT",
                 "SECURITY",
