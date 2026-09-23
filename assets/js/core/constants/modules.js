@@ -983,7 +983,7 @@
 
         ];
 
-        for (
+              for (
             const identifier
             of requiredBeneficiaryIdentifiers
         ) {
@@ -995,6 +995,73 @@
 
                 throw new Error(
                     "[PAY54] Beneficiary enterprise module identifiers are incomplete."
+                );
+
+            }
+
+        }
+
+        /* ------------------------------------------------------------------
+           FUNDING ENTERPRISE EXTENSION
+        ------------------------------------------------------------------ */
+
+        if (
+            MODULES.FUNDING !==
+            "FUNDING"
+        ) {
+
+            throw new Error(
+                "[PAY54] Funding module identifier verification failed."
+            );
+
+        }
+
+        const requiredFundingIdentifiers = [
+
+            MODULES.COMPONENTS?.CORE
+                ?.FUNDING_CONSTANTS,
+
+            MODULES.COMPONENTS?.SERVICES
+                ?.FUNDING,
+
+            MODULES.COMPONENTS?.ENGINES
+                ?.FUNDING,
+
+            MODULES.DOMAIN?.FUNDING
+                ?.ROOT,
+
+            MODULES.DOMAIN?.FUNDING
+                ?.ENGINE,
+
+            MODULES.DOMAIN?.FUNDING
+                ?.SERVICE,
+
+            MODULES.DOMAIN?.FUNDING
+                ?.REGISTRY,
+
+            MODULES.DOMAIN?.FUNDING
+                ?.WALLET_ADAPTER,
+
+            MODULES.DOMAIN?.FUNDING
+                ?.LINKED_CARD_ADAPTER,
+
+            MODULES.DOMAIN?.FUNDING
+                ?.EVENTS
+
+        ];
+
+        for (
+            const identifier
+            of requiredFundingIdentifiers
+        ) {
+
+            if (
+                typeof identifier !== "string" ||
+                !identifier.trim()
+            ) {
+
+                throw new Error(
+                    "[PAY54] Funding enterprise module identifiers are incomplete."
                 );
 
             }
@@ -1045,11 +1112,13 @@
 
         }
 
-        if (
+                if (
             registered.VERSIONS !== "VERSIONS" ||
             registered.CONTACTS !== "CONTACTS" ||
             registered.BENEFICIARIES !==
-                "BENEFICIARIES"
+                "BENEFICIARIES" ||
+            registered.FUNDING !==
+                "FUNDING"
         ) {
 
             throw new Error(
@@ -1071,6 +1140,54 @@
 
             throw new Error(
                 "[PAY54] Beneficiary module registration verification failed."
+            );
+
+        }
+               if (
+            registered.COMPONENTS
+                ?.CORE
+                ?.FUNDING_CONSTANTS !==
+                    "core.constants.funding" ||
+            registered.COMPONENTS
+                ?.SERVICES
+                ?.FUNDING !==
+                    "services.funding" ||
+            registered.COMPONENTS
+                ?.ENGINES
+                ?.FUNDING !==
+                    "engine.funding" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.ROOT !==
+                    "funding" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.ENGINE !==
+                    "funding.engine" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.SERVICE !==
+                    "funding.service" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.REGISTRY !==
+                    "funding.registry" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.WALLET_ADAPTER !==
+                    "funding.adapter.wallet" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.LINKED_CARD_ADAPTER !==
+                    "funding.adapter.linked-card" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.EVENTS !==
+                    "funding.events"
+        ) {
+
+            throw new Error(
+                "[PAY54] Funding module registration verification failed."
             );
 
         }
