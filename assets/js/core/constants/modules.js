@@ -131,9 +131,11 @@
 
         CONTACTS:
             "CONTACTS",
-
         BENEFICIARIES:
             "BENEFICIARIES",
+
+        FUNDING:
+            "FUNDING",
 
         /* ==================================================================
            ENGINE IDENTIFIERS
