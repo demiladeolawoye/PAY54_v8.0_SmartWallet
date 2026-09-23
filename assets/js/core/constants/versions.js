@@ -1154,6 +1154,8 @@
 
         verifyBeneficiaryVersions();
 
+        verifyFundingVersions();
+
         verifyModuleCatalogue();
 
         constants.register(
