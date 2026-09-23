@@ -1114,13 +1114,24 @@
 
         }
 
-        if (
+               if (
             MODULES.BENEFICIARIES !==
             "BENEFICIARIES"
         ) {
 
             throw new Error(
                 "[PAY54] MODULES.BENEFICIARIES compatibility verification failed."
+            );
+
+        }
+
+        if (
+            MODULES.FUNDING !==
+            "FUNDING"
+        ) {
+
+            throw new Error(
+                "[PAY54] MODULES.FUNDING compatibility verification failed."
             );
 
         }
