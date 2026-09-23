@@ -1186,9 +1186,27 @@
             registered.DOMAIN
                 ?.CONTACTS
                 ?.STORAGE !== "1.0.0" ||
-            registered.DOMAIN
+                        registered.DOMAIN
                 ?.BENEFICIARIES
-                ?.STORAGE !== "1.0.0"
+                ?.STORAGE !== "1.0.0" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.ROOT !== "1.0.0" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.ENGINE !== "1.0.0" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.SERVICE !== "1.0.0" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.REGISTRY !== "1.0.0" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.WALLET_ADAPTER !== "1.0.0" ||
+            registered.DOMAIN
+                ?.FUNDING
+                ?.LINKED_CARD_ADAPTER !== "1.0.0"
         ) {
 
             throw new Error(
