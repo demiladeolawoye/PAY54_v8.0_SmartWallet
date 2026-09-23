@@ -1179,9 +1179,10 @@
         }
 
         if (
-            registered.CORE !== "12.0.0" ||
+                       registered.CORE !== "12.0.0" ||
             registered.CONTACTS !== "1.0.0" ||
             registered.BENEFICIARIES !== "1.0.0" ||
+            registered.FUNDING !== "1.0.0" ||
             registered.DOMAIN
                 ?.CONTACTS
                 ?.STORAGE !== "1.0.0" ||
