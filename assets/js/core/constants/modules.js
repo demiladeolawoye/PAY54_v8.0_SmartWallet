@@ -356,8 +356,11 @@
                 CONTACTS:
                     "services.contacts",
 
-                BENEFICIARIES:
+                             BENEFICIARIES:
                     "services.beneficiaries",
+
+                FUNDING:
+                    "services.funding",
 
                 CARDS:
                     "services.cards",
