@@ -237,7 +237,10 @@
                 CONTACT_CONSTANTS:
                     "1.0.0",
 
-                BENEFICIARY_CONSTANTS:
+                        BENEFICIARY_CONSTANTS:
+                    "1.0.0",
+
+                FUNDING_CONSTANTS:
                     "1.0.0",
 
                 CONFIG:
