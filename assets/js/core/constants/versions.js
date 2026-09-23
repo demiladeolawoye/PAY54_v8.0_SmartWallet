@@ -106,6 +106,17 @@
 
     }
 
+       if (
+        MODULES.FUNDING !==
+        "FUNDING"
+    ) {
+
+        throw new Error(
+            "[PAY54] MODULES.FUNDING must be available before versions.js."
+        );
+
+    }
+
     /* ======================================================================
        CANONICAL VERSION CATALOGUE
 
