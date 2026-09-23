@@ -933,7 +933,112 @@
         return true;
 
     }
+    /* ======================================================================
+       FUNDING VERSION VERIFICATION
+    ====================================================================== */
 
+    function verifyFundingVersions() {
+
+        if (
+            VERSIONS.FUNDING !==
+            "1.0.0"
+        ) {
+
+            throw new Error(
+                "[PAY54] VERSIONS.FUNDING must be 1.0.0."
+            );
+
+        }
+
+        const required =
+            Object.freeze([
+
+                VERSIONS.PLATFORM
+                    ?.FUNDING,
+
+                VERSIONS.COMPONENTS
+                    ?.CORE
+                    ?.FUNDING_CONSTANTS,
+
+                VERSIONS.COMPONENTS
+                    ?.FUNDING
+                    ?.CONSTANTS,
+
+                VERSIONS.COMPONENTS
+                    ?.FUNDING
+                    ?.ENGINE,
+
+                VERSIONS.COMPONENTS
+                    ?.FUNDING
+                    ?.SERVICE,
+
+                VERSIONS.COMPONENTS
+                    ?.FUNDING
+                    ?.REGISTRY,
+
+                VERSIONS.COMPONENTS
+                    ?.FUNDING
+                    ?.WALLET_ADAPTER,
+
+                VERSIONS.COMPONENTS
+                    ?.FUNDING
+                    ?.LINKED_CARD_ADAPTER,
+
+                VERSIONS.DOMAIN
+                    ?.FUNDING
+                    ?.ROOT,
+
+                VERSIONS.DOMAIN
+                    ?.FUNDING
+                    ?.CONSTANTS,
+
+                VERSIONS.DOMAIN
+                    ?.FUNDING
+                    ?.ENGINE,
+
+                VERSIONS.DOMAIN
+                    ?.FUNDING
+                    ?.SERVICE,
+
+                VERSIONS.DOMAIN
+                    ?.FUNDING
+                    ?.REGISTRY,
+
+                VERSIONS.DOMAIN
+                    ?.FUNDING
+                    ?.WALLET_ADAPTER,
+
+                VERSIONS.DOMAIN
+                    ?.FUNDING
+                    ?.LINKED_CARD_ADAPTER,
+
+                VERSIONS.DOMAIN
+                    ?.FUNDING
+                    ?.EVENTS
+
+            ]);
+
+        for (
+            const version
+            of required
+        ) {
+
+            if (
+                version !==
+                "1.0.0"
+            ) {
+
+                throw new Error(
+                    "[PAY54] Funding component version catalogue is incomplete or inconsistent."
+                );
+
+            }
+
+        }
+
+        return true;
+
+    }
     /* ======================================================================
        CROSS-CATALOGUE VERIFICATION
     ====================================================================== */
