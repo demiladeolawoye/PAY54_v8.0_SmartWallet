@@ -557,8 +557,47 @@
                 MIGRATION:
                     "beneficiaries.migration",
 
-                LEGACY_FACADE:
+                               LEGACY_FACADE:
                     "beneficiaries.legacy-facade"
+
+            },
+
+            /* --------------------------------------------------------------
+               ENTERPRISE FUNDING DOMAIN
+
+               Platform-level orchestration of financial funding sources.
+
+               This domain is intentionally independent from DOMAIN.WALLET
+               and DOMAIN.CARDS.
+
+               Wallet owns wallet behaviour.
+               Cards owns card lifecycle.
+               Funding owns source discovery, quoting, authorisation,
+               commitment and reversal orchestration.
+            -------------------------------------------------------------- */
+
+            FUNDING: {
+
+                ROOT:
+                    "funding",
+
+                ENGINE:
+                    "funding.engine",
+
+                SERVICE:
+                    "funding.service",
+
+                REGISTRY:
+                    "funding.registry",
+
+                WALLET_ADAPTER:
+                    "funding.adapter.wallet",
+
+                LINKED_CARD_ADAPTER:
+                    "funding.adapter.linked-card",
+
+                EVENTS:
+                    "funding.events"
 
             },
 
