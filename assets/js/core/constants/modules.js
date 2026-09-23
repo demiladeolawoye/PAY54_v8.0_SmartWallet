@@ -396,8 +396,11 @@
                 CONTACTS:
                     "engine.contacts",
 
-                BENEFICIARIES:
-                    "engine.beneficiaries"
+                               BENEFICIARIES:
+                    "engine.beneficiaries",
+
+                FUNDING:
+                    "engine.funding"
 
             },
 
