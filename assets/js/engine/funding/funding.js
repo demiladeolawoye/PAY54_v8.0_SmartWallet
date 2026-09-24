@@ -1839,7 +1839,29 @@ function resolveAdapter(
                     clone(result)
             });
 
-        } catch (error) {
+                } catch (error) {
+
+            /*
+             * Preserve canonical Funding-domain failure codes deliberately
+             * raised by registered adapters.
+             *
+             * Unknown runtime/programming failures remain mapped to
+             * COMMIT_FAILED so implementation details do not leak through
+             * the public Funding API.
+             */
+
+            const adapterCode =
+                normalizeString(
+                    error?.code
+                );
+
+            const knownFailureCode =
+                adapterCode &&
+                Object.values(
+                    FAILURE_CODES
+                ).includes(
+                    adapterCode
+                );
 
             publish(
                 EVENTS.COMMIT_FAILED,
@@ -1852,10 +1874,30 @@ function resolveAdapter(
                         request.operationId ||
                         null,
 
+                    code:
+                        knownFailureCode
+                            ? adapterCode
+                            : FAILURE_CODES.COMMIT_FAILED,
+
                     failedAt:
                         now()
                 }
             );
+
+            if (knownFailureCode) {
+
+                return createFailure(
+                    adapterCode,
+                    error?.message ||
+                        "Funding commitment was rejected.",
+                    isPlainObject(
+                        error?.details
+                    )
+                        ? error.details
+                        : {}
+                );
+
+            }
 
             return createFailure(
                 FAILURE_CODES.COMMIT_FAILED,
@@ -1868,8 +1910,6 @@ function resolveAdapter(
             );
 
         }
-
-    }
 
     /* ======================================================================
        REVERSAL
