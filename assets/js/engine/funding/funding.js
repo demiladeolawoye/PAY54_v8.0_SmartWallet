@@ -1079,54 +1079,79 @@
 
     }
 
-    function resolveAdapter(
-        sourceId
-    ) {
+function resolveAdapter(
+    sourceId
+) {
 
-        const sourceValidation =
-            validateSourceId(
-                sourceId
-            );
+    const sourceValidation =
+        validateSourceId(
+            sourceId
+        );
 
-        if (!sourceValidation.ok) {
+    if (!sourceValidation.ok) {
 
-            return sourceValidation;
-
-        }
-
-        const sourceType =
-            sourceValidation
-                .data
-                .sourceType;
-
-        const descriptor =
-            adapters.get(
-                sourceType
-            );
-
-        if (!descriptor) {
-
-            return createFailure(
-                FAILURE_CODES.ADAPTER_UNAVAILABLE,
-                `No Funding adapter is registered for "${sourceType}".`
-            );
-
-        }
-
-        return createSuccess({
-
-            sourceId:
-                sourceValidation
-                    .data
-                    .sourceId,
-
-            sourceType,
-
-            descriptor
-
-        });
+        return sourceValidation;
 
     }
+
+    const sourceType =
+        sourceValidation
+            .data
+            .sourceType;
+
+    const descriptor =
+        adapters.get(
+            sourceType
+        );
+
+    if (!descriptor) {
+
+        return createFailure(
+            FAILURE_CODES.ADAPTER_UNAVAILABLE,
+            `No Funding adapter is registered for "${sourceType}".`
+        );
+
+    }
+
+    /*
+     * INTERNAL RUNTIME RESOLUTION
+     * ---------------------------
+     * Do not pass the live adapter descriptor through createSuccess().
+     *
+     * createSuccess() intentionally clones outward-facing data.
+     * Adapter descriptors contain executable methods and therefore
+     * must retain their live object identity inside the orchestration
+     * boundary.
+     *
+     * The descriptor itself is already immutable because it is frozen
+     * when registered.
+     */
+
+    return Object.freeze({
+
+        ok:
+            true,
+
+        data:
+            Object.freeze({
+
+                sourceId:
+                    sourceValidation
+                        .data
+                        .sourceId,
+
+                sourceType,
+
+                descriptor
+
+            }),
+
+        timestamp:
+            now()
+
+    });
+
+}
 
     /* ======================================================================
        CAPABILITY
