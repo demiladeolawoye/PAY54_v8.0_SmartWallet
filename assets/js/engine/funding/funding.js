@@ -1839,7 +1839,7 @@ function resolveAdapter(
                     clone(result)
             });
 
-                } catch (error) {
+                        } catch (error) {
 
             /*
              * Preserve canonical Funding-domain failure codes deliberately
