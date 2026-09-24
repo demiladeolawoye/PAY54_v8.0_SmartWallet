@@ -1436,365 +1436,418 @@
 
        This is the ONLY wallet financial mutation boundary in this adapter.
     ====================================================================== */
+async function commit(
+    request
+) {
 
-    async function commit(
-        request
+    if (
+        !request ||
+        typeof request !==
+            "object"
     ) {
 
-        if (
-            !request ||
-            typeof request !==
-                "object"
-        ) {
+        throw createError(
+            FAILURE_CODES.INVALID_REQUEST,
+            "Wallet Funding commit request is invalid."
+        );
+
+    }
+
+    const parsed =
+        parseSourceId(
+            request.sourceId
+        );
+
+    const operationId =
+        normalizeString(
+            request.operationId
+        );
+
+    if (!operationId) {
+
+        throw createError(
+            FAILURE_CODES.INVALID_REQUEST,
+            "Funding operation identifier is required."
+        );
+
+    }
+
+    const idempotencyKey =
+        normalizeIdempotencyKey(
+            request.idempotencyKey
+        );
+
+    const requestedQuoteId =
+        normalizeString(
+            request.quoteId
+        );
+
+    if (!requestedQuoteId) {
+
+        throw createError(
+            FAILURE_CODES.INVALID_REQUEST,
+            "Funding quote identifier is required."
+        );
+
+    }
+
+    /* ==================================================================
+       IDEMPOTENT REPLAY
+
+       This check MUST occur before getStoredQuote().
+
+       A successfully committed quote is intentionally removed from the
+       quote cache. Therefore an exact replay must be resolved from the
+       completed-commit cache without requiring that consumed quote to
+       still exist.
+
+       The replay is accepted only when its immutable request identity
+       matches the original successful commitment.
+    ================================================================== */
+
+    const existing =
+        commits.get(
+            idempotencyKey
+        );
+
+    if (existing) {
+
+        const replayMatches =
+            existing.sourceId ===
+                parsed.sourceId &&
+            existing.quoteId ===
+                requestedQuoteId &&
+            existing.operationId ===
+                operationId;
+
+        if (!replayMatches) {
 
             throw createError(
-                FAILURE_CODES.INVALID_REQUEST,
-                "Wallet Funding commit request is invalid."
+                FAILURE_CODES.IDEMPOTENCY_CONFLICT,
+                "Funding idempotency key was reused with a different financial contract."
             );
 
         }
 
-        const parsed =
-            parseSourceId(
-                request.sourceId
-            );
+        return clone(
+            existing.result
+        );
 
-        const operationId =
-            normalizeString(
-                request.operationId
-            );
+    }
 
-        if (!operationId) {
+    /* ==================================================================
+       NEW COMMIT — QUOTE MUST STILL BE LIVE
+    ================================================================== */
 
-            throw createError(
-                FAILURE_CODES.INVALID_REQUEST,
-                "Funding operation identifier is required."
-            );
+    const storedQuote =
+        getStoredQuote(
+            requestedQuoteId
+        );
 
-        }
+    if (
+        storedQuote.sourceId !==
+        parsed.sourceId
+    ) {
 
-        const idempotencyKey =
-            normalizeIdempotencyKey(
-                request.idempotencyKey
-            );
+        throw createError(
+            FAILURE_CODES.QUOTE_MISMATCH,
+            "Funding quote does not belong to the selected wallet."
+        );
 
-        const storedQuote =
-            getStoredQuote(
-                request.quoteId
-            );
+    }
 
-        if (
-            storedQuote.sourceId !==
-            parsed.sourceId
-        ) {
+    const fingerprint =
+        createCommitFingerprint(
+            request,
+            storedQuote
+        );
 
-            throw createError(
-                FAILURE_CODES.QUOTE_MISMATCH,
-                "Funding quote does not belong to the selected wallet."
-            );
+    /*
+     * Execution-time revalidation.
+     *
+     * Balance and FX are rechecked immediately before the Ledger mutation.
+     */
+    const execution =
+        revalidateQuote(
+            storedQuote
+        );
 
-        }
+    /*
+     * Construct canonical Funding metadata.
+     *
+     * No PIN, OTP, card credential or provider secret is accepted here.
+     */
+    const meta = {
 
-        const fingerprint =
-            createCommitFingerprint(
-                request,
-                storedQuote
-            );
+        [METADATA.SOURCE]:
+            "wallet",
 
-        const existing =
-            commits.get(
-                idempotencyKey
-            );
+        [METADATA.SOURCE_ID]:
+            storedQuote.sourceId,
 
-        if (existing) {
+        [METADATA.SOURCE_TYPE]:
+            SOURCE_TYPES.WALLET,
 
-            if (
-                existing.fingerprint !==
-                fingerprint
-            ) {
+        [METADATA.FUNDING_CURRENCY]:
+            storedQuote.fundingCurrency,
 
-                throw createError(
-                    FAILURE_CODES.IDEMPOTENCY_CONFLICT,
-                    "Funding idempotency key was reused with a different financial contract."
-                );
+        [METADATA.FUNDING_AMOUNT]:
+            execution.fundingAmount,
 
-            }
+        [METADATA.PAYMENT_CURRENCY]:
+            storedQuote.paymentCurrency,
 
-            return clone(
-                existing.result
-            );
+        [METADATA.PAYMENT_AMOUNT]:
+            storedQuote.paymentAmount,
 
-        }
+        [METADATA.MODE]:
+            execution.mode,
 
-        /*
-         * Execution-time revalidation.
-         *
-         * Balance and FX are rechecked immediately before the Ledger mutation.
-         */
-        const execution =
-            revalidateQuote(
-                storedQuote
-            );
+        [METADATA.CONTRACT]:
+            "WP-011B.6E.5E",
 
-        /*
-         * Construct canonical Funding metadata.
-         *
-         * No PIN, OTP, card credential or provider secret is accepted here.
-         */
-        const meta = {
+        [METADATA.QUOTE_ID]:
+            storedQuote.quoteId,
 
-            [METADATA.SOURCE]:
-                "wallet",
+        [METADATA.IDEMPOTENCY_KEY]:
+            idempotencyKey,
 
-            [METADATA.SOURCE_ID]:
-                storedQuote.sourceId,
+        [METADATA.FX_USED]:
+            execution.fxUsed,
 
-            [METADATA.SOURCE_TYPE]:
-                SOURCE_TYPES.WALLET,
+        [METADATA.FX_RATE]:
+            execution.fxRate,
 
-            [METADATA.FUNDING_CURRENCY]:
-                storedQuote.fundingCurrency,
+        operation_id:
+            operationId,
 
-            [METADATA.FUNDING_AMOUNT]:
-                execution.fundingAmount,
+        fx_route:
+            execution.fxRoute
 
-            [METADATA.PAYMENT_CURRENCY]:
-                storedQuote.paymentCurrency,
+    };
 
-            [METADATA.PAYMENT_AMOUNT]:
-                storedQuote.paymentAmount,
+    /*
+     * Preserve caller-supplied non-sensitive business metadata only under
+     * a dedicated nested field.
+     *
+     * The Funding Engine has already applied its sensitive-field guard.
+     */
+    if (
+        request.metadata &&
+        typeof request.metadata ===
+            "object" &&
+        !Array.isArray(
+            request.metadata
+        )
+    ) {
 
-            [METADATA.MODE]:
-                execution.mode,
-
-            [METADATA.CONTRACT]:
-                "WP-011B.6E.5E",
-
-            [METADATA.QUOTE_ID]:
-                storedQuote.quoteId,
-
-            [METADATA.IDEMPOTENCY_KEY]:
-                idempotencyKey,
-
-            [METADATA.FX_USED]:
-                execution.fxUsed,
-
-            [METADATA.FX_RATE]:
-                execution.fxRate,
-
-            operation_id:
-                operationId,
-
-            fx_route:
-                execution.fxRoute
-
-        };
-
-        /*
-         * Preserve caller-supplied non-sensitive business metadata only under
-         * a dedicated nested field.
-         *
-         * The Funding Engine has already applied its sensitive-field guard.
-         */
-        if (
-            request.metadata &&
-            typeof request.metadata ===
-                "object" &&
-            !Array.isArray(
+        meta.context =
+            clone(
                 request.metadata
-            )
-        ) {
-
-            meta.context =
-                clone(
-                    request.metadata
-                );
-
-        }
-
-        const entry =
-            ledger.createEntry({
-
-                type:
-                    "send",
-
-                title:
-                    normalizeString(
-                        request.title
-                    ) ||
-                    "PAY54 Transfer",
-
-                currency:
-                    storedQuote
-                        .fundingCurrency,
-
-                amount:
-                    -Math.abs(
-                        execution
-                            .fundingAmount
-                    ),
-
-                icon:
-                    normalizeString(
-                        request.icon
-                    ) ||
-                    "💸",
-
-                meta
-
-            });
-
-        if (
-            !entry ||
-            typeof entry !==
-                "object"
-        ) {
-
-            throw createError(
-                FAILURE_CODES.COMMIT_FAILED,
-                "Ledger failed to create the wallet Funding entry."
             );
 
-        }
+    }
 
-        /*
-         * Final guard immediately before mutation.
-         *
-         * Never allow this adapter to submit a non-negative debit.
-         */
-        if (
-            !Number.isFinite(
-                Number(
-                    entry.amount
-                )
-            ) ||
+    const entry =
+        ledger.createEntry({
+
+            type:
+                "send",
+
+            title:
+                normalizeString(
+                    request.title
+                ) ||
+                "PAY54 Transfer",
+
+            currency:
+                storedQuote
+                    .fundingCurrency,
+
+            amount:
+                -Math.abs(
+                    execution
+                        .fundingAmount
+                ),
+
+            icon:
+                normalizeString(
+                    request.icon
+                ) ||
+                "💸",
+
+            meta
+
+        });
+
+    if (
+        !entry ||
+        typeof entry !==
+            "object"
+    ) {
+
+        throw createError(
+            FAILURE_CODES.COMMIT_FAILED,
+            "Ledger failed to create the wallet Funding entry."
+        );
+
+    }
+
+    /*
+     * Final guard immediately before mutation.
+     *
+     * Never allow this adapter to submit a non-negative debit.
+     */
+    if (
+        !Number.isFinite(
             Number(
                 entry.amount
-            ) >= 0
-        ) {
+            )
+        ) ||
+        Number(
+            entry.amount
+        ) >= 0
+    ) {
 
-            throw createError(
-                FAILURE_CODES.INTEGRITY_FAILURE,
-                "Wallet Funding Ledger entry is not a valid debit."
-            );
+        throw createError(
+            FAILURE_CODES.INTEGRITY_FAILURE,
+            "Wallet Funding Ledger entry is not a valid debit."
+        );
 
-        }
+    }
 
-        const committedEntry =
-            ledger.applyEntry(
-                entry
-            );
+    const committedEntry =
+        ledger.applyEntry(
+            entry
+        );
 
-        if (
-            !committedEntry
-        ) {
+    if (
+        !committedEntry
+    ) {
 
-            throw createError(
-                FAILURE_CODES.COMMIT_FAILED,
-                "Ledger rejected the wallet Funding commitment."
-            );
+        throw createError(
+            FAILURE_CODES.COMMIT_FAILED,
+            "Ledger rejected the wallet Funding commitment."
+        );
 
-        }
+    }
 
-        const postCommitBalance =
-            readBalance(
-                storedQuote
-                    .fundingCurrency
-            );
+    const postCommitBalance =
+        readBalance(
+            storedQuote
+                .fundingCurrency
+        );
 
-        const commitId =
-            uuid(
-                "FC-WALLET"
-            );
+    const commitId =
+        uuid(
+            "FC-WALLET"
+        );
 
-        const result = {
+    const result = {
 
-            commitId,
+        commitId,
+
+        sourceId:
+            storedQuote.sourceId,
+
+        sourceType:
+            SOURCE_TYPES.WALLET,
+
+        quoteId:
+            storedQuote.quoteId,
+
+        operationId,
+
+        status:
+            COMMIT_STATUS.COMMITTED,
+
+        paymentAmount:
+            storedQuote.paymentAmount,
+
+        paymentCurrency:
+            storedQuote.paymentCurrency,
+
+        fundingAmount:
+            execution.fundingAmount,
+
+        fundingCurrency:
+            storedQuote.fundingCurrency,
+
+        mode:
+            execution.mode,
+
+        fxUsed:
+            execution.fxUsed,
+
+        fxRate:
+            execution.fxRate,
+
+        fxRoute:
+            execution.fxRoute,
+
+        ledgerEntryId:
+            committedEntry.id ||
+            null,
+
+        balanceBefore:
+            execution.balance,
+
+        balanceAfter:
+            postCommitBalance,
+
+        committedAt:
+            now()
+
+    };
+
+    /*
+     * Store the immutable identity required to validate future retries.
+     *
+     * The quote itself may now be removed safely because exact retries can
+     * be resolved from this completed-commit record.
+     */
+    commits.set(
+        idempotencyKey,
+        {
+
+            fingerprint,
 
             sourceId:
                 storedQuote.sourceId,
-
-            sourceType:
-                SOURCE_TYPES.WALLET,
 
             quoteId:
                 storedQuote.quoteId,
 
             operationId,
 
-            status:
-                COMMIT_STATUS.COMMITTED,
+            result:
+                clone(
+                    result
+                )
 
-            paymentAmount:
-                storedQuote.paymentAmount,
+        }
+    );
 
-            paymentCurrency:
-                storedQuote.paymentCurrency,
+    trimMap(
+        commits
+    );
 
-            fundingAmount:
-                execution.fundingAmount,
+    /*
+     * Successful quotes are single-use for NEW financial commitments.
+     *
+     * Exact idempotent retries are resolved above from the completed
+     * commit cache and therefore never reach the Ledger again.
+     */
+    quotes.delete(
+        storedQuote.quoteId
+    );
 
-            fundingCurrency:
-                storedQuote.fundingCurrency,
+    return clone(
+        result
+    );
 
-            mode:
-                execution.mode,
-
-            fxUsed:
-                execution.fxUsed,
-
-            fxRate:
-                execution.fxRate,
-
-            fxRoute:
-                execution.fxRoute,
-
-            ledgerEntryId:
-                committedEntry.id ||
-                null,
-
-            balanceBefore:
-                execution.balance,
-
-            balanceAfter:
-                postCommitBalance,
-
-            committedAt:
-                now()
-
-        };
-
-        commits.set(
-            idempotencyKey,
-            {
-
-                fingerprint,
-
-                result:
-                    clone(
-                        result
-                    )
-
-            }
-        );
-
-        trimMap(
-            commits
-        );
-
-        /*
-         * A successful quote is single-use for a new financial commitment.
-         * Its record remains available only through the idempotent result.
-         */
-        quotes.delete(
-            storedQuote.quoteId
-        );
-
-        return clone(
-            result
-        );
-
-    }
+}
+    
 
     /* ======================================================================
        HEALTH
