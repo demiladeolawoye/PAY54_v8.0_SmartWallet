@@ -1899,7 +1899,7 @@ function resolveAdapter(
 
             }
 
-            return createFailure(
+                       return createFailure(
                 FAILURE_CODES.COMMIT_FAILED,
                 "Funding commitment failed.",
                 {
@@ -1910,6 +1910,8 @@ function resolveAdapter(
             );
 
         }
+
+    }
 
     /* ======================================================================
        REVERSAL
