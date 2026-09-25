@@ -2120,44 +2120,117 @@
 
         });
 
-    /* ======================================================================
-       GLOBAL REGISTRATION
+   /* ======================================================================
+   GLOBAL REGISTRATION
 
-       This is intentionally a standalone infrastructure provider.
+   Runtime Contract
+   ----------------
+   PAY54_LINKED_CARD_FUNDING_PROVIDER
+       Canonical provider boundary consumed by the Linked-Card
+       Funding Adapter.
 
-       It does not mutate PAY54_SERVICES.
-       It does not mutate PAY54_CARDS.
-       It does not mutate PAY54_FUNDING_ENGINE.
+   PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER
+       Development-specific diagnostic/reference boundary.
 
-       The Linked-Card Funding Adapter resolves this provider at point-of-use.
-    ====================================================================== */
+   Both globals MUST reference the exact same immutable provider
+   instance. No duplicate provider state or business logic is created.
+
+   This provider does not mutate:
+
+   • PAY54_SERVICES
+   • PAY54_CARDS
+   • PAY54_FUNDING_ENGINE
+   • PAY54_LEDGER
+
+====================================================================== */
+
+function registerProviderGlobal(
+    propertyName,
+    description
+) {
+
+    const existing =
+        GLOBAL[propertyName];
 
     if (
-        GLOBAL.PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER &&
-        GLOBAL.PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER !== API
+        existing &&
+        existing !== API
     ) {
 
         throw new Error(
-            "[PAY54] Development Linked-Card Provider is already registered."
+            `[PAY54] ${description} is already registered by another provider.`
         );
+
+    }
+
+    if (
+        existing === API
+    ) {
+
+        return;
 
     }
 
     Object.defineProperty(
         GLOBAL,
-        "PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER",
+        propertyName,
         {
             value:
                 API,
+
             enumerable:
                 true,
+
             configurable:
                 false,
+
             writable:
                 false
         }
     );
 
+}
+
+/* ======================================================================
+   CANONICAL LINKED-CARD FUNDING PROVIDER
+====================================================================== */
+
+registerProviderGlobal(
+    "PAY54_LINKED_CARD_FUNDING_PROVIDER",
+    "Linked-Card Funding Provider"
+);
+
+/* ======================================================================
+   DEVELOPMENT PROVIDER DIAGNOSTIC ALIAS
+
+   IMPORTANT
+   ---------
+   This is not a second provider.
+
+   Both names reference the same immutable API instance.
+====================================================================== */
+
+registerProviderGlobal(
+    "PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER",
+    "Development Linked-Card Provider"
+);
+
+/* ======================================================================
+   REGISTRATION INTEGRITY
+====================================================================== */
+
+if (
+    GLOBAL.PAY54_LINKED_CARD_FUNDING_PROVIDER !== API ||
+    GLOBAL.PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER !== API ||
+    GLOBAL.PAY54_LINKED_CARD_FUNDING_PROVIDER !==
+        GLOBAL.PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER
+) {
+
+    throw new Error(
+        "[PAY54] Development Linked-Card Provider registration integrity check failed."
+    );
+
+}
     /* ======================================================================
        STARTUP SELF-CHECK
     ====================================================================== */
