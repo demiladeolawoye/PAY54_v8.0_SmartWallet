@@ -6875,6 +6875,783 @@ releaseTransactionLock(
     }
 
 })();
+/* ==========================================================================
+   PAY54 EXTERNAL-SETTLEMENT TRANSACTION RECORDER
+   Work Package: WP-011B.6E.5G.3
+
+   Purpose
+   -------
+   Records a completed transaction in PAY54 transaction history WITHOUT
+   mutating any PAY54 wallet balance.
+
+   This boundary is reserved for transactions whose financial settlement
+   occurred outside the PAY54 wallet ledger, for example a linked-card
+   funding capture completed through PAY54_FUNDING_SERVICE.
+
+   Security / Accounting Rules
+   ---------------------------
+   • Never mutates wallet balances.
+   • Never calls PAY54_LEDGER.applyEntry().
+   • Requires explicit externally_settled=true.
+   • Rejects wallet and wallet_fx funding sources.
+   • Requires a stable external settlement reference.
+   • Provides deterministic idempotent replay.
+   • Rejects reference reuse for a different financial contract.
+   • Preserves the existing PAY54 transaction schema.
+   • Does not expose provider credentials or card secrets.
+========================================================================== */
+
+const PAY54_EXTERNAL_TX = (() => {
+
+  "use strict";
+
+  const VERSION = "1.0.0";
+
+  const ALLOWED_EXTERNAL_SOURCES =
+    Object.freeze(
+      new Set([
+        "linked_card"
+      ])
+    );
+
+  const FORBIDDEN_KEYS =
+    Object.freeze(
+      new Set([
+        "__proto__",
+        "prototype",
+        "constructor"
+      ])
+    );
+
+  const SENSITIVE_KEYS =
+    Object.freeze(
+      new Set([
+        "pan",
+        "card_number",
+        "cardnumber",
+        "cvv",
+        "cvc",
+        "cvv2",
+        "pin",
+        "otp",
+        "track1",
+        "track2",
+        "magstripe",
+        "password",
+        "secret",
+        "client_secret",
+        "access_token",
+        "refresh_token",
+        "authorization_token"
+      ])
+    );
+
+  function isPlainObject(value){
+
+    if(
+      !value ||
+      typeof value !== "object" ||
+      Array.isArray(value)
+    ){
+      return false;
+    }
+
+    const proto =
+      Object.getPrototypeOf(value);
+
+    return (
+      proto === Object.prototype ||
+      proto === null
+    );
+
+  }
+
+  function cloneSafe(value, depth = 0){
+
+    if(depth > 12){
+      throw new Error(
+        "Transaction metadata exceeds the permitted nesting depth."
+      );
+    }
+
+    if(
+      value === null ||
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ){
+      return value;
+    }
+
+    if(Array.isArray(value)){
+
+      return value.map(
+        item => cloneSafe(item, depth + 1)
+      );
+
+    }
+
+    if(!isPlainObject(value)){
+
+      throw new Error(
+        "Transaction metadata contains an unsupported value."
+      );
+
+    }
+
+    const output = {};
+
+    for(const [key, item] of Object.entries(value)){
+
+      const normalizedKey =
+        String(key).trim().toLowerCase();
+
+      if(FORBIDDEN_KEYS.has(key)){
+        throw new Error(
+          "Transaction metadata contains a forbidden property."
+        );
+      }
+
+      if(SENSITIVE_KEYS.has(normalizedKey)){
+        throw new Error(
+          "Sensitive payment credentials cannot be recorded in transaction metadata."
+        );
+      }
+
+      output[key] =
+        cloneSafe(item, depth + 1);
+
+    }
+
+    return output;
+
+  }
+
+  function normalizeString(value){
+
+    return typeof value === "string"
+      ? value.trim()
+      : "";
+
+  }
+
+  function normalizeCurrency(value){
+
+    const currency =
+      normalizeString(value).toUpperCase();
+
+    return /^[A-Z]{3}$/.test(currency)
+      ? currency
+      : "";
+
+  }
+
+  function normalizeAmount(value){
+
+    const amount =
+      Number(value);
+
+    if(
+      !Number.isFinite(amount) ||
+      amount === 0 ||
+      Math.abs(amount) > 100000000
+    ){
+      return null;
+    }
+
+    return amount;
+
+  }
+
+  function normalizeReference(value){
+
+    const reference =
+      normalizeString(value);
+
+    if(
+      reference.length < 3 ||
+      reference.length > 200
+    ){
+      return "";
+    }
+
+    return reference;
+
+  }
+
+  function stableSerialize(value){
+
+    if(value === null){
+      return "null";
+    }
+
+    if(Array.isArray(value)){
+
+      return (
+        "[" +
+        value
+          .map(stableSerialize)
+          .join(",") +
+        "]"
+      );
+
+    }
+
+    if(isPlainObject(value)){
+
+      return (
+        "{" +
+        Object
+          .keys(value)
+          .sort()
+          .map(
+            key =>
+              JSON.stringify(key) +
+              ":" +
+              stableSerialize(value[key])
+          )
+          .join(",") +
+        "}"
+      );
+
+    }
+
+    return JSON.stringify(value);
+
+  }
+
+  function buildFingerprint({
+    type,
+    currency,
+    amount,
+    source,
+    sourceId,
+    externalReference,
+    operationId,
+    quoteId,
+    authorizationId
+  }){
+
+    return stableSerialize({
+      type,
+      currency,
+      amount,
+      source,
+      sourceId,
+      externalReference,
+      operationId,
+      quoteId,
+      authorizationId
+    });
+
+  }
+
+  function getTransactionList(ledger){
+
+    if(
+      !ledger ||
+      typeof ledger.getTx !== "function"
+    ){
+      throw new Error(
+        "PAY54 transaction repository is unavailable."
+      );
+    }
+
+    const transactions =
+      ledger.getTx();
+
+    return Array.isArray(transactions)
+      ? transactions
+      : [];
+
+  }
+
+  function findExistingTransaction(
+    transactions,
+    externalReference
+  ){
+
+    return (
+      transactions.find(tx => {
+
+        const meta =
+          isPlainObject(tx?.meta)
+            ? tx.meta
+            : {};
+
+        return (
+          meta.externally_settled === true &&
+          meta.external_reference === externalReference
+        );
+
+      }) ||
+      null
+    );
+
+  }
+
+  function getExistingFingerprint(transaction){
+
+    const meta =
+      isPlainObject(transaction?.meta)
+        ? transaction.meta
+        : {};
+
+    return normalizeString(
+      meta.external_financial_fingerprint
+    );
+
+  }
+
+  function createResult({
+    transaction,
+    replayed
+  }){
+
+    return Object.freeze({
+      ok: true,
+      transaction:
+        cloneSafe(transaction),
+      replayed:
+        replayed === true,
+      version: VERSION
+    });
+
+  }
+
+  function recordTransaction(
+    input,
+    options = {}
+  ){
+
+    const ledger =
+      txLedger();
+
+    if(!ledger){
+
+      throw new Error(
+        "PAY54 Ledger is unavailable."
+      );
+
+    }
+
+    if(
+      typeof ledger.createEntry !== "function" ||
+      typeof ledger.getTx !== "function" ||
+      typeof ledger.setTx !== "function"
+    ){
+
+      throw new Error(
+        "PAY54 transaction repository contract is unavailable."
+      );
+
+    }
+
+    if(!isPlainObject(input)){
+
+      throw new TypeError(
+        "External transaction request must be an object."
+      );
+
+    }
+
+    if(
+      options !== undefined &&
+      !isPlainObject(options)
+    ){
+
+      throw new TypeError(
+        "External transaction options must be an object."
+      );
+
+    }
+
+    const safeInput =
+      cloneSafe(input);
+
+    const safeOptions =
+      cloneSafe(options || {});
+
+    const meta =
+      isPlainObject(safeInput.meta)
+        ? safeInput.meta
+        : {};
+
+    if(meta.externally_settled !== true){
+
+      throw new Error(
+        "External transaction recording requires externally_settled=true."
+      );
+
+    }
+
+    const source =
+      normalizeString(
+        meta.funding_source ||
+        meta.source
+      ).toLowerCase();
+
+    if(!ALLOWED_EXTERNAL_SOURCES.has(source)){
+
+      throw new Error(
+        "Funding source is not permitted for external-settlement recording."
+      );
+
+    }
+
+    const sourceId =
+      normalizeString(
+        meta.funding_source_id
+      );
+
+    if(!sourceId){
+
+      throw new Error(
+        "External transaction funding source ID is required."
+      );
+
+    }
+
+    if(
+      source === "linked_card" &&
+      !sourceId.startsWith("linked_card:")
+    ){
+
+      throw new Error(
+        "Linked-card transaction source identity is invalid."
+      );
+
+    }
+
+    const amount =
+      normalizeAmount(
+        safeInput.amount
+      );
+
+    if(amount === null){
+
+      throw new Error(
+        "External transaction amount is invalid."
+      );
+
+    }
+
+    const currency =
+      normalizeCurrency(
+        safeInput.currency
+      );
+
+    if(!currency){
+
+      throw new Error(
+        "External transaction currency is invalid."
+      );
+
+    }
+
+    const externalReference =
+      normalizeReference(
+        meta.external_reference ||
+        meta.commit_id ||
+        meta.commitId
+      );
+
+    if(!externalReference){
+
+      throw new Error(
+        "External settlement reference is required."
+      );
+
+    }
+
+    const operationId =
+      normalizeString(
+        meta.operation_id ||
+        meta.operationId
+      );
+
+    const quoteId =
+      normalizeString(
+        meta.quote_id ||
+        meta.quoteId
+      );
+
+    const authorizationId =
+      normalizeString(
+        meta.authorization_id ||
+        meta.authorizationId
+      );
+
+    const fingerprint =
+      buildFingerprint({
+        type:
+          normalizeString(
+            safeInput.type
+          ) || "external_transaction",
+
+        currency,
+
+        amount,
+
+        source,
+
+        sourceId,
+
+        externalReference,
+
+        operationId,
+
+        quoteId,
+
+        authorizationId
+      });
+
+    const transactions =
+      getTransactionList(ledger);
+
+    const existing =
+      findExistingTransaction(
+        transactions,
+        externalReference
+      );
+
+    if(existing){
+
+      const existingFingerprint =
+        getExistingFingerprint(existing);
+
+      if(
+        !existingFingerprint ||
+        existingFingerprint !== fingerprint
+      ){
+
+        const error =
+          new Error(
+            "External settlement reference was reused with a different financial contract."
+          );
+
+        error.code =
+          "TRANSACTION_IDEMPOTENCY_CONFLICT";
+
+        throw error;
+
+      }
+
+      return createResult({
+        transaction: existing,
+        replayed: true
+      });
+
+    }
+
+    const entry =
+      ledger.createEntry({
+
+        type:
+          normalizeString(
+            safeInput.type
+          ) || "external_transaction",
+
+        title:
+          normalizeString(
+            safeInput.title
+          ) || "Transaction",
+
+        currency,
+
+        amount,
+
+        icon:
+          normalizeString(
+            safeInput.icon
+          ) || "💳",
+
+        meta: {
+          ...meta,
+
+          source,
+
+          funding_source: source,
+
+          funding_source_id:
+            sourceId,
+
+          externally_settled:
+            true,
+
+          external_reference:
+            externalReference,
+
+          external_financial_fingerprint:
+            fingerprint,
+
+          route:
+            "external_settlement",
+
+          wallet_mutation:
+            false,
+
+          recorded_at:
+            new Date().toISOString()
+        }
+
+      });
+
+    if(
+      !entry ||
+      !entry.id
+    ){
+
+      throw new Error(
+        "PAY54 failed to construct the external transaction."
+      );
+
+    }
+
+    /*
+     * IMPORTANT:
+     *
+     * We intentionally DO NOT call:
+     *
+     *   ledger.applyEntry(entry)
+     *
+     * because applyEntry mutates a PAY54 wallet balance.
+     *
+     * External settlement has already occurred through
+     * PAY54_FUNDING_SERVICE / its funding adapter.
+     */
+
+    const nextTransactions =
+      [
+        entry,
+        ...transactions
+      ];
+
+    ledger.setTx(
+      nextTransactions
+    );
+
+    /*
+     * Verify persistence before exposing success.
+     * If the repository did not retain the entry, the caller
+     * can safely invoke Funding Service reversal.
+     */
+
+    const persistedTransactions =
+      getTransactionList(ledger);
+
+    const persisted =
+      persistedTransactions.find(
+        tx => tx?.id === entry.id
+      );
+
+    if(!persisted){
+
+      throw new Error(
+        "External transaction persistence verification failed."
+      );
+
+    }
+
+    if(
+      typeof window.prependTxToDOM ===
+      "function"
+    ){
+
+      try{
+
+        window.prependTxToDOM(
+          persisted
+        );
+
+      }catch(error){
+
+        console.warn(
+          "[PAY54_TX] External transaction feed update failed.",
+          error
+        );
+
+      }
+
+    }
+
+    if(
+      safeOptions.refreshUI === true &&
+      typeof window.refreshUI ===
+      "function"
+    ){
+
+      try{
+
+        window.refreshUI();
+
+      }catch(error){
+
+        console.warn(
+          "[PAY54_TX] External transaction UI refresh failed.",
+          error
+        );
+
+      }
+
+    }
+
+    if(
+      safeOptions.showReceipt === true
+    ){
+
+      try{
+
+        showPaymentReceipt(
+          persisted,
+          normalizeString(
+            safeOptions.title
+          ) || persisted.title || "Transaction",
+          Math.abs(
+            Number(
+              persisted.amount
+            )
+          ),
+          persisted.currency
+        );
+
+      }catch(error){
+
+        console.warn(
+          "[PAY54_TX] External transaction receipt rendering failed.",
+          error
+        );
+
+      }
+
+    }
+
+    return createResult({
+      transaction: persisted,
+      replayed: false
+    });
+
+  }
+
+  return Object.freeze({
+    recordTransaction,
+    version: VERSION
+  });
+
+})();
+
+function recordTransaction(
+  entry,
+  options = {}
+){
+
+  return PAY54_EXTERNAL_TX
+    .recordTransaction(
+      entry,
+      options
+    );
+
+}
 /* =========================
    GLOBAL EXPORT
 ========================= */
