@@ -2,11 +2,8 @@
 
 /* ==========================================================================
    PAY54 ENTERPRISE DEVELOPMENT LINKED-CARD PAYMENT PROVIDER
-   File:
-   assets/js/infrastructure/payments/providers/linked-card-development.js
-
-   Version:
-   v1.0.0
+   File: assets/js/infrastructure/payments/providers/linked-card-development.js
+   Version: v1.0.0
 
    Work Package
    ------------
@@ -18,21 +15,20 @@
    Deterministic development payment-provider implementation for PAY54
    linked-card funding.
 
-   This provider gives the Linked-Card Funding Adapter a controlled provider
-   boundary during development and automated financial-contract testing.
-
-   It models:
-
-   • Card authorization
-   • Strong Customer Authentication outcome
+   Responsibilities
+   ----------------
+   • Provider-backed funding quotation
+   • Card authorization simulation
+   • Strong Customer Authentication outcome simulation
    • Provider capture / financial commitment
    • Provider reversal
    • Provider references
-   • Idempotent capture
-   • Idempotent reversal
-   • Deterministic decline/failure simulation
+   • Capture idempotency
+   • Reversal idempotency
+   • Deterministic failure simulation
    • Immutable outward results
    • Safe provider diagnostics
+   • Fail-closed cross-currency behaviour
 
    Architecture
    ------------
@@ -46,31 +42,31 @@
           ↓
    Future Production PSP / Acquirer / Processor
 
-   IMPORTANT
-   ---------
-   This provider is a DEVELOPMENT infrastructure implementation.
+   Financial Boundary
+   ------------------
+   This is a DEVELOPMENT provider.
 
    It does NOT:
+   • contact a real card network
+   • contact an issuer
+   • contact an acquirer
+   • move real money
+   • mutate PAY54 wallet balances
+   • mutate PAY54 card balances
+   • access PAY54 card storage
+   • access localStorage
+   • access sessionStorage
+   • access PAY54_LEDGER
+   • access PAY54_CARDS
+   • store PAN
+   • store CVV
+   • store PIN
+   • store OTP
+   • store authentication secrets
+   • fabricate cross-currency FX rates
 
-   • Contact a real card network
-   • Contact an issuer
-   • Contact an acquirer
-   • Move real money
-   • Mutate PAY54 wallet balances
-   • Mutate PAY54 card balances
-   • Access PAY54 card storage
-   • Access localStorage
-   • Access sessionStorage
-   • Access PAY54_LEDGER
-   • Access PAY54_CARDS
-   • Store PAN
-   • Store CVV
-   • Store PIN
-   • Store OTP
-   • Store authentication secrets
-
-   A production PSP implementation can replace this provider without changing
-   the Funding Engine's financial-domain contract.
+   Cross-currency quotation fails closed until an approved provider-backed
+   development FX implementation exists.
 
 ========================================================================== */
 
@@ -79,14 +75,12 @@
     "use strict";
 
     /* ======================================================================
-       GLOBAL
+       IDENTITY
     ====================================================================== */
 
-    const GLOBAL =
-        window;
+    const GLOBAL = window;
 
-    const VERSION =
-        "1.0.0";
+    const VERSION = "1.0.0";
 
     const PROVIDER_ID =
         "pay54.linked-card.development";
@@ -100,8 +94,14 @@
     const MODULE =
         "infrastructure.payments.providers.linked-card-development";
 
+    const QUOTE_TTL_MS =
+        90000;
+
+    const MAX_RECORDS =
+        500;
+
     /* ======================================================================
-       DEPENDENCY VERIFICATION
+       DEPENDENCIES
     ====================================================================== */
 
     const constants =
@@ -119,9 +119,7 @@
     }
 
     const FUNDING =
-        constants.get(
-            "FUNDING"
-        );
+        constants.get("FUNDING");
 
     if (
         !FUNDING ||
@@ -134,13 +132,8 @@
 
     }
 
-    /* ======================================================================
-       CANONICAL CONTRACTS
-    ====================================================================== */
-
     const SOURCE_TYPE =
-        FUNDING.SOURCE_TYPES
-            ?.LINKED_CARD;
+        FUNDING.SOURCE_TYPES?.LINKED_CARD;
 
     const AUTHORIZATION_STATUS =
         FUNDING.AUTHORIZATION_STATUS;
@@ -192,17 +185,13 @@
     }
 
     /* ======================================================================
-       PRIVATE RUNTIME STATE
+       PRIVATE STATE
 
-       IMPORTANT
-       ---------
-       Provider state is deliberately memory-only.
-
-       No financial-provider development state is persisted to browser storage.
-
-       Reloading the application creates a fresh deterministic development
-       provider session.
+       All development provider state is intentionally memory-only.
     ====================================================================== */
+
+    const quotes =
+        new Map();
 
     const authorizations =
         new Map();
@@ -219,16 +208,13 @@
     const reversalIdempotency =
         new Map();
 
-    let sequence =
-        0;
+    let sequence = 0;
 
     /* ======================================================================
-       SAFE OBJECT HELPERS
+       GENERIC HELPERS
     ====================================================================== */
 
-    function isPlainObject(
-        value
-    ) {
+    function isPlainObject(value) {
 
         if (
             value === null ||
@@ -240,9 +226,7 @@
         }
 
         const prototype =
-            Object.getPrototypeOf(
-                value
-            );
+            Object.getPrototypeOf(value);
 
         return (
             prototype === Object.prototype ||
@@ -251,9 +235,7 @@
 
     }
 
-    function normalizeString(
-        value
-    ) {
+    function normalizeString(value) {
 
         return typeof value === "string"
             ? value.trim()
@@ -261,31 +243,22 @@
 
     }
 
-    function normalizeCurrency(
-        value
-    ) {
+    function normalizeCurrency(value) {
 
         const currency =
-            normalizeString(
-                value
-            ).toUpperCase();
+            normalizeString(value)
+                .toUpperCase();
 
-        return /^[A-Z]{3}$/.test(
-            currency
-        )
+        return /^[A-Z]{3}$/.test(currency)
             ? currency
             : "";
 
     }
 
-    function normalizeAmount(
-        value
-    ) {
+    function normalizeAmount(value) {
 
         const amount =
-            Number(
-                value
-            );
+            Number(value);
 
         if (
             !Number.isFinite(amount) ||
@@ -315,24 +288,175 @@
 
     }
 
-    function createReference(
-        prefix
-    ) {
+    function createReference(prefix) {
 
-        const numeric =
-            String(
-                nextSequence()
-            ).padStart(
-                8,
-                "0"
-            );
+        return (
+            `${prefix}-` +
+            String(nextSequence())
+                .padStart(8, "0")
+        );
 
-        return `${prefix}-${numeric}`;
+    }
+
+    function trimMap(map) {
+
+        while (
+            map.size > MAX_RECORDS
+        ) {
+
+            const oldest =
+                map.keys()
+                    .next()
+                    .value;
+
+            if (
+                oldest === undefined
+            ) {
+
+                break;
+
+            }
+
+            map.delete(oldest);
+
+        }
 
     }
 
     /* ======================================================================
-       DEFENSIVE CLONING
+       SECURITY
+    ====================================================================== */
+
+    const forbiddenFields =
+        new Set(
+            (
+                SECURITY.FORBIDDEN_FIELDS ||
+                []
+            ).map(
+                field =>
+                    String(field)
+                        .toLowerCase()
+            )
+        );
+
+    function isForbiddenField(field) {
+
+        return forbiddenFields.has(
+            String(field)
+                .toLowerCase()
+        );
+
+    }
+
+    function validateSafePayload(
+        value,
+        path = "request",
+        seen = new WeakSet()
+    ) {
+
+        if (
+            value === null ||
+            value === undefined ||
+            typeof value === "string" ||
+            typeof value === "number" ||
+            typeof value === "boolean"
+        ) {
+
+            return true;
+
+        }
+
+        if (
+            typeof value !== "object"
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.SECURITY_REJECTED,
+                `Unsupported provider payload value at ${path}.`
+            );
+
+        }
+
+        if (
+            seen.has(value)
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.SECURITY_REJECTED,
+                `Circular provider payload rejected at ${path}.`
+            );
+
+        }
+
+        seen.add(value);
+
+        if (
+            Array.isArray(value)
+        ) {
+
+            for (
+                let index = 0;
+                index < value.length;
+                index += 1
+            ) {
+
+                validateSafePayload(
+                    value[index],
+                    `${path}[${index}]`,
+                    seen
+                );
+
+            }
+
+            seen.delete(value);
+
+            return true;
+
+        }
+
+        if (
+            !isPlainObject(value)
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.SECURITY_REJECTED,
+                `Unsupported provider payload object at ${path}.`
+            );
+
+        }
+
+        for (
+            const [key, child]
+            of Object.entries(value)
+        ) {
+
+            if (
+                isForbiddenField(key)
+            ) {
+
+                throw createProviderError(
+                    FAILURE_CODES.SECURITY_REJECTED,
+                    `Forbidden provider field rejected at ${path}.${key}.`
+                );
+
+            }
+
+            validateSafePayload(
+                child,
+                `${path}.${key}`,
+                seen
+            );
+
+        }
+
+        seen.delete(value);
+
+        return true;
+
+    }
+
+    /* ======================================================================
+       CLONING / IMMUTABILITY
     ====================================================================== */
 
     function clone(
@@ -364,23 +488,15 @@
             Array.isArray(value)
         ) {
 
-            seen.set(
-                value,
-                true
-            );
+            seen.set(value, true);
 
             const result =
                 value.map(
                     item =>
-                        clone(
-                            item,
-                            seen
-                        )
+                        clone(item, seen)
                 );
 
-            seen.delete(
-                value
-            );
+            seen.delete(value);
 
             return result;
 
@@ -397,15 +513,10 @@
 
         }
 
-        seen.set(
-            value,
-            true
-        );
+        seen.set(value, true);
 
         const result =
-            Object.create(
-                null
-            );
+            Object.create(null);
 
         for (
             const [key, child]
@@ -413,9 +524,7 @@
         ) {
 
             if (
-                isForbiddenField(
-                    key
-                )
+                isForbiddenField(key)
             ) {
 
                 throw createProviderError(
@@ -426,16 +535,11 @@
             }
 
             result[key] =
-                clone(
-                    child,
-                    seen
-                );
+                clone(child, seen);
 
         }
 
-        seen.delete(
-            value
-        );
+        seen.delete(value);
 
         return result;
 
@@ -448,14 +552,7 @@
 
         if (
             value === null ||
-            typeof value !== "object"
-        ) {
-
-            return value;
-
-        }
-
-        if (
+            typeof value !== "object" ||
             seen.has(value)
         ) {
 
@@ -463,9 +560,7 @@
 
         }
 
-        seen.add(
-            value
-        );
+        seen.add(value);
 
         for (
             const child
@@ -479,163 +574,15 @@
 
         }
 
-        return Object.freeze(
-            value
-        );
+        return Object.freeze(value);
 
     }
 
-    function immutableResult(
-        value
-    ) {
+    function immutableResult(value) {
 
         return deepFreeze(
-            clone(
-                value
-            )
+            clone(value)
         );
-
-    }
-
-    /* ======================================================================
-       SECURITY
-    ====================================================================== */
-
-    const forbiddenFields =
-        new Set(
-            (
-                SECURITY.FORBIDDEN_FIELDS ||
-                []
-            ).map(
-                field =>
-                    String(field)
-                        .toLowerCase()
-            )
-        );
-
-    function isForbiddenField(
-        field
-    ) {
-
-        return forbiddenFields.has(
-            String(field)
-                .toLowerCase()
-        );
-
-    }
-
-    function validateSafePayload(
-        value,
-        path = "request",
-        seen = new WeakSet()
-    ) {
-
-        if (
-            value === null ||
-            typeof value === "string" ||
-            typeof value === "number" ||
-            typeof value === "boolean" ||
-            typeof value === "undefined"
-        ) {
-
-            return true;
-
-        }
-
-        if (
-            typeof value !== "object"
-        ) {
-
-            throw createProviderError(
-                FAILURE_CODES.SECURITY_REJECTED,
-                `Unsupported provider payload value at ${path}.`
-            );
-
-        }
-
-        if (
-            seen.has(value)
-        ) {
-
-            throw createProviderError(
-                FAILURE_CODES.SECURITY_REJECTED,
-                `Circular provider payload rejected at ${path}.`
-            );
-
-        }
-
-        seen.add(
-            value
-        );
-
-        if (
-            Array.isArray(value)
-        ) {
-
-            for (
-                let index = 0;
-                index < value.length;
-                index += 1
-            ) {
-
-                validateSafePayload(
-                    value[index],
-                    `${path}[${index}]`,
-                    seen
-                );
-
-            }
-
-            seen.delete(
-                value
-            );
-
-            return true;
-
-        }
-
-        if (
-            !isPlainObject(value)
-        ) {
-
-            throw createProviderError(
-                FAILURE_CODES.SECURITY_REJECTED,
-                `Unsupported provider payload object at ${path}.`
-            );
-
-        }
-
-        for (
-            const [key, child]
-            of Object.entries(value)
-        ) {
-
-            if (
-                isForbiddenField(
-                    key
-                )
-            ) {
-
-                throw createProviderError(
-                    FAILURE_CODES.SECURITY_REJECTED,
-                    `Forbidden provider field rejected at ${path}.${key}.`
-                );
-
-            }
-
-            validateSafePayload(
-                child,
-                `${path}.${key}`,
-                seen
-            );
-
-        }
-
-        seen.delete(
-            value
-        );
-
-        return true;
 
     }
 
@@ -651,7 +598,8 @@
 
         const error =
             new Error(
-                message
+                message ||
+                "PAY54 development funding provider operation failed."
             );
 
         error.name =
@@ -671,12 +619,10 @@
     }
 
     /* ======================================================================
-       REQUIRED VALUE VALIDATION
+       REQUIRED VALUES
     ====================================================================== */
 
-    function requireObject(
-        request
-    ) {
+    function requireObject(request) {
 
         if (
             !isPlainObject(request)
@@ -689,38 +635,36 @@
 
         }
 
-        validateSafePayload(
-            request
-        );
+        validateSafePayload(request);
 
         return request;
 
     }
 
-    function requireSourceId(
-        value
-    ) {
+    function requireSourceId(value) {
 
         const sourceId =
-            normalizeString(
-                value
-            );
+            normalizeString(value);
 
         const namespace =
             FUNDING.SOURCE_NAMESPACES
                 ?.LINKED_CARD ||
             "linked_card:";
 
+        const maximum =
+            Number(
+                FUNDING.SOURCE_ID
+                    ?.MAX_LENGTH ||
+                160
+            );
+
         if (
             !sourceId ||
             !sourceId.startsWith(namespace) ||
-            sourceId.length <= namespace.length ||
+            sourceId.length <=
+                namespace.length ||
             sourceId.length >
-                (
-                    FUNDING.SOURCE_ID
-                        ?.MAX_LENGTH ||
-                    160
-                )
+                maximum
         ) {
 
             throw createProviderError(
@@ -734,14 +678,10 @@
 
     }
 
-    function requireOperationId(
-        value
-    ) {
+    function requireOperationId(value) {
 
         const operationId =
-            normalizeString(
-                value
-            );
+            normalizeString(value);
 
         if (
             !operationId ||
@@ -759,14 +699,31 @@
 
     }
 
-    function requireQuoteId(
-        value
-    ) {
+    function optionalOperationId(value) {
+
+        const operationId =
+            normalizeString(value);
+
+        if (
+            operationId &&
+            operationId.length > 160
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.INVALID_REQUEST,
+                "Funding operation identifier is invalid."
+            );
+
+        }
+
+        return operationId || null;
+
+    }
+
+    function requireQuoteId(value) {
 
         const quoteId =
-            normalizeString(
-                value
-            );
+            normalizeString(value);
 
         if (
             !quoteId ||
@@ -784,14 +741,10 @@
 
     }
 
-    function requireAuthorizationId(
-        value
-    ) {
+    function requireAuthorizationId(value) {
 
         const authorizationId =
-            normalizeString(
-                value
-            );
+            normalizeString(value);
 
         if (
             !authorizationId ||
@@ -809,14 +762,10 @@
 
     }
 
-    function requireCommitId(
-        value
-    ) {
+    function requireCommitId(value) {
 
         const commitId =
-            normalizeString(
-                value
-            );
+            normalizeString(value);
 
         if (
             !commitId ||
@@ -834,14 +783,10 @@
 
     }
 
-    function requireAmount(
-        value
-    ) {
+    function requireAmount(value) {
 
         const amount =
-            normalizeAmount(
-                value
-            );
+            normalizeAmount(value);
 
         if (
             amount === null
@@ -858,22 +803,16 @@
 
     }
 
-    function requireCurrency(
-        value
-    ) {
+    function requireCurrency(value) {
 
         const currency =
-            normalizeCurrency(
-                value
-            );
+            normalizeCurrency(value);
 
-        if (
-            !currency
-        ) {
+        if (!currency) {
 
             throw createProviderError(
                 FAILURE_CODES.INVALID_CURRENCY,
-                "Provider funding currency must be a valid three-letter ISO currency code."
+                "Provider funding currency must be a valid ISO-style three-letter currency."
             );
 
         }
@@ -882,24 +821,22 @@
 
     }
 
-    function requireIdempotencyKey(
-        value
-    ) {
+    function requireIdempotencyKey(value) {
 
         const key =
-            normalizeString(
-                value
-            );
+            normalizeString(value);
 
         const minimum =
             Number(
-                IDEMPOTENCY.MIN_KEY_LENGTH
-            ) || 16;
+                IDEMPOTENCY.MIN_KEY_LENGTH ||
+                16
+            );
 
         const maximum =
             Number(
-                IDEMPOTENCY.MAX_KEY_LENGTH
-            ) || 160;
+                IDEMPOTENCY.MAX_KEY_LENGTH ||
+                160
+            );
 
         if (
             !key ||
@@ -909,7 +846,7 @@
 
             throw createProviderError(
                 FAILURE_CODES.IDEMPOTENCY_KEY_REQUIRED,
-                `Provider idempotency key must contain between ${minimum} and ${maximum} characters.`
+                "A valid provider idempotency key is required."
             );
 
         }
@@ -919,11 +856,64 @@
     }
 
     /* ======================================================================
-       FINANCIAL FINGERPRINT
+       CARD DESCRIPTOR VALIDATION
 
-       Same idempotency key:
-       • Same financial contract -> replay terminal result.
-       • Different financial contract -> reject.
+       The provider receives only a safe card descriptor from the adapter.
+    ====================================================================== */
+
+    function validateCardDescriptor(card) {
+
+        if (
+            !isPlainObject(card)
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.SOURCE_UNAVAILABLE,
+                "A safe linked-card provider descriptor is required."
+            );
+
+        }
+
+        validateSafePayload(
+            card,
+            "card"
+        );
+
+        const cardId =
+            normalizeString(card.cardId);
+
+        const providerReference =
+            normalizeString(
+                card.providerReference
+            );
+
+        const currency =
+            requireCurrency(
+                card.currency
+            );
+
+        if (
+            !cardId ||
+            !providerReference
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.SOURCE_UNAVAILABLE,
+                "Linked-card provider reference is unavailable."
+            );
+
+        }
+
+        return {
+            cardId,
+            providerReference,
+            currency
+        };
+
+    }
+
+    /* ======================================================================
+       IDEMPOTENCY
     ====================================================================== */
 
     function financialFingerprint({
@@ -944,9 +934,7 @@
             normalizeString(commitId),
             String(amount),
             normalizeCurrency(currency)
-        ].join(
-            "|"
-        );
+        ].join("|");
 
     }
 
@@ -961,9 +949,7 @@
                 idempotencyKey
             );
 
-        if (
-            !existing
-        ) {
+        if (!existing) {
 
             return null;
 
@@ -999,36 +985,24 @@
             {
                 fingerprint,
                 result:
-                    clone(
-                        result
-                    )
+                    clone(result)
             }
         );
+
+        trimMap(registry);
 
     }
 
     /* ======================================================================
-       DEVELOPMENT DECISION ENGINE
+       DEVELOPMENT SIMULATION
 
-       This provider is deterministic.
+       Default:
+       • authorization succeeds
+       • capture succeeds
+       • reversal succeeds
 
-       Default behaviour:
-       • Authorization succeeds
-       • Capture succeeds
-       • Reversal succeeds
+       Supported developmentSimulation values:
 
-       Controlled test outcomes may be supplied only through the explicit
-       developmentSimulation object.
-
-       This is NOT payment-card data and is never sent to a production PSP.
-
-       Example:
-
-       developmentSimulation: {
-           authorization: "decline"
-       }
-
-       Supported:
        authorization:
            approve | decline | pending | cancel | expire | fail
 
@@ -1037,14 +1011,17 @@
 
        reversal:
            reverse | fail | unknown
+
+       The Funding Adapter transports application metadata inside request.metadata,
+       so this provider supports the simulation object from either the direct
+       provider request or request.metadata.developmentSimulation.
     ====================================================================== */
 
-    function getSimulation(
-        request
-    ) {
+    function getSimulation(request) {
 
         const simulation =
-            request
+            request?.developmentSimulation ??
+            request?.metadata
                 ?.developmentSimulation;
 
         if (
@@ -1078,23 +1055,15 @@
 
     }
 
-    function authorizationDecision(
-        request
-    ) {
-
-        const simulation =
-            getSimulation(
-                request
-            );
+    function authorizationDecision(request) {
 
         const value =
             normalizeString(
-                simulation.authorization
+                getSimulation(request)
+                    .authorization
             ).toLowerCase();
 
-        switch (
-            value
-        ) {
+        switch (value) {
 
             case "":
             case "approve":
@@ -1125,23 +1094,15 @@
 
     }
 
-    function captureDecision(
-        request
-    ) {
-
-        const simulation =
-            getSimulation(
-                request
-            );
+    function captureDecision(request) {
 
         const value =
             normalizeString(
-                simulation.capture
+                getSimulation(request)
+                    .capture
             ).toLowerCase();
 
-        switch (
-            value
-        ) {
+        switch (value) {
 
             case "":
             case "commit":
@@ -1163,23 +1124,15 @@
 
     }
 
-    function reversalDecision(
-        request
-    ) {
-
-        const simulation =
-            getSimulation(
-                request
-            );
+    function reversalDecision(request) {
 
         const value =
             normalizeString(
-                simulation.reversal
+                getSimulation(request)
+                    .reversal
             ).toLowerCase();
 
-        switch (
-            value
-        ) {
+        switch (value) {
 
             case "":
             case "reverse":
@@ -1202,24 +1155,150 @@
     }
 
     /* ======================================================================
-       AUTHORIZE
+       QUOTE
 
-       Authorization reserves/approves the external funding attempt.
+       Same-currency linked-card funding is quoted deterministically.
 
-       It does NOT:
-       • debit a PAY54 wallet
-       • mutate a linked-card balance
-       • create a Ledger debit
-       • imply provider capture
+       Cross-currency linked-card funding deliberately FAILS CLOSED because
+       this development provider has no approved external FX provider.
+
+       It MUST NOT:
+       • access PAY54_LEDGER for rates
+       • fabricate a rate
+       • silently use 1:1
+       • trust a client supplied FX rate
     ====================================================================== */
 
-    async function authorize(
-        request
-    ) {
+    async function quote(request) {
 
-        requireObject(
-            request
+        requireObject(request);
+
+        const sourceId =
+            requireSourceId(
+                request.sourceId
+            );
+
+        const operationId =
+            optionalOperationId(
+                request.operationId
+            );
+
+        const paymentAmount =
+            requireAmount(
+                request.paymentAmount
+            );
+
+        const paymentCurrency =
+            requireCurrency(
+                request.paymentCurrency
+            );
+
+        const fundingCurrency =
+            requireCurrency(
+                request.fundingCurrency
+            );
+
+        const card =
+            validateCardDescriptor(
+                request.card
+            );
+
+        if (
+            card.currency !==
+            fundingCurrency
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.QUOTE_MISMATCH,
+                "Linked-card funding currency does not match the provider card descriptor."
+            );
+
+        }
+
+        if (
+            paymentCurrency !==
+            fundingCurrency
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.FX_QUOTE_UNAVAILABLE,
+                "Development linked-card provider has no approved cross-currency FX quote for this funding request.",
+                {
+                    paymentCurrency,
+                    fundingCurrency
+                }
+            );
+
+        }
+
+        const quoteId =
+            createReference(
+                "QUOTE-DEV"
+            );
+
+        const providerQuoteId =
+            createReference(
+                "PSP-QUOTE"
+            );
+
+        const createdAtMs =
+            Date.now();
+
+        const createdAt =
+            new Date(
+                createdAtMs
+            ).toISOString();
+
+        const expiresAt =
+            new Date(
+                createdAtMs +
+                QUOTE_TTL_MS
+            ).toISOString();
+
+        const result = {
+            quoteId,
+            providerQuoteId,
+            sourceId,
+            sourceType:
+                SOURCE_TYPE,
+            operationId,
+            paymentAmount,
+            paymentCurrency,
+            fundingAmount:
+                paymentAmount,
+            fundingCurrency,
+            fxUsed:
+                false,
+            fxRate:
+                1,
+            provider:
+                PROVIDER_ID,
+            status:
+                "valid",
+            createdAt,
+            expiresAt
+        };
+
+        quotes.set(
+            quoteId,
+            clone(result)
         );
+
+        trimMap(quotes);
+
+        return immutableResult(
+            result
+        );
+
+    }
+
+    /* ======================================================================
+       AUTHORIZE
+    ====================================================================== */
+
+    async function authorize(request) {
+
+        requireObject(request);
 
         const sourceId =
             requireSourceId(
@@ -1248,6 +1327,10 @@
                 request.currency
             );
 
+        validateCardDescriptor(
+            request.card
+        );
+
         const decision =
             authorizationDecision(
                 request
@@ -1267,69 +1350,79 @@
             now();
 
         let status =
-            AUTHORIZATION_STATUS.AUTHORIZED;
+            AUTHORIZATION_STATUS
+                .AUTHORIZED;
 
         let failureCode =
             null;
 
-        switch (
-            decision
-        ) {
+        switch (decision) {
 
             case "approve":
 
                 status =
-                    AUTHORIZATION_STATUS.AUTHORIZED;
+                    AUTHORIZATION_STATUS
+                        .AUTHORIZED;
 
                 break;
 
             case "decline":
 
                 status =
-                    AUTHORIZATION_STATUS.DECLINED;
+                    AUTHORIZATION_STATUS
+                        .DECLINED;
 
                 failureCode =
-                    FAILURE_CODES.AUTHORIZATION_DECLINED;
+                    FAILURE_CODES
+                        .AUTHORIZATION_DECLINED;
 
                 break;
 
             case "pending":
 
                 status =
-                    AUTHORIZATION_STATUS.PENDING;
+                    AUTHORIZATION_STATUS
+                        .PENDING;
 
                 failureCode =
-                    FAILURE_CODES.AUTHORIZATION_PENDING;
+                    FAILURE_CODES
+                        .AUTHORIZATION_PENDING;
 
                 break;
 
             case "cancel":
 
                 status =
-                    AUTHORIZATION_STATUS.CANCELLED;
+                    AUTHORIZATION_STATUS
+                        .CANCELLED;
 
                 failureCode =
-                    FAILURE_CODES.AUTHORIZATION_CANCELLED;
+                    FAILURE_CODES
+                        .AUTHORIZATION_CANCELLED;
 
                 break;
 
             case "expire":
 
                 status =
-                    AUTHORIZATION_STATUS.EXPIRED;
+                    AUTHORIZATION_STATUS
+                        .EXPIRED;
 
                 failureCode =
-                    FAILURE_CODES.AUTHORIZATION_EXPIRED;
+                    FAILURE_CODES
+                        .AUTHORIZATION_EXPIRED;
 
                 break;
 
             case "fail":
 
                 status =
-                    AUTHORIZATION_STATUS.FAILED;
+                    AUTHORIZATION_STATUS
+                        .FAILED;
 
                 failureCode =
-                    FAILURE_CODES.AUTHORIZATION_FAILED;
+                    FAILURE_CODES
+                        .AUTHORIZATION_FAILED;
 
                 break;
 
@@ -1349,6 +1442,11 @@
                 SOURCE_TYPE,
             operationId,
             quoteId,
+            providerQuoteId:
+                normalizeString(
+                    request.providerQuoteId
+                ) ||
+                null,
             fundingAmount:
                 amount,
             fundingCurrency:
@@ -1367,10 +1465,10 @@
 
         authorizations.set(
             authorizationId,
-            clone(
-                result
-            )
+            clone(result)
         );
+
+        trimMap(authorizations);
 
         return immutableResult(
             result
@@ -1381,21 +1479,14 @@
     /* ======================================================================
        CAPTURE / COMMIT
 
-       This is the development provider's simulated external financial
-       commitment boundary.
+       This simulates the external provider's financial commitment boundary.
 
-       It MUST NOT mutate PAY54 card or wallet balances.
-
-       Idempotency is enforced independently at the provider boundary.
+       It does not mutate PAY54 wallets or card balances.
     ====================================================================== */
 
-    async function capture(
-        request
-    ) {
+    async function capture(request) {
 
-        requireObject(
-            request
-        );
+        requireObject(request);
 
         const sourceId =
             requireSourceId(
@@ -1434,14 +1525,16 @@
                 request.currency
             );
 
+        validateCardDescriptor(
+            request.card
+        );
+
         const authorization =
             authorizations.get(
                 authorizationId
             );
 
-        if (
-            !authorization
-        ) {
+        if (!authorization) {
 
             throw createProviderError(
                 FAILURE_CODES.AUTHORIZATION_REQUIRED,
@@ -1475,12 +1568,10 @@
             AUTHORIZATION_STATUS.AUTHORIZED
         ) {
 
-            const code =
-                authorization.failureCode ||
-                FAILURE_CODES.AUTHORIZATION_REQUIRED;
-
             throw createProviderError(
-                code,
+                authorization.failureCode ||
+                    FAILURE_CODES
+                        .AUTHORIZATION_REQUIRED,
                 "Provider capture requires a successful authorization."
             );
 
@@ -1503,9 +1594,7 @@
                 fingerprint
             );
 
-        if (
-            replay
-        ) {
+        if (replay) {
 
             return replay;
 
@@ -1535,9 +1624,7 @@
         let failureCode =
             null;
 
-        switch (
-            decision
-        ) {
+        switch (decision) {
 
             case "commit":
 
@@ -1562,7 +1649,8 @@
                     COMMIT_STATUS.UNKNOWN;
 
                 failureCode =
-                    FAILURE_CODES.COMMIT_STATE_UNKNOWN;
+                    FAILURE_CODES
+                        .COMMIT_STATE_UNKNOWN;
 
                 break;
 
@@ -1583,6 +1671,15 @@
             operationId,
             quoteId,
             authorizationId,
+            paymentAmount:
+                normalizeAmount(
+                    request.paymentAmount
+                ),
+            paymentCurrency:
+                normalizeCurrency(
+                    request.paymentCurrency
+                ) ||
+                null,
             fundingAmount:
                 amount,
             fundingCurrency:
@@ -1605,10 +1702,10 @@
 
         captures.set(
             commitId,
-            clone(
-                result
-            )
+            clone(result)
         );
+
+        trimMap(captures);
 
         storeIdempotentRecord(
             captureIdempotency,
@@ -1623,42 +1720,24 @@
 
     }
 
-    /* ======================================================================
-       COMMIT ALIAS
+    async function commit(request) {
 
-       The infrastructure provider uses "capture", which is the normal PSP
-       terminology.
-
-       "commit" is provided as a safe semantic alias for infrastructure
-       integrations that use PAY54 Funding terminology.
-    ====================================================================== */
-
-    async function commit(
-        request
-    ) {
-
-        return capture(
-            request
-        );
+        return capture(request);
 
     }
 
     /* ======================================================================
-       REVERSE
+       REVERSAL
 
-       Reversal compensates a successfully committed provider capture.
+       A reversal may intentionally have a different operationId from the
+       original Funding operation.
 
-       Reversal is append-only from the provider's perspective:
-       the original capture record is retained.
+       originalOperationId correlates the reversal to the original commit.
     ====================================================================== */
 
-    async function reverse(
-        request
-    ) {
+    async function reverse(request) {
 
-        requireObject(
-            request
-        );
+        requireObject(request);
 
         const sourceId =
             requireSourceId(
@@ -1668,6 +1747,11 @@
         const operationId =
             requireOperationId(
                 request.operationId
+            );
+
+        const originalOperationId =
+            normalizeString(
+                request.originalOperationId
             );
 
         const commitId =
@@ -1680,14 +1764,12 @@
                 request.idempotencyKey
             );
 
-        const capture =
+        const captureRecord =
             captures.get(
                 commitId
             );
 
-        if (
-            !capture
-        ) {
+        if (!captureRecord) {
 
             throw createProviderError(
                 FAILURE_CODES.REVERSAL_FAILED,
@@ -1697,21 +1779,32 @@
         }
 
         if (
-            capture.sourceId !==
-                sourceId ||
-            capture.operationId !==
-                operationId
+            captureRecord.sourceId !==
+            sourceId
         ) {
 
             throw createProviderError(
                 FAILURE_CODES.REVERSAL_FAILED,
-                "Provider reversal does not match the committed financial contract."
+                "Provider reversal source does not match the committed financial contract."
             );
 
         }
 
         if (
-            capture.status !==
+            originalOperationId &&
+            captureRecord.operationId !==
+                originalOperationId
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.REVERSAL_FAILED,
+                "Provider reversal original operation does not match the committed financial contract."
+            );
+
+        }
+
+        if (
+            captureRecord.status !==
             COMMIT_STATUS.COMMITTED
         ) {
 
@@ -1723,19 +1816,20 @@
         }
 
         const amount =
-            capture.fundingAmount;
+            captureRecord.fundingAmount;
 
         const currency =
-            capture.fundingCurrency;
+            captureRecord.fundingCurrency;
 
         const fingerprint =
             financialFingerprint({
                 operationId,
                 sourceId,
                 quoteId:
-                    capture.quoteId,
+                    captureRecord.quoteId,
                 authorizationId:
-                    capture.authorizationId,
+                    captureRecord
+                        .authorizationId,
                 commitId,
                 amount,
                 currency
@@ -1748,9 +1842,7 @@
                 fingerprint
             );
 
-        if (
-            replay
-        ) {
+        if (replay) {
 
             return replay;
 
@@ -1780,9 +1872,7 @@
         let failureCode =
             null;
 
-        switch (
-            decision
-        ) {
+        switch (decision) {
 
             case "reverse":
 
@@ -1797,7 +1887,8 @@
                     REVERSAL_STATUS.FAILED;
 
                 failureCode =
-                    FAILURE_CODES.REVERSAL_FAILED;
+                    FAILURE_CODES
+                        .REVERSAL_FAILED;
 
                 break;
 
@@ -1807,7 +1898,8 @@
                     REVERSAL_STATUS.UNKNOWN;
 
                 failureCode =
-                    FAILURE_CODES.REVERSAL_STATE_UNKNOWN;
+                    FAILURE_CODES
+                        .REVERSAL_STATE_UNKNOWN;
 
                 break;
 
@@ -1826,10 +1918,12 @@
             sourceType:
                 SOURCE_TYPE,
             operationId,
+            originalOperationId:
+                captureRecord.operationId,
             quoteId:
-                capture.quoteId,
+                captureRecord.quoteId,
             authorizationId:
-                capture.authorizationId,
+                captureRecord.authorizationId,
             commitId,
             fundingAmount:
                 amount,
@@ -1853,10 +1947,10 @@
 
         reversals.set(
             reversalId,
-            clone(
-                result
-            )
+            clone(result)
         );
+
+        trimMap(reversals);
 
         storeIdempotentRecord(
             reversalIdempotency,
@@ -1873,25 +1967,13 @@
 
     /* ======================================================================
        LOOKUPS
-
-       These expose only development provider lifecycle records.
-
-       They do not expose card credentials because the provider never receives
-       or stores card credentials.
     ====================================================================== */
 
-    function getAuthorization(
-        authorizationId
-    ) {
-
-        const id =
-            normalizeString(
-                authorizationId
-            );
+    function getQuote(quoteId) {
 
         const result =
-            authorizations.get(
-                id
+            quotes.get(
+                normalizeString(quoteId)
             );
 
         return result
@@ -1900,18 +1982,28 @@
 
     }
 
-    function getCapture(
-        commitId
+    function getAuthorization(
+        authorizationId
     ) {
 
-        const id =
-            normalizeString(
-                commitId
+        const result =
+            authorizations.get(
+                normalizeString(
+                    authorizationId
+                )
             );
+
+        return result
+            ? immutableResult(result)
+            : null;
+
+    }
+
+    function getCapture(commitId) {
 
         const result =
             captures.get(
-                id
+                normalizeString(commitId)
             );
 
         return result
@@ -1924,14 +2016,11 @@
         reversalId
     ) {
 
-        const id =
-            normalizeString(
-                reversalId
-            );
-
         const result =
             reversals.get(
-                id
+                normalizeString(
+                    reversalId
+                )
             );
 
         return result
@@ -1946,54 +2035,102 @@
 
     function getHealth() {
 
+        const providerContractValid =
+            typeof quote === "function" &&
+            typeof authorize === "function" &&
+            typeof commit === "function" &&
+            typeof reverse === "function";
+
         const healthy =
             Boolean(
                 FUNDING &&
-                SOURCE_TYPE === "linked_card" &&
-                AUTHORIZATION_STATUS.AUTHORIZED ===
+                SOURCE_TYPE ===
+                    "linked_card" &&
+                AUTHORIZATION_STATUS
+                    .AUTHORIZED ===
                     "authorized" &&
-                COMMIT_STATUS.COMMITTED ===
+                COMMIT_STATUS
+                    .COMMITTED ===
                     "committed" &&
-                REVERSAL_STATUS.REVERSED ===
+                REVERSAL_STATUS
+                    .REVERSED ===
                     "reversed" &&
                 SECURITY.FAIL_CLOSED ===
-                    true
+                    true &&
+                providerContractValid
             );
 
         return immutableResult({
             healthy,
+
             status:
                 healthy
-                    ? FUNDING.HEALTH.HEALTHY
-                    : FUNDING.HEALTH.UNAVAILABLE,
+                    ? FUNDING.HEALTH
+                        .HEALTHY
+                    : FUNDING.HEALTH
+                        .UNAVAILABLE,
+
             module:
                 MODULE,
+
             provider:
                 PROVIDER_ID,
+
             providerType:
                 PROVIDER_TYPE,
+
             version:
                 VERSION,
+
             sourceType:
                 SOURCE_TYPE,
+
             capabilities: [
-                FUNDING.CAPABILITIES.AUTHORIZE,
-                FUNDING.CAPABILITIES.COMMIT,
-                FUNDING.CAPABILITIES.REVERSE,
-                FUNDING.CAPABILITIES.IDEMPOTENCY,
+                "quote",
                 FUNDING.CAPABILITIES
-                    .STRONG_CUSTOMER_AUTHENTICATION
+                    ?.AUTHORIZE ||
+                    "authorize",
+                FUNDING.CAPABILITIES
+                    ?.COMMIT ||
+                    "commit",
+                FUNDING.CAPABILITIES
+                    ?.REVERSE ||
+                    "reverse",
+                FUNDING.CAPABILITIES
+                    ?.IDEMPOTENCY ||
+                    "idempotency",
+                FUNDING.CAPABILITIES
+                    ?.STRONG_CUSTOMER_AUTHENTICATION ||
+                    "strong_customer_authentication"
             ],
+
+            quotePolicy: {
+                sameCurrency:
+                    true,
+                crossCurrency:
+                    false,
+                crossCurrencyPolicy:
+                    "fail_closed"
+            },
+
             realMoney:
                 false,
+
             persistentProviderState:
                 false,
+
+            quoteRecords:
+                quotes.size,
+
             authorizationRecords:
                 authorizations.size,
+
             captureRecords:
                 captures.size,
+
             reversalRecords:
                 reversals.size,
+
             checkedAt:
                 now()
         });
@@ -2008,28 +2145,18 @@
 
     /* ======================================================================
        DEVELOPMENT RESET
-
-       Explicitly available for deterministic automated test isolation.
-
-       This operation exists only because this is the development provider.
-
-       It never touches PAY54 application storage, Cards Engine or Ledger.
     ====================================================================== */
 
     function reset() {
 
+        quotes.clear();
         authorizations.clear();
-
         captures.clear();
-
         reversals.clear();
-
         captureIdempotency.clear();
-
         reversalIdempotency.clear();
 
-        sequence =
-            0;
+        sequence = 0;
 
         return immutableResult({
             reset:
@@ -2050,27 +2177,54 @@
         deepFreeze({
             id:
                 PROVIDER_ID,
+
             name:
                 PROVIDER_NAME,
+
             type:
                 PROVIDER_TYPE,
+
             sourceType:
                 SOURCE_TYPE,
+
             version:
                 VERSION,
+
             environment:
                 "development",
+
             realMoney:
                 false,
+
             persistentProviderState:
                 false,
+
+            quotePolicy: {
+                sameCurrency:
+                    true,
+                crossCurrency:
+                    false,
+                crossCurrencyPolicy:
+                    "fail_closed"
+            },
+
             capabilities: [
-                FUNDING.CAPABILITIES.AUTHORIZE,
-                FUNDING.CAPABILITIES.COMMIT,
-                FUNDING.CAPABILITIES.REVERSE,
-                FUNDING.CAPABILITIES.IDEMPOTENCY,
+                "quote",
                 FUNDING.CAPABILITIES
-                    .STRONG_CUSTOMER_AUTHENTICATION
+                    ?.AUTHORIZE ||
+                    "authorize",
+                FUNDING.CAPABILITIES
+                    ?.COMMIT ||
+                    "commit",
+                FUNDING.CAPABILITIES
+                    ?.REVERSE ||
+                    "reverse",
+                FUNDING.CAPABILITIES
+                    ?.IDEMPOTENCY ||
+                    "idempotency",
+                FUNDING.CAPABILITIES
+                    ?.STRONG_CUSTOMER_AUTHENTICATION ||
+                    "strong_customer_authentication"
             ]
         });
 
@@ -2098,6 +2252,8 @@
 
             descriptor,
 
+            quote,
+
             authorize,
 
             capture,
@@ -2105,6 +2261,8 @@
             commit,
 
             reverse,
+
+            getQuote,
 
             getAuthorization,
 
@@ -2117,120 +2275,97 @@
             health,
 
             reset
-
         });
 
-   /* ======================================================================
-   GLOBAL REGISTRATION
+    /* ======================================================================
+       GLOBAL REGISTRATION
 
-   Runtime Contract
-   ----------------
-   PAY54_LINKED_CARD_FUNDING_PROVIDER
-       Canonical provider boundary consumed by the Linked-Card
-       Funding Adapter.
+       Both names deliberately resolve to the exact same immutable API.
 
-   PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER
-       Development-specific diagnostic/reference boundary.
+       PAY54_LINKED_CARD_FUNDING_PROVIDER
+       ----------------------------------
+       Canonical provider boundary consumed by the Linked-Card Funding Adapter.
 
-   Both globals MUST reference the exact same immutable provider
-   instance. No duplicate provider state or business logic is created.
+       PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER
+       --------------------------------------
+       Explicit development/testing alias.
 
-   This provider does not mutate:
+       This provider does not mutate PAY54_SERVICES, PAY54_CARDS,
+       PAY54_FUNDING_ENGINE, PAY54_LEDGER or browser storage.
+    ====================================================================== */
 
-   • PAY54_SERVICES
-   • PAY54_CARDS
-   • PAY54_FUNDING_ENGINE
-   • PAY54_LEDGER
+    const registrations = [
+        "PAY54_LINKED_CARD_FUNDING_PROVIDER",
+        "PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER"
+    ];
 
-====================================================================== */
-
-function registerProviderGlobal(
-    propertyName,
-    description
-) {
-
-    const existing =
-        GLOBAL[propertyName];
-
-    if (
-        existing &&
-        existing !== API
+    for (
+        const registrationName
+        of registrations
     ) {
 
-        throw new Error(
-            `[PAY54] ${description} is already registered by another provider.`
+        const existing =
+            GLOBAL[registrationName];
+
+        if (
+            existing &&
+            existing !== API
+        ) {
+
+            throw new Error(
+                `[PAY54] ${registrationName} is already registered.`
+            );
+
+        }
+
+    }
+
+    for (
+        const registrationName
+        of registrations
+    ) {
+
+        if (
+            GLOBAL[registrationName] ===
+            API
+        ) {
+
+            continue;
+
+        }
+
+        Object.defineProperty(
+            GLOBAL,
+            registrationName,
+            {
+                value:
+                    API,
+                enumerable:
+                    true,
+                configurable:
+                    false,
+                writable:
+                    false
+            }
         );
 
     }
 
     if (
-        existing === API
+        GLOBAL
+            .PAY54_LINKED_CARD_FUNDING_PROVIDER !==
+        API ||
+        GLOBAL
+            .PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER !==
+        API
     ) {
 
-        return;
+        throw new Error(
+            "[PAY54] Development Linked-Card Provider registration integrity check failed."
+        );
 
     }
 
-    Object.defineProperty(
-        GLOBAL,
-        propertyName,
-        {
-            value:
-                API,
-
-            enumerable:
-                true,
-
-            configurable:
-                false,
-
-            writable:
-                false
-        }
-    );
-
-}
-
-/* ======================================================================
-   CANONICAL LINKED-CARD FUNDING PROVIDER
-====================================================================== */
-
-registerProviderGlobal(
-    "PAY54_LINKED_CARD_FUNDING_PROVIDER",
-    "Linked-Card Funding Provider"
-);
-
-/* ======================================================================
-   DEVELOPMENT PROVIDER DIAGNOSTIC ALIAS
-
-   IMPORTANT
-   ---------
-   This is not a second provider.
-
-   Both names reference the same immutable API instance.
-====================================================================== */
-
-registerProviderGlobal(
-    "PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER",
-    "Development Linked-Card Provider"
-);
-
-/* ======================================================================
-   REGISTRATION INTEGRITY
-====================================================================== */
-
-if (
-    GLOBAL.PAY54_LINKED_CARD_FUNDING_PROVIDER !== API ||
-    GLOBAL.PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER !== API ||
-    GLOBAL.PAY54_LINKED_CARD_FUNDING_PROVIDER !==
-        GLOBAL.PAY54_LINKED_CARD_DEVELOPMENT_PROVIDER
-) {
-
-    throw new Error(
-        "[PAY54] Development Linked-Card Provider registration integrity check failed."
-    );
-
-}
     /* ======================================================================
        STARTUP SELF-CHECK
     ====================================================================== */
