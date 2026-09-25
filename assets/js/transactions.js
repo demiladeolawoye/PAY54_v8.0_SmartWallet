@@ -7660,6 +7660,12 @@ window.PAY54_TX = {
 
     processTransaction,
 
+    /*
+     * External-settlement transaction recorder.
+     * Records transaction history without mutating wallet balances.
+     */
+    recordTransaction,
+
     orchestrateTransaction,
 
     createTransactionSaga,
