@@ -4041,6 +4041,20 @@ const fundingLedger =
                 modal.querySelector(
                     "#sendFundingStatus"
                 );
+/* ==========================================================================
+   PAY54 SEND — FUNDING SOURCE SELECTOR
+   Work Package: WP-011B.6E.5G.5B
+
+   Purpose
+   -------
+   • Preserve the existing proven wallet funding selector.
+   • Discover linked-card sources through PAY54_FUNDING_SERVICE.
+   • Never read card storage directly.
+   • Never authorize, capture, commit or reverse funds here.
+   • Never mutate wallet/card balances.
+   • Preserve legacy wallet option values until execution migration.
+========================================================================== */
+
 const getLiveFundingBalances =
     () => {
 
@@ -4115,14 +4129,174 @@ const getLiveFundingBalances =
 
     };
 
-const populateFundingSources =
+
+/* ==========================================================================
+   FUNDING SOURCE NORMALISATION
+========================================================================== */
+
+const fundingSourceRegistry =
+    new Map();
+
+
+const cleanFundingString =
+    value =>
+        typeof value === "string"
+            ? value.trim()
+            : "";
+
+
+const normaliseFundingCurrency =
+    value => {
+
+        const currency =
+            cleanFundingString(
+                value
+            ).toUpperCase();
+
+        return /^[A-Z]{3}$/.test(
+            currency
+        )
+            ? currency
+            : "";
+
+    };
+
+
+const isLinkedCardFundingSource =
+    source =>
+        Boolean(
+            source &&
+            source.type ===
+                "linked_card" &&
+            cleanFundingString(
+                source.id
+            ).startsWith(
+                "linked_card:"
+            )
+        );
+
+
+const resolveFundingSourceDescriptor =
+    value => {
+
+        const key =
+            cleanFundingString(
+                value
+            );
+
+        if(
+            fundingSourceRegistry.has(
+                key
+            )
+        ){
+
+            return fundingSourceRegistry.get(
+                key
+            );
+
+        }
+
+        /*
+         * Legacy wallet compatibility.
+         *
+         * Until the execution path is migrated in the next
+         * controlled work package, wallet option values remain
+         * bare ISO currencies such as NGN / GBP / USD.
+         */
+
+        const walletCurrency =
+            normaliseFundingCurrency(
+                key
+            );
+
+        if(walletCurrency){
+
+            return Object.freeze({
+                id:
+                    `wallet:${walletCurrency}`,
+                optionValue:
+                    walletCurrency,
+                type:
+                    "wallet",
+                currency:
+                    walletCurrency,
+                legacyWalletValue:
+                    true
+            });
+
+        }
+
+        return null;
+
+    };
+
+
+const getLinkedCardDisplayLabel =
+    source => {
+
+        const currency =
+            normaliseFundingCurrency(
+                source?.currency ||
+                source?.fundingCurrency ||
+                source?.funding_currency
+            );
+
+        const last4 =
+            cleanFundingString(
+                source?.last4 ||
+                source?.card?.last4 ||
+                source?.display?.last4
+            );
+
+        const scheme =
+            cleanFundingString(
+                source?.scheme ||
+                source?.brand ||
+                source?.card?.scheme ||
+                source?.card?.brand ||
+                source?.display?.scheme ||
+                source?.display?.brand
+            );
+
+        const name =
+            cleanFundingString(
+                source?.name ||
+                source?.label ||
+                source?.displayName ||
+                source?.display_name
+            );
+
+        let label =
+            name ||
+            (
+                scheme && last4
+                    ? `${scheme} •••• ${last4}`
+                    : last4
+                        ? `Linked Card •••• ${last4}`
+                        : "Linked Card"
+            );
+
+        if(currency){
+
+            label +=
+                ` — ${currency}`;
+
+        }
+
+        return label;
+
+    };
+
+
+/* ==========================================================================
+   WALLET SOURCE POPULATION
+========================================================================== */
+
+const populateWalletFundingSources =
     () => {
 
         const balances =
             getLiveFundingBalances();
-
-        fundingSource.innerHTML =
-            "";
 
         const currencies =
             Object.keys(
@@ -4154,12 +4328,58 @@ const populateFundingSources =
         currencies.forEach(
             currency => {
 
+                const canonicalId =
+                    `wallet:${currency}`;
+
+                const descriptor =
+                    Object.freeze({
+                        id:
+                            canonicalId,
+                        optionValue:
+                            currency,
+                        type:
+                            "wallet",
+                        currency,
+                        balance:
+                            Number(
+                                balances[
+                                    currency
+                                ] || 0
+                            ),
+                        legacyWalletValue:
+                            true
+                    });
+
+                fundingSourceRegistry.set(
+                    currency,
+                    descriptor
+                );
+
+                fundingSourceRegistry.set(
+                    canonicalId,
+                    descriptor
+                );
+
                 const option =
                     document.createElement(
                         "option"
                     );
 
+                /*
+                 * IMPORTANT:
+                 * Keep bare currency here during 5G.5B.
+                 * The existing submit path still expects this.
+                 */
                 option.value =
+                    currency;
+
+                option.dataset.sourceId =
+                    canonicalId;
+
+                option.dataset.sourceType =
+                    "wallet";
+
+                option.dataset.currency =
                     currency;
 
                 option.textContent =
@@ -4188,6 +4408,227 @@ const populateFundingSources =
         );
 
     };
+
+
+/* ==========================================================================
+   LINKED-CARD SOURCE DISCOVERY
+========================================================================== */
+
+const discoverLinkedCardFundingSources =
+    async () => {
+
+        const service =
+            window.PAY54_FUNDING_SERVICE ||
+            null;
+
+        if(
+            !service ||
+            typeof service.listSources !==
+                "function"
+        ){
+
+            console.warn(
+                "[PAY54_SEND] Funding Service unavailable; wallet funding remains available."
+            );
+
+            return [];
+
+        }
+
+        let result;
+
+        try{
+
+            result =
+                await service.listSources();
+
+        }catch(error){
+
+            console.warn(
+                "[PAY54_SEND] Funding source discovery failed.",
+                error
+            );
+
+            return [];
+
+        }
+
+        if(
+            !result ||
+            result.ok !== true ||
+            !Array.isArray(
+                result?.data?.sources
+            )
+        ){
+
+            console.warn(
+                "[PAY54_SEND] Funding Service returned an invalid source catalogue.",
+                result
+            );
+
+            return [];
+
+        }
+
+        return result.data.sources
+            .filter(
+                isLinkedCardFundingSource
+            );
+
+    };
+
+
+const appendLinkedCardFundingSources =
+    sources => {
+
+        sources.forEach(
+            source => {
+
+                const sourceId =
+                    cleanFundingString(
+                        source.id
+                    );
+
+                if(
+                    !sourceId ||
+                    fundingSourceRegistry.has(
+                        sourceId
+                    )
+                ){
+
+                    return;
+
+                }
+
+                const currency =
+                    normaliseFundingCurrency(
+                        source.currency ||
+                        source.fundingCurrency ||
+                        source.funding_currency
+                    );
+
+                /*
+                 * Fail closed:
+                 * an external card without a known currency
+                 * cannot be offered as a Send funding source.
+                 */
+                if(!currency){
+
+                    console.warn(
+                        "[PAY54_SEND] Linked-card funding source omitted because its currency is unavailable.",
+                        sourceId
+                    );
+
+                    return;
+
+                }
+
+                const descriptor =
+                    Object.freeze({
+                        id:
+                            sourceId,
+                        optionValue:
+                            sourceId,
+                        type:
+                            "linked_card",
+                        currency,
+                        source,
+                        legacyWalletValue:
+                            false
+                    });
+
+                fundingSourceRegistry.set(
+                    sourceId,
+                    descriptor
+                );
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    sourceId;
+
+                option.dataset.sourceId =
+                    sourceId;
+
+                option.dataset.sourceType =
+                    "linked_card";
+
+                option.dataset.currency =
+                    currency;
+
+                option.textContent =
+                    getLinkedCardDisplayLabel(
+                        source
+                    );
+
+                fundingSource.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    };
+
+
+const populateFundingSources =
+    async () => {
+
+        const previousValue =
+            cleanFundingString(
+                fundingSource.value
+            );
+
+        fundingSourceRegistry.clear();
+
+        fundingSource.innerHTML =
+            "";
+
+        /*
+         * Wallets are populated synchronously first so existing
+         * Send Money remains usable even if Funding Service
+         * discovery is unavailable.
+         */
+        populateWalletFundingSources();
+
+        const linkedCardSources =
+            await discoverLinkedCardFundingSources();
+
+        appendLinkedCardFundingSources(
+            linkedCardSources
+        );
+
+        /*
+         * Preserve an existing selection when possible.
+         */
+        if(
+            previousValue &&
+            Array.from(
+                fundingSource.options
+            ).some(
+                option =>
+                    option.value ===
+                    previousValue
+            )
+        ){
+
+            fundingSource.value =
+                previousValue;
+
+        }
+
+        renderFundingState();
+
+    };
+
+
+/* ==========================================================================
+   EXISTING CANONICAL WALLET FX RESOLUTION
+   Preserved unchanged for the wallet path.
+========================================================================== */
 
 const getCanonicalFxRate =
     (
@@ -4265,9 +4706,7 @@ const getCanonicalFxRate =
                 ? ratesPayload.table
                 : null;
 
-        if(
-            !table
-        ){
+        if(!table){
 
             return null;
 
@@ -4304,10 +4743,12 @@ const getCanonicalFxRate =
             const resolvedRate =
                 1 / inverseRate;
 
-            return Number.isFinite(
-                resolvedRate
-            ) &&
-            resolvedRate > 0
+            return (
+                Number.isFinite(
+                    resolvedRate
+                ) &&
+                resolvedRate > 0
+            )
                 ? resolvedRate
                 : null;
 
@@ -4316,6 +4757,7 @@ const getCanonicalFxRate =
         return null;
 
     };
+
 
 const resolveWalletFundingQuote =
     ({
@@ -4357,8 +4799,7 @@ const resolveWalletFundingQuote =
         ){
 
             return {
-                ok:
-                    false,
+                ok: false,
                 reason:
                     "LEDGER_UNAVAILABLE"
             };
@@ -4379,8 +4820,7 @@ const resolveWalletFundingQuote =
         ){
 
             return {
-                ok:
-                    false,
+                ok: false,
                 reason:
                     "INVALID_REQUEST"
             };
@@ -4403,8 +4843,7 @@ const resolveWalletFundingQuote =
             );
 
             return {
-                ok:
-                    false,
+                ok: false,
                 reason:
                     "BALANCE_UNAVAILABLE"
             };
@@ -4426,8 +4865,7 @@ const resolveWalletFundingQuote =
         ){
 
             return {
-                ok:
-                    false,
+                ok: false,
                 reason:
                     "INVALID_BALANCE"
             };
@@ -4443,24 +4881,31 @@ const resolveWalletFundingQuote =
                 ok:
                     sourceBalance >=
                     resolvedPaymentAmount,
+
                 reason:
                     sourceBalance >=
                     resolvedPaymentAmount
                         ? null
                         : "INSUFFICIENT_FUNDS",
+
                 mode:
                     "same_currency",
+
                 paymentCurrency:
                     resolvedPaymentCurrency,
+
                 fundingCurrency:
                     resolvedFundingCurrency,
+
                 paymentAmount:
                     resolvedPaymentAmount,
+
                 sourceDebit:
                     resolvedPaymentAmount,
+
                 sourceBalance,
-                fxRate:
-                    1
+
+                fxRate: 1
             };
 
         }
@@ -4480,16 +4925,19 @@ const resolveWalletFundingQuote =
         ){
 
             return {
-                ok:
-                    false,
+                ok: false,
                 reason:
                     "FX_PAIR_UNAVAILABLE",
+
                 paymentCurrency:
                     resolvedPaymentCurrency,
+
                 fundingCurrency:
                     resolvedFundingCurrency,
+
                 paymentAmount:
                     resolvedPaymentAmount,
+
                 sourceBalance
             };
 
@@ -4516,8 +4964,7 @@ const resolveWalletFundingQuote =
             );
 
             return {
-                ok:
-                    false,
+                ok: false,
                 reason:
                     "FX_CONVERSION_FAILED"
             };
@@ -4532,8 +4979,7 @@ const resolveWalletFundingQuote =
         ){
 
             return {
-                ok:
-                    false,
+                ok: false,
                 reason:
                     "INVALID_FX_QUOTE"
             };
@@ -4544,37 +4990,130 @@ const resolveWalletFundingQuote =
             ok:
                 sourceBalance >=
                 sourceDebit,
+
             reason:
                 sourceBalance >=
                 sourceDebit
                     ? null
                     : "INSUFFICIENT_FUNDS",
+
             mode:
                 "cross_currency",
+
             paymentCurrency:
                 resolvedPaymentCurrency,
+
             fundingCurrency:
                 resolvedFundingCurrency,
+
             paymentAmount:
                 resolvedPaymentAmount,
+
             sourceDebit,
+
             sourceBalance,
+
             fxRate:
                 canonicalRate
         };
 
     };
 
+
+/* ==========================================================================
+   FUNDING SOURCE PRESENTATION
+========================================================================== */
+
 const renderFundingState =
     () => {
 
-        const selectedCurrency =
-            String(
-                fundingSource.value ||
+        const descriptor =
+            resolveFundingSourceDescriptor(
+                fundingSource.value
+            );
+
+        if(!descriptor){
+
+            fundingBalance.textContent =
+                "";
+
+            fundingStatus.textContent =
+                "Select a valid funding source.";
+
+            return;
+
+        }
+
+        const enteredAmount =
+            Number.parseFloat(
+                amountInput.value
+            );
+
+
+        /* ======================================================
+           LINKED CARD
+           Discovery/display only in WP-011B.6E.5G.5B.
+           No quote, authorization or commit occurs here.
+        ====================================================== */
+
+        if(
+            descriptor.type ===
+                "linked_card"
+        ){
+
+            const currency =
+                descriptor.currency;
+
+            fundingBalance.textContent =
+                `Linked card • ${currency}`;
+
+            if(
+                !Number.isFinite(
+                    enteredAmount
+                ) ||
+                enteredAmount <= 0
+            ){
+
+                fundingStatus.textContent =
+                    currency ===
+                    paymentCurrency
+                        ? "Enter an amount to continue with this linked card."
+                        : `This linked card funds in ${currency}. ${paymentCurrency} card funding requires a provider FX quote.`;
+
+                return;
+
+            }
+
+            if(
+                currency !==
                 paymentCurrency
-            )
-            .trim()
-            .toUpperCase();
+            ){
+
+                fundingStatus.textContent =
+                    `Linked-card FX from ${currency} to ${paymentCurrency} is currently unavailable.`;
+
+                return;
+
+            }
+
+            fundingStatus.textContent =
+                `${formatFundingBalance(
+                    paymentCurrency,
+                    enteredAmount
+                )} can be checked against this linked card before PIN verification.`;
+
+            return;
+
+        }
+
+
+        /* ======================================================
+           WALLET
+           Existing wallet quote behaviour preserved.
+        ====================================================== */
+
+        const selectedCurrency =
+            descriptor.currency;
 
         const balances =
             getLiveFundingBalances();
@@ -4591,11 +5130,6 @@ const renderFundingState =
                 selectedCurrency,
                 balance
             )}`;
-
-        const enteredAmount =
-            Number.parseFloat(
-                amountInput.value
-            );
 
         if(
             !Number.isFinite(
@@ -4636,16 +5170,19 @@ const renderFundingState =
             resolveWalletFundingQuote({
                 ledger:
                     fundingLedger,
+
                 paymentCurrency,
+
                 fundingCurrency:
                     selectedCurrency,
+
                 paymentAmount:
                     enteredAmount
             });
 
         if(
             quote.reason ===
-            "FX_PAIR_UNAVAILABLE"
+                "FX_PAIR_UNAVAILABLE"
         ){
 
             fundingStatus.textContent =
@@ -4680,9 +5217,7 @@ const renderFundingState =
 
         }
 
-        if(
-            !quote.ok
-        ){
+        if(!quote.ok){
 
             fundingStatus.textContent =
                 "Funding quote is temporarily unavailable.";
@@ -4693,7 +5228,7 @@ const renderFundingState =
 
         if(
             quote.mode ===
-            "same_currency"
+                "same_currency"
         ){
 
             fundingStatus.textContent =
@@ -4714,14 +5249,41 @@ const renderFundingState =
 
     };
 
-populateFundingSources();
 
-renderFundingState();
+/* ==========================================================================
+   INITIALISATION
+========================================================================== */
+
+void populateFundingSources()
+    .catch(
+        error => {
+
+            console.error(
+                "[PAY54_SEND] Funding source selector failed to initialise.",
+                error
+            );
+
+            /*
+             * Wallet-only fallback.
+             */
+            fundingSourceRegistry.clear();
+
+            fundingSource.innerHTML =
+                "";
+
+            populateWalletFundingSources();
+
+            renderFundingState();
+
+        }
+    );
+
 
 fundingSource.addEventListener(
     "change",
     renderFundingState
 );
+
 
 amountInput.addEventListener(
     "input",
