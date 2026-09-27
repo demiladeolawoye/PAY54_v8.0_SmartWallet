@@ -5020,6 +5020,623 @@ const resolveWalletFundingQuote =
     };
 
 
+/* ==========================================================================
+   FUNDING SOURCE PRESENTATION
+   Work Package: WP-011B.6E.5G.5C
+
+   Linked-card behaviour
+   ---------------------
+   • Quotes only through PAY54_FUNDING_SERVICE.
+   • No authorization.
+   • No commit/capture.
+   • No transaction creation.
+   • No wallet/card balance mutation.
+   • Async quote race protection.
+   • Short debounce while the customer types.
+   • Linked-card Send remains disabled until the execution path is integrated.
+========================================================================== */
+
+let linkedCardQuoteSequence = 0;
+
+let linkedCardQuoteTimer = null;
+
+let linkedCardQuoteState =
+    Object.freeze({
+        status: "idle",
+        sourceId: null,
+        paymentAmount: null,
+        paymentCurrency: null,
+        quote: null,
+        error: null
+    });
+
+
+const getConfirmSendButton =
+    () =>
+        modal.querySelector(
+            "#confirmSend"
+        );
+
+
+const setLinkedCardSendGuard =
+    active => {
+
+        const button =
+            getConfirmSendButton();
+
+        if(!button){
+            return;
+        }
+
+        /*
+         * During WP-011B.6E.5G.5C the legacy submit path is
+         * still wallet-only.
+         *
+         * A linked card may be selected and quoted, but must
+         * not be submitted until post-PIN execution integration
+         * is installed and verified.
+         */
+
+        if(active){
+
+            button.disabled =
+                true;
+
+            button.setAttribute(
+                "aria-disabled",
+                "true"
+            );
+
+            button.title =
+                "Linked-card Send execution is being prepared.";
+
+            return;
+
+        }
+
+        button.disabled =
+            false;
+
+        button.removeAttribute(
+            "aria-disabled"
+        );
+
+        button.removeAttribute(
+            "title"
+        );
+
+    };
+
+
+const resetLinkedCardQuoteState =
+    () => {
+
+        linkedCardQuoteSequence += 1;
+
+        if(linkedCardQuoteTimer !== null){
+
+            clearTimeout(
+                linkedCardQuoteTimer
+            );
+
+            linkedCardQuoteTimer =
+                null;
+
+        }
+
+        linkedCardQuoteState =
+            Object.freeze({
+                status: "idle",
+                sourceId: null,
+                paymentAmount: null,
+                paymentCurrency: null,
+                quote: null,
+                error: null
+            });
+
+    };
+
+
+const createLinkedCardQuoteOperationId =
+    () => {
+
+        const randomPart =
+            (
+                globalThis.crypto &&
+                typeof globalThis.crypto
+                    .randomUUID ===
+                    "function"
+            )
+                ? globalThis.crypto
+                    .randomUUID()
+                : `${Date.now()}-${Math.random()
+                    .toString(36)
+                    .slice(2, 12)}`;
+
+        return (
+            `PAY54-SEND-PREPIN-${randomPart}`
+        );
+
+    };
+
+
+const formatLinkedCardQuoteFailure =
+    result => {
+
+        const code =
+            cleanFundingString(
+                result?.code
+            );
+
+        if(
+            code ===
+                "FUNDING_FX_QUOTE_UNAVAILABLE" ||
+            code ===
+                "FX_QUOTE_UNAVAILABLE"
+        ){
+
+            return (
+                "Linked-card FX is currently unavailable for this payment."
+            );
+
+        }
+
+        const message =
+            cleanFundingString(
+                result?.message
+            );
+
+        return (
+            message ||
+            "Linked-card funding quote is temporarily unavailable."
+        );
+
+    };
+
+
+const requestLinkedCardPrePinQuote =
+    async ({
+        descriptor,
+        paymentAmount,
+        requestSequence
+    }) => {
+
+        const sourceId =
+            cleanFundingString(
+                descriptor?.id
+            );
+
+        const service =
+            window.PAY54_FUNDING_SERVICE ||
+            null;
+
+        if(
+            !service ||
+            typeof service.quote !==
+                "function"
+        ){
+
+            if(
+                requestSequence !==
+                    linkedCardQuoteSequence
+            ){
+                return;
+            }
+
+            linkedCardQuoteState =
+                Object.freeze({
+                    status:
+                        "failed",
+
+                    sourceId,
+
+                    paymentAmount,
+
+                    paymentCurrency,
+
+                    quote:
+                        null,
+
+                    error:
+                        "FUNDING_SERVICE_UNAVAILABLE"
+                });
+
+            fundingStatus.textContent =
+                "Linked-card funding service is temporarily unavailable.";
+
+            return;
+
+        }
+
+        let result;
+
+        try{
+
+            result =
+                await service.quote({
+                    sourceId,
+
+                    paymentAmount,
+
+                    paymentCurrency,
+
+                    operationId:
+                        createLinkedCardQuoteOperationId(),
+
+                    metadata: {
+                        channel:
+                            "send_money",
+
+                        stage:
+                            "pre_pin_quote",
+
+                        workPackage:
+                            "WP-011B.6E.5G.5C"
+                    }
+                });
+
+        }catch(error){
+
+            /*
+             * A newer user input/selection invalidates this
+             * asynchronous response.
+             */
+
+            if(
+                requestSequence !==
+                    linkedCardQuoteSequence
+            ){
+                return;
+            }
+
+            linkedCardQuoteState =
+                Object.freeze({
+                    status:
+                        "failed",
+
+                    sourceId,
+
+                    paymentAmount,
+
+                    paymentCurrency,
+
+                    quote:
+                        null,
+
+                    error:
+                        cleanFundingString(
+                            error?.code
+                        ) ||
+                        "QUOTE_FAILED"
+                });
+
+            fundingStatus.textContent =
+                cleanFundingString(
+                    error?.message
+                ) ||
+                "Linked-card funding quote is temporarily unavailable.";
+
+            return;
+
+        }
+
+
+        /*
+         * Ignore stale quote responses.
+         */
+
+        if(
+            requestSequence !==
+                linkedCardQuoteSequence
+        ){
+            return;
+        }
+
+
+        /*
+         * Ensure the user has not changed funding source while
+         * the provider quote was in flight.
+         */
+
+        const currentDescriptor =
+            resolveFundingSourceDescriptor(
+                fundingSource.value
+            );
+
+        if(
+            !currentDescriptor ||
+            currentDescriptor.type !==
+                "linked_card" ||
+            currentDescriptor.id !==
+                sourceId
+        ){
+            return;
+        }
+
+
+        /*
+         * Ensure the entered amount has not changed while the
+         * quote was in flight.
+         */
+
+        const currentAmount =
+            Number.parseFloat(
+                amountInput.value
+            );
+
+        if(
+            !Number.isFinite(
+                currentAmount
+            ) ||
+            currentAmount !==
+                paymentAmount
+        ){
+            return;
+        }
+
+
+        if(
+            !result ||
+            result.ok !== true ||
+            !result?.data?.quote
+        ){
+
+            linkedCardQuoteState =
+                Object.freeze({
+                    status:
+                        "failed",
+
+                    sourceId,
+
+                    paymentAmount,
+
+                    paymentCurrency,
+
+                    quote:
+                        null,
+
+                    error:
+                        cleanFundingString(
+                            result?.code
+                        ) ||
+                        "QUOTE_FAILED"
+                });
+
+            fundingStatus.textContent =
+                formatLinkedCardQuoteFailure(
+                    result
+                );
+
+            return;
+
+        }
+
+
+        const quote =
+            result.data.quote;
+
+        const quoteId =
+            cleanFundingString(
+                quote.quoteId
+            );
+
+        const quoteSourceId =
+            cleanFundingString(
+                quote.sourceId
+            );
+
+        const quotePaymentCurrency =
+            normaliseFundingCurrency(
+                quote.paymentCurrency
+            );
+
+        const quoteFundingCurrency =
+            normaliseFundingCurrency(
+                quote.fundingCurrency
+            );
+
+        const quotePaymentAmount =
+            Number(
+                quote.paymentAmount
+            );
+
+        const quoteFundingAmount =
+            Number(
+                quote.fundingAmount
+            );
+
+        const quoteFxRate =
+            Number(
+                quote.fxRate
+            );
+
+
+        /*
+         * Fail closed if the Funding Service/adapter returned
+         * a quote that does not represent the exact request.
+         */
+
+        const quoteContractValid =
+            Boolean(
+                quoteId &&
+                quoteSourceId ===
+                    sourceId &&
+                quotePaymentCurrency ===
+                    paymentCurrency &&
+                Number.isFinite(
+                    quotePaymentAmount
+                ) &&
+                quotePaymentAmount ===
+                    paymentAmount &&
+                quoteFundingCurrency &&
+                Number.isFinite(
+                    quoteFundingAmount
+                ) &&
+                quoteFundingAmount > 0
+            );
+
+
+        if(!quoteContractValid){
+
+            linkedCardQuoteState =
+                Object.freeze({
+                    status:
+                        "failed",
+
+                    sourceId,
+
+                    paymentAmount,
+
+                    paymentCurrency,
+
+                    quote:
+                        null,
+
+                    error:
+                        "QUOTE_CONTRACT_MISMATCH"
+                });
+
+            fundingStatus.textContent =
+                "Linked-card funding quote could not be verified.";
+
+            return;
+
+        }
+
+
+        linkedCardQuoteState =
+            Object.freeze({
+                status:
+                    "ready",
+
+                sourceId,
+
+                paymentAmount,
+
+                paymentCurrency,
+
+                quote,
+
+                error:
+                    null
+            });
+
+
+        fundingBalance.textContent =
+            `Funding requirement: ${formatFundingBalance(
+                quoteFundingCurrency,
+                quoteFundingAmount
+            )}`;
+
+
+        if(
+            quote.fxUsed === true
+        ){
+
+            fundingStatus.textContent =
+                Number.isFinite(
+                    quoteFxRate
+                ) &&
+                quoteFxRate > 0
+                    ? `${formatFundingBalance(
+                        paymentCurrency,
+                        quotePaymentAmount
+                    )} will use ${formatFundingBalance(
+                        quoteFundingCurrency,
+                        quoteFundingAmount
+                    )} at the provider quote rate ${quoteFxRate}.`
+                    : `${formatFundingBalance(
+                        paymentCurrency,
+                        quotePaymentAmount
+                    )} will use ${formatFundingBalance(
+                        quoteFundingCurrency,
+                        quoteFundingAmount
+                    )}.`;
+
+            return;
+
+        }
+
+
+        fundingStatus.textContent =
+            `${formatFundingBalance(
+                paymentCurrency,
+                quotePaymentAmount
+            )} funding quote confirmed from the selected linked card.`;
+
+    };
+
+
+const scheduleLinkedCardPrePinQuote =
+    ({
+        descriptor,
+        paymentAmount
+    }) => {
+
+        linkedCardQuoteSequence += 1;
+
+        const requestSequence =
+            linkedCardQuoteSequence;
+
+
+        if(linkedCardQuoteTimer !== null){
+
+            clearTimeout(
+                linkedCardQuoteTimer
+            );
+
+        }
+
+
+        linkedCardQuoteState =
+            Object.freeze({
+                status:
+                    "pending",
+
+                sourceId:
+                    descriptor.id,
+
+                paymentAmount,
+
+                paymentCurrency,
+
+                quote:
+                    null,
+
+                error:
+                    null
+            });
+
+
+        fundingStatus.textContent =
+            "Checking linked-card funding…";
+
+
+        /*
+         * Small debounce prevents unnecessary provider quote
+         * requests while the customer is still typing.
+         */
+
+        linkedCardQuoteTimer =
+            setTimeout(
+                () => {
+
+                    linkedCardQuoteTimer =
+                        null;
+
+                    void requestLinkedCardPrePinQuote({
+                        descriptor,
+                        paymentAmount,
+                        requestSequence
+                    });
+
+                },
+                180
+            );
+
+    };
+
+
 const renderFundingState =
     () => {
 
@@ -5028,7 +5645,14 @@ const renderFundingState =
                 fundingSource.value
             );
 
+
         if(!descriptor){
+
+            resetLinkedCardQuoteState();
+
+            setLinkedCardSendGuard(
+                false
+            );
 
             fundingBalance.textContent =
                 "";
@@ -5040,6 +5664,7 @@ const renderFundingState =
 
         }
 
+
         const enteredAmount =
             Number.parseFloat(
                 amountInput.value
@@ -5048,8 +5673,7 @@ const renderFundingState =
 
         /* ======================================================
            LINKED CARD
-           Discovery/display only in WP-011B.6E.5G.5B.
-           No quote, authorization or commit occurs here.
+           WP-011B.6E.5G.5C — PRE-PIN QUOTE ONLY
         ====================================================== */
 
         if(
@@ -5057,11 +5681,22 @@ const renderFundingState =
                 "linked_card"
         ){
 
-            const currency =
-                descriptor.currency;
+            /*
+             * Critical safety boundary:
+             *
+             * The current submit handler is still wallet-only.
+             * Keep Send disabled for linked cards until the
+             * post-PIN Funding Service execution path is installed.
+             */
+
+            setLinkedCardSendGuard(
+                true
+            );
+
 
             fundingBalance.textContent =
-                `Linked card • ${currency}`;
+                `Linked card • ${descriptor.currency}`;
+
 
             if(
                 !Number.isFinite(
@@ -5070,33 +5705,21 @@ const renderFundingState =
                 enteredAmount <= 0
             ){
 
+                resetLinkedCardQuoteState();
+
                 fundingStatus.textContent =
-                    currency ===
-                    paymentCurrency
-                        ? "Enter an amount to continue with this linked card."
-                        : `This linked card funds in ${currency}. ${paymentCurrency} card funding requires a provider FX quote.`;
+                    "Enter an amount to obtain a linked-card funding quote.";
 
                 return;
 
             }
 
-            if(
-                currency !==
-                paymentCurrency
-            ){
 
-                fundingStatus.textContent =
-                    `Linked-card FX from ${currency} to ${paymentCurrency} is currently unavailable.`;
-
-                return;
-
-            }
-
-            fundingStatus.textContent =
-                `${formatFundingBalance(
-                    paymentCurrency,
+            scheduleLinkedCardPrePinQuote({
+                descriptor,
+                paymentAmount:
                     enteredAmount
-                )} can be checked against this linked card before PIN verification.`;
+            });
 
             return;
 
@@ -5105,14 +5728,23 @@ const renderFundingState =
 
         /* ======================================================
            WALLET
-           Existing wallet quote behaviour preserved.
+           Existing behaviour remains unchanged.
         ====================================================== */
+
+        resetLinkedCardQuoteState();
+
+        setLinkedCardSendGuard(
+            false
+        );
+
 
         const selectedCurrency =
             descriptor.currency;
 
+
         const balances =
             getLiveFundingBalances();
+
 
         const balance =
             Number(
@@ -5121,11 +5753,13 @@ const renderFundingState =
                 ] || 0
             );
 
+
         fundingBalance.textContent =
             `Available: ${formatFundingBalance(
                 selectedCurrency,
                 balance
             )}`;
+
 
         if(
             !Number.isFinite(
@@ -5136,7 +5770,7 @@ const renderFundingState =
 
             if(
                 selectedCurrency ===
-                paymentCurrency
+                    paymentCurrency
             ){
 
                 fundingStatus.textContent =
@@ -5146,12 +5780,14 @@ const renderFundingState =
 
             }
 
+
             const fxRate =
                 getCanonicalFxRate(
                     fundingLedger,
                     paymentCurrency,
                     selectedCurrency
                 );
+
 
             fundingStatus.textContent =
                 fxRate
@@ -5161,6 +5797,7 @@ const renderFundingState =
             return;
 
         }
+
 
         const quote =
             resolveWalletFundingQuote({
@@ -5176,6 +5813,7 @@ const renderFundingState =
                     enteredAmount
             });
 
+
         if(
             quote.reason ===
                 "FX_PAIR_UNAVAILABLE"
@@ -5188,6 +5826,7 @@ const renderFundingState =
 
         }
 
+
         if(
             !quote.ok &&
             quote.reason ===
@@ -5198,6 +5837,7 @@ const renderFundingState =
                 Number(
                     quote.sourceDebit
                 );
+
 
             fundingStatus.textContent =
                 Number.isFinite(
@@ -5213,6 +5853,7 @@ const renderFundingState =
 
         }
 
+
         if(!quote.ok){
 
             fundingStatus.textContent =
@@ -5221,6 +5862,7 @@ const renderFundingState =
             return;
 
         }
+
 
         if(
             quote.mode ===
@@ -5234,6 +5876,7 @@ const renderFundingState =
 
         }
 
+
         fundingStatus.textContent =
             `${formatFundingBalance(
                 paymentCurrency,
@@ -5244,8 +5887,6 @@ const renderFundingState =
             )} from your ${selectedCurrency} wallet.`;
 
     };
-
-
 /* ==========================================================================
    INITIALISATION
 ========================================================================== */
