@@ -6854,32 +6854,45 @@ if(
                      */
 
                     const executionQuoteValid =
-                        Boolean(
-                            executionQuoteId &&
+    Boolean(
+        executionQuoteId &&
 
-                            executionQuoteSourceId ===
-                                sourceId &&
+        executionQuoteSourceId ===
+            sourceId &&
 
-                            executionPaymentCurrency ===
-                                currency &&
+        executionPaymentCurrency ===
+            currency &&
 
-                            Number.isFinite(
-                                executionPaymentAmount
-                            ) &&
+        Number.isFinite(
+            executionPaymentAmount
+        ) &&
 
-                            executionPaymentAmount ===
-                                amount &&
+        executionPaymentAmount ===
+            amount &&
 
-                            executionFundingCurrency &&
+        executionFundingCurrency &&
 
-                            Number.isFinite(
-                                executionFundingAmount
-                            ) &&
+        /*
+         * WP-011B.6E.5G.5D
+         *
+         * The fresh provider quote must still settle against
+         * the currency of the source that was independently
+         * refetched after successful PIN verification.
+         *
+         * Never permit a provider quote whose funding currency
+         * has diverged from the execution-time source contract.
+         */
 
-                            executionFundingAmount >
-                                0
-                        );
+        executionFundingCurrency ===
+            executionSourceCurrency &&
 
+        Number.isFinite(
+            executionFundingAmount
+        ) &&
+
+        executionFundingAmount >
+            0
+    );
 
                     if(!executionQuoteValid){
 
