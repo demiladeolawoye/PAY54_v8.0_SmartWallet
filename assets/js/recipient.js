@@ -7032,62 +7032,303 @@ console.info(
                     }
 
 
+                                        /*
+                     * --------------------------------------------------
+                     * WP-011B.6E.5G.5E
+                     * LINKED-CARD AUTHORIZATION + COMMIT
+                     * --------------------------------------------------
+                     *
+                     * 5G.5D has already established:
+                     *
+                     * • PAY54 PIN verification succeeded.
+                     * • Immutable execution intent survived PIN.
+                     * • Funding source was refetched.
+                     * • Source remained eligible.
+                     * • A fresh post-PIN quote was obtained.
+                     * • The execution quote matches the customer-approved
+                     *   payment contract.
+                     *
+                     * This work package may therefore cross the external
+                     * provider financial execution boundary.
+                     *
+                     * IMPORTANT:
+                     *
+                     * • Authorization MUST occur through Funding Service.
+                     * • Commit MUST occur through Funding Service.
+                     * • recipient.js MUST NOT call the provider directly.
+                     * • recipient.js MUST NOT mutate PAY54 wallet balances.
+                     * • recipient.js MUST NOT mutate linked-card balances.
+                     * • recipient.js MUST NOT call PAY54_LEDGER.applyEntry().
+                     * • Canonical PAY54 transaction recording remains
+                     *   intentionally deferred to WP-011B.6E.5G.5F.
+                     */
+
+
+                    if(
+                        typeof fundingService.authorize !==
+                            "function" ||
+                        typeof fundingService.commit !==
+                            "function"
+                    ){
+
+                        throw new Error(
+                            "Linked-card financial execution is temporarily unavailable."
+                        );
+
+                    }
+
+
                     /*
                      * --------------------------------------------------
-                     * WP-011B.6E.5G.5D STOP BOUNDARY
+                     * FINAL EXECUTION-INTENT ASSERTION
                      * --------------------------------------------------
                      *
-                     * Revalidation has succeeded.
+                     * Never authorize merely because the execution quote
+                     * itself is valid. The quote must also remain bound to
+                     * the immutable intent that crossed the PIN boundary.
+                     */
+
+                    const authorizationIntentValid =
+                        Boolean(
+
+                            linkedCardExecutionIntent &&
+
+                            linkedCardExecutionIntent.sourceId ===
+                                sourceId &&
+
+                            linkedCardExecutionIntent.sourceType ===
+                                "linked_card" &&
+
+                            linkedCardExecutionIntent.recipient ===
+                                user &&
+
+                            linkedCardExecutionIntent.paymentAmount ===
+                                executionPaymentAmount &&
+
+                            linkedCardExecutionIntent.paymentCurrency ===
+                                executionPaymentCurrency &&
+
+                            executionQuoteSourceId ===
+                                sourceId &&
+
+                            executionFundingCurrency ===
+                                executionSourceCurrency
+
+                        );
+
+
+                    if(!authorizationIntentValid){
+
+                        throw new Error(
+                            "Linked-card execution intent no longer matches the authorized payment."
+                        );
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * EXECUTION IDENTIFIERS
+                     * --------------------------------------------------
                      *
-                     * DO NOT authorize.
-                     * DO NOT commit.
-                     * DO NOT capture.
-                     * DO NOT record a transaction.
+                     * Authorization and commit intentionally share the
+                     * operation identifier associated with the fresh
+                     * post-PIN execution quote.
                      *
-                     * Those operations begin in WP-011B.6E.5G.5E.
+                     * The commit idempotency key is created once for this
+                     * execution attempt and must never be regenerated
+                     * between retries of the same commit operation.
+                     */
+
+                    const commitIdempotencyKey =
+                        `PAY54-SEND-COMMIT-${executionOperationId}`;
+
+
+                    /*
+                     * --------------------------------------------------
+                     * AUTHORIZATION
+                     * --------------------------------------------------
                      */
 
                     fundingBalance.textContent =
-                        `Revalidated funding: ${formatFundingBalance(
+                        `Authorizing: ${formatFundingBalance(
                             executionFundingCurrency,
                             executionFundingAmount
                         )}`;
 
 
                     fundingStatus.textContent =
-                        "PIN verified. Linked-card funding revalidated successfully. Authorization has not been executed.";
+                        "PIN verified. Authorizing linked-card funding securely…";
+
+
+                    const authorizationResult =
+                        await fundingService
+                            .authorize({
+                                sourceId,
+
+                                quoteId:
+                                    executionQuoteId,
+
+                                operationId:
+                                    executionOperationId,
+
+                                metadata: {
+                                    channel:
+                                        "send_money",
+
+                                    stage:
+                                        "linked_card_authorization",
+
+                                    workPackage:
+                                        "WP-011B.6E.5G.5E",
+
+                                    recipient:
+                                        linkedCardExecutionIntent
+                                            .recipient
+                                }
+                            });
+
+
+                    if(
+                        !authorizationResult ||
+                        authorizationResult.ok !==
+                            true ||
+                        !authorizationResult?.data?.authorization
+                    ){
+
+                        throw new Error(
+                            cleanFundingString(
+                                authorizationResult?.message
+                            ) ||
+                            "Linked-card funding authorization failed."
+                        );
+
+                    }
+
+
+                    const authorization =
+                        authorizationResult
+                            .data
+                            .authorization;
+
+
+                    const authorizationId =
+                        cleanFundingString(
+                            authorization.authorizationId
+                        );
+
+
+                    const authorizationSourceId =
+                        cleanFundingString(
+                            authorization.sourceId
+                        );
+
+
+                    const authorizationQuoteId =
+                        cleanFundingString(
+                            authorization.quoteId
+                        );
+
+
+                    const authorizationOperationId =
+                        cleanFundingString(
+                            authorization.operationId
+                        );
+
+
+                    const authorizationStatus =
+                        cleanFundingString(
+                            authorization.status
+                        );
+
+
+                    /*
+                     * --------------------------------------------------
+                     * AUTHORIZATION CONTRACT VALIDATION
+                     * --------------------------------------------------
+                     *
+                     * An authorization response is not trusted merely
+                     * because Funding Service returned ok:true.
+                     */
+
+                    const authorizationValid =
+                        Boolean(
+
+                            authorizationId &&
+
+                            authorizationStatus ===
+                                "authorized" &&
+
+                            authorizationSourceId ===
+                                sourceId &&
+
+                            authorizationQuoteId ===
+                                executionQuoteId &&
+
+                            authorizationOperationId ===
+                                executionOperationId
+
+                        );
+
+
+                    if(!authorizationValid){
+
+                        console.error(
+                            "[PAY54_SEND] Linked-card authorization contract validation failed.",
+                            {
+                                expected: {
+                                    sourceId,
+
+                                    quoteId:
+                                        executionQuoteId,
+
+                                    operationId:
+                                        executionOperationId,
+
+                                    status:
+                                        "authorized"
+                                },
+
+                                received: {
+                                    authorizationId,
+
+                                    sourceId:
+                                        authorizationSourceId,
+
+                                    quoteId:
+                                        authorizationQuoteId,
+
+                                    operationId:
+                                        authorizationOperationId,
+
+                                    status:
+                                        authorizationStatus
+                                }
+                            }
+                        );
+
+
+                        throw new Error(
+                            "Linked-card provider authorization could not be verified."
+                        );
+
+                    }
 
 
                     console.info(
-                        "[PAY54_SEND] WP-011B.6E.5G.5D post-PIN linked-card funding revalidated.",
+                        "[PAY54_SEND] WP-011B.6E.5G.5E linked-card authorization verified.",
                         {
                             sourceId,
 
-                            prePinQuoteId:
-                                cleanFundingString(
-                                    prePinQuote.quoteId
-                                ),
-
                             executionQuoteId,
 
-                            paymentAmount:
-                                executionPaymentAmount,
+                            authorizationId,
 
-                            paymentCurrency:
-                                executionPaymentCurrency,
+                            operationId:
+                                executionOperationId,
 
-                            fundingAmount:
-                                executionFundingAmount,
-
-                            fundingCurrency:
-                                executionFundingCurrency,
-
-                            fxUsed:
-                                executionQuote.fxUsed ===
-                                    true,
-
-                            authorizationExecuted:
-                                false,
+                            status:
+                                authorizationStatus,
 
                             commitExecuted:
                                 false,
@@ -7099,7 +7340,507 @@ console.info(
 
 
                     /*
-                     * Release the execution lock first.
+                     * --------------------------------------------------
+                     * PRE-COMMIT EXECUTION CONTRACT RECHECK
+                     * --------------------------------------------------
+                     *
+                     * Authorization may take time. Re-read the mutable UI
+                     * immediately before crossing the provider commit
+                     * boundary.
+                     *
+                     * The customer must still be looking at exactly the
+                     * payment that was PIN-verified and authorized.
+                     */
+
+                    const preCommitDescriptor =
+                        resolveFundingSourceDescriptor(
+                            fundingSource.value
+                        );
+
+
+                    const preCommitRawAmount =
+                        Number.parseFloat(
+                            amountInput.value
+                        );
+
+
+                    const preCommitAmount =
+                        Number.isFinite(
+                            preCommitRawAmount
+                        )
+                            ? Number(
+                                preCommitRawAmount.toFixed(
+                                    2
+                                )
+                            )
+                            : 0;
+
+
+                    const preCommitRecipient =
+                        normalisePay54Tag(
+                            cleanString(
+                                recipientInput.value
+                            )
+                        );
+
+
+                    const preCommitContractValid =
+                        Boolean(
+
+                            preCommitDescriptor?.type ===
+                                "linked_card" &&
+
+                            preCommitDescriptor?.id ===
+                                linkedCardExecutionIntent.sourceId &&
+
+                            preCommitAmount ===
+                                linkedCardExecutionIntent.paymentAmount &&
+
+                            preCommitRecipient ===
+                                linkedCardExecutionIntent.recipient &&
+
+                            currency ===
+                                linkedCardExecutionIntent.paymentCurrency
+
+                        );
+
+
+                    if(!preCommitContractValid){
+
+                        console.error(
+                            "[PAY54_SEND] Linked-card payment changed after authorization and before commit.",
+                            {
+                                intended:
+                                    linkedCardExecutionIntent,
+
+                                current: {
+                                    sourceId:
+                                        preCommitDescriptor?.id ||
+                                        null,
+
+                                    sourceType:
+                                        preCommitDescriptor?.type ||
+                                        null,
+
+                                    recipient:
+                                        preCommitRecipient,
+
+                                    paymentAmount:
+                                        preCommitAmount,
+
+                                    paymentCurrency:
+                                        currency
+                                },
+
+                                authorizationId
+                            }
+                        );
+
+
+                        throw new Error(
+                            "Payment details changed before linked-card commitment."
+                        );
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * COMMIT / PROVIDER CAPTURE
+                     * --------------------------------------------------
+                     *
+                     * This is the external provider financial commitment
+                     * boundary.
+                     *
+                     * The Funding Adapter and provider own:
+                     *
+                     * • authorization lookup
+                     * • source revalidation
+                     * • quote validation
+                     * • commit idempotency
+                     * • provider capture
+                     * • provider commitment confirmation
+                     */
+
+                    fundingBalance.textContent =
+                        `Authorized: ${formatFundingBalance(
+                            executionFundingCurrency,
+                            executionFundingAmount
+                        )}`;
+
+
+                    fundingStatus.textContent =
+                        "Linked-card funding authorized. Confirming provider commitment…";
+
+
+                    const commitResult =
+                        await fundingService
+                            .commit({
+                                sourceId,
+
+                                quoteId:
+                                    executionQuoteId,
+
+                                authorizationId,
+
+                                operationId:
+                                    executionOperationId,
+
+                                idempotencyKey:
+                                    commitIdempotencyKey,
+
+                                metadata: {
+                                    channel:
+                                        "send_money",
+
+                                    stage:
+                                        "linked_card_commit",
+
+                                    workPackage:
+                                        "WP-011B.6E.5G.5E",
+
+                                    recipient:
+                                        linkedCardExecutionIntent
+                                            .recipient
+                                }
+                            });
+
+
+                    if(
+                        !commitResult ||
+                        commitResult.ok !==
+                            true ||
+                        !commitResult?.data?.commit
+                    ){
+
+                        throw new Error(
+                            cleanFundingString(
+                                commitResult?.message
+                            ) ||
+                            "Linked-card funding commitment could not be confirmed."
+                        );
+
+                    }
+
+
+                    const fundingCommit =
+                        commitResult
+                            .data
+                            .commit;
+
+
+                    const commitId =
+                        cleanFundingString(
+                            fundingCommit.commitId
+                        );
+
+
+                    const commitSourceId =
+                        cleanFundingString(
+                            fundingCommit.sourceId
+                        );
+
+
+                    const commitSourceType =
+                        cleanFundingString(
+                            fundingCommit.sourceType
+                        );
+
+
+                    const commitQuoteId =
+                        cleanFundingString(
+                            fundingCommit.quoteId
+                        );
+
+
+                    const commitAuthorizationId =
+                        cleanFundingString(
+                            fundingCommit.authorizationId
+                        );
+
+
+                    const commitOperationId =
+                        cleanFundingString(
+                            fundingCommit.operationId
+                        );
+
+
+                    const commitStatus =
+                        cleanFundingString(
+                            fundingCommit.status
+                        );
+
+
+                    const commitPaymentAmount =
+                        Number(
+                            fundingCommit.paymentAmount
+                        );
+
+
+                    const commitPaymentCurrency =
+                        normaliseFundingCurrency(
+                            fundingCommit.paymentCurrency
+                        );
+
+
+                    const commitFundingAmount =
+                        Number(
+                            fundingCommit.fundingAmount
+                        );
+
+
+                    const commitFundingCurrency =
+                        normaliseFundingCurrency(
+                            fundingCommit.fundingCurrency
+                        );
+
+
+                    /*
+                     * --------------------------------------------------
+                     * COMMIT CONTRACT VALIDATION
+                     * --------------------------------------------------
+                     *
+                     * Provider commitment is accepted only when every
+                     * financially relevant identifier and amount matches
+                     * the fresh post-PIN execution contract.
+                     */
+
+                    const commitValid =
+                        Boolean(
+
+                            commitId &&
+
+                            commitStatus ===
+                                "committed" &&
+
+                            commitSourceId ===
+                                sourceId &&
+
+                            commitSourceType ===
+                                "linked_card" &&
+
+                            commitQuoteId ===
+                                executionQuoteId &&
+
+                            commitAuthorizationId ===
+                                authorizationId &&
+
+                            commitOperationId ===
+                                executionOperationId &&
+
+                            Number.isFinite(
+                                commitPaymentAmount
+                            ) &&
+
+                            commitPaymentAmount ===
+                                executionPaymentAmount &&
+
+                            commitPaymentCurrency ===
+                                executionPaymentCurrency &&
+
+                            Number.isFinite(
+                                commitFundingAmount
+                            ) &&
+
+                            commitFundingAmount ===
+                                executionFundingAmount &&
+
+                            commitFundingCurrency ===
+                                executionFundingCurrency
+
+                        );
+
+
+                    if(!commitValid){
+
+                        /*
+                         * IMPORTANT:
+                         *
+                         * At this point Funding Service may already have
+                         * received provider commitment confirmation.
+                         *
+                         * Do not represent this as an ordinary payment
+                         * failure and do not attempt a second commitment.
+                         *
+                         * Automated compensation/reversal is introduced
+                         * in WP-011B.6E.5G.5G.
+                         */
+
+                        console.error(
+                            "[PAY54_SEND] CRITICAL: linked-card provider commitment returned an unverifiable financial contract.",
+                            {
+                                expected: {
+                                    sourceId,
+
+                                    sourceType:
+                                        "linked_card",
+
+                                    quoteId:
+                                        executionQuoteId,
+
+                                    authorizationId,
+
+                                    operationId:
+                                        executionOperationId,
+
+                                    paymentAmount:
+                                        executionPaymentAmount,
+
+                                    paymentCurrency:
+                                        executionPaymentCurrency,
+
+                                    fundingAmount:
+                                        executionFundingAmount,
+
+                                    fundingCurrency:
+                                        executionFundingCurrency
+                                },
+
+                                received: {
+                                    commitId,
+
+                                    sourceId:
+                                        commitSourceId,
+
+                                    sourceType:
+                                        commitSourceType,
+
+                                    quoteId:
+                                        commitQuoteId,
+
+                                    authorizationId:
+                                        commitAuthorizationId,
+
+                                    operationId:
+                                        commitOperationId,
+
+                                    status:
+                                        commitStatus,
+
+                                    paymentAmount:
+                                        commitPaymentAmount,
+
+                                    paymentCurrency:
+                                        commitPaymentCurrency,
+
+                                    fundingAmount:
+                                        commitFundingAmount,
+
+                                    fundingCurrency:
+                                        commitFundingCurrency
+                                }
+                            }
+                        );
+
+
+                        fundingBalance.textContent =
+                            "Provider commitment requires reconciliation.";
+
+
+                        fundingStatus.textContent =
+                            "Linked-card funding reached the provider but PAY54 could not verify the final commitment contract. Do not retry this payment.";
+
+
+                        setLinkedCardSendGuard(
+                            true
+                        );
+
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Payment status requires verification. Please do not retry."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * WP-011B.6E.5G.5E STOP BOUNDARY
+                     * --------------------------------------------------
+                     *
+                     * Provider authorization and provider commitment are
+                     * now confirmed.
+                     *
+                     * DO NOT:
+                     *
+                     * • call PAY54_LEDGER.applyEntry()
+                     * • mutate a PAY54 wallet
+                     * • mutate local linked-card balance
+                     * • record the canonical PAY54 transaction
+                     * • update beneficiary transfer statistics
+                     * • display the final payment receipt
+                     *
+                     * Canonical external transaction recording begins in
+                     * WP-011B.6E.5G.5F.
+                     */
+
+                    fundingBalance.textContent =
+                        `Committed funding: ${formatFundingBalance(
+                            commitFundingCurrency,
+                            commitFundingAmount
+                        )}`;
+
+
+                    fundingStatus.textContent =
+                        "Linked-card funding authorized and committed successfully. PAY54 transaction recording has not been executed.";
+
+
+                    console.info(
+                        "[PAY54_SEND] WP-011B.6E.5G.5E linked-card funding committed.",
+                        {
+                            sourceId,
+
+                            executionQuoteId,
+
+                            authorizationId,
+
+                            commitId,
+
+                            operationId:
+                                executionOperationId,
+
+                            idempotencyKey:
+                                commitIdempotencyKey,
+
+                            paymentAmount:
+                                commitPaymentAmount,
+
+                            paymentCurrency:
+                                commitPaymentCurrency,
+
+                            fundingAmount:
+                                commitFundingAmount,
+
+                            fundingCurrency:
+                                commitFundingCurrency,
+
+                            providerReference:
+                                cleanFundingString(
+                                    fundingCommit.providerReference
+                                ) ||
+                                null,
+
+                            authorizationExecuted:
+                                true,
+
+                            commitExecuted:
+                                true,
+
+                            walletMutationExecuted:
+                                false,
+
+                            transactionRecorded:
+                                false
+                        }
+                    );
+
+
+                    /*
+                     * Release the generic execution busy state first.
                      */
 
                     submitButton.disabled =
@@ -7111,12 +7852,12 @@ console.info(
 
 
                     /*
-                     * Then deliberately reacquire the linked-card
-                     * guard.
+                     * Immediately reacquire the linked-card guard.
                      *
-                     * 5G.5D proves revalidation only. The customer
-                     * must not proceed into authorization until
-                     * 5G.5E is installed.
+                     * The provider has committed this funding operation.
+                     * The customer MUST NOT be able to submit it again
+                     * while canonical transaction recording remains
+                     * intentionally deferred to 5G.5F.
                      */
 
                     setLinkedCardSendGuard(
@@ -7126,12 +7867,11 @@ console.info(
 
                     window.PAY54_TOAST
                     ?.showToast(
-                        "Linked-card funding revalidated securely."
+                        "Linked-card funding committed securely."
                     );
 
 
                     return;
-
 
                 }catch(error){
 
