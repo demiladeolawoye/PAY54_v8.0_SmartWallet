@@ -6749,33 +6749,123 @@ const prePinQuoteValid =
                      */
 
                     const currentDescriptor =
-                        resolveFundingSourceDescriptor(
-                            fundingSource.value
-                        );
+    resolveFundingSourceDescriptor(
+        fundingSource.value
+    );
 
 
-                    const currentAmount =
-                        Number.parseFloat(
-                            amountInput.value
-                        );
+const currentAmount =
+    Number.parseFloat(
+        amountInput.value
+    );
 
 
-                    if(
-                        !currentDescriptor ||
-                        currentDescriptor.type !==
-                            "linked_card" ||
-                        currentDescriptor.id !==
-                            sourceId ||
-                        !Number.isFinite(
-                            currentAmount
-                        ) ||
-                        Number(
-                            currentAmount.toFixed(
-                                2
-                            )
-                        ) !==
-                            amount
-                    ){
+const currentRecipient =
+    normalisePay54Tag(
+        cleanString(
+            recipientInput.value
+        )
+    );
+
+
+const currentPaymentAmount =
+    Number.isFinite(
+        currentAmount
+    )
+        ? Number(
+            currentAmount.toFixed(
+                2
+            )
+        )
+        : 0;
+
+
+const executionIntentStillValid =
+    Boolean(
+
+        linkedCardExecutionIntent &&
+
+        linkedCardExecutionIntent.sourceType ===
+            "linked_card" &&
+
+        linkedCardExecutionIntent.sourceId ===
+            sourceId &&
+
+        linkedCardExecutionIntent.sourceId ===
+            currentDescriptor?.id &&
+
+        currentDescriptor?.type ===
+            "linked_card" &&
+
+        linkedCardExecutionIntent.paymentAmount ===
+            amount &&
+
+        linkedCardExecutionIntent.paymentAmount ===
+            currentPaymentAmount &&
+
+        linkedCardExecutionIntent.paymentCurrency ===
+            currency &&
+
+        linkedCardExecutionIntent.recipient ===
+            user &&
+
+        linkedCardExecutionIntent.recipient ===
+            currentRecipient &&
+
+        linkedCardExecutionIntent.prePinQuoteId ===
+            cleanFundingString(
+                prePinQuote?.quoteId
+            )
+
+    );
+
+
+if(!executionIntentStillValid){
+
+    console.error(
+        "[PAY54_SEND] Linked-card execution intent changed across PIN boundary.",
+        {
+            intended:
+                linkedCardExecutionIntent,
+
+            current: {
+                sourceId:
+                    currentDescriptor?.id ||
+                    null,
+
+                sourceType:
+                    currentDescriptor?.type ||
+                    null,
+
+                recipient:
+                    currentRecipient,
+
+                paymentAmount:
+                    currentPaymentAmount,
+
+                paymentCurrency:
+                    currency,
+
+                prePinQuoteId:
+                    cleanFundingString(
+                        prePinQuote?.quoteId
+                    )
+            }
+        }
+    );
+
+
+    throw new Error(
+        "Payment details changed during PIN verification."
+    );
+
+}
+
+
+console.info(
+    "[PAY54_SEND] 5G.5D linked-card execution intent verified after PIN.",
+    linkedCardExecutionIntent
+);
 
                         throw new Error(
                             "Payment details changed during PIN verification."
