@@ -6867,12 +6867,6 @@ console.info(
     linkedCardExecutionIntent
 );
 
-                        throw new Error(
-                            "Payment details changed during PIN verification."
-                        );
-
-                    }
-
 
                     /*
                      * --------------------------------------------------
