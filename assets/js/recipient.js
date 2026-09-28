@@ -5058,6 +5058,10 @@ const getConfirmSendButton =
         );
 
 
+const LINKED_CARD_SEND_GUARD_ATTRIBUTE =
+    "data-pay54-linked-card-send-guard";
+
+
 const setLinkedCardSendGuard =
     active => {
 
@@ -5069,18 +5073,33 @@ const setLinkedCardSendGuard =
         }
 
         /*
-         * During WP-011B.6E.5G.5C the legacy submit path is
-         * still wallet-only.
+         * WP-011B.6E.5G.5C
          *
-         * A linked card may be selected and quoted, but must
-         * not be submitted until post-PIN execution integration
-         * is installed and verified.
+         * Linked-card quote preview may prevent submission,
+         * but this guard must never override a disabled state
+         * owned by validation, PIN verification, transaction
+         * execution or another PAY54 control.
          */
 
         if(active){
 
-            button.disabled =
-                true;
+            /*
+             * Record ownership only when this guard is the
+             * component that changes the button from enabled
+             * to disabled.
+             */
+
+            if(!button.disabled){
+
+                button.setAttribute(
+                    LINKED_CARD_SEND_GUARD_ATTRIBUTE,
+                    "true"
+                );
+
+                button.disabled =
+                    true;
+
+            }
 
             button.setAttribute(
                 "aria-disabled",
@@ -5091,22 +5110,46 @@ const setLinkedCardSendGuard =
                 "Linked-card Send execution is being prepared.";
 
             return;
+        }
+
+        /*
+         * Release the disabled state only when this guard
+         * originally acquired it.
+         *
+         * If another workflow disabled the button, PAY54 must
+         * preserve that state.
+         */
+
+        const ownsDisabledState =
+            button.getAttribute(
+                LINKED_CARD_SEND_GUARD_ATTRIBUTE
+            ) === "true";
+
+        if(ownsDisabledState){
+
+            button.disabled =
+                false;
+
+            button.removeAttribute(
+                LINKED_CARD_SEND_GUARD_ATTRIBUTE
+            );
+
+            button.removeAttribute(
+                "aria-disabled"
+            );
 
         }
 
-        button.disabled =
-            false;
-
-        button.removeAttribute(
-            "aria-disabled"
-        );
+        /*
+         * The title belongs exclusively to this linked-card
+         * presentation guard and can safely be removed.
+         */
 
         button.removeAttribute(
             "title"
         );
 
     };
-
 
 const resetLinkedCardQuoteState =
     () => {
