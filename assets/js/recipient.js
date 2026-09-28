@@ -6468,13 +6468,58 @@ if(
      * displayed to the customer.
      */
 
-    const prePinQuote =
-        linkedCardQuoteState?.quote ||
-        null;
+  const prePinQuote =
+    linkedCardQuoteState?.quote ||
+    null;
 
 
-    const prePinQuoteValid =
-        Boolean(
+/* ==========================================================
+   WP-011B.6E.5G.5D.1
+   IMMUTABLE SEND EXECUTION INTENT
+
+   The financial contract crossing the PIN boundary must not
+   depend on mutable form controls or a stale modal closure.
+
+   This intent is deliberately created before PIN and frozen.
+========================================================== */
+
+const linkedCardExecutionIntent =
+    Object.freeze({
+
+        sourceId,
+
+        sourceType:
+            "linked_card",
+
+        recipient:
+            user,
+
+        paymentAmount:
+            amount,
+
+        paymentCurrency:
+            currency,
+
+        prePinQuoteId:
+            cleanFundingString(
+                prePinQuote?.quoteId
+            ),
+
+        createdAt:
+            new Date()
+                .toISOString()
+
+    });
+
+
+console.info(
+    "[PAY54_SEND] 5G.5D linked-card execution intent created.",
+    linkedCardExecutionIntent
+);
+
+
+const prePinQuoteValid =
+    Boolean(
             linkedCardQuoteState?.status ===
                 "ready" &&
 
