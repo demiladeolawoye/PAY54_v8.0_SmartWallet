@@ -6423,7 +6423,654 @@ amountInput.addEventListener(
                         return;
 
                     }
+/* ==========================================================================
+   LINKED-CARD SEND — POST-PIN REVALIDATION
+   Work Package: WP-011B.6E.5G.5D
 
+   Security boundary
+   -----------------
+   • Requires a verified pre-PIN Funding Service quote.
+   • PIN verification occurs before execution revalidation.
+   • Funding source is refetched after PIN.
+   • A completely fresh Funding Service quote is obtained after PIN.
+   • Source / amount / currency are revalidated.
+   • NO authorization occurs in this work package.
+   • NO commit/capture occurs.
+   • NO transaction is recorded.
+   • NO wallet balance is mutated.
+   • NO local linked-card balance is mutated.
+========================================================================== */
+
+const selectedFundingDescriptor =
+    resolveFundingSourceDescriptor(
+        fundingSource.value
+    );
+
+
+if(
+    selectedFundingDescriptor?.type ===
+        "linked_card"
+){
+
+    const sourceId =
+        cleanFundingString(
+            selectedFundingDescriptor.id
+        );
+
+
+    /*
+     * ----------------------------------------------------------
+     * PRE-PIN CONTRACT VERIFICATION
+     * ----------------------------------------------------------
+     *
+     * Never enter PIN verification unless the asynchronous
+     * pre-PIN quote represents the exact payment currently
+     * displayed to the customer.
+     */
+
+    const prePinQuote =
+        linkedCardQuoteState?.quote ||
+        null;
+
+
+    const prePinQuoteValid =
+        Boolean(
+            linkedCardQuoteState?.status ===
+                "ready" &&
+
+            linkedCardQuoteState?.sourceId ===
+                sourceId &&
+
+            Number(
+                linkedCardQuoteState?.paymentAmount
+            ) ===
+                amount &&
+
+            linkedCardQuoteState?.paymentCurrency ===
+                currency &&
+
+            prePinQuote &&
+
+            cleanFundingString(
+                prePinQuote.sourceId
+            ) ===
+                sourceId &&
+
+            normaliseFundingCurrency(
+                prePinQuote.paymentCurrency
+            ) ===
+                currency &&
+
+            Number(
+                prePinQuote.paymentAmount
+            ) ===
+                amount
+        );
+
+
+    if(!prePinQuoteValid){
+
+        setLinkedCardSendGuard(
+            true
+        );
+
+        fundingStatus.textContent =
+            "The linked-card funding quote is no longer current. Please wait for a fresh quote.";
+
+        window.PAY54_TOAST
+        ?.showToast(
+            "Please wait for the linked-card funding quote to refresh."
+        );
+
+        renderFundingState();
+
+        return;
+
+    }
+
+
+    const fundingService =
+        window.PAY54_FUNDING_SERVICE ||
+        null;
+
+
+    if(
+        !fundingService ||
+        typeof fundingService.getSource !==
+            "function" ||
+        typeof fundingService.quote !==
+            "function"
+    ){
+
+        setLinkedCardSendGuard(
+            true
+        );
+
+        fundingStatus.textContent =
+            "Linked-card funding is temporarily unavailable.";
+
+        window.PAY54_TOAST
+        ?.showToast(
+            "Linked-card funding is temporarily unavailable."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * PIN VERIFICATION
+     * ----------------------------------------------------------
+     *
+     * No Funding Service authorization/commit operation occurs
+     * before this boundary.
+     */
+
+    try{
+
+        requestPinVerification(
+            async () => {
+
+                /*
+                 * Successful PAY54 PIN verification.
+                 *
+                 * Lock the form while execution-time funding
+                 * revalidation is in progress.
+                 */
+
+                submitButton.disabled =
+                    true;
+
+                submitButton.setAttribute(
+                    "aria-busy",
+                    "true"
+                );
+
+
+                try{
+
+                    /*
+                     * --------------------------------------------------
+                     * SOURCE REFETCH
+                     * --------------------------------------------------
+                     *
+                     * The pre-PIN source descriptor cannot be trusted
+                     * as execution-time state.
+                     */
+
+                    const sourceResult =
+                        await fundingService
+                            .getSource(
+                                sourceId
+                            );
+
+
+                    if(
+                        !sourceResult ||
+                        sourceResult.ok !==
+                            true ||
+                        !sourceResult?.data?.source
+                    ){
+
+                        throw new Error(
+                            "Linked-card funding source is no longer available."
+                        );
+
+                    }
+
+
+                    const executionSource =
+                        sourceResult.data.source;
+
+
+                    const executionSourceId =
+                        cleanFundingString(
+                            executionSource.id
+                        );
+
+
+                    const executionSourceType =
+                        cleanFundingString(
+                            executionSource.type
+                        );
+
+
+                    const executionSourceCurrency =
+                        normaliseFundingCurrency(
+                            executionSource.currency
+                        );
+
+
+                    /*
+                     * Fail closed if the source identity changed.
+                     */
+
+                    if(
+                        executionSourceId !==
+                            sourceId ||
+                        executionSourceType !==
+                            "linked_card"
+                    ){
+
+                        throw new Error(
+                            "Linked-card funding source identity changed during verification."
+                        );
+
+                    }
+
+
+                    /*
+                     * Explicit execution-time eligibility checks.
+                     *
+                     * These conditions are intentionally defensive.
+                     * If the canonical source explicitly reports that
+                     * it is inactive or frozen, execution stops.
+                     */
+
+                    if(
+                        executionSource.active ===
+                            false ||
+                        executionSource.frozen ===
+                            true
+                    ){
+
+                        throw new Error(
+                            "Linked-card funding source is no longer eligible."
+                        );
+
+                    }
+
+
+                    if(
+                        !executionSourceCurrency
+                    ){
+
+                        throw new Error(
+                            "Linked-card funding currency is unavailable."
+                        );
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * UI CONTRACT RECHECK
+                     * --------------------------------------------------
+                     *
+                     * The user must still be looking at the same source,
+                     * amount and currency after returning from PIN.
+                     */
+
+                    const currentDescriptor =
+                        resolveFundingSourceDescriptor(
+                            fundingSource.value
+                        );
+
+
+                    const currentAmount =
+                        Number.parseFloat(
+                            amountInput.value
+                        );
+
+
+                    if(
+                        !currentDescriptor ||
+                        currentDescriptor.type !==
+                            "linked_card" ||
+                        currentDescriptor.id !==
+                            sourceId ||
+                        !Number.isFinite(
+                            currentAmount
+                        ) ||
+                        Number(
+                            currentAmount.toFixed(
+                                2
+                            )
+                        ) !==
+                            amount
+                    ){
+
+                        throw new Error(
+                            "Payment details changed during PIN verification."
+                        );
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * FRESH POST-PIN QUOTE
+                     * --------------------------------------------------
+                     *
+                     * Never authorize against the pre-PIN quote.
+                     *
+                     * A new operation identifier is deliberately used
+                     * because this is a new execution-time quote.
+                     */
+
+                    const executionOperationId =
+                        createLinkedCardQuoteOperationId()
+                            .replace(
+                                "PREPIN",
+                                "POSTPIN"
+                            );
+
+
+                    const executionQuoteResult =
+                        await fundingService
+                            .quote({
+                                sourceId,
+
+                                paymentAmount:
+                                    amount,
+
+                                paymentCurrency:
+                                    currency,
+
+                                operationId:
+                                    executionOperationId,
+
+                                metadata: {
+                                    channel:
+                                        "send_money",
+
+                                    stage:
+                                        "post_pin_revalidation",
+
+                                    workPackage:
+                                        "WP-011B.6E.5G.5D"
+                                }
+                            });
+
+
+                    if(
+                        !executionQuoteResult ||
+                        executionQuoteResult.ok !==
+                            true ||
+                        !executionQuoteResult?.data?.quote
+                    ){
+
+                        throw new Error(
+                            cleanFundingString(
+                                executionQuoteResult?.message
+                            ) ||
+                            "Linked-card funding could not be revalidated after PIN verification."
+                        );
+
+                    }
+
+
+                    const executionQuote =
+                        executionQuoteResult
+                            .data
+                            .quote;
+
+
+                    const executionQuoteId =
+                        cleanFundingString(
+                            executionQuote.quoteId
+                        );
+
+
+                    const executionQuoteSourceId =
+                        cleanFundingString(
+                            executionQuote.sourceId
+                        );
+
+
+                    const executionPaymentCurrency =
+                        normaliseFundingCurrency(
+                            executionQuote.paymentCurrency
+                        );
+
+
+                    const executionFundingCurrency =
+                        normaliseFundingCurrency(
+                            executionQuote.fundingCurrency
+                        );
+
+
+                    const executionPaymentAmount =
+                        Number(
+                            executionQuote.paymentAmount
+                        );
+
+
+                    const executionFundingAmount =
+                        Number(
+                            executionQuote.fundingAmount
+                        );
+
+
+                    /*
+                     * --------------------------------------------------
+                     * EXECUTION QUOTE CONTRACT
+                     * --------------------------------------------------
+                     *
+                     * Every financially relevant field must still
+                     * represent the payment approved by the customer.
+                     */
+
+                    const executionQuoteValid =
+                        Boolean(
+                            executionQuoteId &&
+
+                            executionQuoteSourceId ===
+                                sourceId &&
+
+                            executionPaymentCurrency ===
+                                currency &&
+
+                            Number.isFinite(
+                                executionPaymentAmount
+                            ) &&
+
+                            executionPaymentAmount ===
+                                amount &&
+
+                            executionFundingCurrency &&
+
+                            Number.isFinite(
+                                executionFundingAmount
+                            ) &&
+
+                            executionFundingAmount >
+                                0
+                        );
+
+
+                    if(!executionQuoteValid){
+
+                        throw new Error(
+                            "Post-PIN linked-card funding quote failed financial contract validation."
+                        );
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * WP-011B.6E.5G.5D STOP BOUNDARY
+                     * --------------------------------------------------
+                     *
+                     * Revalidation has succeeded.
+                     *
+                     * DO NOT authorize.
+                     * DO NOT commit.
+                     * DO NOT capture.
+                     * DO NOT record a transaction.
+                     *
+                     * Those operations begin in WP-011B.6E.5G.5E.
+                     */
+
+                    fundingBalance.textContent =
+                        `Revalidated funding: ${formatFundingBalance(
+                            executionFundingCurrency,
+                            executionFundingAmount
+                        )}`;
+
+
+                    fundingStatus.textContent =
+                        "PIN verified. Linked-card funding revalidated successfully. Authorization has not been executed.";
+
+
+                    console.info(
+                        "[PAY54_SEND] WP-011B.6E.5G.5D post-PIN linked-card funding revalidated.",
+                        {
+                            sourceId,
+
+                            prePinQuoteId:
+                                cleanFundingString(
+                                    prePinQuote.quoteId
+                                ),
+
+                            executionQuoteId,
+
+                            paymentAmount:
+                                executionPaymentAmount,
+
+                            paymentCurrency:
+                                executionPaymentCurrency,
+
+                            fundingAmount:
+                                executionFundingAmount,
+
+                            fundingCurrency:
+                                executionFundingCurrency,
+
+                            fxUsed:
+                                executionQuote.fxUsed ===
+                                    true,
+
+                            authorizationExecuted:
+                                false,
+
+                            commitExecuted:
+                                false,
+
+                            transactionRecorded:
+                                false
+                        }
+                    );
+
+
+                    /*
+                     * Release the execution lock first.
+                     */
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.removeAttribute(
+                        "aria-busy"
+                    );
+
+
+                    /*
+                     * Then deliberately reacquire the linked-card
+                     * guard.
+                     *
+                     * 5G.5D proves revalidation only. The customer
+                     * must not proceed into authorization until
+                     * 5G.5E is installed.
+                     */
+
+                    setLinkedCardSendGuard(
+                        true
+                    );
+
+
+                    window.PAY54_TOAST
+                    ?.showToast(
+                        "Linked-card funding revalidated securely."
+                    );
+
+
+                    return;
+
+
+                }catch(error){
+
+                    /*
+                     * Revalidation failure is fail-closed.
+                     *
+                     * No authorization/commit has occurred, therefore
+                     * no reversal is required at this stage.
+                     */
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.removeAttribute(
+                        "aria-busy"
+                    );
+
+
+                    setLinkedCardSendGuard(
+                        true
+                    );
+
+
+                    fundingStatus.textContent =
+                        cleanFundingString(
+                            error?.message
+                        ) ||
+                        "Linked-card funding could not be revalidated.";
+
+
+                    console.error(
+                        "[PAY54_SEND] WP-011B.6E.5G.5D post-PIN revalidation failed.",
+                        error
+                    );
+
+
+                    window.PAY54_TOAST
+                    ?.showToast(
+                        "Linked-card funding could not be revalidated."
+                    );
+
+
+                    return;
+
+                }
+
+            }
+        );
+
+
+    }catch(error){
+
+        setLinkedCardSendGuard(
+            true
+        );
+
+
+        console.error(
+            "[PAY54_SEND] Linked-card PIN verification failed to initialise.",
+            error
+        );
+
+
+        window.PAY54_TOAST
+        ?.showToast(
+            "Payment verification is temporarily unavailable."
+        );
+
+    }
+
+
+    /*
+     * Critical:
+     *
+     * Linked-card funding must never fall through into the
+     * existing wallet-only execution path below.
+     */
+
+    return;
+
+}
                                         /*
                      * ----------------------------------------------------------
                      * EXPLICIT FUNDING VALIDATION
