@@ -5564,6 +5564,22 @@ const requestLinkedCardPrePinQuote =
                     null
             });
 
+       /*
+ * WP-011B.6E.5G.5D
+ *
+ * The pre-PIN quote is now valid for the exact source,
+ * amount and payment currency currently displayed.
+ *
+ * Release only the linked-card presentation guard so the
+ * customer may proceed to PAY54 PIN verification.
+ *
+ * This does NOT authorize or commit the linked card.
+ */
+
+setLinkedCardSendGuard(
+    false
+);
+
 
         fundingBalance.textContent =
             `Funding requirement: ${formatFundingBalance(
