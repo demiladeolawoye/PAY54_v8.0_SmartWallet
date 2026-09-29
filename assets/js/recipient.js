@@ -7757,36 +7757,45 @@ console.info(
                     }
 
 
-                    /*
+                                      /*
                      * --------------------------------------------------
-                     * WP-011B.6E.5G.5E STOP BOUNDARY
+                     * WP-011B.6E.5G.5F
+                     * CANONICAL EXTERNAL TRANSACTION RECORDING
                      * --------------------------------------------------
                      *
-                     * Provider authorization and provider commitment are
-                     * now confirmed.
+                     * Provider authorization and provider commitment have
+                     * already completed successfully.
                      *
-                     * DO NOT:
+                     * The financial settlement therefore exists outside
+                     * the PAY54 wallet ledger.
                      *
-                     * • call PAY54_LEDGER.applyEntry()
-                     * • mutate a PAY54 wallet
-                     * • mutate local linked-card balance
-                     * • record the canonical PAY54 transaction
-                     * • update beneficiary transfer statistics
-                     * • display the final payment receipt
+                     * This stage records that completed external
+                     * settlement into PAY54's canonical transaction
+                     * repository.
                      *
-                     * Canonical external transaction recording begins in
-                     * WP-011B.6E.5G.5F.
+                     * CRITICAL FINANCIAL RULES
+                     * --------------------------------------------------
+                     *
+                     * • PAY54_TX.recordTransaction() is the ONLY
+                     *   transaction-recording boundary used here.
+                     *
+                     * • PAY54_LEDGER.applyEntry() MUST NOT be called.
+                     *
+                     * • No PAY54 wallet may be debited or credited.
+                     *
+                     * • No local linked-card balance may be mutated.
+                     *
+                     * • Provider authorization MUST NOT be repeated.
+                     *
+                     * • Provider commit/capture MUST NOT be repeated.
+                     *
+                     * • Final receipt rendering remains deferred.
+                     *
+                     * • Beneficiary transfer statistics remain deferred.
+                     *
+                     * • Automatic reversal/compensation is introduced
+                     *   separately in WP-011B.6E.5G.5G.
                      */
-
-                    fundingBalance.textContent =
-                        `Committed funding: ${formatFundingBalance(
-                            commitFundingCurrency,
-                            commitFundingAmount
-                        )}`;
-
-
-                    fundingStatus.textContent =
-                        "Linked-card funding authorized and committed successfully. PAY54 transaction recording has not been executed.";
 
 
                     console.info(
@@ -7840,7 +7849,834 @@ console.info(
 
 
                     /*
-                     * Release the generic execution busy state first.
+                     * --------------------------------------------------
+                     * TRANSACTION ENGINE BOUNDARY
+                     * --------------------------------------------------
+                     *
+                     * Resolve the facade at execution time.
+                     *
+                     * recipient.js must never access PAY54_EXTERNAL_TX
+                     * directly.
+                     */
+
+                    const transactionEngine =
+                        window.PAY54_TX;
+
+
+                    if(
+                        !transactionEngine ||
+                        typeof transactionEngine
+                            .recordTransaction !==
+                            "function"
+                    ){
+
+                        fundingBalance.textContent =
+                            "Provider commitment requires reconciliation.";
+
+
+                        fundingStatus.textContent =
+                            "Linked-card funding was committed, but PAY54 transaction recording is unavailable. Do not retry this payment.";
+
+
+                        setLinkedCardSendGuard(
+                            true
+                        );
+
+
+                        console.error(
+                            "[PAY54_SEND] CRITICAL: provider commitment succeeded but PAY54 transaction recorder is unavailable.",
+                            {
+                                sourceId,
+
+                                quoteId:
+                                    executionQuoteId,
+
+                                authorizationId,
+
+                                commitId,
+
+                                operationId:
+                                    executionOperationId
+                            }
+                        );
+
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Payment status requires verification. Please do not retry."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * EXTERNAL SETTLEMENT REFERENCE
+                     * --------------------------------------------------
+                     *
+                     * commitId is the canonical immutable reference for
+                     * this confirmed provider financial commitment.
+                     *
+                     * PAY54_TX.recordTransaction() uses the external
+                     * reference as its idempotency boundary.
+                     */
+
+                    const externalSettlementReference =
+                        commitId;
+
+
+                    if(!externalSettlementReference){
+
+                        fundingBalance.textContent =
+                            "Provider commitment requires reconciliation.";
+
+
+                        fundingStatus.textContent =
+                            "Linked-card funding was committed, but its settlement reference is unavailable. Do not retry this payment.";
+
+
+                        setLinkedCardSendGuard(
+                            true
+                        );
+
+
+                        console.error(
+                            "[PAY54_SEND] CRITICAL: committed linked-card funding has no external settlement reference.",
+                            {
+                                sourceId,
+
+                                executionQuoteId,
+
+                                authorizationId,
+
+                                operationId:
+                                    executionOperationId
+                            }
+                        );
+
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Payment status requires verification. Please do not retry."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * FINANCIAL ISOLATION BASELINE
+                     * --------------------------------------------------
+                     *
+                     * Capture wallet state immediately before canonical
+                     * transaction recording.
+                     *
+                     * This is a defence-in-depth production invariant:
+                     * external settlement recording is permitted to add a
+                     * transaction record, but it is NEVER permitted to
+                     * change PAY54 wallet balances.
+                     */
+
+                    const recordingLedger =
+                        safeLedger();
+
+
+                    if(
+                        !recordingLedger ||
+                        typeof recordingLedger
+                            .getBalances !==
+                            "function"
+                    ){
+
+                        fundingBalance.textContent =
+                            "Provider commitment requires reconciliation.";
+
+
+                        fundingStatus.textContent =
+                            "Linked-card funding was committed, but PAY54 could not verify wallet isolation. Do not retry this payment.";
+
+
+                        setLinkedCardSendGuard(
+                            true
+                        );
+
+
+                        console.error(
+                            "[PAY54_SEND] CRITICAL: wallet isolation baseline unavailable after provider commitment.",
+                            {
+                                sourceId,
+
+                                commitId,
+
+                                operationId:
+                                    executionOperationId
+                            }
+                        );
+
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Payment status requires verification. Please do not retry."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    const balancesBeforeRecording =
+                        structuredClone(
+                            recordingLedger
+                                .getBalances()
+                        );
+
+
+                    /*
+                     * --------------------------------------------------
+                     * CANONICAL EXTERNAL TRANSACTION
+                     * --------------------------------------------------
+                     *
+                     * Transaction amount is negative because this is a
+                     * customer Send transaction.
+                     *
+                     * IMPORTANT:
+                     *
+                     * The negative transaction amount is transaction
+                     * history semantics only.
+                     *
+                     * PAY54_TX.recordTransaction() persists the entry
+                     * without applying it to wallet balances.
+                     */
+
+                    const externalTransactionMeta = {
+
+                        /*
+                         * Recipient / customer instruction
+                         */
+
+                        recipient:
+                            linkedCardExecutionIntent
+                                .recipient,
+
+                        note,
+
+                        /*
+                         * External settlement contract
+                         */
+
+                        externally_settled:
+                            true,
+
+                        external_reference:
+                            externalSettlementReference,
+
+                        funding_source:
+                            "linked_card",
+
+                        funding_source_id:
+                            sourceId,
+
+                        /*
+                         * Financial contract
+                         */
+
+                        payment_amount:
+                            commitPaymentAmount,
+
+                        payment_currency:
+                            commitPaymentCurrency,
+
+                        funding_amount:
+                            commitFundingAmount,
+
+                        funding_currency:
+                            commitFundingCurrency,
+
+                        funding_mode:
+                            "external_linked_card",
+
+                        funding_contract:
+                            "WP-011B.6E.5G.5F",
+
+                        /*
+                         * Provider execution lineage
+                         */
+
+                        operation_id:
+                            executionOperationId,
+
+                        quote_id:
+                            executionQuoteId,
+
+                        authorization_id:
+                            authorizationId,
+
+                        commit_id:
+                            commitId,
+
+                        commit_idempotency_key:
+                            commitIdempotencyKey,
+
+                        provider_reference:
+                            cleanFundingString(
+                                fundingCommit
+                                    .providerReference
+                            ) ||
+                            null,
+
+                        /*
+                         * External settlement must never mutate a PAY54
+                         * wallet.
+                         */
+
+                        wallet_mutation:
+                            false,
+
+                        /*
+                         * Funding characteristics
+                         */
+
+                        fx_used:
+                            fundingCommit.fxUsed ===
+                                true,
+
+                        fx_rate:
+                            Number.isFinite(
+                                Number(
+                                    fundingCommit.fxRate
+                                )
+                            )
+                                ? Number(
+                                    fundingCommit.fxRate
+                                )
+                                : 1,
+
+                        /*
+                         * Compatibility aliases
+                         */
+
+                        fundingSource:
+                            "linked_card",
+
+                        fundingSourceId:
+                            sourceId,
+
+                        paymentAmount:
+                            commitPaymentAmount,
+
+                        paymentCurrency:
+                            commitPaymentCurrency,
+
+                        fundingAmount:
+                            commitFundingAmount,
+
+                        fundingCurrency:
+                            commitFundingCurrency,
+
+                        operationId:
+                            executionOperationId,
+
+                        quoteId:
+                            executionQuoteId,
+
+                        authorizationId,
+
+                        commitId,
+
+                        externalReference:
+                            externalSettlementReference
+
+                    };
+
+
+                    if(
+                        selectedContact?.id
+                    ){
+
+                        externalTransactionMeta.contactId =
+                            selectedContact.id;
+
+                    }
+
+
+                    let transactionRecordResult;
+
+
+                    try{
+
+                        transactionRecordResult =
+                            transactionEngine
+                                .recordTransaction(
+                                    {
+                                        type:
+                                            "send",
+
+                                        title:
+                                            `Sent to ${linkedCardExecutionIntent.recipient}`,
+
+                                        currency:
+                                            commitPaymentCurrency,
+
+                                        amount:
+                                            -commitPaymentAmount,
+
+                                        icon:
+                                            "📤",
+
+                                        meta:
+                                            externalTransactionMeta
+                                    },
+                                    {
+                                        /*
+                                         * 5G.5F is deliberately a
+                                         * recording-only stage.
+                                         */
+
+                                        refreshUI:
+                                            false,
+
+                                        showReceipt:
+                                            false
+                                    }
+                                );
+
+                    }catch(recordingError){
+
+                        /*
+                         * ------------------------------------------------
+                         * POST-COMMIT RECORDING FAILURE
+                         * ------------------------------------------------
+                         *
+                         * Provider settlement has already completed.
+                         *
+                         * Therefore this MUST NOT fall into the ordinary
+                         * pre-commit failure path and MUST NOT invite the
+                         * customer to retry.
+                         *
+                         * WP-011B.6E.5G.5G introduces the controlled
+                         * compensation/reversal workflow.
+                         */
+
+                        fundingBalance.textContent =
+                            "Provider commitment requires reconciliation.";
+
+
+                        fundingStatus.textContent =
+                            "Linked-card funding was committed, but PAY54 could not record the transaction. Do not retry this payment.";
+
+
+                        setLinkedCardSendGuard(
+                            true
+                        );
+
+
+                        console.error(
+                            "[PAY54_SEND] CRITICAL: provider commitment succeeded but canonical transaction recording failed.",
+                            {
+                                sourceId,
+
+                                externalReference:
+                                    externalSettlementReference,
+
+                                quoteId:
+                                    executionQuoteId,
+
+                                authorizationId,
+
+                                commitId,
+
+                                operationId:
+                                    executionOperationId,
+
+                                error:
+                                    recordingError
+                            }
+                        );
+
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Payment status requires verification. Please do not retry."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * RECORDING RESULT VALIDATION
+                     * --------------------------------------------------
+                     */
+
+                    const recordedTransaction =
+                        transactionRecordResult
+                            ?.transaction ||
+                        null;
+
+
+                    const recordedMeta =
+                        recordedTransaction?.meta &&
+                        typeof recordedTransaction.meta ===
+                            "object"
+                            ? recordedTransaction.meta
+                            : {};
+
+
+                    const recordedAmount =
+                        Number(
+                            recordedTransaction?.amount
+                        );
+
+
+                    const recordedCurrency =
+                        normaliseFundingCurrency(
+                            recordedTransaction?.currency
+                        );
+
+
+                    const recordedTransactionValid =
+                        Boolean(
+
+                            transactionRecordResult?.ok ===
+                                true &&
+
+                            recordedTransaction?.id &&
+
+                            recordedTransaction?.type ===
+                                "send" &&
+
+                            Number.isFinite(
+                                recordedAmount
+                            ) &&
+
+                            recordedAmount ===
+                                -commitPaymentAmount &&
+
+                            recordedCurrency ===
+                                commitPaymentCurrency &&
+
+                            recordedMeta
+                                .externally_settled ===
+                                true &&
+
+                            cleanFundingString(
+                                recordedMeta
+                                    .funding_source
+                            ) ===
+                                "linked_card" &&
+
+                            cleanFundingString(
+                                recordedMeta
+                                    .funding_source_id
+                            ) ===
+                                sourceId &&
+
+                            cleanFundingString(
+                                recordedMeta
+                                    .external_reference
+                            ) ===
+                                externalSettlementReference &&
+
+                            cleanFundingString(
+                                recordedMeta
+                                    .operation_id
+                            ) ===
+                                executionOperationId &&
+
+                            cleanFundingString(
+                                recordedMeta
+                                    .quote_id
+                            ) ===
+                                executionQuoteId &&
+
+                            cleanFundingString(
+                                recordedMeta
+                                    .authorization_id
+                            ) ===
+                                authorizationId &&
+
+                            cleanFundingString(
+                                recordedMeta
+                                    .commit_id
+                            ) ===
+                                commitId &&
+
+                            Number(
+                                recordedMeta
+                                    .payment_amount
+                            ) ===
+                                commitPaymentAmount &&
+
+                            normaliseFundingCurrency(
+                                recordedMeta
+                                    .payment_currency
+                            ) ===
+                                commitPaymentCurrency &&
+
+                            Number(
+                                recordedMeta
+                                    .funding_amount
+                            ) ===
+                                commitFundingAmount &&
+
+                            normaliseFundingCurrency(
+                                recordedMeta
+                                    .funding_currency
+                            ) ===
+                                commitFundingCurrency &&
+
+                            recordedMeta
+                                .wallet_mutation ===
+                                false
+
+                        );
+
+
+                    if(!recordedTransactionValid){
+
+                        fundingBalance.textContent =
+                            "Recorded payment requires reconciliation.";
+
+
+                        fundingStatus.textContent =
+                            "Linked-card funding was committed, but PAY54 could not verify the canonical transaction contract. Do not retry this payment.";
+
+
+                        setLinkedCardSendGuard(
+                            true
+                        );
+
+
+                        console.error(
+                            "[PAY54_SEND] CRITICAL: canonical external transaction failed post-persistence contract validation.",
+                            {
+                                sourceId,
+
+                                externalReference:
+                                    externalSettlementReference,
+
+                                commitId,
+
+                                transactionRecordResult
+                            }
+                        );
+
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Payment status requires verification. Please do not retry."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * WALLET ISOLATION POSTCONDITION
+                     * --------------------------------------------------
+                     */
+
+                    const balancesAfterRecording =
+                        structuredClone(
+                            recordingLedger
+                                .getBalances()
+                        );
+
+
+                    const balanceCurrenciesBefore =
+                        Object.keys(
+                            balancesBeforeRecording
+                        )
+                        .sort();
+
+
+                    const balanceCurrenciesAfter =
+                        Object.keys(
+                            balancesAfterRecording
+                        )
+                        .sort();
+
+
+                    const walletCurrencySetUnchanged =
+                        JSON.stringify(
+                            balanceCurrenciesBefore
+                        ) ===
+                        JSON.stringify(
+                            balanceCurrenciesAfter
+                        );
+
+
+                    const walletValuesUnchanged =
+                        walletCurrencySetUnchanged &&
+                        balanceCurrenciesBefore
+                            .every(
+                                walletCurrency =>
+                                    Number(
+                                        balancesBeforeRecording[
+                                            walletCurrency
+                                        ]
+                                    ) ===
+                                    Number(
+                                        balancesAfterRecording[
+                                            walletCurrency
+                                        ]
+                                    )
+                            );
+
+
+                    if(!walletValuesUnchanged){
+
+                        /*
+                         * This would represent a severe architecture
+                         * violation because external transaction
+                         * recording must never post a wallet entry.
+                         */
+
+                        fundingBalance.textContent =
+                            "Payment requires reconciliation.";
+
+
+                        fundingStatus.textContent =
+                            "PAY54 detected an unexpected wallet-state change while recording an externally settled payment. Do not retry.";
+
+
+                        setLinkedCardSendGuard(
+                            true
+                        );
+
+
+                        console.error(
+                            "[PAY54_SEND] CRITICAL: external transaction recording violated wallet financial isolation.",
+                            {
+                                sourceId,
+
+                                commitId,
+
+                                transactionId:
+                                    recordedTransaction.id,
+
+                                before:
+                                    balancesBeforeRecording,
+
+                                after:
+                                    balancesAfterRecording
+                            }
+                        );
+
+
+                        window.PAY54_TOAST
+                        ?.showToast(
+                            "Payment status requires verification. Please do not retry."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * --------------------------------------------------
+                     * WP-011B.6E.5G.5F STOP BOUNDARY
+                     * --------------------------------------------------
+                     *
+                     * We now have:
+                     *
+                     * • PIN-verified execution intent
+                     * • fresh post-PIN quote
+                     * • provider authorization
+                     * • provider commit/capture
+                     * • canonical PAY54 external transaction
+                     * • verified wallet financial isolation
+                     *
+                     * Still intentionally NOT executed:
+                     *
+                     * • beneficiary transfer-stat enrichment
+                     * • final Send Money receipt
+                     * • post-commit compensation/reversal
+                     *
+                     * Compensation/reversal begins in 5G.5G.
+                     */
+
+                    fundingBalance.textContent =
+                        `Recorded payment: ${formatFundingBalance(
+                            commitPaymentCurrency,
+                            commitPaymentAmount
+                        )}`;
+
+
+                    fundingStatus.textContent =
+                        "Linked-card payment committed and recorded successfully. PAY54 wallet balances were not changed.";
+
+
+                    console.info(
+                        "[PAY54_SEND] WP-011B.6E.5G.5F canonical external transaction recorded.",
+                        {
+                            transactionId:
+                                recordedTransaction.id,
+
+                            replayed:
+                                transactionRecordResult
+                                    .replayed ===
+                                true,
+
+                            sourceId,
+
+                            externalReference:
+                                externalSettlementReference,
+
+                            executionQuoteId,
+
+                            authorizationId,
+
+                            commitId,
+
+                            operationId:
+                                executionOperationId,
+
+                            paymentAmount:
+                                commitPaymentAmount,
+
+                            paymentCurrency:
+                                commitPaymentCurrency,
+
+                            fundingAmount:
+                                commitFundingAmount,
+
+                            fundingCurrency:
+                                commitFundingCurrency,
+
+                            externallySettled:
+                                true,
+
+                            walletMutationExecuted:
+                                false,
+
+                            beneficiaryUpdated:
+                                false,
+
+                            receiptDisplayed:
+                                false
+                        }
+                    );
+
+
+                    /*
+                     * Release the generic execution busy state before
+                     * reacquiring the linked-card submission guard.
                      */
 
                     submitButton.disabled =
@@ -7852,12 +8688,10 @@ console.info(
 
 
                     /*
-                     * Immediately reacquire the linked-card guard.
+                     * Do not permit a second Send submission.
                      *
-                     * The provider has committed this funding operation.
-                     * The customer MUST NOT be able to submit it again
-                     * while canonical transaction recording remains
-                     * intentionally deferred to 5G.5F.
+                     * The external provider settlement and canonical
+                     * PAY54 transaction now both exist.
                      */
 
                     setLinkedCardSendGuard(
@@ -7867,12 +8701,11 @@ console.info(
 
                     window.PAY54_TOAST
                     ?.showToast(
-                        "Linked-card funding committed securely."
+                        "Linked-card payment recorded securely."
                     );
 
 
                     return;
-
                 }catch(error){
 
                     /*
