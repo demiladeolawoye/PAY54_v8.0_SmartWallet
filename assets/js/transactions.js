@@ -7658,12 +7658,30 @@ function recordTransaction(
 
 window.PAY54_TX = {
 
+    /*
+     * ================================================================
+     * CANONICAL TRANSACTION ENTRY POINTS
+     * ================================================================
+     *
+     * processTransaction
+     *   Existing PAY54 wallet-backed transaction execution.
+     *
+     * recordTransaction
+     *   Canonical persistence boundary for transactions whose financial
+     *   settlement has already completed outside the PAY54 wallet
+     *   ledger, including linked-card funding.
+     *
+     * IMPORTANT:
+     *
+     * recordTransaction() MUST remain the public facade over
+     * PAY54_EXTERNAL_TX.
+     *
+     * Consumers must not access PAY54_EXTERNAL_TX directly.
+     * ================================================================
+     */
+
     processTransaction,
 
-    /*
-     * External-settlement transaction recorder.
-     * Records transaction history without mutating wallet balances.
-     */
     recordTransaction,
 
     orchestrateTransaction,
