@@ -8681,53 +8681,40 @@ const compensateLinkedCardPostCommit =
                         window.PAY54_TX;
 
 
-                    if(
-                        !transactionEngine ||
-                        typeof transactionEngine
-                            .recordTransaction !==
-                            "function"
-                    ){
+                  if(
+    !transactionEngine ||
+    typeof transactionEngine
+        .recordTransaction !==
+        "function"
+){
 
-                        fundingBalance.textContent =
-                            "Provider commitment requires reconciliation.";
+    console.error(
+        "[PAY54_SEND] CRITICAL: provider commitment succeeded but PAY54 transaction recorder is unavailable.",
+        {
+            sourceId,
 
+            quoteId:
+                executionQuoteId,
 
-                        fundingStatus.textContent =
-                            "Linked-card funding was committed, but PAY54 transaction recording is unavailable. Do not retry this payment.";
+            authorizationId,
 
+            commitId,
 
-                        setLinkedCardSendGuard(
-                            true
-                        );
-
-
-                        console.error(
-                            "[PAY54_SEND] CRITICAL: provider commitment succeeded but PAY54 transaction recorder is unavailable.",
-                            {
-                                sourceId,
-
-                                quoteId:
-                                    executionQuoteId,
-
-                                authorizationId,
-
-                                commitId,
-
-                                operationId:
-                                    executionOperationId
-                            }
-                        );
+            operationId:
+                executionOperationId
+        }
+    );
 
 
-                        window.PAY54_TOAST
-                        ?.showToast(
-                            "Payment status requires verification. Please do not retry."
-                        );
+    await compensateLinkedCardPostCommit({
+        reason:
+            "TRANSACTION_RECORDER_UNAVAILABLE"
+    });
 
 
-                        return;
+    return;
 
-                    }
+}
 
 
                     /*
