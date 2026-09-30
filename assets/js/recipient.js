@@ -7847,7 +7847,825 @@ console.info(
                         }
                     );
 
+/* ==========================================================================
+   PAY54 SEND — POST-COMMIT COMPENSATION CONTROLLER
+   Work Package: WP-011B.6E.5G.5G.3
 
+   Purpose
+   -------
+   A linked-card provider commitment is financially authoritative.
+
+   If PAY54 cannot establish the canonical transaction after that commitment,
+   the original Send operation MUST NOT be retried.
+
+   Where PAY54 can prove that no canonical external-settlement transaction
+   exists, this controller requests an idempotent provider reversal through
+   PAY54_FUNDING_SERVICE.
+
+   Safety invariants
+   -----------------
+   • Never call the provider directly.
+   • Never call PAY54_LEDGER.applyEntry().
+   • Never mutate a PAY54 wallet.
+   • Never mutate a linked-card balance.
+   • Never reverse if a canonical transaction for this commit already exists.
+   • Never claim compensation unless the Funding Service confirms "reversed".
+   • Failed/unknown reversal state always requires reconciliation.
+   • Reversal identity is deterministic for the committed financial contract.
+========================================================================== */
+
+const compensateLinkedCardPostCommit =
+    async ({
+        reason,
+        cause = null
+    } = {}) => {
+
+        const compensationReason =
+            cleanFundingString(
+                reason
+            ) ||
+            "POST_COMMIT_CANONICAL_RECORDING_FAILURE";
+
+
+        /*
+         * ----------------------------------------------------------
+         * DETERMINISTIC COMPENSATION IDENTITY
+         * ----------------------------------------------------------
+         *
+         * A reversal is a separate financial operation from the
+         * original Send operation.
+         *
+         * The same committed payment must always produce the same
+         * reversal operation/idempotency identities.
+         */
+
+        const reversalOperationId =
+            `PAY54-SEND-REVERSAL-${commitId}`;
+
+        const reversalIdempotencyKey =
+            `PAY54-SEND-REVERSAL-IDEMPOTENCY-${commitId}`;
+
+
+        /*
+         * ----------------------------------------------------------
+         * CANONICAL TRANSACTION SAFETY CHECK
+         * ----------------------------------------------------------
+         *
+         * Before requesting any reversal, prove that PAY54 does not
+         * already contain a canonical externally-settled transaction
+         * for this provider commitment.
+         *
+         * This protects against the dangerous case where persistence
+         * succeeded but a later acknowledgement/verification failed.
+         */
+
+        let canonicalTransactions;
+
+
+        try{
+
+            const compensationLedger =
+                safeLedger();
+
+
+            if(
+                !compensationLedger ||
+                typeof compensationLedger
+                    .getTx !==
+                    "function"
+            ){
+
+                throw new Error(
+                    "Canonical transaction repository is unavailable during compensation."
+                );
+
+            }
+
+
+            canonicalTransactions =
+                compensationLedger
+                    .getTx();
+
+
+            if(
+                !Array.isArray(
+                    canonicalTransactions
+                )
+            ){
+
+                throw new Error(
+                    "Canonical transaction repository returned an invalid transaction collection."
+                );
+
+            }
+
+        }catch(repositoryError){
+
+            fundingBalance.textContent =
+                "Payment requires reconciliation.";
+
+
+            fundingStatus.textContent =
+                "Linked-card funding was committed, but PAY54 cannot safely determine whether a transaction was recorded. No automatic reversal was attempted. Do not retry this payment.";
+
+
+            setLinkedCardSendGuard(
+                true
+            );
+
+
+            console.error(
+                "[PAY54_SEND] WP-011B.6E.5G.5G.3 compensation blocked: canonical transaction state could not be proven.",
+                {
+                    sourceId,
+
+                    commitId,
+
+                    originalOperationId:
+                        executionOperationId,
+
+                    compensationReason,
+
+                    repositoryError,
+
+                    originalCause:
+                        cause
+                }
+            );
+
+
+            window.PAY54_TOAST
+            ?.showToast(
+                "Payment status requires verification. Please do not retry."
+            );
+
+
+            return Object.freeze({
+                ok:
+                    false,
+
+                compensated:
+                    false,
+
+                reconciliationRequired:
+                    true,
+
+                status:
+                    "canonical_state_unknown",
+
+                reversalAttempted:
+                    false,
+
+                reversalOperationId,
+
+                reversalIdempotencyKey
+            });
+
+        }
+
+
+        const existingCanonicalTransaction =
+            canonicalTransactions
+                .find(
+                    transaction => {
+
+                        const transactionMeta =
+                            transaction?.meta &&
+                            typeof transaction.meta ===
+                                "object"
+                                ? transaction.meta
+                                : {};
+
+
+                        const transactionCommitId =
+                            cleanFundingString(
+                                transactionMeta
+                                    .commit_id ||
+                                transactionMeta
+                                    .commitId
+                            );
+
+
+                        const transactionExternalReference =
+                            cleanFundingString(
+                                transactionMeta
+                                    .external_reference ||
+                                transactionMeta
+                                    .externalReference
+                            );
+
+
+                        return Boolean(
+
+                            transactionMeta
+                                .externally_settled ===
+                                true &&
+
+                            cleanFundingString(
+                                transactionMeta
+                                    .funding_source ||
+                                transactionMeta
+                                    .fundingSource
+                            ) ===
+                                "linked_card" &&
+
+                            (
+                                transactionCommitId ===
+                                    commitId ||
+
+                                transactionExternalReference ===
+                                    commitId
+                            )
+
+                        );
+
+                    }
+                ) ||
+            null;
+
+
+        if(
+            existingCanonicalTransaction
+        ){
+
+            /*
+             * A canonical PAY54 transaction already exists.
+             *
+             * Reversing here would create a provider refund while PAY54
+             * still records the payment as successfully settled.
+             *
+             * Therefore automatic compensation is forbidden.
+             */
+
+            fundingBalance.textContent =
+                "Recorded payment requires verification.";
+
+
+            fundingStatus.textContent =
+                "PAY54 detected an existing canonical transaction for this committed payment. Automatic reversal was blocked to protect financial consistency. Do not retry.";
+
+
+            setLinkedCardSendGuard(
+                true
+            );
+
+
+            console.error(
+                "[PAY54_SEND] WP-011B.6E.5G.5G.3 automatic reversal blocked because canonical transaction already exists.",
+                {
+                    sourceId,
+
+                    commitId,
+
+                    transactionId:
+                        existingCanonicalTransaction
+                            .id ||
+                        null,
+
+                    originalOperationId:
+                        executionOperationId,
+
+                    compensationReason,
+
+                    originalCause:
+                        cause
+                }
+            );
+
+
+            window.PAY54_TOAST
+            ?.showToast(
+                "Payment recorded but requires verification. Please do not retry."
+            );
+
+
+            return Object.freeze({
+                ok:
+                    false,
+
+                compensated:
+                    false,
+
+                reconciliationRequired:
+                    true,
+
+                status:
+                    "canonical_transaction_present",
+
+                reversalAttempted:
+                    false,
+
+                transactionId:
+                    existingCanonicalTransaction
+                        .id ||
+                    null,
+
+                reversalOperationId,
+
+                reversalIdempotencyKey
+            });
+
+        }
+
+
+        /*
+         * ----------------------------------------------------------
+         * FUNDING SERVICE BOUNDARY
+         * ----------------------------------------------------------
+         *
+         * Resolve at point-of-use because recipient.js loads before
+         * the Funding Service in the dashboard boot sequence.
+         */
+
+        const compensationFundingService =
+            window.PAY54_FUNDING_SERVICE;
+
+
+        if(
+            !compensationFundingService ||
+            typeof compensationFundingService
+                .reverse !==
+                "function"
+        ){
+
+            fundingBalance.textContent =
+                "Payment requires reconciliation.";
+
+
+            fundingStatus.textContent =
+                "Linked-card funding was committed, but the PAY54 compensation service is unavailable. Do not retry this payment.";
+
+
+            setLinkedCardSendGuard(
+                true
+            );
+
+
+            console.error(
+                "[PAY54_SEND] WP-011B.6E.5G.5G.3 compensation unavailable after confirmed provider commitment.",
+                {
+                    sourceId,
+
+                    commitId,
+
+                    originalOperationId:
+                        executionOperationId,
+
+                    compensationReason,
+
+                    originalCause:
+                        cause
+                }
+            );
+
+
+            window.PAY54_TOAST
+            ?.showToast(
+                "Payment status requires verification. Please do not retry."
+            );
+
+
+            return Object.freeze({
+                ok:
+                    false,
+
+                compensated:
+                    false,
+
+                reconciliationRequired:
+                    true,
+
+                status:
+                    "compensation_service_unavailable",
+
+                reversalAttempted:
+                    false,
+
+                reversalOperationId,
+
+                reversalIdempotencyKey
+            });
+
+        }
+
+
+        /*
+         * ----------------------------------------------------------
+         * REVERSAL REQUEST
+         * ----------------------------------------------------------
+         *
+         * Do not send amounts/currencies reconstructed from the UI.
+         *
+         * commitId allows the Funding Adapter to resolve the original
+         * committed financial contract and supply its authoritative
+         * amounts/currencies to the provider.
+         */
+
+        let reversalResult;
+
+
+        try{
+
+            reversalResult =
+                await compensationFundingService
+                    .reverse({
+                        sourceId,
+
+                        operationId:
+                            reversalOperationId,
+
+                        commitId,
+
+                        idempotencyKey:
+                            reversalIdempotencyKey
+                    });
+
+        }catch(reversalError){
+
+            fundingBalance.textContent =
+                "Payment requires reconciliation.";
+
+
+            fundingStatus.textContent =
+                "Linked-card funding was committed and PAY54 attempted compensation, but the reversal result could not be confirmed. Do not retry this payment.";
+
+
+            setLinkedCardSendGuard(
+                true
+            );
+
+
+            console.error(
+                "[PAY54_SEND] WP-011B.6E.5G.5G.3 reversal request failed or returned an unknown state.",
+                {
+                    sourceId,
+
+                    commitId,
+
+                    originalOperationId:
+                        executionOperationId,
+
+                    reversalOperationId,
+
+                    reversalIdempotencyKey,
+
+                    compensationReason,
+
+                    reversalError,
+
+                    originalCause:
+                        cause
+                }
+            );
+
+
+            window.PAY54_TOAST
+            ?.showToast(
+                "Payment reversal requires verification. Please do not retry."
+            );
+
+
+            return Object.freeze({
+                ok:
+                    false,
+
+                compensated:
+                    false,
+
+                reconciliationRequired:
+                    true,
+
+                status:
+                    "reversal_unconfirmed",
+
+                reversalAttempted:
+                    true,
+
+                reversalOperationId,
+
+                reversalIdempotencyKey
+            });
+
+        }
+
+
+        /*
+         * ----------------------------------------------------------
+         * FUNDING SERVICE RESULT VALIDATION
+         * ----------------------------------------------------------
+         */
+
+        if(
+            reversalResult?.ok !==
+                true
+        ){
+
+            const failureCode =
+                cleanFundingString(
+                    reversalResult
+                        ?.error
+                        ?.code ||
+                    reversalResult
+                        ?.code ||
+                    reversalResult
+                        ?.failureCode
+                ) ||
+                "FUNDING_REVERSAL_UNCONFIRMED";
+
+
+            fundingBalance.textContent =
+                "Payment requires reconciliation.";
+
+
+            fundingStatus.textContent =
+                "PAY54 attempted to reverse the committed linked-card payment, but compensation was not confirmed. Do not retry this payment.";
+
+
+            setLinkedCardSendGuard(
+                true
+            );
+
+
+            console.error(
+                "[PAY54_SEND] WP-011B.6E.5G.5G.3 Funding Service did not confirm compensation.",
+                {
+                    sourceId,
+
+                    commitId,
+
+                    originalOperationId:
+                        executionOperationId,
+
+                    reversalOperationId,
+
+                    reversalIdempotencyKey,
+
+                    compensationReason,
+
+                    failureCode,
+
+                    reversalResult,
+
+                    originalCause:
+                        cause
+                }
+            );
+
+
+            window.PAY54_TOAST
+            ?.showToast(
+                "Payment reversal requires verification. Please do not retry."
+            );
+
+
+            return Object.freeze({
+                ok:
+                    false,
+
+                compensated:
+                    false,
+
+                reconciliationRequired:
+                    true,
+
+                status:
+                    "reversal_unconfirmed",
+
+                failureCode,
+
+                reversalAttempted:
+                    true,
+
+                reversalOperationId,
+
+                reversalIdempotencyKey
+            });
+
+        }
+
+
+        const reversal =
+            reversalResult
+                ?.data
+                ?.reversal ||
+            null;
+
+
+        const reversalStatus =
+            cleanFundingString(
+                reversal?.status
+            )
+            .toLowerCase();
+
+
+        const reversalId =
+            cleanFundingString(
+                reversal?.reversalId
+            );
+
+
+        const reversalSourceId =
+            cleanFundingString(
+                reversal?.sourceId
+            );
+
+
+        const reversalCommitId =
+            cleanFundingString(
+                reversal?.commitId
+            );
+
+
+        const confirmedReversal =
+            Boolean(
+
+                reversal &&
+
+                reversalStatus ===
+                    "reversed" &&
+
+                reversalId &&
+
+                reversalSourceId ===
+                    sourceId &&
+
+                reversalCommitId ===
+                    commitId
+
+            );
+
+
+        if(
+            !confirmedReversal
+        ){
+
+            fundingBalance.textContent =
+                "Payment requires reconciliation.";
+
+
+            fundingStatus.textContent =
+                "PAY54 received a compensation response but could not verify a confirmed reversal. Do not retry this payment.";
+
+
+            setLinkedCardSendGuard(
+                true
+            );
+
+
+            console.error(
+                "[PAY54_SEND] WP-011B.6E.5G.5G.3 reversal contract validation failed.",
+                {
+                    sourceId,
+
+                    commitId,
+
+                    originalOperationId:
+                        executionOperationId,
+
+                    reversalOperationId,
+
+                    reversalIdempotencyKey,
+
+                    compensationReason,
+
+                    reversalResult,
+
+                    originalCause:
+                        cause
+                }
+            );
+
+
+            window.PAY54_TOAST
+            ?.showToast(
+                "Payment reversal requires verification. Please do not retry."
+            );
+
+
+            return Object.freeze({
+                ok:
+                    false,
+
+                compensated:
+                    false,
+
+                reconciliationRequired:
+                    true,
+
+                status:
+                    "reversal_contract_unverified",
+
+                reversalAttempted:
+                    true,
+
+                reversalOperationId,
+
+                reversalIdempotencyKey
+            });
+
+        }
+
+
+        /*
+         * ----------------------------------------------------------
+         * CONFIRMED COMPENSATION
+         * ----------------------------------------------------------
+         *
+         * The provider commitment has been successfully reversed.
+         *
+         * No PAY54 wallet mutation occurs here.
+         * No success receipt is generated.
+         * No beneficiary transfer statistics are updated.
+         */
+
+        fundingBalance.textContent =
+            `Payment reversed: ${formatFundingBalance(
+                commitPaymentCurrency,
+                commitPaymentAmount
+            )}`;
+
+
+        fundingStatus.textContent =
+            "PAY54 could not complete transaction recording after the linked-card payment was committed, so the payment was automatically reversed. No PAY54 wallet balance was changed.";
+
+
+        setLinkedCardSendGuard(
+            true
+        );
+
+
+        console.info(
+            "[PAY54_SEND] WP-011B.6E.5G.5G.3 automatic post-commit compensation confirmed.",
+            {
+                sourceId,
+
+                commitId,
+
+                originalOperationId:
+                    executionOperationId,
+
+                reversalOperationId,
+
+                reversalIdempotencyKey,
+
+                reversalId,
+
+                reversalStatus,
+
+                providerReference:
+                    cleanFundingString(
+                        reversal
+                            ?.providerReference
+                    ) ||
+                    null,
+
+                compensationReason,
+
+                externallySettled:
+                    false,
+
+                walletMutationExecuted:
+                    false,
+
+                beneficiaryUpdated:
+                    false,
+
+                receiptDisplayed:
+                    false
+            }
+        );
+
+
+        window.PAY54_TOAST
+        ?.showToast(
+            "Payment could not be completed and was automatically reversed."
+        );
+
+
+        return Object.freeze({
+            ok:
+                true,
+
+            compensated:
+                true,
+
+            reconciliationRequired:
+                false,
+
+            status:
+                "reversed",
+
+            reversalAttempted:
+                true,
+
+            reversalId,
+
+            reversalOperationId,
+
+            reversalIdempotencyKey
+        });
+
+    };
                     /*
                      * --------------------------------------------------
                      * TRANSACTION ENGINE BOUNDARY
