@@ -8733,45 +8733,34 @@ const compensateLinkedCardPostCommit =
                         commitId;
 
 
-                    if(!externalSettlementReference){
+                  if(!externalSettlementReference){
 
-                        fundingBalance.textContent =
-                            "Provider commitment requires reconciliation.";
+    console.error(
+        "[PAY54_SEND] CRITICAL: committed linked-card funding has no external settlement reference.",
+        {
+            sourceId,
 
+            executionQuoteId,
 
-                        fundingStatus.textContent =
-                            "Linked-card funding was committed, but its settlement reference is unavailable. Do not retry this payment.";
+            authorizationId,
 
+            commitId,
 
-                        setLinkedCardSendGuard(
-                            true
-                        );
-
-
-                        console.error(
-                            "[PAY54_SEND] CRITICAL: committed linked-card funding has no external settlement reference.",
-                            {
-                                sourceId,
-
-                                executionQuoteId,
-
-                                authorizationId,
-
-                                operationId:
-                                    executionOperationId
-                            }
-                        );
+            operationId:
+                executionOperationId
+        }
+    );
 
 
-                        window.PAY54_TOAST
-                        ?.showToast(
-                            "Payment status requires verification. Please do not retry."
-                        );
+    await compensateLinkedCardPostCommit({
+        reason:
+            "SETTLEMENT_REFERENCE_UNAVAILABLE"
+    });
 
 
-                        return;
+    return;
 
-                    }
+}
 
 
                     /*
