@@ -2681,8 +2681,20 @@
                         card
                     ),
 
-                providerReference:
-                    committed.providerReference
+                               providerReference:
+                    committed.providerReference,
+
+                metadata:
+                    request.metadata &&
+                    typeof request.metadata ===
+                        "object" &&
+                    !Array.isArray(
+                        request.metadata
+                    )
+                        ? clone(
+                            request.metadata
+                        )
+                        : {}
 
             });
 
