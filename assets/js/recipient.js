@@ -8780,49 +8780,35 @@ const compensateLinkedCardPostCommit =
                     const recordingLedger =
                         safeLedger();
 
+if(
+    !recordingLedger ||
+    typeof recordingLedger
+        .getBalances !==
+        "function"
+){
 
-                    if(
-                        !recordingLedger ||
-                        typeof recordingLedger
-                            .getBalances !==
-                            "function"
-                    ){
+    console.error(
+        "[PAY54_SEND] CRITICAL: wallet isolation baseline unavailable after provider commitment.",
+        {
+            sourceId,
 
-                        fundingBalance.textContent =
-                            "Provider commitment requires reconciliation.";
+            commitId,
 
-
-                        fundingStatus.textContent =
-                            "Linked-card funding was committed, but PAY54 could not verify wallet isolation. Do not retry this payment.";
-
-
-                        setLinkedCardSendGuard(
-                            true
-                        );
-
-
-                        console.error(
-                            "[PAY54_SEND] CRITICAL: wallet isolation baseline unavailable after provider commitment.",
-                            {
-                                sourceId,
-
-                                commitId,
-
-                                operationId:
-                                    executionOperationId
-                            }
-                        );
+            operationId:
+                executionOperationId
+        }
+    );
 
 
-                        window.PAY54_TOAST
-                        ?.showToast(
-                            "Payment status requires verification. Please do not retry."
-                        );
+    await compensateLinkedCardPostCommit({
+        reason:
+            "WALLET_ISOLATION_BASELINE_UNAVAILABLE"
+    });
 
 
-                        return;
+    return;
 
-                    }
+}
 
 
                     const balancesBeforeRecording =
