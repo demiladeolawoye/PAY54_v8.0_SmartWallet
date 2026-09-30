@@ -9027,70 +9027,60 @@ if(
                                     }
                                 );
 
-                    }catch(recordingError){
+                   }catch(recordingError){
 
-                        /*
-                         * ------------------------------------------------
-                         * POST-COMMIT RECORDING FAILURE
-                         * ------------------------------------------------
-                         *
-                         * Provider settlement has already completed.
-                         *
-                         * Therefore this MUST NOT fall into the ordinary
-                         * pre-commit failure path and MUST NOT invite the
-                         * customer to retry.
-                         *
-                         * WP-011B.6E.5G.5G introduces the controlled
-                         * compensation/reversal workflow.
-                         */
+    /*
+     * ==============================================================
+     * WP-011B.6E.5G.5G.3
+     * AUTOMATIC POST-COMMIT COMPENSATION
+     * ==============================================================
+     *
+     * Provider settlement is already committed.
+     *
+     * The original Send operation MUST NOT be retried.
+     *
+     * Before requesting reversal, the compensation controller checks
+     * the canonical transaction repository. If persistence actually
+     * succeeded despite the thrown recording error, automatic reversal
+     * is blocked and the operation moves to reconciliation instead.
+     */
 
-                        fundingBalance.textContent =
-                            "Provider commitment requires reconciliation.";
+    console.error(
+        "[PAY54_SEND] CRITICAL: provider commitment succeeded but canonical transaction recording failed.",
+        {
+            sourceId,
 
+            externalReference:
+                externalSettlementReference,
 
-                        fundingStatus.textContent =
-                            "Linked-card funding was committed, but PAY54 could not record the transaction. Do not retry this payment.";
+            quoteId:
+                executionQuoteId,
 
+            authorizationId,
 
-                        setLinkedCardSendGuard(
-                            true
-                        );
+            commitId,
 
+            operationId:
+                executionOperationId,
 
-                        console.error(
-                            "[PAY54_SEND] CRITICAL: provider commitment succeeded but canonical transaction recording failed.",
-                            {
-                                sourceId,
-
-                                externalReference:
-                                    externalSettlementReference,
-
-                                quoteId:
-                                    executionQuoteId,
-
-                                authorizationId,
-
-                                commitId,
-
-                                operationId:
-                                    executionOperationId,
-
-                                error:
-                                    recordingError
-                            }
-                        );
+            error:
+                recordingError
+        }
+    );
 
 
-                        window.PAY54_TOAST
-                        ?.showToast(
-                            "Payment status requires verification. Please do not retry."
-                        );
+    await compensateLinkedCardPostCommit({
+        reason:
+            "CANONICAL_TRANSACTION_RECORDING_FAILED",
+
+        cause:
+            recordingError
+    });
 
 
-                        return;
+    return;
 
-                    }
-
+}
 
                     /*
                      * --------------------------------------------------
