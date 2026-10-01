@@ -196,11 +196,12 @@ function sanitizeMeta(
 }
 
 const LS = {
-    BALANCES: "pay54_balances",
-    TX: "pay54_transactions",
-    RATES: "pay54_fx_rates",
-    BASE_CUR: "pay54_base_currency" // used for FX equivalents display
-  };
+  BALANCES: "pay54_balances",
+  TX: "pay54_transactions",
+  TX_META: "pay54_transactions_meta",
+  RATES: "pay54_fx_rates",
+  BASE_CUR: "pay54_base_currency"
+};
 
   const DEFAULT_BALANCES = {
     NGN: 1250000.5,
