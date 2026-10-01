@@ -2100,10 +2100,15 @@ window.PAY54_LEDGER = {
   getBaseCurrency,
   setBaseCurrency,
 
-  getTx,
-  setTx,
+getTx,
+setTx,
 
-  createEntry,
-  applyEntry
+getTransactionRepositoryStatus,
+initializeTransactionRepository,
+
+TX_REPOSITORY_STATE,
+
+createEntry,
+applyEntry
 };
 })();
