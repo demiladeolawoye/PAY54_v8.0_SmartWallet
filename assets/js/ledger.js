@@ -1082,7 +1082,8 @@ function inspectTransactionRepository(){
 
 function persistTransactionRepository(
   transactions,
-  previousMeta = null
+  previousMeta = null,
+  metadataOptions = {}
 ){
 
   if(
@@ -1098,11 +1099,12 @@ function persistTransactionRepository(
   }
 
 
-  const metadata =
-    buildTransactionRepositoryMeta(
-      transactions,
-      previousMeta
-    );
+const metadata =
+  buildTransactionRepositoryMeta(
+    transactions,
+    previousMeta,
+    metadataOptions
+  );
 
 
   /*
