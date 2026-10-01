@@ -150,7 +150,1017 @@ function uuid(){
   );
 
 }
+/* ==========================================================
+   STORAGE BOUNDARY
+========================================================== */
 
+function storageGet(
+  key
+){
+
+  if(STORAGE){
+
+    return STORAGE.get(
+      key
+    );
+
+  }
+
+  return localStorage.getItem(
+    key
+  );
+
+}
+
+
+function storageSet(
+  key,
+  value
+){
+
+  if(STORAGE){
+
+    STORAGE.set(
+      key,
+      value
+    );
+
+    return;
+
+  }
+
+  localStorage.setItem(
+    key,
+    JSON.stringify(
+      value
+    )
+  );
+
+}
+
+
+function isPlainObject(
+  value
+){
+
+  return Boolean(
+
+    value &&
+
+    typeof value ===
+      "object" &&
+
+    !Array.isArray(
+      value
+    )
+
+  );
+
+}
+
+
+function parseStoredDocument(
+  raw
+){
+
+  if(
+    raw === null ||
+    raw === undefined
+  ){
+
+    return {
+
+      exists:
+        false,
+
+      valid:
+        false,
+
+      value:
+        null,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  if(
+    typeof raw !==
+      "string"
+  ){
+
+    return {
+
+      exists:
+        true,
+
+      valid:
+        true,
+
+      value:
+        raw,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  try{
+
+    return {
+
+      exists:
+        true,
+
+      valid:
+        true,
+
+      value:
+        JSON.parse(
+          raw
+        ),
+
+      error:
+        null
+
+    };
+
+  }catch(error){
+
+    return {
+
+      exists:
+        true,
+
+      valid:
+        false,
+
+      value:
+        null,
+
+      error
+
+    };
+
+  }
+
+}
+
+
+function cardRepositoryError(
+  code,
+  message,
+  details = {}
+){
+
+  const error =
+    new Error(
+      message
+    );
+
+  error.name =
+    "PAY54CardRepositoryError";
+
+  error.code =
+    code;
+
+  error.details =
+    Object.freeze({
+      ...details
+    });
+
+  return error;
+
+}
+
+
+/* ==========================================================
+   REPOSITORY DIGEST
+========================================================== */
+
+function calculateCardRepositoryDigest(
+  cards
+){
+
+  const canonical =
+    JSON.stringify(
+      Array.isArray(cards)
+        ? cards
+        : []
+    );
+
+  let hash =
+    2166136261;
+
+
+  for(
+    let index = 0;
+    index < canonical.length;
+    index += 1
+  ){
+
+    hash ^=
+      canonical.charCodeAt(
+        index
+      );
+
+    hash =
+      Math.imul(
+        hash,
+        16777619
+      );
+
+  }
+
+
+  return (
+    hash >>> 0
+  )
+    .toString(16)
+    .padStart(
+      8,
+      "0"
+    );
+
+}
+
+
+/* ==========================================================
+   METADATA CONTRACT
+========================================================== */
+
+function isLegacyCardRepositoryMeta(
+  metadata
+){
+
+  return Boolean(
+
+    isPlainObject(
+      metadata
+    ) &&
+
+    metadata.version ===
+      ENGINE_VERSION &&
+
+    metadata.engine ===
+      ENGINE_NAME &&
+
+    typeof metadata.updated ===
+      "string" &&
+
+    Number.isInteger(
+      metadata.cards
+    ) &&
+
+    metadata.cards >= 0
+
+  );
+
+}
+
+
+function isValidCardRepositoryMeta(
+  metadata
+){
+
+  return Boolean(
+
+    isPlainObject(
+      metadata
+    ) &&
+
+    metadata.schemaVersion ===
+      CARD_REPOSITORY_SCHEMA_VERSION &&
+
+    metadata.documentType ===
+      CARD_REPOSITORY_DOCUMENT_TYPE &&
+
+    metadata.engineVersion ===
+      ENGINE_VERSION &&
+
+    metadata.engine ===
+      ENGINE_NAME &&
+
+    typeof metadata.initializedAt ===
+      "string" &&
+
+    metadata.initializedAt &&
+
+    typeof metadata.updatedAt ===
+      "string" &&
+
+    metadata.updatedAt &&
+
+    Number.isInteger(
+      metadata.revision
+    ) &&
+
+    metadata.revision >= 1 &&
+
+    Number.isInteger(
+      metadata.recordCount
+    ) &&
+
+    metadata.recordCount >= 0 &&
+
+    typeof metadata.contentDigest ===
+      "string" &&
+
+    metadata.contentDigest.length > 0 &&
+
+    metadata.integrityState ===
+      "VALID"
+
+  );
+
+}
+
+
+function buildCardRepositoryMeta(
+  cards,
+  previousMetadata = null
+){
+
+  const timestamp =
+    now();
+
+  const previousValid =
+    isValidCardRepositoryMeta(
+      previousMetadata
+    );
+
+
+  return {
+
+    schemaVersion:
+      CARD_REPOSITORY_SCHEMA_VERSION,
+
+    documentType:
+      CARD_REPOSITORY_DOCUMENT_TYPE,
+
+    engineVersion:
+      ENGINE_VERSION,
+
+    engine:
+      ENGINE_NAME,
+
+    initializedAt:
+      previousValid
+        ? previousMetadata
+            .initializedAt
+        : timestamp,
+
+    updatedAt:
+      timestamp,
+
+    revision:
+      previousValid
+        ? previousMetadata
+            .revision + 1
+        : 1,
+
+    recordCount:
+      cards.length,
+
+    contentDigest:
+      calculateCardRepositoryDigest(
+        cards
+      ),
+
+    integrityState:
+      "VALID"
+
+  };
+
+}
+
+
+/* ==========================================================
+   REPOSITORY INSPECTION
+========================================================== */
+
+function inspectCardRepository(){
+
+  let cardsRaw;
+  let metadataRaw;
+
+
+  try{
+
+    cardsRaw =
+      storageGet(
+        STORAGE_KEY
+      );
+
+    metadataRaw =
+      storageGet(
+        STORAGE_META_KEY
+      );
+
+  }catch(error){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .UNAVAILABLE,
+
+      code:
+        "CARD_REPOSITORY_STORAGE_UNAVAILABLE",
+
+      reason:
+        "Canonical card storage could not be accessed.",
+
+      cards:
+        null,
+
+      metadata:
+        null,
+
+      error
+
+    };
+
+  }
+
+
+  const cardDocument =
+    parseStoredDocument(
+      cardsRaw
+    );
+
+
+  const metadataDocument =
+    parseStoredDocument(
+      metadataRaw
+    );
+
+
+  /*
+   * No cards and no metadata.
+   *
+   * This is deliberately NOT interpreted as [].
+   */
+
+  if(
+    !cardDocument.exists &&
+    !metadataDocument.exists
+  ){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .UNINITIALIZED,
+
+      code:
+        "CARD_REPOSITORY_UNINITIALIZED",
+
+      reason:
+        "Canonical card repository has not been initialised.",
+
+      cards:
+        null,
+
+      metadata:
+        null,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  /*
+   * Metadata proves a repository previously existed,
+   * but the actual card repository has disappeared.
+   */
+
+  if(
+    !cardDocument.exists &&
+    metadataDocument.exists
+  ){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .LOST,
+
+      code:
+        "CARD_REPOSITORY_LOST",
+
+      reason:
+        "Canonical card repository is missing while card repository metadata still exists.",
+
+      cards:
+        null,
+
+      metadata:
+        metadataDocument.valid
+          ? metadataDocument.value
+          : null,
+
+      error:
+        metadataDocument.error
+
+    };
+
+  }
+
+
+  if(
+    !cardDocument.valid
+  ){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .CORRUPT,
+
+      code:
+        "CARD_REPOSITORY_CORRUPT",
+
+      reason:
+        "Canonical card repository contains invalid data.",
+
+      cards:
+        null,
+
+      metadata:
+        null,
+
+      error:
+        cardDocument.error
+
+    };
+
+  }
+
+
+  if(
+    !Array.isArray(
+      cardDocument.value
+    )
+  ){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .CORRUPT,
+
+      code:
+        "CARD_REPOSITORY_INVALID_DOCUMENT",
+
+      reason:
+        "Canonical card repository is not a card array.",
+
+      cards:
+        null,
+
+      metadata:
+        null,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  const cards =
+    cardDocument.value;
+
+
+  /*
+   * Existing card repository without metadata can be
+   * safely adopted because the repository itself exists.
+   */
+
+  if(
+    !metadataDocument.exists
+  ){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .LEGACY_VALID,
+
+      code:
+        "CARD_REPOSITORY_LEGACY_VALID",
+
+      reason:
+        "Existing card repository requires integrity metadata adoption.",
+
+      cards,
+
+      metadata:
+        null,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  /*
+   * Existing v11 metadata can also be upgraded safely.
+   */
+
+  if(
+    metadataDocument.valid &&
+    isLegacyCardRepositoryMeta(
+      metadataDocument.value
+    )
+  ){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .LEGACY_VALID,
+
+      code:
+        "CARD_REPOSITORY_LEGACY_VALID",
+
+      reason:
+        "Existing card repository uses legacy integrity metadata.",
+
+      cards,
+
+      metadata:
+        metadataDocument.value,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  if(
+    !metadataDocument.valid ||
+    !isValidCardRepositoryMeta(
+      metadataDocument.value
+    )
+  ){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .CORRUPT,
+
+      code:
+        "CARD_REPOSITORY_METADATA_CORRUPT",
+
+      reason:
+        "Canonical card repository metadata is invalid.",
+
+      cards,
+
+      metadata:
+        metadataDocument.valid
+          ? metadataDocument.value
+          : null,
+
+      error:
+        metadataDocument.error
+
+    };
+
+  }
+
+
+  const metadata =
+    metadataDocument.value;
+
+
+  const expectedDigest =
+    calculateCardRepositoryDigest(
+      cards
+    );
+
+
+  if(
+    metadata.recordCount !==
+      cards.length ||
+
+    metadata.contentDigest !==
+      expectedDigest
+  ){
+
+    return {
+
+      state:
+        CARD_REPOSITORY_STATE
+          .INCONSISTENT,
+
+      code:
+        "CARD_REPOSITORY_INTEGRITY_MISMATCH",
+
+      reason:
+        "Canonical card repository does not match its integrity metadata.",
+
+      cards,
+
+      metadata,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  return {
+
+    state:
+      CARD_REPOSITORY_STATE
+        .VALID,
+
+    code:
+      "CARD_REPOSITORY_VALID",
+
+    reason:
+      null,
+
+    cards,
+
+    metadata,
+
+    error:
+      null
+
+  };
+
+}
+
+
+/* ==========================================================
+   CANONICAL PERSISTENCE
+========================================================== */
+
+function persistCardRepository(
+  cards,
+  previousMetadata = null
+){
+
+  if(
+    !Array.isArray(
+      cards
+    )
+  ){
+
+    throw new TypeError(
+      "Canonical card repository must be an array."
+    );
+
+  }
+
+
+  const metadata =
+    buildCardRepositoryMeta(
+      cards,
+      previousMetadata
+    );
+
+
+  /*
+   * Card data first, integrity metadata second.
+   */
+
+  storageSet(
+    STORAGE_KEY,
+    cards
+  );
+
+  storageSet(
+    STORAGE_META_KEY,
+    metadata
+  );
+
+
+  const verification =
+    inspectCardRepository();
+
+
+  if(
+    verification.state !==
+      CARD_REPOSITORY_STATE
+        .VALID
+  ){
+
+    throw cardRepositoryError(
+      verification.code ||
+        "CARD_REPOSITORY_PERSISTENCE_FAILED",
+
+      verification.reason ||
+        "Canonical card repository persistence verification failed.",
+
+      {
+        state:
+          verification.state
+      }
+    );
+
+  }
+
+
+  return verification;
+
+}
+
+
+/* ==========================================================
+   LEGACY ADOPTION
+========================================================== */
+
+function adoptLegacyCardRepository(
+  inspection
+){
+
+  if(
+    !inspection ||
+    inspection.state !==
+      CARD_REPOSITORY_STATE
+        .LEGACY_VALID ||
+    !Array.isArray(
+      inspection.cards
+    )
+  ){
+
+    throw cardRepositoryError(
+      "CARD_REPOSITORY_LEGACY_ADOPTION_INVALID",
+      "Legacy card repository cannot be adopted from the current state."
+    );
+
+  }
+
+
+  const metadata =
+    buildCardRepositoryMeta(
+      inspection.cards
+    );
+
+
+  storageSet(
+    STORAGE_META_KEY,
+    metadata
+  );
+
+
+  const verification =
+    inspectCardRepository();
+
+
+  if(
+    verification.state !==
+      CARD_REPOSITORY_STATE
+        .VALID
+  ){
+
+    throw cardRepositoryError(
+      verification.code ||
+        "CARD_REPOSITORY_LEGACY_ADOPTION_FAILED",
+
+      verification.reason ||
+        "Legacy card repository integrity adoption failed."
+    );
+
+  }
+
+
+  return verification;
+
+}
+
+
+/* ==========================================================
+   REPOSITORY STATUS
+========================================================== */
+
+function getCardRepositoryStatus(){
+
+  const inspection =
+    inspectCardRepository();
+
+
+  return Object.freeze({
+
+    state:
+      inspection.state,
+
+    code:
+      inspection.code,
+
+    reason:
+      inspection.reason,
+
+    recordCount:
+      Array.isArray(
+        inspection.cards
+      )
+        ? inspection.cards.length
+        : null,
+
+    metadata:
+      inspection.metadata &&
+      isPlainObject(
+        inspection.metadata
+      )
+        ? Object.freeze({
+            ...inspection.metadata
+          })
+        : null
+
+  });
+
+}
+
+
+/* ==========================================================
+   STARTUP INTEGRITY CHECK
+========================================================== */
+
+function bootstrapCardRepository(){
+
+  const inspection =
+    inspectCardRepository();
+
+
+  if(
+    inspection.state ===
+      CARD_REPOSITORY_STATE
+        .VALID
+  ){
+
+    return;
+
+  }
+
+
+  if(
+    inspection.state ===
+      CARD_REPOSITORY_STATE
+        .LEGACY_VALID
+  ){
+
+    adoptLegacyCardRepository(
+      inspection
+    );
+
+    return;
+
+  }
+
+
+  if(
+    inspection.state ===
+      CARD_REPOSITORY_STATE
+        .UNINITIALIZED
+  ){
+
+    console.error(
+      "[PAY54_CARDS] Canonical card repository is absent. PAY54 cannot determine whether this account genuinely has no cards or whether card state was lost. Repository was NOT automatically initialised."
+    );
+
+    return;
+
+  }
+
+
+  console.error(
+    "[PAY54_CARDS] Card repository integrity check failed.",
+    {
+      state:
+        inspection.state,
+
+      code:
+        inspection.code,
+
+      reason:
+        inspection.reason
+    }
+  );
+
+}
 /* =========================================
    LOAD
 ========================================= */
