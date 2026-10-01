@@ -79,7 +79,42 @@ const ENGINE_VERSION =
 
 const ENGINE_NAME =
   "PAY54 Enterprise Cards Engine";
+/* ==========================================================
+   CANONICAL CARD REPOSITORY INTEGRITY
+   Work Package: WP-011B.6E.5G.5G.7
+========================================================== */
 
+const CARD_REPOSITORY_SCHEMA_VERSION =
+  1;
+
+const CARD_REPOSITORY_DOCUMENT_TYPE =
+  "pay54.cards.repository.meta";
+
+const CARD_REPOSITORY_STATE =
+  Object.freeze({
+
+    UNINITIALIZED:
+      "UNINITIALIZED",
+
+    LEGACY_VALID:
+      "LEGACY_VALID",
+
+    VALID:
+      "VALID",
+
+    LOST:
+      "LOST",
+
+    CORRUPT:
+      "CORRUPT",
+
+    INCONSISTENT:
+      "INCONSISTENT",
+
+    UNAVAILABLE:
+      "UNAVAILABLE"
+
+  });
    const STORAGE =
 window.PAY54_SECURITY?.storage;
 
