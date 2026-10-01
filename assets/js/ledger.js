@@ -1310,10 +1310,65 @@ function initializeTransactionRepository(){
   }
 
 
+  let existingBalances;
+
+
+  try{
+
+    existingBalances =
+      storageGet(
+        LS.BALANCES
+      );
+
+  }catch(error){
+
+    throw transactionRepositoryError(
+      "TX_REPOSITORY_INITIALIZATION_SAFETY_UNKNOWN",
+      "PAY54 could not establish whether ordinary transaction repository initialization is safe.",
+      {
+        cause:
+          error?.message ||
+          String(error)
+      }
+    );
+
+  }
+
+
+  /*
+   * Ordinary initialization is valid only for a genuinely
+   * fresh PAY54 state where no wallet repository exists.
+   *
+   * Existing wallet state + missing transaction state is an
+   * historical-continuity ambiguity and must use the explicit
+   * historical-gap recovery baseline instead.
+   */
+
+  if(
+    existingBalances !== null &&
+    existingBalances !== undefined
+  ){
+
+    throw transactionRepositoryError(
+      "TX_REPOSITORY_RECOVERY_BASELINE_REQUIRED",
+      "Wallet state already exists while transaction history is uninitialised. Ordinary initialization is blocked; an explicit historical-gap recovery baseline is required.",
+      {
+        state:
+          inspection.state
+      }
+    );
+
+  }
+
+
   const verification =
     persistTransactionRepository(
       [],
-      null
+      null,
+      {
+        historyContinuity:
+          TX_HISTORY_CONTINUITY.COMPLETE
+      }
     );
 
 
@@ -1326,6 +1381,9 @@ function initializeTransactionRepository(){
       revision:
         verification.metadata.revision,
 
+      historyContinuity:
+        TX_HISTORY_CONTINUITY.COMPLETE,
+
       occurredAt:
         nowISO()
     }
@@ -1335,8 +1393,381 @@ function initializeTransactionRepository(){
   return getTransactionRepositoryStatus();
 
 }
+/* ==========================================================
+   EXPLICIT HISTORICAL-GAP RECOVERY BASELINE
+   Work Package: WP-011B.6E.5G.5G.4 — Stage 2
+========================================================== */
+
+function establishTransactionHistoryRecoveryBaseline(
+  request = {}
+){
+
+  if(
+    !isPlainObject(
+      request
+    )
+  ){
+
+    throw new TypeError(
+      "Historical-gap recovery request must be an object."
+    );
+
+  }
 
 
+  const reason =
+    typeof request.reason ===
+      "string"
+        ? request.reason.trim()
+        : "";
+
+
+  const acknowledgedHistoryGap =
+    request.acknowledgedHistoryGap ===
+      true;
+
+
+  if(
+    !acknowledgedHistoryGap
+  ){
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_GAP_ACKNOWLEDGEMENT_REQUIRED",
+      "Explicit acknowledgement of the historical transaction continuity gap is required."
+    );
+
+  }
+
+
+  if(
+    reason.length < 10 ||
+    reason.length > 500
+  ){
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_GAP_REASON_REQUIRED",
+      "A recovery reason between 10 and 500 characters is required."
+    );
+
+  }
+
+
+  const inspection =
+    inspectTransactionRepository();
+
+
+  /*
+   * Recovery baseline creation is intentionally single-use.
+   */
+
+  if(
+    inspection.state ===
+      TX_REPOSITORY_STATE.VALID
+  ){
+
+    const continuity =
+      inspection.metadata
+        ?.historyContinuity ??
+      TX_HISTORY_CONTINUITY.COMPLETE;
+
+
+    if(
+      continuity ===
+        TX_HISTORY_CONTINUITY
+          .UNKNOWN_BEFORE_BASELINE
+    ){
+
+      throw transactionRepositoryError(
+        "TX_HISTORY_RECOVERY_BASELINE_ALREADY_ESTABLISHED",
+        "A historical-gap recovery baseline already exists.",
+        {
+          recoveryBaselineAt:
+            inspection.metadata
+              ?.recoveryBaselineAt ||
+            null,
+
+          revision:
+            inspection.metadata
+              ?.revision ||
+            null
+        }
+      );
+
+    }
+
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_RECOVERY_NOT_PERMITTED",
+      "A valid canonical transaction repository already exists; historical-gap recovery is not permitted."
+    );
+
+  }
+
+
+  if(
+    inspection.state !==
+      TX_REPOSITORY_STATE
+        .UNINITIALIZED
+  ){
+
+    throw transactionRepositoryError(
+      inspection.code ||
+        "TX_HISTORY_RECOVERY_BLOCKED",
+
+      inspection.reason ||
+        "Historical-gap recovery is not safe from the current repository state.",
+
+      {
+        state:
+          inspection.state
+      }
+    );
+
+  }
+
+
+  /*
+   * Existing wallet state is mandatory.
+   *
+   * If no wallet state exists, this is not an historical-gap
+   * recovery scenario; ordinary initialization should be used.
+   */
+
+  let balanceRaw;
+
+
+  try{
+
+    balanceRaw =
+      storageGet(
+        LS.BALANCES
+      );
+
+  }catch(error){
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_RECOVERY_BALANCE_STATE_UNAVAILABLE",
+      "Wallet state could not be accessed during historical-gap recovery.",
+      {
+        cause:
+          error?.message ||
+          String(error)
+      }
+    );
+
+  }
+
+
+  if(
+    balanceRaw === null ||
+    balanceRaw === undefined
+  ){
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_RECOVERY_WALLET_STATE_REQUIRED",
+      "Historical-gap recovery requires an existing wallet repository."
+    );
+
+  }
+
+
+  const balanceDocument =
+    parseStoredJSON(
+      balanceRaw
+    );
+
+
+  if(
+    !balanceDocument.valid ||
+    !isPlainObject(
+      balanceDocument.value
+    )
+  ){
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_RECOVERY_WALLET_STATE_INVALID",
+      "Historical-gap recovery was blocked because the wallet repository is invalid."
+    );
+
+  }
+
+
+  const balanceEntries =
+    Object.entries(
+      balanceDocument.value
+    );
+
+
+  const walletStateValid =
+    balanceEntries.length > 0 &&
+    balanceEntries.every(
+      ([currency, amount]) => {
+
+        return Boolean(
+
+          /^[A-Z]{3}$/.test(
+            String(
+              currency || ""
+            )
+            .trim()
+            .toUpperCase()
+          ) &&
+
+          Number.isFinite(
+            Number(
+              amount
+            )
+          )
+
+        );
+
+      }
+    );
+
+
+  if(
+    !walletStateValid
+  ){
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_RECOVERY_WALLET_STATE_INVALID",
+      "Historical-gap recovery was blocked because wallet balances failed structural validation."
+    );
+
+  }
+
+
+  const recoveryBaselineAt =
+    nowISO();
+
+
+  /*
+   * No historical transaction is created here.
+   *
+   * The empty repository represents only the start of the
+   * new canonical observation window.
+   *
+   * Metadata permanently records that continuity before this
+   * timestamp is unknown.
+   */
+
+  const verification =
+    persistTransactionRepository(
+      [],
+      null,
+      {
+        historyContinuity:
+          TX_HISTORY_CONTINUITY
+            .UNKNOWN_BEFORE_BASELINE,
+
+        recoveryBaselineAt,
+
+        recoveryReason:
+          reason,
+
+        recoveryAcknowledged:
+          true
+      }
+    );
+
+
+  const metadata =
+    verification.metadata;
+
+
+  const recoveryContractValid =
+    Boolean(
+
+      verification.state ===
+        TX_REPOSITORY_STATE.VALID &&
+
+      Array.isArray(
+        verification.transactions
+      ) &&
+
+      verification.transactions.length ===
+        0 &&
+
+      metadata &&
+
+      metadata.recordCount ===
+        0 &&
+
+      metadata.historyContinuity ===
+        TX_HISTORY_CONTINUITY
+          .UNKNOWN_BEFORE_BASELINE &&
+
+      metadata.baselineType ===
+        TX_REPOSITORY_BASELINE_TYPE
+          .HISTORICAL_GAP_RECOVERY &&
+
+      metadata.recoveryBaselineAt ===
+        recoveryBaselineAt &&
+
+      metadata.recoveryReason ===
+        reason &&
+
+      metadata.recoveryAcknowledged ===
+        true
+
+  );
+
+
+  if(
+    !recoveryContractValid
+  ){
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_RECOVERY_VERIFICATION_FAILED",
+      "PAY54 could not verify the historical-gap recovery baseline after persistence."
+    );
+
+  }
+
+
+  publishLedgerEvent(
+    "ledger.transaction.repository.recovery.baseline.established",
+    {
+      recoveryBaselineAt,
+
+      recoveryReason:
+        reason,
+
+      historyContinuity:
+        metadata.historyContinuity,
+
+      baselineType:
+        metadata.baselineType,
+
+      recordCount:
+        metadata.recordCount,
+
+      revision:
+        metadata.revision,
+
+      occurredAt:
+        nowISO()
+    }
+  );
+
+
+  console.warn(
+    "[PAY54_LEDGER] Historical transaction continuity before the recovery baseline is unknown.",
+    {
+      recoveryBaselineAt,
+
+      historyContinuity:
+        metadata.historyContinuity,
+
+      recordCount:
+        metadata.recordCount
+    }
+  );
+
+
+  return getTransactionRepositoryStatus();
+
+}
 function bootstrapTransactionRepository(){
 
   const inspection =
@@ -1464,6 +1895,30 @@ function getTransactionRepositoryStatus(){
     inspectTransactionRepository();
 
 
+  const metadata =
+    inspection.metadata &&
+    isPlainObject(
+      inspection.metadata
+    )
+      ? inspection.metadata
+      : null;
+
+
+  const historyContinuity =
+    metadata
+      ? (
+          metadata.historyContinuity ??
+          TX_HISTORY_CONTINUITY.COMPLETE
+        )
+      : null;
+
+
+  const historicalGap =
+    historyContinuity ===
+      TX_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE;
+
+
   return Object.freeze({
 
     state:
@@ -1482,10 +1937,26 @@ function getTransactionRepositoryStatus(){
         ? inspection.transactions.length
         : null,
 
+    historyContinuity,
+
+    historicalGap,
+
+    recoveryBaselineAt:
+      historicalGap
+        ? metadata
+            ?.recoveryBaselineAt ||
+          null
+        : null,
+
+    baselineType:
+      metadata
+        ?.baselineType ||
+      null,
+
     metadata:
-      inspection.metadata
+      metadata
         ? Object.freeze({
-            ...inspection.metadata
+            ...metadata
           })
         : null
 
@@ -2352,8 +2823,11 @@ setTx,
 
 getTransactionRepositoryStatus,
 initializeTransactionRepository,
+establishTransactionHistoryRecoveryBaseline,
 
 TX_REPOSITORY_STATE,
+TX_HISTORY_CONTINUITY,
+TX_REPOSITORY_BASELINE_TYPE,
 
 createEntry,
 applyEntry
