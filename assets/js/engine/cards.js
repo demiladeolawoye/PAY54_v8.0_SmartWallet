@@ -456,6 +456,142 @@ function isValidCardRepositoryMeta(
   metadata
 ){
 
+  if(
+    !isPlainObject(
+      metadata
+    ) ||
+
+    metadata.schemaVersion !==
+      CARD_REPOSITORY_SCHEMA_VERSION ||
+
+    metadata.documentType !==
+      CARD_REPOSITORY_DOCUMENT_TYPE ||
+
+    metadata.engineVersion !==
+      ENGINE_VERSION ||
+
+    metadata.engine !==
+      ENGINE_NAME ||
+
+    typeof metadata.initializedAt !==
+      "string" ||
+
+    !metadata.initializedAt ||
+
+    typeof metadata.updatedAt !==
+      "string" ||
+
+    !metadata.updatedAt ||
+
+    !Number.isInteger(
+      metadata.revision
+    ) ||
+
+    metadata.revision < 1 ||
+
+    !Number.isInteger(
+      metadata.recordCount
+    ) ||
+
+    metadata.recordCount < 0 ||
+
+    typeof metadata.contentDigest !==
+      "string" ||
+
+    !metadata.contentDigest ||
+
+    metadata.integrityState !==
+      "VALID"
+  ){
+
+    return false;
+
+  }
+
+
+  /*
+   * Stage 1 metadata created before continuity support
+   * remains valid and is interpreted as COMPLETE.
+   */
+
+  const continuity =
+    metadata.historyContinuity ??
+    CARD_HISTORY_CONTINUITY.COMPLETE;
+
+
+  if(
+    continuity !==
+      CARD_HISTORY_CONTINUITY.COMPLETE &&
+
+    continuity !==
+      CARD_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE
+  ){
+
+    return false;
+
+  }
+
+
+  if(
+    continuity ===
+      CARD_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE
+  ){
+
+    return Boolean(
+
+      metadata.baselineType ===
+        CARD_REPOSITORY_BASELINE_TYPE
+          .HISTORICAL_GAP_RECOVERY &&
+
+      typeof metadata.recoveryBaselineAt ===
+        "string" &&
+
+      metadata.recoveryBaselineAt.length > 0 &&
+
+      typeof metadata.recoveryReason ===
+        "string" &&
+
+      metadata.recoveryReason
+        .trim()
+        .length >= 10 &&
+
+      metadata.recoveryAcknowledged ===
+        true
+
+    );
+
+  }
+
+
+  /*
+   * COMPLETE continuity must not simultaneously claim
+   * historical-gap recovery.
+   */
+
+  if(
+    metadata.baselineType ===
+      CARD_REPOSITORY_BASELINE_TYPE
+        .HISTORICAL_GAP_RECOVERY ||
+
+    metadata.recoveryBaselineAt ||
+
+    metadata.recoveryReason ||
+
+    metadata.recoveryAcknowledged ===
+      true
+  ){
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
   return Boolean(
 
     isPlainObject(
@@ -511,11 +647,40 @@ function isValidCardRepositoryMeta(
 
 function buildCardRepositoryMeta(
   cards,
-  previousMetadata = null
+  previousMetadata = null,
+  options = {}
 ){
+
+  if(
+    !Array.isArray(
+      cards
+    )
+  ){
+
+    throw new TypeError(
+      "Canonical card repository must be an array."
+    );
+
+  }
+
+
+  if(
+    options !== undefined &&
+    !isPlainObject(
+      options
+    )
+  ){
+
+    throw new TypeError(
+      "Card repository metadata options must be an object."
+    );
+
+  }
+
 
   const timestamp =
     now();
+
 
   const previousValid =
     isValidCardRepositoryMeta(
@@ -523,7 +688,51 @@ function buildCardRepositoryMeta(
     );
 
 
-  return {
+  const previousContinuity =
+    previousValid
+      ? (
+          previousMetadata.historyContinuity ??
+          CARD_HISTORY_CONTINUITY.COMPLETE
+        )
+      : null;
+
+
+  const requestedContinuity =
+    options.historyContinuity ??
+    previousContinuity ??
+    CARD_HISTORY_CONTINUITY.COMPLETE;
+
+
+  const isRecoveryBaseline =
+    requestedContinuity ===
+      CARD_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE;
+
+
+  /*
+   * Once a historical-gap baseline exists it cannot be
+   * downgraded to COMPLETE by an ordinary card write.
+   */
+
+  if(
+    previousContinuity ===
+      CARD_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE &&
+
+    requestedContinuity !==
+      CARD_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE
+  ){
+
+    throw cardRepositoryError(
+      "CARD_HISTORY_CONTINUITY_DOWNGRADE_BLOCKED",
+      "Historical card continuity cannot be changed from unknown-before-baseline to complete."
+    );
+
+  }
+
+
+  const metadata = {
 
     schemaVersion:
       CARD_REPOSITORY_SCHEMA_VERSION,
@@ -561,12 +770,66 @@ function buildCardRepositoryMeta(
       ),
 
     integrityState:
-      "VALID"
+      "VALID",
+
+    historyContinuity:
+      requestedContinuity
 
   };
 
-}
 
+  if(
+    isRecoveryBaseline
+  ){
+
+    const preservingExistingRecovery =
+      previousValid &&
+      previousMetadata.historyContinuity ===
+        CARD_HISTORY_CONTINUITY
+          .UNKNOWN_BEFORE_BASELINE;
+
+
+    metadata.baselineType =
+      CARD_REPOSITORY_BASELINE_TYPE
+        .HISTORICAL_GAP_RECOVERY;
+
+
+    metadata.recoveryBaselineAt =
+      preservingExistingRecovery
+        ? previousMetadata
+            .recoveryBaselineAt
+        : options
+            .recoveryBaselineAt;
+
+
+    metadata.recoveryReason =
+      preservingExistingRecovery
+        ? previousMetadata
+            .recoveryReason
+        : options
+            .recoveryReason;
+
+
+    metadata.recoveryAcknowledged =
+      preservingExistingRecovery
+        ? previousMetadata
+            .recoveryAcknowledged
+        : options
+            .recoveryAcknowledged ===
+              true;
+
+  }else{
+
+    metadata.baselineType =
+      CARD_REPOSITORY_BASELINE_TYPE
+        .NORMAL_INITIALIZATION;
+
+  }
+
+
+  return metadata;
+
+}
 
 /* ==========================================================
    REPOSITORY INSPECTION
@@ -946,7 +1209,8 @@ function inspectCardRepository(){
 
 function persistCardRepository(
   cards,
-  previousMetadata = null
+  previousMetadata = null,
+  metadataOptions = {}
 ){
 
   if(
@@ -962,11 +1226,12 @@ function persistCardRepository(
   }
 
 
-  const metadata =
-    buildCardRepositoryMeta(
-      cards,
-      previousMetadata
-    );
+ const metadata =
+  buildCardRepositoryMeta(
+    cards,
+    previousMetadata,
+    metadataOptions
+  );
 
 
   /*
@@ -1120,7 +1385,334 @@ function getCardRepositoryStatus(){
   });
 
 }
+/* ==========================================================
+   EXPLICIT CARD REPOSITORY RECOVERY BASELINE
+   Work Package: WP-011B.6E.5G.5G.7 — Stage 2
+========================================================== */
 
+function establishCardRepositoryRecoveryBaseline(
+  request = {}
+){
+
+  if(
+    !isPlainObject(
+      request
+    )
+  ){
+
+    throw new TypeError(
+      "Card repository recovery request must be an object."
+    );
+
+  }
+
+
+  const reason =
+    typeof request.reason ===
+      "string"
+        ? request.reason.trim()
+        : "";
+
+
+  const acknowledgedHistoryGap =
+    request.acknowledgedHistoryGap ===
+      true;
+
+
+  if(
+    !acknowledgedHistoryGap
+  ){
+
+    throw cardRepositoryError(
+      "CARD_HISTORY_GAP_ACKNOWLEDGEMENT_REQUIRED",
+      "Explicit acknowledgement of the historical card continuity gap is required."
+    );
+
+  }
+
+
+  if(
+    reason.length < 10 ||
+    reason.length > 500
+  ){
+
+    throw cardRepositoryError(
+      "CARD_HISTORY_GAP_REASON_REQUIRED",
+      "A card repository recovery reason between 10 and 500 characters is required."
+    );
+
+  }
+
+
+  const inspection =
+    inspectCardRepository();
+
+
+  /*
+   * Recovery is single-use.
+   */
+
+  if(
+    inspection.state ===
+      CARD_REPOSITORY_STATE.VALID
+  ){
+
+    const continuity =
+      inspection.metadata
+        ?.historyContinuity ??
+      CARD_HISTORY_CONTINUITY.COMPLETE;
+
+
+    if(
+      continuity ===
+        CARD_HISTORY_CONTINUITY
+          .UNKNOWN_BEFORE_BASELINE
+    ){
+
+      throw cardRepositoryError(
+        "CARD_HISTORY_RECOVERY_BASELINE_ALREADY_ESTABLISHED",
+        "A historical-gap card repository recovery baseline already exists.",
+        {
+          recoveryBaselineAt:
+            inspection.metadata
+              ?.recoveryBaselineAt ||
+            null,
+
+          revision:
+            inspection.metadata
+              ?.revision ||
+            null
+        }
+      );
+
+    }
+
+
+    throw cardRepositoryError(
+      "CARD_HISTORY_RECOVERY_NOT_PERMITTED",
+      "A valid canonical card repository already exists; historical-gap recovery is not permitted."
+    );
+
+  }
+
+
+  if(
+    inspection.state !==
+      CARD_REPOSITORY_STATE
+        .UNINITIALIZED
+  ){
+
+    throw cardRepositoryError(
+      inspection.code ||
+        "CARD_HISTORY_RECOVERY_BLOCKED",
+
+      inspection.reason ||
+        "Historical card recovery is not safe from the current repository state.",
+
+      {
+        state:
+          inspection.state
+      }
+    );
+
+  }
+
+
+  /*
+   * Require evidence that this is an existing PAY54
+   * account rather than an untouched fresh installation.
+   *
+   * The Ledger must exist and its transaction repository
+   * must already have a recognised canonical state.
+   */
+
+  const ledger =
+    window.PAY54_LEDGER ||
+    null;
+
+
+  if(
+    !ledger ||
+    typeof ledger
+      .getTransactionRepositoryStatus !==
+        "function"
+  ){
+
+    throw cardRepositoryError(
+      "CARD_HISTORY_RECOVERY_ACCOUNT_EVIDENCE_UNAVAILABLE",
+      "PAY54 could not establish existing-account evidence for card repository recovery."
+    );
+
+  }
+
+
+  let ledgerStatus;
+
+
+  try{
+
+    ledgerStatus =
+      ledger
+        .getTransactionRepositoryStatus();
+
+  }catch(error){
+
+    throw cardRepositoryError(
+      "CARD_HISTORY_RECOVERY_ACCOUNT_EVIDENCE_UNAVAILABLE",
+      "PAY54 could not verify existing wallet transaction state before card repository recovery.",
+      {
+        cause:
+          error?.message ||
+          String(error)
+      }
+    );
+
+  }
+
+
+  if(
+    ledgerStatus?.state !==
+      "VALID"
+  ){
+
+    throw cardRepositoryError(
+      "CARD_HISTORY_RECOVERY_ACCOUNT_EVIDENCE_INVALID",
+      "Card repository recovery requires a valid canonical PAY54 transaction repository.",
+      {
+        ledgerState:
+          ledgerStatus?.state ||
+          null
+      }
+    );
+
+  }
+
+
+  const recoveryBaselineAt =
+    now();
+
+
+  /*
+   * No historical card is fabricated here.
+   *
+   * [] means only:
+   * canonical card observation begins from this baseline.
+   */
+
+  const verification =
+    persistCardRepository(
+      [],
+      null,
+      {
+        historyContinuity:
+          CARD_HISTORY_CONTINUITY
+            .UNKNOWN_BEFORE_BASELINE,
+
+        recoveryBaselineAt,
+
+        recoveryReason:
+          reason,
+
+        recoveryAcknowledged:
+          true
+      }
+    );
+
+
+  const metadata =
+    verification.metadata;
+
+
+  const contractValid =
+    Boolean(
+
+      verification.state ===
+        CARD_REPOSITORY_STATE.VALID &&
+
+      Array.isArray(
+        verification.cards
+      ) &&
+
+      verification.cards.length ===
+        0 &&
+
+      metadata &&
+
+      metadata.recordCount ===
+        0 &&
+
+      metadata.historyContinuity ===
+        CARD_HISTORY_CONTINUITY
+          .UNKNOWN_BEFORE_BASELINE &&
+
+      metadata.baselineType ===
+        CARD_REPOSITORY_BASELINE_TYPE
+          .HISTORICAL_GAP_RECOVERY &&
+
+      metadata.recoveryBaselineAt ===
+        recoveryBaselineAt &&
+
+      metadata.recoveryReason ===
+        reason &&
+
+      metadata.recoveryAcknowledged ===
+        true
+
+  );
+
+
+  if(
+    !contractValid
+  ){
+
+    throw cardRepositoryError(
+      "CARD_HISTORY_RECOVERY_VERIFICATION_FAILED",
+      "PAY54 could not verify the card repository historical-gap recovery baseline after persistence."
+    );
+
+  }
+
+
+  publishCardEvent(
+    "cards.repository.recovery.baseline.established",
+    {
+      recoveryBaselineAt,
+
+      historyContinuity:
+        metadata.historyContinuity,
+
+      baselineType:
+        metadata.baselineType,
+
+      recordCount:
+        metadata.recordCount,
+
+      revision:
+        metadata.revision,
+
+      recoveredAt:
+        now()
+    }
+  );
+
+
+  console.warn(
+    "[PAY54_CARDS] Historical card continuity before the recovery baseline is unknown.",
+    {
+      recoveryBaselineAt,
+
+      historyContinuity:
+        metadata.historyContinuity,
+
+      recordCount:
+        metadata.recordCount
+    }
+  );
+
+
+  return getCardRepositoryStatus();
+
+}
 
 /* ==========================================================
    STARTUP INTEGRITY CHECK
