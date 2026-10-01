@@ -592,59 +592,6 @@ function isValidCardRepositoryMeta(
 
 }
 
-  return Boolean(
-
-    isPlainObject(
-      metadata
-    ) &&
-
-    metadata.schemaVersion ===
-      CARD_REPOSITORY_SCHEMA_VERSION &&
-
-    metadata.documentType ===
-      CARD_REPOSITORY_DOCUMENT_TYPE &&
-
-    metadata.engineVersion ===
-      ENGINE_VERSION &&
-
-    metadata.engine ===
-      ENGINE_NAME &&
-
-    typeof metadata.initializedAt ===
-      "string" &&
-
-    metadata.initializedAt &&
-
-    typeof metadata.updatedAt ===
-      "string" &&
-
-    metadata.updatedAt &&
-
-    Number.isInteger(
-      metadata.revision
-    ) &&
-
-    metadata.revision >= 1 &&
-
-    Number.isInteger(
-      metadata.recordCount
-    ) &&
-
-    metadata.recordCount >= 0 &&
-
-    typeof metadata.contentDigest ===
-      "string" &&
-
-    metadata.contentDigest.length > 0 &&
-
-    metadata.integrityState ===
-      "VALID"
-
-  );
-
-}
-
-
 function buildCardRepositoryMeta(
   cards,
   previousMetadata = null,
