@@ -549,18 +549,93 @@ function isValidTransactionRepositoryMeta(
 
 function buildTransactionRepositoryMeta(
   transactions,
-  previousMeta = null
+  previousMeta = null,
+  options = {}
 ){
+
+  if(
+    !Array.isArray(
+      transactions
+    )
+  ){
+
+    throw new TypeError(
+      "Canonical transaction repository must be an array."
+    );
+
+  }
+
+
+  if(
+    options !== undefined &&
+    !isPlainObject(
+      options
+    )
+  ){
+
+    throw new TypeError(
+      "Transaction repository metadata options must be an object."
+    );
+
+  }
+
 
   const now =
     nowISO();
+
 
   const previousIsValid =
     isValidTransactionRepositoryMeta(
       previousMeta
     );
 
-  return {
+
+  const previousContinuity =
+    previousIsValid
+      ? (
+          previousMeta.historyContinuity ??
+          TX_HISTORY_CONTINUITY.COMPLETE
+        )
+      : null;
+
+
+  const requestedContinuity =
+    options.historyContinuity ??
+    previousContinuity ??
+    TX_HISTORY_CONTINUITY.COMPLETE;
+
+
+  const isRecoveryBaseline =
+    requestedContinuity ===
+      TX_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE;
+
+
+  /*
+   * Once historical continuity is marked unknown before a
+   * recovery baseline, ordinary transaction writes must
+   * preserve that fact permanently.
+   */
+
+  if(
+    previousContinuity ===
+      TX_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE &&
+
+    requestedContinuity !==
+      TX_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE
+  ){
+
+    throw transactionRepositoryError(
+      "TX_HISTORY_CONTINUITY_DOWNGRADE_BLOCKED",
+      "Historical-gap recovery continuity cannot be changed to complete continuity."
+    );
+
+  }
+
+
+  const metadata = {
 
     schemaVersion:
       TX_REPOSITORY_SCHEMA_VERSION,
@@ -594,12 +669,70 @@ function buildTransactionRepositoryMeta(
       ),
 
     integrityState:
-      "VALID"
+      "VALID",
+
+    historyContinuity:
+      requestedContinuity
 
   };
 
-}
 
+  if(
+    isRecoveryBaseline
+  ){
+
+    const recoveryBaselineAt =
+      previousIsValid &&
+      previousMeta.historyContinuity ===
+        TX_HISTORY_CONTINUITY
+          .UNKNOWN_BEFORE_BASELINE
+        ? previousMeta.recoveryBaselineAt
+        : options.recoveryBaselineAt;
+
+
+    const recoveryReason =
+      previousIsValid &&
+      previousMeta.historyContinuity ===
+        TX_HISTORY_CONTINUITY
+          .UNKNOWN_BEFORE_BASELINE
+        ? previousMeta.recoveryReason
+        : options.recoveryReason;
+
+
+    const recoveryAcknowledged =
+      previousIsValid &&
+      previousMeta.historyContinuity ===
+        TX_HISTORY_CONTINUITY
+          .UNKNOWN_BEFORE_BASELINE
+        ? previousMeta.recoveryAcknowledged
+        : options.recoveryAcknowledged;
+
+
+    metadata.baselineType =
+      TX_REPOSITORY_BASELINE_TYPE
+        .HISTORICAL_GAP_RECOVERY;
+
+    metadata.recoveryBaselineAt =
+      recoveryBaselineAt;
+
+    metadata.recoveryReason =
+      recoveryReason;
+
+    metadata.recoveryAcknowledged =
+      recoveryAcknowledged === true;
+
+  }else{
+
+    metadata.baselineType =
+      TX_REPOSITORY_BASELINE_TYPE
+        .NORMAL_INITIALIZATION;
+
+  }
+
+
+  return metadata;
+
+}
 
 function inspectTransactionRepository(){
 
