@@ -255,7 +255,996 @@ const LS = {
   function uid(prefix = "TX") {
     return `${prefix}-${Math.random().toString(16).slice(2, 8).toUpperCase()}-${Date.now().toString().slice(-6)}`;
   }
+/* ==========================================================
+   CANONICAL TRANSACTION REPOSITORY INTEGRITY
+   Work Package: WP-011B.6E.5G.5G.4
+========================================================== */
 
+const TX_REPOSITORY_SCHEMA_VERSION = 1;
+
+const TX_REPOSITORY_DOCUMENT_TYPE =
+  "pay54.transactions.repository.meta";
+
+const TX_REPOSITORY_STATE = Object.freeze({
+  UNINITIALIZED: "UNINITIALIZED",
+  LEGACY_VALID: "LEGACY_VALID",
+  VALID: "VALID",
+  LOST: "LOST",
+  CORRUPT: "CORRUPT",
+  INCONSISTENT: "INCONSISTENT",
+  UNAVAILABLE: "UNAVAILABLE"
+});
+
+
+function transactionRepositoryError(
+  code,
+  message,
+  details = {}
+){
+
+  const error =
+    new Error(message);
+
+  error.name =
+    "PAY54TransactionRepositoryError";
+
+  error.code =
+    code;
+
+  error.details =
+    Object.freeze({
+      ...details
+    });
+
+  return error;
+
+}
+
+
+function parseStoredJSON(
+  raw
+){
+
+  if(
+    raw === null ||
+    raw === undefined
+  ){
+
+    return {
+      exists: false,
+      valid: false,
+      value: null,
+      error: null
+    };
+
+  }
+
+  try{
+
+    const value =
+      typeof raw === "string"
+        ? JSON.parse(raw)
+        : raw;
+
+    return {
+      exists: true,
+      valid: true,
+      value,
+      error: null
+    };
+
+  }catch(error){
+
+    return {
+      exists: true,
+      valid: false,
+      value: null,
+      error
+    };
+
+  }
+
+}
+
+
+function calculateTransactionRepositoryDigest(
+  transactions
+){
+
+  const canonical =
+    JSON.stringify(
+      Array.isArray(transactions)
+        ? transactions
+        : []
+    );
+
+  let hash =
+    2166136261;
+
+  for(
+    let index = 0;
+    index < canonical.length;
+    index += 1
+  ){
+
+    hash ^=
+      canonical.charCodeAt(index);
+
+    hash =
+      Math.imul(
+        hash,
+        16777619
+      );
+
+  }
+
+  return (
+    hash >>> 0
+  )
+    .toString(16)
+    .padStart(
+      8,
+      "0"
+    );
+
+}
+
+
+function isValidTransactionRepositoryMeta(
+  meta
+){
+
+  return Boolean(
+
+    isPlainObject(meta) &&
+
+    meta.schemaVersion ===
+      TX_REPOSITORY_SCHEMA_VERSION &&
+
+    meta.documentType ===
+      TX_REPOSITORY_DOCUMENT_TYPE &&
+
+    typeof meta.initializedAt ===
+      "string" &&
+
+    typeof meta.updatedAt ===
+      "string" &&
+
+    Number.isInteger(
+      meta.revision
+    ) &&
+
+    meta.revision >= 1 &&
+
+    Number.isInteger(
+      meta.recordCount
+    ) &&
+
+    meta.recordCount >= 0 &&
+
+    typeof meta.contentDigest ===
+      "string" &&
+
+    meta.contentDigest.length > 0 &&
+
+    meta.integrityState ===
+      "VALID"
+
+  );
+
+}
+
+
+function buildTransactionRepositoryMeta(
+  transactions,
+  previousMeta = null
+){
+
+  const now =
+    nowISO();
+
+  const previousIsValid =
+    isValidTransactionRepositoryMeta(
+      previousMeta
+    );
+
+  return {
+
+    schemaVersion:
+      TX_REPOSITORY_SCHEMA_VERSION,
+
+    documentType:
+      TX_REPOSITORY_DOCUMENT_TYPE,
+
+    initializedAt:
+      previousIsValid
+        ? previousMeta.initializedAt
+        : now,
+
+    updatedAt:
+      now,
+
+    revision:
+      previousIsValid
+        ? previousMeta.revision + 1
+        : 1,
+
+    recordCount:
+      transactions.length,
+
+    headTransactionId:
+      transactions[0]?.id ||
+      null,
+
+    contentDigest:
+      calculateTransactionRepositoryDigest(
+        transactions
+      ),
+
+    integrityState:
+      "VALID"
+
+  };
+
+}
+
+
+function inspectTransactionRepository(){
+
+  let transactionRaw;
+  let metadataRaw;
+
+  try{
+
+    transactionRaw =
+      storageGet(
+        LS.TX
+      );
+
+    metadataRaw =
+      storageGet(
+        LS.TX_META
+      );
+
+  }catch(error){
+
+    return {
+
+      state:
+        TX_REPOSITORY_STATE
+          .UNAVAILABLE,
+
+      code:
+        "TX_REPOSITORY_STORAGE_UNAVAILABLE",
+
+      reason:
+        "Canonical transaction storage could not be accessed.",
+
+      transactions:
+        null,
+
+      metadata:
+        null,
+
+      error
+
+    };
+
+  }
+
+
+  const transactionDocument =
+    parseStoredJSON(
+      transactionRaw
+    );
+
+  const metadataDocument =
+    parseStoredJSON(
+      metadataRaw
+    );
+
+
+  /*
+   * No transaction repository and no metadata.
+   *
+   * This is deliberately NOT interpreted as [].
+   * It may represent a genuine first-run account or
+   * unexpected repository loss from a legacy deployment.
+   */
+
+  if(
+    !transactionDocument.exists &&
+    !metadataDocument.exists
+  ){
+
+    return {
+
+      state:
+        TX_REPOSITORY_STATE
+          .UNINITIALIZED,
+
+      code:
+        "TX_REPOSITORY_UNINITIALIZED",
+
+      reason:
+        "Canonical transaction repository has not been initialised.",
+
+      transactions:
+        null,
+
+      metadata:
+        null,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  /*
+   * Metadata says a repository existed but the
+   * actual financial repository has disappeared.
+   */
+
+  if(
+    !transactionDocument.exists &&
+    metadataDocument.exists
+  ){
+
+    return {
+
+      state:
+        TX_REPOSITORY_STATE.LOST,
+
+      code:
+        "TX_REPOSITORY_LOST",
+
+      reason:
+        "Canonical transaction repository is missing while repository metadata still exists.",
+
+      transactions:
+        null,
+
+      metadata:
+        metadataDocument.valid
+          ? metadataDocument.value
+          : null,
+
+      error:
+        metadataDocument.error
+
+    };
+
+  }
+
+
+  /*
+   * Transaction storage exists but cannot be parsed
+   * as valid JSON.
+   */
+
+  if(
+    !transactionDocument.valid
+  ){
+
+    return {
+
+      state:
+        TX_REPOSITORY_STATE.CORRUPT,
+
+      code:
+        "TX_REPOSITORY_CORRUPT",
+
+      reason:
+        "Canonical transaction repository contains invalid JSON.",
+
+      transactions:
+        null,
+
+      metadata:
+        null,
+
+      error:
+        transactionDocument.error
+
+    };
+
+  }
+
+
+  /*
+   * Repository must always contain an array.
+   */
+
+  if(
+    !Array.isArray(
+      transactionDocument.value
+    )
+  ){
+
+    return {
+
+      state:
+        TX_REPOSITORY_STATE.CORRUPT,
+
+      code:
+        "TX_REPOSITORY_INVALID_DOCUMENT",
+
+      reason:
+        "Canonical transaction repository is not a transaction array.",
+
+      transactions:
+        null,
+
+      metadata:
+        null,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  const transactions =
+    transactionDocument.value;
+
+
+  /*
+   * Valid legacy repository with no metadata.
+   *
+   * We can safely adopt this repository because the
+   * transaction document itself still exists.
+   *
+   * We NEVER fabricate transaction history.
+   */
+
+  if(
+    !metadataDocument.exists
+  ){
+
+    return {
+
+      state:
+        TX_REPOSITORY_STATE
+          .LEGACY_VALID,
+
+      code:
+        "TX_REPOSITORY_LEGACY_VALID",
+
+      reason:
+        "Existing transaction repository requires integrity metadata adoption.",
+
+      transactions,
+
+      metadata:
+        null,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  if(
+    !metadataDocument.valid ||
+    !isValidTransactionRepositoryMeta(
+      metadataDocument.value
+    )
+  ){
+
+    return {
+
+      state:
+        TX_REPOSITORY_STATE.CORRUPT,
+
+      code:
+        "TX_REPOSITORY_METADATA_CORRUPT",
+
+      reason:
+        "Canonical transaction repository metadata is invalid.",
+
+      transactions,
+
+      metadata:
+        metadataDocument.valid
+          ? metadataDocument.value
+          : null,
+
+      error:
+        metadataDocument.error
+
+    };
+
+  }
+
+
+  const metadata =
+    metadataDocument.value;
+
+  const expectedDigest =
+    calculateTransactionRepositoryDigest(
+      transactions
+    );
+
+  const actualHeadTransactionId =
+    transactions[0]?.id ||
+    null;
+
+
+  if(
+    metadata.recordCount !==
+      transactions.length ||
+
+    metadata.contentDigest !==
+      expectedDigest ||
+
+    metadata.headTransactionId !==
+      actualHeadTransactionId
+  ){
+
+    return {
+
+      state:
+        TX_REPOSITORY_STATE
+          .INCONSISTENT,
+
+      code:
+        "TX_REPOSITORY_INTEGRITY_MISMATCH",
+
+      reason:
+        "Canonical transaction repository does not match its integrity metadata.",
+
+      transactions,
+
+      metadata,
+
+      error:
+        null
+
+    };
+
+  }
+
+
+  return {
+
+    state:
+      TX_REPOSITORY_STATE.VALID,
+
+    code:
+      "TX_REPOSITORY_VALID",
+
+    reason:
+      null,
+
+    transactions,
+
+    metadata,
+
+    error:
+      null
+
+  };
+
+}
+
+
+function persistTransactionRepository(
+  transactions,
+  previousMeta = null
+){
+
+  if(
+    !Array.isArray(
+      transactions
+    )
+  ){
+
+    throw new TypeError(
+      "Canonical transaction repository must be an array."
+    );
+
+  }
+
+
+  const metadata =
+    buildTransactionRepositoryMeta(
+      transactions,
+      previousMeta
+    );
+
+
+  /*
+   * Financial write order is intentional.
+   *
+   * Transaction data is written first.
+   * Integrity metadata is written second.
+   *
+   * Therefore metadata can never claim that a new
+   * repository revision exists before the transaction
+   * document itself has been written.
+   */
+
+  storageSet(
+    LS.TX,
+    JSON.stringify(
+      transactions
+    )
+  );
+
+  storageSet(
+    LS.TX_META,
+    JSON.stringify(
+      metadata
+    )
+  );
+
+
+  /*
+   * Mandatory read-after-write verification.
+   */
+
+  const verification =
+    inspectTransactionRepository();
+
+
+  if(
+    verification.state !==
+      TX_REPOSITORY_STATE.VALID
+  ){
+
+    publishLedgerEvent(
+      "ledger.transaction.repository.integrity.failed",
+      {
+        state:
+          verification.state,
+
+        code:
+          verification.code,
+
+        reason:
+          verification.reason,
+
+        occurredAt:
+          nowISO()
+      }
+    );
+
+
+    throw transactionRepositoryError(
+      verification.code ||
+        "TX_REPOSITORY_PERSISTENCE_FAILED",
+
+      verification.reason ||
+        "Canonical transaction repository persistence verification failed.",
+
+      {
+        state:
+          verification.state
+      }
+    );
+
+  }
+
+
+  return verification;
+
+}
+
+
+function adoptLegacyTransactionRepository(
+  inspection
+){
+
+  if(
+    !inspection ||
+    inspection.state !==
+      TX_REPOSITORY_STATE
+        .LEGACY_VALID ||
+    !Array.isArray(
+      inspection.transactions
+    )
+  ){
+
+    throw transactionRepositoryError(
+      "TX_REPOSITORY_LEGACY_ADOPTION_INVALID",
+      "Legacy transaction repository cannot be adopted from the current state."
+    );
+
+  }
+
+
+  const metadata =
+    buildTransactionRepositoryMeta(
+      inspection.transactions
+    );
+
+
+  storageSet(
+    LS.TX_META,
+    JSON.stringify(
+      metadata
+    )
+  );
+
+
+  const verification =
+    inspectTransactionRepository();
+
+
+  if(
+    verification.state !==
+      TX_REPOSITORY_STATE.VALID
+  ){
+
+    throw transactionRepositoryError(
+      verification.code ||
+        "TX_REPOSITORY_LEGACY_ADOPTION_FAILED",
+
+      verification.reason ||
+        "Legacy transaction repository integrity adoption failed."
+    );
+
+  }
+
+
+  publishLedgerEvent(
+    "ledger.transaction.repository.adopted",
+    {
+      recordCount:
+        verification.transactions.length,
+
+      revision:
+        verification.metadata.revision,
+
+      occurredAt:
+        nowISO()
+    }
+  );
+
+
+  return verification;
+
+}
+
+
+function initializeTransactionRepository(){
+
+  const inspection =
+    inspectTransactionRepository();
+
+
+  if(
+    inspection.state ===
+      TX_REPOSITORY_STATE.VALID
+  ){
+
+    return getTransactionRepositoryStatus();
+
+  }
+
+
+  if(
+    inspection.state ===
+      TX_REPOSITORY_STATE
+        .LEGACY_VALID
+  ){
+
+    adoptLegacyTransactionRepository(
+      inspection
+    );
+
+    return getTransactionRepositoryStatus();
+
+  }
+
+
+  if(
+    inspection.state !==
+      TX_REPOSITORY_STATE
+        .UNINITIALIZED
+  ){
+
+    throw transactionRepositoryError(
+      inspection.code,
+      inspection.reason,
+      {
+        state:
+          inspection.state
+      }
+    );
+
+  }
+
+
+  const verification =
+    persistTransactionRepository(
+      [],
+      null
+    );
+
+
+  publishLedgerEvent(
+    "ledger.transaction.repository.initialized",
+    {
+      recordCount:
+        0,
+
+      revision:
+        verification.metadata.revision,
+
+      occurredAt:
+        nowISO()
+    }
+  );
+
+
+  return getTransactionRepositoryStatus();
+
+}
+
+
+function bootstrapTransactionRepository(){
+
+  const inspection =
+    inspectTransactionRepository();
+
+
+  /*
+   * Existing valid repository.
+   */
+
+  if(
+    inspection.state ===
+      TX_REPOSITORY_STATE.VALID
+  ){
+
+    return;
+
+  }
+
+
+  /*
+   * Safely adopt an existing legacy transaction
+   * repository because its transaction document
+   * actually exists.
+   */
+
+  if(
+    inspection.state ===
+      TX_REPOSITORY_STATE
+        .LEGACY_VALID
+  ){
+
+    adoptLegacyTransactionRepository(
+      inspection
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Fresh-install bootstrap.
+   *
+   * An absent TX repository can be automatically
+   * initialised ONLY when the wallet-balance
+   * repository is also absent.
+   *
+   * If balances already exist, PAY54 cannot prove
+   * whether this is a legitimate zero-transaction
+   * account or transaction-history loss.
+   *
+   * In that situation we fail closed.
+   */
+
+  if(
+    inspection.state ===
+      TX_REPOSITORY_STATE
+        .UNINITIALIZED
+  ){
+
+    let existingBalances;
+
+    try{
+
+      existingBalances =
+        storageGet(
+          LS.BALANCES
+        );
+
+    }catch(error){
+
+      console.error(
+        "[PAY54_LEDGER] Unable to determine transaction repository bootstrap safety.",
+        error
+      );
+
+      return;
+
+    }
+
+
+    if(
+      existingBalances === null ||
+      existingBalances === undefined
+    ){
+
+      initializeTransactionRepository();
+
+      return;
+
+    }
+
+
+    console.error(
+      "[PAY54_LEDGER] Canonical transaction repository is absent while wallet state already exists. Financial history state is unknown; repository was NOT automatically initialised."
+    );
+
+
+    publishLedgerEvent(
+      "ledger.transaction.repository.state.unknown",
+      {
+        state:
+          inspection.state,
+
+        code:
+          inspection.code,
+
+        balancesRepositoryPresent:
+          true,
+
+        occurredAt:
+          nowISO()
+      }
+    );
+
+  }
+
+}
+
+
+function getTransactionRepositoryStatus(){
+
+  const inspection =
+    inspectTransactionRepository();
+
+
+  return Object.freeze({
+
+    state:
+      inspection.state,
+
+    code:
+      inspection.code,
+
+    reason:
+      inspection.reason,
+
+    recordCount:
+      Array.isArray(
+        inspection.transactions
+      )
+        ? inspection.transactions.length
+        : null,
+
+    metadata:
+      inspection.metadata
+        ? Object.freeze({
+            ...inspection.metadata
+          })
+        : null
+
+  });
+
+}
   function moneyFmt(cur, amt) {
     const s = SYMBOLS[cur] ?? "";
     const n = Number(amt || 0);
