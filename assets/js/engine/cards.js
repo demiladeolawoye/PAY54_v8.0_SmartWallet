@@ -115,6 +115,33 @@ const CARD_REPOSITORY_STATE =
       "UNAVAILABLE"
 
   });
+   /* ==========================================================
+   CARD HISTORY CONTINUITY
+   Work Package: WP-011B.6E.5G.5G.7 — Stage 2
+========================================================== */
+
+const CARD_HISTORY_CONTINUITY =
+  Object.freeze({
+
+    COMPLETE:
+      "COMPLETE",
+
+    UNKNOWN_BEFORE_BASELINE:
+      "UNKNOWN_BEFORE_BASELINE"
+
+  });
+
+
+const CARD_REPOSITORY_BASELINE_TYPE =
+  Object.freeze({
+
+    NORMAL_INITIALIZATION:
+      "NORMAL_INITIALIZATION",
+
+    HISTORICAL_GAP_RECOVERY:
+      "HISTORICAL_GAP_RECOVERY"
+
+  });
    const STORAGE =
 window.PAY54_SECURITY?.storage;
 
