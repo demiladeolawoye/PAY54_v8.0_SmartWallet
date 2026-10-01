@@ -1167,33 +1167,51 @@ function bootstrapCardRepository(){
 
 function getCards(){
 
-    try{
+  let inspection =
+    inspectCardRepository();
 
-        if(STORAGE){
 
-            return STORAGE.get(
+  if(
+    inspection.state ===
+      CARD_REPOSITORY_STATE
+        .LEGACY_VALID
+  ){
 
-                STORAGE_KEY
+    inspection =
+      adoptLegacyCardRepository(
+        inspection
+      );
 
-            ) || [];
+  }
 
-        }
 
-        return JSON.parse(
+  if(
+    inspection.state !==
+      CARD_REPOSITORY_STATE
+        .VALID
+  ){
 
-            localStorage.getItem(
+    throw cardRepositoryError(
+      inspection.code ||
+        "CARD_REPOSITORY_UNAVAILABLE",
 
-                STORAGE_KEY
+      inspection.reason ||
+        "Canonical card repository is unavailable.",
 
-            )
+      {
+        state:
+          inspection.state
+      }
+    );
 
-        ) || [];
+  }
 
-    }catch{
 
-        return [];
-
-    }
+  return inspection.cards.map(
+    card => ({
+      ...card
+    })
+  );
 
 }
 
