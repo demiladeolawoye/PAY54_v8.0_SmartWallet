@@ -1891,29 +1891,142 @@ if(
 
     }
 
-    const balances = getBalances();
+/*
+ * ==========================================================
+ * FINANCIAL PERSISTENCE PREFLIGHT
+ * ==========================================================
+ *
+ * Transaction repository integrity MUST be established
+ * before any wallet balance is changed.
+ *
+ * A missing/corrupt/unknown history repository therefore
+ * blocks the financial mutation before money can move.
+ */
 
-    const previousBalance =
+const list =
+  getTx();
 
-        Number(
 
-            balances[e.currency] ?? 0
+const balances =
+  getBalances();
 
-        );
 
-    balances[e.currency] =
+const previousBalances =
+  {
+    ...balances
+  };
 
-        previousBalance +
 
-        Number(e.amount);
+const previousBalance =
+  Number(
+    balances[e.currency] ?? 0
+  );
 
-    setBalances(balances);
 
-    const list = getTx();
+balances[e.currency] =
+  previousBalance +
+  Number(
+    e.amount
+  );
 
-    list.unshift(e);
 
-    setTx(list);
+const nextTransactions =
+  [
+    e,
+    ...list
+  ];
+
+
+try{
+
+  setBalances(
+    balances
+  );
+
+
+  setTx(
+    nextTransactions
+  );
+
+}catch(error){
+
+  /*
+   * Defence-in-depth rollback.
+   *
+   * If transaction persistence fails after the wallet
+   * write, restore the balance snapshot immediately.
+   */
+
+  try{
+
+    storageSet(
+      LS.BALANCES,
+      JSON.stringify(
+        previousBalances
+      )
+    );
+
+
+    publishLedgerEvent(
+      "ledger.balance.rollback.completed",
+      {
+        transactionId:
+          e.id || null,
+
+        currency:
+          e.currency,
+
+        restoredBalance:
+          previousBalance,
+
+        occurredAt:
+          nowISO()
+      }
+    );
+
+  }catch(rollbackError){
+
+    publishLedgerEvent(
+      "ledger.balance.rollback.failed",
+      {
+        transactionId:
+          e.id || null,
+
+        currency:
+          e.currency,
+
+        originalError:
+          error?.message ||
+          String(error),
+
+        rollbackError:
+          rollbackError?.message ||
+          String(rollbackError),
+
+        occurredAt:
+          nowISO()
+      }
+    );
+
+
+    console.error(
+      "[PAY54_LEDGER] CRITICAL: transaction persistence failed and wallet rollback could not be confirmed.",
+      {
+        transactionId:
+          e.id || null,
+
+        error,
+
+        rollbackError
+      }
+    );
+
+  }
+
+
+  throw error;
+
+}
 
     publishLedgerEvent(
 
