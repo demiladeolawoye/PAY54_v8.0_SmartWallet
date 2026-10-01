@@ -1421,15 +1421,143 @@ function initRates() {
     return a * rate(from, to);
   }
 
-  function getTx() {
-    const v = safeJSONParse(storageGet(LS.TX), []);
-    return Array.isArray(v) ? v : [];
+  function getTx(){
+
+  let inspection =
+    inspectTransactionRepository();
+
+
+  /*
+   * Existing legacy repository can be adopted safely
+   * because the transaction array itself still exists.
+   */
+
+  if(
+    inspection.state ===
+      TX_REPOSITORY_STATE
+        .LEGACY_VALID
+  ){
+
+    inspection =
+      adoptLegacyTransactionRepository(
+        inspection
+      );
+
   }
 
-  function setTx(list) {
-    storageSet(LS.TX, JSON.stringify(Array.isArray(list) ? list : []));
+
+  if(
+    inspection.state !==
+      TX_REPOSITORY_STATE.VALID
+  ){
+
+    publishLedgerEvent(
+      "ledger.transaction.repository.read.blocked",
+      {
+        state:
+          inspection.state,
+
+        code:
+          inspection.code,
+
+        reason:
+          inspection.reason,
+
+        occurredAt:
+          nowISO()
+      }
+    );
+
+
+    throw transactionRepositoryError(
+      inspection.code ||
+        "TX_REPOSITORY_UNAVAILABLE",
+
+      inspection.reason ||
+        "Canonical transaction repository is unavailable.",
+
+      {
+        state:
+          inspection.state
+      }
+    );
+
   }
 
+
+  return inspection.transactions;
+
+}
+
+
+function setTx(list){
+
+  if(
+    !Array.isArray(
+      list
+    )
+  ){
+
+    throw new TypeError(
+      "Canonical transaction repository update must be an array."
+    );
+
+  }
+
+
+  let inspection =
+    inspectTransactionRepository();
+
+
+  if(
+    inspection.state ===
+      TX_REPOSITORY_STATE
+        .LEGACY_VALID
+  ){
+
+    inspection =
+      adoptLegacyTransactionRepository(
+        inspection
+      );
+
+  }
+
+
+  /*
+   * Never overwrite a repository whose state is
+   * missing, corrupt, inconsistent or unavailable.
+   *
+   * Doing so could destroy evidence needed for
+   * financial reconciliation.
+   */
+
+  if(
+    inspection.state !==
+      TX_REPOSITORY_STATE.VALID
+  ){
+
+    throw transactionRepositoryError(
+      inspection.code ||
+        "TX_REPOSITORY_WRITE_BLOCKED",
+
+      inspection.reason ||
+        "Canonical transaction repository cannot be safely updated.",
+
+      {
+        state:
+          inspection.state
+      }
+    );
+
+  }
+
+
+  persistTransactionRepository(
+    list,
+    inspection.metadata
+  );
+
+}
   /**
    * ledgerEntry schema:
    * {
