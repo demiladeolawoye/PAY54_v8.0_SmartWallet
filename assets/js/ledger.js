@@ -274,7 +274,31 @@ const TX_REPOSITORY_STATE = Object.freeze({
   INCONSISTENT: "INCONSISTENT",
   UNAVAILABLE: "UNAVAILABLE"
 });
+/* ==========================================================
+   TRANSACTION HISTORY CONTINUITY STATES
+   Work Package: WP-011B.6E.5G.5G.4 — Stage 2
+========================================================== */
 
+const TX_HISTORY_CONTINUITY = Object.freeze({
+
+  COMPLETE:
+    "COMPLETE",
+
+  UNKNOWN_BEFORE_BASELINE:
+    "UNKNOWN_BEFORE_BASELINE"
+
+});
+
+
+const TX_REPOSITORY_BASELINE_TYPE = Object.freeze({
+
+  NORMAL_INITIALIZATION:
+    "NORMAL_INITIALIZATION",
+
+  HISTORICAL_GAP_RECOVERY:
+    "HISTORICAL_GAP_RECOVERY"
+
+});
 
 function transactionRepositoryError(
   code,
