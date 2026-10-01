@@ -1354,6 +1354,30 @@ function getCardRepositoryStatus(){
     inspectCardRepository();
 
 
+  const metadata =
+    inspection.metadata &&
+    isPlainObject(
+      inspection.metadata
+    )
+      ? inspection.metadata
+      : null;
+
+
+  const historyContinuity =
+    metadata
+      ? (
+          metadata.historyContinuity ??
+          CARD_HISTORY_CONTINUITY.COMPLETE
+        )
+      : null;
+
+
+  const historicalGap =
+    historyContinuity ===
+      CARD_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE;
+
+
   return Object.freeze({
 
     state:
@@ -1372,13 +1396,26 @@ function getCardRepositoryStatus(){
         ? inspection.cards.length
         : null,
 
+    historyContinuity,
+
+    historicalGap,
+
+    recoveryBaselineAt:
+      historicalGap
+        ? metadata
+            ?.recoveryBaselineAt ||
+          null
+        : null,
+
+    baselineType:
+      metadata
+        ?.baselineType ||
+      null,
+
     metadata:
-      inspection.metadata &&
-      isPlainObject(
-        inspection.metadata
-      )
+      metadata
         ? Object.freeze({
-            ...inspection.metadata
+            ...metadata
           })
         : null
 
@@ -2498,8 +2535,11 @@ getCardById,
 saveCards,
 
 getCardRepositoryStatus,
+establishCardRepositoryRecoveryBaseline,
 
 CARD_REPOSITORY_STATE,
+CARD_HISTORY_CONTINUITY,
+CARD_REPOSITORY_BASELINE_TYPE,
 
   /* Card Management */
 
