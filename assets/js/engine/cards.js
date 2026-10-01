@@ -1218,68 +1218,75 @@ function getCards(){
 /* =========================================
    SAVE
 ========================================= */
+function saveCards(
+  cards
+){
 
-function saveCards(cards){
+  if(
+    !Array.isArray(
+      cards
+    )
+  ){
 
-    if(STORAGE){
+    throw new TypeError(
+      "Card repository update must be an array."
+    );
 
-        STORAGE.set(
+  }
 
-            STORAGE_KEY,
 
-            cards
+  let inspection =
+    inspectCardRepository();
 
-        );
 
-    }else{
+  if(
+    inspection.state ===
+      CARD_REPOSITORY_STATE
+        .LEGACY_VALID
+  ){
 
-        localStorage.setItem(
+    inspection =
+      adoptLegacyCardRepository(
+        inspection
+      );
 
-            STORAGE_KEY,
+  }
 
-            JSON.stringify(cards)
 
-        );
+  /*
+   * Never overwrite missing, corrupt, lost or inconsistent
+   * card state.
+   *
+   * Doing so would destroy evidence of a repository-loss
+   * condition.
+   */
 
-    }
+  if(
+    inspection.state !==
+      CARD_REPOSITORY_STATE
+        .VALID
+  ){
 
-    const metadata = {
+    throw cardRepositoryError(
+      inspection.code ||
+        "CARD_REPOSITORY_WRITE_BLOCKED",
 
-        version:
-            ENGINE_VERSION,
+      inspection.reason ||
+        "Canonical card repository cannot be safely updated.",
 
-        engine:
-            ENGINE_NAME,
+      {
+        state:
+          inspection.state
+      }
+    );
 
-        updated:
-            now(),
+  }
 
-        cards:
-            cards.length
 
-    };
-
-    if(STORAGE){
-
-        STORAGE.set(
-
-            STORAGE_META_KEY,
-
-            metadata
-
-        );
-
-    }else{
-
-        localStorage.setItem(
-
-            STORAGE_META_KEY,
-
-            JSON.stringify(metadata)
-
-        );
-
-    }
+  persistCardRepository(
+    cards,
+    inspection.metadata
+  );
 
 }
 
@@ -1853,16 +1860,27 @@ function getCardTransactions(
 }
    
 /* =========================================
+   REPOSITORY BOOTSTRAP
+========================================= */
+
+bootstrapCardRepository();
+
+
+/* =========================================
    EXPORT
 ========================================= */
 
 return{
 
-  /* Repository */
+ /* Repository */
 
-  getCards,
-  getCardById,
-  saveCards,
+getCards,
+getCardById,
+saveCards,
+
+getCardRepositoryStatus,
+
+CARD_REPOSITORY_STATE,
 
   /* Card Management */
 
