@@ -418,46 +418,134 @@ function isValidTransactionRepositoryMeta(
   meta
 ){
 
-  return Boolean(
+  if(
+    !isPlainObject(meta) ||
 
-    isPlainObject(meta) &&
+    meta.schemaVersion !==
+      TX_REPOSITORY_SCHEMA_VERSION ||
 
-    meta.schemaVersion ===
-      TX_REPOSITORY_SCHEMA_VERSION &&
+    meta.documentType !==
+      TX_REPOSITORY_DOCUMENT_TYPE ||
 
-    meta.documentType ===
-      TX_REPOSITORY_DOCUMENT_TYPE &&
+    typeof meta.initializedAt !==
+      "string" ||
 
-    typeof meta.initializedAt ===
-      "string" &&
+    !meta.initializedAt ||
 
-    typeof meta.updatedAt ===
-      "string" &&
+    typeof meta.updatedAt !==
+      "string" ||
 
-    Number.isInteger(
+    !meta.updatedAt ||
+
+    !Number.isInteger(
       meta.revision
-    ) &&
+    ) ||
 
-    meta.revision >= 1 &&
+    meta.revision < 1 ||
 
-    Number.isInteger(
+    !Number.isInteger(
       meta.recordCount
-    ) &&
+    ) ||
 
-    meta.recordCount >= 0 &&
+    meta.recordCount < 0 ||
 
-    typeof meta.contentDigest ===
-      "string" &&
+    typeof meta.contentDigest !==
+      "string" ||
 
-    meta.contentDigest.length > 0 &&
+    !meta.contentDigest ||
 
-    meta.integrityState ===
+    meta.integrityState !==
       "VALID"
+  ){
 
-  );
+    return false;
+
+  }
+
+
+  /*
+   * Stage 1 repositories created before continuity metadata
+   * existed remain valid and are interpreted as COMPLETE.
+   */
+
+  const continuity =
+    meta.historyContinuity ??
+    TX_HISTORY_CONTINUITY.COMPLETE;
+
+
+  if(
+    continuity !==
+      TX_HISTORY_CONTINUITY.COMPLETE &&
+
+    continuity !==
+      TX_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE
+  ){
+
+    return false;
+
+  }
+
+
+  /*
+   * Recovery-baselined repositories require an explicit,
+   * internally consistent recovery record.
+   */
+
+  if(
+    continuity ===
+      TX_HISTORY_CONTINUITY
+        .UNKNOWN_BEFORE_BASELINE
+  ){
+
+    return Boolean(
+
+      meta.baselineType ===
+        TX_REPOSITORY_BASELINE_TYPE
+          .HISTORICAL_GAP_RECOVERY &&
+
+      typeof meta.recoveryBaselineAt ===
+        "string" &&
+
+      meta.recoveryBaselineAt.length > 0 &&
+
+      typeof meta.recoveryReason ===
+        "string" &&
+
+      meta.recoveryReason.trim()
+        .length >= 10 &&
+
+      meta.recoveryAcknowledged ===
+        true
+
+    );
+
+  }
+
+
+  /*
+   * A repository claiming complete continuity must never
+   * simultaneously claim historical-gap recovery.
+   */
+
+  if(
+    meta.baselineType ===
+      TX_REPOSITORY_BASELINE_TYPE
+        .HISTORICAL_GAP_RECOVERY ||
+    meta.recoveryBaselineAt ||
+    meta.recoveryReason ||
+    meta.recoveryAcknowledged ===
+      true
+  ){
+
+    return false;
+
+  }
+
+
+  return true;
 
 }
-
 
 function buildTransactionRepositoryMeta(
   transactions,
