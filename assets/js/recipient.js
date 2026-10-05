@@ -9392,90 +9392,504 @@ if(
                         "Linked-card payment committed and recorded successfully. PAY54 wallet balances were not changed.";
 
 
-                    console.info(
-                        "[PAY54_SEND] WP-011B.6E.5G.5F canonical external transaction recorded.",
+                    /* ==========================================================================
+   WP-011B.6E.5G.5H.2
+   LINKED-CARD SEND COMPLETION
+========================================================================== */
+
+/*
+ * At this point all financial work is complete:
+ *
+ * • provider authorization succeeded
+ * • provider commit succeeded
+ * • canonical PAY54 transaction exists
+ * • wallet financial isolation was verified
+ *
+ * Everything below is non-financial completion/enrichment only.
+ *
+ * IMPORTANT:
+ * Failures below MUST NOT make PAY54 report the payment as failed.
+ */
+
+
+/* --------------------------------------------------------------------------
+   BENEFICIARY ENRICHMENT
+-------------------------------------------------------------------------- */
+
+let canonicalBeneficiary =
+    null;
+
+
+try{
+
+    const beneficiaryService =
+        window.PAY54_BENEFICIARIES_SERVICE ||
+        window.PAY54_BENEFICIARY_SERVICE ||
+        null;
+
+
+    if(
+        beneficiaryService &&
+        typeof beneficiaryService
+            .resolveRecipient ===
+            "function" &&
+        typeof beneficiaryService
+            .createBeneficiary ===
+            "function" &&
+        typeof beneficiaryService
+            .recordUsage ===
+            "function"
+    ){
+
+        canonicalBeneficiary =
+            beneficiaryService
+                .resolveRecipient({
+                    pay54Id:
+                        linkedCardExecutionIntent
+                            .recipient
+                });
+
+
+        if(
+            !canonicalBeneficiary
+        ){
+
+            canonicalBeneficiary =
+                beneficiaryService
+                    .createBeneficiary({
+
+                        contactId:
+                            selectedContact?.id ||
+                            null,
+
+                        type:
+                            "PAY54",
+
+                        destinations: [
+                            {
+                                type:
+                                    "PAY54",
+
+                                pay54Id:
+                                    linkedCardExecutionIntent
+                                        .recipient,
+
+                                currency:
+                                    commitPaymentCurrency,
+
+                                metadata: {
+                                    source:
+                                        selectedContact
+                                            ? "contacts_picker"
+                                            : "send_money"
+                                }
+                            }
+                        ],
+
+                        metadata: {
+                            source:
+                                "send_money",
+
+                            relationship:
+                                selectedContact
+                                    ? "contact"
+                                    : "manual",
+
+                            currency:
+                                commitPaymentCurrency
+                        }
+
+                    });
+
+        }
+
+        else if(
+            selectedContact?.id &&
+            !canonicalBeneficiary
+                .contactId &&
+            typeof beneficiaryService
+                .linkContact ===
+                "function"
+        ){
+
+            canonicalBeneficiary =
+                beneficiaryService
+                    .linkContact(
+                        canonicalBeneficiary.id,
+                        selectedContact.id
+                    );
+
+        }
+
+
+        if(
+            canonicalBeneficiary?.id
+        ){
+
+            canonicalBeneficiary =
+                beneficiaryService
+                    .recordUsage(
+                        canonicalBeneficiary.id,
                         {
-                            transactionId:
-                                recordedTransaction.id,
+                            increment:
+                                1,
 
-                            replayed:
-                                transactionRecordResult
-                                    .replayed ===
-                                true,
-
-                            sourceId,
-
-                            externalReference:
-                                externalSettlementReference,
-
-                            executionQuoteId,
-
-                            authorizationId,
-
-                            commitId,
-
-                            operationId:
-                                executionOperationId,
-
-                            paymentAmount:
-                                commitPaymentAmount,
-
-                            paymentCurrency:
-                                commitPaymentCurrency,
-
-                            fundingAmount:
-                                commitFundingAmount,
-
-                            fundingCurrency:
-                                commitFundingCurrency,
-
-                            externallySettled:
-                                true,
-
-                            walletMutationExecuted:
-                                false,
-
-                            beneficiaryUpdated:
-                                false,
-
-                            receiptDisplayed:
-                                false
+                            lastUsedAt:
+                                new Date()
+                                    .toISOString()
                         }
                     );
 
+        }
 
-                    /*
-                     * Release the generic execution busy state before
-                     * reacquiring the linked-card submission guard.
-                     */
+    }
 
-                    submitButton.disabled =
-                        false;
+}catch(
+    beneficiaryError
+){
 
-                    submitButton.removeAttribute(
-                        "aria-busy"
-                    );
+    console.warn(
+        "[PAY54_SEND] Linked-card beneficiary post-transaction enrichment failed.",
+        beneficiaryError
+    );
 
-
-                    /*
-                     * Do not permit a second Send submission.
-                     *
-                     * The external provider settlement and canonical
-                     * PAY54 transaction now both exist.
-                     */
-
-                    setLinkedCardSendGuard(
-                        true
-                    );
+}
 
 
-                    window.PAY54_TOAST
-                    ?.showToast(
-                        "Linked-card payment recorded securely."
-                    );
+/* --------------------------------------------------------------------------
+   LEGACY RECIPIENT COMPATIBILITY
+-------------------------------------------------------------------------- */
+
+try{
+
+    const recipientTag =
+        linkedCardExecutionIntent
+            .recipient;
 
 
-                    return;
+    const legacyRecipient =
+        addRecipient({
+
+            type:
+                "pay54",
+
+            tag:
+                recipientTag,
+
+            displayName:
+                resolveContactName(
+                    selectedContact
+                ) ||
+                recipientTag,
+
+            currency:
+                commitPaymentCurrency
+
+        });
+
+
+    if(
+        legacyRecipient
+    ){
+
+        updateRecipientUsage(
+            legacyRecipient.tag
+        );
+
+
+        publishRecipientAudit(
+
+            "recipient.selected",
+
+            {
+
+                recipientId:
+                    legacyRecipient.id,
+
+                tag:
+                    legacyRecipient.tag,
+
+                contactId:
+                    selectedContact?.id ||
+                    null,
+
+                beneficiaryId:
+                    canonicalBeneficiary?.id ||
+                    null,
+
+                source:
+                    selectedContact
+                        ? "contacts_picker"
+                        : "manual",
+
+                fundingSource:
+                    "linked_card",
+
+                transactionId:
+                    recordedTransaction.id
+
+            }
+
+        );
+
+    }
+
+}catch(
+    legacyRecipientError
+){
+
+    console.warn(
+        "[PAY54_SEND] Linked-card legacy recipient post-transaction enrichment failed.",
+        legacyRecipientError
+    );
+
+}
+
+
+/* --------------------------------------------------------------------------
+   UI FEED REFRESH
+-------------------------------------------------------------------------- */
+
+try{
+
+    prependTxToDOM(
+        recordedTransaction
+    );
+
+    refreshUI();
+
+}catch(
+    refreshError
+){
+
+    console.warn(
+        "[PAY54_SEND] Linked-card post-transaction UI refresh failed.",
+        refreshError
+    );
+
+}
+
+
+/* --------------------------------------------------------------------------
+   RECEIPT
+-------------------------------------------------------------------------- */
+
+let receiptDisplayed =
+    false;
+
+
+try{
+
+    const receipts =
+        window.PAY54_RECEIPTS ||
+        null;
+
+
+    if(
+        !receipts ||
+        typeof receipts
+            .openReceiptModal !==
+            "function"
+    ){
+
+        throw new Error(
+            "PAY54 receipt engine is unavailable."
+        );
+
+    }
+
+
+    const linkedCardSource =
+        fundingSourceRegistry.get(
+            sourceId
+        )?.source ||
+        null;
+
+
+    const linkedCardLabel =
+        linkedCardSource
+            ? getLinkedCardDisplayLabel(
+                linkedCardSource
+            )
+            : "Linked card";
+
+
+    receipts.openReceiptModal({
+
+        title:
+            "Send Money",
+
+        tx:
+            recordedTransaction,
+
+        lines: [
+
+            "Payment successful",
+
+            `Recipient: ${
+                linkedCardExecutionIntent
+                    .recipient
+            }`,
+
+            `Funding source: ${
+                linkedCardLabel
+            }`,
+
+            `Amount: ${formatFundingBalance(
+                commitPaymentCurrency,
+                commitPaymentAmount
+            )}`,
+
+            `Provider reference: ${
+                externalSettlementReference
+            }`
+
+        ]
+
+    });
+
+
+    receiptDisplayed =
+        true;
+
+}catch(
+    receiptError
+){
+
+    console.error(
+        "[PAY54_SEND] Linked-card receipt rendering failed after successful payment.",
+        receiptError
+    );
+
+
+    window.PAY54_TOAST
+    ?.showToast(
+        "Payment completed successfully, but the receipt could not be displayed."
+    );
+
+}
+
+
+/* --------------------------------------------------------------------------
+   COMPLETION AUDIT
+-------------------------------------------------------------------------- */
+
+console.info(
+
+    "[PAY54_SEND] WP-011B.6E.5G.5H linked-card Send completed.",
+
+    {
+
+        transactionId:
+            recordedTransaction.id,
+
+        replayed:
+            transactionRecordResult
+                .replayed ===
+            true,
+
+        sourceId,
+
+        externalReference:
+            externalSettlementReference,
+
+        executionQuoteId,
+
+        authorizationId,
+
+        commitId,
+
+        operationId:
+            executionOperationId,
+
+        paymentAmount:
+            commitPaymentAmount,
+
+        paymentCurrency:
+            commitPaymentCurrency,
+
+        fundingAmount:
+            commitFundingAmount,
+
+        fundingCurrency:
+            commitFundingCurrency,
+
+        externallySettled:
+            true,
+
+        walletMutationExecuted:
+            false,
+
+        beneficiaryUpdated:
+            Boolean(
+                canonicalBeneficiary?.id
+            ),
+
+        receiptDisplayed
+
+    }
+
+);
+
+
+/* --------------------------------------------------------------------------
+   FINAL SUBMISSION GUARD
+-------------------------------------------------------------------------- */
+
+/*
+ * Release the temporary busy state.
+ */
+
+submitButton.disabled =
+    false;
+
+submitButton.removeAttribute(
+    "aria-busy"
+);
+
+
+/*
+ * Then immediately re-arm the linked-card guard.
+ *
+ * The provider settlement and canonical transaction already exist.
+ * A second submission must never be possible.
+ */
+
+setLinkedCardSendGuard(
+    true
+);
+
+
+/* --------------------------------------------------------------------------
+   SUCCESS NOTIFICATION
+-------------------------------------------------------------------------- */
+
+if(
+    receiptDisplayed
+){
+
+    window.PAY54_TOAST
+    ?.showToast(
+        "Payment completed successfully."
+    );
+
+}
+
+
+/*
+ * IMPORTANT:
+ *
+ * Do not call:
+ *
+ * • PAY54_LEDGER.applyEntry()
+ * • PAY54_TX.recordTransaction()
+ * • PAY54_FUNDING_SERVICE.commit()
+ * • PAY54_FUNDING_SERVICE.reverse()
+ *
+ * Financial execution is already complete.
+ */
+
+return;
                 }catch(error){
 
                     /*
