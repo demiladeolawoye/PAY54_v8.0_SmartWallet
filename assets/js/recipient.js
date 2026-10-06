@@ -9358,58 +9358,36 @@ if(
                     }
 
 
-                    /*
-                     * --------------------------------------------------
-                     * WP-011B.6E.5G.5F STOP BOUNDARY
-                     * --------------------------------------------------
-                     *
-                     * We now have:
-                     *
-                     * • PIN-verified execution intent
-                     * • fresh post-PIN quote
-                     * • provider authorization
-                     * • provider commit/capture
-                     * • canonical PAY54 external transaction
-                     * • verified wallet financial isolation
-                     *
-                     * Still intentionally NOT executed:
-                     *
-                     * • beneficiary transfer-stat enrichment
-                     * • final Send Money receipt
-                     * • post-commit compensation/reversal
-                     *
-                     * Compensation/reversal begins in 5G.5G.
-                     */
-
-                    fundingBalance.textContent =
-                        `Recorded payment: ${formatFundingBalance(
-                            commitPaymentCurrency,
-                            commitPaymentAmount
-                        )}`;
-
-
-                    fundingStatus.textContent =
-                        "Linked-card payment committed and recorded successfully. PAY54 wallet balances were not changed.";
-
-
                     /* ==========================================================================
    WP-011B.6E.5G.5H.2
    LINKED-CARD SEND COMPLETION
 ========================================================================== */
 
 /*
- * At this point all financial work is complete:
+ * Financial execution has already completed successfully:
  *
  * • provider authorization succeeded
  * • provider commit succeeded
- * • canonical PAY54 transaction exists
- * • wallet financial isolation was verified
+ * • canonical PAY54 external transaction exists
+ * • wallet financial isolation has been verified
  *
- * Everything below is non-financial completion/enrichment only.
- *
- * IMPORTANT:
- * Failures below MUST NOT make PAY54 report the payment as failed.
+ * Everything below is non-financial post-transaction completion.
  */
+
+
+/* --------------------------------------------------------------------------
+   SUCCESS STATUS
+-------------------------------------------------------------------------- */
+
+fundingBalance.textContent =
+    `Recorded payment: ${formatFundingBalance(
+        commitPaymentCurrency,
+        commitPaymentAmount
+    )}`;
+
+
+fundingStatus.textContent =
+    "Linked-card payment committed and recorded successfully. PAY54 wallet balances were not changed.";
 
 
 /* --------------------------------------------------------------------------
@@ -9430,24 +9408,21 @@ try{
 
     if(
         beneficiaryService &&
-        typeof beneficiaryService
-            .resolveRecipient ===
+        typeof beneficiaryService.resolveRecipient ===
             "function" &&
-        typeof beneficiaryService
-            .createBeneficiary ===
+        typeof beneficiaryService.createBeneficiary ===
             "function" &&
-        typeof beneficiaryService
-            .recordUsage ===
+        typeof beneficiaryService.recordUsage ===
             "function"
     ){
 
         canonicalBeneficiary =
-            beneficiaryService
-                .resolveRecipient({
-                    pay54Id:
-                        linkedCardExecutionIntent
-                            .recipient
-                });
+            beneficiaryService.resolveRecipient({
+
+                pay54Id:
+                    linkedCardExecutionIntent.recipient
+
+            });
 
 
         if(
@@ -9455,69 +9430,75 @@ try{
         ){
 
             canonicalBeneficiary =
-                beneficiaryService
-                    .createBeneficiary({
+                beneficiaryService.createBeneficiary({
 
-                        contactId:
-                            selectedContact?.id ||
-                            null,
+                    contactId:
+                        selectedContact?.id ||
+                        null,
 
-                        type:
-                            "PAY54",
+                    type:
+                        "PAY54",
 
-                        destinations: [
-                            {
-                                type:
-                                    "PAY54",
+                    destinations: [
 
-                                pay54Id:
-                                    linkedCardExecutionIntent
-                                        .recipient,
+                        {
 
-                                currency:
-                                    commitPaymentCurrency,
+                            type:
+                                "PAY54",
 
-                                metadata: {
-                                    source:
-                                        selectedContact
-                                            ? "contacts_picker"
-                                            : "send_money"
-                                }
-                            }
-                        ],
-
-                        metadata: {
-                            source:
-                                "send_money",
-
-                            relationship:
-                                selectedContact
-                                    ? "contact"
-                                    : "manual",
+                            pay54Id:
+                                linkedCardExecutionIntent.recipient,
 
                             currency:
-                                commitPaymentCurrency
+                                commitPaymentCurrency,
+
+                            metadata: {
+
+                                source:
+                                    selectedContact
+                                        ? "contacts_picker"
+                                        : "send_money"
+
+                            }
+
                         }
 
-                    });
+                    ],
+
+                    metadata: {
+
+                        source:
+                            "send_money",
+
+                        relationship:
+                            selectedContact
+                                ? "contact"
+                                : "manual",
+
+                        currency:
+                            commitPaymentCurrency
+
+                    }
+
+                });
 
         }
 
         else if(
             selectedContact?.id &&
-            !canonicalBeneficiary
-                .contactId &&
-            typeof beneficiaryService
-                .linkContact ===
+            !canonicalBeneficiary.contactId &&
+            typeof beneficiaryService.linkContact ===
                 "function"
         ){
 
             canonicalBeneficiary =
-                beneficiaryService
-                    .linkContact(
-                        canonicalBeneficiary.id,
-                        selectedContact.id
-                    );
+                beneficiaryService.linkContact(
+
+                    canonicalBeneficiary.id,
+
+                    selectedContact.id
+
+                );
 
         }
 
@@ -9527,18 +9508,22 @@ try{
         ){
 
             canonicalBeneficiary =
-                beneficiaryService
-                    .recordUsage(
-                        canonicalBeneficiary.id,
-                        {
-                            increment:
-                                1,
+                beneficiaryService.recordUsage(
 
-                            lastUsedAt:
-                                new Date()
-                                    .toISOString()
-                        }
-                    );
+                    canonicalBeneficiary.id,
+
+                    {
+
+                        increment:
+                            1,
+
+                        lastUsedAt:
+                            new Date()
+                                .toISOString()
+
+                    }
+
+                );
 
         }
 
@@ -9549,8 +9534,11 @@ try{
 ){
 
     console.warn(
+
         "[PAY54_SEND] Linked-card beneficiary post-transaction enrichment failed.",
+
         beneficiaryError
+
     );
 
 }
@@ -9563,8 +9551,7 @@ try{
 try{
 
     const recipientTag =
-        linkedCardExecutionIntent
-            .recipient;
+        linkedCardExecutionIntent.recipient;
 
 
     const legacyRecipient =
@@ -9639,15 +9626,18 @@ try{
 ){
 
     console.warn(
+
         "[PAY54_SEND] Linked-card legacy recipient post-transaction enrichment failed.",
+
         legacyRecipientError
+
     );
 
 }
 
 
 /* --------------------------------------------------------------------------
-   UI FEED REFRESH
+   RECENT TRANSACTION / DASHBOARD REFRESH
 -------------------------------------------------------------------------- */
 
 try{
@@ -9663,8 +9653,11 @@ try{
 ){
 
     console.warn(
+
         "[PAY54_SEND] Linked-card post-transaction UI refresh failed.",
+
         refreshError
+
     );
 
 }
@@ -9687,8 +9680,7 @@ try{
 
     if(
         !receipts ||
-        typeof receipts
-            .openReceiptModal !==
+        typeof receipts.openReceiptModal !==
             "function"
     ){
 
@@ -9727,8 +9719,7 @@ try{
             "Payment successful",
 
             `Recipient: ${
-                linkedCardExecutionIntent
-                    .recipient
+                linkedCardExecutionIntent.recipient
             }`,
 
             `Funding source: ${
@@ -9757,8 +9748,11 @@ try{
 ){
 
     console.error(
+
         "[PAY54_SEND] Linked-card receipt rendering failed after successful payment.",
+
         receiptError
+
     );
 
 
@@ -9784,8 +9778,7 @@ console.info(
             recordedTransaction.id,
 
         replayed:
-            transactionRecordResult
-                .replayed ===
+            transactionRecordResult.replayed ===
             true,
 
         sourceId,
@@ -9833,11 +9826,11 @@ console.info(
 
 
 /* --------------------------------------------------------------------------
-   FINAL SUBMISSION GUARD
+   DUPLICATE-SUBMISSION PROTECTION
 -------------------------------------------------------------------------- */
 
 /*
- * Release the temporary busy state.
+ * Release generic busy state.
  */
 
 submitButton.disabled =
@@ -9849,10 +9842,10 @@ submitButton.removeAttribute(
 
 
 /*
- * Then immediately re-arm the linked-card guard.
+ * Immediately re-lock linked-card submission.
  *
- * The provider settlement and canonical transaction already exist.
- * A second submission must never be possible.
+ * The provider commitment and canonical PAY54 transaction
+ * already exist. A second submission must not be possible.
  */
 
 setLinkedCardSendGuard(
@@ -9877,16 +9870,14 @@ if(
 
 
 /*
- * IMPORTANT:
+ * Financial execution is already complete.
  *
- * Do not call:
+ * DO NOT call:
  *
  * • PAY54_LEDGER.applyEntry()
  * • PAY54_TX.recordTransaction()
  * • PAY54_FUNDING_SERVICE.commit()
  * • PAY54_FUNDING_SERVICE.reverse()
- *
- * Financial execution is already complete.
  */
 
 return;
