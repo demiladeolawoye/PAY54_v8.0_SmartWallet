@@ -208,77 +208,48 @@
     const reversalIdempotency =
         new Map();
 
+       /*
+     * Sequence is retained only as a local diagnostic ordering component.
+     *
+     * IMPORTANT:
+     * It is NOT the uniqueness boundary.
+     *
+     * Browser refreshes and provider resets may legitimately return this
+     * counter to zero. Collision resistance is provided by timestamp +
+     * cryptographically secure entropy.
+     */
     let sequence = 0;
 
+
+    const REFERENCE_RANDOM_BYTES =
+        12;
+
+
     /* ======================================================================
-       GENERIC HELPERS
+       PROVIDER REFERENCE GENERATION
+
+       Provider financial references MUST remain collision-resistant across:
+
+       • browser refresh
+       • provider reload
+       • development reset
+       • multiple tabs
+       • repeated test runs
+
+       The former sequence-only implementation could regenerate references
+       such as COMMIT-DEV-00000007 after a page reload.
+
+       Reference format:
+
+       PREFIX-YYYYMMDDTHHMMSSmmmZ-<CRYPTO>-<SEQUENCE>
+
+       Example:
+
+       COMMIT-DEV-20261006T115500123Z-8F54C291D7A94B3E2C61F809-000001
+
+       The sequence is for readability only.
+       Uniqueness MUST NOT depend on it.
     ====================================================================== */
-
-    function isPlainObject(value) {
-
-        if (
-            value === null ||
-            typeof value !== "object"
-        ) {
-
-            return false;
-
-        }
-
-        const prototype =
-            Object.getPrototypeOf(value);
-
-        return (
-            prototype === Object.prototype ||
-            prototype === null
-        );
-
-    }
-
-    function normalizeString(value) {
-
-        return typeof value === "string"
-            ? value.trim()
-            : "";
-
-    }
-
-    function normalizeCurrency(value) {
-
-        const currency =
-            normalizeString(value)
-                .toUpperCase();
-
-        return /^[A-Z]{3}$/.test(currency)
-            ? currency
-            : "";
-
-    }
-
-    function normalizeAmount(value) {
-
-        const amount =
-            Number(value);
-
-        if (
-            !Number.isFinite(amount) ||
-            amount <= 0
-        ) {
-
-            return null;
-
-        }
-
-        return amount;
-
-    }
-
-    function now() {
-
-        return new Date()
-            .toISOString();
-
-    }
 
     function nextSequence() {
 
@@ -288,38 +259,123 @@
 
     }
 
-    function createReference(prefix) {
 
-        return (
-            `${prefix}-` +
-            String(nextSequence())
-                .padStart(8, "0")
-        );
+    function referenceTimestamp() {
+
+        return new Date()
+            .toISOString()
+            .replace(
+                /[-:.]/g,
+                ""
+            );
 
     }
 
-    function trimMap(map) {
 
-        while (
-            map.size > MAX_RECORDS
+    function secureRandomHex(
+        byteLength =
+            REFERENCE_RANDOM_BYTES
+    ) {
+
+        const cryptoApi =
+            GLOBAL.crypto ||
+            null;
+
+        if (
+            !cryptoApi ||
+            typeof cryptoApi.getRandomValues !==
+                "function"
         ) {
 
-            const oldest =
-                map.keys()
-                    .next()
-                    .value;
-
-            if (
-                oldest === undefined
-            ) {
-
-                break;
-
-            }
-
-            map.delete(oldest);
+            throw createProviderError(
+                FAILURE_CODES.SECURITY_REJECTED,
+                "Cryptographically secure provider reference generation is unavailable."
+            );
 
         }
+
+        const bytes =
+            new Uint8Array(
+                byteLength
+            );
+
+        cryptoApi.getRandomValues(
+            bytes
+        );
+
+        return Array.from(
+            bytes,
+            byte =>
+                byte
+                    .toString(16)
+                    .padStart(2, "0")
+        )
+            .join("")
+            .toUpperCase();
+
+    }
+
+
+    function normalizeReferencePrefix(
+        prefix
+    ) {
+
+        const normalized =
+            normalizeString(
+                prefix
+            )
+                .toUpperCase();
+
+        if (
+            !normalized ||
+            !/^[A-Z0-9-]+$/.test(
+                normalized
+            ) ||
+            normalized.length > 40
+        ) {
+
+            throw createProviderError(
+                FAILURE_CODES.INVALID_REQUEST,
+                "Provider reference prefix is invalid."
+            );
+
+        }
+
+        return normalized;
+
+    }
+
+
+    function createReference(
+        prefix
+    ) {
+
+        const safePrefix =
+            normalizeReferencePrefix(
+                prefix
+            );
+
+        const timestamp =
+            referenceTimestamp();
+
+        const entropy =
+            secureRandomHex();
+
+        const localSequence =
+            String(
+                nextSequence()
+            )
+                .padStart(
+                    6,
+                    "0"
+                );
+
+        return [
+            safePrefix,
+            timestamp,
+            entropy,
+            localSequence
+        ].join("-");
 
     }
 
