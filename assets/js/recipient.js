@@ -6432,7 +6432,76 @@ amountInput.addEventListener(
                 modal.querySelector(
                     "#confirmSend"
                 );
+/* ==========================================================================
+   PAY54 SEND — PRE-PIN CONCURRENT SUBMISSION GUARD
+   Work Package: WP-011B.6E.5G.5H.5B
 
+   Prevents rapid click / double-submit from starting multiple Send
+   execution intents before PIN verification has completed.
+========================================================================== */
+
+let sendVerificationInProgress =
+    false;
+
+
+const acquireSendVerificationLock =
+    () => {
+
+        if(
+            sendVerificationInProgress
+        ){
+
+            console.warn(
+                "[PAY54_SEND] Duplicate Send submission blocked while payment verification is already in progress."
+            );
+
+            return false;
+
+        }
+
+
+        sendVerificationInProgress =
+            true;
+
+
+        submitButton.disabled =
+            true;
+
+        submitButton.setAttribute(
+            "aria-disabled",
+            "true"
+        );
+
+        submitButton.setAttribute(
+            "aria-busy",
+            "true"
+        );
+
+
+        return true;
+
+    };
+
+
+const releaseSendVerificationLock =
+    () => {
+
+        sendVerificationInProgress =
+            false;
+
+
+        submitButton.disabled =
+            false;
+
+        submitButton.removeAttribute(
+            "aria-disabled"
+        );
+
+        submitButton.removeAttribute(
+            "aria-busy"
+        );
+
+    };
             if(
                                 !form ||
                 !recipientInput ||
