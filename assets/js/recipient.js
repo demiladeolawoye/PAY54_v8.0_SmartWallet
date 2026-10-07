@@ -10441,16 +10441,43 @@ return;
 
                 }
 
+                        },
+
+            {
+                onCancel:
+                    () => {
+
+                        releaseSendVerificationLock();
+
+                        renderFundingState();
+
+                    }
             }
+
         );
 
 
     }catch(error){
 
+        releaseSendVerificationLock();
+
         setLinkedCardSendGuard(
             true
         );
 
+
+        console.error(
+            "[PAY54_SEND] Linked-card PIN verification failed to initialise.",
+            error
+        );
+
+
+        window.PAY54_TOAST
+        ?.showToast(
+            "Payment verification is temporarily unavailable."
+        );
+
+    }
 
         console.error(
             "[PAY54_SEND] Linked-card PIN verification failed to initialise.",
