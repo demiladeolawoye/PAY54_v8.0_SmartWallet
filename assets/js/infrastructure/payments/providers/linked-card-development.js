@@ -207,7 +207,122 @@
 
     const reversalIdempotency =
         new Map();
+    /* ======================================================================
+       GENERIC HELPERS
+    ====================================================================== */
 
+    function isPlainObject(value) {
+
+        if (
+            value === null ||
+            typeof value !== "object"
+        ) {
+
+            return false;
+
+        }
+
+        const prototype =
+            Object.getPrototypeOf(
+                value
+            );
+
+        return (
+            prototype ===
+                Object.prototype ||
+            prototype ===
+                null
+        );
+
+    }
+
+
+    function normalizeString(value) {
+
+        return typeof value ===
+            "string"
+            ? value.trim()
+            : "";
+
+    }
+
+
+    function normalizeCurrency(value) {
+
+        const currency =
+            normalizeString(
+                value
+            )
+                .toUpperCase();
+
+        return /^[A-Z]{3}$/.test(
+            currency
+        )
+            ? currency
+            : "";
+
+    }
+
+
+    function normalizeAmount(value) {
+
+        const amount =
+            Number(
+                value
+            );
+
+        if (
+            !Number.isFinite(
+                amount
+            ) ||
+            amount <= 0
+        ) {
+
+            return null;
+
+        }
+
+        return amount;
+
+    }
+
+
+    function now() {
+
+        return new Date()
+            .toISOString();
+
+    }
+
+
+    function trimMap(map) {
+
+        while (
+            map.size >
+            MAX_RECORDS
+        ) {
+
+            const oldest =
+                map
+                    .keys()
+                    .next()
+                    .value;
+
+            if (
+                oldest === undefined
+            ) {
+
+                break;
+
+            }
+
+            map.delete(
+                oldest
+            );
+
+        }
+
+    }
        /*
      * Sequence is retained only as a local diagnostic ordering component.
      *
