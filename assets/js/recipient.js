@@ -11485,7 +11485,17 @@ if(
 
                                 }
 
+                                                      },
+
+                            {
+                                onCancel:
+                                    () => {
+
+                                        releaseSendVerificationLock();
+
+                                    }
                             }
+
                         );
 
                     }catch(error){
