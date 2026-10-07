@@ -10672,22 +10672,58 @@ if(
 
 }
 
-                    const restoreSubmitState =
-                        () => {
+                const restoreSubmitState =
+    () => {
 
-                            submitButton.disabled =
-                                false;
+        sendVerificationInProgress =
+            false;
 
-                            submitButton.removeAttribute(
-                                "aria-busy"
-                            );
+        submitButton.disabled =
+            false;
 
-                        };
+        submitButton.removeAttribute(
+            "aria-disabled"
+        );
 
+        submitButton.removeAttribute(
+            "aria-busy"
+        );
+
+    };
+if(
+    !acquireSendVerificationLock()
+){
+
+    return;
+
+}
                     try{
 
                     requestPinVerification(
+
     () => {
+
+        /*
+         * PIN verification succeeded.
+         * Hand control from the pre-PIN guard to the
+         * wallet financial execution lifecycle.
+         */
+
+        sendVerificationInProgress =
+            false;
+
+        submitButton.disabled =
+            true;
+
+        submitButton.setAttribute(
+            "aria-disabled",
+            "true"
+        );
+
+        submitButton.setAttribute(
+            "aria-busy",
+            "true"
+        );
 
         /*
          * ----------------------------------------------------------
@@ -10701,13 +10737,6 @@ if(
          * underlying Send Money form permanently disabled.
          */
 
-        submitButton.disabled =
-            true;
-
-        submitButton.setAttribute(
-            "aria-busy",
-            "true"
-        );
 
         try{
 
