@@ -1083,128 +1083,551 @@ function showToast(message){
   },3000);
 
 }
- function requestPinVerification(callback){
+ /* ==========================================================
+   PAY54 PIN VERIFICATION
+   Supports lifecycle cancellation callbacks so financial
+   orchestration locks can be safely released.
+========================================================== */
 
-  const savedPin = localStorage.getItem(LS.PIN);
+function requestPinVerification(
+    callback,
+    options = {}
+){
 
-  /* 🔐 FORCE PIN SETUP FIRST */
-if(!savedPin){
-  openCreatePinModal(callback);
-  return;
-}
+    const savedPin =
+        localStorage.getItem(
+            LS.PIN
+        );
 
-  openModal({
-    title: "Enter PIN",
+    const onCancel =
+        typeof options.onCancel ===
+            "function"
+            ? options.onCancel
+            : null;
 
-    bodyHTML: `
-      <div class="p54-note">Confirm your PIN to proceed</div>
+    if(!savedPin){
 
-      <input 
-        class="p54-input" 
-        id="userPin" 
-        type="password" 
-        placeholder="••••"
-        maxlength="6"
-        style="margin-top:12px"
-      >
+        openCreatePinModal(
+            callback,
+            options
+        );
 
-      <div class="p54-actions">
-        <button class="p54-btn" id="cancelPin">Cancel</button>
-        <button class="p54-btn primary" id="confirmPin">Confirm</button>
-      </div>
-    `,
-
-    onMount: ({ modal, close }) => {
-
-      const input = modal.querySelector("#userPin");
-
-      modal.querySelector("#cancelPin").addEventListener("click", close);
-
-      modal.querySelector("#confirmPin").addEventListener("click", () => {
-
-        const entered = input.value.trim();
-
-        if(entered === savedPin){
-          close();
-          callback(); // ✅ proceed
-        } else {
-          alert("Incorrect PIN");
-        }
-
-      });
+        return;
 
     }
-  });
+
+    openModal({
+
+        title:
+            "Enter PIN",
+
+        bodyHTML: `
+            <div class="p54-note">
+                Confirm your PIN to proceed
+            </div>
+
+            <input
+                class="p54-input"
+                id="userPin"
+                type="password"
+                placeholder="••••"
+                maxlength="6"
+                autocomplete="current-password"
+                style="margin-top:12px"
+            >
+
+            <div class="p54-actions">
+
+                <button
+                    class="p54-btn"
+                    type="button"
+                    id="cancelPin"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="p54-btn primary"
+                    type="button"
+                    id="confirmPin"
+                >
+                    Confirm
+                </button>
+
+            </div>
+        `,
+
+        onMount: ({
+            modal,
+            close
+        }) => {
+
+            const input =
+                modal.querySelector(
+                    "#userPin"
+                );
+
+            const cancelButton =
+                modal.querySelector(
+                    "#cancelPin"
+                );
+
+            const confirmButton =
+                modal.querySelector(
+                    "#confirmPin"
+                );
+
+            const backdrop =
+                modal.closest(
+                    ".p54-modal-backdrop"
+                );
+
+            let verificationCompleted =
+                false;
+
+            let cancellationReported =
+                false;
+
+            let closeObserver =
+                null;
+
+
+            const reportCancellation =
+                () => {
+
+                    if(
+                        verificationCompleted ||
+                        cancellationReported
+                    ){
+                        return;
+                    }
+
+                    cancellationReported =
+                        true;
+
+                    if(onCancel){
+
+                        try{
+
+                            onCancel();
+
+                        }catch(error){
+
+                            console.error(
+                                "[PAY54_SECURITY] PIN cancellation handler failed.",
+                                error
+                            );
+
+                        }
+
+                    }
+
+                };
+
+
+            /*
+             * The PAY54 modal engine can close via:
+             *
+             * • Cancel
+             * • X
+             * • backdrop click
+             * • Escape
+             * • programmatic close
+             *
+             * Observe removal of the modal backdrop so all
+             * cancellation paths release orchestration locks.
+             */
+
+            if(
+                backdrop &&
+                typeof MutationObserver ===
+                    "function"
+            ){
+
+                closeObserver =
+                    new MutationObserver(
+                        () => {
+
+                            if(
+                                !backdrop.isConnected
+                            ){
+
+                                closeObserver
+                                    ?.disconnect();
+
+                                reportCancellation();
+
+                            }
+
+                        }
+                    );
+
+                closeObserver.observe(
+                    document.body,
+                    {
+                        childList:
+                            true
+                    }
+                );
+
+            }
+
+
+            cancelButton
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        close();
+
+                    }
+                );
+
+
+            confirmButton
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        const entered =
+                            input.value.trim();
+
+                        if(
+                            entered !==
+                            savedPin
+                        ){
+
+                            window.PAY54_TOAST
+                                ?.showToast(
+                                    "Incorrect PIN"
+                                );
+
+                            input.focus();
+
+                            return;
+
+                        }
+
+
+                        /*
+                         * Successful verification must be recorded
+                         * before closing so modal removal is not
+                         * interpreted as cancellation.
+                         */
+
+                        verificationCompleted =
+                            true;
+
+                        cancellationReported =
+                            true;
+
+                        closeObserver
+                            ?.disconnect();
+
+
+                        close();
+
+
+                        if(
+                            typeof callback ===
+                                "function"
+                        ){
+
+                            callback();
+
+                        }
+
+                    }
+                );
+
+
+            input.focus();
+
+        }
+
+    });
 
 }
-   function openCreatePinModal(callback){
 
-  openModal({
-    title: "Create Transaction PIN",
 
-    bodyHTML: `
-      <div class="p54-note">Set a 4-digit PIN for secure transactions</div>
+/* ==========================================================
+   PAY54 CREATE TRANSACTION PIN
+========================================================== */
 
-      <input 
-        class="p54-input" 
-        id="newPin" 
-        type="password" 
-        placeholder="Enter PIN"
-        maxlength="6"
-        style="margin-top:12px"
-      >
+function openCreatePinModal(
+    callback,
+    options = {}
+){
 
-      <input 
-        class="p54-input" 
-        id="confirmPin" 
-        type="password" 
-        placeholder="Confirm PIN"
-        maxlength="6"
-        style="margin-top:10px"
-      >
+    const onCancel =
+        typeof options.onCancel ===
+            "function"
+            ? options.onCancel
+            : null;
 
-      <div class="p54-actions">
-        <button class="p54-btn" id="cancelCreatePin">Cancel</button>
-        <button class="p54-btn primary" id="savePin">Save PIN</button>
-      </div>
-    `,
 
-    onMount: ({ modal, close }) => {
+    openModal({
 
-      const pin1 = modal.querySelector("#newPin");
-      const pin2 = modal.querySelector("#confirmPin");
+        title:
+            "Create Transaction PIN",
 
-      modal.querySelector("#cancelCreatePin").addEventListener("click", close);
+        bodyHTML: `
+            <div class="p54-note">
+                Set a 4 to 6 digit PIN for secure transactions
+            </div>
 
-      modal.querySelector("#savePin").addEventListener("click", () => {
+            <input
+                class="p54-input"
+                id="newPin"
+                type="password"
+                inputmode="numeric"
+                autocomplete="new-password"
+                placeholder="Enter PIN"
+                maxlength="6"
+                style="margin-top:12px"
+            >
 
-        const p1 = pin1.value.trim();
-        const p2 = pin2.value.trim();
+            <input
+                class="p54-input"
+                id="confirmPin"
+                type="password"
+                inputmode="numeric"
+                autocomplete="new-password"
+                placeholder="Confirm PIN"
+                maxlength="6"
+                style="margin-top:10px"
+            >
 
-        if(p1.length < 4){
-          alert("PIN must be at least 4 digits");
-          return;
+            <div class="p54-actions">
+
+                <button
+                    class="p54-btn"
+                    type="button"
+                    id="cancelCreatePin"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="p54-btn primary"
+                    type="button"
+                    id="savePin"
+                >
+                    Save PIN
+                </button>
+
+            </div>
+        `,
+
+        onMount: ({
+            modal,
+            close
+        }) => {
+
+            const pin1 =
+                modal.querySelector(
+                    "#newPin"
+                );
+
+            const pin2 =
+                modal.querySelector(
+                    "#confirmPin"
+                );
+
+            const cancelButton =
+                modal.querySelector(
+                    "#cancelCreatePin"
+                );
+
+            const saveButton =
+                modal.querySelector(
+                    "#savePin"
+                );
+
+            const backdrop =
+                modal.closest(
+                    ".p54-modal-backdrop"
+                );
+
+            let verificationCompleted =
+                false;
+
+            let cancellationReported =
+                false;
+
+            let closeObserver =
+                null;
+
+
+            const reportCancellation =
+                () => {
+
+                    if(
+                        verificationCompleted ||
+                        cancellationReported
+                    ){
+                        return;
+                    }
+
+                    cancellationReported =
+                        true;
+
+                    if(onCancel){
+
+                        try{
+
+                            onCancel();
+
+                        }catch(error){
+
+                            console.error(
+                                "[PAY54_SECURITY] PIN creation cancellation handler failed.",
+                                error
+                            );
+
+                        }
+
+                    }
+
+                };
+
+
+            if(
+                backdrop &&
+                typeof MutationObserver ===
+                    "function"
+            ){
+
+                closeObserver =
+                    new MutationObserver(
+                        () => {
+
+                            if(
+                                !backdrop.isConnected
+                            ){
+
+                                closeObserver
+                                    ?.disconnect();
+
+                                reportCancellation();
+
+                            }
+
+                        }
+                    );
+
+                closeObserver.observe(
+                    document.body,
+                    {
+                        childList:
+                            true
+                    }
+                );
+
+            }
+
+
+            cancelButton
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        close();
+
+                    }
+                );
+
+
+            saveButton
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        const p1 =
+                            pin1.value.trim();
+
+                        const p2 =
+                            pin2.value.trim();
+
+
+                        if(
+                            !/^\d{4,6}$/.test(
+                                p1
+                            )
+                        ){
+
+                            window.PAY54_TOAST
+                                ?.showToast(
+                                    "PIN must contain 4 to 6 digits"
+                                );
+
+                            pin1.focus();
+
+                            return;
+
+                        }
+
+
+                        if(
+                            p1 !==
+                            p2
+                        ){
+
+                            window.PAY54_TOAST
+                                ?.showToast(
+                                    "PINs do not match"
+                                );
+
+                            pin2.focus();
+
+                            return;
+
+                        }
+
+
+                        localStorage.setItem(
+                            LS.PIN,
+                            p1
+                        );
+
+
+                        verificationCompleted =
+                            true;
+
+                        cancellationReported =
+                            true;
+
+                        closeObserver
+                            ?.disconnect();
+
+
+                        window.PAY54_TOAST
+                            ?.showToast(
+                                "PIN set successfully"
+                            );
+
+
+                        close();
+
+
+                        if(
+                            typeof callback ===
+                                "function"
+                        ){
+
+                            callback();
+
+                        }
+
+                    }
+                );
+
+
+            pin1.focus();
+
         }
 
-        if(p1 !== p2){
-          alert("PINs do not match");
-          return;
-        }
-
-        localStorage.setItem(LS.PIN, p1);
-
-        alert("PIN set successfully ✅");
-
-        close();
-
-        if(callback){
-          callback(); // 🔥 continue original action
-        }
-
-      });
-
-    }
-  });
+    });
 
 }
    /* =========================
