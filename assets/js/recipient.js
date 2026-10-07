@@ -6432,7 +6432,34 @@ amountInput.addEventListener(
                 modal.querySelector(
                     "#confirmSend"
                 );
-/* ==========================================================================
+
+            if(
+                                !form ||
+                !recipientInput ||
+                !amountInput ||
+                !fundingSource ||
+                !fundingBalance ||
+                !fundingStatus ||
+                !noteInput ||
+                !cancelButton ||
+                !submitButton
+            ){
+
+                console.error(
+                    "[PAY54_SEND] Send Money UI failed to initialise."
+                );
+
+                window.PAY54_TOAST
+                ?.showToast(
+                    "Send Money is temporarily unavailable."
+                );
+
+                close();
+
+                return;
+
+            }
+           /* ==========================================================================
    PAY54 SEND — PRE-PIN CONCURRENT SUBMISSION GUARD
    Work Package: WP-011B.6E.5G.5H.5B
 
@@ -6502,32 +6529,6 @@ const releaseSendVerificationLock =
         );
 
     };
-            if(
-                                !form ||
-                !recipientInput ||
-                !amountInput ||
-                !fundingSource ||
-                !fundingBalance ||
-                !fundingStatus ||
-                !noteInput ||
-                !cancelButton ||
-                !submitButton
-            ){
-
-                console.error(
-                    "[PAY54_SEND] Send Money UI failed to initialise."
-                );
-
-                window.PAY54_TOAST
-                ?.showToast(
-                    "Send Money is temporarily unavailable."
-                );
-
-                close();
-
-                return;
-
-            }
 
             const cleanString = (
                 value
