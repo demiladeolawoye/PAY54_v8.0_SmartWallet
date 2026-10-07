@@ -7105,10 +7105,41 @@ const prePinQuoteValid =
      * before this boundary.
      */
 
-    try{
+   if(
+    !acquireSendVerificationLock()
+){
 
-        requestPinVerification(
-            async () => {
+    return;
+
+}
+
+try{
+
+    requestPinVerification(
+
+        async () => {
+
+            /*
+             * PIN verification succeeded.
+             * Hand control from the pre-PIN guard to the
+             * linked-card financial execution lifecycle.
+             */
+
+            sendVerificationInProgress =
+                false;
+
+            submitButton.disabled =
+                true;
+
+            submitButton.setAttribute(
+                "aria-disabled",
+                "true"
+            );
+
+            submitButton.setAttribute(
+                "aria-busy",
+                "true"
+            );
 
                 /*
                  * Successful PAY54 PIN verification.
@@ -7116,14 +7147,6 @@ const prePinQuoteValid =
                  * Lock the form while execution-time funding
                  * revalidation is in progress.
                  */
-
-                submitButton.disabled =
-                    true;
-
-                submitButton.setAttribute(
-                    "aria-busy",
-                    "true"
-                );
 
 
                 try{
