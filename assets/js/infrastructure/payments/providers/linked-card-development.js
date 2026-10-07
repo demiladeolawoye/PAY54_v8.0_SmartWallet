@@ -3,7 +3,7 @@
 /* ==========================================================================
    PAY54 ENTERPRISE DEVELOPMENT LINKED-CARD PAYMENT PROVIDER
    File: assets/js/infrastructure/payments/providers/linked-card-development.js
-   Version: v1.0.0
+   Version: v1.0.1
 
    Work Package
    ------------
