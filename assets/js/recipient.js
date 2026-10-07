@@ -10457,41 +10457,27 @@ return;
 
         );
 
+}catch(error){
 
-    }catch(error){
+    releaseSendVerificationLock();
 
-        releaseSendVerificationLock();
-
-        setLinkedCardSendGuard(
-            true
-        );
-
-
-        console.error(
-            "[PAY54_SEND] Linked-card PIN verification failed to initialise.",
-            error
-        );
+    setLinkedCardSendGuard(
+        true
+    );
 
 
-        window.PAY54_TOAST
-        ?.showToast(
-            "Payment verification is temporarily unavailable."
-        );
-
-    }
-
-        console.error(
-            "[PAY54_SEND] Linked-card PIN verification failed to initialise.",
-            error
-        );
+    console.error(
+        "[PAY54_SEND] Linked-card PIN verification failed to initialise.",
+        error
+    );
 
 
-        window.PAY54_TOAST
-        ?.showToast(
-            "Payment verification is temporarily unavailable."
-        );
+    window.PAY54_TOAST
+    ?.showToast(
+        "Payment verification is temporarily unavailable."
+    );
 
-    }
+}
 
 
     /*
