@@ -6949,6 +6949,27 @@ if(
         cleanFundingString(
             selectedFundingDescriptor.id
         );
+   /*
+ * Fast duplicate-submit rejection.
+ *
+ * The financial submission lock is acquired later, immediately
+ * before PIN verification. This early check prevents a repeated
+ * browser submit event from constructing another immutable
+ * linked-card execution intent while an existing Send operation
+ * is already awaiting PIN or executing.
+ */
+
+if(
+    sendVerificationInProgress
+){
+
+    console.warn(
+        "[PAY54_SEND] Duplicate linked-card Send submission blocked before execution-intent creation."
+    );
+
+    return;
+
+}
 /*
  * Fast duplicate-submit rejection.
  *
