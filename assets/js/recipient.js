@@ -8823,7 +8823,7 @@ const compensateLinkedCardPostCommit =
 
         try{
 
-           reversalResult =
+          reversalResult =
     await compensationFundingService
         .reverse({
             sourceId,
@@ -8834,27 +8834,7 @@ const compensateLinkedCardPostCommit =
             commitId,
 
             idempotencyKey:
-                reversalIdempotencyKey,
-
-            metadata: {
-
-                channel:
-                    "send_money",
-
-                stage:
-                    "post_commit_compensation_test",
-
-                workPackage:
-                    "WP-011B.6E.5G.5H.5C",
-
-                developmentSimulation: {
-
-                    reversal:
-                        "unknown"
-
-                }
-
-            }
+                reversalIdempotencyKey
         });
 
         }catch(reversalError){
