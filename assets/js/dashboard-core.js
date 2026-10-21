@@ -663,7 +663,58 @@ if (
   }
 
 }
+/* ==========================================================
+   ENTERPRISE SESSION ROUTING
+========================================================== */
 
+let pay54SessionRedirectInProgress =
+    false;
+
+function redirectToLogin(
+    reason = "SESSION_REQUIRED"
+){
+
+    if(
+        pay54SessionRedirectInProgress
+    ){
+        return false;
+    }
+
+    pay54SessionRedirectInProgress =
+        true;
+
+    try{
+
+        sessionStorage.setItem(
+            "pay54_session_redirect_reason",
+            String(reason)
+        );
+
+    }catch(error){
+
+        console.warn(
+            "[PAY54_DASHBOARD] Unable to persist session redirect reason.",
+            error
+        );
+
+    }
+
+    console.warn(
+        "[PAY54_DASHBOARD] Authentication required. Redirecting to login.",
+        {
+            reason
+        }
+    );
+
+    window.location.replace(
+        "login.html?reason=" +
+        encodeURIComponent(
+            String(reason)
+        )
+    );
+
+    return true;
+}
 /* =========================================
    INIT ENGINE
 ========================================= */
@@ -671,37 +722,43 @@ if (
 function initDashboard(){
 
 const session =
-window.PAY54_SECURITY?.session;
+    window.PAY54_SECURITY?.session;
 
 /* ==========================================================
    ENTERPRISE SESSION VALIDATION
 ========================================================== */
 
 if(
-
-    session &&
-
-    typeof session.isAuthenticated === "function"
-
+    !session ||
+    typeof session.isAuthenticated !==
+        "function"
 ){
 
-    if(
+    redirectToLogin(
+        "SESSION_MANAGER_UNAVAILABLE"
+    );
 
-        !session.isAuthenticated()
+    return;
+}
 
-    ){
+if(
+    session.isAuthenticated() !==
+        true
+){
 
-        window.PAY54_TOAST
-        ?.showToast(
+    const currentSession =
+        typeof session.getCurrent ===
+            "function"
+            ? session.getCurrent()
+            : null;
 
-            "Your session has expired."
+    redirectToLogin(
+        currentSession
+            ? "SESSION_EXPIRED"
+            : "SESSION_REQUIRED"
+    );
 
-        );
-
-        return;
-
-    }
-
+    return;
 }
   if(window.PAY54_APP.initialized){
 
