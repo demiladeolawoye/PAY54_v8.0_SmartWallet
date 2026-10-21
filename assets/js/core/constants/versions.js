@@ -385,7 +385,7 @@ SECURITY: {
         "11.0.0",
 
     VALIDATOR:
-        "11.0.0",
+    "12.0.0",
 
     SANITIZER:
         "12.0.0",
