@@ -1304,8 +1304,10 @@ function reset(){
    /* ========================================================================
    EVENT CONSTANTS
 ======================================================================== */
-
 const EVENTS = Object.freeze({
+
+    CORE_EVENTS_READY:
+        "core.events.ready",
 
     APP_READY:
         "app.ready",
