@@ -379,7 +379,7 @@ SECURITY: {
         "12.0.0",
 
     SESSION_MANAGER:
-        "11.0.0",
+    "12.0.0",
 
     TRANSACTION_GUARD:
         "11.0.0",
