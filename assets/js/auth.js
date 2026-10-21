@@ -172,11 +172,39 @@ function login(e) {
     return showMessage("Invalid email or PIN");
   }
 
-  showMessage("Login successful", "success");
+try {
 
-  setTimeout(() => {
-    window.location.href = "dashboard.html";
-  }, 1000);
+    createDevelopmentAuthHandoff(
+        email
+    );
+
+} catch (
+    error
+) {
+
+    console.error(
+        "[PAY54_AUTH] Development authentication handoff failed.",
+        error
+    );
+
+    return showMessage(
+        "Unable to establish a secure session. Please try again."
+    );
+}
+
+showMessage(
+    "Login successful",
+    "success"
+);
+
+setTimeout(
+    () => {
+
+        window.location.href =
+            "dashboard.html";
+    },
+    1000
+); 
 }
 
 // ---------- FORGOT PIN ----------
