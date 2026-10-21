@@ -1452,34 +1452,54 @@ Object.defineProperty(
 );
 
 /* ========================================================================
-   ENTERPRISE SELF TEST
+   ENTERPRISE STARTUP SIGNAL
+
+   IMPORTANT
+   ---------
+   The Event Bus becoming available does NOT mean the PAY54 application
+   is ready.
+
+   "app.ready" is reserved for the final application bootstrap lifecycle
+   after Core, Security, Infrastructure, Services, Engines, Modules and UI
+   have been validated.
+
+   This event announces only that the Event Bus itself is operational.
 ======================================================================== */
 
 (function(){
 
-    const start = now();
+    const start =
+        now();
 
     publish(
 
-        EVENTS.APP_READY,
+        EVENTS.CORE_EVENTS_READY,
 
         {
 
-            version:VERSION
+            version:
+                VERSION,
+
+            module:
+                "PAY54_EVENTS",
+
+            readyAt:
+                timestamp()
 
         },
 
         {
 
-            source:"bootstrap"
+            source:
+                "events"
 
         }
 
     );
 
     const elapsed =
-
-        now() - start;
+        now() -
+        start;
 
     console.info(
 
@@ -1487,12 +1507,11 @@ Object.defineProperty(
 
         "color:#2563eb;font-weight:bold;",
 
-        "v"+VERSION,
+        "v" +
+        VERSION,
 
         "(" +
-
         elapsed.toFixed(2) +
-
         "ms)"
 
     );
