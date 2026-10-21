@@ -1,2173 +1,2958 @@
+"use strict";
+
 /* ========================================================================
    PAY54 ENTERPRISE PLATFORM
    ------------------------------------------------------------------------
    File: assets/js/security/session-manager.js
-   Version: v11.0.0
-   Module: WP-003B Enterprise Session Manager
+   Version: v12.0.0
+   Module: Titan Enterprise Session Manager
+   Status: Production Candidate
    ------------------------------------------------------------------------
-   Responsibilities
+   Purpose
+   -------
+   Canonical browser-side session lifecycle coordinator for Project Titan.
 
-   • Enterprise session lifecycle
-   • Idle timeout management
-   • Absolute session expiry
-   • Session rotation
-   • Multi-tab synchronisation
-   • Session fingerprint validation
-   • Automatic logout
-   • Event Bus integration
-   • Secure Storage integration
+   Security model
+   --------------
+   • Browser session state contains non-secret metadata only.
+   • This module never creates or persists refresh/access tokens.
+   • Authenticated state must be explicitly established by an authentication
+     layer; the Session Manager never invents authentication.
+   • Session identifiers require cryptographically secure randomness.
+   • Absolute expiry and idle expiry are enforced independently.
+   • Device fingerprinting is a soft context-binding signal, not a credential.
+   • Multi-tab session adoption is validated before activation.
 ======================================================================== */
 
 (() => {
 
-"use strict";
+    "use strict";
 
-/* ========================================================================
-   DEPENDENCIES
-======================================================================== */
+    /* ====================================================================
+       IDENTITY
+    ==================================================================== */
 
-const EVENTS =
-window.PAY54_EVENTS || null;
+    const GLOBAL =
+        window;
 
-const STORAGE =
-window.PAY54_SECURITY?.storage || null;
+    const MODULE_ID =
+        "security.session-manager";
 
-if(!STORAGE){
+    const MODULE_NAME =
+        "PAY54 Titan Enterprise Session Manager";
 
-    console.error(
+    const FILE_PATH =
+        "assets/js/security/session-manager.js";
 
-        "[PAY54_SESSION]",
+    const VERSION =
+        "12.0.0";
 
-        "Secure Storage module not available."
+    const STARTED_AT =
+        new Date()
+            .toISOString();
 
-    );
+    /* ====================================================================
+       DEPENDENCIES
+    ==================================================================== */
 
-    return;
+    const REGISTRY =
+        GLOBAL.PAY54_REGISTRY ||
+        null;
 
-}
+    const CONFIG =
+        GLOBAL.PAY54_CONFIG ||
+        null;
 
-/* ========================================================================
-   SESSION CONSTANTS
-======================================================================== */
+    const EVENTS =
+        GLOBAL.PAY54_EVENTS ||
+        null;
 
-const STORAGE_KEY =
-"session";
+    const STORAGE =
+        GLOBAL.PAY54_SECURITY?.storage ||
+        null;
 
-const SESSION_REGISTRY_KEY =
-"session_registry";
+    if (
+        !REGISTRY ||
+        typeof REGISTRY.registerModule !==
+            "function"
+    ) {
 
-const TRUSTED_DEVICE_KEY =
-"trusted_devices";
+        throw new Error(
+            "[PAY54_SESSION] Platform Registry must load before Session Manager."
+        );
+    }
 
-const REFRESH_TOKEN_KEY =
-"refresh_token";
+    if (
+        !CONFIG ||
+        typeof CONFIG.get !==
+            "function"
+    ) {
 
-const SESSION_AUDIT_KEY =
-"session_audit";
+        throw new Error(
+            "[PAY54_SESSION] Runtime Config must load before Session Manager."
+        );
+    }
 
-const SESSION_VERSION =
-"11.0.0";
+    if (
+        !STORAGE ||
+        typeof STORAGE.get !==
+            "function" ||
+        typeof STORAGE.set !==
+            "function"
+    ) {
 
-const DEFAULT_IDLE_TIMEOUT =
-15 * 60 * 1000;
+        throw new Error(
+            "[PAY54_SESSION] Secure Storage v12 must load before Session Manager."
+        );
+    }
 
-const DEFAULT_MAX_SESSION =
-8 * 60 * 60 * 1000;
-const SESSION_RISK = Object.freeze({
+    /* ====================================================================
+       SAFE RELOAD GUARD
+    ==================================================================== */
 
-    LOW:
-        "LOW",
+    const existingSession =
+        GLOBAL.PAY54_SECURITY?.session ||
+        null;
 
-    MEDIUM:
-        "MEDIUM",
+    if (
+        existingSession
+    ) {
 
-    HIGH:
-        "HIGH"
+        if (
+            existingSession.id ===
+                MODULE_ID &&
+            existingSession.version ===
+                VERSION &&
+            typeof existingSession.health ===
+                "function" &&
+            typeof existingSession.isAuthenticated ===
+                "function"
+        ) {
 
-});
-   const LOGOUT_POLICY = Object.freeze({
+            console.info(
+                "[PAY54_SESSION] Existing Titan Session Manager preserved."
+            );
 
-    NONE:
-        "NONE",
+            return;
+        }
 
-    IDLE:
-        "IDLE",
+        throw new Error(
+            "[PAY54_SESSION] PAY54_SECURITY.session already exists with an incompatible contract."
+        );
+    }
 
-    EXPIRED:
-        "EXPIRED",
+    /* ====================================================================
+       CONSTANTS
+    ==================================================================== */
 
-    INVALID:
-        "INVALID",
+    const STORAGE_KEY =
+        "session";
 
-    HIGH_RISK:
-        "HIGH_RISK"
+    const SESSION_REGISTRY_KEY =
+        "session_registry";
 
-});
-   const MFA_CONFIG = Object.freeze({
+    const TRUSTED_DEVICE_KEY =
+        "trusted_devices";
 
-    ENABLED:
-        false,
+    const SESSION_AUDIT_KEY =
+        "session_audit";
 
-    REQUIRED_RISK:
-        SESSION_RISK.HIGH
+    const DEFAULT_IDLE_TIMEOUT =
+        15 * 60 * 1000;
 
-});
-   const SESSION_DIAGNOSTICS = Object.freeze({
+    const DEFAULT_MAX_SESSION =
+        8 * 60 * 60 * 1000;
 
-    VERSION:
-        SESSION_VERSION,
+    const ACTIVITY_PERSIST_INTERVAL =
+        30 * 1000;
 
-    MODULE:
-        "Enterprise Session Manager"
+    const TRUSTED_DEVICE_TTL =
+        30 * 24 * 60 * 60 * 1000;
 
-});
-   const BIOMETRIC_CONFIG = Object.freeze({
+    const MAX_TRUSTED_DEVICES =
+        10;
 
-    ENABLED:
-        false,
+    const MAX_SESSION_REGISTRY_ENTRIES =
+        20;
 
-    PROVIDER:
-        "NONE"
+    const MAX_AUDIT_ENTRIES =
+        250;
 
-});
-/* ========================================================================
-   SESSION EVENTS
-======================================================================== */
+    const SESSION_RISK =
+        Object.freeze({
 
-const SESSION_EVENTS =
-Object.freeze({
+            LOW:
+                "LOW",
 
-    CREATED:
-        "session.created",
+            MEDIUM:
+                "MEDIUM",
 
-    RESTORED:
-        "session.restored",
+            HIGH:
+                "HIGH"
+        });
 
-    UPDATED:
-        "session.updated",
+    const LOGOUT_POLICY =
+        Object.freeze({
 
-    ROTATED:
-        "session.rotated",
+            NONE:
+                "NONE",
 
-    EXPIRED:
-        "session.expired",
+            IDLE:
+                "IDLE",
 
-    IDLE:
-        "session.idle",
+            EXPIRED:
+                "EXPIRED",
 
-    LOGOUT:
-        "session.logout",
+            INVALID:
+                "INVALID",
 
-    INVALID:
-        "session.invalid"
+            HIGH_RISK:
+                "HIGH_RISK",
 
-});
+            REMOTE:
+                "REMOTE",
 
-/* ========================================================================
-   EVENT PUBLISHER
-======================================================================== */
+            USER:
+                "USER"
+        });
 
-function publishSessionEvent(
+    const SESSION_EVENTS =
+        Object.freeze({
 
-    eventName,
+            CREATED:
+                "session.created",
 
-    payload = {}
+            RESTORED:
+                "session.restored",
 
-){
+            UPDATED:
+                "session.updated",
 
-    try{
+            ROTATED:
+                "session.rotated",
 
-        if(
+            EXPIRED:
+                "session.expired",
 
-            EVENTS &&
+            IDLE:
+                "session.idle",
 
-            typeof EVENTS.publish === "function"
+            LOGOUT:
+                "session.logout",
 
-        ){
+            INVALID:
+                "session.invalid",
+
+            RISK_CHANGED:
+                "session.risk.changed",
+
+            READY:
+                "security.session.ready"
+        });
+
+    /* ====================================================================
+       PRIVATE STATE
+    ==================================================================== */
+
+    let currentSession =
+        null;
+
+    let idleTimer =
+        null;
+
+    let absoluteExpiryTimer =
+        null;
+
+    let activityFlushTimer =
+        null;
+
+    let lastPersistedActivityAt =
+        0;
+
+    let lastKnownRisk =
+        SESSION_RISK.HIGH;
+
+    const state = {
+
+        ready:
+            false,
+
+        readyAt:
+            null,
+
+        restored:
+            false,
+
+        starts:
+            0,
+
+        rotations:
+            0,
+
+        logouts:
+            0,
+
+        remoteSyncs:
+            0,
+
+        invalidations:
+            0,
+
+        activityUpdates:
+            0,
+
+        persistedActivityUpdates:
+            0,
+
+        lastError:
+            null
+    };
+
+    /* ====================================================================
+       UTILITIES
+    ==================================================================== */
+
+    function now() {
+
+        return Date.now();
+    }
+
+
+    function nowISO() {
+
+        return new Date()
+            .toISOString();
+    }
+
+
+    function isPlainObject(
+        value
+    ) {
+
+        if (
+            !value ||
+            typeof value !==
+                "object" ||
+            Array.isArray(
+                value
+            )
+        ) {
+
+            return false;
+        }
+
+        const prototype =
+            Object.getPrototypeOf(
+                value
+            );
+
+        return (
+            prototype ===
+                Object.prototype ||
+            prototype ===
+                null
+        );
+    }
+
+
+    function clone(
+        value
+    ) {
+
+        return (
+            value === null ||
+            value === undefined
+        )
+
+            ? value
+
+            : JSON.parse(
+                JSON.stringify(
+                    value
+                )
+            );
+    }
+
+
+    function rememberError(
+        error
+    ) {
+
+        state.lastError =
+            Object.freeze({
+
+                name:
+                    error?.name ||
+                    "Error",
+
+                message:
+                    error?.message ||
+                    String(
+                        error
+                    ),
+
+                timestamp:
+                    nowISO()
+            });
+    }
+
+
+    function publish(
+        eventName,
+        payload = {}
+    ) {
+
+        try {
+
+            if (
+                !EVENTS ||
+                typeof EVENTS.publish !==
+                    "function"
+            ) {
+
+                return false;
+            }
 
             EVENTS.publish(
 
                 eventName,
 
-                payload,
+                Object.freeze({
+
+                    moduleId:
+                        MODULE_ID,
+
+                    occurredAt:
+                        nowISO(),
+
+                    ...payload
+                }),
 
                 {
 
                     source:
-
-                    "session-manager"
-
+                        MODULE_ID
                 }
-
             );
 
+            return true;
+
+        } catch (
+            error
+        ) {
+
+            rememberError(
+                error
+            );
+
+            console.warn(
+                "[PAY54_SESSION] Event publication failed.",
+                error
+            );
+
+            return false;
+        }
+    }
+
+
+    function createSecureId() {
+
+        const cryptoApi =
+            GLOBAL.crypto;
+
+        if (
+            cryptoApi?.randomUUID
+        ) {
+
+            return cryptoApi.randomUUID();
         }
 
-    }catch(error){
+        if (
+            cryptoApi?.getRandomValues
+        ) {
 
-        console.error(
+            const bytes =
+                new Uint8Array(
+                    16
+                );
 
-            "[PAY54_SESSION]",
+            cryptoApi.getRandomValues(
+                bytes
+            );
 
-            eventName,
+            bytes[6] =
+                (
+                    bytes[6] &
+                    0x0f
+                ) |
+                0x40;
 
-            error
+            bytes[8] =
+                (
+                    bytes[8] &
+                    0x3f
+                ) |
+                0x80;
 
+            const hex =
+                Array.from(
+
+                    bytes,
+
+                    byte =>
+                        byte
+                            .toString(
+                                16
+                            )
+                            .padStart(
+                                2,
+                                "0"
+                            )
+                )
+                .join("");
+
+            return [
+                hex.slice(
+                    0,
+                    8
+                ),
+                hex.slice(
+                    8,
+                    12
+                ),
+                hex.slice(
+                    12,
+                    16
+                ),
+                hex.slice(
+                    16,
+                    20
+                ),
+                hex.slice(
+                    20
+                )
+            ]
+            .join("-");
+        }
+
+        throw new Error(
+            "[PAY54_SESSION] Cryptographically secure random session identifiers are unavailable."
         );
-
     }
 
-}
 
-/* ========================================================================
-   RUNTIME
-======================================================================== */
+    function normaliseDuration(
+        value,
+        fallback,
+        name
+    ) {
 
-let activityTimer = null;
+        const resolved =
+            value ??
+            fallback;
 
-let currentSession = null;
+        const numeric =
+            Number(
+                resolved
+            );
 
-/* ========================================================================
-   UTILITIES
-======================================================================== */
+        if (
+            !Number.isFinite(
+                numeric
+            ) ||
+            numeric <= 0
+        ) {
 
-function now(){
+            throw new TypeError(
+                `[PAY54_SESSION] ${name} must be a positive finite number of milliseconds.`
+            );
+        }
 
-    return Date.now();
-
-}
-
-function nowISO(){
-
-    return new Date()
-
-    .toISOString();
-
-}
-
-function uuid(){
-
-    if(
-
-        crypto?.randomUUID
-
-    ){
-
-        return crypto.randomUUID();
-
+        return numeric;
     }
 
-    return (
 
-        Date.now()
+    function normaliseRoles(
+        value
+    ) {
 
-        .toString(36)
+        if (
+            value === undefined ||
+            value === null
+        ) {
 
-        +
+            return [];
+        }
 
-        Math.random()
+        if (
+            !Array.isArray(
+                value
+            )
+        ) {
 
-        .toString(36)
+            throw new TypeError(
+                "[PAY54_SESSION] roles must be an array."
+            );
+        }
 
-        .substring(2)
+        return Array.from(
 
-    );
+            new Set(
 
-}
+                value
+                    .map(
+                        role =>
+                            String(
+                                role ??
+                                ""
+                            ).trim()
+                    )
+                    .filter(
+                        Boolean
+                    )
+            )
+        );
+    }
 
-/* ========================================================================
-   DEVICE FINGERPRINT
-======================================================================== */
 
-function createFingerprint(){
+    function createFingerprint() {
 
-    return [
+        const timezone =
+            (() => {
 
-        navigator.userAgent,
+                try {
 
-        navigator.language,
+                    return (
+                        Intl
+                            .DateTimeFormat()
+                            .resolvedOptions()
+                            .timeZone ||
+                        "unknown"
+                    );
 
-        screen.width,
+                } catch {
 
-        screen.height,
+                    return "unknown";
+                }
 
-        Intl.DateTimeFormat()
+            })();
 
-        .resolvedOptions()
+        return [
 
-        .timeZone
+            navigator.userAgent ||
+                "unknown",
 
-    ].join("|");
+            navigator.language ||
+                "unknown",
 
-}
-/* ========================================================================
-   SESSION FACTORY
-======================================================================== */
-
-function createSession(
-
-    options = {}
-
-){
-
-    const timestamp =
-        now();
-
-    return {
-
-        id:
-
-            uuid(),
-
-        version:
-
-            SESSION_VERSION,
-
-        created:
-
-            timestamp,
-
-        updated:
-
-            timestamp,
-
-        expires:
-
-            timestamp +
-
-            DEFAULT_MAX_SESSION,
-
-        lastActivity:
-
-            timestamp,
-
-        idleTimeout:
-
-            options.idleTimeout ??
-
-            DEFAULT_IDLE_TIMEOUT,
-
-        maxSession:
-
-            options.maxSession ??
-
-            DEFAULT_MAX_SESSION,
-
-        fingerprint:
-
-            createFingerprint(),
-
-        authenticated:
-
-            Boolean(
-
-                options.authenticated
-
+            String(
+                screen?.width ??
+                "unknown"
             ),
 
-        userId:
+            String(
+                screen?.height ??
+                "unknown"
+            ),
 
-            options.userId ??
+            timezone
 
-            null,
+        ].join("|");
+    }
 
-        roles:
+
+    function validateSessionShape(
+        session
+    ) {
+
+        return Boolean(
+
+            isPlainObject(
+                session
+            ) &&
+
+            typeof session.id ===
+                "string" &&
+
+            session.id.length >=
+                16 &&
+
+            session.version ===
+                VERSION &&
+
+            Number.isFinite(
+                session.created
+            ) &&
+
+            Number.isFinite(
+                session.updated
+            ) &&
+
+            Number.isFinite(
+                session.expires
+            ) &&
+
+            Number.isFinite(
+                session.lastActivity
+            ) &&
+
+            Number.isFinite(
+                session.idleTimeout
+            ) &&
+
+            Number.isFinite(
+                session.maxSession
+            ) &&
+
+            typeof session.fingerprint ===
+                "string" &&
+
+            typeof session.authenticated ===
+                "boolean" &&
 
             Array.isArray(
+                session.roles
+            ) &&
 
-                options.roles
-
+            isPlainObject(
+                session.metadata
             )
-
-            ?
-
-            [...options.roles]
-
-            :
-
-            [],
-
-        metadata:
-
-            isObject(
-
-                options.metadata
-
-            )
-
-            ?
-
-            structuredClone(
-
-                options.metadata
-
-            )
-
-            :
-
-            {}
-
-    };
-
-}
-/* ========================================================================
-   SESSION REGISTRY
-======================================================================== */
-
-function getSessionRegistry(){
-
-    return STORAGE.get(
-
-        SESSION_REGISTRY_KEY,
-
-        []
-
-    );
-
-}
-
-function saveSessionRegistry(
-
-    registry
-
-){
-
-    STORAGE.set(
-
-        SESSION_REGISTRY_KEY,
-
-        registry
-
-    );
-
-}
-
-function registerSession(
-
-    session
-
-){
-
-    const registry =
-
-        getSessionRegistry();
-
-    const exists =
-
-        registry.some(
-
-            item =>
-
-                item.id ===
-
-                session.id
-
         );
-
-    if(
-
-        exists
-
-    ){
-
-        return;
-
     }
 
-    registry.push({
-
-        id:
-
-            session.id,
-
-        userId:
-
-            session.userId,
-
-        created:
-
-            session.created,
-
-        fingerprint:
-
-            session.fingerprint
-
-    });
-
-    saveSessionRegistry(
-
-        registry
-
-    );
-
-}
-
-function unregisterSession(
-
-    sessionId
-
-){
-
-    const registry =
-
-        getSessionRegistry()
-
-        .filter(
-
-            item =>
-
-                item.id !==
-
-                sessionId
-
-        );
-
-    saveSessionRegistry(
-
-        registry
-
-    );
-
-}
-   /* ========================================================================
-   TRUSTED DEVICES
-======================================================================== */
-
-function getTrustedDevices(){
-
-    return STORAGE.get(
-
-        TRUSTED_DEVICE_KEY,
-
-        []
-
-    );
-
-}
-
-function saveTrustedDevices(
-
-    devices
-
-){
-
-    STORAGE.set(
-
-        TRUSTED_DEVICE_KEY,
-
-        devices
-
-    );
-
-}
-
-function trustCurrentDevice(){
-
-    if(
-
-        !currentSession
-
-    ){
-
-        return;
-
-    }
-
-    const devices =
-
-        getTrustedDevices();
-
-    const exists =
-
-        devices.some(
-
-            item =>
-
-                item.fingerprint ===
-
-                currentSession.fingerprint
-
-        );
-
-    if(
-
-        exists
-
-    ){
-
-        return;
-
-    }
-
-    devices.push({
-
-        fingerprint:
-
-            currentSession.fingerprint,
-
-        trustedAt:
-
-            nowISO()
-
-    });
-
-    saveTrustedDevices(
-
-        devices
-
-    );
-
-}
-   /* ========================================================================
-   REFRESH TOKEN
-======================================================================== */
-
-function createRefreshToken(){
-
-    return {
-
-    id:
-
-        uuid(),
-
-    sessionId:
-
-        currentSession
-
-            ?
-
-            currentSession.id
-
-            :
-
-            null,
-
-    userId:
-
-        currentSession
-
-            ?
-
-            currentSession.userId
-
-            :
-
-            null,
-
-    fingerprint:
-
-        currentSession
-
-            ?
-
-            currentSession.fingerprint
-
-            :
-
-            null,
-
-    created:
-
-        now(),
-
-    expires:
-
-        now() +
-
-        (30 * 24 * 60 * 60 * 1000),
-
-    version:
-
-        SESSION_VERSION
-
-};
-
-}
-
-function saveRefreshToken(
-
-    token
-
-){
-
-    STORAGE.set(
-
-        REFRESH_TOKEN_KEY,
-
-        token
-
-    );
-
-}
-
-function getRefreshToken(){
-
-    return STORAGE.get(
-
-        REFRESH_TOKEN_KEY,
-
-        null
-
-    );
-
-}
-
-function revokeRefreshToken(){
-
-    STORAGE.remove(
-
-        REFRESH_TOKEN_KEY
-
-    );
-
-}
-/* ========================================================================
-   SESSION AUDIT
-======================================================================== */
-
-function getSessionAudit(){
-
-    return STORAGE.get(
-
-        SESSION_AUDIT_KEY,
-
-        []
-
-    );
-
-}
-
-function saveSessionAudit(
-
-    audit
-
-){
-
-    STORAGE.set(
-
-        SESSION_AUDIT_KEY,
-
-        audit
-
-    );
-
-}
-
-function recordSessionAudit(
-
-    action,
-
-    details = {}
-
-){
-
-    const audit =
-
-        getSessionAudit();
-
-    audit.push({
-
-        id:
-
-            uuid(),
-
-        action,
-
-        timestamp:
-
-            nowISO(),
-
-        sessionId:
-
-            currentSession
-
-                ? currentSession.id
-
-                : null,
-
-        userId:
-
-            currentSession
-
-                ? currentSession.userId
-
-                : null,
-
-        details
-
-    });
-
-    saveSessionAudit(
-
-        audit
-
-    );
-
-}   
-/* ========================================================================
-   SESSION PERSISTENCE
-======================================================================== */
-
-function saveSession(
-
-    session
-
-){
-
-    session.updated =
-
-        now();
-
-    STORAGE.set(
-
-        STORAGE_KEY,
-
-        session,
-
-        {
-
-            ttl:
-
-            session.maxSession
-
+    /* ====================================================================
+       SESSION FACTORY
+    ==================================================================== */
+
+    function createSession(
+        options = {}
+    ) {
+
+        if (
+            !isPlainObject(
+                options
+            )
+        ) {
+
+            throw new TypeError(
+                "[PAY54_SESSION] Session options must be a plain object."
+            );
         }
 
-    );
+        const timestamp =
+            now();
 
-    currentSession =
+        const idleTimeout =
+            normaliseDuration(
 
-        structuredClone(
+                options.idleTimeout,
 
-            session
+                DEFAULT_IDLE_TIMEOUT,
 
+                "idleTimeout"
+            );
+
+        const maxSession =
+            normaliseDuration(
+
+                options.maxSession,
+
+                DEFAULT_MAX_SESSION,
+
+                "maxSession"
+            );
+
+        if (
+            idleTimeout >
+            maxSession
+        ) {
+
+            throw new Error(
+                "[PAY54_SESSION] idleTimeout cannot exceed maxSession."
+            );
+        }
+
+        return {
+
+            id:
+                createSecureId(),
+
+            version:
+                VERSION,
+
+            created:
+                timestamp,
+
+            updated:
+                timestamp,
+
+            expires:
+                timestamp +
+                maxSession,
+
+            lastActivity:
+                timestamp,
+
+            idleTimeout,
+
+            maxSession,
+
+            fingerprint:
+                createFingerprint(),
+
+            authenticated:
+                options.authenticated ===
+                true,
+
+            userId:
+                options.userId ??
+                null,
+
+            roles:
+                normaliseRoles(
+                    options.roles
+                ),
+
+            metadata:
+
+                isPlainObject(
+                    options.metadata
+                )
+
+                    ? clone(
+                        options.metadata
+                    )
+
+                    : {}
+        };
+    }
+
+    /* ====================================================================
+       SESSION REGISTRY
+    ==================================================================== */
+
+    function getSessionRegistry() {
+
+        const registry =
+            STORAGE.get(
+
+                SESSION_REGISTRY_KEY,
+
+                []
+            );
+
+        return (
+            Array.isArray(
+                registry
+            )
+
+                ? registry
+
+                : []
         );
+    }
 
-    publishSessionEvent(
 
-        SESSION_EVENTS.UPDATED,
+    function pruneSessionRegistry(
+        registry =
+            getSessionRegistry()
+    ) {
 
-        {
+        const timestamp =
+            now();
 
-            sessionId:
+        const seen =
+            new Set();
 
+        const pruned =
+            registry
+
+                .filter(
+                    item =>
+
+                        isPlainObject(
+                            item
+                        ) &&
+
+                        typeof item.id ===
+                            "string" &&
+
+                        !seen.has(
+                            item.id
+                        ) &&
+
+                        Number.isFinite(
+                            item.expires
+                        ) &&
+
+                        item.expires >
+                            timestamp
+                )
+
+                .map(
+                    item => {
+
+                        seen.add(
+                            item.id
+                        );
+
+                        return item;
+                    }
+                )
+
+                .sort(
+                    (
+                        a,
+                        b
+                    ) =>
+
+                        (
+                            b.updated ||
+                            b.created ||
+                            0
+                        )
+                        -
+                        (
+                            a.updated ||
+                            a.created ||
+                            0
+                        )
+                )
+
+                .slice(
+                    0,
+                    MAX_SESSION_REGISTRY_ENTRIES
+                );
+
+        return pruned;
+    }
+
+
+    function saveSessionRegistry(
+        registry
+    ) {
+
+        STORAGE.set(
+
+            SESSION_REGISTRY_KEY,
+
+            pruneSessionRegistry(
+
+                Array.isArray(
+                    registry
+                )
+
+                    ? registry
+
+                    : []
+            )
+        );
+    }
+
+
+    function registerSession(
+        session
+    ) {
+
+        let registry =
+            pruneSessionRegistry();
+
+        registry =
+            registry.filter(
+                item =>
+                    item.id !==
+                    session.id
+            );
+
+        registry.unshift({
+
+            id:
                 session.id,
 
-            updatedAt:
+            userId:
+                session.userId,
 
-                nowISO()
+            created:
+                session.created,
 
+            updated:
+                session.updated,
+
+            expires:
+                session.expires,
+
+            fingerprint:
+                session.fingerprint
+        });
+
+        saveSessionRegistry(
+            registry
+        );
+    }
+
+
+    function unregisterSession(
+        sessionId
+    ) {
+
+        if (
+            !sessionId
+        ) {
+
+            return false;
         }
 
-    );
+        const before =
+            getSessionRegistry();
 
-    return currentSession;
+        const after =
+            before.filter(
+                item =>
+                    item?.id !==
+                    sessionId
+            );
 
-}
+        saveSessionRegistry(
+            after
+        );
 
-function loadSession(){
+        return (
+            after.length !==
+            before.length
+        );
+    }
 
-    const session =
 
-        STORAGE.get(
+    function replaceRegisteredSession(
+        previousId,
+        session
+    ) {
+
+        let registry =
+            getSessionRegistry()
+
+                .filter(
+                    item =>
+                        item?.id !==
+                            previousId &&
+                        item?.id !==
+                            session.id
+                );
+
+        registry.unshift({
+
+            id:
+                session.id,
+
+            userId:
+                session.userId,
+
+            created:
+                session.created,
+
+            updated:
+                session.updated,
+
+            expires:
+                session.expires,
+
+            fingerprint:
+                session.fingerprint
+        });
+
+        saveSessionRegistry(
+            registry
+        );
+    }
+
+    /* ====================================================================
+       TRUSTED DEVICES
+    ==================================================================== */
+
+    function getTrustedDevices() {
+
+        const timestamp =
+            now();
+
+        const devices =
+            STORAGE.get(
+
+                TRUSTED_DEVICE_KEY,
+
+                []
+            );
+
+        if (
+            !Array.isArray(
+                devices
+            )
+        ) {
+
+            return [];
+        }
+
+        return devices
+
+            .filter(
+                device =>
+
+                    isPlainObject(
+                        device
+                    ) &&
+
+                    typeof device.id ===
+                        "string" &&
+
+                    typeof device.fingerprint ===
+                        "string" &&
+
+                    Number.isFinite(
+                        device.expiresAt
+                    ) &&
+
+                    device.expiresAt >
+                        timestamp
+            )
+
+            .sort(
+                (
+                    a,
+                    b
+                ) =>
+
+                    (
+                        b.lastSeenAt ||
+                        0
+                    )
+                    -
+                    (
+                        a.lastSeenAt ||
+                        0
+                    )
+            )
+
+            .slice(
+                0,
+                MAX_TRUSTED_DEVICES
+            );
+    }
+
+
+    function saveTrustedDevices(
+        devices
+    ) {
+
+        STORAGE.set(
+
+            TRUSTED_DEVICE_KEY,
+
+            Array.isArray(
+                devices
+            )
+
+                ? devices.slice(
+                    0,
+                    MAX_TRUSTED_DEVICES
+                )
+
+                : []
+        );
+    }
+
+
+    function trustCurrentDevice() {
+
+        if (
+            !currentSession
+        ) {
+
+            return null;
+        }
+
+        const timestamp =
+            now();
+
+        const fingerprint =
+            currentSession.fingerprint;
+
+        let devices =
+            getTrustedDevices();
+
+        let device =
+            devices.find(
+                item =>
+                    item.fingerprint ===
+                    fingerprint
+            ) ||
+            null;
+
+        if (
+            device
+        ) {
+
+            device = {
+
+                ...device,
+
+                lastSeenAt:
+                    timestamp,
+
+                expiresAt:
+                    timestamp +
+                    TRUSTED_DEVICE_TTL
+            };
+
+            devices =
+                devices.filter(
+                    item =>
+                        item.id !==
+                        device.id
+                );
+
+        } else {
+
+            device = {
+
+                id:
+                    createSecureId(),
+
+                fingerprint,
+
+                createdAt:
+                    timestamp,
+
+                lastSeenAt:
+                    timestamp,
+
+                expiresAt:
+                    timestamp +
+                    TRUSTED_DEVICE_TTL
+            };
+        }
+
+        devices.unshift(
+            device
+        );
+
+        saveTrustedDevices(
+            devices
+        );
+
+        return clone(
+            device
+        );
+    }
+
+
+    function revokeTrustedDevice(
+        deviceId
+    ) {
+
+        const id =
+            String(
+                deviceId ??
+                ""
+            ).trim();
+
+        if (
+            !id
+        ) {
+
+            return false;
+        }
+
+        const before =
+            getTrustedDevices();
+
+        const after =
+            before.filter(
+                device =>
+                    device.id !==
+                    id
+            );
+
+        saveTrustedDevices(
+            after
+        );
+
+        return (
+            after.length !==
+            before.length
+        );
+    }
+
+    /* ====================================================================
+       SESSION AUDIT
+    ==================================================================== */
+
+    function getSessionAudit() {
+
+        const audit =
+            STORAGE.get(
+
+                SESSION_AUDIT_KEY,
+
+                []
+            );
+
+        return (
+            Array.isArray(
+                audit
+            )
+
+                ? audit
+
+                : []
+        );
+    }
+
+
+    function recordSessionAudit(
+        action,
+        details = {}
+    ) {
+
+        const audit =
+            getSessionAudit();
+
+        audit.push({
+
+            id:
+                createSecureId(),
+
+            action:
+                String(
+                    action ||
+                    "SESSION_EVENT"
+                ),
+
+            timestamp:
+                nowISO(),
+
+            sessionId:
+                currentSession?.id ??
+                details.sessionId ??
+                null,
+
+            userId:
+                currentSession?.userId ??
+                details.userId ??
+                null,
+
+            details:
+
+                isPlainObject(
+                    details
+                )
+
+                    ? clone(
+                        details
+                    )
+
+                    : {}
+        });
+
+        STORAGE.set(
+
+            SESSION_AUDIT_KEY,
+
+            audit.slice(
+                -MAX_AUDIT_ENTRIES
+            )
+        );
+    }
+
+    /* ====================================================================
+       SESSION PERSISTENCE
+    ==================================================================== */
+
+    function persistSession(
+        session,
+        publishUpdate = true
+    ) {
+
+        if (
+            !validateSessionShape(
+                session
+            )
+        ) {
+
+            throw new Error(
+                "[PAY54_SESSION] Refusing to persist an invalid session contract."
+            );
+        }
+
+        const remainingLifetime =
+            session.expires -
+            now();
+
+        if (
+            remainingLifetime <=
+            0
+        ) {
+
+            throw new Error(
+                "[PAY54_SESSION] Refusing to persist an expired session."
+            );
+        }
+
+        session.updated =
+            now();
+
+        STORAGE.set(
 
             STORAGE_KEY,
 
-            null
-
-        );
-
-    if(
-
-        !session
-
-    ){
-
-        currentSession =
-
-            null;
-
-        return null;
-
-    }
-
-    currentSession =
-
-        structuredClone(
-
-            session
-
-        );
-
-    return currentSession;
-
-}
-
-/* ========================================================================
-   SESSION VALIDATION
-======================================================================== */
-
-function validateSession(
-
-    session
-
-){
-
-    if(
-
-        !session
-
-    ){
-
-        return false;
-
-    }
-
-    if(
-
-        session.version !==
-
-        SESSION_VERSION
-
-    ){
-
-        publishSessionEvent(
-
-            SESSION_EVENTS.INVALID,
+            session,
 
             {
 
-                reason:
-
-                "Version mismatch"
-
+                ttl:
+                    remainingLifetime
             }
-
-        );
-
-        return false;
-
-    }
-
-    if(
-
-        session.expires <=
-
-        now()
-
-    ){
-
-        publishSessionEvent(
-
-            SESSION_EVENTS.EXPIRED,
-
-            {
-
-                sessionId:
-
-                    session.id
-
-            }
-
-        );
-
-        return false;
-
-    }
-
-    if(
-
-        session.fingerprint !==
-
-        createFingerprint()
-
-    ){
-
-        publishSessionEvent(
-
-            SESSION_EVENTS.INVALID,
-
-            {
-
-                reason:
-
-                "Fingerprint mismatch"
-
-            }
-
-        );
-
-        return false;
-
-    }
-
-    return true;
-
-}
-
-/* ========================================================================
-   SESSION RESTORE
-======================================================================== */
-
-function restoreSession(){
-
-    const session =
-
-        loadSession();
-
-    if(
-
-        !validateSession(
-
-            session
-
-        )
-
-    ){
-
-        STORAGE.remove(
-
-            STORAGE_KEY
-
         );
 
         currentSession =
+            clone(
+                session
+            );
 
-            null;
+        lastPersistedActivityAt =
+            currentSession.lastActivity;
 
-        return null;
+        if (
+            publishUpdate
+        ) {
 
-    }
-recordSessionAudit(
+            publish(
 
-    "SESSION_RESTORED"
+                SESSION_EVENTS.UPDATED,
 
-);
-    publishSessionEvent(
+                {
 
-        SESSION_EVENTS.RESTORED,
+                    sessionId:
+                        session.id,
 
-        {
-
-            sessionId:
-
-                session.id,
-
-            restoredAt:
-
-                nowISO()
-
+                    updatedAt:
+                        nowISO()
+                }
+            );
         }
 
-    );
-
-    return session;
-
-}
-/* ========================================================================
-   SESSION ACTIVITY
-======================================================================== */
-
-function updateActivity(){
-
-    if(
-
-        !currentSession
-
-    ){
-
-        return;
-
-    }
-
-    currentSession.lastActivity =
-
-        now();
-
-    saveSession(
-
-        currentSession
-
-    );
-
-}
-
-function clearActivityTimer(){
-
-    if(
-
-        activityTimer
-
-    ){
-
-        clearTimeout(
-
-            activityTimer
-
+        return clone(
+            currentSession
         );
-
-        activityTimer = null;
-
     }
 
-}
 
-/* ========================================================================
-   IDLE TIMEOUT
-======================================================================== */
+    function loadPersistedSession() {
 
-function scheduleIdleTimeout(){
+        const session =
+            STORAGE.get(
 
-    clearActivityTimer();
+                STORAGE_KEY,
 
-    if(
+                null
+            );
 
-        !currentSession
+        return (
+            session
 
-    ){
+                ? clone(
+                    session
+                )
 
-        return;
-
+                : null
+        );
     }
 
-    activityTimer =
+    /* ====================================================================
+       VALIDATION / RISK
+    ==================================================================== */
 
-        setTimeout(
+    function validateSession(
+        session,
+        options = {}
+    ) {
 
-            ()=>{
+        const emitEvents =
+            options.emitEvents !==
+            false;
 
-                publishSessionEvent(
+        const timestamp =
+            now();
+
+        if (
+            !validateSessionShape(
+                session
+            )
+        ) {
+
+            if (
+                emitEvents
+            ) {
+
+                publish(
+
+                    SESSION_EVENTS.INVALID,
+
+                    {
+
+                        reason:
+                            "Invalid session contract"
+                    }
+                );
+            }
+
+            return false;
+        }
+
+        if (
+            session.expires <=
+            timestamp
+        ) {
+
+            if (
+                emitEvents
+            ) {
+
+                publish(
+
+                    SESSION_EVENTS.EXPIRED,
+
+                    {
+
+                        sessionId:
+                            session.id
+                    }
+                );
+            }
+
+            return false;
+        }
+
+        if (
+            session.lastActivity +
+            session.idleTimeout <=
+            timestamp
+        ) {
+
+            if (
+                emitEvents
+            ) {
+
+                publish(
 
                     SESSION_EVENTS.IDLE,
 
                     {
 
                         sessionId:
-
-                            currentSession.id,
-
-                        detectedAt:
-
-                            nowISO()
-
+                            session.id
                     }
+                );
+            }
 
+            return false;
+        }
+
+        if (
+            session.fingerprint !==
+            createFingerprint()
+        ) {
+
+            if (
+                emitEvents
+            ) {
+
+                publish(
+
+                    SESSION_EVENTS.INVALID,
+
+                    {
+
+                        sessionId:
+                            session.id,
+
+                        reason:
+                            "Session context fingerprint mismatch"
+                    }
+                );
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+    function calculateSessionRisk(
+        session =
+            currentSession
+    ) {
+
+        if (
+            !session ||
+            !session.authenticated
+        ) {
+
+            return SESSION_RISK.HIGH;
+        }
+
+        const trusted =
+            getTrustedDevices()
+
+                .some(
+                    device =>
+                        device.fingerprint ===
+                        session.fingerprint
                 );
 
-                logout(
+        return (
+            trusted
 
-    LOGOUT_POLICY.IDLE
+                ? SESSION_RISK.LOW
 
-);
+                : SESSION_RISK.MEDIUM
+        );
+    }
 
-            },
 
-            currentSession.idleTimeout
+    function publishRiskChangeIfNeeded() {
 
+        const risk =
+            calculateSessionRisk();
+
+        if (
+            risk !==
+            lastKnownRisk
+        ) {
+
+            publish(
+
+                SESSION_EVENTS.RISK_CHANGED,
+
+                {
+
+                    previousRisk:
+                        lastKnownRisk,
+
+                    risk,
+
+                    sessionId:
+                        currentSession?.id ??
+                        null
+                }
+            );
+
+            lastKnownRisk =
+                risk;
+        }
+
+        return risk;
+    }
+
+
+    function getSessionRisk() {
+
+        return calculateSessionRisk();
+    }
+
+
+    function evaluateLogoutPolicy(
+        session =
+            currentSession
+    ) {
+
+        if (
+            !session ||
+            !validateSessionShape(
+                session
+            )
+        ) {
+
+            return LOGOUT_POLICY.INVALID;
+        }
+
+        const timestamp =
+            now();
+
+        if (
+            session.expires <=
+            timestamp
+        ) {
+
+            return LOGOUT_POLICY.EXPIRED;
+        }
+
+        if (
+            session.lastActivity +
+            session.idleTimeout <=
+            timestamp
+        ) {
+
+            return LOGOUT_POLICY.IDLE;
+        }
+
+        return LOGOUT_POLICY.NONE;
+    }
+
+    /* ====================================================================
+       TIMERS
+    ==================================================================== */
+
+    function clearTimers() {
+
+        if (
+            idleTimer
+        ) {
+
+            clearTimeout(
+                idleTimer
+            );
+
+            idleTimer =
+                null;
+        }
+
+        if (
+            absoluteExpiryTimer
+        ) {
+
+            clearTimeout(
+                absoluteExpiryTimer
+            );
+
+            absoluteExpiryTimer =
+                null;
+        }
+
+        if (
+            activityFlushTimer
+        ) {
+
+            clearTimeout(
+                activityFlushTimer
+            );
+
+            activityFlushTimer =
+                null;
+        }
+    }
+
+
+    function scheduleSessionTimers() {
+
+        if (
+            !currentSession
+        ) {
+
+            clearTimers();
+
+            return;
+        }
+
+        if (
+            idleTimer
+        ) {
+
+            clearTimeout(
+                idleTimer
+            );
+        }
+
+        if (
+            absoluteExpiryTimer
+        ) {
+
+            clearTimeout(
+                absoluteExpiryTimer
+            );
+        }
+
+        const timestamp =
+            now();
+
+        const idleRemaining =
+            Math.max(
+
+                0,
+
+                currentSession.lastActivity +
+                currentSession.idleTimeout -
+                timestamp
+            );
+
+        const absoluteRemaining =
+            Math.max(
+
+                0,
+
+                currentSession.expires -
+                timestamp
+            );
+
+        idleTimer =
+            setTimeout(
+
+                () => {
+
+                    publish(
+
+                        SESSION_EVENTS.IDLE,
+
+                        {
+
+                            sessionId:
+                                currentSession?.id ??
+                                null,
+
+                            detectedAt:
+                                nowISO()
+                        }
+                    );
+
+                    logout(
+                        LOGOUT_POLICY.IDLE
+                    );
+                },
+
+                idleRemaining
+            );
+
+        absoluteExpiryTimer =
+            setTimeout(
+
+                () => {
+
+                    publish(
+
+                        SESSION_EVENTS.EXPIRED,
+
+                        {
+
+                            sessionId:
+                                currentSession?.id ??
+                                null,
+
+                            detectedAt:
+                                nowISO()
+                        }
+                    );
+
+                    logout(
+                        LOGOUT_POLICY.EXPIRED
+                    );
+                },
+
+                absoluteRemaining
+            );
+    }
+
+    /* ====================================================================
+       ACTIVITY
+    ==================================================================== */
+
+    function flushActivity() {
+
+        activityFlushTimer =
+            null;
+
+        if (
+            !currentSession
+        ) {
+
+            return false;
+        }
+
+        const policy =
+            evaluateLogoutPolicy();
+
+        if (
+            policy !==
+            LOGOUT_POLICY.NONE
+        ) {
+
+            logout(
+                policy
+            );
+
+            return false;
+        }
+
+        persistSession(
+            currentSession,
+            true
         );
 
-}
+        state.persistedActivityUpdates +=
+            1;
 
-/* ========================================================================
-   SESSION ROTATION
-======================================================================== */
-
-function rotateSession(){
-
-    if(
-
-        !currentSession
-
-    ){
-
-        return null;
-
+        return true;
     }
 
-    const previousId =
 
-        currentSession.id;
+    function scheduleActivityFlush() {
 
-    currentSession.id =
+        if (
+            !currentSession ||
+            activityFlushTimer
+        ) {
 
-        uuid();
-
-    currentSession.updated =
-
-        now();
-
-    saveSession(
-
-        currentSession
-
-    );
-recordSessionAudit(
-
-    "SESSION_ROTATED"
-
-);
-    publishSessionEvent(
-
-        SESSION_EVENTS.ROTATED,
-
-        {
-
-            previousSessionId:
-
-                previousId,
-
-            sessionId:
-
-                currentSession.id,
-
-            rotatedAt:
-
-                nowISO()
-
+            return;
         }
 
-    );
+        const elapsed =
+            now() -
+            lastPersistedActivityAt;
 
-    scheduleIdleTimeout();
+        const delay =
+            Math.max(
 
-    return currentSession;
+                0,
 
-}
+                ACTIVITY_PERSIST_INTERVAL -
+                elapsed
+            );
 
-/* ========================================================================
-   LOGOUT
-======================================================================== */
-
-function logout(
-
-    reason = "User logout"
-
-){
-
-    clearActivityTimer();
-
-    STORAGE.remove(
-
-        STORAGE_KEY
-
-    );
-   revokeRefreshToken();
-
-    const sessionId =
-
-        currentSession
-
-        ?
-
-        currentSession.id
-
-        :
-
-        null;
-   const userId =
-
-    currentSession
-
-    ?
-
-    currentSession.userId
-
-    :
-
-    null;
-
-    currentSession =
-
-        null;
-   if(
-
-    sessionId
-
-){
-
-    unregisterSession(
-
-        sessionId
-
-    );
-
-}
-  recordSessionAudit(
-
-    "SESSION_LOGOUT",
-
-    {
-
-        sessionId,
-
-        userId,
-
-        reason
-
+        activityFlushTimer =
+            setTimeout(
+                flushActivity,
+                delay
+            );
     }
 
-);
-    publishSessionEvent(
 
-        SESSION_EVENTS.LOGOUT,
+    function updateActivity() {
 
-        {
+        if (
+            !currentSession
+        ) {
 
-            sessionId,
-
-            reason,
-
-            loggedOutAt:
-
-                nowISO()
-
+            return false;
         }
 
-    );
+        const policy =
+            evaluateLogoutPolicy();
 
-}
+        if (
+            policy !==
+            LOGOUT_POLICY.NONE
+        ) {
 
-/* ========================================================================
-   SESSION START
-======================================================================== */
+            logout(
+                policy
+            );
 
-function startSession(
+            return false;
+        }
 
-    options = {}
+        currentSession.lastActivity =
+            now();
 
-){
+        state.activityUpdates +=
+            1;
 
-    const session =
+        scheduleSessionTimers();
 
-        createSession(
+        scheduleActivityFlush();
 
-            options
+        return true;
+    }
 
+
+    function keepAlive() {
+
+        if (
+            !currentSession ||
+            !validateSession(
+                currentSession,
+                {
+                    emitEvents:
+                        false
+                }
+            )
+        ) {
+
+            return false;
+        }
+
+        updateActivity();
+
+        publishRiskChangeIfNeeded();
+
+        return true;
+    }
+
+    /* ====================================================================
+       SESSION START / RESTORE / ROTATE / LOGOUT
+    ==================================================================== */
+
+    function startSession(
+        options = {}
+    ) {
+
+        if (
+            currentSession
+        ) {
+
+            logout(
+                "REPLACED_BY_NEW_SESSION"
+            );
+        }
+
+        const session =
+            createSession(
+                options
+            );
+
+        currentSession =
+            clone(
+                session
+            );
+
+        persistSession(
+            currentSession,
+            false
         );
 
-    saveSession(
+        registerSession(
+            currentSession
+        );
 
-        session
+        scheduleSessionTimers();
 
-    );
-   const refreshToken =
+        lastKnownRisk =
+            calculateSessionRisk(
+                currentSession
+            );
 
-    createRefreshToken();
+        state.starts +=
+            1;
 
-saveRefreshToken(
+        recordSessionAudit(
 
-    refreshToken
+            "SESSION_CREATED",
 
-);
+            {
 
-   registerSession(
+                authenticated:
+                    currentSession.authenticated
+            }
+        );
 
-    session
+        publish(
 
-);
+            SESSION_EVENTS.CREATED,
 
-    scheduleIdleTimeout();
+            {
 
-    recordSessionAudit(
+                sessionId:
+                    currentSession.id,
 
-    "SESSION_CREATED"
+                authenticated:
+                    currentSession.authenticated,
 
-);
-    publishSessionEvent(
+                createdAt:
+                    nowISO()
+            }
+        );
 
-        SESSION_EVENTS.CREATED,
-
-        {
-
-            sessionId:
-
-                session.id,
-
-            createdAt:
-
-                nowISO()
-
-        }
-
-    );
-
-    return session;
-
-}  
-/* ========================================================================
-   MULTI-TAB SYNCHRONISATION
-======================================================================== */
-
-function handleStorageEvent(
-
-    event
-
-){
-
-    if(
-
-        !event ||
-
-        event.key !==
-
-        `PAY54:${STORAGE_KEY}`
-
-    ){
-
-        return;
-
+        return clone(
+            currentSession
+        );
     }
 
-    if(
 
-        event.newValue === null
+    function restoreSession() {
 
-    ){
+        const session =
+            loadPersistedSession();
 
-        clearActivityTimer();
+        if (
+            !session
+        ) {
 
-        currentSession = null;
+            currentSession =
+                null;
 
-        publishSessionEvent(
+            state.restored =
+                false;
+
+            return null;
+        }
+
+        if (
+            !validateSession(
+                session
+            )
+        ) {
+
+            STORAGE.remove(
+                STORAGE_KEY
+            );
+
+            unregisterSession(
+                session.id
+            );
+
+            currentSession =
+                null;
+
+            state.restored =
+                false;
+
+            state.invalidations +=
+                1;
+
+            return null;
+        }
+
+        currentSession =
+            clone(
+                session
+            );
+
+        registerSession(
+            currentSession
+        );
+
+        scheduleSessionTimers();
+
+        lastKnownRisk =
+            calculateSessionRisk(
+                currentSession
+            );
+
+        state.restored =
+            true;
+
+        recordSessionAudit(
+            "SESSION_RESTORED"
+        );
+
+        publish(
+
+            SESSION_EVENTS.RESTORED,
+
+            {
+
+                sessionId:
+                    currentSession.id,
+
+                restoredAt:
+                    nowISO()
+            }
+        );
+
+        return clone(
+            currentSession
+        );
+    }
+
+
+    function rotateSession() {
+
+        if (
+            !currentSession ||
+            !validateSession(
+                currentSession,
+                {
+                    emitEvents:
+                        false
+                }
+            )
+        ) {
+
+            return null;
+        }
+
+        const previousId =
+            currentSession.id;
+
+        currentSession.id =
+            createSecureId();
+
+        currentSession.updated =
+            now();
+
+        persistSession(
+            currentSession,
+            false
+        );
+
+        replaceRegisteredSession(
+            previousId,
+            currentSession
+        );
+
+        scheduleSessionTimers();
+
+        state.rotations +=
+            1;
+
+        recordSessionAudit(
+
+            "SESSION_ROTATED",
+
+            {
+
+                previousSessionId:
+                    previousId,
+
+                sessionId:
+                    currentSession.id
+            }
+        );
+
+        publish(
+
+            SESSION_EVENTS.ROTATED,
+
+            {
+
+                previousSessionId:
+                    previousId,
+
+                sessionId:
+                    currentSession.id,
+
+                rotatedAt:
+                    nowISO()
+            }
+        );
+
+        return clone(
+            currentSession
+        );
+    }
+
+
+    function logout(
+        reason =
+            LOGOUT_POLICY.USER
+    ) {
+
+        const sessionId =
+            currentSession?.id ??
+            null;
+
+        const userId =
+            currentSession?.userId ??
+            null;
+
+        clearTimers();
+
+        if (
+            sessionId
+        ) {
+
+            unregisterSession(
+                sessionId
+            );
+        }
+
+        try {
+
+            STORAGE.remove(
+                STORAGE_KEY
+            );
+
+        } catch (
+            error
+        ) {
+
+            rememberError(
+                error
+            );
+        }
+
+        currentSession =
+            null;
+
+        lastKnownRisk =
+            SESSION_RISK.HIGH;
+
+        state.logouts +=
+            1;
+
+        recordSessionAudit(
+
+            "SESSION_LOGOUT",
+
+            {
+
+                sessionId,
+
+                userId,
+
+                reason
+            }
+        );
+
+        publish(
 
             SESSION_EVENTS.LOGOUT,
 
             {
 
-                reason:
+                sessionId,
 
-                "Remote logout",
+                reason,
 
                 loggedOutAt:
-
-                nowISO()
-
+                    nowISO()
             }
-
         );
 
-        return;
-
+        return true;
     }
 
-    const session =
+    /* ====================================================================
+       MULTI-TAB SYNCHRONISATION
+    ==================================================================== */
 
-        STORAGE.get(
+    function handleStorageEvent(
+        event
+    ) {
 
-            STORAGE_KEY,
+        if (
+            !event ||
+            event.key !==
+                `PAY54:${STORAGE_KEY}`
+        ) {
 
-            null
-
-        );
-
-    if(
-
-        !session
-
-    ){
-
-        return;
-
-    }
-
-    currentSession =
-
-        structuredClone(
-
-            session
-
-        );
-
-    scheduleIdleTimeout();
-
-    publishSessionEvent(
-
-        SESSION_EVENTS.RESTORED,
-
-        {
-
-            sessionId:
-
-                session.id,
-
-            source:
-
-                "storage-sync",
-
-            restoredAt:
-
-                nowISO()
-
+            return;
         }
 
-    );
+        if (
+            event.newValue ===
+                null
+        ) {
 
-}
-/* ========================================================================
-   SESSION RISK
-======================================================================== */
+            clearTimers();
 
-function calculateSessionRisk(){
+            currentSession =
+                null;
 
-    if(
+            lastKnownRisk =
+                SESSION_RISK.HIGH;
 
-        !currentSession
+            state.remoteSyncs +=
+                1;
 
-    ){
+            publish(
 
-        return SESSION_RISK.HIGH;
+                SESSION_EVENTS.LOGOUT,
 
-    }
+                {
 
-    if(
+                    reason:
+                        LOGOUT_POLICY.REMOTE,
 
-        !currentSession.authenticated
+                    loggedOutAt:
+                        nowISO()
+                }
+            );
 
-    ){
+            return;
+        }
 
-        return SESSION_RISK.HIGH;
+        const session =
+            loadPersistedSession();
 
-    }
+        if (
+            !session ||
+            !validateSession(
+                session
+            )
+        ) {
 
-    const trusted =
+            return;
+        }
 
-        getTrustedDevices()
+        currentSession =
+            clone(
+                session
+            );
 
-        .some(
-
-            device =>
-
-                device.fingerprint ===
-
-                currentSession.fingerprint
-
+        registerSession(
+            currentSession
         );
 
-    if(
+        scheduleSessionTimers();
 
-        !trusted
+        publishRiskChangeIfNeeded();
 
-    ){
+        state.remoteSyncs +=
+            1;
 
-        return SESSION_RISK.MEDIUM;
+        publish(
 
-    }
+            SESSION_EVENTS.RESTORED,
 
-    return SESSION_RISK.LOW;
+            {
 
-}
+                sessionId:
+                    currentSession.id,
 
-function getSessionRisk(){
+                source:
+                    "storage-sync",
 
-    return calculateSessionRisk();
-
-}
-   /* ========================================================================
-   LOGOUT POLICIES
-======================================================================== */
-
-function evaluateLogoutPolicy(){
-
-    if(
-
-        !currentSession
-
-    ){
-
-        return LOGOUT_POLICY.INVALID;
-
-    }
-
-    if(
-
-        currentSession.expires <=
-
-        now()
-
-    ){
-
-        return LOGOUT_POLICY.EXPIRED;
-
-    }
-
-    if(
-
-        calculateSessionRisk() ===
-
-        SESSION_RISK.HIGH
-
-    ){
-
-        return LOGOUT_POLICY.HIGH_RISK;
-
-    }
-
-    return LOGOUT_POLICY.NONE;
-
-}
-   /* ========================================================================
-   MFA
-======================================================================== */
-
-function requiresMFA(){
-
-    if(
-
-        !MFA_CONFIG.ENABLED
-
-    ){
-
-        return false;
-
-    }
-
-    return (
-
-        calculateSessionRisk() ===
-
-        MFA_CONFIG.REQUIRED_RISK
-
-    );
-
-}
-
-function requestMFA(){
-
-   recordSessionAudit(
-
-    "SESSION_MFA_REQUIRED"
-
-); 
-   publishSessionEvent(
-
-        "session.mfa.required",
-
-        {
-
-            sessionId:
-
-                currentSession
-
-                    ? currentSession.id
-
-                    : null,
-
-            requestedAt:
-
-                nowISO()
-
-        }
-
-    );
-
-    return true;
-
-}
-   /* ========================================================================
-   BIOMETRIC AUTHENTICATION
-======================================================================== */
-
-function isBiometricEnabled(){
-
-    return BIOMETRIC_CONFIG.ENABLED;
-
-}
-
-function getBiometricProvider(){
-
-    return BIOMETRIC_CONFIG.PROVIDER;
-
-}
-
-function requestBiometricAuthentication(){
-
-    if(
-
-        !isBiometricEnabled()
-
-    ){
-
-        return false;
-
-    }
-recordSessionAudit(
-
-    "SESSION_BIOMETRIC_REQUIRED"
-
-);
-    publishSessionEvent(
-
-        "session.biometric.required",
-
-        {
-
-            sessionId:
-
-                currentSession
-
-                    ? currentSession.id
-
-                    : null,
-
-            provider:
-
-                getBiometricProvider(),
-
-            requestedAt:
-
-                nowISO()
-
-        }
-
-    );
-
-    return true;
-
-}
-  /* ========================================================================
-   DIAGNOSTICS
-======================================================================== */
-
-function getDiagnostics(){
-
-    return {
-
-        version:
-
-            SESSION_DIAGNOSTICS.VERSION,
-
-        module:
-
-            SESSION_DIAGNOSTICS.MODULE,
-
-        authenticated:
-
-            Boolean(
-
-                currentSession &&
-
-                currentSession.authenticated
-
-            ),
-
-        activeSession:
-
-            currentSession
-
-                ? currentSession.id
-
-                : null,
-
-        risk:
-
-            currentSession
-
-                ? calculateSessionRisk()
-
-                : SESSION_RISK.HIGH,
-
-        trustedDevices:
-
-            getTrustedDevices()
-
-            .length,
-
-        registeredSessions:
-
-            getSessionRegistry()
-
-            .length,
-
-        auditEntries:
-
-            getSessionAudit()
-
-            .length,
-
-        refreshToken:
-
-            Boolean(
-
-                getRefreshToken()
-
-            ),
-
-        mfaEnabled:
-
-            MFA_CONFIG.ENABLED,
-
-        biometricEnabled:
-
-            BIOMETRIC_CONFIG.ENABLED,
-
-        storageAvailable:
-
-    Boolean(
-
-        STORAGE
-
-    ),
-
-eventBusAvailable:
-
-    Boolean(
-
-        EVENTS
-
-    ),
-       
-       timestamp:
-
-            nowISO()
-
-    };
-
-} 
-   function checkDiagnostics(){
-
-    return {
-
-        healthy:
-
-            true,
-
-        diagnostics:
-
-            getDiagnostics()
-
-    };
-
-}
-/* ========================================================================
-   SESSION HEALTH
-======================================================================== */
-
-function checkSessionHealth(){
-
-    if(
-
-        !currentSession
-
-    ){
-
-        return false;
-
-    }
-
-    if(
-
-        !validateSession(
-
-            currentSession
-
-        )
-
-    ){
-
-       logout(
-
-    LOGOUT_POLICY.INVALID
-
-);
-
-        return false;
-
-    }
-   const logoutPolicy =
-
-    evaluateLogoutPolicy();
-
-if(
-
-    logoutPolicy !==
-
-    LOGOUT_POLICY.NONE
-
-){
-
-    logout(
-
-        logoutPolicy
-
-    );
-
-    return false;
-
-}
-    currentSession.risk =
-
-    calculateSessionRisk();
-   if(
-
-    requiresMFA()
-
-){
-
-    requestMFA();
-
-}
-   if(
-
-    isBiometricEnabled()
-
-){
-
-    requestBiometricAuthentication();
-
-}
-   return true;
-
-}
-
-/* ========================================================================
-   KEEP-ALIVE
-======================================================================== */
-
-function keepAlive(){
-
-    if(
-
-        !checkSessionHealth()
-
-    ){
-
-        return false;
-
-    }
-
-    updateActivity();
-
-    scheduleIdleTimeout();
-
-    return true;
-
-}
-
-/* ========================================================================
-   EVENT REGISTRATION
-======================================================================== */
-
-window.addEventListener(
-
-    "storage",
-
-    handleStorageEvent
-
-);
-
-[
-    "mousemove",
-    "mousedown",
-    "keydown",
-    "touchstart",
-    "scroll"
-].forEach(eventName=>{
-
-    window.addEventListener(
-
-        eventName,
-
-        ()=>{
-
-            if(
-
-                currentSession
-
-            ){
-
-                keepAlive();
-
+                restoredAt:
+                    nowISO()
             }
+        );
+    }
 
-        },
+    /* ====================================================================
+       VALIDATE / AUTH STATE
+    ==================================================================== */
 
-        {
+    function checkSessionHealth() {
 
-            passive:true
+        if (
+            !currentSession
+        ) {
 
+            return false;
         }
 
-    );
+        const policy =
+            evaluateLogoutPolicy();
 
-});
-  /* ========================================================================
-   PUBLIC API
-======================================================================== */
+        if (
+            policy !==
+            LOGOUT_POLICY.NONE
+        ) {
 
-const session = Object.freeze({
+            logout(
+                policy
+            );
 
-    start: startSession,
+            return false;
+        }
 
-    restore: restoreSession,
+        if (
+            !validateSession(
+                currentSession
+            )
+        ) {
 
-    trustCurrentDevice,
+            logout(
+                LOGOUT_POLICY.INVALID
+            );
 
-   getTrustedDevices, 
+            return false;
+        }
 
-   getRefreshToken,
+        publishRiskChangeIfNeeded();
 
-    revokeRefreshToken,
+        return true;
+    }
 
-    rotate: rotateSession,
 
-    logout,
-
-    keepAlive,
-
-    validate: checkSessionHealth,
-
-    getSessionRisk,
-
-   getSessionAudit,
-
-   evaluateLogoutPolicy,
-
-   requiresMFA,
-
-   requestMFA,
-   isBiometricEnabled,
-
-getBiometricProvider,
-
-requestBiometricAuthentication,
-
-   getDiagnostics,
-
-checkDiagnostics,
-   
-    getCurrent(){
-
-        return currentSession
-            ? structuredClone(currentSession)
-            : null;
-
-    },
-
-    isAuthenticated(){
+    function isAuthenticated() {
 
         return Boolean(
 
             currentSession &&
 
-            currentSession.authenticated
+            currentSession.authenticated ===
+                true &&
 
+            checkSessionHealth()
         );
-
     }
 
-});
+    /* ====================================================================
+       DIAGNOSTICS / HEALTH
+    ==================================================================== */
 
-/* ========================================================================
-   PAY54 SECURITY ROOT
-======================================================================== */
+    function getDiagnostics() {
 
-window.PAY54_SECURITY =
-window.PAY54_SECURITY || {};
+        return Object.freeze({
 
-Object.defineProperty(
+            version:
+                VERSION,
 
-    window.PAY54_SECURITY,
+            module:
+                MODULE_NAME,
 
-    "session",
+            authenticated:
+                Boolean(
+                    currentSession?.authenticated
+                ),
 
-    {
+            activeSession:
+                currentSession?.id ??
+                null,
 
-        value: session,
+            risk:
+                calculateSessionRisk(),
 
-        writable: false,
+            trustedDevices:
+                getTrustedDevices()
+                    .length,
 
-        configurable: false,
+            registeredSessions:
+                pruneSessionRegistry()
+                    .length,
 
-        enumerable: true
+            auditEntries:
+                getSessionAudit()
+                    .length,
 
+            storageAvailable:
+                Boolean(
+                    STORAGE
+                        ?.health
+                        ?.()
+                        ?.healthy
+                ),
+
+            eventBusAvailable:
+                Boolean(
+                    EVENTS
+                ),
+
+            refreshTokenStored:
+                false,
+
+            activityPersistIntervalMs:
+                ACTIVITY_PERSIST_INTERVAL,
+
+            timestamp:
+                nowISO()
+        });
     }
 
-);
 
-/* ========================================================================
-   STARTUP
-======================================================================== */
+    function verifyIntegrity() {
 
-try{
+        const errors =
+            [];
 
-    const restored =
+        if (
+            !STORAGE ||
+            STORAGE
+                .health
+                ?.()
+                ?.healthy !==
+                true
+        ) {
+
+            errors.push(
+                "Secure Storage is unavailable or unhealthy."
+            );
+        }
+
+        if (
+            !REGISTRY ||
+            typeof REGISTRY.has !==
+                "function"
+        ) {
+
+            errors.push(
+                "Platform Registry is unavailable."
+            );
+        }
+
+        if (
+            !CONFIG ||
+            typeof CONFIG.get !==
+                "function"
+        ) {
+
+            errors.push(
+                "Runtime Config is unavailable."
+            );
+        }
+
+        if (
+            currentSession &&
+            !validateSession(
+                currentSession,
+                {
+                    emitEvents:
+                        false
+                }
+            )
+        ) {
+
+            errors.push(
+                "Current session is invalid."
+            );
+        }
+
+        return Object.freeze({
+
+            ok:
+                errors.length ===
+                0,
+
+            status:
+
+                errors.length ===
+                    0
+
+                    ? "HEALTHY"
+
+                    : "DEGRADED",
+
+            errors:
+                Object.freeze(
+                    errors
+                ),
+
+            checkedAt:
+                nowISO()
+        });
+    }
+
+
+    function health() {
+
+        const integrity =
+            verifyIntegrity();
+
+        return Object.freeze({
+
+            ok:
+                integrity.ok,
+
+            healthy:
+                integrity.ok,
+
+            status:
+                integrity.status,
+
+            id:
+                MODULE_ID,
+
+            name:
+                MODULE_NAME,
+
+            version:
+                VERSION,
+
+            file:
+                FILE_PATH,
+
+            startedAt:
+                STARTED_AT,
+
+            ready:
+                state.ready,
+
+            readyAt:
+                state.readyAt,
+
+            activeSession:
+                currentSession?.id ??
+                null,
+
+            authenticated:
+                Boolean(
+                    currentSession?.authenticated
+                ),
+
+            risk:
+                calculateSessionRisk(),
+
+            refreshTokenStored:
+                false,
+
+            state:
+                Object.freeze({
+                    ...state
+                }),
+
+            integrity
+        });
+    }
+
+
+    function checkDiagnostics() {
+
+        return Object.freeze({
+
+            healthy:
+                verifyIntegrity()
+                    .ok,
+
+            diagnostics:
+                getDiagnostics()
+        });
+    }
+
+    /* ====================================================================
+       LEGACY MFA / BIOMETRIC SAFE COMPATIBILITY
+
+       These remain explicit capability checks rather than simulated auth.
+    ==================================================================== */
+
+    function requiresMFA() {
+
+        return false;
+    }
+
+
+    function requestMFA() {
+
+        return false;
+    }
+
+
+    function isBiometricEnabled() {
+
+        return false;
+    }
+
+
+    function getBiometricProvider() {
+
+        return "NONE";
+    }
+
+
+    function requestBiometricAuthentication() {
+
+        return false;
+    }
+
+    /* ====================================================================
+       PUBLIC API
+    ==================================================================== */
+
+    const session =
+        Object.freeze({
+
+            id:
+                MODULE_ID,
+
+            name:
+                MODULE_NAME,
+
+            version:
+                VERSION,
+
+            file:
+                FILE_PATH,
+
+            start:
+                startSession,
+
+            restore:
+                restoreSession,
+
+            rotate:
+                rotateSession,
+
+            logout,
+
+            keepAlive,
+
+            validate:
+                checkSessionHealth,
+
+            trustCurrentDevice,
+
+            getTrustedDevices,
+
+            revokeTrustedDevice,
+
+            getSessionRisk,
+
+            getSessionAudit,
+
+            evaluateLogoutPolicy,
+
+            requiresMFA,
+
+            requestMFA,
+
+            isBiometricEnabled,
+
+            getBiometricProvider,
+
+            requestBiometricAuthentication,
+
+            getDiagnostics,
+
+            checkDiagnostics,
+
+            verifyIntegrity,
+
+            health,
+
+            getCurrent() {
+
+                return currentSession
+
+                    ? clone(
+                        currentSession
+                    )
+
+                    : null;
+            },
+
+            isAuthenticated
+        });
+
+    /* ====================================================================
+       GLOBAL EXPOSURE
+    ==================================================================== */
+
+    Object.defineProperty(
+
+        GLOBAL.PAY54_SECURITY,
+
+        "session",
+
+        {
+
+            value:
+                session,
+
+            writable:
+                false,
+
+            configurable:
+                false,
+
+            enumerable:
+                true
+        }
+    );
+
+    /* ====================================================================
+       REGISTRY INTEGRATION
+    ==================================================================== */
+
+    REGISTRY.registerModule(
+
+        MODULE_ID,
+
+        Object.freeze({
+
+            id:
+                MODULE_ID,
+
+            name:
+                MODULE_NAME,
+
+            version:
+                VERSION,
+
+            type:
+                "security",
+
+            layer:
+                "layer.security",
+
+            path:
+                FILE_PATH,
+
+            api:
+                session,
+
+            health
+        })
+    );
+
+    /* ====================================================================
+       EVENT REGISTRATION
+    ==================================================================== */
+
+    GLOBAL.addEventListener(
+
+        "storage",
+
+        handleStorageEvent
+    );
+
+    const activityHandler =
+        () => {
+
+            if (
+                currentSession
+            ) {
+
+                updateActivity();
+            }
+        };
+
+    [
+        "pointerdown",
+        "keydown",
+        "touchstart"
+    ]
+    .forEach(
+        eventName => {
+
+            GLOBAL.addEventListener(
+
+                eventName,
+
+                activityHandler,
+
+                {
+                    passive:
+                        true
+                }
+            );
+        }
+    );
+
+    /* ====================================================================
+       STARTUP RESTORE
+    ==================================================================== */
+
+    try {
 
         restoreSession();
 
-   checkDiagnostics();
+    } catch (
+        error
+    ) {
 
-    if(
+        rememberError(
+            error
+        );
 
-        restored
-
-    ){
-
-        scheduleIdleTimeout();
-
+        console.error(
+            "[PAY54_SESSION] Session restore failed.",
+            error
+        );
     }
 
-}catch(error){
+    state.ready =
+        true;
 
-    console.error(
+    state.readyAt =
+        nowISO();
 
-        "[PAY54_SESSION]",
+    publish(
 
-        "Session restore failed",
+        SESSION_EVENTS.READY,
 
-        error
+        {
 
+            version:
+                VERSION,
+
+            authenticated:
+                isAuthenticated(),
+
+            readyAt:
+                state.readyAt
+        }
     );
 
-}
-
-/* ========================================================================
-   MODULE READY
-======================================================================== */
-
-Object.freeze(
-
-    SESSION_EVENTS
-
-);
-   Object.freeze(
-
-    SESSION_RISK
-
-);
-
-Object.freeze(
-
-    LOGOUT_POLICY
-
-);
-
-Object.freeze(
-
-    MFA_CONFIG
-
-);
-
-Object.freeze(
-
-    BIOMETRIC_CONFIG
-
-);
-
-Object.freeze(
-
-    SESSION_DIAGNOSTICS
-
-);
-
-console.info(
-
-    "[PAY54]",
-
-    "Enterprise Session Manager",
-
-    SESSION_VERSION,
-
-    "loaded"
-
-);
+    console.info(
+        `[PAY54_SESSION] ${MODULE_NAME} v${VERSION} ready.`
+    );
 
 })();
