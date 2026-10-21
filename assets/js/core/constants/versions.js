@@ -379,7 +379,7 @@ SECURITY: {
         "12.0.0",
 
     SESSION_MANAGER:
-    "12.0.0",
+        "12.0.0",
 
     TRANSACTION_GUARD:
         "11.0.0",
@@ -388,7 +388,7 @@ SECURITY: {
         "11.0.0",
 
     SANITIZER:
-        "11.0.0",
+        "12.0.0",
 
     XSS:
         "11.0.0"
