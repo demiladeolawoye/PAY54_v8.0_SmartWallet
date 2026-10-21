@@ -3,6 +3,94 @@
 ========================== */
 
 const PIN_REGEX = /^\d{4}$/;
+const PAY54_DEV_AUTH_HANDOFF_KEY =
+    "pay54_dev_auth_handoff";
+
+const PAY54_DEV_AUTH_HANDOFF_TTL_MS =
+    60 * 1000;
+
+function createDevelopmentAuthHandoff(
+    email
+) {
+
+    const normalisedEmail =
+        String(
+            email || ""
+        )
+        .trim()
+        .toLowerCase();
+
+    if (
+        !normalisedEmail
+    ) {
+
+        throw new Error(
+            "Authenticated email is required."
+        );
+    }
+
+    const cryptoApi =
+        window.crypto;
+
+    if (
+        !cryptoApi ||
+        typeof cryptoApi.getRandomValues !==
+            "function"
+    ) {
+
+        throw new Error(
+            "Secure browser randomness is unavailable."
+        );
+    }
+
+    const bytes =
+        new Uint8Array(
+            16
+        );
+
+    cryptoApi.getRandomValues(
+        bytes
+    );
+
+    const nonce =
+        Array.from(
+            bytes,
+            byte =>
+                byte
+                    .toString(16)
+                    .padStart(2, "0")
+        )
+        .join("");
+
+    const issuedAt =
+        Date.now();
+
+    const handoff = {
+
+        schema:
+            "PAY54-DEV-AUTH-HANDOFF-V1",
+
+        email:
+            normalisedEmail,
+
+        issuedAt,
+
+        expiresAt:
+            issuedAt +
+            PAY54_DEV_AUTH_HANDOFF_TTL_MS,
+
+        nonce
+    };
+
+    sessionStorage.setItem(
+        PAY54_DEV_AUTH_HANDOFF_KEY,
+        JSON.stringify(
+            handoff
+        )
+    );
+
+    return handoff;
+}
 
 // ---------- Utilities ----------
 function showMessage(text, type = "error") {
