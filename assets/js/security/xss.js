@@ -1,1745 +1,1855 @@
+"use strict";
+
 /* ========================================================================
    PAY54 ENTERPRISE PLATFORM
    ------------------------------------------------------------------------
    File: assets/js/security/xss.js
-   Version: v11.0.0
-   Module: WP-003E Enterprise XSS Protection Engine
-   ------------------------------------------------------------------------
-   Responsibilities
+   Version: v12.0.0
+   Module: Titan Enterprise XSS Protection Engine
+   Status: Production Candidate
 
-   • Safe DOM rendering
-   • Safe HTML rendering
-   • Safe text rendering
-   • Attribute protection
-   • URL protection
-   • Trusted rendering pipeline
-   • CSP compatibility
-   • Trusted Types compatibility hooks
-   • DOM security utilities
-   • Event Bus integration
+   Purpose
+   -------
+   Canonical safe-DOM rendering boundary for Project Titan.
+
+   Security model
+   --------------
+   • Text rendering uses textContent only.
+   • HTML rendering must pass through Sanitizer v12 strict allowlisting.
+   • Active-content elements are rejected at creation time.
+   • Event-handler, style and dangerous URL attributes are blocked.
+   • URI-bearing attributes use context-specific URL policies.
+   • Iframe source rendering remains disabled.
+   • Trusted Types is used when available but never replaces sanitization.
+   • Mutation monitoring is diagnostic only.
 ======================================================================== */
 
 (() => {
 
-"use strict";
+    "use strict";
 
-/* ========================================================================
-   DEPENDENCIES
-======================================================================== */
+    /* ====================================================================
+       IDENTITY
+    ==================================================================== */
 
-const EVENTS =
-window.PAY54_EVENTS || null;
+    const GLOBAL =
+        window;
 
-const SANITIZER =
-window.PAY54_SECURITY?.sanitizer || null;
+    const MODULE_ID =
+        "security.xss";
 
-/* ========================================================================
-   VERSION
-======================================================================== */
+    const MODULE_NAME =
+        "PAY54 Titan Enterprise XSS Protection Engine";
 
-const VERSION =
-"11.0.0";
+    const FILE_PATH =
+        "assets/js/security/xss.js";
 
-/* ========================================================================
-   XSS EVENTS
-======================================================================== */
+    const VERSION =
+        "12.0.0";
 
-const XSS_EVENTS =
-Object.freeze({
+    const STARTED_AT =
+        new Date().toISOString();
 
-    RENDER:
-        "xss.render",
+    /* ====================================================================
+       DEPENDENCIES
+    ==================================================================== */
 
-    BLOCKED:
-        "xss.blocked",
+    const REGISTRY =
+        GLOBAL.PAY54_REGISTRY || null;
 
-    WARNING:
-        "xss.warning",
+    const CONFIG =
+        GLOBAL.PAY54_CONFIG || null;
 
-    ATTRIBUTE:
-        "xss.attribute",
+    const EVENTS =
+        GLOBAL.PAY54_EVENTS || null;
 
-    LINK:
-        "xss.link"
+    const SANITIZER =
+        GLOBAL.PAY54_SECURITY?.sanitizer || null;
 
-});
+    if (
+        !REGISTRY ||
+        typeof REGISTRY.registerModule !== "function"
+    ) {
+        throw new Error(
+            "[PAY54_XSS] Platform Registry must load before XSS Protection."
+        );
+    }
 
-/* ========================================================================
-   EVENT PUBLISHER
-======================================================================== */
+    if (
+        !CONFIG ||
+        typeof CONFIG.get !== "function"
+    ) {
+        throw new Error(
+            "[PAY54_XSS] Runtime Config must load before XSS Protection."
+        );
+    }
 
-function publish(
+    if (
+        !SANITIZER ||
+        SANITIZER.version !== "12.0.0" ||
+        typeof SANITIZER.html !== "function" ||
+        typeof SANITIZER.url !== "function"
+    ) {
+        throw new Error(
+            "[PAY54_XSS] Sanitizer v12 must load before XSS Protection."
+        );
+    }
 
-    event,
+    /* ====================================================================
+       SAFE RELOAD GUARD
+    ==================================================================== */
 
-    payload = {}
+    const existing =
+        GLOBAL.PAY54_SECURITY?.xss || null;
 
-){
+    if (existing) {
 
-    try{
-
-        if(
-
-            EVENTS &&
-
-            typeof EVENTS.publish === "function"
-
-        ){
-
-            EVENTS.publish(
-
-                event,
-
-                payload,
-
-                {
-
-                    source:
-
-                    "xss"
-
-                }
-
+        if (
+            existing.id === MODULE_ID &&
+            existing.version === VERSION &&
+            typeof existing.health === "function" &&
+            typeof existing.setHTML === "function"
+        ) {
+            console.info(
+                "[PAY54_XSS] Existing Titan XSS Protection preserved."
             );
 
+            return;
         }
 
-    }
-
-    catch(error){
-
-        console.error(
-
-            "[PAY54_XSS]",
-
-            error
-
+        throw new Error(
+            "[PAY54_XSS] PAY54_SECURITY.xss already exists with an incompatible contract."
         );
-
     }
 
-}
+    /* ====================================================================
+       EVENTS
+    ==================================================================== */
 
-/* ========================================================================
-   UTILITIES
-======================================================================== */
+    const XSS_EVENTS =
+        Object.freeze({
 
-function isElement(
+            RENDER:
+                "xss.render",
 
-    value
+            BLOCKED:
+                "xss.blocked",
 
-){
+            WARNING:
+                "xss.warning",
 
-    return (
+            ATTRIBUTE:
+                "xss.attribute",
 
-        value instanceof Element
+            LINK:
+                "xss.link",
 
-    );
+            READY:
+                "security.xss.ready"
+        });
 
-}
+    /* ====================================================================
+       STATE
+    ==================================================================== */
 
-function isString(
+    const state = {
 
-    value
+        ready:
+            false,
 
-){
+        readyAt:
+            null,
 
-    return typeof value === "string";
+        renders:
+            0,
 
-}
+        blocked:
+            0,
 
-function result(
+        warnings:
+            0,
 
-    success,
+        attributeWrites:
+            0,
 
-    warnings = []
+        monitoring:
+            false,
 
-){
-
-    return {
-
-        success,
-
-        warnings,
-
-        timestamp:
-
-            new Date()
-
-            .toISOString()
-
+        lastError:
+            null
     };
 
-}
-  /* ========================================================================
-   SAFE TEXT RENDERING
-======================================================================== */
+    function nowISO() {
 
-function setText(
+        return new Date().toISOString();
+    }
 
-    element,
 
-    value
+    function rememberError(
+        error
+    ) {
 
-){
+        state.lastError =
+            Object.freeze({
 
-    if(
+                name:
+                    error?.name || "Error",
 
-        !isElement(element)
+                message:
+                    error?.message || String(error),
 
-    ){
+                timestamp:
+                    nowISO()
+            });
+    }
 
-        publish(
 
-            XSS_EVENTS.WARNING,
+    function publish(
+        eventName,
+        payload = {}
+    ) {
 
-            {
+        try {
 
-                operation:
-
-                    "setText"
-
+            if (
+                !EVENTS ||
+                typeof EVENTS.publish !== "function"
+            ) {
+                return false;
             }
 
-        );
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_ELEMENT"
-
-            ]
-
-        );
-
-    }
-
-    const text =
-
-        String(
-
-            value ?? ""
-
-        );
-
-    element.textContent =
-
-        text;
-
-    publish(
-
-        XSS_EVENTS.RENDER,
-
-        {
-
-            type:
-
-                "text"
-
-        }
-
-    );
-
-    return result(true);
-
-}
-
-/* ========================================================================
-   SAFE HTML RENDERING
-======================================================================== */
-
-function setHTML(
-
-    element,
-
-    html
-
-){
-
-    if(
-
-        !isElement(element)
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_ELEMENT"
-
-            ]
-
-        );
-
-    }
-
-    if(
-
-        !SANITIZER
-
-    ){
-
-        publish(
-
-            XSS_EVENTS.BLOCKED,
-
-            {
-
-                operation:
-
-                    "setHTML",
-
-                reason:
-
-                    "SANITIZER_UNAVAILABLE"
-
-            }
-
-        );
-
-        return result(
-
-            false,
-
-            [
-
-                "SANITIZER_UNAVAILABLE"
-
-            ]
-
-        );
-
-    }
-
-    const sanitized =
-
-        SANITIZER.html(
-
-            String(
-
-                html ?? ""
-
-            )
-
-        );
-
-    element.innerHTML =
-
-        sanitized.value;
-
-    publish(
-
-        XSS_EVENTS.RENDER,
-
-        {
-
-            type:
-
-                "html",
-
-            modified:
-
-                sanitized.modified
-
-        }
-
-    );
-
-    return result(
-
-        true,
-
-        sanitized.warnings
-
-    );
-
-}
-
-/* ========================================================================
-   SAFE HTML APPEND
-======================================================================== */
-
-function appendHTML(
-
-    element,
-
-    html
-
-){
-
-    if(
-
-        !isElement(element)
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_ELEMENT"
-
-            ]
-
-        );
-
-    }
-
-    if(
-
-        !SANITIZER
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "SANITIZER_UNAVAILABLE"
-
-            ]
-
-        );
-
-    }
-
-    const sanitized =
-
-        SANITIZER.html(
-
-            String(
-
-                html ?? ""
-
-            )
-
-        );
-
-    element.insertAdjacentHTML(
-
-        "beforeend",
-
-        sanitized.value
-
-    );
-
-    publish(
-
-        XSS_EVENTS.RENDER,
-
-        {
-
-            type:
-
-                "append"
-
-        }
-
-    );
-
-    return result(
-
-        true,
-
-        sanitized.warnings
-
-    );
-
-}
-
-/* ========================================================================
-   SAFE ELEMENT CLEAR
-======================================================================== */
-
-function clear(
-
-    element
-
-){
-
-    if(
-
-        !isElement(element)
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_ELEMENT"
-
-            ]
-
-        );
-
-    }
-
-    element.replaceChildren();
-
-    publish(
-
-        XSS_EVENTS.RENDER,
-
-        {
-
-            type:
-
-                "clear"
-
-        }
-
-    );
-
-    return result(true);
-
-}
-
-/* ========================================================================
-   SAFE REPLACE CHILDREN
-======================================================================== */
-
-function replaceChildren(
-
-    element,
-
-    ...children
-
-){
-
-    if(
-
-        !isElement(element)
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_ELEMENT"
-
-            ]
-
-        );
-
-    }
-
-    element.replaceChildren(
-
-        ...children
-
-    );
-
-    publish(
-
-        XSS_EVENTS.RENDER,
-
-        {
-
-            type:
-
-                "replace"
-
-        }
-
-    );
-
-    return result(true);
-
-}
-
-/* ========================================================================
-   SAFE DOCUMENT FRAGMENT
-======================================================================== */
-
-function createFragment(){
-
-    return document.createDocumentFragment();
-
-}
-
-/* ========================================================================
-   SAFE TEXT NODE
-======================================================================== */
-
-function createTextNode(
-
-    value
-
-){
-
-    return document.createTextNode(
-
-        String(
-
-            value ?? ""
-
-        )
-
-    );
-
-}
-
-/* ========================================================================
-   SAFE ELEMENT CREATION
-======================================================================== */
-
-function createElement(
-
-    tag
-
-){
-
-    if(
-
-        !isString(tag)
-
-    ){
-
-        throw new TypeError(
-
-            "Invalid tag"
-
-        );
-
-    }
-
-    return document.createElement(
-
-        tag.toLowerCase()
-
-    );
-
-}
-  /* ========================================================================
-   SAFE ATTRIBUTE SETTER
-======================================================================== */
-
-const BLOCKED_ATTRIBUTES = Object.freeze([
-
-    "onabort",
-    "onblur",
-    "onchange",
-    "onclick",
-    "ondblclick",
-    "onerror",
-    "onfocus",
-    "oninput",
-    "onkeydown",
-    "onkeypress",
-    "onkeyup",
-    "onload",
-    "onmousedown",
-    "onmousemove",
-    "onmouseout",
-    "onmouseover",
-    "onmouseup",
-    "onreset",
-    "onresize",
-    "onscroll",
-    "onsubmit",
-    "onunload",
-    "style"
-
-]);
-
-function setAttribute(
-
-    element,
-
-    name,
-
-    value
-
-){
-
-    if(
-
-        !isElement(element)
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_ELEMENT"
-
-            ]
-
-        );
-
-    }
-
-    const attribute =
-
-        String(
-
-            name ?? ""
-
-        )
-
-        .toLowerCase();
-
-    if(
-
-        BLOCKED_ATTRIBUTES.includes(
-
-            attribute
-
-        )
-
-    ){
-
-        publish(
-
-            XSS_EVENTS.BLOCKED,
-
-            {
-
-                attribute
-
-            }
-
-        );
-
-        return result(
-
-            false,
-
-            [
-
-                "BLOCKED_ATTRIBUTE"
-
-            ]
-
-        );
-
-    }
-
-    const encoded =
-
-        SANITIZER
-
-            ? SANITIZER.encodeAttribute(
-
-                value
-
-            )
-
-            : {
-
-                value:
-
-                    String(
-
-                        value ?? ""
-
-                    )
-
-            };
-
-    element.setAttribute(
-
-        attribute,
-
-        encoded.value
-
-    );
-
-    publish(
-
-        XSS_EVENTS.ATTRIBUTE,
-
-        {
-
-            attribute
-
-        }
-
-    );
-
-    return result(true);
-
-}
-
-/* ========================================================================
-   SAFE ATTRIBUTE REMOVAL
-======================================================================== */
-
-function removeAttribute(
-
-    element,
-
-    attribute
-
-){
-
-    if(
-
-        !isElement(element)
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_ELEMENT"
-
-            ]
-
-        );
-
-    }
-
-    element.removeAttribute(
-
-        attribute
-
-    );
-
-    return result(true);
-
-}
-
-/* ========================================================================
-   SAFE LINK BUILDER
-======================================================================== */
-
-function createLink(
-
-    url,
-
-    label
-
-){
-
-    const link =
-
-        createElement(
-
-            "a"
-
-        );
-
-    if(
-
-        SANITIZER
-
-    ){
-
-        const safeURL =
-
-            SANITIZER.url(
-
-                url
-
+            EVENTS.publish(
+                eventName,
+                Object.freeze({
+                    moduleId: MODULE_ID,
+                    occurredAt: nowISO(),
+                    ...payload
+                }),
+                {
+                    source: MODULE_ID
+                }
             );
 
-        link.href =
+            return true;
 
-            safeURL.value;
+        } catch (error) {
 
+            rememberError(error);
+
+            return false;
+        }
     }
 
-    else{
+    /* ====================================================================
+       RESULT / TYPE HELPERS
+    ==================================================================== */
 
-        link.href = "#";
+    function isElement(
+        value
+    ) {
 
+        return Boolean(
+            value &&
+            value.nodeType === Node.ELEMENT_NODE
+        );
     }
 
-    link.rel =
 
-        "noopener noreferrer";
+    function isNode(
+        value
+    ) {
 
-    link.target =
+        return Boolean(
+            value &&
+            typeof value.nodeType === "number"
+        );
+    }
 
-        "_blank";
 
-    setText(
+    function result(
+        success,
+        warnings = [],
+        details = {}
+    ) {
 
-        link,
+        return Object.freeze({
 
-        label
+            success:
+                success === true,
 
-    );
+            warnings:
+                Object.freeze(
+                    Array.from(
+                        new Set(
+                            Array.isArray(warnings)
+                                ? warnings.map(String)
+                                : []
+                        )
+                    )
+                ),
 
-    publish(
+            details:
+                Object.freeze({
+                    ...(
+                        details &&
+                        typeof details === "object"
+                            ? details
+                            : {}
+                    )
+                }),
 
-        XSS_EVENTS.LINK,
+            timestamp:
+                nowISO()
+        });
+    }
 
-        {}
 
-    );
+    function blocked(
+        reason,
+        details = {}
+    ) {
 
-    return link;
+        state.blocked += 1;
 
-}
-
-/* ========================================================================
-   SAFE IMAGE SOURCE
-======================================================================== */
-
-function setImageSource(
-
-    image,
-
-    url
-
-){
-
-    if(
-
-        !(image instanceof HTMLImageElement)
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_IMAGE"
-
-            ]
-
+        publish(
+            XSS_EVENTS.BLOCKED,
+            {
+                reason,
+                ...details
+            }
         );
 
+        return result(
+            false,
+            [reason],
+            details
+        );
     }
 
-    const safe =
+    /* ====================================================================
+       ELEMENT / ATTRIBUTE POLICIES
+    ==================================================================== */
 
-        SANITIZER
+    const BLOCKED_TAGS =
+        new Set([
 
-        ? SANITIZER.url(
+            "SCRIPT",
+            "STYLE",
+            "IFRAME",
+            "FRAME",
+            "FRAMESET",
+            "OBJECT",
+            "EMBED",
+            "APPLET",
+            "BASE",
+            "META",
+            "LINK",
+            "TEMPLATE",
+            "SVG",
+            "MATH"
+        ]);
 
-            url
+    const URL_ATTRIBUTES =
+        Object.freeze({
 
+            href:
+                "navigation",
+
+            src:
+                "resource",
+
+            poster:
+                "resource",
+
+            cite:
+                "navigation",
+
+            action:
+                "sameOrigin",
+
+            formaction:
+                "sameOrigin"
+        });
+
+    const ALWAYS_BLOCKED_ATTRIBUTES =
+        new Set([
+
+            "style",
+            "srcdoc",
+            "xmlns",
+            "xlink:href"
+        ]);
+
+
+    function normalizeAttributeName(
+        name
+    ) {
+
+        return String(
+            name ?? ""
         )
-
-        : {
-
-            value:""
-
-        };
-
-    image.src =
-
-        safe.value;
-
-    return result(
-
-        true,
-
-        safe.warnings || []
-
-    );
-
-}
-
-/* ========================================================================
-   SAFE IFRAME SOURCE
-======================================================================== */
-
-function setIframeSource(
-
-    iframe,
-
-    url
-
-){
-
-    if(
-
-        !(iframe instanceof HTMLIFrameElement)
-
-    ){
-
-        return result(
-
-            false,
-
-            [
-
-                "INVALID_IFRAME"
-
-            ]
-
-        );
-
+        .trim()
+        .toLowerCase();
     }
 
-    return result(
 
-        false,
+    function isEventAttribute(
+        name
+    ) {
 
-        [
+        return /^on[a-z0-9_-]+$/i
+            .test(name);
+    }
 
-            "IFRAME_RENDERING_DISABLED"
 
-        ]
+    function assertCreatableTag(
+        tag
+    ) {
 
-    );
+        const normalized =
+            String(tag ?? "")
+                .trim()
+                .toUpperCase();
 
-}
+        if (
+            !/^[A-Z][A-Z0-9-]*$/
+                .test(normalized)
+        ) {
+            throw new TypeError(
+                "[PAY54_XSS] Invalid element tag."
+            );
+        }
 
-/* ========================================================================
-   SAFE DOWNLOAD LINK
-======================================================================== */
+        if (
+            BLOCKED_TAGS.has(normalized)
+        ) {
 
-function createDownloadLink(
+            state.blocked += 1;
 
-    url,
+            publish(
+                XSS_EVENTS.BLOCKED,
+                {
+                    reason:
+                        "BLOCKED_ELEMENT_TAG",
 
-    filename,
+                    tag:
+                        normalized
+                }
+            );
 
-    label
+            throw new Error(
+                `[PAY54_XSS] Active-content element ${normalized} is not permitted.`
+            );
+        }
 
-){
+        return normalized.toLowerCase();
+    }
 
-    const link =
+    /* ====================================================================
+       SAFE TEXT RENDERING
+    ==================================================================== */
 
-        createLink(
+    function setText(
+        element,
+        value
+    ) {
 
-            url,
+        if (!isElement(element)) {
 
-            label
+            return blocked(
+                "INVALID_ELEMENT",
+                {
+                    operation:
+                        "setText"
+                }
+            );
+        }
 
+        element.textContent =
+            String(value ?? "");
+
+        state.renders += 1;
+
+        publish(
+            XSS_EVENTS.RENDER,
+            {
+                type:
+                    "text"
+            }
         );
 
-    if(
+        return result(true);
+    }
 
-        SANITIZER
+    /* ====================================================================
+       HTML SANITIZATION
+    ==================================================================== */
 
-    ){
+    function sanitizeHTMLValue(
+        html
+    ) {
+
+        return SANITIZER.html(
+            String(html ?? "")
+        );
+    }
+
+    /* ====================================================================
+       TRUSTED TYPES
+    ==================================================================== */
+
+    const TRUSTED_TYPES =
+        GLOBAL.trustedTypes || null;
+
+    let trustedPolicy =
+        null;
+
+
+    function getTrustedPolicy() {
+
+        if (!TRUSTED_TYPES) {
+            return null;
+        }
+
+        if (trustedPolicy) {
+            return trustedPolicy;
+        }
+
+        try {
+
+            trustedPolicy =
+                TRUSTED_TYPES.createPolicy(
+                    "pay54-xss-v12",
+                    {
+                        createHTML(value) {
+
+                            return sanitizeHTMLValue(
+                                value
+                            ).value;
+                        }
+                    }
+                );
+
+        } catch (error) {
+
+            rememberError(error);
+
+            trustedPolicy =
+                null;
+        }
+
+        return trustedPolicy;
+    }
+
+
+    function createTrustedHTML(
+        html
+    ) {
+
+        const sanitized =
+            sanitizeHTMLValue(html);
+
+        const policy =
+            getTrustedPolicy();
+
+        if (policy) {
+
+            return policy.createHTML(
+                sanitized.value
+            );
+        }
+
+        return sanitized.value;
+    }
+
+    /* ====================================================================
+       SAFE HTML RENDERING
+    ==================================================================== */
+
+    function setHTML(
+        element,
+        html
+    ) {
+
+        if (!isElement(element)) {
+
+            return blocked(
+                "INVALID_ELEMENT",
+                {
+                    operation:
+                        "setHTML"
+                }
+            );
+        }
+
+        const sanitized =
+            sanitizeHTMLValue(html);
+
+        const policy =
+            getTrustedPolicy();
+
+        element.innerHTML =
+            policy
+                ? policy.createHTML(
+                    sanitized.value
+                )
+                : sanitized.value;
+
+        state.renders += 1;
+
+        publish(
+            XSS_EVENTS.RENDER,
+            {
+                type:
+                    "html",
+
+                modified:
+                    sanitized.modified,
+
+                trustedTypes:
+                    Boolean(policy)
+            }
+        );
+
+        return result(
+            true,
+            sanitized.warnings,
+            {
+                modified:
+                    sanitized.modified
+            }
+        );
+    }
+
+
+    function appendHTML(
+        element,
+        html
+    ) {
+
+        if (!isElement(element)) {
+
+            return blocked(
+                "INVALID_ELEMENT",
+                {
+                    operation:
+                        "appendHTML"
+                }
+            );
+        }
+
+        const sanitized =
+            sanitizeHTMLValue(html);
+
+        const template =
+            document.createElement(
+                "template"
+            );
+
+        const policy =
+            getTrustedPolicy();
+
+        template.innerHTML =
+            policy
+                ? policy.createHTML(
+                    sanitized.value
+                )
+                : sanitized.value;
+
+        element.append(
+            template.content
+        );
+
+        state.renders += 1;
+
+        publish(
+            XSS_EVENTS.RENDER,
+            {
+                type:
+                    "append",
+
+                modified:
+                    sanitized.modified
+            }
+        );
+
+        return result(
+            true,
+            sanitized.warnings,
+            {
+                modified:
+                    sanitized.modified
+            }
+        );
+    }
+
+
+    function render(
+        element,
+        html
+    ) {
+
+        return setHTML(
+            element,
+            html
+        );
+    }
+
+    /* ====================================================================
+       SAFE DOM UTILITIES
+    ==================================================================== */
+
+    function clear(
+        element
+    ) {
+
+        if (!isElement(element)) {
+
+            return blocked(
+                "INVALID_ELEMENT",
+                {
+                    operation:
+                        "clear"
+                }
+            );
+        }
+
+        element.replaceChildren();
+
+        state.renders += 1;
+
+        return result(true);
+    }
+
+
+    function replaceChildren(
+        element,
+        ...children
+    ) {
+
+        if (!isElement(element)) {
+
+            return blocked(
+                "INVALID_ELEMENT",
+                {
+                    operation:
+                        "replaceChildren"
+                }
+            );
+        }
+
+        for (
+            const child
+            of children
+        ) {
+
+            if (
+                !isNode(child) &&
+                typeof child !== "string"
+            ) {
+                return blocked(
+                    "INVALID_CHILD_NODE",
+                    {
+                        operation:
+                            "replaceChildren"
+                    }
+                );
+            }
+        }
+
+        element.replaceChildren(
+            ...children
+        );
+
+        state.renders += 1;
+
+        return result(true);
+    }
+
+
+    function createFragment() {
+
+        return document
+            .createDocumentFragment();
+    }
+
+
+    function createTextNode(
+        value
+    ) {
+
+        return document.createTextNode(
+            String(value ?? "")
+        );
+    }
+
+
+    function createElement(
+        tag
+    ) {
+
+        const safeTag =
+            assertCreatableTag(tag);
+
+        return document.createElement(
+            safeTag
+        );
+    }
+
+    /* ====================================================================
+       SAFE ATTRIBUTE HANDLING
+    ==================================================================== */
+
+    function setAttribute(
+        element,
+        name,
+        value
+    ) {
+
+        if (!isElement(element)) {
+
+            return blocked(
+                "INVALID_ELEMENT",
+                {
+                    operation:
+                        "setAttribute"
+                }
+            );
+        }
+
+        const attribute =
+            normalizeAttributeName(name);
+
+        if (!attribute) {
+
+            return blocked(
+                "INVALID_ATTRIBUTE"
+            );
+        }
+
+        if (
+            isEventAttribute(attribute) ||
+            ALWAYS_BLOCKED_ATTRIBUTES
+                .has(attribute)
+        ) {
+
+            return blocked(
+                "BLOCKED_ATTRIBUTE",
+                {
+                    attribute
+                }
+            );
+        }
+
+        if (
+            Object.prototype
+                .hasOwnProperty.call(
+                    URL_ATTRIBUTES,
+                    attribute
+                )
+        ) {
+
+            const policy =
+                URL_ATTRIBUTES[
+                    attribute
+                ];
+
+            const safeURL =
+                SANITIZER.url(
+                    String(value ?? ""),
+                    {
+                        policy
+                    }
+                );
+
+            if (!safeURL.value) {
+
+                element.removeAttribute(
+                    attribute
+                );
+
+                return blocked(
+                    "UNSAFE_URL_ATTRIBUTE",
+                    {
+                        attribute
+                    }
+                );
+            }
+
+            element.setAttribute(
+                attribute,
+                safeURL.value
+            );
+
+            state.attributeWrites += 1;
+
+            publish(
+                XSS_EVENTS.ATTRIBUTE,
+                {
+                    attribute,
+                    policy
+                }
+            );
+
+            return result(
+                true,
+                safeURL.warnings
+            );
+        }
+
+        if (
+            attribute === "target"
+        ) {
+
+            const target =
+                String(value ?? "")
+                    .trim()
+                    .toLowerCase();
+
+            if (
+                ![
+                    "_blank",
+                    "_self"
+                ].includes(target)
+            ) {
+                return blocked(
+                    "BLOCKED_TARGET"
+                );
+            }
+
+            element.setAttribute(
+                "target",
+                target
+            );
+
+            if (
+                target === "_blank"
+            ) {
+
+                const rel =
+                    new Set(
+                        String(
+                            element.getAttribute(
+                                "rel"
+                            ) || ""
+                        )
+                        .split(/\s+/)
+                        .filter(Boolean)
+                    );
+
+                rel.add(
+                    "noopener"
+                );
+
+                rel.add(
+                    "noreferrer"
+                );
+
+                element.setAttribute(
+                    "rel",
+                    Array.from(rel)
+                        .join(" ")
+                );
+            }
+
+            return result(true);
+        }
+
+        const encoded =
+            SANITIZER.encodeAttribute(
+                value
+            );
+
+        element.setAttribute(
+            attribute,
+            encoded.value
+        );
+
+        state.attributeWrites += 1;
+
+        publish(
+            XSS_EVENTS.ATTRIBUTE,
+            {
+                attribute
+            }
+        );
+
+        return result(
+            true,
+            encoded.warnings
+        );
+    }
+
+
+    function removeAttribute(
+        element,
+        attribute
+    ) {
+
+        if (!isElement(element)) {
+
+            return blocked(
+                "INVALID_ELEMENT",
+                {
+                    operation:
+                        "removeAttribute"
+                }
+            );
+        }
+
+        element.removeAttribute(
+            normalizeAttributeName(
+                attribute
+            )
+        );
+
+        return result(true);
+    }
+
+    /* ====================================================================
+       SAFE LINK BUILDER
+    ==================================================================== */
+
+    function createLink(
+        url,
+        label
+    ) {
+
+        const link =
+            createElement("a");
+
+        const hrefResult =
+            setAttribute(
+                link,
+                "href",
+                url
+            );
+
+        if (
+            hrefResult.success !== true
+        ) {
+
+            link.setAttribute(
+                "href",
+                "#"
+            );
+        }
+
+        setAttribute(
+            link,
+            "target",
+            "_blank"
+        );
+
+        setText(
+            link,
+            label
+        );
+
+        publish(
+            XSS_EVENTS.LINK,
+            {
+                safe:
+                    hrefResult.success === true
+            }
+        );
+
+        return link;
+    }
+
+    /* ====================================================================
+       SAFE DOWNLOAD LINK
+    ==================================================================== */
+
+    function createDownloadLink(
+        url,
+        filename,
+        label
+    ) {
+
+        const link =
+            createLink(
+                url,
+                label
+            );
 
         const safeName =
-
             SANITIZER.filename(
-
                 filename
-
             );
 
         link.download =
-
             safeName.value;
 
+        return link;
     }
 
-    return link;
+    /* ====================================================================
+       SAFE BUTTON
+    ==================================================================== */
 
-}
+    function createButton(
+        text,
+        type = "button"
+    ) {
 
-/* ========================================================================
-   SAFE BUTTON
-======================================================================== */
-
-function createButton(
-
-    text,
-
-    type = "button"
-
-){
-
-    const button =
-
-        createElement(
-
-            "button"
-
-        );
-
-    button.type =
-
-        type;
-
-    setText(
-
-        button,
-
-        text
-
-    );
-
-    return button;
-
-}
-
-/* ========================================================================
-   SAFE LIST ITEM
-======================================================================== */
-
-function createListItem(
-
-    text
-
-){
-
-    const li =
-
-        createElement(
-
-            "li"
-
-        );
-
-    setText(
-
-        li,
-
-        text
-
-    );
-
-    return li;
-
-}
-  /* ========================================================================
-   TRUSTED TYPES SUPPORT
-======================================================================== */
-
-const TRUSTED_TYPES =
-
-    window.trustedTypes || null;
-
-let trustedPolicy = null;
-
-function getTrustedPolicy(){
-
-    if(
-
-        !TRUSTED_TYPES
-
-    ){
-
-        return null;
-
-    }
-
-    if(
-
-        trustedPolicy
-
-    ){
-
-        return trustedPolicy;
-
-    }
-
-    try{
-
-        trustedPolicy =
-
-            TRUSTED_TYPES.createPolicy(
-
-                "pay54",
-
-                {
-
-                    createHTML(value){
-
-                        return SANITIZER
-                            ? SANITIZER.html(value).value
-                            : String(value);
-
-                    },
-
-                    createScriptURL(value){
-
-                        return SANITIZER
-                            ? SANITIZER.url(value).value
-                            : "";
-
-                    }
-
-                }
-
+        const button =
+            createElement(
+                "button"
             );
 
-    }
+        const normalizedType =
+            String(type ?? "button")
+                .toLowerCase();
 
-    catch{
+        button.type =
+            [
+                "button",
+                "submit",
+                "reset"
+            ].includes(
+                normalizedType
+            )
+                ? normalizedType
+                : "button";
 
-        trustedPolicy = null;
-
-    }
-
-    return trustedPolicy;
-
-}
-
-/* ========================================================================
-   SAFE TRUSTED HTML
-======================================================================== */
-
-function createTrustedHTML(
-
-    html
-
-){
-
-    const policy =
-
-        getTrustedPolicy();
-
-    if(
-
-        policy
-
-    ){
-
-        return policy.createHTML(
-
-            html
-
+        setText(
+            button,
+            text
         );
 
+        return button;
     }
 
-    return SANITIZER
+    /* ====================================================================
+       SAFE LIST ITEM
+    ==================================================================== */
 
-        ? SANITIZER.html(
+    function createListItem(
+        text
+    ) {
 
-            html
+        const item =
+            createElement("li");
 
-        ).value
+        setText(
+            item,
+            text
+        );
 
-        : String(html);
+        return item;
+    }
 
-}
+    /* ====================================================================
+       SAFE IMAGE SOURCE
+    ==================================================================== */
 
-/* ========================================================================
-   CSP DETECTION
-======================================================================== */
+    function setImageSource(
+        image,
+        url
+    ) {
 
-function supportsCSP(){
+        if (
+            !(
+                image instanceof
+                HTMLImageElement
+            )
+        ) {
 
-    return Boolean(
+            return blocked(
+                "INVALID_IMAGE"
+            );
+        }
 
-        document.querySelector(
+        const safe =
+            SANITIZER.url(
+                String(url ?? ""),
+                {
+                    policy:
+                        "resource"
+                }
+            );
 
-            'meta[http-equiv="Content-Security-Policy"]'
+        if (!safe.value) {
 
-        )
+            image.removeAttribute(
+                "src"
+            );
 
-    );
+            return blocked(
+                "UNSAFE_IMAGE_SOURCE"
+            );
+        }
 
-}
-
-/* ========================================================================
-   SAFE RENDER
-======================================================================== */
-
-function render(
-
-    element,
-
-    html
-
-){
-
-    if(
-
-        !isElement(element)
-
-    ){
+        image.src =
+            safe.value;
 
         return result(
-
-            false,
-
-            [
-
-                "INVALID_ELEMENT"
-
-            ]
-
+            true,
+            safe.warnings
         );
-
     }
 
-    element.innerHTML =
+    /* ====================================================================
+       IFRAME SOURCE — DISABLED
+    ==================================================================== */
 
-        createTrustedHTML(
+    function setIframeSource(
+        iframe,
+        url
+    ) {
 
-            html
+        if (
+            !(
+                iframe instanceof
+                HTMLIFrameElement
+            )
+        ) {
 
-        );
-
-    publish(
-
-        XSS_EVENTS.RENDER,
-
-        {
-
-            trusted:
-
-                Boolean(
-
-                    getTrustedPolicy()
-
-                )
-
+            return blocked(
+                "INVALID_IFRAME"
+            );
         }
 
-    );
+        void url;
 
-    return result(true);
+        iframe.removeAttribute(
+            "src"
+        );
 
-}
-
-/* ========================================================================
-   DOM MONITOR
-======================================================================== */
-
-let observer = null;
-
-function startMonitoring(
-
-    root = document.body
-
-){
-
-    if(
-
-        observer ||
-
-        !window.MutationObserver ||
-
-        !root
-
-    ){
-
-        return;
-
+        return blocked(
+            "IFRAME_RENDERING_DISABLED"
+        );
     }
 
-    observer =
+    /* ====================================================================
+       CSP DETECTION
+    ==================================================================== */
 
-        new MutationObserver(
+    function supportsCSP() {
 
-            mutations=>{
+        return Boolean(
+            document.querySelector(
+                'meta[http-equiv="Content-Security-Policy"]'
+            )
+        );
+    }
 
-                publish(
+    /* ====================================================================
+       DOM MONITOR
+    ==================================================================== */
 
-                    XSS_EVENTS.WARNING,
+    let observer =
+        null;
 
-                    {
 
-                        mutations:
+    function startMonitoring(
+        root = document.body
+    ) {
 
-                            mutations.length
+        if (
+            observer ||
+            !GLOBAL.MutationObserver ||
+            !root
+        ) {
+            return false;
+        }
 
-                    }
+        observer =
+            new MutationObserver(
+                mutations => {
 
-                );
+                    state.warnings += 1;
 
+                    publish(
+                        XSS_EVENTS.WARNING,
+                        {
+                            type:
+                                "DOM_MUTATION_OBSERVED",
+
+                            mutations:
+                                mutations.length
+                        }
+                    );
+                }
+            );
+
+        observer.observe(
+            root,
+            {
+                childList:
+                    true,
+
+                subtree:
+                    true,
+
+                attributes:
+                    true
             }
-
         );
 
-    observer.observe(
+        state.monitoring =
+            true;
 
-        root,
+        return true;
+    }
 
-        {
 
-            childList:true,
+    function stopMonitoring() {
 
-            subtree:true,
+        if (!observer) {
 
-            attributes:true
+            state.monitoring =
+                false;
 
+            return false;
         }
-
-    );
-
-}
-
-/* ========================================================================
-   STOP MONITOR
-======================================================================== */
-
-function stopMonitoring(){
-
-    if(
-
-        observer
-
-    ){
 
         observer.disconnect();
 
-        observer = null;
+        observer =
+            null;
 
+        state.monitoring =
+            false;
+
+        return true;
     }
 
-}
+    /* ====================================================================
+       STATUS
+    ==================================================================== */
 
-/* ========================================================================
-   SECURITY STATUS
-======================================================================== */
+    function status() {
 
-function status(){
+        return Object.freeze({
 
-    return Object.freeze({
+            version:
+                VERSION,
 
-        version:
+            sanitizer:
+                SANITIZER.version,
 
-            VERSION,
+            trustedTypes:
+                Boolean(
+                    TRUSTED_TYPES
+                ),
 
-        trustedTypes:
+            trustedPolicy:
+                Boolean(
+                    trustedPolicy
+                ),
 
-            Boolean(
+            cspMetaDetected:
+                supportsCSP(),
 
-                TRUSTED_TYPES
+            monitoring:
+                state.monitoring,
 
-            ),
+            htmlPolicy:
+                "SANITIZER_V12_STRICT_ALLOWLIST",
 
-        trustedPolicy:
+            iframeRendering:
+                "DISABLED"
+        });
+    }
 
-            Boolean(
+    /* ====================================================================
+       SELF TEST
+    ==================================================================== */
 
-                trustedPolicy
+    function selfTest() {
 
-            ),
+        const container =
+            document.createElement(
+                "div"
+            );
 
-        csp:
+        const htmlResult =
+            setHTML(
+                container,
+                '<p>PAY54</p><script>alert(1)</script><a href="javascript:alert(1)">x</a>'
+            );
 
-            supportsCSP(),
+        const blockedScript =
+            !container.innerHTML
+                .toLowerCase()
+                .includes(
+                    "<script"
+                );
 
-        monitoring:
+        const blockedJavascript =
+            !container.innerHTML
+                .toLowerCase()
+                .includes(
+                    "javascript:"
+                );
 
-            Boolean(
+        let activeElementBlocked =
+            false;
 
-                observer
+        try {
 
-            )
+            createElement(
+                "script"
+            );
 
-    });
+        } catch {
 
-}
-
-/* ========================================================================
-   SECURITY SELF TEST
-======================================================================== */
-
-function selfTest(){
-
-    const report = {
-
-        trustedTypes:
-
-            Boolean(
-
-                TRUSTED_TYPES
-
-            ),
-
-        sanitizer:
-
-            Boolean(
-
-                SANITIZER
-
-            ),
-
-        csp:
-
-            supportsCSP(),
-
-        monitoring:
-
-            Boolean(
-
-                observer
-
-            )
-
-    };
-
-    publish(
-
-        XSS_EVENTS.RENDER,
-
-        {
-
-            selfTest:true
-
+            activeElementBlocked =
+                true;
         }
 
-    );
+        return Object.freeze({
 
-    return Object.freeze(report);
+            ok:
+                htmlResult.success === true &&
+                blockedScript &&
+                blockedJavascript &&
+                activeElementBlocked,
 
-}
-  /* ========================================================================
-   XSS REGISTRY
-======================================================================== */
+            version:
+                VERSION,
 
-const XSS = Object.freeze({
+            sanitizerVersion:
+                SANITIZER.version,
 
-    setText,
-    setHTML,
-    appendHTML,
-    clear,
-    replaceChildren,
+            blockedScript,
 
-    createElement,
-    createFragment,
-    createTextNode,
+            blockedJavascript,
 
-    setAttribute,
-    removeAttribute,
+            activeElementBlocked,
 
-    createLink,
-    createDownloadLink,
-    createButton,
-    createListItem,
+            trustedTypes:
+                Boolean(
+                    TRUSTED_TYPES
+                ),
 
-    setImageSource,
-    setIframeSource,
-
-    render,
-    createTrustedHTML,
-
-    startMonitoring,
-    stopMonitoring,
-
-    status,
-    selfTest
-
-});
-
-/* ========================================================================
-   DISPATCHER
-======================================================================== */
-
-function run(
-
-    operation,
-
-    ...args
-
-){
-
-    const fn =
-
-        XSS[operation];
-
-    if(
-
-        typeof fn !== "function"
-
-    ){
-
-        publish(
-
-            XSS_EVENTS.WARNING,
-
-            {
-
-                operation
-
-            }
-
-        );
-
-        return result(
-
-            false,
-
-            [
-
-                "UNKNOWN_OPERATION"
-
-            ]
-
-        );
-
+            cspMetaDetected:
+                supportsCSP()
+        });
     }
 
-    return fn(
+    /* ====================================================================
+       DISPATCH REGISTRY
+    ==================================================================== */
 
+    const OPERATIONS =
+        Object.freeze({
+
+            setText,
+            setHTML,
+            appendHTML,
+            clear,
+            replaceChildren,
+
+            createElement,
+            createFragment,
+            createTextNode,
+
+            setAttribute,
+            removeAttribute,
+
+            createLink,
+            createDownloadLink,
+            createButton,
+            createListItem,
+
+            setImageSource,
+            setIframeSource,
+
+            render,
+            createTrustedHTML,
+
+            startMonitoring,
+            stopMonitoring,
+
+            status,
+            selfTest
+        });
+
+
+    function run(
+        operation,
         ...args
+    ) {
 
-    );
+        const fn =
+            OPERATIONS[
+                operation
+            ];
 
-}
+        if (
+            typeof fn !== "function"
+        ) {
 
-function has(
+            state.warnings += 1;
 
-    operation
+            publish(
+                XSS_EVENTS.WARNING,
+                {
+                    operation,
 
-){
+                    warning:
+                        "UNKNOWN_OPERATION"
+                }
+            );
 
-    return Object.prototype.hasOwnProperty.call(
+            return result(
+                false,
+                [
+                    "UNKNOWN_OPERATION"
+                ]
+            );
+        }
 
-        XSS,
+        return fn(
+            ...args
+        );
+    }
 
+
+    function has(
         operation
+    ) {
 
+        return Object.prototype
+            .hasOwnProperty.call(
+                OPERATIONS,
+                operation
+            );
+    }
+
+
+    function list() {
+
+        return Object.keys(
+            OPERATIONS
+        )
+        .sort();
+    }
+
+    /* ====================================================================
+       HEALTH / INTEGRITY
+    ==================================================================== */
+
+    function verifyIntegrity() {
+
+        const errors =
+            [];
+
+        if (
+            !SANITIZER ||
+            SANITIZER.version !== "12.0.0" ||
+            SANITIZER.health?.()?.healthy !== true
+        ) {
+
+            errors.push(
+                "Sanitizer v12 is unavailable or unhealthy."
+            );
+        }
+
+        if (
+            !REGISTRY ||
+            typeof REGISTRY.has !== "function"
+        ) {
+
+            errors.push(
+                "Platform Registry is unavailable."
+            );
+        }
+
+        if (
+            !CONFIG ||
+            typeof CONFIG.get !== "function"
+        ) {
+
+            errors.push(
+                "Runtime Config is unavailable."
+            );
+        }
+
+        const required = [
+
+            "setText",
+            "setHTML",
+            "appendHTML",
+            "createElement",
+            "setAttribute",
+            "createLink",
+            "setImageSource",
+            "setIframeSource"
+        ];
+
+        for (
+            const name
+            of required
+        ) {
+
+            if (!has(name)) {
+
+                errors.push(
+                    `Required XSS operation missing: ${name}.`
+                );
+            }
+        }
+
+        return Object.freeze({
+
+            ok:
+                errors.length === 0,
+
+            status:
+                errors.length === 0
+                    ? "HEALTHY"
+                    : "DEGRADED",
+
+            errors:
+                Object.freeze(
+                    errors
+                ),
+
+            checkedAt:
+                nowISO()
+        });
+    }
+
+
+    function health() {
+
+        const integrity =
+            verifyIntegrity();
+
+        return Object.freeze({
+
+            ok:
+                integrity.ok,
+
+            healthy:
+                integrity.ok,
+
+            status:
+                integrity.status,
+
+            id:
+                MODULE_ID,
+
+            name:
+                MODULE_NAME,
+
+            version:
+                VERSION,
+
+            file:
+                FILE_PATH,
+
+            startedAt:
+                STARTED_AT,
+
+            ready:
+                state.ready,
+
+            readyAt:
+                state.readyAt,
+
+            renders:
+                state.renders,
+
+            blocked:
+                state.blocked,
+
+            warnings:
+                state.warnings,
+
+            attributeWrites:
+                state.attributeWrites,
+
+            monitoring:
+                state.monitoring,
+
+            sanitizerVersion:
+                SANITIZER.version,
+
+            trustedTypesSupported:
+                Boolean(
+                    TRUSTED_TYPES
+                ),
+
+            cspMetaDetected:
+                supportsCSP(),
+
+            iframeRendering:
+                "DISABLED",
+
+            lastError:
+                state.lastError,
+
+            integrity
+        });
+    }
+
+    /* ====================================================================
+       PUBLIC API
+    ==================================================================== */
+
+    const api =
+        Object.freeze({
+
+            id:
+                MODULE_ID,
+
+            name:
+                MODULE_NAME,
+
+            version:
+                VERSION,
+
+            file:
+                FILE_PATH,
+
+            run,
+            has,
+            list,
+
+            status,
+            selfTest,
+            verifyIntegrity,
+            health,
+
+            operations:
+                OPERATIONS,
+
+            setText,
+            setHTML,
+            appendHTML,
+            clear,
+            replaceChildren,
+
+            createElement,
+            createFragment,
+            createTextNode,
+
+            setAttribute,
+            removeAttribute,
+
+            createLink,
+            createDownloadLink,
+            createButton,
+            createListItem,
+
+            setImageSource,
+            setIframeSource,
+
+            render,
+            createTrustedHTML,
+
+            startMonitoring,
+            stopMonitoring
+        });
+
+    /* ====================================================================
+       SECURITY ROOT
+    ==================================================================== */
+
+    if (
+        !GLOBAL.PAY54_SECURITY
+    ) {
+
+        Object.defineProperty(
+            GLOBAL,
+            "PAY54_SECURITY",
+            {
+                value:
+                    {},
+
+                writable:
+                    false,
+
+                configurable:
+                    false,
+
+                enumerable:
+                    true
+            }
+        );
+    }
+
+    Object.defineProperty(
+        GLOBAL.PAY54_SECURITY,
+        "xss",
+        {
+            value:
+                api,
+
+            writable:
+                false,
+
+            configurable:
+                false,
+
+            enumerable:
+                true
+        }
     );
 
-}
+    /* ====================================================================
+       PLATFORM REGISTRY
+    ==================================================================== */
 
-function list(){
+    REGISTRY.registerModule(
+        MODULE_ID,
+        Object.freeze({
 
-    return Object.keys(
+            id:
+                MODULE_ID,
 
-        XSS
+            name:
+                MODULE_NAME,
 
-    ).sort();
+            version:
+                VERSION,
 
-}
+            type:
+                "security",
 
-/* ========================================================================
-   PUBLIC API
-======================================================================== */
+            layer:
+                "layer.security",
 
-const api = Object.freeze({
-
-    version:
-
-        VERSION,
-
-    run,
-
-    has,
-
-    list,
-
-    status,
-
-    selfTest,
-
-    operations:
-
-        XSS,
-
-    setText,
-    setHTML,
-    appendHTML,
-    clear,
-    replaceChildren,
-
-    createElement,
-    createFragment,
-    createTextNode,
-
-    setAttribute,
-    removeAttribute,
-
-    createLink,
-    createDownloadLink,
-    createButton,
-    createListItem,
-
-    setImageSource,
-    setIframeSource,
-
-    render,
-    createTrustedHTML,
-
-    startMonitoring,
-    stopMonitoring
-
-});
-
-/* ========================================================================
-   PAY54 SECURITY ROOT
-======================================================================== */
-
-window.PAY54_SECURITY =
-window.PAY54_SECURITY || {};
-
-Object.defineProperty(
-
-    window.PAY54_SECURITY,
-
-    "xss",
-
-    {
-
-        value:
+            path:
+                FILE_PATH,
 
             api,
 
-        writable:
+            health
+        })
+    );
 
-            false,
+    /* ====================================================================
+       READY
+    ==================================================================== */
 
-        configurable:
+    state.ready =
+        true;
 
-            false,
+    state.readyAt =
+        nowISO();
 
-        enumerable:
+    publish(
+        XSS_EVENTS.READY,
+        {
+            version:
+                VERSION,
 
-            true
+            sanitizerVersion:
+                SANITIZER.version,
 
-    }
+            readyAt:
+                state.readyAt
+        }
+    );
 
-);
+    console.info(
+        `[PAY54_XSS] ${MODULE_NAME} v${VERSION} ready.`
+    );
 
-/* ========================================================================
-   STARTUP
-======================================================================== */
-
-publish(
-
-    XSS_EVENTS.RENDER,
-
-    {
-
-        module:
-
-            "xss",
-
-        version:
-
-            VERSION
-
-    }
-
-);
-
-console.info(
-
-    "[PAY54]",
-
-    "Enterprise XSS Engine",
-
-    VERSION,
-
-    "loaded"
-
-);
-
-/* ========================================================================
-   MODULE COMPLETE
-======================================================================== */
-
-})();  
+})();
