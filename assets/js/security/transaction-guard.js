@@ -1,2376 +1,2968 @@
+"use strict";
+
 /* ========================================================================
    PAY54 ENTERPRISE PLATFORM
    ------------------------------------------------------------------------
    File: assets/js/security/transaction-guard.js
-   Version: v11.0.0
-   Module: WP-003F Enterprise Transaction Guard
-   ------------------------------------------------------------------------
-   Responsibilities
+   Version: v12.0.0
+   Module: Titan Enterprise Transaction Guard
+   Status: Production Candidate
 
-   • Enterprise transaction authorization
-   • Session verification
-   • Transaction validation pipeline
-   • Duplicate detection hooks
-   • Velocity protection
-   • Risk integration
-   • Fraud prevention hooks
-   • AML integration hooks
-   • Event Bus integration
+   Purpose
+   -------
+   Canonical client-side transaction authorization boundary for Project Titan.
+
+   Security model
+   --------------
+   • Fail closed when required security dependencies are unavailable.
+   • Never performs, retries, reverses or mutates a financial transaction.
+   • Never claims server-side fraud/AML clearance from browser heuristics.
+   • Real-money mode is blocked unless authoritative risk controls are present.
+   • Duplicate protection is keyed by stable operation identifiers, not amount.
+   • Legacy boolean validate(...) remains supported for existing UI consumers.
 ======================================================================== */
 
 (() => {
 
-"use strict";
+    "use strict";
 
-/* ========================================================================
-   DEPENDENCIES
-======================================================================== */
+    const GLOBAL =
+        window;
 
-const EVENTS =
-window.PAY54_EVENTS || null;
+    const MODULE_ID =
+        "security.transaction-guard";
 
-const SESSION =
-window.PAY54_SECURITY?.session || null;
+    const MODULE_NAME =
+        "PAY54 Titan Enterprise Transaction Guard";
 
-const SESSION_MANAGER =
-window.PAY54_SECURITY?.session || null;
+    const FILE_PATH =
+        "assets/js/security/transaction-guard.js";
 
-const STORAGE =
-window.PAY54_SECURITY?.storage || null;
+    const VERSION =
+        "12.0.0";
 
-const VALIDATOR =
-window.PAY54_SECURITY?.validator || null;
+    const STARTED_AT =
+        new Date()
+            .toISOString();
 
-const SANITIZER =
-window.PAY54_SECURITY?.sanitizer || null;
+    /* ====================================================================
+       DEPENDENCIES
+    ==================================================================== */
 
-/* ========================================================================
-   VERSION
-======================================================================== */
+    const REGISTRY =
+        GLOBAL.PAY54_REGISTRY ||
+        null;
 
-const VERSION =
-"11.0.0";
+    const CONFIG =
+        GLOBAL.PAY54_CONFIG ||
+        null;
 
-const TRANSACTION_AUDIT_KEY =
-"transaction_audit";
+    const EVENTS =
+        GLOBAL.PAY54_EVENTS ||
+        null;
 
-/* ========================================================================
-   TRANSACTION EVENTS
-======================================================================== */
+    const SECURITY =
+        GLOBAL.PAY54_SECURITY ||
+        null;
 
-const GUARD_EVENTS =
-Object.freeze({
+    const SESSION =
+        SECURITY?.session ||
+        null;
 
-    APPROVED:
-        "guard.approved",
+    const STORAGE =
+        SECURITY?.storage ||
+        null;
 
-    REJECTED:
-        "guard.rejected",
+    const VALIDATOR =
+        SECURITY?.validator ||
+        null;
 
-    WARNING:
-        "guard.warning",
+    const SANITIZER =
+        SECURITY?.sanitizer ||
+        null;
 
-    DUPLICATE:
-        "guard.duplicate",
+    if (
+        !REGISTRY ||
+        typeof REGISTRY.registerModule !==
+            "function"
+    ) {
 
-    LIMIT:
-        "guard.limit",
+        throw new Error(
+            "[PAY54_GUARD] Platform Registry must load before Transaction Guard."
+        );
+    }
 
-    FRAUD:
-        "guard.fraud"
+    if (
+        !CONFIG ||
+        typeof CONFIG.get !==
+            "function"
+    ) {
 
-});
+        throw new Error(
+            "[PAY54_GUARD] Runtime Config must load before Transaction Guard."
+        );
+    }
 
-/* ========================================================================
-   EVENT PUBLISHER
-======================================================================== */
+    if (
+        !SESSION ||
+        typeof SESSION.isAuthenticated !==
+            "function"
+    ) {
 
-function publish(
+        throw new Error(
+            "[PAY54_GUARD] Session Manager v12 must load before Transaction Guard."
+        );
+    }
 
-    event,
+    if (
+        !STORAGE ||
+        typeof STORAGE.get !==
+            "function" ||
+        typeof STORAGE.set !==
+            "function"
+    ) {
 
-    payload = {}
+        throw new Error(
+            "[PAY54_GUARD] Secure Storage v12 must load before Transaction Guard."
+        );
+    }
 
-){
+    if (
+        !VALIDATOR ||
+        VALIDATOR.version !==
+            "12.0.0"
+    ) {
 
-    try{
+        throw new Error(
+            "[PAY54_GUARD] Validator v12 must load before Transaction Guard."
+        );
+    }
 
-        if(
+    if (
+        !SANITIZER ||
+        SANITIZER.version !==
+            "12.0.0"
+    ) {
 
-            EVENTS &&
+        throw new Error(
+            "[PAY54_GUARD] Sanitizer v12 must load before Transaction Guard."
+        );
+    }
 
-            typeof EVENTS.publish === "function"
+    /* ====================================================================
+       SAFE RELOAD GUARD
+    ==================================================================== */
 
-        ){
+    const existing =
+        SECURITY?.transactionGuard ||
+        null;
+
+    if (
+        existing
+    ) {
+
+        if (
+            existing.id ===
+                MODULE_ID &&
+            existing.version ===
+                VERSION &&
+            typeof existing.validate ===
+                "function" &&
+            typeof existing.evaluateTransaction ===
+                "function"
+        ) {
+
+            console.info(
+                "[PAY54_GUARD] Existing Titan Transaction Guard preserved."
+            );
+
+            return;
+        }
+
+        throw new Error(
+            "[PAY54_GUARD] PAY54_SECURITY.transactionGuard already exists with an incompatible contract."
+        );
+    }
+
+    /* ====================================================================
+       CONSTANTS
+    ==================================================================== */
+
+    const AUDIT_KEY =
+        "transaction_guard_audit";
+
+    const MAX_AUDIT_ENTRIES =
+        500;
+
+    const DUPLICATE_WINDOW_MS =
+        60_000;
+
+    const VELOCITY_WINDOW_MS =
+        60_000;
+
+    const MAX_TRANSACTIONS_PER_WINDOW =
+        10;
+
+    const EVENTS_MAP =
+        Object.freeze({
+
+            APPROVED:
+                "guard.approved",
+
+            REJECTED:
+                "guard.rejected",
+
+            WARNING:
+                "guard.warning",
+
+            DUPLICATE:
+                "guard.duplicate",
+
+            LIMIT:
+                "guard.limit",
+
+            FRAUD:
+                "guard.fraud",
+
+            AML:
+                "guard.aml",
+
+            READY:
+                "security.transaction-guard.ready"
+        });
+
+    const DEFAULT_POLICY =
+        Object.freeze({
+
+            enabled:
+                true,
+
+            requireSession:
+                true,
+
+            validateAmounts:
+                true,
+
+            validateWalletsWhenPresent:
+                true,
+
+            validateCurrency:
+                true,
+
+            validatePayloads:
+                true,
+
+            duplicateProtection:
+                true,
+
+            velocityProtection:
+                true,
+
+            advisoryRiskChecks:
+                true,
+
+            auditEvents:
+                true,
+
+            duplicateWindowMs:
+                DUPLICATE_WINDOW_MS,
+
+            velocityWindowMs:
+                VELOCITY_WINDOW_MS,
+
+            maxTransactionsPerWindow:
+                MAX_TRANSACTIONS_PER_WINDOW
+        });
+
+    const PROTECTED_POLICY_KEYS =
+        new Set([
+
+            "enabled",
+
+            "requireSession",
+
+            "validateAmounts",
+
+            "validateCurrency",
+
+            "validatePayloads"
+        ]);
+
+    /* ====================================================================
+       PRIVATE STATE
+    ==================================================================== */
+
+    let activePolicy = {
+
+        ...DEFAULT_POLICY
+    };
+
+    const duplicateCache =
+        new Map();
+
+    const velocityCache =
+        new Map();
+
+    const state = {
+
+        ready:
+            false,
+
+        readyAt:
+            null,
+
+        evaluations:
+            0,
+
+        approvals:
+            0,
+
+        rejections:
+            0,
+
+        duplicates:
+            0,
+
+        velocityBlocks:
+            0,
+
+        lastError:
+            null
+    };
+
+    /* ====================================================================
+       UTILITIES
+    ==================================================================== */
+
+    function now() {
+
+        return Date.now();
+    }
+
+
+    function nowISO() {
+
+        return new Date()
+            .toISOString();
+    }
+
+
+    function rememberError(
+        error
+    ) {
+
+        state.lastError =
+            Object.freeze({
+
+                name:
+                    error?.name ||
+                    "Error",
+
+                message:
+                    error?.message ||
+                    String(
+                        error
+                    ),
+
+                timestamp:
+                    nowISO()
+            });
+    }
+
+
+    function secureId() {
+
+        const cryptoApi =
+            GLOBAL.crypto;
+
+        if (
+            cryptoApi?.randomUUID
+        ) {
+
+            return cryptoApi.randomUUID();
+        }
+
+        if (
+            cryptoApi?.getRandomValues
+        ) {
+
+            const bytes =
+                new Uint8Array(
+                    16
+                );
+
+            cryptoApi.getRandomValues(
+                bytes
+            );
+
+            bytes[6] =
+                (
+                    bytes[6] &
+                    0x0f
+                ) |
+                0x40;
+
+            bytes[8] =
+                (
+                    bytes[8] &
+                    0x3f
+                ) |
+                0x80;
+
+            const hex =
+                Array.from(
+                    bytes,
+                    byte =>
+                        byte
+                            .toString(
+                                16
+                            )
+                            .padStart(
+                                2,
+                                "0"
+                            )
+                )
+                .join("");
+
+            return (
+                `${hex.slice(0, 8)}-` +
+                `${hex.slice(8, 12)}-` +
+                `${hex.slice(12, 16)}-` +
+                `${hex.slice(16, 20)}-` +
+                `${hex.slice(20)}`
+            );
+        }
+
+        throw new Error(
+            "[PAY54_GUARD] Cryptographically secure identifiers are unavailable."
+        );
+    }
+
+
+    function clone(
+        value
+    ) {
+
+        if (
+            typeof structuredClone ===
+                "function"
+        ) {
+
+            return structuredClone(
+                value
+            );
+        }
+
+        return JSON.parse(
+            JSON.stringify(
+                value
+            )
+        );
+    }
+
+
+    function publish(
+        eventName,
+        payload = {}
+    ) {
+
+        try {
+
+            if (
+                !EVENTS ||
+                typeof EVENTS.publish !==
+                    "function"
+            ) {
+
+                return false;
+            }
 
             EVENTS.publish(
 
-                event,
+                eventName,
 
-                payload,
+                Object.freeze({
+
+                    moduleId:
+                        MODULE_ID,
+
+                    occurredAt:
+                        nowISO(),
+
+                    ...payload
+                }),
 
                 {
 
                     source:
-
-                    "transaction-guard"
-
+                        MODULE_ID
                 }
-
             );
 
-        }
+            return true;
 
-    }
-
-    catch(error){
-
-        console.error(
-
-            "[PAY54_GUARD]",
-
+        } catch (
             error
+        ) {
 
-        );
+            rememberError(
+                error
+            );
 
+            return false;
+        }
     }
 
-}
-/* ========================================================================
-   TRANSACTION AUDIT
-======================================================================== */
-
-function getTransactionAudit(){
-
-    return STORAGE?.get(
-
-        TRANSACTION_AUDIT_KEY,
-
-        []
-
-    ) || [];
-
-}
-
-function saveTransactionAudit(
-
-    audit
-
-){
-
-    STORAGE?.set(
-
-        TRANSACTION_AUDIT_KEY,
-
-        audit
-
-    );
-
-}
-
-function recordTransactionAudit(
-
-    action,
-
-    details = {}
-
-){
-
-    const audit =
-
-        getTransactionAudit();
-
-    audit.push({
-
-        id:
-
-            uuid(),
-
-        action,
-
-        timestamp:
-
-            new Date()
-
-                .toISOString(),
-
-        details
-
-    });
-
-    saveTransactionAudit(
-
-        audit
-
-    );
-
-}
-/* ========================================================================
-   DEFAULT POLICY
-======================================================================== */
-
-const DEFAULT_POLICY =
-Object.freeze({
-
-    enabled: true,
-
-    requireSession: true,
-
-    validateAmounts: true,
-
-    validateWallets: true,
-
-    validateCurrency: true,
-
-    duplicateProtection: true,
-
-    velocityProtection: true,
-
-    riskChecks: true,
-
-    auditEvents: true
-
-});
-
-/* ========================================================================
-   UTILITIES
-======================================================================== */
-
-function now(){
-
-    return Date.now();
-
-}
-
-function uuid(){
-
-    if(
-
-        crypto?.randomUUID
-
-    ){
-
-        return crypto.randomUUID();
-
-    }
-
-    return (
-
-        "txn-" +
-
-        now() +
-
-        "-" +
-
-        Math.random()
-
-            .toString(36)
-
-            .slice(2)
-
-    );
-
-}
-
-function clone(
-
-    value
-
-){
-
-    if(
-
-        typeof structuredClone === "function"
-
-    ){
-
-        return structuredClone(
-
-            value
-
-        );
-
-    }
-
-    return JSON.parse(
-
-        JSON.stringify(
-
-            value
-
-        )
-
-    );
-
-}
-
-/* ========================================================================
-   GUARD RESULT
-======================================================================== */
-
-function createResult(
-
-    approved,
-
-    reason = null,
-
-    warnings = []
-
-){
-
-    return {
-
+    /* ====================================================================
+       RESULTS
+    ==================================================================== */
+
+    function createResult(
         approved,
+        reason = null,
+        warnings = [],
+        details = {}
+    ) {
 
-        reason,
+        state.evaluations +=
+            1;
 
-        warnings,
+        if (
+            approved ===
+                true
+        ) {
 
-        reference:
+            state.approvals +=
+                1;
 
-            uuid(),
+        } else {
 
-        timestamp:
+            state.rejections +=
+                1;
+        }
 
-            new Date()
+        return Object.freeze({
 
-            .toISOString()
+            approved:
+                approved ===
+                true,
 
-    };
+            reason:
+                reason ===
+                    null
 
-}
+                    ? null
 
-/* ========================================================================
-   TRANSACTION CONTEXT
-======================================================================== */
+                    : String(
+                        reason
+                    ),
 
-function createContext(
+            warnings:
+                Object.freeze(
 
-    transaction = {}
+                    Array.from(
 
-){
+                        new Set(
 
-    const context =
+                            Array.isArray(
+                                warnings
+                            )
 
-        clone(
+                                ? warnings.map(
+                                    String
+                                )
 
-            transaction
+                                : []
+                        )
+                    )
+                ),
 
-        );
+            details:
+                Object.freeze({
 
-    context.reference ||=
+                    ...(
+                        details &&
+                        typeof details ===
+                            "object"
 
-        uuid();
+                            ? details
 
-    context.createdAt ||=
+                            : {}
+                    )
+                }),
 
-        new Date()
+            reference:
+                secureId(),
 
-        .toISOString();
-
-    context.guardVersion =
-
-        VERSION;
-
-    return context;
-
-}
- /* ========================================================================
-   SESSION VALIDATION
-======================================================================== */
-
-function validateSession(){
-
-    if(
-
-        !DEFAULT_POLICY.requireSession
-
-    ){
-
-        return createResult(
-
-            true
-
-        );
-
+            timestamp:
+                nowISO()
+        });
     }
 
-    if(
-
-        !SESSION ||
-
-        typeof SESSION.isAuthenticated !== "function"
-
-    ){
-
-        publish(
-
-            GUARD_EVENTS.WARNING,
-
-            {
-
-                stage:
-
-                    "session"
-
-            }
-
-        );
-
-        return createResult(
-
-            false,
-
-            "SESSION_ENGINE_UNAVAILABLE"
-
-        );
-
-    }
-
-    if(
-
-        !SESSION.isAuthenticated()
-
-    ){
-
-        publish(
-
-            GUARD_EVENTS.REJECTED,
-
-            {
-
-                stage:
-
-                    "session"
-
-            }
-
-        );
-
-        return createResult(
-
-            false,
-
-            "SESSION_REQUIRED"
-
-        );
-
-    }
-
-    return createResult(
-
-        true
-
-    );
-
-}
-
-/* ========================================================================
-   WALLET VALIDATION
-======================================================================== */
-
-function validateWallet(
-
-    walletId
-
-){
-
-    if(
-
-        !DEFAULT_POLICY.validateWallets
-
-    ){
-
-        return createResult(
-
-            true
-
-        );
-
-    }
-
-    if(
-
-        !VALIDATOR ||
-
-        typeof VALIDATOR.walletId !== "function"
-
-    ){
-
-        return createResult(
-
-            false,
-
-            "VALIDATOR_UNAVAILABLE"
-
-        );
-
-    }
-
-    const validation =
-
-        VALIDATOR.walletId(
-
-            walletId
-
-        );
-
-    if(
-
-        !validation.valid
-
-    ){
-
-        publish(
-
-            GUARD_EVENTS.REJECTED,
-
-            {
-
-                stage:
-
-                    "wallet"
-
-            }
-
-        );
-
-        return createResult(
-
-            false,
-
-            "INVALID_WALLET"
-
-        );
-
-    }
-
-    return createResult(
-
-        true
-
-    );
-
-}
-
-/* ========================================================================
-   AMOUNT VALIDATION
-======================================================================== */
-
-function validateAmount(
-
-    amount
-
-){
-
-    if(
-
-        !DEFAULT_POLICY.validateAmounts
-
-    ){
-
-        return createResult(
-
-            true
-
-        );
-
-    }
-
-    if(
-
-        !VALIDATOR ||
-
-        typeof VALIDATOR.amount !== "function"
-
-    ){
-
-        return createResult(
-
-            false,
-
-            "VALIDATOR_UNAVAILABLE"
-
-        );
-
-    }
-
-    const validation =
-
-        VALIDATOR.amount(
-
-            amount
-
-        );
-
-    if(
-
-        !validation.valid
-
-    ){
-
-        publish(
-
-            GUARD_EVENTS.REJECTED,
-
-            {
-
-                stage:
-
-                    "amount"
-
-            }
-
-        );
-
-        return createResult(
-
-            false,
-
-            "INVALID_AMOUNT"
-
-        );
-
-    }
-
-    return createResult(
-
-        true
-
-    );
-
-}
-
-/* ========================================================================
-   CURRENCY VALIDATION
-======================================================================== */
-
-function validateCurrency(
-
-    currency
-
-){
-
-    if(
-
-        !DEFAULT_POLICY.validateCurrency
-
-    ){
-
-        return createResult(
-
-            true
-
-        );
-
-    }
-
-    if(
-
-        !VALIDATOR ||
-
-        typeof VALIDATOR.currency !== "function"
-
-    ){
-
-        return createResult(
-
-            false,
-
-            "VALIDATOR_UNAVAILABLE"
-
-        );
-
-    }
-
-    const validation =
-
-        VALIDATOR.currency(
-
-            currency
-
-        );
-
-    if(
-
-        !validation.valid
-
-    ){
-
-        publish(
-
-            GUARD_EVENTS.REJECTED,
-
-            {
-
-                stage:
-
-                    "currency"
-
-            }
-
-        );
-
-        return createResult(
-
-            false,
-
-            "INVALID_CURRENCY"
-
-        );
-
-    }
-
-    return createResult(
-
-        true
-
-    );
-
-}
-
-/* ========================================================================
-   PAYLOAD SANITIZATION
-======================================================================== */
-
-function sanitizeTransaction(
-
-    transaction
-
-){
-
-    if(
-
-        !SANITIZER ||
-
-        typeof SANITIZER.payload !== "function"
-
-    ){
-
-        return clone(
-
-            transaction
-
-        );
-
-    }
-
-    return SANITIZER
-
-        .payload(
-
-            transaction
-
+    /* ====================================================================
+       AUDIT
+    ==================================================================== */
+
+    function getTransactionAudit() {
+
+        const value =
+            STORAGE.get(
+                AUDIT_KEY,
+                []
+            );
+
+        return Array.isArray(
+            value
         )
 
-        .value;
+            ? value
 
-}
+            : [];
+    }
 
-/* ========================================================================
-   INITIAL AUTHORIZATION
-======================================================================== */
 
-function authorize(
+    function saveTransactionAudit(
+        entries
+    ) {
 
-    transaction
-
-){
-
-    const context =
-
-        createContext(
-
-            sanitizeTransaction(
-
-                transaction
-
+        const normalized =
+            Array.isArray(
+                entries
             )
 
+                ? entries.slice(
+                    -MAX_AUDIT_ENTRIES
+                )
+
+                : [];
+
+        STORAGE.set(
+            AUDIT_KEY,
+            normalized
         );
-
-    const session =
-
-        validateSession();
-
-    if(
-
-        !session.approved
-
-    ){
-
-        return session;
-
     }
 
-    const wallet =
 
-        validateWallet(
+    function recordTransactionAudit(
+        action,
+        details = {}
+    ) {
 
-            context.walletId
+        if (
+            activePolicy.auditEvents !==
+                true
+        ) {
 
-        );
-
-    if(
-
-        !wallet.approved
-
-    ){
-
-        return wallet;
-
-    }
-
-    const amount =
-
-        validateAmount(
-
-            context.amount
-
-        );
-
-    if(
-
-        !amount.approved
-
-    ){
-
-        return amount;
-
-    }
-
-    const currency =
-
-        validateCurrency(
-
-            context.currency
-
-        );
-
-    if(
-
-        !currency.approved
-
-    ){
-
-        return currency;
-
-    }
-
-    publish(
-
-        GUARD_EVENTS.APPROVED,
-
-        {
-
-            reference:
-
-                context.reference,
-
-            stage:
-
-                "authorization"
-
+            return false;
         }
 
-    );
+        const entries =
+            getTransactionAudit();
 
-    return createResult(
+        entries.push({
 
-        true
-
-    );
-
-} 
-/* ========================================================================
-   TRANSACTION CACHE
-======================================================================== */
-
-const TRANSACTION_CACHE =
-new Map();
-
-/* ========================================================================
-   VELOCITY CACHE
-======================================================================== */
-
-const VELOCITY_CACHE =
-new Map();
-
-/* ========================================================================
-   CACHE CONFIGURATION
-======================================================================== */
-
-const CACHE_POLICY =
-Object.freeze({
-
-    duplicateWindow:
-
-        60_000,
-
-    velocityWindow:
-
-        60_000,
-
-    maxTransactions:
-
-        10
-
-});
-
-/* ========================================================================
-   TRANSACTION FINGERPRINT
-======================================================================== */
-
-function fingerprint(
-
-    transaction
-
-){
-
-    return [
-
-        transaction.walletId ?? "",
-
-        transaction.amount ?? "",
-
-        transaction.currency ?? "",
-
-        transaction.type ?? "",
-
-        transaction.beneficiary ?? ""
-
-    ]
-
-    .join("|")
-
-    .toLowerCase();
-
-}
-
-/* ========================================================================
-   DUPLICATE DETECTION
-======================================================================== */
-
-function detectDuplicate(
-
-    transaction
-
-){
-
-    if(
-
-        !DEFAULT_POLICY.duplicateProtection
-
-    ){
-
-        return createResult(
-
-            true
-
-        );
-
-    }
-
-    const key =
-
-        fingerprint(
-
-            transaction
-
-        );
-
-    const timestamp =
-
-        TRANSACTION_CACHE.get(
-
-            key
-
-        );
-
-    if(
-
-        timestamp &&
-
-        (
-
-            now() - timestamp
-
-        ) <
-
-        CACHE_POLICY.duplicateWindow
-
-    ){
-
-        publish(
-
-            GUARD_EVENTS.DUPLICATE,
-
-            {
-
-                key
-
-            }
-
-        );
-
-        return createResult(
-
-            false,
-
-            "DUPLICATE_TRANSACTION"
-
-        );
-
-    }
-
-    TRANSACTION_CACHE.set(
-
-        key,
-
-        now()
-
-    );
-
-    return createResult(
-
-        true
-
-    );
-
-}
-
-/* ========================================================================
-   VELOCITY CHECK
-======================================================================== */
-
-function checkVelocity(
-
-    walletId
-
-){
-
-    if(
-
-        !DEFAULT_POLICY.velocityProtection
-
-    ){
-
-        return createResult(
-
-            true
-
-        );
-
-    }
-
-    const timestamp =
-
-        now();
-
-    const history =
-
-        VELOCITY_CACHE.get(
-
-            walletId
-
-        ) || [];
-
-    const recent =
-
-        history.filter(
-
-            value =>
-
-                (
-
-                    timestamp - value
-
-                ) <
-
-                CACHE_POLICY.velocityWindow
-
-        );
-
-    if(
-
-        recent.length >=
-
-        CACHE_POLICY.maxTransactions
-
-    ){
-
-        publish(
-
-            GUARD_EVENTS.LIMIT,
-
-            {
-
-                walletId
-
-            }
-
-        );
-
-        return createResult(
-
-            false,
-
-            "VELOCITY_LIMIT"
-
-        );
-
-    }
-
-    recent.push(
-
-        timestamp
-
-    );
-
-    VELOCITY_CACHE.set(
-
-        walletId,
-
-        recent
-
-    );
-
-    return createResult(
-
-        true
-
-    );
-
-}
-
-/* ========================================================================
-   CACHE CLEANUP
-======================================================================== */
-
-function cleanupCaches(){
-
-    const timestamp =
-
-        now();
-
-    for(
-
-        const [
-
-            key,
-
-            value
-
-        ]
-
-        of
-
-        TRANSACTION_CACHE
-
-    ){
-
-        if(
-
-            (
-
-                timestamp - value
-
-            ) >
-
-            CACHE_POLICY.duplicateWindow
-
-        ){
-
-            TRANSACTION_CACHE.delete(
-
-                key
-
-            );
-
-        }
-
-    }
-
-    for(
-
-        const [
-
-            wallet,
-
-            history
-
-        ]
-
-        of
-
-        VELOCITY_CACHE
-
-    ){
-
-        const recent =
-
-            history.filter(
-
-                value =>
-
-                    (
-
-                        timestamp - value
-
-                    ) <
-
-                    CACHE_POLICY.velocityWindow
-
-            );
-
-        if(
-
-            recent.length
-
-        ){
-
-            VELOCITY_CACHE.set(
-
-                wallet,
-
-                recent
-
-            );
-
-        }
-
-        else{
-
-            VELOCITY_CACHE.delete(
-
-                wallet
-
-            );
-
-        }
-
-    }
-
-}
-
-/* ========================================================================
-   REPLAY PROTECTION
-======================================================================== */
-
-function preventReplay(
-
-    context
-
-){
-
-    const duplicate =
-
-        detectDuplicate(
-
-            context
-
-        );
-
-    if(
-
-        !duplicate.approved
-
-    ){
-
-        return duplicate;
-
-    }
-
-    const velocity =
-
-        checkVelocity(
-
-            context.walletId
-
-        );
-
-    if(
-
-        !velocity.approved
-
-    ){
-
-        return velocity;
-
-    }
-
-    cleanupCaches();
-
-    return createResult(
-
-        true
-
-    );
-
-}
-
-/* ========================================================================
-   ENTERPRISE AUTHORIZATION PIPELINE
-======================================================================== */
-
-function authorizeTransaction(
-
-    transaction
-
-){
-
-    const context =
-
-        createContext(
-
-            sanitizeTransaction(
-
-                transaction
-
-            )
-
-        );
-
-    const authorization =
-
-        authorize(
-
-            context
-
-        );
-
-    if(
-
-        !authorization.approved
-
-    ){
-
-        return authorization;
-
-    }
-
-    const replay =
-
-        preventReplay(
-
-            context
-
-        );
-
-    if(
-
-        !replay.approved
-
-    ){
-
-        return replay;
-
-    }
-recordTransactionAudit(
-
-    "TRANSACTION_AUTHORISED",
-
-    {
-
-        reference:
-
-            context.reference
-
-    }
-
-);
-    publish(
-
-        GUARD_EVENTS.APPROVED,
-
-        {
-
-            reference:
-
-                context.reference,
-
-            pipeline:
-
-                "transaction"
-
-        }
-
-    );
-
-    return createResult(
-
-        true
-
-    );
-
-} 
-   const TRANSACTION_RISK =
-Object.freeze({
-
-    LOW:
-        "LOW",
-
-    MEDIUM:
-        "MEDIUM",
-
-    HIGH:
-        "HIGH",
-
-    CRITICAL:
-        "CRITICAL"
-
-});
- /* ========================================================================
-   RISK POLICY
-======================================================================== */
-
-const RISK_POLICY =
-Object.freeze({
-
-    mediumAmount:
-
-        1000,
-
-    highAmount:
-
-        5000,
-
-    maximumAmount:
-
-        100000,
-
-    requireStepUpRisk:
-
-        70
-
-});
-/* ========================================================================
-   RISK CLASSIFICATION
-======================================================================== */
-
-function classifyRisk(
-
-    score
-
-){
-
-    if(
-
-        score >= 100
-
-    ){
-
-        return TRANSACTION_RISK.CRITICAL;
-
-    }
-
-    if(
-
-        score >= 70
-
-    ){
-
-        return TRANSACTION_RISK.HIGH;
-
-    }
-
-    if(
-
-        score >= 30
-
-    ){
-
-        return TRANSACTION_RISK.MEDIUM;
-
-    }
-
-    return TRANSACTION_RISK.LOW;
-
-}
-/* ========================================================================
-   RISK SCORE
-======================================================================== */
-
-function calculateRiskScore(
-
-    context
-
-){
-
-    let score = 0;
-    const reasons = [];
-
-    const amount =
-        Number(context.amount || 0);
-
-    if(
-
-        amount >=
-        RISK_POLICY.mediumAmount
-
-    ){
-
-        score += 20;
-        reasons.push(
-            "MEDIUM_VALUE"
-        );
-
-    }
-
-    if(
-
-        amount >=
-        RISK_POLICY.highAmount
-
-    ){
-
-        score += 30;
-        reasons.push(
-            "HIGH_VALUE"
-        );
-
-    }
-
-    if(
-
-        amount >
-        RISK_POLICY.maximumAmount
-
-    ){
-
-        score += 100;
-        reasons.push(
-            "EXCEEDS_MAXIMUM"
-        );
-
-    }
-
-    if(
-
-        !context.beneficiary
-
-    ){
-
-        score += 10;
-        reasons.push(
-            "UNKNOWN_BENEFICIARY"
-        );
-
-    }
-
- return {
-
-    score,
-
-    level:
-
-        classifyRisk(
-
-            score
-
-        ),
-
-    reasons
-
-};
-
-}
-
-/* ========================================================================
-   STEP-UP AUTHENTICATION
-======================================================================== */
-
-function requiresStepUp(
-
-    score
-
-){
-
-    return (
-
-        score >=
-
-        RISK_POLICY.requireStepUpRisk
-
-    );
-
-}
-/* ========================================================================
-   MFA ESCALATION
-======================================================================== */
-
-function requestTransactionMFA(
-
-    context,
-
-    risk
-
-){
-
-    if(
-
-        !SESSION_MANAGER ||
-
-        typeof SESSION_MANAGER.requestMFA !== "function"
-
-    ){
-
-        return false;
-
-    }
-
-    SESSION_MANAGER.requestMFA();
-
-    publish(
-
-        GUARD_EVENTS.WARNING,
-
-        {
-
-            reference:
-
-                context.reference,
-
-            score:
-
-                risk.score,
-
-            level:
-
-                risk.level,
+            id:
+                secureId(),
 
             action:
+                String(
+                    action ||
+                    "GUARD_EVENT"
+                ),
 
-                "MFA_REQUIRED"
+            timestamp:
+                nowISO(),
 
-        }
+            details: {
 
-    );
+                transactionId:
+                    details.transactionId ??
+                    null,
 
-    return true;
+                reference:
+                    details.reference ??
+                    null,
 
-}
-/* ========================================================================
-   FRAUD EVALUATION
-======================================================================== */
+                type:
+                    details.type ??
+                    null,
 
-function evaluateFraud(
+                currency:
+                    details.currency ??
+                    null,
 
-    context
+                reason:
+                    details.reason ??
+                    null,
 
-){
+                riskLevel:
+                    details.riskLevel ??
+                    null
+            }
+        });
 
-    const risk =
-
-        calculateRiskScore(
-
-            context
-
+        saveTransactionAudit(
+            entries
         );
 
-    if(
-
-        risk.score >= 100
-
-    ){
-recordTransactionAudit(
-
-    "TRANSACTION_FRAUD_BLOCKED",
-
-    {
-
-        reference:
-
-            context.reference,
-
-        score:
-
-            risk.score,
-
-        level:
-
-            risk.level
-
+        return true;
     }
 
-);
+    /* ====================================================================
+       POLICY
+    ==================================================================== */
+
+    function getPolicy() {
+
+        return Object.freeze({
+
+            ...activePolicy
+        });
+    }
+
+
+    function updatePolicy(
+        updates = {}
+    ) {
+
+        if (
+            !updates ||
+            typeof updates !==
+                "object" ||
+            Array.isArray(
+                updates
+            )
+        ) {
+
+            throw new TypeError(
+                "[PAY54_GUARD] Policy updates must be a plain object."
+            );
+        }
+
+        const isProduction =
+            CONFIG.isProduction?.() ===
+            true;
+
+        const realMoneyMode =
+            CONFIG.get(
+                "environment.realMoneyMode"
+            ) ===
+            true;
+
+        const next = {
+
+            ...activePolicy
+        };
+
+        for (
+            const [
+                key,
+                value
+            ]
+            of Object.entries(
+                updates
+            )
+        ) {
+
+            if (
+                !Object.prototype
+                    .hasOwnProperty
+                    .call(
+                        DEFAULT_POLICY,
+                        key
+                    )
+            ) {
+
+                throw new Error(
+                    `[PAY54_GUARD] Unknown policy key: ${key}.`
+                );
+            }
+
+            if (
+                (
+                    isProduction ||
+                    realMoneyMode
+                ) &&
+                PROTECTED_POLICY_KEYS.has(
+                    key
+                ) &&
+                value !==
+                    true
+            ) {
+
+                throw new Error(
+                    `[PAY54_GUARD] Protected policy ${key} cannot be disabled in production/real-money mode.`
+                );
+            }
+
+            if (
+                [
+                    "duplicateWindowMs",
+                    "velocityWindowMs",
+                    "maxTransactionsPerWindow"
+                ]
+                .includes(
+                    key
+                )
+            ) {
+
+                if (
+                    !Number.isFinite(
+                        value
+                    ) ||
+                    value <=
+                        0
+                ) {
+
+                    throw new Error(
+                        `[PAY54_GUARD] Policy ${key} must be a positive finite number.`
+                    );
+                }
+
+            } else if (
+                typeof value !==
+                    "boolean"
+            ) {
+
+                throw new Error(
+                    `[PAY54_GUARD] Policy ${key} must be boolean.`
+                );
+            }
+
+            next[key] =
+                value;
+        }
+
+        activePolicy =
+            next;
+
         publish(
 
-            GUARD_EVENTS.FRAUD,
+            EVENTS_MAP.WARNING,
+
+            {
+
+                stage:
+                    "policy",
+
+                updated:
+                    Object.keys(
+                        updates
+                    )
+            }
+        );
+
+        return getPolicy();
+    }
+
+    /* ====================================================================
+       SESSION VALIDATION
+    ==================================================================== */
+
+    function validateSession() {
+
+        if (
+            activePolicy.requireSession !==
+                true
+        ) {
+
+            return createResult(
+                true
+            );
+        }
+
+        if (
+            !SESSION ||
+            typeof SESSION.isAuthenticated !==
+                "function"
+        ) {
+
+            return createResult(
+                false,
+                "SESSION_ENGINE_UNAVAILABLE"
+            );
+        }
+
+        if (
+            SESSION.isAuthenticated() !==
+                true
+        ) {
+
+            publish(
+
+                EVENTS_MAP.REJECTED,
+
+                {
+
+                    stage:
+                        "session",
+
+                    reason:
+                        "SESSION_REQUIRED"
+                }
+            );
+
+            return createResult(
+                false,
+                "SESSION_REQUIRED"
+            );
+        }
+
+        return createResult(
+            true
+        );
+    }
+
+    /* ====================================================================
+       WALLET VALIDATION
+    ==================================================================== */
+
+    function validateWallet(
+        walletId
+    ) {
+
+        if (
+            activePolicy.validateWalletsWhenPresent !==
+                true
+        ) {
+
+            return createResult(
+                true
+            );
+        }
+
+        const value =
+            String(
+                walletId ??
+                ""
+            )
+            .trim();
+
+        /*
+         * Current Project Titan ledger entries do not yet carry a canonical
+         * walletId on every entry. Missing wallet IDs therefore remain
+         * compatible, while supplied wallet IDs must validate strictly.
+         */
+        if (
+            !value
+        ) {
+
+            return createResult(
+
+                true,
+
+                null,
+
+                [
+                    "WALLET_ID_NOT_SUPPLIED"
+                ]
+            );
+        }
+
+        const validation =
+            VALIDATOR.walletId(
+                value
+            );
+
+        return validation.valid ===
+            true
+
+            ? createResult(
+                true
+            )
+
+            : createResult(
+                false,
+                "INVALID_WALLET"
+            );
+    }
+
+    /* ====================================================================
+       AMOUNT / CURRENCY / PAYLOAD
+    ==================================================================== */
+
+    function validateAmount(
+        amount
+    ) {
+
+        if (
+            activePolicy.validateAmounts !==
+                true
+        ) {
+
+            return createResult(
+                true
+            );
+        }
+
+        const numeric =
+            Number(
+                amount
+            );
+
+        if (
+            !Number.isFinite(
+                numeric
+            ) ||
+            numeric <=
+                0
+        ) {
+
+            return createResult(
+                false,
+                "INVALID_AMOUNT"
+            );
+        }
+
+        const validation =
+            VALIDATOR.amount(
+
+                numeric,
+
+                Number.MIN_VALUE,
+
+                Number.MAX_SAFE_INTEGER
+            );
+
+        return validation.valid ===
+            true
+
+            ? createResult(
+                true
+            )
+
+            : createResult(
+                false,
+                "INVALID_AMOUNT"
+            );
+    }
+
+
+    function validateCurrency(
+        currency
+    ) {
+
+        if (
+            activePolicy.validateCurrency !==
+                true
+        ) {
+
+            return createResult(
+                true
+            );
+        }
+
+        const validation =
+            VALIDATOR.currency(
+
+                String(
+                    currency ??
+                    ""
+                )
+                .toUpperCase()
+            );
+
+        return validation.valid ===
+            true
+
+            ? createResult(
+                true
+            )
+
+            : createResult(
+                false,
+                "INVALID_CURRENCY"
+            );
+    }
+
+
+    function validatePayload(
+        payload
+    ) {
+
+        if (
+            activePolicy.validatePayloads !==
+                true
+        ) {
+
+            return createResult(
+                true
+            );
+        }
+
+        if (
+            payload ===
+                undefined ||
+            payload ===
+                null
+        ) {
+
+            return createResult(
+                true
+            );
+        }
+
+        if (
+            typeof payload !==
+                "object" ||
+            Array.isArray(
+                payload
+            )
+        ) {
+
+            return createResult(
+                false,
+                "INVALID_PAYLOAD"
+            );
+        }
+
+        const validation =
+            VALIDATOR.payload(
+                payload
+            );
+
+        return validation.valid ===
+            true
+
+            ? createResult(
+                true
+            )
+
+            : createResult(
+                false,
+                "INVALID_PAYLOAD"
+            );
+    }
+
+    /* ====================================================================
+       SANITIZATION / CONTEXT
+    ==================================================================== */
+
+    function sanitizeTransaction(
+        transaction
+    ) {
+
+        if (
+            !transaction ||
+            typeof transaction !==
+                "object" ||
+            Array.isArray(
+                transaction
+            )
+        ) {
+
+            throw new TypeError(
+                "[PAY54_GUARD] Transaction must be an object."
+            );
+        }
+
+        const sanitized =
+            SANITIZER.securePayload(
+                transaction
+            );
+
+        return clone(
+            sanitized.value
+        );
+    }
+
+
+    function createContext(
+        transaction = {}
+    ) {
+
+        if (
+            !transaction ||
+            typeof transaction !==
+                "object" ||
+            Array.isArray(
+                transaction
+            )
+        ) {
+
+            throw new TypeError(
+                "[PAY54_GUARD] Transaction context must be an object."
+            );
+        }
+
+        const context =
+            clone(
+                transaction
+            );
+
+        context.reference =
+            String(
+
+                context.reference ||
+                context.id ||
+                secureId()
+            );
+
+        context.createdAt =
+            context.createdAt ||
+            nowISO();
+
+        context.guardVersion =
+            VERSION;
+
+        return context;
+    }
+
+    /* ====================================================================
+       IDEMPOTENCY / REPLAY
+    ==================================================================== */
+
+    function stableOperationKey(
+        transaction
+    ) {
+
+        const candidates = [
+
+            transaction?.idempotencyKey,
+
+            transaction?.operationId,
+
+            transaction?.id,
+
+            transaction?.reference
+        ];
+
+        for (
+            const candidate
+            of candidates
+        ) {
+
+            const value =
+                String(
+                    candidate ??
+                    ""
+                )
+                .trim();
+
+            if (
+                value
+            ) {
+
+                return value
+                    .toLowerCase();
+            }
+        }
+
+        return null;
+    }
+
+
+    function cleanupCaches() {
+
+        const timestamp =
+            now();
+
+        for (
+            const [
+                key,
+                value
+            ]
+            of duplicateCache
+        ) {
+
+            if (
+                (
+                    timestamp -
+                    value
+                ) >
+                activePolicy
+                    .duplicateWindowMs
+            ) {
+
+                duplicateCache.delete(
+                    key
+                );
+            }
+        }
+
+        for (
+            const [
+                key,
+                history
+            ]
+            of velocityCache
+        ) {
+
+            const recent =
+                history.filter(
+                    value =>
+                        (
+                            timestamp -
+                            value
+                        ) <
+                        activePolicy
+                            .velocityWindowMs
+                );
+
+            if (
+                recent.length
+            ) {
+
+                velocityCache.set(
+                    key,
+                    recent
+                );
+
+            } else {
+
+                velocityCache.delete(
+                    key
+                );
+            }
+        }
+    }
+
+
+    function detectDuplicate(
+        transaction,
+        options = {}
+    ) {
+
+        if (
+            activePolicy.duplicateProtection !==
+                true
+        ) {
+
+            return createResult(
+                true
+            );
+        }
+
+        cleanupCaches();
+
+        const key =
+            stableOperationKey(
+                transaction
+            );
+
+        if (
+            !key
+        ) {
+
+            return createResult(
+
+                true,
+
+                null,
+
+                [
+                    "IDEMPOTENCY_KEY_NOT_SUPPLIED"
+                ]
+            );
+        }
+
+        const previous =
+            duplicateCache.get(
+                key
+            );
+
+        if (
+            previous &&
+            (
+                now() -
+                previous
+            ) <
+            activePolicy
+                .duplicateWindowMs
+        ) {
+
+            state.duplicates +=
+                1;
+
+            publish(
+
+                EVENTS_MAP.DUPLICATE,
+
+                {
+                    key
+                }
+            );
+
+            return createResult(
+                false,
+                "DUPLICATE_TRANSACTION"
+            );
+        }
+
+        if (
+            options.commit !==
+                false
+        ) {
+
+            duplicateCache.set(
+                key,
+                now()
+            );
+        }
+
+        return createResult(
+            true
+        );
+    }
+
+
+    function resolveVelocityKey(
+        transaction
+    ) {
+
+        const walletId =
+            String(
+                transaction?.walletId ??
+                ""
+            )
+            .trim();
+
+        if (
+            walletId
+        ) {
+
+            return (
+                `wallet:${walletId}`
+            );
+        }
+
+        const sessionUser =
+            SESSION
+                .getCurrent
+                ?.()
+                ?.userId;
+
+        if (
+            sessionUser
+        ) {
+
+            return (
+                "user:" +
+                String(
+                    sessionUser
+                )
+                .toLowerCase()
+            );
+        }
+
+        return null;
+    }
+
+
+    function checkVelocity(
+        subject
+    ) {
+
+        if (
+            activePolicy.velocityProtection !==
+                true
+        ) {
+
+            return createResult(
+                true
+            );
+        }
+
+        const key =
+            typeof subject ===
+                "object"
+
+                ? resolveVelocityKey(
+                    subject
+                )
+
+                : (
+                    String(
+                        subject ??
+                        ""
+                    )
+                    .trim() ||
+                    null
+                );
+
+        if (
+            !key
+        ) {
+
+            return createResult(
+
+                true,
+
+                null,
+
+                [
+                    "VELOCITY_SUBJECT_NOT_AVAILABLE"
+                ]
+            );
+        }
+
+        cleanupCaches();
+
+        const timestamp =
+            now();
+
+        const recent =
+            (
+                velocityCache.get(
+                    key
+                ) ||
+                []
+            )
+            .filter(
+                value =>
+                    (
+                        timestamp -
+                        value
+                    ) <
+                    activePolicy
+                        .velocityWindowMs
+            );
+
+        if (
+            recent.length >=
+            activePolicy
+                .maxTransactionsPerWindow
+        ) {
+
+            state.velocityBlocks +=
+                1;
+
+            publish(
+
+                EVENTS_MAP.LIMIT,
+
+                {
+                    key
+                }
+            );
+
+            return createResult(
+                false,
+                "VELOCITY_LIMIT"
+            );
+        }
+
+        recent.push(
+            timestamp
+        );
+
+        velocityCache.set(
+            key,
+            recent
+        );
+
+        return createResult(
+            true
+        );
+    }
+
+
+    function preventReplay(
+        context
+    ) {
+
+        const duplicate =
+            detectDuplicate(
+                context
+            );
+
+        if (
+            !duplicate.approved
+        ) {
+
+            return duplicate;
+        }
+
+        const velocity =
+            checkVelocity(
+                context
+            );
+
+        if (
+            !velocity.approved
+        ) {
+
+            return velocity;
+        }
+
+        return createResult(
+
+            true,
+
+            null,
+
+            [
+                ...duplicate.warnings,
+                ...velocity.warnings
+            ]
+        );
+    }
+
+    /* ====================================================================
+       AUTHORIZATION
+    ==================================================================== */
+
+    function authorize(
+        transaction
+    ) {
+
+        let context;
+
+        try {
+
+            const payload =
+                validatePayload(
+                    transaction
+                );
+
+            if (
+                !payload.approved
+            ) {
+
+                return payload;
+            }
+
+            context =
+                createContext(
+
+                    sanitizeTransaction(
+                        transaction
+                    )
+                );
+
+        } catch (
+            error
+        ) {
+
+            rememberError(
+                error
+            );
+
+            return createResult(
+                false,
+                "INVALID_TRANSACTION_STRUCTURE"
+            );
+        }
+
+        const session =
+            validateSession();
+
+        if (
+            !session.approved
+        ) {
+
+            return session;
+        }
+
+        const wallet =
+            validateWallet(
+                context.walletId
+            );
+
+        if (
+            !wallet.approved
+        ) {
+
+            return wallet;
+        }
+
+        const amount =
+            validateAmount(
+                context.amount
+            );
+
+        if (
+            !amount.approved
+        ) {
+
+            return amount;
+        }
+
+        const currency =
+            validateCurrency(
+                context.currency
+            );
+
+        if (
+            !currency.approved
+        ) {
+
+            return currency;
+        }
+
+        const warnings = [
+
+            ...wallet.warnings,
+
+            ...amount.warnings,
+
+            ...currency.warnings
+        ];
+
+        publish(
+
+            EVENTS_MAP.APPROVED,
 
             {
 
                 reference:
+                    context.reference,
 
+                stage:
+                    "authorization"
+            }
+        );
+
+        return createResult(
+
+            true,
+
+            null,
+
+            warnings,
+
+            {
+                contextReference:
+                    context.reference
+            }
+        );
+    }
+
+
+    function authorizeTransaction(
+        transaction
+    ) {
+
+        let context;
+
+        try {
+
+            context =
+                createContext(
+
+                    sanitizeTransaction(
+                        transaction
+                    )
+                );
+
+        } catch (
+            error
+        ) {
+
+            rememberError(
+                error
+            );
+
+            return createResult(
+                false,
+                "INVALID_TRANSACTION_STRUCTURE"
+            );
+        }
+
+        const authorization =
+            authorize(
+                context
+            );
+
+        if (
+            !authorization.approved
+        ) {
+
+            return authorization;
+        }
+
+        const replay =
+            preventReplay(
+                context
+            );
+
+        if (
+            !replay.approved
+        ) {
+
+            return replay;
+        }
+
+        recordTransactionAudit(
+
+            "TRANSACTION_AUTHORISED",
+
+            {
+
+                transactionId:
+                    context.id ??
+                    null,
+
+                reference:
+                    context.reference,
+
+                type:
+                    context.type ??
+                    null,
+
+                currency:
+                    context.currency ??
+                    null
+            }
+        );
+
+        publish(
+
+            EVENTS_MAP.APPROVED,
+
+            {
+
+                reference:
+                    context.reference,
+
+                pipeline:
+                    "transaction"
+            }
+        );
+
+        return createResult(
+
+            true,
+
+            null,
+
+            [
+                ...authorization.warnings,
+                ...replay.warnings
+            ],
+
+            {
+                contextReference:
+                    context.reference
+            }
+        );
+    }
+
+    /* ====================================================================
+       CLIENT-SIDE RISK ADVISORY
+    ==================================================================== */
+
+    function calculateRiskScore(
+        context = {}
+    ) {
+
+        let score =
+            0;
+
+        const reasons =
+            [];
+
+        /*
+         * Currency-neutral amount thresholds are deliberately NOT used.
+         * NGN/GBP/USD values are not directly comparable.
+         */
+
+        if (
+            !String(
+                context.beneficiary ??
+                context.recipient ??
+                ""
+            )
+            .trim()
+        ) {
+
+            score +=
+                10;
+
+            reasons.push(
+                "BENEFICIARY_NOT_SUPPLIED"
+            );
+        }
+
+        if (
+            context.meta
+                ?.newBeneficiary ===
+            true
+        ) {
+
+            score +=
+                20;
+
+            reasons.push(
+                "NEW_BENEFICIARY"
+            );
+        }
+
+        if (
+            context.meta
+                ?.crossBorder ===
+            true
+        ) {
+
+            score +=
+                10;
+
+            reasons.push(
+                "CROSS_BORDER"
+            );
+        }
+
+        if (
+            context.meta
+                ?.deviceChanged ===
+            true
+        ) {
+
+            score +=
+                20;
+
+            reasons.push(
+                "DEVICE_CHANGED"
+            );
+        }
+
+        if (
+            context.meta
+                ?.riskSignal ===
+            "HIGH"
+        ) {
+
+            score +=
+                50;
+
+            reasons.push(
+                "HIGH_RISK_SIGNAL"
+            );
+        }
+
+        return Object.freeze({
+
+            score,
+
+            level:
+                score >=
+                    70
+
+                    ? "HIGH"
+
+                    : score >=
+                        30
+
+                        ? "MEDIUM"
+
+                        : "LOW",
+
+            reasons:
+                Object.freeze(
+                    reasons
+                ),
+
+            authoritative:
+                false
+        });
+    }
+
+
+    function classifyRisk(
+        score
+    ) {
+
+        const numeric =
+            Number(
+                score
+            );
+
+        if (
+            !Number.isFinite(
+                numeric
+            ) ||
+            numeric <
+                0
+        ) {
+
+            return "UNKNOWN";
+        }
+
+        if (
+            numeric >=
+            70
+        ) {
+
+            return "HIGH";
+        }
+
+        if (
+            numeric >=
+            30
+        ) {
+
+            return "MEDIUM";
+        }
+
+        return "LOW";
+    }
+
+
+    function evaluateFraud(
+        context
+    ) {
+
+        const risk =
+            calculateRiskScore(
+                context
+            );
+
+        publish(
+
+            EVENTS_MAP.FRAUD,
+
+            {
+
+                reference:
                     context.reference,
 
                 score:
+                    risk.score,
 
-                    risk.score
+                level:
+                    risk.level,
 
+                authoritative:
+                    false
             }
-
         );
 
         return createResult(
 
-            false,
+            true,
 
-            "FRAUD_RISK",
+            null,
 
-            risk.reasons
-
-        );
-
-    }
-
-    if(
-
-        requiresStepUp(
-
-            risk.score
-
-        )
-
-    ){
-requestTransactionMFA(
-
-    context,
-
-    risk
-
-);
-       recordTransactionAudit(
-
-    "TRANSACTION_STEP_UP",
-
-    {
-
-        reference:
-
-            context.reference,
-
-        score:
-
-            risk.score,
-
-        level:
-
-            risk.level
-
-    }
-
-);
-        publish(
-
-            GUARD_EVENTS.WARNING,
+            [
+                "CLIENT_FRAUD_ASSESSMENT_ADVISORY_ONLY",
+                ...risk.reasons
+            ],
 
             {
 
-    reference:
+                riskScore:
+                    risk.score,
 
-        context.reference,
+                riskLevel:
+                    risk.level,
 
-    score:
+                authoritative:
+                    false
+            }
+        );
+    }
 
-        risk.score,
 
-    level:
+    function evaluateAML(
+        context
+    ) {
 
-        risk.level,
+        publish(
 
-    action:
+            EVENTS_MAP.AML,
 
-        "STEP_UP"
+            {
 
-}
+                reference:
+                    context.reference,
 
+                authoritative:
+                    false
+            }
         );
 
         return createResult(
 
-            false,
+            true,
 
-            "STEP_UP_REQUIRED",
+            null,
 
-            risk.reasons
+            [
+                "AML_PROVIDER_NOT_INTEGRATED"
+            ],
 
+            {
+                authoritative:
+                    false
+            }
         );
-
     }
 
-    return createResult(
 
-        true,
+    function liveRiskControlsAvailable() {
 
-        null,
+        return Boolean(
 
-        risk.reasons
+            GLOBAL
+                .PAY54_RISK_PROVIDER
+                ?.authoritative ===
+            true &&
 
-    );
-
-}
-
-/* ========================================================================
-   AML HOOK
-======================================================================== */
-
-function evaluateAML(
-
-    context
-
-){
-recordTransactionAudit(
-
-    "TRANSACTION_AML_CHECK",
-
-    {
-
-        reference:
-
-            context.reference
-
+            GLOBAL
+                .PAY54_AML_PROVIDER
+                ?.authoritative ===
+            true
+        );
     }
 
-);
-    publish(
+    /* ====================================================================
+       FINAL FINANCIAL PIPELINE
+    ==================================================================== */
 
-        GUARD_EVENTS.WARNING,
+    function evaluateTransaction(
+        transaction
+    ) {
 
-        {
+        if (
+            activePolicy.enabled !==
+                true
+        ) {
 
-            stage:
-
-                "aml",
-
-            reference:
-
-                context.reference
-
+            return createResult(
+                false,
+                "GUARD_DISABLED"
+            );
         }
 
-    );
+        const realMoneyMode =
+            CONFIG.get(
+                "environment.realMoneyMode"
+            ) ===
+            true;
 
-    return createResult(
+        /*
+         * Browser-only risk hooks cannot authorize real money.
+         */
+        if (
+            realMoneyMode &&
+            !liveRiskControlsAvailable()
+        ) {
 
-        true
+            recordTransactionAudit(
 
-    );
+                "TRANSACTION_BLOCKED",
 
-}
+                {
 
-/* ========================================================================
-   FINAL SECURITY PIPELINE
-======================================================================== */
+                    transactionId:
+                        transaction?.id ??
+                        null,
 
-function evaluateTransaction(
+                    reference:
+                        transaction
+                            ?.reference ??
+                        null,
 
-    transaction
+                    type:
+                        transaction?.type ??
+                        null,
 
-){
+                    currency:
+                        transaction
+                            ?.currency ??
+                        null,
 
-    const context =
+                    reason:
+                        "AUTHORITATIVE_RISK_CONTROLS_UNAVAILABLE"
+                }
+            );
 
-        createContext(
+            return createResult(
+                false,
+                "AUTHORITATIVE_RISK_CONTROLS_UNAVAILABLE"
+            );
+        }
 
-            sanitizeTransaction(
+        let context;
 
-                transaction
+        try {
 
+            context =
+                createContext(
+
+                    sanitizeTransaction(
+                        transaction
+                    )
+                );
+
+        } catch (
+            error
+        ) {
+
+            rememberError(
+                error
+            );
+
+            return createResult(
+                false,
+                "INVALID_TRANSACTION_STRUCTURE"
+            );
+        }
+
+        const authorization =
+            authorizeTransaction(
+                context
+            );
+
+        if (
+            !authorization.approved
+        ) {
+
+            recordTransactionAudit(
+
+                "TRANSACTION_REJECTED",
+
+                {
+
+                    transactionId:
+                        context.id ??
+                        null,
+
+                    reference:
+                        context.reference,
+
+                    type:
+                        context.type ??
+                        null,
+
+                    currency:
+                        context.currency ??
+                        null,
+
+                    reason:
+                        authorization.reason
+                }
+            );
+
+            return authorization;
+        }
+
+        const warnings = [
+
+            ...authorization.warnings
+        ];
+
+        if (
+            activePolicy.advisoryRiskChecks ===
+                true
+        ) {
+
+            const fraud =
+                evaluateFraud(
+                    context
+                );
+
+            const aml =
+                evaluateAML(
+                    context
+                );
+
+            warnings.push(
+                ...fraud.warnings,
+                ...aml.warnings
+            );
+        }
+
+        recordTransactionAudit(
+
+            "TRANSACTION_APPROVED",
+
+            {
+
+                transactionId:
+                    context.id ??
+                    null,
+
+                reference:
+                    context.reference,
+
+                type:
+                    context.type ??
+                    null,
+
+                currency:
+                    context.currency ??
+                    null,
+
+                riskLevel:
+                    calculateRiskScore(
+                        context
+                    ).level
+            }
+        );
+
+        publish(
+
+            EVENTS_MAP.APPROVED,
+
+            {
+
+                reference:
+                    context.reference,
+
+                pipeline:
+                    "final"
+            }
+        );
+
+        return createResult(
+
+            true,
+
+            null,
+
+            warnings,
+
+            {
+
+                contextReference:
+                    context.reference,
+
+                realMoneyMode,
+
+                authoritativeRiskControls:
+                    liveRiskControlsAvailable()
+            }
+        );
+    }
+
+    /* ====================================================================
+       LEGACY BOOLEAN COMPATIBILITY
+       Used by dashboard-core.js, cards.js and wallet.js.
+    ==================================================================== */
+
+    function validate(
+        request = {}
+    ) {
+
+        if (
+            activePolicy.enabled !==
+                true
+        ) {
+
+            return false;
+        }
+
+        const session =
+            validateSession();
+
+        if (
+            !session.approved
+        ) {
+
+            return false;
+        }
+
+        if (
+            !request ||
+            typeof request !==
+                "object" ||
+            Array.isArray(
+                request
             )
+        ) {
 
-        );
-
-    const authorization =
-
-        authorizeTransaction(
-
-            context
-
-        );
-
-    if(
-
-        !authorization.approved
-
-    ){
-
-        return authorization;
-
-    }
-
-    const fraud =
-
-        evaluateFraud(
-
-            context
-
-        );
-
-    if(
-
-        !fraud.approved
-
-    ){
-
-        return fraud;
-
-    }
-
-    const aml =
-
-        evaluateAML(
-
-            context
-
-        );
-
-    if(
-
-        !aml.approved
-
-    ){
-
-        return aml;
-
-    }
-
-    publish(
-
-        GUARD_EVENTS.APPROVED,
-
-        {
-
-            reference:
-
-                context.reference,
-
-            pipeline:
-
-                "risk"
-
+            return false;
         }
 
-    );
+        const type =
+            String(
+                request.type ??
+                ""
+            )
+            .trim();
 
-    return createResult(
+        if (
+            !type
+        ) {
 
-        true,
-
-        null,
-
-        fraud.warnings
-
-    );
-
-}
-  /* ========================================================================
-   POLICY MANAGEMENT
-======================================================================== */
-
-let activePolicy = {
-
-    ...DEFAULT_POLICY
-
-};
-
-function getPolicy(){
-
-    return Object.freeze({
-
-        ...activePolicy
-
-    });
-
-}
-
-function updatePolicy(
-
-    updates = {}
-
-){
-
-    activePolicy = {
-
-        ...activePolicy,
-
-        ...updates
-
-    };
-
-    publish(
-
-        GUARD_EVENTS.WARNING,
-
-        {
-
-            stage:
-
-                "policy",
-
-            updated:
-
-                Object.keys(
-
-                    updates
-
-                )
-
+            return false;
         }
 
-    );
+        const payload =
+            validatePayload(
+                request.payload ??
+                {}
+            );
 
-    return getPolicy();
+        if (
+            !payload.approved
+        ) {
 
-}
-
-/* ========================================================================
-   SECURITY STATUS
-======================================================================== */
-
-function status(){
-
-    return Object.freeze({
-
-        version:
-
-            VERSION,
-
-        policy:
-
-            getPolicy(),
-
-        duplicateCache:
-
-            TRANSACTION_CACHE.size,
-
-       auditEntries:
-
-    getTransactionAudit()
-
-        .length, 
-       velocityCache:
-
-            VELOCITY_CACHE.size,
-       mfaAvailable:
-
-    Boolean(
-
-        SESSION_MANAGER &&
-
-        typeof SESSION_MANAGER.requestMFA === "function"
-
-    ),
-
-    });
-
-}
-
-/* ========================================================================
-   SELF TEST
-======================================================================== */
-
-function selfTest(){
-
-    const report = {
-
-        session:
-
-            Boolean(
-
-                SESSION
-
-            ),
-
-        validator:
-
-            Boolean(
-
-                VALIDATOR
-
-            ),
-
-        sanitizer:
-
-            Boolean(
-
-                SANITIZER
-
-            ),
-
-        events:
-
-            Boolean(
-
-                EVENTS
-
-            ),
-      sessionMFA:
-
-    Boolean(
-
-        SESSION_MANAGER &&
-
-        typeof SESSION_MANAGER.requestMFA === "function"
-
-    ), 
-
-    };
-
-    publish(
-
-        GUARD_EVENTS.WARNING,
-
-        {
-
-            stage:
-
-                "self-test"
-
+            return false;
         }
-
-    );
-
-    return Object.freeze(
-
-        report
-
-    );
-
-}
-
-/* ========================================================================
-   GUARD REGISTRY
-======================================================================== */
-
-const GUARD = Object.freeze({
-
-    validateSession,
-    validateWallet,
-    validateAmount,
-    validateCurrency,
-
-    sanitizeTransaction,
-
-    authorize,
-    authorizeTransaction,
-    evaluateTransaction,
-
-    detectDuplicate,
-    checkVelocity,
-    preventReplay,
-
-    calculateRiskScore,
-    classifyRisk,
-    evaluateFraud,
-    evaluateAML,
-
-    getPolicy,
-    updatePolicy,
-
-    status,
-    selfTest
-
-});
-
-/* ========================================================================
-   DISPATCHER
-======================================================================== */
-
-function run(
-
-    operation,
-
-    ...args
-
-){
-
-    const fn =
-
-        GUARD[operation];
-
-    if(
-
-        typeof fn !== "function"
-
-    ){
 
         publish(
 
-            GUARD_EVENTS.WARNING,
+            EVENTS_MAP.APPROVED,
 
             {
 
-                operation
+                stage:
+                    "legacy-validate",
 
+                type
             }
-
         );
 
-        return createResult(
-
-            false,
-
-            "UNKNOWN_OPERATION"
-
-        );
-
+        return true;
     }
 
-    return fn(
+    /* ====================================================================
+       STATUS / SELF TEST
+    ==================================================================== */
 
+    function status() {
+
+        return Object.freeze({
+
+            id:
+                MODULE_ID,
+
+            version:
+                VERSION,
+
+            policy:
+                getPolicy(),
+
+            duplicateCache:
+                duplicateCache.size,
+
+            velocityCache:
+                velocityCache.size,
+
+            auditEntries:
+                getTransactionAudit()
+                    .length,
+
+            sessionAuthenticated:
+                SESSION
+                    .isAuthenticated() ===
+                true,
+
+            realMoneyMode:
+                CONFIG.get(
+                    "environment.realMoneyMode"
+                ) ===
+                true,
+
+            authoritativeRiskControls:
+                liveRiskControlsAvailable(),
+
+            clientRiskMode:
+                "ADVISORY_ONLY"
+        });
+    }
+
+
+    function selfTest() {
+
+        return Object.freeze({
+
+            session:
+                Boolean(
+                    SESSION
+                ),
+
+            secureStorage:
+                STORAGE
+                    .health
+                    ?.()
+                    ?.healthy ===
+                true,
+
+            validator:
+                VALIDATOR
+                    .health
+                    ?.()
+                    ?.healthy ===
+                true,
+
+            sanitizer:
+                SANITIZER
+                    .health
+                    ?.()
+                    ?.healthy ===
+                true,
+
+            registry:
+                Boolean(
+                    REGISTRY
+                ),
+
+            events:
+                Boolean(
+                    EVENTS
+                ),
+
+            validateCompatibility:
+                typeof validate ===
+                "function",
+
+            evaluateTransactionAvailable:
+                typeof evaluateTransaction ===
+                "function",
+
+            realMoneyMode:
+                CONFIG.get(
+                    "environment.realMoneyMode"
+                ) ===
+                true,
+
+            authoritativeRiskControls:
+                liveRiskControlsAvailable()
+        });
+    }
+
+    /* ====================================================================
+       OPERATION REGISTRY
+    ==================================================================== */
+
+    const OPERATIONS =
+        Object.freeze({
+
+            validate,
+
+            validateSession,
+
+            validateWallet,
+
+            validateAmount,
+
+            validateCurrency,
+
+            validatePayload,
+
+            sanitizeTransaction,
+
+            authorize,
+
+            authorizeTransaction,
+
+            evaluateTransaction,
+
+            detectDuplicate,
+
+            checkVelocity,
+
+            preventReplay,
+
+            calculateRiskScore,
+
+            classifyRisk,
+
+            evaluateFraud,
+
+            evaluateAML,
+
+            getPolicy,
+
+            updatePolicy,
+
+            status,
+
+            selfTest
+        });
+
+
+    function run(
+        operation,
         ...args
+    ) {
 
-    );
+        const fn =
+            OPERATIONS[
+                operation
+            ];
 
-}
+        if (
+            typeof fn !==
+                "function"
+        ) {
 
-function has(
+            return createResult(
+                false,
+                "UNKNOWN_OPERATION"
+            );
+        }
 
-    operation
+        return fn(
+            ...args
+        );
+    }
 
-){
 
-    return Object.prototype.hasOwnProperty.call(
-
-        GUARD,
-
+    function has(
         operation
+    ) {
 
+        return Object.prototype
+            .hasOwnProperty
+            .call(
+                OPERATIONS,
+                operation
+            );
+    }
+
+
+    function list() {
+
+        return Object.keys(
+            OPERATIONS
+        )
+        .sort();
+    }
+
+    /* ====================================================================
+       HEALTH / INTEGRITY
+    ==================================================================== */
+
+    function verifyIntegrity() {
+
+        const errors =
+            [];
+
+        if (
+            SESSION
+                .health
+                ?.()
+                ?.healthy !==
+            true
+        ) {
+
+            errors.push(
+                "Session Manager is unhealthy."
+            );
+        }
+
+        if (
+            STORAGE
+                .health
+                ?.()
+                ?.healthy !==
+            true
+        ) {
+
+            errors.push(
+                "Secure Storage is unhealthy."
+            );
+        }
+
+        if (
+            VALIDATOR
+                .health
+                ?.()
+                ?.healthy !==
+            true
+        ) {
+
+            errors.push(
+                "Validator is unhealthy."
+            );
+        }
+
+        if (
+            SANITIZER
+                .health
+                ?.()
+                ?.healthy !==
+            true
+        ) {
+
+            errors.push(
+                "Sanitizer is unhealthy."
+            );
+        }
+
+        if (
+            typeof validate !==
+                "function"
+        ) {
+
+            errors.push(
+                "Legacy validate compatibility API is missing."
+            );
+        }
+
+        if (
+            typeof evaluateTransaction !==
+                "function"
+        ) {
+
+            errors.push(
+                "Financial evaluation API is missing."
+            );
+        }
+
+        return Object.freeze({
+
+            ok:
+                errors.length ===
+                0,
+
+            status:
+                errors.length ===
+                    0
+
+                    ? "HEALTHY"
+
+                    : "DEGRADED",
+
+            errors:
+                Object.freeze(
+                    errors
+                ),
+
+            checkedAt:
+                nowISO()
+        });
+    }
+
+
+    function health() {
+
+        const integrity =
+            verifyIntegrity();
+
+        return Object.freeze({
+
+            ok:
+                integrity.ok,
+
+            healthy:
+                integrity.ok,
+
+            status:
+                integrity.status,
+
+            id:
+                MODULE_ID,
+
+            name:
+                MODULE_NAME,
+
+            version:
+                VERSION,
+
+            file:
+                FILE_PATH,
+
+            startedAt:
+                STARTED_AT,
+
+            ready:
+                state.ready,
+
+            readyAt:
+                state.readyAt,
+
+            evaluations:
+                state.evaluations,
+
+            approvals:
+                state.approvals,
+
+            rejections:
+                state.rejections,
+
+            duplicates:
+                state.duplicates,
+
+            velocityBlocks:
+                state.velocityBlocks,
+
+            realMoneyMode:
+                CONFIG.get(
+                    "environment.realMoneyMode"
+                ) ===
+                true,
+
+            authoritativeRiskControls:
+                liveRiskControlsAvailable(),
+
+            clientRiskMode:
+                "ADVISORY_ONLY",
+
+            auditEntries:
+                getTransactionAudit()
+                    .length,
+
+            lastError:
+                state.lastError,
+
+            integrity
+        });
+    }
+
+    /* ====================================================================
+       PUBLIC API
+    ==================================================================== */
+
+    const api =
+        Object.freeze({
+
+            id:
+                MODULE_ID,
+
+            name:
+                MODULE_NAME,
+
+            version:
+                VERSION,
+
+            file:
+                FILE_PATH,
+
+            run,
+
+            has,
+
+            list,
+
+            operations:
+                OPERATIONS,
+
+            validate,
+
+            validateSession,
+
+            validateWallet,
+
+            validateAmount,
+
+            validateCurrency,
+
+            validatePayload,
+
+            sanitizeTransaction,
+
+            authorize,
+
+            authorizeTransaction,
+
+            evaluateTransaction,
+
+            detectDuplicate,
+
+            checkVelocity,
+
+            preventReplay,
+
+            calculateRiskScore,
+
+            classifyRisk,
+
+            evaluateFraud,
+
+            evaluateAML,
+
+            getTransactionAudit,
+
+            getPolicy,
+
+            updatePolicy,
+
+            status,
+
+            selfTest,
+
+            verifyIntegrity,
+
+            health
+        });
+
+    /* ====================================================================
+       GLOBAL EXPOSURE
+    ==================================================================== */
+
+    Object.defineProperty(
+
+        GLOBAL.PAY54_SECURITY,
+
+        "transactionGuard",
+
+        {
+
+            value:
+                api,
+
+            writable:
+                false,
+
+            configurable:
+                false,
+
+            enumerable:
+                true
+        }
     );
 
-}
+    /* ====================================================================
+       REGISTRY
+    ==================================================================== */
 
-function list(){
+    REGISTRY.registerModule(
 
-    return Object.keys(
+        MODULE_ID,
 
-        GUARD
+        Object.freeze({
 
-    ).sort();
+            id:
+                MODULE_ID,
 
-}
+            name:
+                MODULE_NAME,
 
-/* ========================================================================
-   PUBLIC API
-======================================================================== */
+            version:
+                VERSION,
 
-const api = Object.freeze({
+            type:
+                "security",
 
-    version:
+            layer:
+                "layer.security",
 
-        VERSION,
-
-    run,
-
-    has,
-
-    list,
-
-    status,
-
-    selfTest,
-   getTransactionAudit,
-    getPolicy,
-    updatePolicy,
-
-    operations:
-
-        GUARD,
-
-    validateSession,
-    validateWallet,
-    validateAmount,
-    validateCurrency,
-
-    sanitizeTransaction,
-
-    authorize,
-    authorizeTransaction,
-    evaluateTransaction,
-
-    detectDuplicate,
-    checkVelocity,
-    preventReplay,
-
-    calculateRiskScore,
-    classifyRisk,
-    evaluateFraud,
-    evaluateAML
-
-});
-
-/* ========================================================================
-   PAY54 SECURITY ROOT
-======================================================================== */
-
-window.PAY54_SECURITY =
-window.PAY54_SECURITY || {};
-
-Object.defineProperty(
-
-    window.PAY54_SECURITY,
-
-    "transactionGuard",
-
-    {
-
-        value:
+            path:
+                FILE_PATH,
 
             api,
 
-        writable:
+            health
+        })
+    );
 
-            false,
+    /* ====================================================================
+       READY
+    ==================================================================== */
 
-        configurable:
+    state.ready =
+        true;
 
-            false,
+    state.readyAt =
+        nowISO();
 
-        enumerable:
+    publish(
 
-            true
+        EVENTS_MAP.READY,
 
-    }
+        {
 
-);
+            version:
+                VERSION,
 
-/* ========================================================================
-   STARTUP
-======================================================================== */
+            readyAt:
+                state.readyAt,
 
-publish(
+            realMoneyMode:
+                CONFIG.get(
+                    "environment.realMoneyMode"
+                ) ===
+                true
+        }
+    );
 
-    GUARD_EVENTS.APPROVED,
-
-    {
-
-        module:
-
-            "transaction-guard",
-
-        version:
-
-            VERSION
-
-    }
-
-);
-
-console.info(
-
-    "[PAY54]",
-
-    "Enterprise Transaction Guard",
-
-    VERSION,
-
-    "loaded"
-
-);
-
-/* ========================================================================
-   MODULE COMPLETE
-======================================================================== */
+    console.info(
+        `[PAY54_GUARD] ${MODULE_NAME} v${VERSION} ready.`
+    );
 
 })();
