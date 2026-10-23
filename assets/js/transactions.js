@@ -7972,7 +7972,24 @@ function renderAlerts(){
       </div>
 
     `).join("");
+container
+  .querySelectorAll(
+    '[data-feed-action="open-alert"]'
+  )
+  .forEach(button => {
 
+    button.addEventListener(
+      "click",
+      event => {
+
+        window.openAlertItem?.(
+          event.currentTarget
+        );
+
+      }
+    );
+
+  });
 }
 
 /* =========================================
@@ -7999,15 +8016,33 @@ function renderNews(){
           ${item.summary}
         </div>
 
-        <button
-          class="feed-open-btn"
-          onclick="openNewsItem(this)"
-        >
-          Open
-        </button>
+      <button
+  class="feed-open-btn"
+  type="button"
+  data-feed-action="open-news"
+>
+  Open
+</button>
 
       </div>
 
     `).join("");
+container
+  .querySelectorAll(
+    '[data-feed-action="open-news"]'
+  )
+  .forEach(button => {
 
+    button.addEventListener(
+      "click",
+      event => {
+
+        window.openNewsItem?.(
+          event.currentTarget
+        );
+
+      }
+    );
+
+  });
 }
