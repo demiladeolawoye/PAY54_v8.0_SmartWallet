@@ -1377,11 +1377,64 @@ body.light .available-balance{
   letter-spacing:0.3px;
   font-size:14px;
 }
-/* =========================
-   MODAL SCROLL LOCK (v8.2 FIX)
-========================= */
-body.modal-open {
-  overflow: hidden;
+/* ==========================================================
+   PAY54 ENTERPRISE MODAL SYSTEM
+   CSP-SAFE STATIC STYLES
+========================================================== */
+
+.p54-modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:grid;
+  place-items:center;
+  z-index:9999;
+  padding:18px;
+}
+
+.p54-modal{
+  width:min(560px,100%);
+  max-height:90vh;
+  overflow:auto;
+  border-radius:18px;
+  background:#0f172a;
+  color:#fff;
+}
+
+body.light .p54-modal{
+  background:#ffffff;
+  color:#0f172a;
+}
+
+.p54-modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.p54-modal-title{
+  font-size:16px;
+  font-weight:800;
+}
+
+.p54-x{
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+}
+
+.p54-modal-body{
+  padding:16px;
+}
+
+/* CSP-safe scroll lock */
+html.modal-open,
+body.modal-open{
+  overflow:hidden;
 }
 /* =========================
    🔥 PAY54 PREMIUM SECTION SPACING (FINAL)
