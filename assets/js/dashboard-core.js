@@ -1836,12 +1836,13 @@ window.renderAlerts = function(){
 
         </div>
 
-        <button
-          class="feed-open-btn"
-          onclick="openAlertItem(this)"
-        >
-          Open
-        </button>
+       <button
+  class="feed-open-btn"
+  type="button"
+  data-feed-action="open-alert"
+>
+  Open
+</button>
 
       </div>
 
@@ -1892,6 +1893,24 @@ window.renderAlerts = function(){
 
   container.innerHTML =
     alertHtml + requestHtml;
+   container
+  .querySelectorAll(
+    '[data-feed-action="open-alert"]'
+  )
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      event => {
+
+        window.openAlertItem(
+          event.currentTarget
+        );
+
+      }
+    );
+
+  });
 
   if(
     typeof bindRequestButtons ===
