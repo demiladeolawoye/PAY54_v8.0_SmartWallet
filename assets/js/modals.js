@@ -263,14 +263,17 @@ if(typeof onMount === "function"){
   }
 
 }
-
-return{
-
+return {
   close
-
 };
 
-} /window.closeAllModals = function(){
+} // End openModal()
+
+/* =========================================
+   CLOSE ALL MODALS
+========================================= */
+
+window.closeAllModals = function(){
 
   document
     .querySelectorAll(
@@ -289,7 +292,7 @@ return{
     "modal-open"
   );
 
-};/ End openModal()
+};
 
 /* =========================================
    GLOBAL LEGACY SUPPORT
@@ -298,12 +301,8 @@ return{
 window.openModal =
 openModal;
 
-
-
-return{
-
+return {
   openModal
-
 };
 
 })();
