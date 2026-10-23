@@ -7961,12 +7961,13 @@ function renderAlerts(){
           ${alert.message}
         </div>
 
-        <button
-          class="feed-open-btn"
-          onclick="openAlertItem(this)"
-        >
-          Open
-        </button>
+       <button
+  class="feed-open-btn"
+  type="button"
+  data-feed-action="open-alert"
+>
+  Open
+</button>
 
       </div>
 
