@@ -124,13 +124,13 @@ window.PAY54_MODALS = (function(){
 
   backdrop.remove();
 
-  document.body.classList.remove(
-    "modal-open"
-  );
+document.body.classList.remove(
+  "modal-open"
+);
 
-  document.body.style.overflow = "";
-
-  document.documentElement.style.overflow = "";
+document.documentElement.classList.remove(
+  "modal-open"
+);
 
   document.removeEventListener(
 
