@@ -79,75 +79,8 @@ function publishModalEvent(
 
 window.PAY54_MODALS = (function(){
 
-  function ensureModalStyles(){
-
-    if(document.getElementById("pay54-modal-style")) return;
-
-    const style = document.createElement("style");
-
-    style.id = "pay54-modal-style";
-
-    style.textContent = `
-
-      .p54-modal-backdrop{
-        position:fixed;
-        inset:0;
-        background:rgba(0,0,0,.55);
-        display:grid;
-        place-items:center;
-        z-index:9999;
-        padding:18px;
-      }
-
-      .p54-modal{
-        width:min(560px,100%);
-        max-height:90vh;
-        overflow:auto;
-        border-radius:18px;
-        background:#0f172a;
-        color:#fff;
-        overflow:hidden;
-      }
-
-      body.light .p54-modal{
-        background:#ffffff;
-        color:#0f172a;
-      }
-
-      .p54-modal-head{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        padding:14px 16px;
-        border-bottom:1px solid rgba(255,255,255,.1);
-      }
-
-      .p54-modal-title{
-        font-size:16px;
-        font-weight:800;
-      }
-
-      .p54-x{
-        width:36px;
-        height:36px;
-        border-radius:999px;
-        border:none;
-        cursor:pointer;
-      }
-
-      .p54-modal-body{
-        padding:16px;
-      }
-
-    `;
-
-    document.head.appendChild(style);
-
-  }
-
+  
   function openModal({title="", bodyHTML="", onMount}){
-
-    ensureModalStyles();
 
     const backdrop = document.createElement("div");
 
