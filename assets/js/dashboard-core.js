@@ -2055,7 +2055,24 @@ window.renderNews = function(){
     </div>
 
   `).join("");
+container
+  .querySelectorAll(
+    '[data-feed-action="open-news"]'
+  )
+  .forEach(button => {
 
+    button.addEventListener(
+      "click",
+      event => {
+
+        window.openNewsItem(
+          event.currentTarget
+        );
+
+      }
+    );
+
+  });
 };
 
 /* =========================================
