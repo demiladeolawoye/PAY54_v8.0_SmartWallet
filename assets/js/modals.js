@@ -195,7 +195,13 @@ function escClose(e){
 
     document.addEventListener("keydown", escClose);
 
-    document.body.classList.add("modal-open");
+    document.body.classList.add(
+  "modal-open"
+);
+
+document.documentElement.classList.add(
+  "modal-open"
+);
 
   document.body.appendChild(
   backdrop
