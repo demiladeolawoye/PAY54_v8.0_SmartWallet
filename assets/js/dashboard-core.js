@@ -2044,12 +2044,13 @@ window.renderNews = function(){
 
       </div>
 
-      <button
-        class="feed-open-btn"
-        onclick="openNewsItem(this)"
-      >
-        Open
-      </button>
+   <button
+  class="feed-open-btn"
+  type="button"
+  data-feed-action="open-news"
+>
+  Open
+</button>
 
     </div>
 
