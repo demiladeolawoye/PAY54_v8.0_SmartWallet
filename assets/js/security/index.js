@@ -56,11 +56,19 @@ window.PAY54_EVENTS || null;
 const PLATFORM_REGISTRY =
 window.PAY54_REGISTRY || null;
 
-window.PAY54_SECURITY =
-window.PAY54_SECURITY || {};
-
 const SECURITY =
 window.PAY54_SECURITY;
+
+if(
+    !SECURITY ||
+    typeof SECURITY !== "object"
+){
+
+    throw new Error(
+        "[PAY54_SECURITY] PAY54 Security namespace must exist before Security Bootstrap loads."
+    );
+
+}
 
 if(
     !PLATFORM_REGISTRY ||
