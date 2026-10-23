@@ -270,7 +270,26 @@ return{
 
 };
 
-} // End openModal()
+} /window.closeAllModals = function(){
+
+  document
+    .querySelectorAll(
+      ".p54-modal-backdrop"
+    )
+    .forEach(
+      element =>
+        element.remove()
+    );
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+
+  document.documentElement.classList.remove(
+    "modal-open"
+  );
+
+};/ End openModal()
 
 /* =========================================
    GLOBAL LEGACY SUPPORT
@@ -279,16 +298,7 @@ return{
 window.openModal =
 openModal;
 
-window.closeAllModals =
-function(){
 
-  document
-    .querySelectorAll(
-      ".p54-modal-backdrop"
-    )
-    .forEach(el=>el.remove());
-
-};
 
 return{
 
