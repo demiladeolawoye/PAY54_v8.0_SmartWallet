@@ -77,9 +77,6 @@
     const MODULE_ID =
         "contacts.ui";
 
-    const STYLE_ID =
-        "pay54-contacts-management-styles";
-
     const SERVICE =
         GLOBAL.PAY54_CONTACTS_SERVICE;
 
