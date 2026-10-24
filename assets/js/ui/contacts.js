@@ -1254,8 +1254,6 @@
         onChanged = null
     ) {
 
-        ensureStyles();
-
         const contact =
             typeof contactOrId ===
             "object"
