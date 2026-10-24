@@ -1723,8 +1723,6 @@
         options = {}
     ) {
 
-        ensureStyles();
-
         const health =
             SERVICE.getHealth();
 
