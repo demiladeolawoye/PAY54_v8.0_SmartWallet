@@ -742,8 +742,6 @@
         onSaved = null
     ) {
 
-        ensureStyles();
-
         const editing =
             Boolean(
                 contact &&
