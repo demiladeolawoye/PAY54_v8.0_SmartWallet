@@ -734,216 +734,160 @@
 
       bodyHTML: `
 
+  <div
+    class="p54-receipt"
+    role="document"
+    aria-label="PAY54 transaction receipt"
+  >
+
+    <div
+      class="p54-receipt-head"
+    >
+
+      <div
+        class="p54-receipt-success-icon"
+        aria-hidden="true"
+      >
+        ✓
+      </div>
+
+      <div
+        class="p54-receipt-success-title"
+      >
+        Payment Successful
+      </div>
+
+      <div
+        class="muted p54-receipt-success-sub"
+      >
+        ${escapeHtml(
+          title || "Transaction"
+        )}
+      </div>
+
+    </div>
+
+    <div
+      class="p54-divider"
+    ></div>
+
+    <div
+      class="p54-receipt-summary"
+    >
+
+      <div>
+
         <div
-          class="p54-receipt"
-          role="document"
-          aria-label="PAY54 transaction receipt"
+          class="muted p54-receipt-label"
         >
-
-          <div
-            style="
-              text-align:center;
-              margin-bottom:16px;
-            "
-          >
-
-            <div
-              aria-hidden="true"
-              style="
-                width:52px;
-                height:52px;
-                margin:0 auto 10px;
-                border-radius:999px;
-                display:grid;
-                place-items:center;
-                font-size:24px;
-                font-weight:900;
-                background:rgba(34,197,94,.14);
-              "
-            >
-              ✓
-            </div>
-
-            <div
-              style="
-                font-size:18px;
-                font-weight:900;
-              "
-            >
-              Payment Successful
-            </div>
-
-            <div
-              class="muted"
-              style="
-                margin-top:5px;
-                font-size:13px;
-              "
-            >
-              ${escapeHtml(
-                title || "Transaction"
-              )}
-            </div>
-
-          </div>
-
-          <div
-            class="p54-divider"
-          ></div>
-
-          <div
-            style="
-              display:grid;
-              gap:10px;
-            "
-          >
-
-            <div>
-
-              <div
-                class="muted"
-                style="
-                  font-size:12px;
-                "
-              >
-                Amount
-              </div>
-
-              <div
-                style="
-                  margin-top:2px;
-                  font-size:20px;
-                  font-weight:900;
-                "
-              >
-                ${escapeHtml(
-                  formatMoney(
-                    transactionCurrency,
-                    Math.abs(
-                      transactionAmount
-                    )
-                  )
-                )}
-              </div>
-
-            </div>
-
-            <div>
-
-              <div
-                class="muted"
-                style="
-                  font-size:12px;
-                "
-              >
-                Transaction ID
-              </div>
-
-              <div
-                style="
-                  margin-top:2px;
-                  font-size:13px;
-                  font-weight:800;
-                  overflow-wrap:anywhere;
-                "
-              >
-                ${escapeHtml(
-                  tx.id
-                )}
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="p54-divider"
-          ></div>
-
-          <pre
-            style="
-              margin:0;
-              white-space:pre-wrap;
-              overflow-wrap:anywhere;
-              font-family:
-                ui-monospace,
-                SFMono-Regular,
-                Menlo,
-                Monaco,
-                Consolas,
-                monospace;
-              font-size:12px;
-              line-height:1.6;
-            "
-          >${escapeHtml(
-            receiptText
-          )}</pre>
-
-          <div
-            class="p54-divider"
-          ></div>
-
-          <div
-            style="
-              font-size:12px;
-            "
-          >
-
-            <a
-              href="${escapeHtml(
-                joinUrl
-              )}"
-              style="
-                font-weight:900;
-                text-decoration:underline;
-              "
-            >
-              Join PAY54 — Earn rewards
-            </a>
-
-          </div>
-
+          Amount
         </div>
 
         <div
-          class="p54-actions"
+          class="p54-receipt-amount"
         >
-
-          <button
-            class="p54-btn"
-            type="button"
-            id="copyRcpt"
-          >
-            Copy
-          </button>
-
-          <button
-            class="p54-btn"
-            type="button"
-            id="waRcpt"
-          >
-            WhatsApp
-          </button>
-
-          <button
-            class="p54-btn"
-            type="button"
-            id="againRcpt"
-          >
-            Make Another Payment
-          </button>
-
-          <button
-            class="p54-btn primary"
-            type="button"
-            id="doneRcpt"
-          >
-            Close
-          </button>
-
+          ${escapeHtml(
+            formatMoney(
+              transactionCurrency,
+              Math.abs(
+                transactionAmount
+              )
+            )
+          )}
         </div>
 
-      `,
+      </div>
+
+      <div>
+
+        <div
+          class="muted p54-receipt-label"
+        >
+          Transaction ID
+        </div>
+
+        <div
+          class="p54-receipt-transaction-id"
+        >
+          ${escapeHtml(
+            tx.id
+          )}
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      class="p54-divider"
+    ></div>
+
+    <pre
+      class="p54-receipt-text"
+    >${escapeHtml(
+      receiptText
+    )}</pre>
+
+    <div
+      class="p54-divider"
+    ></div>
+
+    <div
+      class="p54-receipt-referral"
+    >
+
+      <a
+        class="p54-receipt-referral-link"
+        href="${escapeHtml(
+          joinUrl
+        )}"
+      >
+        Join PAY54 — Earn rewards
+      </a>
+
+    </div>
+
+  </div>
+
+  <div
+    class="p54-actions"
+  >
+
+    <button
+      class="p54-btn"
+      type="button"
+      id="copyRcpt"
+    >
+      Copy
+    </button>
+
+    <button
+      class="p54-btn"
+      type="button"
+      id="waRcpt"
+    >
+      WhatsApp
+    </button>
+
+    <button
+      class="p54-btn"
+      type="button"
+      id="againRcpt"
+    >
+      Make Another Payment
+    </button>
+
+    <button
+      class="p54-btn primary"
+      type="button"
+      id="doneRcpt"
+    >
+      Close
+    </button>
+
+  </div>
+
+`,
 
       onMount: ({
         modal,
