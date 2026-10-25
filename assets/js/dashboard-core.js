@@ -2123,11 +2123,10 @@ window.PAY54_UI.openAgent = function(){
   placeholder="Phone number"
 >
 
-          <select
-            id="agentBusiness"
-            class="p54-input"
-            style="margin-top:12px"
-          >
+         <select
+  id="agentBusiness"
+  class="p54-input p54-dashboard-field-spaced"
+>
             <option value="">
               Select business type
             </option>
