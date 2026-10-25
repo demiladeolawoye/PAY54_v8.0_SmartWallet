@@ -3977,10 +3977,7 @@ window.PAY54_UI.openSavings = function(){
 
         <div class="p54-form">
 
-          <div style="
-            text-align:center;
-            margin-bottom:18px;
-          ">
+         <div class="p54-savings-goal-summary">
 
             <div class="label">
               Saved Amount
