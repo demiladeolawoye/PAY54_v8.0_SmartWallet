@@ -17,37 +17,26 @@ function showToast(message = "Done"){
 
   if(!container){
 
-    container = document.createElement("div");
-
-    container.id = "toastContainer";
-
-    container.style.position = "fixed";
-    container.style.top = "20px";
-    container.style.right = "20px";
-    container.style.zIndex = "99999";
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-    container.style.gap = "10px";
-
-    document.body.appendChild(container);
-
-  }
-
-  const toast =
+  container =
     document.createElement("div");
 
-  toast.className = "p54-toast";
+  container.id =
+    "toastContainer";
 
-  toast.style.padding = "14px 18px";
-  toast.style.borderRadius = "14px";
-  toast.style.background =
-    "linear-gradient(135deg,#2563eb,#1d4ed8)";
-  toast.style.color = "#fff";
-  toast.style.fontWeight = "800";
-  toast.style.boxShadow =
-    "0 10px 30px rgba(0,0,0,.35)";
-  toast.style.animation =
-    "fadeIn .25s ease";
+  container.className =
+    "p54-toast-container--fallback";
+
+  document.body.appendChild(
+    container
+  );
+
+}
+
+  const toast =
+  document.createElement("div");
+
+toast.className =
+  "p54-toast p54-toast--ui-engine";
 
   toast.textContent = message;
 
@@ -55,16 +44,17 @@ function showToast(message = "Done"){
 
   setTimeout(()=>{
 
-    toast.style.opacity = "0";
+  toast.classList.add(
+    "is-exiting"
+  );
 
-    toast.style.transform =
-      "translateY(-6px)";
+  setTimeout(()=>{
 
-    setTimeout(()=>{
-      toast.remove();
-    },250);
+    toast.remove();
 
-  },2500);
+  },250);
+
+},2500);
 
 }
 
