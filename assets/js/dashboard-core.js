@@ -181,8 +181,7 @@ class="p54-input"
 
 <button
 id="createWalletBtn"
-class="btn primary"
-style="width:100%;margin-top:15px"
+class="btn primary p54-dashboard-full-action"
 >
 
 Create Wallet
