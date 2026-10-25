@@ -2540,7 +2540,7 @@ data-type="fx"
 
 <div
 id="tradeResults"
-style="margin-top:20px"
+class="p54-market-results"
 ></div>
 
 `,
