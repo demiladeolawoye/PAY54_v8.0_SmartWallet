@@ -4338,3 +4338,49 @@ body:not(.light) .p54-contacts-empty{
     }
 
 }
+/* ==========================================================
+   PAY54 UI ENGINE TOAST
+   CSP-SAFE STATIC STYLES
+========================================================== */
+
+/* Fallback container created only when #toastContainer
+   is missing from the page */
+#toastContainer.p54-toast-container--fallback{
+    position:fixed;
+    top:20px;
+    right:20px;
+    bottom:auto;
+    left:auto;
+    transform:none;
+    z-index:99999;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+/* UI Engine toast presentation */
+.p54-toast.p54-toast--ui-engine{
+    padding:14px 18px;
+    border-radius:14px;
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #1d4ed8
+        );
+    color:#fff;
+    font-weight:800;
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.35);
+    animation:
+        fadeIn .25s ease;
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
+}
+
+/* Toast dismissal state */
+.p54-toast.p54-toast--ui-engine.is-exiting{
+    opacity:0;
+    transform:translateY(-6px);
+}
