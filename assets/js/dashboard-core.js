@@ -3267,11 +3267,10 @@ window.PAY54_UI.openBills = function(){
           </select>
 
           <input
-            id="billTarget"
-            class="p54-input"
-            placeholder="Phone / Meter / Smartcard"
-            style="margin-top:12px"
-          >
+  id="billTarget"
+  class="p54-input p54-dashboard-field-spaced"
+  placeholder="Phone / Meter / Smartcard"
+>
 
           <input
             id="billAmount"
