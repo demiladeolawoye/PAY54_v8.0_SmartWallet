@@ -2938,7 +2938,7 @@ merchant.fee
 
 <div class="checkout-row">
 <span>Discount</span>
-<strong style="color:#22c55e">
+<strong class="p54-positive-text">
 -${ledger.moneyFmt(
 merchant.currency,
 merchant.discount
