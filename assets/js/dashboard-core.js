@@ -1116,9 +1116,9 @@ class="p54-input"
 
 </div>
 
-<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-
 <div class="p54-history-quick-filters">
+
+<button class="btn ghost txQuickFilter" data-filter="today">
 Today
 </button>
 
