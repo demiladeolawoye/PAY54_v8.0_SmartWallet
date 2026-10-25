@@ -168,6 +168,33 @@ new QRCode(output,{
   const canvas =
     output.querySelector("canvas");
 
+  const image =
+    output.querySelector("img");
+
+  if(canvas){
+
+    canvas.classList.add(
+      "p54-merchant-qr-canvas"
+    );
+
+    canvas.removeAttribute(
+      "style"
+    );
+
+  }
+
+  if(image){
+
+    image.classList.add(
+      "p54-merchant-qr-image"
+    );
+
+    image.removeAttribute(
+      "style"
+    );
+
+  }
+
   if(!canvas){
 
     qrShareFile = null;
