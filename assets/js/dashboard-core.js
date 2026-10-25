@@ -1100,7 +1100,7 @@ class="p54-input"
 placeholder="Search name, amount, currency or reference"
 >
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+<div class="p54-history-date-grid">
 
 <input
 id="txDateFrom"
