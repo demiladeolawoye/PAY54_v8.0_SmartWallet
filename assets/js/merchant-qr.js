@@ -314,24 +314,132 @@ modal.querySelector("#shareQR")
 
   }
 
-  const qrData =
-    canvas.toDataURL();
-
   try{
 
-    await navigator.clipboard
-      .writeText(qrData);
+    const blob =
+      await new Promise(
+        (resolve,reject)=>{
+
+          canvas.toBlob(
+            result => {
+
+              if(result){
+
+                resolve(result);
+
+                return;
+
+              }
+
+              reject(
+                new Error(
+                  "Unable to create QR image."
+                )
+              );
+
+            },
+            "image/png"
+          );
+
+        }
+      );
+
+    const fileName =
+      `${merchant || "PAY54"}-QR.png`;
+
+    const qrFile =
+      new File(
+        [blob],
+        fileName,
+        {
+          type:"image/png"
+        }
+      );
+
+    if(
+      typeof navigator.share ===
+        "function" &&
+      (
+        typeof navigator.canShare !==
+          "function" ||
+        navigator.canShare({
+          files:[qrFile]
+        })
+      )
+    ){
+
+      await navigator.share({
+
+        title:
+          "PAY54 Merchant QR",
+
+        text:
+          merchant
+            ? `PAY54 QR for ${merchant}`
+            : "PAY54 Merchant QR",
+
+        files:[
+          qrFile
+        ]
+
+      });
+
+      return;
+
+    }
+
+    const shareText =
+      JSON.stringify({
+        merchant,
+        qrImage:
+          canvas.toDataURL(
+            "image/png"
+          )
+      });
+
+    if(
+      navigator.clipboard &&
+      typeof navigator.clipboard
+        .writeText ===
+        "function" &&
+      document.hasFocus()
+    ){
+
+      await navigator.clipboard
+        .writeText(
+          shareText
+        );
+
+      alert(
+        "QR copied for sharing"
+      );
+
+      return;
+
+    }
 
     alert(
-      "QR copied for sharing"
+      "Sharing is not available in this browser. Please use Download instead."
     );
 
   }catch(err){
 
-    console.error(err);
+    if(
+      err?.name ===
+      "AbortError"
+    ){
+
+      return;
+
+    }
+
+    console.error(
+      "[PAY54_MERCHANT_QR] Share failed:",
+      err
+    );
 
     alert(
-      "Share failed"
+      "Unable to share QR. Please use Download instead."
     );
 
   }
