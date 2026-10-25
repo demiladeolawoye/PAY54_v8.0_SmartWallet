@@ -161,6 +161,44 @@ new QRCode(output,{
   width:220,
   height:220
 });
+  setTimeout(()=>{
+
+  const canvas =
+    output.querySelector("canvas");
+
+  if(!canvas){
+
+    qrShareFile = null;
+
+    return;
+
+  }
+
+  canvas.toBlob(
+    blob => {
+
+      if(!blob){
+
+        qrShareFile = null;
+
+        return;
+
+      }
+
+      qrShareFile =
+        new File(
+          [blob],
+          `${merchant || "PAY54"}-QR.png`,
+          {
+            type:"image/png"
+          }
+        );
+
+    },
+    "image/png"
+  );
+
+},0);
 
 });
 
