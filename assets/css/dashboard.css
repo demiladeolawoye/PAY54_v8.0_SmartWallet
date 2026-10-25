@@ -4564,3 +4564,30 @@ body.light .p54-toast.p54-toast--ui-engine{
 .p54-utility-results-spaced{
     margin-top:16px;
 }
+/* ==========================================================
+   PAY54 DASHBOARD CORE — CSP HARDENING
+   BATCH 2: AGENT / SHOP / TRADING
+========================================================== */
+
+.p54-dashboard-field-spaced{
+    margin-top:12px;
+}
+
+.p54-market-results{
+    margin-top:20px;
+}
+
+.p54-shop-vendor-action{
+    width:100%;
+    margin-bottom:10px;
+}
+
+.p54-trade-asset{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+    padding:12px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:12px;
+}
