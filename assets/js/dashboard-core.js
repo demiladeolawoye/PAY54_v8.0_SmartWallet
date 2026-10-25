@@ -4001,26 +4001,21 @@ window.PAY54_UI.openSavings = function(){
             Add Money
           </button>
 
-          <button
-            class="btn ghost"
-            id="withdrawGoalBtn"
-            style="width:100%;margin-top:10px"
-          >
+<button
+  class="btn ghost p54-savings-withdraw-action"
+  id="withdrawGoalBtn"
+>
             Withdraw
           </button>
 
-          <div style="
-            margin-top:24px;
-            font-weight:900;
-          ">
-            Auto Save Plan
-          </div>
+          <div class="p54-savings-auto-title">
+  Auto Save Plan
+</div>
 
           <select
-            id="autoFrequency"
-            class="p54-input"
-            style="margin-top:12px"
-          >
+  id="autoFrequency"
+  class="p54-input p54-dashboard-field-spaced"
+>
             <option value="weekly">
               Weekly
             </option>
@@ -4035,18 +4030,16 @@ window.PAY54_UI.openSavings = function(){
           </select>
 
           <input
-            id="autoAmount"
-            class="p54-input"
-            type="number"
-            placeholder="Auto save amount"
-            style="margin-top:12px"
-          >
+  id="autoAmount"
+  class="p54-input p54-dashboard-field-spaced"
+  type="number"
+  placeholder="Auto save amount"
+>
 
           <button
-            class="btn primary"
-            id="saveAutoBtn"
-            style="width:100%;margin-top:14px"
-          >
+  class="btn primary p54-savings-auto-action"
+  id="saveAutoBtn"
+>
             Save Auto Plan
           </button>
 
