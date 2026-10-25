@@ -3257,11 +3257,10 @@ window.PAY54_UI.openBills = function(){
             class="p54-input"
           ></select>
 
-          <select
-            id="billBundle"
-            class="p54-input"
-            style="margin-top:12px"
-          >
+         <select
+  id="billBundle"
+  class="p54-input p54-dashboard-field-spaced"
+>
             <option value="">
               Select Bundle
             </option>
