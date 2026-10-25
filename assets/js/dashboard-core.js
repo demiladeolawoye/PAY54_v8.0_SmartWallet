@@ -2150,11 +2150,10 @@ window.PAY54_UI.openAgent = function(){
           </select>
 
           <input
-            id="agentLocation"
-            class="p54-input"
-            placeholder="Location / City"
-            style="margin-top:12px"
-          >
+  id="agentLocation"
+  class="p54-input p54-dashboard-field-spaced"
+  placeholder="Location / City"
+>
 
           <input
             id="agentCapacity"
