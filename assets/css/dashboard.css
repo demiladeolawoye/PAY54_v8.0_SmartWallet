@@ -4438,3 +4438,16 @@ body.light .p54-toast.p54-toast--ui-engine{
     margin-top:15px;
     text-align:center;
 }
+/* ==========================================================
+   PAY54 MERCHANT QR
+   THIRD-PARTY QRCode.js CSP NORMALISATION
+========================================================== */
+
+.p54-merchant-qr-canvas{
+    display:none;
+}
+
+.p54-merchant-qr-image{
+    display:block;
+    margin:0 auto;
+}
