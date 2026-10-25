@@ -3875,10 +3875,9 @@ window.PAY54_UI.openSavings = function(){
 >
 
           <button
-            class="btn primary"
-            id="saveGoalBtn"
-            style="width:100%;margin-top:18px"
-          >
+  class="btn primary p54-savings-create-action"
+  id="saveGoalBtn"
+>
             Create Goal
           </button>
 
