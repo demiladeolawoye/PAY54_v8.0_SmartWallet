@@ -3741,12 +3741,9 @@ window.PAY54_UI.openSavings = function(){
                 id="createGoalCard"
               >
 
-                <div style="
-                  font-size:56px;
-                  font-weight:200;
-                ">
-                  +
-                </div>
+               <div class="p54-savings-create-icon">
+  +
+</div>
 
                 <button
   id="createGoalBtn"
