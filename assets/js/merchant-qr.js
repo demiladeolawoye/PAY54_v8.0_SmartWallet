@@ -224,37 +224,66 @@ modal.querySelector("#downloadQR")
 
   }
 
-  win.document.write(`
+  const dashboardStylesheet =
+  [...document.styleSheets]
+    .map(
+      sheet =>
+        sheet.href
+    )
+    .find(
+      href =>
+        typeof href ===
+          "string" &&
+        href.includes(
+          "/assets/css/dashboard.css"
+        )
+    );
 
-    <html>
+const stylesheetMarkup =
+  dashboardStylesheet
+    ? `<link rel="stylesheet" href="${dashboardStylesheet}">`
+    : "";
 
-      <head>
+win.document.write(`
 
-        <title>
-          PAY54 Merchant QR
-        </title>
+  <!DOCTYPE html>
 
-      </head>
+  <html lang="en">
 
-      <body style="
-        text-align:center;
-        padding:30px;
-      ">
+    <head>
 
-        <h2>
-          PAY54 Merchant QR
-        </h2>
+      <meta charset="UTF-8">
 
-        <img
-          src="${canvas.toDataURL()}"
-          style="width:300px"
-        >
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+      >
 
-      </body>
+      <title>
+        PAY54 Merchant QR
+      </title>
 
-    </html>
+      ${stylesheetMarkup}
 
-  `);
+    </head>
+
+    <body class="p54-merchant-qr-print">
+
+      <h2>
+        PAY54 Merchant QR
+      </h2>
+
+      <img
+        class="p54-merchant-qr-print-image"
+        src="${canvas.toDataURL()}"
+        alt="PAY54 Merchant QR"
+      >
+
+    </body>
+
+  </html>
+
+`);
 
   win.document.close();
 
