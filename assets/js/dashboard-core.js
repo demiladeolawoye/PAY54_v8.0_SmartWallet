@@ -3680,11 +3680,7 @@ window.PAY54_UI.openSavings = function(){
 
                   <div>
 
-                    <div style="
-                      display:flex;
-                      justify-content:space-between;
-                      align-items:center;
-                    ">
+                   <div class="p54-savings-goal-head">
 
                       <strong>
                         ${goal.name}
