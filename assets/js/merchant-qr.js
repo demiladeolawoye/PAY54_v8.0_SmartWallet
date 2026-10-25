@@ -156,6 +156,8 @@ JSON.stringify({
 
 output.innerHTML = "";
 
+qrShareFile = null;
+
 new QRCode(output,{
   text:payload,
   width:220,
