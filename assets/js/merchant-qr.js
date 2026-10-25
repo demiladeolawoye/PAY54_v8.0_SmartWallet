@@ -116,7 +116,7 @@ onMount:({modal,close})=>{
 const form = modal.querySelector("#qrForm");
 const output = modal.querySelector("#qrOutput");
 
-llet merchant = "";
+let merchant = "";
 let qrShareFile = null;
 
 form.addEventListener("submit",(e)=>{
