@@ -3694,12 +3694,9 @@ window.PAY54_UI.openSavings = function(){
   ${progress}%
 </div>
 
-                    <div style="
-                      text-align:center;
-                      font-weight:800;
-                    ">
-                      Saved
-                    </div>
+                    <div class="p54-savings-saved-label">
+  Saved
+</div>
 
                     <div style="
                       text-align:center;
