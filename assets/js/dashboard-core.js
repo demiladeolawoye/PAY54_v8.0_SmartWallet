@@ -3272,13 +3272,12 @@ window.PAY54_UI.openBills = function(){
   placeholder="Phone / Meter / Smartcard"
 >
 
-          <input
-            id="billAmount"
-            class="p54-input"
-            type="number"
-            placeholder="Amount"
-            style="margin-top:12px"
-          >
+         <input
+  id="billAmount"
+  class="p54-input p54-dashboard-field-spaced"
+  type="number"
+  placeholder="Amount"
+>
 
           <div class="quick-amounts">
 
