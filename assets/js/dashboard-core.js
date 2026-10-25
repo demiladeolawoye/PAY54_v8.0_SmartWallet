@@ -2606,16 +2606,7 @@ results.innerHTML =
 .map(asset=>`
 
 <div
-class="trade-asset"
-style="
-padding:12px;
-border:1px solid rgba(255,255,255,.1);
-border-radius:12px;
-margin-bottom:10px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-"
+class="trade-asset p54-trade-asset"
 >
 
 <div>
