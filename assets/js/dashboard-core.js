@@ -3312,10 +3312,9 @@ window.PAY54_UI.openBills = function(){
           </div>
 
           <select
-            id="billWallet"
-            class="p54-input"
-            style="margin-top:12px"
-          >
+  id="billWallet"
+  class="p54-input p54-dashboard-field-spaced"
+>
             <option value="NGN">
               NGN Wallet
             </option>
