@@ -171,29 +171,97 @@ new QRCode(output,{
   const image =
     output.querySelector("img");
 
-  if(canvas){
+  const normaliseQrElement =
+    (
+      element,
+      className
+    ) => {
 
-    canvas.classList.add(
-      "p54-merchant-qr-canvas"
-    );
+      if(!element){
+        return;
+      }
 
-    canvas.removeAttribute(
-      "style"
-    );
+      element.classList.add(
+        className
+      );
 
-  }
+      element.removeAttribute(
+        "style"
+      );
 
+    };
+
+  normaliseQrElement(
+    canvas,
+    "p54-merchant-qr-canvas"
+  );
+
+  normaliseQrElement(
+    image,
+    "p54-merchant-qr-image"
+  );
+
+  /*
+   * QRCode.js may write its image display style
+   * after the data-URL image has loaded.
+   * Normalise it again once rendering completes.
+   */
   if(image){
 
-    image.classList.add(
-      "p54-merchant-qr-image"
-    );
+    const normaliseLoadedImage =
+      () => {
 
-    image.removeAttribute(
-      "style"
-    );
+        normaliseQrElement(
+          image,
+          "p54-merchant-qr-image"
+        );
+
+        normaliseQrElement(
+          canvas,
+          "p54-merchant-qr-canvas"
+        );
+
+      };
+
+    if(image.complete){
+
+      normaliseLoadedImage();
+
+    }else{
+
+      image.addEventListener(
+        "load",
+        normaliseLoadedImage,
+        {
+          once:true
+        }
+      );
+
+    }
 
   }
+
+  /*
+   * Final browser-render pass after QRCode.js has
+   * completed its DOM presentation updates.
+   */
+  requestAnimationFrame(()=>{
+
+    requestAnimationFrame(()=>{
+
+      normaliseQrElement(
+        canvas,
+        "p54-merchant-qr-canvas"
+      );
+
+      normaliseQrElement(
+        image,
+        "p54-merchant-qr-image"
+      );
+
+    });
+
+  });
 
   if(!canvas){
 
@@ -228,7 +296,6 @@ new QRCode(output,{
   );
 
 },0);
-
 });
 
 modal.querySelector("#cancelQR")
