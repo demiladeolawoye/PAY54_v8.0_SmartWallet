@@ -3867,13 +3867,12 @@ window.PAY54_UI.openSavings = function(){
             placeholder="Goal name"
           >
 
-          <input
-            id="goalTarget"
-            class="p54-input"
-            type="number"
-            placeholder="Target amount"
-            style="margin-top:12px"
-          >
+         <input
+  id="goalTarget"
+  class="p54-input p54-dashboard-field-spaced"
+  type="number"
+  placeholder="Target amount"
+>
 
           <button
             class="btn primary"
