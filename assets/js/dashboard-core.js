@@ -2856,7 +2856,7 @@ Trust Score ${merchant.trust}/100
 
 <div class="checkout-row">
 <span>Risk</span>
-<strong style="color:#22c55e">
+<strong class="p54-positive-text">
 ${merchant.risk}
 </strong>
 </div>
