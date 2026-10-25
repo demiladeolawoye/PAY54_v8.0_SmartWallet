@@ -4384,3 +4384,28 @@ body:not(.light) .p54-contacts-empty{
     opacity:0;
     transform:translateY(-6px);
 }
+/* Preserve UI Engine toast appearance in light mode */
+body.light .p54-toast.p54-toast--ui-engine{
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #1d4ed8
+        );
+    color:#fff;
+}
+
+/* UI Engine toast entry animation */
+@keyframes fadeIn{
+
+    from{
+        opacity:0;
+        transform:translateY(6px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
