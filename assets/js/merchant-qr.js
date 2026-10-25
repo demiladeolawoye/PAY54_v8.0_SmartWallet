@@ -61,7 +61,10 @@ bodyHTML:`
   </select>
 </div>
 
-<div id="qrOutput" style="text-align:center;margin-top:15px"></div>
+<div
+  id="qrOutput"
+  class="p54-merchant-qr-output"
+></div>
 
 <div class="p54-actions">
 
