@@ -4599,3 +4599,77 @@ body.light .p54-toast.p54-toast--ui-engine{
 .p54-positive-text{
     color:#22c55e;
 }
+/* ==========================================================
+   PAY54 DASHBOARD CORE — CSP HARDENING
+   BATCH 4: SAVINGS
+========================================================== */
+
+.p54-savings-goal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.p54-savings-progress{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:90px;
+    height:90px;
+    margin:22px auto;
+    border:8px solid #e5e7eb;
+    border-radius:50%;
+    font-weight:900;
+}
+
+.p54-savings-saved-label{
+    text-align:center;
+    font-weight:800;
+}
+
+.p54-savings-saved-amount{
+    text-align:center;
+    font-size:34px;
+    font-weight:900;
+}
+
+.p54-savings-target{
+    margin-top:8px;
+    color:var(--muted);
+    text-align:center;
+    font-size:13px;
+}
+
+.p54-savings-create-icon{
+    font-size:56px;
+    font-weight:200;
+}
+
+.p54-savings-create-action{
+    width:100%;
+    margin-top:18px;
+}
+
+.p54-savings-goal-summary{
+    margin-bottom:18px;
+    text-align:center;
+}
+
+.p54-savings-full-action{
+    width:100%;
+}
+
+.p54-savings-withdraw-action{
+    width:100%;
+    margin-top:10px;
+}
+
+.p54-savings-auto-title{
+    margin-top:24px;
+    font-weight:900;
+}
+
+.p54-savings-auto-action{
+    width:100%;
+    margin-top:14px;
+}
