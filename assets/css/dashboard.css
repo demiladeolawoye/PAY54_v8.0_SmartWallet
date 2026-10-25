@@ -4409,3 +4409,27 @@ body.light .p54-toast.p54-toast--ui-engine{
     }
 
 }
+/* ==========================================================
+   PAY54 MERCHANT QR PRINT
+   CSP-SAFE STATIC STYLES
+========================================================== */
+
+.p54-merchant-qr-print{
+    margin:0;
+    padding:30px;
+    text-align:center;
+    font-family:
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+}
+
+.p54-merchant-qr-print-image{
+    width:300px;
+    max-width:100%;
+    height:auto;
+}
