@@ -3702,15 +3702,10 @@ window.PAY54_UI.openSavings = function(){
   ${LEDGER.moneyFmt("NGN", goal.saved)}
 </div>
 
-                    <div style="
-                      text-align:center;
-                      margin-top:8px;
-                      color:var(--muted);
-                      font-size:13px;
-                    ">
-                      Target:
-                      ${LEDGER.moneyFmt("NGN", goal.target)}
-                    </div>
+                   <div class="p54-savings-target">
+  Target:
+  ${LEDGER.moneyFmt("NGN", goal.target)}
+</div>
 
                   </div>
 
