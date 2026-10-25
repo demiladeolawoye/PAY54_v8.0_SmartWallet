@@ -355,54 +355,15 @@ modal.querySelector("#shareQR")
 
   try{
 
-    const blob =
-      await new Promise(
-        (resolve,reject)=>{
-
-          canvas.toBlob(
-            result => {
-
-              if(result){
-
-                resolve(result);
-
-                return;
-
-              }
-
-              reject(
-                new Error(
-                  "Unable to create QR image."
-                )
-              );
-
-            },
-            "image/png"
-          );
-
-        }
-      );
-
-    const fileName =
-      `${merchant || "PAY54"}-QR.png`;
-
-    const qrFile =
-      new File(
-        [blob],
-        fileName,
-        {
-          type:"image/png"
-        }
-      );
-
     if(
+      qrShareFile &&
       typeof navigator.share ===
         "function" &&
       (
         typeof navigator.canShare !==
           "function" ||
         navigator.canShare({
-          files:[qrFile]
+          files:[qrShareFile]
         })
       )
     ){
@@ -418,7 +379,7 @@ modal.querySelector("#shareQR")
             : "PAY54 Merchant QR",
 
         files:[
-          qrFile
+          qrShareFile
         ]
 
       });
@@ -426,15 +387,6 @@ modal.querySelector("#shareQR")
       return;
 
     }
-
-    const shareText =
-      JSON.stringify({
-        merchant,
-        qrImage:
-          canvas.toDataURL(
-            "image/png"
-          )
-      });
 
     if(
       navigator.clipboard &&
@@ -446,11 +398,11 @@ modal.querySelector("#shareQR")
 
       await navigator.clipboard
         .writeText(
-          shareText
+          "PAY54 Merchant QR"
         );
 
       alert(
-        "QR copied for sharing"
+        "Sharing is unavailable on this browser. QR details copied; you can also use Download."
       );
 
       return;
@@ -484,7 +436,6 @@ modal.querySelector("#shareQR")
   }
 
 });
-
 } // closes onMount
 
 }); // closes openModal
