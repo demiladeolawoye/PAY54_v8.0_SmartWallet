@@ -2117,12 +2117,11 @@ window.PAY54_UI.openAgent = function(){
             placeholder="Full name"
           >
 
-          <input
-            id="agentPhone"
-            class="p54-input"
-            placeholder="Phone number"
-            style="margin-top:12px"
-          >
+         <input
+  id="agentPhone"
+  class="p54-input p54-dashboard-field-spaced"
+  placeholder="Phone number"
+>
 
           <select
             id="agentBusiness"
