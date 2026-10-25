@@ -4591,3 +4591,11 @@ body.light .p54-toast.p54-toast--ui-engine{
     border:1px solid rgba(255,255,255,.1);
     border-radius:12px;
 }
+/* ==========================================================
+   PAY54 DASHBOARD CORE — CSP HARDENING
+   BATCH 3: CHECKOUT / BILLS
+========================================================== */
+
+.p54-positive-text{
+    color:#22c55e;
+}
