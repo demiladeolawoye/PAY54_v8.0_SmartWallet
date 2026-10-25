@@ -4528,3 +4528,39 @@ body.light .p54-toast.p54-toast--ui-engine{
     font-weight:900;
     text-decoration:underline;
 }
+/* ==========================================================
+   PAY54 DASHBOARD CORE — CSP HARDENING
+   BATCH 1: WALLET / HISTORY / UTILITIES
+========================================================== */
+
+.p54-dashboard-full-action{
+    width:100%;
+    margin-top:15px;
+}
+
+.p54-history-date-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:12px;
+}
+
+.p54-history-quick-filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px;
+}
+
+.p54-history-results{
+    margin-top:16px;
+}
+
+.p54-utility-search-action{
+    width:100%;
+    margin-top:14px;
+}
+
+.p54-utility-results-spaced{
+    margin-top:16px;
+}
