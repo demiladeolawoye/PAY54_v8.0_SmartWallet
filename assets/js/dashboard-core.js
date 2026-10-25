@@ -1388,18 +1388,16 @@ window.openATMFinder = function(){
       >
 
       <button
-        id="atmSearchBtn"
-        class="btn primary utility-search-btn"
-        style="margin-top:14px;width:100%"
-      >
+  id="atmSearchBtn"
+  class="btn primary utility-search-btn p54-utility-search-action"
+>
         Search Nearby
       </button>
 
-      <div
-        id="atmResults"
-        class="utility-results"
-        style="margin-top:16px"
-      ></div>
+     <div
+  id="atmResults"
+  class="utility-results p54-utility-results-spaced"
+></div>
 
     </div>
 
