@@ -2404,7 +2404,7 @@ data-type="shopping"
 
 <div
 id="shopResults"
-style="margin-top:20px"
+class="p54-market-results"
 ></div>
 
 `,
