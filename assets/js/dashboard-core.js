@@ -3994,11 +3994,10 @@ window.PAY54_UI.openSavings = function(){
 
           </div>
 
-          <button
-            class="btn primary"
-            id="addMoneyGoalBtn"
-            style="width:100%"
-          >
+<button
+  class="btn primary p54-savings-full-action"
+  id="addMoneyGoalBtn"
+>
             Add Money
           </button>
 
