@@ -4451,3 +4451,80 @@ body.light .p54-toast.p54-toast--ui-engine{
     display:block;
     margin:0 auto;
 }
+/* ==========================================================
+   PAY54 RECEIPT MODAL
+   CSP-SAFE STATIC STYLES
+========================================================== */
+
+.p54-receipt-head{
+    margin-bottom:16px;
+    text-align:center;
+}
+
+.p54-receipt-success-icon{
+    display:grid;
+    place-items:center;
+    width:52px;
+    height:52px;
+    margin:0 auto 10px;
+    border-radius:999px;
+    background:rgba(34,197,94,.14);
+    font-size:24px;
+    font-weight:900;
+}
+
+.p54-receipt-success-title{
+    font-size:18px;
+    font-weight:900;
+}
+
+.p54-receipt-success-sub{
+    margin-top:5px;
+    font-size:13px;
+}
+
+.p54-receipt-summary{
+    display:grid;
+    gap:10px;
+}
+
+.p54-receipt-label{
+    font-size:12px;
+}
+
+.p54-receipt-amount{
+    margin-top:2px;
+    font-size:20px;
+    font-weight:900;
+}
+
+.p54-receipt-transaction-id{
+    margin-top:2px;
+    overflow-wrap:anywhere;
+    font-size:13px;
+    font-weight:800;
+}
+
+.p54-receipt-text{
+    margin:0;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+    font-size:12px;
+    line-height:1.6;
+}
+
+.p54-receipt-referral{
+    font-size:12px;
+}
+
+.p54-receipt-referral-link{
+    font-weight:900;
+    text-decoration:underline;
+}
