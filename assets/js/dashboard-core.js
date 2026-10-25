@@ -2434,12 +2434,9 @@ vendors[type]
 .map(v=>`
 
 <button
-class="btn primary"
-style="
-width:100%;
-margin-bottom:10px;
-"
-onclick="window.open('${v.url}','_blank')"
+class="btn primary p54-shop-vendor-action"
+type="button"
+data-vendor-url="${v.url}"
 >
 
 ${v.name}
@@ -2449,6 +2446,33 @@ ${v.name}
 `)
 
 .join("");
+
+   results
+.querySelectorAll(
+".p54-shop-vendor-action"
+)
+.forEach(vendorBtn=>{
+
+vendorBtn.addEventListener(
+"click",
+()=>{
+
+const vendorUrl =
+vendorBtn.dataset.vendorUrl;
+
+if(!vendorUrl){
+return;
+}
+
+window.open(
+vendorUrl,
+"_blank",
+"noopener,noreferrer"
+);
+
+});
+
+});
 
 });
 
