@@ -4433,3 +4433,8 @@ body.light .p54-toast.p54-toast--ui-engine{
     max-width:100%;
     height:auto;
 }
+/* Merchant QR generator output */
+.p54-merchant-qr-output{
+    margin-top:15px;
+    text-align:center;
+}
