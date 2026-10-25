@@ -2155,12 +2155,11 @@ window.PAY54_UI.openAgent = function(){
   placeholder="Location / City"
 >
 
-          <input
-            id="agentCapacity"
-            class="p54-input"
-            placeholder="Daily cash capacity"
-            style="margin-top:12px"
-          >
+        <input
+  id="agentCapacity"
+  class="p54-input p54-dashboard-field-spaced"
+  placeholder="Daily cash capacity"
+>
 
         </div>
 
