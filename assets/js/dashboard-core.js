@@ -1479,19 +1479,17 @@ openModal({
         placeholder="Enter city or postcode"
       >
 
-      <button
-        id="posSearchBtn"
-        class="btn primary utility-search-btn"
-        style="margin-top:14px;width:100%"
-      >
+     <button
+  id="posSearchBtn"
+  class="btn primary utility-search-btn p54-utility-search-action"
+>
         Search Nearby
       </button>
 
       <div
-        id="posResults"
-        class="utility-results"
-        style="margin-top:16px"
-      ></div>
+  id="posResults"
+  class="utility-results p54-utility-results-spaced"
+></div>
 
     </div>
 
