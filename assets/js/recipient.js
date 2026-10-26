@@ -1700,7 +1700,10 @@ function openScanAndPay() {
     title: "Scan & Pay",
 
     bodyHTML: `
-      <div id="qr-reader" style="width:100%; margin-bottom:15px;"></div>
+      <div
+  id="qr-reader"
+  class="p54-scan-qr-reader"
+></div>
 
       <form class="p54-form" id="scanPayForm">
 
