@@ -395,45 +395,38 @@ function showPaymentReceipt(tx, merchant, amount, currency){
     title: "Payment Successful",
 
     bodyHTML: `
-      <div style="text-align:center">
+      <div class="p54-tx-receipt">
 
         <div class="pay-success-check">✔</div>
 
-        <div style="
-          font-size:18px;
-          font-weight:900;
-          margin-top:8px;
-        ">
-          Payment Completed
-        </div>
+     <div class="p54-tx-receipt-title">
+  Payment Completed
+</div>
 
         <div class="p54-divider"></div>
 
         <div class="p54-note"><b>Merchant</b></div>
         <div>${merchant}</div>
 
-        <div class="p54-note" style="margin-top:10px">
-          <b>Amount</b>
-        </div>
+        <div class="p54-note p54-tx-receipt-section">
+  <b>Amount</b>
+</div>
 
-        <div style="
-          font-size:18px;
-          font-weight:900;
-        ">
-          ${ledger.moneyFmt(currency, amount)}
-        </div>
+<div class="p54-tx-receipt-amount">
+  ${ledger.moneyFmt(currency, amount)}
+</div>
 
-        <div class="p54-note" style="margin-top:10px">
-          <b>Receipt ID</b>
-        </div>
+      <div class="p54-note p54-tx-receipt-section">
+  <b>Receipt ID</b>
+</div>
 
         <div>${receiptId}</div>
 
-        <div class="p54-note" style="margin-top:10px">
-          ${new Date().toLocaleString()}
-        </div>
+        <div class="p54-note p54-tx-receipt-section">
+  ${new Date().toLocaleString()}
+</div>
 
-        <div class="p54-actions" style="margin-top:16px">
+       <div class="p54-actions p54-tx-receipt-actions">
 
           <button class="p54-btn" id="copyBtn">
             Copy
