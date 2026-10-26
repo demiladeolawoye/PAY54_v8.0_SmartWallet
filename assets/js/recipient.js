@@ -11668,7 +11668,7 @@ function openCheckoutFromRequest(req){
       <div><b>Amount:</b> ${req.currency} ${req.amount}</div>
       <div><b>Ref:</b> ${req.ref}</div>
 
-      <div class="p54-actions" style="margin-top:16px">
+      <div class="p54-actions p54-checkout-actions">
         <button class="p54-btn" id="cancel">Cancel</button>
         <button class="p54-btn primary" id="payNow">Pay Now</button>
       </div>
