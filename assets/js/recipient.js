@@ -1381,27 +1381,25 @@ function openCreatePinModal(
                 Set a 4 to 6 digit PIN for secure transactions
             </div>
 
-            <input
-                class="p54-input"
-                id="newPin"
-                type="password"
-                inputmode="numeric"
-                autocomplete="new-password"
-                placeholder="Enter PIN"
-                maxlength="6"
-                style="margin-top:12px"
-            >
+          <input
+    class="p54-input p54-tx-pin-field"
+    id="newPin"
+    type="password"
+    inputmode="numeric"
+    autocomplete="new-password"
+    placeholder="Enter PIN"
+    maxlength="6"
+>
 
-            <input
-                class="p54-input"
-                id="confirmPin"
-                type="password"
-                inputmode="numeric"
-                autocomplete="new-password"
-                placeholder="Confirm PIN"
-                maxlength="6"
-                style="margin-top:10px"
-            >
+<input
+    class="p54-input p54-tx-pin-confirm-field"
+    id="confirmPin"
+    type="password"
+    inputmode="numeric"
+    autocomplete="new-password"
+    placeholder="Confirm PIN"
+    maxlength="6"
+>
 
             <div class="p54-actions">
 
