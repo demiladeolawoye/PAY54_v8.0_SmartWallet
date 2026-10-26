@@ -1132,15 +1132,14 @@ function requestPinVerification(
                 Confirm your PIN to proceed
             </div>
 
-            <input
-                class="p54-input"
-                id="userPin"
-                type="password"
-                placeholder="••••"
-                maxlength="6"
-                autocomplete="current-password"
-                style="margin-top:12px"
-            >
+           <input
+    class="p54-input p54-tx-pin-field"
+    id="userPin"
+    type="password"
+    placeholder="••••"
+    maxlength="6"
+    autocomplete="current-password"
+>
 
             <div class="p54-actions">
 
