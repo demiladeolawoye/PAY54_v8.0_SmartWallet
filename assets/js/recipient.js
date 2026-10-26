@@ -705,18 +705,49 @@ availableEl.innerHTML = `
         ${n.sub}
       </div>
 
-    </div>
-
-    <button
-      class="btn ghost sm"
-      onclick="openNewsItem(this)"
-    >
-      Open
-    </button>
+   <button
+  class="btn ghost sm"
+  type="button"
+  data-news-open="true"
+>
+  Open
+</button>
 
   </div>
 
 `).join("");
+     newsFeedEl
+  .querySelectorAll(
+    "[data-news-open]"
+  )
+  .forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          if(
+            typeof window.openNewsItem ===
+              "function"
+          ){
+
+            window.openNewsItem(
+              button
+            );
+
+            return;
+          }
+
+          console.warn(
+            "[PAY54_NEWS] News item handler unavailable."
+          );
+
+        }
+      );
+
+    }
+  );
   }
 
   if (clearAlertsBtn) {
