@@ -11555,25 +11555,17 @@ bodyHTML: `
     Your PAY54 Tag
   </div>
 
-  <div style="
-    font-size:28px;
-    font-weight:900;
-    margin-top:6px;
-  ">
+  <div class="p54-receive-tag-value">
     @Demi Olawoye
-  </div>
+</div>
 
-  <div class="p54-label" style="margin-top:18px;">
+<div class="p54-label p54-receive-account-label">
     Account Number
-  </div>
+</div>
 
-  <div style="
-    font-size:32px;
-    font-weight:900;
-    margin-top:6px;
-  ">
+ <div class="p54-receive-account-value">
     3001234567
-  </div>
+</div>
 
   <div class="p54-receive-qr">
     <div id="receiveQR"></div>
