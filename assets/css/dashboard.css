@@ -4778,3 +4778,21 @@ body.light .p54-toast.p54-toast--ui-engine{
     gap:10px;
     margin-top:10px;
 }
+/* ==========================================================
+   PAY54 SEND MONEY
+   CSP HARDENING — PRESENTATION
+========================================================== */
+
+.p54-send-funding-balance{
+    min-height:18px;
+    margin-top:7px;
+    font-size:12px;
+    opacity:.82;
+}
+
+.p54-send-funding-status{
+    min-height:18px;
+    margin-top:4px;
+    font-size:12px;
+    opacity:.75;
+}
