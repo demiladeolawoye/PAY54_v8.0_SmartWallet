@@ -2012,13 +2012,13 @@ function openAddMoney() {
           function renderAgentFields(val){
             if(val === "yes"){
   agentFields.innerHTML = `
-    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+    <div class="p54-dynamic-field-stack">
       <input class="p54-input small" placeholder="Agent Tag / Account" required>
     </div>
   `;
 } else {
   agentFields.innerHTML = `
-    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+    <div class="p54-dynamic-field-stack">
      <input class="p54-input small" placeholder="Agent Name" required>
 <input class="p54-input small" placeholder="Account Number" required>
     </div>
