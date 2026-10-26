@@ -12561,7 +12561,10 @@ function openSavings(){
 
         <input class="p54-input" id="saveAmount" placeholder="Amount to Save">
 
-        <div id="goalList" style="margin-top:10px"></div>
+        <div
+    id="goalList"
+    class="p54-goal-list"
+></div>
 
         <div class="p54-actions">
           <button class="p54-btn" type="button" id="cancelSave">Cancel</button>
