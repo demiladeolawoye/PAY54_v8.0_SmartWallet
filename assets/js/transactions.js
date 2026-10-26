@@ -169,23 +169,21 @@ function openCreatePinModal(callback){
         Set a secure PIN for PAY54 transactions
       </div>
 
-      <input 
-        class="p54-input"
-        id="newPin"
-        type="password"
-        placeholder="Enter PIN"
-        maxlength="6"
-        style="margin-top:12px"
-      >
+     <input 
+  class="p54-input p54-tx-pin-field"
+  id="newPin"
+  type="password"
+  placeholder="Enter PIN"
+  maxlength="6"
+>
 
-      <input
-        class="p54-input"
-        id="confirmPin"
-        type="password"
-        placeholder="Confirm PIN"
-        maxlength="6"
-        style="margin-top:10px"
-      >
+    <input
+  class="p54-input p54-tx-pin-confirm-field"
+  id="confirmPin"
+  type="password"
+  placeholder="Confirm PIN"
+  maxlength="6"
+>
 
       <div class="p54-actions">
         <button class="p54-btn" id="cancelCreatePin">
