@@ -12821,11 +12821,10 @@ function openBetFunding(){
         </div>
 
         <div
-          class="p54-note"
-          style="margin-top:12px"
-        >
-          🔞 18+ Only. Please gamble responsibly.
-        </div>
+    class="p54-note p54-betting-responsibility-note"
+>
+    🔞 18+ Only. Please gamble responsibly.
+</div>
 
         <div class="p54-actions">
 
