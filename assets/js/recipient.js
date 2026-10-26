@@ -182,34 +182,31 @@ function publishRecipientEvent(
 window.addEventListener("error", function (e) {
   console.error("🚨 GLOBAL ERROR:", e.message);
 
-  document.body.innerHTML = `
-    <div style="
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height:100vh;
-      font-family:sans-serif;
-      text-align:center;
-      padding:20px;
-    ">
+document.body.innerHTML = `
+    <div class="p54-fatal-error">
       <div>
         <h2>⚠️ PAY54 Temporary Issue</h2>
         <p>Something went wrong. Please refresh the app.</p>
-        <button onclick="location.reload()" style="
-          margin-top:10px;
-          padding:10px 20px;
-          border:none;
-          border-radius:8px;
-          background:#2563eb;
-          color:white;
-          font-weight:bold;
-          cursor:pointer;
-        ">
+
+        <button
+          id="pay54FatalRefresh"
+          class="p54-fatal-error-refresh"
+          type="button"
+        >
           Refresh
         </button>
       </div>
     </div>
-  `;
+`;
+
+document
+  .getElementById("pay54FatalRefresh")
+  ?.addEventListener(
+    "click",
+    () => {
+      window.location.reload();
+    }
+  );
 });
 
  let LEDGER;
