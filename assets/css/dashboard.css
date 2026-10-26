@@ -4796,3 +4796,42 @@ body.light .p54-toast.p54-toast--ui-engine{
     font-size:12px;
     opacity:.75;
 }
+/* ==========================================================
+   PAY54 RECIPIENT / LEGACY DASHBOARD
+   CSP HARDENING — FINAL INLINE STYLE REMOVAL
+========================================================== */
+
+.p54-receive-tag-value{
+    margin-top:6px;
+    font-size:28px;
+    font-weight:900;
+}
+
+.p54-receive-account-label{
+    margin-top:18px;
+}
+
+.p54-receive-account-value{
+    margin-top:6px;
+    font-size:32px;
+    font-weight:900;
+}
+
+.p54-checkout-actions{
+    margin-top:16px;
+}
+
+.p54-bill-quick-amounts{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:8px;
+}
+
+.p54-goal-list{
+    margin-top:10px;
+}
+
+.p54-betting-responsibility-note{
+    margin-top:12px;
+}
