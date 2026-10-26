@@ -12447,7 +12447,7 @@ function openBills(){
           dynamic.innerHTML = `
             <input class="p54-input" id="billPhone" placeholder="Phone Number" required>
 
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <div class="p54-bill-quick-amounts">
               <button type="button" class="p54-btn amt" data-amt="500">₦500</button>
               <button type="button" class="p54-btn amt" data-amt="1000">₦1000</button>
             </div>
