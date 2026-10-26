@@ -4457,26 +4457,16 @@ window.PAY54_UI.openRequestMoney = function(){
 
         <div>
 
-          <div
-            style="
-              display:flex;
-              gap:10px;
-              align-items:stretch;
-            "
-          >
+         <div class="p54-request-recipient-row">
 
-            <input
-              id="reqRecipient"
-              class="p54-input"
-              type="text"
-              placeholder="Recipient Name"
-              autocomplete="off"
-              aria-label="Recipient name"
-              style="
-                flex:1;
-                min-width:0;
-              "
-            >
+           <input
+  id="reqRecipient"
+  class="p54-input p54-request-recipient-input"
+  type="text"
+  placeholder="Recipient Name"
+  autocomplete="off"
+  aria-label="Recipient name"
+>
 
             ${
               contactsPicker &&
@@ -4484,17 +4474,13 @@ window.PAY54_UI.openRequestMoney = function(){
 
                 ? `
 
-                  <button
-                    id="requestContactBtn"
-                    class="p54-btn"
-                    type="button"
-                    aria-label="Choose from contacts"
-                    title="Choose from contacts"
-                    style="
-                      flex:0 0 auto;
-                      white-space:nowrap;
-                    "
-                  >
+                <button
+  id="requestContactBtn"
+  class="p54-btn p54-request-contact-btn"
+  type="button"
+  aria-label="Choose from contacts"
+  title="Choose from contacts"
+>
                     Contacts
                   </button>
 
@@ -4505,55 +4491,47 @@ window.PAY54_UI.openRequestMoney = function(){
 
           </div>
 
-          <div
-            id="requestContactStatus"
-            aria-live="polite"
-            style="
-              min-height:18px;
-              margin-top:7px;
-              font-size:12px;
-              opacity:.75;
-            "
-          >
+         <div
+  id="requestContactStatus"
+  class="p54-request-contact-status"
+  aria-live="polite"
+>
             Enter recipient details or choose from Contacts.
           </div>
 
         </div>
 
-        <input
-          id="reqPhone"
-          class="p54-input"
-          type="tel"
-          inputmode="tel"
-          placeholder="Phone Number"
-          autocomplete="tel"
-          aria-label="Recipient phone number"
-          style="margin-top:12px"
-        >
+       <input
+  id="reqPhone"
+  class="p54-input p54-dashboard-field-spaced"
+  type="tel"
+  inputmode="tel"
+  placeholder="Phone Number"
+  autocomplete="tel"
+  aria-label="Recipient phone number"
+>
 
-        <input
-          id="reqAmount"
-          class="p54-input"
-          type="number"
-          inputmode="decimal"
-          min="0.01"
-          step="0.01"
-          placeholder="Amount"
-          autocomplete="off"
-          aria-label="Amount to request"
-          style="margin-top:12px"
-        >
+    <input
+  id="reqAmount"
+  class="p54-input p54-dashboard-field-spaced"
+  type="number"
+  inputmode="decimal"
+  min="0.01"
+  step="0.01"
+  placeholder="Amount"
+  autocomplete="off"
+  aria-label="Amount to request"
+>
 
-        <input
-          id="reqReason"
-          class="p54-input"
-          type="text"
-          maxlength="140"
-          placeholder="Reason"
-          autocomplete="off"
-          aria-label="Reason for request"
-          style="margin-top:12px"
-        >
+    <input
+  id="reqReason"
+  class="p54-input p54-dashboard-field-spaced"
+  type="text"
+  maxlength="140"
+  placeholder="Reason"
+  autocomplete="off"
+  aria-label="Reason for request"
+>
 
         <div class="p54-actions">
 
