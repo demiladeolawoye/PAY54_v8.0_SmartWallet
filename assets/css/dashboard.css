@@ -4673,3 +4673,30 @@ body.light .p54-toast.p54-toast--ui-engine{
     width:100%;
     margin-top:14px;
 }
+/* ==========================================================
+   PAY54 DASHBOARD CORE — CSP HARDENING
+   BATCH 5: REQUEST MONEY
+========================================================== */
+
+.p54-request-recipient-row{
+    display:flex;
+    align-items:stretch;
+    gap:10px;
+}
+
+.p54-request-recipient-input{
+    flex:1;
+    min-width:0;
+}
+
+.p54-request-contact-btn{
+    flex:0 0 auto;
+    white-space:nowrap;
+}
+
+.p54-request-contact-status{
+    min-height:18px;
+    margin-top:7px;
+    font-size:12px;
+    opacity:.75;
+}
