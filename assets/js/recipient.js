@@ -4331,19 +4331,16 @@ const fundingLedger =
         required
     ></select>
 
-    <div
-        id="sendFundingBalance"
-        style="
-            min-height:18px;
-            margin-top:7px;
-            font-size:12px;
-            opacity:.82;
-        "
-    ></div>
-
-  <div
+ <div
     id="sendFundingBalance"
     class="p54-send-funding-balance"
+></div>
+
+<div
+    id="sendFundingStatus"
+    class="p54-send-funding-status"
+    aria-live="polite"
+    role="status"
 ></div>
 
 </div>
