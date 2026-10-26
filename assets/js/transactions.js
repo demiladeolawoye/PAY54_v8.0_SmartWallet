@@ -319,14 +319,13 @@ const savedPin =
         Confirm your transaction PIN
       </div>
 
-      <input
-        class="p54-input"
-        id="userPin"
-        type="password"
-        maxlength="6"
-        placeholder="••••"
-        style="margin-top:12px"
-      >
+   <input
+  class="p54-input p54-tx-pin-field"
+  id="userPin"
+  type="password"
+  maxlength="6"
+  placeholder="••••"
+>
 
       <div class="p54-actions">
         <button class="p54-btn" id="cancelPin">
