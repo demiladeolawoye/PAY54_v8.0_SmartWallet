@@ -4735,3 +4735,46 @@ body.light .p54-toast.p54-toast--ui-engine{
 .p54-tx-receipt-actions{
     margin-top:16px;
 }
+/* ==========================================================
+   PAY54 RECIPIENT / LEGACY DASHBOARD
+   CSP HARDENING — BATCH 1
+========================================================== */
+
+.p54-fatal-error{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+    padding:20px;
+    font-family:sans-serif;
+    text-align:center;
+}
+
+.p54-fatal-error-refresh{
+    margin-top:10px;
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:#2563eb;
+    color:#fff;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.p54-available-balance{
+    margin-top:6px;
+    font-size:13px;
+    opacity:.85;
+}
+
+#qr-reader.p54-scan-qr-reader{
+    width:100%;
+    margin-bottom:15px;
+}
+
+.p54-dynamic-field-stack{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:10px;
+}
