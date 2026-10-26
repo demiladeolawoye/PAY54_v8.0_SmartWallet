@@ -4700,3 +4700,38 @@ body.light .p54-toast.p54-toast--ui-engine{
     font-size:12px;
     opacity:.75;
 }
+/* ==========================================================
+   PAY54 TRANSACTIONS
+   CSP-SAFE STATIC STYLES
+========================================================== */
+
+.p54-tx-pin-field{
+    margin-top:12px;
+}
+
+.p54-tx-pin-confirm-field{
+    margin-top:10px;
+}
+
+.p54-tx-receipt{
+    text-align:center;
+}
+
+.p54-tx-receipt-title{
+    margin-top:8px;
+    font-size:18px;
+    font-weight:900;
+}
+
+.p54-tx-receipt-section{
+    margin-top:10px;
+}
+
+.p54-tx-receipt-amount{
+    font-size:18px;
+    font-weight:900;
+}
+
+.p54-tx-receipt-actions{
+    margin-top:16px;
+}
