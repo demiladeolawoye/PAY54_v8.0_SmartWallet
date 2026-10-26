@@ -4266,27 +4266,20 @@ const fundingLedger =
             Recipient
         </div>
 
-        <div
-            style="
-                display:flex;
-                gap:10px;
-                align-items:stretch;
-            "
-        >
+       <div class="p54-request-recipient-row">
 
-            <input
-                class="p54-input"
-                id="sendUser"
-                name="recipient"
-                type="text"
-                placeholder="@username"
-                autocomplete="off"
-                autocapitalize="none"
-                spellcheck="false"
-                aria-label="PAY54 recipient"
-                required
-                style="flex:1;min-width:0;"
-            >
+           <input
+    class="p54-input p54-request-recipient-input"
+    id="sendUser"
+    name="recipient"
+    type="text"
+    placeholder="@username"
+    autocomplete="off"
+    autocapitalize="none"
+    spellcheck="false"
+    aria-label="PAY54 recipient"
+    required
+>
 
             ${
                 CONTACTS_PICKER &&
@@ -4296,18 +4289,14 @@ const fundingLedger =
                     ? `
 
             <button
-                class="p54-btn"
-                type="button"
-                id="chooseSendContact"
-                aria-label="Choose recipient from contacts"
-                title="Choose from contacts"
-                style="
-                    flex:0 0 auto;
-                    white-space:nowrap;
-                "
-            >
-                Contacts
-            </button>
+    class="p54-btn p54-request-contact-btn"
+    type="button"
+    id="chooseSendContact"
+    aria-label="Choose recipient from contacts"
+    title="Choose from contacts"
+>
+    Contacts
+</button>
 
                     `
 
@@ -4317,17 +4306,12 @@ const fundingLedger =
         </div>
 
         <div
-            id="sendRecipientStatus"
-            aria-live="polite"
-            style="
-                min-height:18px;
-                margin-top:7px;
-                font-size:12px;
-                opacity:.75;
-            "
-        >
-            Enter a PAY54 tag or choose from Contacts.
-        </div>
+    id="sendRecipientStatus"
+    class="p54-request-contact-status"
+    aria-live="polite"
+>
+    Enter a PAY54 tag or choose from Contacts.
+</div>
 
     </div>
    <div>
@@ -4357,17 +4341,10 @@ const fundingLedger =
         "
     ></div>
 
-    <div
-        id="sendFundingStatus"
-        aria-live="polite"
-        role="status"
-        style="
-            min-height:18px;
-            margin-top:4px;
-            font-size:12px;
-            opacity:.75;
-        "
-    ></div>
+  <div
+    id="sendFundingBalance"
+    class="p54-send-funding-balance"
+></div>
 
 </div>
 
