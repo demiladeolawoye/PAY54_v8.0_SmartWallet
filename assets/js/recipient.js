@@ -483,12 +483,13 @@ let availableEl = document.getElementById("availableBalance");
 /* 🔥 AUTO-CREATE IF MISSING */
 if(!availableEl){
 
-  availableEl = document.createElement("div");
-  availableEl.id = "availableBalance";
+availableEl = document.createElement("div");
 
-  availableEl.style.marginTop = "6px";
-  availableEl.style.fontSize = "13px";
-  availableEl.style.opacity = "0.85";
+availableEl.id =
+  "availableBalance";
+
+availableEl.className =
+  "p54-available-balance";
 
   const parent = document.getElementById("balanceAmount")?.parentNode;
 
