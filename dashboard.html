@@ -5,7 +5,26 @@
 <meta charset="UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta
+  http-equiv="Content-Security-Policy"
+  content="
+    default-src 'self';
+    script-src 'self' https://cdnjs.cloudflare.com;
+    script-src-attr 'none';
+    style-src 'self';
+    style-src-attr 'none';
+    img-src 'self' data: blob:;
+    font-src 'self';
+    connect-src 'self';
+    media-src 'self' blob:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-src 'none';
+    worker-src 'self' blob:;
+    manifest-src 'self';
+  "
+>
 <title>PAY54 — Dashboard</title>
 
 <link
