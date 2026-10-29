@@ -1,10 +1,11 @@
+
 "use strict";
 
 /* ==========================================================================
    PAY54 ENTERPRISE PLATFORM
    --------------------------------------------------------------------------
    File: assets/js/security/development-auth-bridge.js
-   Version: v1.0.0
+   Version: v1.0.1
    Module: Development Authentication Bridge
 
    Purpose
@@ -44,7 +45,7 @@
         "assets/js/security/development-auth-bridge.js";
 
     const VERSION =
-        "1.0.0";
+        "1.0.1";
 
     const STARTED_AT =
         new Date()
@@ -708,15 +709,19 @@
             );
         }
 
+        /*
+         * A successfully established session can expire or be logged out
+         * independently of this development-only handoff module. That is
+         * expected Session Manager behaviour, not a bridge integrity fault.
+         * Live authentication is reported by health() below.
+         */
         if (
-            state.authenticated ===
-                true &&
-            SESSION.isAuthenticated() !==
-                true
+            state.authenticated === true &&
+            state.attempted !== true
         ) {
 
             errors.push(
-                "Bridge authentication state disagrees with Session Manager."
+                "Bridge session success was recorded without an authentication attempt."
             );
         }
 
@@ -747,6 +752,23 @@
 
         const integrity =
             verifyIntegrity();
+
+        /*
+         * state.authenticated records that this bridge once succeeded.
+         * Only Titan Session Manager can attest to current authentication.
+         * Never present historical bridge success as a live session.
+         */
+        let currentlyAuthenticated =
+            false;
+
+        try {
+            currentlyAuthenticated =
+                state.authenticated === true &&
+                SESSION.isAuthenticated() === true &&
+                SESSION.getCurrent()?.authenticated === true;
+        } catch (error) {
+            rememberError(error);
+        }
 
         return Object.freeze({
 
@@ -784,7 +806,7 @@
                 state.attempted,
 
             authenticated:
-                state.authenticated,
+                currentlyAuthenticated,
 
             handoffConsumed:
                 state.handoffConsumed,
