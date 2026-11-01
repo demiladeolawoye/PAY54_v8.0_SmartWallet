@@ -1,775 +1,247 @@
+
 "use strict";
 
-/* ==========================================================================
-   PAY54 ENTERPRISE — PREMIUM CARDS UI
-   File: assets/js/engine/cards-ui.js
-   Version: 2.2.0
-   Work Package: WP-TITAN-CARDS-001D.6
-
-   Responsibilities
-   ----------------
-   - Render PAY54 cards in a premium graphical format
-   - Support linked cards and PAY54 virtual cards
-   - Preserve canonical Card Engine usage
-   - Improve customer-facing card actions and wording
-   - Keep development virtual cards clearly labelled as demo records
-
-   Notes
-   -----
-   - This module does not modify ledger balances
-   - This module relies on the canonical PAY54_CARDS engine
-   - Development virtual cards are demo records, not issued payment cards
-========================================================================== */
+/* PAY54 Enterprise Premium Cards UI v2.3.0
+   WP-TITAN-CARDS-001D.7
+   Canonical repository only.
+   Demo cards are not payment instruments. */
 
 (() => {
-  "use strict";
+  const W = window;
+  const VERSION = "2.3.0";
+  const ui = W.PAY54_CARDS_UI || (W.PAY54_CARDS_UI = {});
+  const $ = (root, selector) => root.querySelector(selector);
 
-  const GLOBAL = window;
-  const VERSION = "2.2.0";
-  const ENGINE_NAME = "PAY54 Premium Cards UI";
-  const STYLE_ID = "pay54-premium-cards-ui-styles";
+  const safe = value => String(value ?? "").replace(
+    /[&<>"']/g,
+    char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]
+  );
 
-  function ensureStyles() {
-    if (document.getElementById(STYLE_ID)) {
-      return;
+  const toast = message => {
+    if (typeof W.PAY54_TOAST?.showToast === "function") {
+      W.PAY54_TOAST.showToast(message);
+    } else {
+      console.info("[PAY54_CARDS_UI]", message);
+    }
+  };
+
+  const report = error => {
+    console.error("[PAY54_CARDS_UI]", error);
+    toast(error?.message || "Card operation could not be completed.");
+  };
+
+  const engine = () => {
+    if (
+      typeof W.PAY54_CARDS?.getCards !== "function" ||
+      typeof W.PAY54_CARDS?.getCardRepositoryStatus !== "function"
+    ) {
+      throw new Error("PAY54 Card Engine is unavailable.");
+    }
+    return W.PAY54_CARDS;
+  };
+
+  const modals = () => {
+    if (typeof W.PAY54_MODALS?.openModal !== "function") {
+      throw new Error("PAY54 modal service is unavailable.");
+    }
+    return W.PAY54_MODALS;
+  };
+
+  const authenticated = () =>
+    W.PAY54_SECURITY?.session?.isAuthenticated?.() === true;
+
+  const requireReady = () => {
+    if (!authenticated()) {
+      throw new Error("Session expired. Please sign in again.");
     }
 
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
-    style.textContent = `
-      .p54-cards-workspace{
-        display:flex;
-        flex-direction:column;
-        gap:20px;
-        padding:4px 0 2px;
-      }
-
-      .p54-cards-toolbar{
-        display:flex;
-        flex-wrap:wrap;
-        gap:12px;
-        align-items:center;
-      }
-
-      .p54-cards-toolbar .p54-btn{
-        min-height:44px;
-        font-weight:700;
-      }
-
-      .p54-cards-toolbar .p54-btn.primary{
-        box-shadow:0 10px 24px rgba(49, 104, 255, 0.20);
-      }
-
-      .p54-cards-disclaimer{
-        margin:0;
-        padding:10px 12px;
-        border-radius:14px;
-        background:#f6f8ff;
-        color:#4b587c;
-        font-size:13px;
-        line-height:1.45;
-      }
-
-      .p54-cards-section{
-        display:flex;
-        flex-direction:column;
-        gap:14px;
-      }
-
-      .p54-cards-section-head{
-        display:flex;
-        flex-direction:column;
-        gap:4px;
-      }
-
-      .p54-cards-section-title{
-        margin:0;
-        font-size:18px;
-        line-height:1.2;
-        font-weight:800;
-        color:#10172d;
-      }
-
-      .p54-cards-section-copy{
-        margin:0;
-        font-size:13px;
-        color:#66718f;
-        line-height:1.45;
-      }
-
-      .p54-card-grid{
-        display:grid;
-        grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-        gap:16px;
-      }
-
-      .p54-card-record{
-        display:flex;
-        flex-direction:column;
-        gap:12px;
-        padding:14px;
-        border:1px solid #e4e8f4;
-        border-radius:22px;
-        background:#ffffff;
-        box-shadow:0 10px 24px rgba(16, 23, 45, 0.05);
-      }
-
-      .p54-card-surface{
-        position:relative;
-        min-height:196px;
-        border-radius:22px;
-        padding:18px 18px 16px;
-        color:#ffffff;
-        overflow:hidden;
-        display:flex;
-        flex-direction:column;
-        justify-content:space-between;
-        box-shadow:0 20px 40px rgba(10, 22, 60, 0.22);
-      }
-
-      .p54-card-surface::before{
-        content:"";
-        position:absolute;
-        top:-35%;
-        right:-18%;
-        width:220px;
-        height:220px;
-        border-radius:50%;
-        background:rgba(255,255,255,0.10);
-      }
-
-      .p54-card-surface::after{
-        content:"";
-        position:absolute;
-        bottom:-40%;
-        left:-8%;
-        width:180px;
-        height:180px;
-        border-radius:50%;
-        background:rgba(255,255,255,0.08);
-      }
-
-      .p54-card-surface.virtual{
-        background:
-          radial-gradient(circle at top right, rgba(255,255,255,0.18), transparent 35%),
-          linear-gradient(135deg, #1b43ff 0%, #2764ff 45%, #08a0ff 100%);
-      }
-
-      .p54-card-surface.linked{
-        background:
-          radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 35%),
-          linear-gradient(135deg, #08184b 0%, #142e85 58%, #2d5cff 100%);
-      }
-
-      .p54-card-surface.mastercard{
-        background:
-          radial-gradient(circle at top right, rgba(255,255,255,0.14), transparent 35%),
-          linear-gradient(135deg, #24103d 0%, #5a1758 55%, #b12a47 100%);
-      }
-
-      .p54-card-topline,
-      .p54-card-bottomline{
-        position:relative;
-        z-index:1;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:10px;
-      }
-
-      .p54-card-brand-block{
-        display:flex;
-        flex-direction:column;
-        gap:4px;
-      }
-
-      .p54-card-brand{
-        font-size:18px;
-        font-weight:900;
-        letter-spacing:0.04em;
-      }
-
-      .p54-card-kind{
-        font-size:11px;
-        font-weight:700;
-        text-transform:uppercase;
-        letter-spacing:0.12em;
-        opacity:0.84;
-      }
-
-      .p54-card-network{
-        font-size:14px;
-        font-weight:800;
-        letter-spacing:0.04em;
-      }
-
-      .p54-card-chip-row{
-        position:relative;
-        z-index:1;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-      }
-
-      .p54-card-chip{
-        width:44px;
-        height:32px;
-        border-radius:10px;
-        background:
-          linear-gradient(145deg, rgba(241, 212, 121, 0.95), rgba(197, 144, 55, 0.95));
-        box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25);
-      }
-
-      .p54-card-contactless{
-        width:32px;
-        height:32px;
-        opacity:0.95;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-      }
-
-      .p54-card-contactless svg{
-        width:28px;
-        height:28px;
-      }
-
-      .p54-card-number{
-        position:relative;
-        z-index:1;
-        font-size:24px;
-        line-height:1.2;
-        font-weight:800;
-        letter-spacing:0.08em;
-        word-spacing:0.22em;
-      }
-
-      .p54-card-meta{
-        position:relative;
-        z-index:1;
-        display:grid;
-        grid-template-columns:1fr auto;
-        gap:12px;
-      }
-
-      .p54-card-meta-item{
-        display:flex;
-        flex-direction:column;
-        gap:4px;
-      }
-
-      .p54-card-meta-label{
-        font-size:10px;
-        text-transform:uppercase;
-        letter-spacing:0.12em;
-        opacity:0.78;
-        font-weight:700;
-      }
-
-      .p54-card-meta-value{
-        font-size:14px;
-        line-height:1.2;
-        font-weight:800;
-      }
-
-      .p54-card-flags{
-        display:flex;
-        flex-wrap:wrap;
-        gap:8px;
-      }
-
-      .p54-card-flag{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        min-height:24px;
-        padding:4px 10px;
-        border-radius:999px;
-        font-size:11px;
-        font-weight:800;
-        letter-spacing:0.05em;
-        text-transform:uppercase;
-      }
-
-      .p54-card-flag.default{
-        background:rgba(255,255,255,0.20);
-        border:1px solid rgba(255,255,255,0.30);
-      }
-
-      .p54-card-flag.demo{
-        background:rgba(255,255,255,0.18);
-        border:1px solid rgba(255,255,255,0.28);
-      }
-
-      .p54-card-summary{
-        display:flex;
-        gap:12px;
-        align-items:flex-start;
-        justify-content:space-between;
-      }
-
-      .p54-card-summary-copy{
-        display:flex;
-        flex-direction:column;
-        gap:4px;
-        min-width:0;
-      }
-
-      .p54-card-summary-title{
-        margin:0;
-        font-size:18px;
-        line-height:1.2;
-        font-weight:800;
-        color:#10172d;
-      }
-
-      .p54-card-summary-text{
-        margin:0;
-        font-size:13px;
-        line-height:1.45;
-        color:#66718f;
-      }
-
-      .p54-status-pill{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        min-height:28px;
-        padding:6px 10px;
-        border-radius:999px;
-        font-size:12px;
-        font-weight:800;
-        white-space:nowrap;
-      }
-
-      .p54-status-pill.active{
-        background:#dcfce8;
-        color:#12733f;
-      }
-
-      .p54-status-pill.frozen{
-        background:#fff1cf;
-        color:#8a5c00;
-      }
-
-      .p54-card-actions{
-        display:flex;
-        flex-wrap:wrap;
-        gap:10px;
-      }
-
-      .p54-card-actions .p54-btn{
-        min-height:42px;
-        font-weight:700;
-      }
-
-      .p54-card-actions .p54-btn[disabled]{
-        opacity:0.60;
-        cursor:not-allowed;
-      }
-
-      .p54-cards-empty{
-        padding:22px 18px;
-        border:1px dashed #d7ddee;
-        border-radius:18px;
-        background:#fafbff;
-        text-align:center;
-        color:#5b6686;
-      }
-
-      .p54-cards-empty-title{
-        margin:0 0 6px;
-        font-size:16px;
-        font-weight:800;
-        color:#10172d;
-      }
-
-      .p54-cards-empty-copy{
-        margin:0;
-        font-size:13px;
-        line-height:1.45;
-      }
-
-      .p54-card-builder-note{
-        margin:0;
-        padding:12px 14px;
-        border-radius:14px;
-        background:#fafbff;
-        color:#5b6686;
-        font-size:13px;
-        line-height:1.5;
-      }
-
-      .p54-card-form{
-        display:flex;
-        flex-direction:column;
-        gap:12px;
-      }
-
-      .p54-card-form-row{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:12px;
-      }
-
-      .p54-card-form .p54-input{
-        width:100%;
-      }
-
-      .p54-card-dialog-actions{
-        display:flex;
-        flex-wrap:wrap;
-        gap:10px;
-        margin-top:6px;
-      }
-
-      @media (max-width: 720px){
-        .p54-card-grid{
-          grid-template-columns:1fr;
-        }
-
-        .p54-card-form-row{
-          grid-template-columns:1fr;
-        }
-
-        .p54-card-number{
-          font-size:21px;
-        }
-
-        .p54-card-summary{
-          flex-direction:column;
-          align-items:flex-start;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  function getCardsEngine() {
-    const engine = GLOBAL.PAY54_CARDS;
-
-    if (!engine || typeof engine.getCards !== "function") {
-      throw new Error("PAY54 Cards Engine unavailable.");
-    }
-
-    return engine;
-  }
-
-  function getModalEngine() {
-    const modals = GLOBAL.PAY54_MODALS;
-
-    if (!modals || typeof modals.openModal !== "function") {
-      throw new Error("PAY54 Modal Engine unavailable.");
-    }
-
-    return modals;
-  }
-
-  function showToast(message) {
-    GLOBAL.PAY54_TOAST?.showToast?.(message);
-  }
-
-  function escapeHTML(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
-  function escapeAttribute(value) {
-    return escapeHTML(value);
-  }
-
-  function getSessionUserName() {
-    const storedName =
-      GLOBAL.localStorage?.getItem("pay54_name") ||
-      "PAY54 User";
-
-    return storedName.toUpperCase();
-  }
-
-  function isVirtualCard(card) {
-    const type =
-      String(
-        card?.type ||
-        card?.instrumentType ||
-        ""
-      ).toLowerCase();
-
-    const nickname =
-      String(card?.nickname || "").toLowerCase();
-
-    return (
-      type === "virtual" ||
-      card?.development === true ||
-      nickname.includes("virtual")
-    );
-  }
-
-  function isMastercard(card) {
-    const scheme =
-      String(
-        card?.network ||
-        card?.scheme ||
-        ""
-      ).toLowerCase();
-
-    return scheme.includes("master");
-  }
-
-  function getCardSurfaceClass(card) {
-    if (isVirtualCard(card)) {
-      return "virtual";
-    }
-
-    if (isMastercard(card)) {
-      return "mastercard";
-    }
-
-    return "linked";
-  }
-
-  function formatMaskedNumber(card) {
-    const last4 =
-      String(card?.last4 || "0000")
-        .slice(-4)
-        .padStart(4, "0");
-
-    return `•••• •••• •••• ${last4}`;
-  }
-
-  function formatExpiry(card) {
-    const expiry = String(card?.expiry || "").trim();
-
-    if (expiry) {
-      return expiry;
-    }
-
-    return "12/29";
-  }
-
-  function getCardholderName(card) {
-    return String(
-      card?.holderName ||
-      card?.cardholderName ||
-      getSessionUserName()
-    ).toUpperCase();
-  }
-
-  function getCardNetwork(card) {
-    return String(
-      card?.network ||
-      card?.scheme ||
-      (isVirtualCard(card) ? "VISA" : "CARD")
-    ).toUpperCase();
-  }
-
-  function getCardTitle(card) {
-    if (isVirtualCard(card)) {
-      return String(
-        card?.nickname || "PAY54 Virtual Card"
+    const e = engine();
+
+    if (e.getCardRepositoryStatus().state !== "VALID") {
+      throw new Error(
+        "Card repository is unavailable. No changes were made."
       );
     }
+    return e;
+  };
 
-    return `${getCardNetwork(card)} •••• ${String(card?.last4 || "").slice(-4)}`;
-  }
-
-  function getCardSummaryCopy(card) {
-    if (isVirtualCard(card)) {
-      return card?.development === true
-        ? "Demo virtual card · Not an issued payment card"
-        : "PAY54 virtual card";
-    }
-
-    return String(
-      card?.nickname || "Linked card reference"
+  const development = () => {
+    const c = W.PAY54_CONFIG;
+    return (
+      c?.isProduction?.() === false &&
+      ["development", "test", "staging"].includes(
+        c?.get?.("environment.name", "")
+      ) &&
+      c?.get?.("environment.realMoneyMode", true) === false &&
+      c?.get?.("environment.allowDevelopmentProviders", false) === true
     );
-  }
+  };
 
-  function getCardVisualKind(card) {
-    if (isVirtualCard(card)) {
-      return card?.development === true
-        ? "Virtual · Demo"
-        : "Virtual";
-    }
+  const isVirtual = c =>
+    c?.type === "virtual" ||
+    c?.cardType === "virtual" ||
+    c?.developmentVirtual === true ||
+    c?.instrumentType === "virtual";
 
-    return "Linked Card";
-  }
+  const isDemo = c =>
+    c?.developmentVirtual === true ||
+    c?.development === true ||
+    c?.referenceOnly === true ||
+    c?.issuerIssued !== true;
 
-  function getCardStatusClass(card) {
-    return card?.frozen ? "frozen" : "active";
-  }
+  const contactlessEnabled = c =>
+    c?.issuerIssued === true &&
+    c?.contactlessEnabled === true &&
+    c?.walletTokenized === true &&
+    !isDemo(c);
 
-  function getCardStatusText(card) {
-    return card?.frozen ? "Frozen" : "Active";
-  }
+  const network = c => {
+    const n = String(c?.network || c?.scheme || "")
+      .trim()
+      .toLowerCase();
 
-  function sortCards(cards) {
-    return [...cards].sort((left, right) => {
-      const defaultScore =
-        Number(Boolean(right?.default)) -
-        Number(Boolean(left?.default));
+    return n === "visa"
+      ? "Visa"
+      : n === "mastercard"
+        ? "Mastercard"
+        : "PAY54";
+  };
 
-      if (defaultScore !== 0) {
-        return defaultScore;
-      }
+  const title = c =>
+    String(
+      c?.nickname ||
+      (isVirtual(c) ? "PAY54 Virtual Card" : "Linked Card Reference")
+    );
 
-      const linkedOrder =
-        Number(isVirtualCard(left)) -
-        Number(isVirtualCard(right));
+  const masked = c =>
+    /^\d{4}$/.test(String(c?.last4 ?? ""))
+      ? `••••  ••••  ••••  ${c.last4}`
+      : "••••  ••••  ••••  ••••";
 
-      if (linkedOrder !== 0) {
-        return linkedOrder;
-      }
+  const displayExpiry = c =>
+    /^(0[1-9]|1[0-2])\/\d{2}$/.test(String(c?.expiry ?? ""))
+      ? c.expiry
+      : "Not available";
 
-      const leftCreated =
-        String(left?.createdAt || "");
-      const rightCreated =
-        String(right?.createdAt || "");
+  const cards = () => requireReady().getCards();
 
-      return rightCreated.localeCompare(leftCreated);
-    });
-  }
+  const contactlessSVG = `
+    <svg viewBox="0 0 32 32"
+         aria-hidden="true"
+         focusable="false">
+      <path
+        d="M9 11c4 3 4 7 0 10
+           M14 7c7 5 7 13 0 18
+           M19 3c10 8 10 18 0 26"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.3"
+        stroke-linecap="round"/>
+    </svg>
+  `;
 
-  function getCards() {
-    const engine = getCardsEngine();
-    const cards = engine.getCards();
-
-    return Array.isArray(cards)
-      ? sortCards(cards)
-      : [];
-  }
-
-  function getContactlessIcon() {
-    return `
-      <svg viewBox="0 0 32 32"
-           aria-hidden="true"
-           focusable="false"
-           xmlns="http://www.w3.org/2000/svg">
-        <g fill="none"
-           stroke="rgba(255,255,255,0.96)"
-           stroke-width="2.4"
-           stroke-linecap="round">
-          <path d="M10 12.5c2.7 1.4 4.5 4 4.5 7.1S12.7 25.3 10 26.7"/>
-          <path d="M15 9.3c3.9 2.1 6.5 5.9 6.5 10.3S18.9 27.8 15 29.9"/>
-          <path d="M20 6.3c5 2.8 8.4 7.8 8.4 13.3S25 30 20 32.8"/>
-        </g>
-      </svg>
-    `;
-  }
-
-  function getSurfaceFlags(card) {
-    const flags = [];
-
-    if (card?.default) {
-      flags.push({
-        label: "Default",
-        css: "default"
-      });
-    }
-
-    if (isVirtualCard(card) && card?.development === true) {
-      flags.push({
-        label: "Demo",
-        css: "demo"
-      });
-    }
-
-    return flags;
-  }
-
-  function renderCardSurface(card) {
-    const flags = getSurfaceFlags(card);
+  function face(c, index) {
+    const virtual = isVirtual(c);
+    const demo = isDemo(c);
+    const active = contactlessEnabled(c);
+    const shape = virtual ? "virtual" : "linked";
+    const label = demo ? "DEMO · NOT FOR PAYMENT" : "CARD";
 
     return `
-      <div class="p54-card-surface ${escapeAttribute(getCardSurfaceClass(card))}">
-        <div class="p54-card-topline">
-          <div class="p54-card-brand-block">
-            <div class="p54-card-brand">PAY54</div>
-            <div class="p54-card-kind">${escapeHTML(getCardVisualKind(card))}</div>
+      <article
+        class="p54c-item"
+        role="group"
+        aria-roledescription="slide"
+        aria-label="Card ${index + 1}: ${safe(title(c))}">
+
+        <div class="p54c-face ${shape}${c.frozen ? " is-frozen" : ""}">
+          <div class="p54c-line">
+            <strong class="p54c-logo">PAY54</strong>
+            <span class="p54c-network">${safe(network(c))}</span>
           </div>
 
-          <div class="p54-card-network">${escapeHTML(getCardNetwork(card))}</div>
-        </div>
-
-        <div class="p54-card-chip-row">
-          <div class="p54-card-chip" aria-hidden="true"></div>
-          <div class="p54-card-contactless" aria-label="Contactless enabled">
-            ${getContactlessIcon()}
-          </div>
-        </div>
-
-        <div class="p54-card-number">${escapeHTML(formatMaskedNumber(card))}</div>
-
-        <div class="p54-card-meta">
-          <div class="p54-card-meta-item">
-            <span class="p54-card-meta-label">Cardholder</span>
-            <span class="p54-card-meta-value">${escapeHTML(getCardholderName(card))}</span>
+          <div class="p54c-line">
+            <span class="p54c-chip" aria-hidden="true"></span>
+            <span
+              class="p54c-contactless"
+              title="${active
+                ? "Contactless enabled by issuer"
+                : "Illustration only — contactless disabled"}">
+              ${contactlessSVG}
+            </span>
           </div>
 
-          <div class="p54-card-meta-item">
-            <span class="p54-card-meta-label">Expiry</span>
-            <span class="p54-card-meta-value">${escapeHTML(formatExpiry(card))}</span>
-          </div>
-        </div>
+          <div class="p54c-pan">${safe(masked(c))}</div>
 
-        <div class="p54-card-bottomline">
-          <div class="p54-card-flags">
-            ${flags.map(flag => `
-              <span class="p54-card-flag ${escapeAttribute(flag.css)}">
-                ${escapeHTML(flag.label)}
-              </span>
-            `).join("")}
+          <div class="p54c-line p54c-bottom">
+            <div>
+              <small>${safe(label)}</small>
+              <strong>${safe(title(c))}</strong>
+            </div>
+            <div class="p54c-exp">
+              <small>EXPIRY</small>
+              <strong>${safe(displayExpiry(c))}</strong>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  }
 
-  function renderCardRecord(card) {
-    const cardId = escapeAttribute(card.id);
-
-    return `
-      <article class="p54-card-record"
-               data-card-id="${cardId}">
-        ${renderCardSurface(card)}
-
-        <div class="p54-card-summary">
-          <div class="p54-card-summary-copy">
-            <h4 class="p54-card-summary-title">
-              ${escapeHTML(getCardTitle(card))}
-            </h4>
-
-            <p class="p54-card-summary-text">
-              ${escapeHTML(getCardSummaryCopy(card))}
+        <div class="p54c-info">
+          <div>
+            <strong>${safe(title(c))}</strong>
+            <p>
+              ${virtual ? "Virtual card" : "Linked card reference"}
+              · ${demo ? "Non-spendable demo" : "Issuer-backed record"}
             </p>
           </div>
-
-          <span class="p54-status-pill ${escapeAttribute(getCardStatusClass(card))}">
-            ${escapeHTML(getCardStatusText(card))}
+          <span class="p54c-status ${c.frozen ? "frozen" : "active"}">
+            ${c.frozen ? "Frozen" : "Active"}
           </span>
         </div>
 
-        <div class="p54-card-actions">
-          <button class="p54-btn"
-                  type="button"
-                  data-freeze="${cardId}">
-            ${card?.frozen ? "Unfreeze" : "Freeze"}
+        <div class="p54c-flags">
+          ${c.default
+            ? '<span class="p54c-chiplabel">Default</span>'
+            : ""}
+          <span class="p54c-chiplabel">
+            ${demo ? "Demo" : "Issuer record"}
+          </span>
+          <span class="p54c-chiplabel">
+            ${active
+              ? "Contactless enabled"
+              : "Contactless not enabled"}
+          </span>
+        </div>
+
+        <div class="p54c-actions">
+          <button type="button" class="p54-btn"
+            data-action="details" data-id="${safe(c.id)}">
+            Details
           </button>
 
-          <button class="p54-btn"
-                  type="button"
-                  data-default="${cardId}"
-                  ${card?.default ? "disabled aria-disabled=\"true\"" : ""}>
-            ${card?.default ? "Default Card" : "Set Default"}
+          <button type="button" class="p54-btn"
+            data-action="activity" data-id="${safe(c.id)}">
+            Activity
           </button>
 
-          <button class="p54-btn danger"
-                  type="button"
-                  data-delete="${cardId}">
+          <button type="button" class="p54-btn"
+            data-action="freeze" data-id="${safe(c.id)}">
+            ${c.frozen ? "Unfreeze" : "Freeze"}
+          </button>
+
+          <button type="button" class="p54-btn"
+            data-action="default" data-id="${safe(c.id)}"
+            ${c.default ? "disabled" : ""}>
+            ${c.default ? "Default" : "Set Default"}
+          </button>
+
+          <button type="button" class="p54-btn danger"
+            data-action="remove" data-id="${safe(c.id)}">
             Remove
           </button>
         </div>
@@ -777,509 +249,574 @@
     `;
   }
 
-  function renderEmptyState(title, copy) {
-    return `
-      <div class="p54-cards-empty">
-        <h4 class="p54-cards-empty-title">${escapeHTML(title)}</h4>
-        <p class="p54-cards-empty-copy">${escapeHTML(copy)}</p>
-      </div>
-    `;
-  }
+  function workspace() {
+    const list = cards();
 
-  function renderSection(title, copy, cards, emptyTitle, emptyCopy) {
     return `
-      <section class="p54-cards-section">
-        <div class="p54-cards-section-head">
-          <h3 class="p54-cards-section-title">${escapeHTML(title)}</h3>
-          <p class="p54-cards-section-copy">${escapeHTML(copy)}</p>
+      <section class="p54c-root" aria-label="PAY54 cards management">
+        <header class="p54c-header">
+          <div>
+            <h3>My Cards</h3>
+            <p>Manage your virtual cards and linked references.</p>
+          </div>
+          <span class="p54c-chiplabel">
+            ${list.length} card${list.length === 1 ? "" : "s"}
+          </span>
+        </header>
+
+        <div class="p54c-toolbar">
+          <button type="button" class="p54-btn primary"
+            data-action="create"
+            ${!development() || list.some(isVirtual) ? "disabled" : ""}>
+            + Create Virtual Card
+          </button>
+          <button type="button" class="p54-btn"
+            data-action="link"
+            ${!development() ? "disabled" : ""}>
+            + Link Existing Card
+          </button>
         </div>
 
-        ${
-          cards.length
-            ? `
-              <div class="p54-card-grid">
-                ${cards.map(renderCardRecord).join("")}
-              </div>
-            `
-            : renderEmptyState(emptyTitle, emptyCopy)
-        }
+        <p class="p54c-note" role="note">
+          Development cards and linked references are not issued
+          payment instruments. The contactless graphic is illustrative
+          unless issuer-enabled capability is explicitly confirmed.
+        </p>
+
+        ${list.length ? `
+          <div class="p54c-carousel-head">
+            <strong>Your cards</strong>
+            <div class="p54c-nav">
+              <button type="button" data-action="prev"
+                aria-label="Previous card">‹</button>
+              <span data-counter aria-live="polite">
+                1 / ${list.length}
+              </span>
+              <button type="button" data-action="next"
+                aria-label="Next card">›</button>
+            </div>
+          </div>
+
+          <div class="p54c-track" tabindex="0"
+            role="region" aria-label="Swipeable cards">
+            ${list.map(face).join("")}
+          </div>
+        ` : `
+          <div class="p54c-empty">
+            No cards saved. Create a development card
+            or link a reference.
+          </div>
+        `}
       </section>
     `;
   }
 
-  function renderCardsWorkspace() {
-    const cards = getCards();
+  function verifiedChange(action, validate) {
+    const e = requireReady();
+    const previous = e.getCardRepositoryStatus();
 
-    const linkedCards =
-      cards.filter(card => !isVirtualCard(card));
+    action(e);
 
-    const virtualCards =
-      cards.filter(card => isVirtualCard(card));
+    const next = e.getCardRepositoryStatus();
 
-    return `
-      <div class="p54-cards-workspace">
+    if (
+      next.state !== "VALID" ||
+      next.metadata?.revision !==
+        previous.metadata?.revision + 1 ||
+      !validate(e)
+    ) {
+      throw new Error(
+        "Card update could not be verified. Do not repeat it " +
+        "until the repository is inspected."
+      );
+    }
+  }
 
-        <div class="p54-cards-toolbar">
-          <button class="p54-btn primary"
-                  type="button"
-                  id="pay54LinkCardAction">
-            + Link Existing Card
+  function detail(c) {
+    const activity = requireReady().getCardTransactions?.(c.id) || [];
+
+    modals().openModal({
+      title: "Card Details",
+      bodyHTML: `
+        <div class="p54c-detail">
+          <h3>${safe(title(c))}</h3>
+          <dl>
+            <div><dt>Card type</dt><dd>
+              ${isVirtual(c) ? "Virtual" : "Linked reference"}
+            </dd></div>
+            <div><dt>Network / label</dt><dd>
+              ${safe(network(c))}
+            </dd></div>
+            <div><dt>Card number</dt><dd>
+              ${safe(masked(c))}
+            </dd></div>
+            <div><dt>Expiry</dt><dd>
+              ${safe(displayExpiry(c))}
+            </dd></div>
+            <div><dt>Status</dt><dd>
+              ${c.frozen ? "Frozen" : "Active"}
+            </dd></div>
+            <div><dt>Default</dt><dd>
+              ${c.default ? "Yes" : "No"}
+            </dd></div>
+            <div><dt>Contactless</dt><dd>
+              ${contactlessEnabled(c)
+                ? "Issuer-enabled"
+                : "Not enabled"}
+            </dd></div>
+            <div><dt>Payment capability</dt><dd>
+              ${isDemo(c)
+                ? "Demo only — unavailable"
+                : "Subject to issuer verification"}
+            </dd></div>
+            <div><dt>Recorded activity</dt><dd>
+              ${activity.length} record${activity.length === 1 ? "" : "s"}
+            </dd></div>
+          </dl>
+          <button type="button" class="p54-btn" data-close>
+            Close
           </button>
+        </div>`,
+      onMount: ({modal, close}) =>
+        $(modal, "[data-close]")?.addEventListener("click", close)
+    });
+  }
 
-          <button class="p54-btn"
-                  type="button"
-                  id="pay54CreateVirtualCardAction">
-            + Create Virtual Card
+  function activity(c) {
+    const entries = requireReady().getCardTransactions?.(c.id) || [];
+
+    const rows = entries.slice(0, 30).map(tx => {
+      const label = String(
+        tx?.description || tx?.type || "Card activity"
+      );
+      const date = String(tx?.created || tx?.createdAt || "");
+      const amount =
+        typeof tx?.amount === "number" && Number.isFinite(tx.amount)
+          ? `${safe(tx.currency || "")} ${safe(
+              tx.amount.toLocaleString(undefined, {
+                maximumFractionDigits: 2
+              })
+            )}`
+          : "Amount unavailable";
+
+      return `
+        <li>
+          <strong>${safe(label)}</strong>
+          <span>${safe(date)}</span>
+          <span>${amount}</span>
+        </li>
+      `;
+    }).join("");
+
+    modals().openModal({
+      title: "Card Activity",
+      bodyHTML: `
+        <div class="p54c-detail">
+          <h3>${safe(title(c))}</h3>
+          <p>
+            Recorded card activity only.
+            This is not a bank statement.
+          </p>
+
+          ${entries.length
+            ? `<ul class="p54c-history">${rows}</ul>
+              ${entries.length > 30
+                ? "<p>Showing the 30 most recent records.</p>"
+                : ""}`
+            : "<p>No card activity has been recorded.</p>"}
+
+          <button type="button" class="p54-btn" data-close>
+            Close
           </button>
-        </div>
-
-        <p class="p54-cards-disclaimer">
-          Development virtual cards are demo records used for PAY54 product
-          testing. They are not issued bank cards and cannot be used to make payments.
-        </p>
-
-        ${renderSection(
-          "Virtual Cards",
-          "Beautiful PAY54 virtual cards for the wallet experience. Demo cards remain clearly marked until live issuing is enabled.",
-          virtualCards,
-          "No virtual cards yet",
-          "Create a PAY54 virtual card to preview the premium wallet card experience."
-        )}
-
-        ${renderSection(
-          "Linked Cards",
-          "Linked cards are external card references that you can manage inside PAY54.",
-          linkedCards,
-          "No linked cards yet",
-          "Link an existing bank card to create a managed reference inside PAY54."
-        )}
-
-      </div>
-    `;
+        </div>`,
+      onMount: ({modal, close}) =>
+        $(modal, "[data-close]")?.addEventListener("click", close)
+    });
   }
 
-  function randomDigits(length) {
-    let output = "";
-
-    for (let index = 0; index < length; index += 1) {
-      output += Math.floor(Math.random() * 10);
-    }
-
-    return output;
-  }
-
-  function generateExpiry() {
-    const now = new Date();
-    const futureYear = now.getFullYear() + 3;
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = String(futureYear).slice(-2);
-
-    return `${month}/${year}`;
-  }
-
-  function hasDefaultCard(cards) {
-    return cards.some(card => card?.default === true);
-  }
-
-  function createVirtualCardRecord(existingCards) {
-    return {
-      id: GLOBAL.crypto?.randomUUID
-        ? GLOBAL.crypto.randomUUID()
-        : `pay54-virtual-${Date.now()}-${randomDigits(4)}`,
-
-      type: "virtual",
-      instrumentType: "virtual",
-      development: true,
-      program: "PAY54",
-      scheme: "Visa",
-      network: "Visa",
-      nickname: "PAY54 Virtual Card",
-      holderName: getSessionUserName(),
-      last4: randomDigits(4),
-      expiry: generateExpiry(),
-      frozen: false,
-      default: !hasDefaultCard(existingCards),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      contactless: true,
-      paymentEnabled: false
-    };
-  }
-
-  function reconcileDefaultCard(engine) {
-    const cards = Array.isArray(engine.getCards())
-      ? engine.getCards()
-      : [];
-
-    if (!cards.length) {
-      return;
-    }
-
-    if (cards.some(card => card?.default === true)) {
-      return;
-    }
-
-    if (typeof engine.setDefault === "function") {
-      engine.setDefault(cards[0].id);
-    }
-  }
-
-  function findCardById(engine, cardId) {
-    if (typeof engine.getCardById === "function") {
-      return engine.getCardById(cardId) || null;
-    }
-
-    const cards = Array.isArray(engine.getCards())
-      ? engine.getCards()
-      : [];
-
-    return cards.find(card => card?.id === cardId) || null;
-  }
-
-  function openAddLinkedCard(onComplete) {
-    const modals = getModalEngine();
-    const engine = getCardsEngine();
-
-    modals.openModal({
-      title: "Link Existing Card",
-
+  function confirmRemove(c, refresh) {
+    modals().openModal({
+      title: "Remove Card Reference",
       bodyHTML: `
-        <div class="p54-card-form">
-          <p class="p54-card-builder-note">
-            Add a linked card reference to manage it in PAY54.
-            This does not issue a new card.
+        <div class="p54c-detail">
+          <p>
+            Remove <strong>${safe(title(c))}</strong>
+            from the development card repository?
           </p>
-
-          <input class="p54-input"
-                 id="pay54LinkedCardHolder"
-                 placeholder="Cardholder name"
-                 value="${escapeAttribute(getSessionUserName())}" />
-
-          <input class="p54-input"
-                 id="pay54LinkedCardNumber"
-                 placeholder="Card number" />
-
-          <div class="p54-card-form-row">
-            <input class="p54-input"
-                   id="pay54LinkedCardExpiry"
-                   placeholder="MM/YY" />
-
-            <input class="p54-input"
-                   id="pay54LinkedCardNickname"
-                   placeholder="Nickname (optional)" />
-          </div>
-
-          <select class="p54-input"
-                  id="pay54LinkedCardScheme">
-            <option value="Visa">Visa</option>
-            <option value="Mastercard">Mastercard</option>
-          </select>
-
-          <div class="p54-card-dialog-actions">
-            <button class="p54-btn"
-                    type="button"
-                    id="pay54CancelLinkedCard">
+          <p>This cannot be undone through the Cards UI.</p>
+          <div class="p54c-dialog-actions">
+            <button type="button" class="p54-btn" data-cancel>
               Cancel
             </button>
-
-            <button class="p54-btn primary"
-                    type="button"
-                    id="pay54SaveLinkedCard">
-              Link Card
-            </button>
+            <button type="button" class="p54-btn danger"
+              data-confirm>Remove</button>
           </div>
-        </div>
-      `,
-
-      onMount: ({ modal, close }) => {
-        modal
-          .querySelector("#pay54CancelLinkedCard")
-          ?.addEventListener("click", close);
-
-        modal
-          .querySelector("#pay54SaveLinkedCard")
-          ?.addEventListener("click", () => {
-            const holderName =
-              modal.querySelector("#pay54LinkedCardHolder")
-                ?.value
-                ?.trim() || "";
-
-            const number =
-              modal.querySelector("#pay54LinkedCardNumber")
-                ?.value
-                ?.replace(/\s+/g, "")
-                ?.trim() || "";
-
-            const expiry =
-              modal.querySelector("#pay54LinkedCardExpiry")
-                ?.value
-                ?.trim() || "";
-
-            const nickname =
-              modal.querySelector("#pay54LinkedCardNickname")
-                ?.value
-                ?.trim() || "";
-
-            const scheme =
-              modal.querySelector("#pay54LinkedCardScheme")
-                ?.value
-                ?.trim() || "Visa";
-
-            if (!holderName) {
-              showToast("Cardholder name is required.");
-              return;
-            }
-
-            if (!/^\d{8,19}$/.test(number)) {
-              showToast("Enter a valid card number.");
-              return;
-            }
-
-            if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-              showToast("Expiry must use MM/YY format.");
-              return;
-            }
-
-            const currentCards = getCards();
-
-            const card = {
-              id: GLOBAL.crypto?.randomUUID
-                ? GLOBAL.crypto.randomUUID()
-                : `pay54-linked-${Date.now()}-${randomDigits(4)}`,
-
-              type: "linked",
-              instrumentType: "linked",
-              scheme,
-              network: scheme,
-              nickname: nickname || "Linked card reference",
-              holderName,
-              last4: number.slice(-4),
-              expiry,
-              frozen: false,
-              default: !hasDefaultCard(currentCards),
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              contactless: true
-            };
-
-            try {
-              engine.addCard(card);
-              reconcileDefaultCard(engine);
-              close();
-              onComplete?.("Linked card added.");
-            } catch (error) {
-              console.error("[PAY54_CARDS_UI] Unable to link card.", error);
-              showToast("Unable to link the card.");
-            }
-          });
+        </div>`,
+      onMount: ({modal, close}) => {
+        $(modal, "[data-cancel]")?.addEventListener("click", close);
+        $(modal, "[data-confirm]")?.addEventListener("click", () => {
+          try {
+            verifiedChange(
+              e => e.deleteCard(c.id),
+              e => !e.getCardById(c.id)
+            );
+            close();
+            refresh();
+            toast("Card reference removed.");
+          } catch (error) {
+            report(error);
+          }
+        });
       }
     });
   }
 
-  function openCreateVirtualCard(onComplete) {
-    const modals = getModalEngine();
-    const engine = getCardsEngine();
-
-    modals.openModal({
-      title: "Create Virtual Card",
-
-      bodyHTML: `
-        <div class="p54-card-form">
-          <p class="p54-card-builder-note">
-            This creates a PAY54 demo virtual card record for the premium wallet experience.
-            It is not an issued bank card and cannot be used for live payments.
-          </p>
-
-          <div class="p54-card-dialog-actions">
-            <button class="p54-btn"
-                    type="button"
-                    id="pay54CancelVirtualCard">
-              Cancel
-            </button>
-
-            <button class="p54-btn primary"
-                    type="button"
-                    id="pay54ConfirmVirtualCard">
-              Create Virtual Card
-            </button>
-          </div>
-        </div>
-      `,
-
-      onMount: ({ modal, close }) => {
-        modal
-          .querySelector("#pay54CancelVirtualCard")
-          ?.addEventListener("click", close);
-
-        modal
-          .querySelector("#pay54ConfirmVirtualCard")
-          ?.addEventListener("click", () => {
-            try {
-              const currentCards = getCards();
-              const card = createVirtualCardRecord(currentCards);
-
-              engine.addCard(card);
-              reconcileDefaultCard(engine);
-
-              close();
-              onComplete?.("PAY54 virtual card created.");
-            } catch (error) {
-              console.error("[PAY54_CARDS_UI] Unable to create virtual card.", error);
-              showToast("Unable to create virtual card.");
-            }
-          });
+  function createCard(refresh) {
+    try {
+      if (!development()) {
+        throw new Error(
+          "Demo card creation is disabled in this environment."
+        );
       }
-    });
+
+      if (cards().some(isVirtual)) {
+        throw new Error(
+          "A development virtual card already exists."
+        );
+      }
+
+      modals().openModal({
+        title: "Create Virtual Card",
+        bodyHTML: `
+          <div class="p54c-detail">
+            <p>
+              This will create a non-spendable PAY54 demo card,
+              without a payment number or CVV.
+            </p>
+            <div class="p54c-dialog-actions">
+              <button type="button" class="p54-btn"
+                data-cancel>Cancel</button>
+              <button type="button" class="p54-btn primary"
+                data-confirm>Create Demo Card</button>
+            </div>
+          </div>`,
+        onMount: ({modal, close}) => {
+          $(modal, "[data-cancel]")?.addEventListener(
+            "click", close
+          );
+
+          $(modal, "[data-confirm]")?.addEventListener(
+            "click", () => {
+              try {
+                if (cards().some(isVirtual)) {
+                  throw new Error(
+                    "A virtual demo card already exists."
+                  );
+                }
+
+                let created;
+
+                verifiedChange(e => {
+                  created = e.addCard({
+                    type: "virtual",
+                    cardType: "virtual",
+                    developmentVirtual: true,
+                    scheme: "PAY54",
+                    nickname: "PAY54 Demo Virtual Card",
+                    referenceOnly: true,
+                    issuerIssued: false,
+                    contactlessEnabled: false,
+                    walletTokenized: false
+                  });
+                }, e => Boolean(
+                  created?.id && e.getCardById(created.id)
+                ));
+
+                close();
+                refresh();
+                toast("Demo virtual card created.");
+              } catch (error) {
+                report(error);
+              }
+            }
+          );
+        }
+      });
+    } catch (error) {
+      report(error);
+    }
   }
 
-  function openRemoveCard(cardId, onComplete) {
-    const modals = getModalEngine();
-    const engine = getCardsEngine();
-    const card = findCardById(engine, cardId);
+  function linkCard(refresh) {
+    try {
+      if (!development()) {
+        throw new Error(
+          "Reference linking is disabled in this environment."
+        );
+      }
 
-    if (!card) {
-      showToast("Card record not found.");
-      return;
-    }
+      requireReady();
 
-    modals.openModal({
-      title: "Remove Card",
+      modals().openModal({
+        title: "Link Existing Card Reference",
+        bodyHTML: `
+          <form class="p54c-form" novalidate>
+            <p>
+              Development reference only. Never enter
+              a full card number, PIN or CVV.
+            </p>
 
-      bodyHTML: `
-        <div class="p54-card-form">
-          <p class="p54-card-builder-note">
-            Remove <strong>${escapeHTML(getCardTitle(card))}</strong> from PAY54 card management?
-            This action removes the card record from the current repository.
-          </p>
+            <label>
+              Card network
+              <select name="network" class="p54-input">
+                <option>Visa</option>
+                <option>Mastercard</option>
+              </select>
+            </label>
 
-          <div class="p54-card-dialog-actions">
-            <button class="p54-btn"
-                    type="button"
-                    id="pay54CancelRemoveCard">
-              Cancel
-            </button>
+            <label>
+              Last four digits
+              <input name="last4" class="p54-input"
+                inputmode="numeric" maxlength="4"
+                autocomplete="off" required>
+            </label>
 
-            <button class="p54-btn danger"
-                    type="button"
-                    id="pay54ConfirmRemoveCard">
-              Remove
-            </button>
-          </div>
-        </div>
-      `,
+            <label>
+              Nickname
+              <input name="nickname" class="p54-input"
+                maxlength="60" autocomplete="off">
+            </label>
 
-      onMount: ({ modal, close }) => {
-        modal
-          .querySelector("#pay54CancelRemoveCard")
-          ?.addEventListener("click", close);
+            <label>
+              Expiry (optional MM/YY)
+              <input name="expiry" class="p54-input"
+                maxlength="5" autocomplete="off">
+            </label>
 
-        modal
-          .querySelector("#pay54ConfirmRemoveCard")
-          ?.addEventListener("click", () => {
+            <div class="p54c-dialog-actions">
+              <button type="button" class="p54-btn"
+                data-cancel>Cancel</button>
+              <button type="submit" class="p54-btn primary">
+                Save Reference
+              </button>
+            </div>
+          </form>`,
+        onMount: ({modal, close}) => {
+          $(modal, "[data-cancel]")?.addEventListener(
+            "click", close
+          );
+
+          $(modal, "form")?.addEventListener("submit", event => {
+            event.preventDefault();
+
             try {
-              engine.deleteCard(cardId);
-              reconcileDefaultCard(engine);
+              const form = event.currentTarget;
+              const digits = form.elements
+                .namedItem("last4").value.trim();
+              const expiry = form.elements
+                .namedItem("expiry").value.trim();
+              const nickname = form.elements
+                .namedItem("nickname").value.trim();
+
+              if (!/^\d{4}$/.test(digits)) {
+                throw new Error("Enter exactly four digits.");
+              }
+
+              if (
+                expiry &&
+                !/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)
+              ) {
+                throw new Error("Expiry must be MM/YY.");
+              }
+
+              let created;
+
+              verifiedChange(e => {
+                created = e.addCard({
+                  type: "linked-reference",
+                  scheme: form.elements
+                    .namedItem("network").value,
+                  nickname: nickname || "Linked Card Reference",
+                  last4: digits,
+                  expiry,
+                  referenceOnly: true,
+                  issuerIssued: false,
+                  contactlessEnabled: false
+                });
+              }, e => Boolean(
+                created?.id && e.getCardById(created.id)
+              ));
+
               close();
-              onComplete?.("Card removed.");
+              refresh();
+              toast("Linked card reference saved.");
             } catch (error) {
-              console.error("[PAY54_CARDS_UI] Unable to remove card.", error);
-              showToast("Unable to remove the card.");
+              report(error);
             }
           });
-      }
-    });
+        }
+      });
+    } catch (error) {
+      report(error);
+    }
   }
 
   function openCards() {
-    ensureStyles();
+    try {
+      requireReady();
 
-    const modals = getModalEngine();
-    getCardsEngine();
+      modals().openModal({
+        title: "PAY54 · My Cards",
+        bodyHTML: workspace(),
 
-    modals.openModal({
-      title: "PAY54 Virtual & Linked Cards",
+        onMount: ({modal}) => {
+          const body = $(modal, ".p54-modal-body");
+          let position = 0;
 
-      bodyHTML: renderCardsWorkspace(),
+          const updateCounter = () => {
+            const track = $(modal, ".p54c-track");
+            const slides = track?.querySelectorAll(".p54c-item") || [];
 
-      onMount: ({ modal }) => {
-        function refresh(successMessage) {
-          const body = modal.querySelector(".p54-modal-body");
+            if (!slides.length) return;
 
-          if (body) {
-            body.innerHTML = renderCardsWorkspace();
-            bind();
-          }
+            const left = track.getBoundingClientRect().left;
+            let closest = 0;
+            let distance = Infinity;
 
-          if (successMessage) {
-            showToast(successMessage);
-          }
+            slides.forEach((el, i) => {
+              const d = Math.abs(
+                el.getBoundingClientRect().left - left
+              );
+
+              if (d < distance) {
+                distance = d;
+                closest = i;
+              }
+            });
+
+            position = closest;
+
+            const counter = $(modal, "[data-counter]");
+            if (counter) {
+              counter.textContent =
+                `${position + 1} / ${slides.length}`;
+            }
+          };
+
+          const refresh = () => {
+            if (!body) return;
+
+            body.innerHTML = workspace();
+
+            const track = $(modal, ".p54c-track");
+            track?.addEventListener("scroll", updateCounter, {
+              passive: true
+            });
+
+            position = 0;
+          };
+
+          $(modal, ".p54c-track")?.addEventListener(
+            "scroll", updateCounter, {passive: true}
+          );
+
+          modal.addEventListener("click", event => {
+            const target = event.target.closest(
+              "button[data-action]"
+            );
+
+            if (
+              !target ||
+              !modal.contains(target) ||
+              target.disabled
+            ) return;
+
+            const action = target.dataset.action;
+
+            try {
+              if (action === "create") {
+                return createCard(refresh);
+              }
+
+              if (action === "link") {
+                return linkCard(refresh);
+              }
+
+              if (action === "prev" || action === "next") {
+                const track = $(modal, ".p54c-track");
+                const slides = [
+                  ...(track?.querySelectorAll(".p54c-item") || [])
+                ];
+
+                const next = Math.min(
+                  slides.length - 1,
+                  Math.max(
+                    0,
+                    position + (action === "next" ? 1 : -1)
+                  )
+                );
+
+                slides[next]?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "nearest",
+                  inline: "start"
+                });
+                return;
+              }
+
+              const e = requireReady();
+              const c = e.getCardById(target.dataset.id);
+
+              if (!c) {
+                throw new Error(
+                  "Card no longer exists. Please reopen the card list."
+                );
+              }
+
+              if (action === "details") {
+                return detail(c);
+              }
+
+              if (action === "activity") {
+                return activity(c);
+              }
+
+              if (action === "remove") {
+                return confirmRemove(c, refresh);
+              }
+
+              if (action === "freeze") {
+                verifiedChange(
+                  x => x.toggleFreeze(c.id),
+                  x => x.getCardById(c.id)?.frozen === !c.frozen
+                );
+
+                refresh();
+                toast(c.frozen ? "Card unfrozen." : "Card frozen.");
+              } else if (action === "default" && !c.default) {
+                verifiedChange(
+                  x => x.setDefault(c.id),
+                  x => x.getCardById(c.id)?.default === true
+                );
+
+                refresh();
+                toast("Default card updated.");
+              }
+            } catch (error) {
+              report(error);
+            }
+          });
         }
-
-        function bind() {
-          modal
-            .querySelector("#pay54LinkCardAction")
-            ?.addEventListener("click", () => {
-              openAddLinkedCard(refresh);
-            });
-
-          modal
-            .querySelector("#pay54CreateVirtualCardAction")
-            ?.addEventListener("click", () => {
-              openCreateVirtualCard(refresh);
-            });
-
-          modal
-            .querySelectorAll("[data-freeze]")
-            .forEach(button => {
-              button.addEventListener("click", () => {
-                try {
-                  const engine = getCardsEngine();
-                  engine.toggleFreeze(button.dataset.freeze);
-                  refresh("Card status updated.");
-                } catch (error) {
-                  console.error("[PAY54_CARDS_UI] Unable to update freeze state.", error);
-                  showToast("Unable to update the card state.");
-                }
-              });
-            });
-
-          modal
-            .querySelectorAll("[data-default]")
-            .forEach(button => {
-              button.addEventListener("click", () => {
-                if (button.disabled) {
-                  return;
-                }
-
-                try {
-                  const engine = getCardsEngine();
-                  engine.setDefault(button.dataset.default);
-                  refresh("Default card updated.");
-                } catch (error) {
-                  console.error("[PAY54_CARDS_UI] Unable to update default card.", error);
-                  showToast("Unable to set the default card.");
-                }
-              });
-            });
-
-          modal
-            .querySelectorAll("[data-delete]")
-            .forEach(button => {
-              button.addEventListener("click", () => {
-                openRemoveCard(button.dataset.delete, refresh);
-              });
-            });
-        }
-
-        bind();
-      }
-    });
+      });
+    } catch (error) {
+      report(error);
+    }
   }
 
-  GLOBAL.PAY54_CARDS_UI = GLOBAL.PAY54_CARDS_UI || {};
-  GLOBAL.PAY54_CARDS_UI.version = VERSION;
-  GLOBAL.PAY54_CARDS_UI.name = ENGINE_NAME;
-  GLOBAL.PAY54_CARDS_UI.openCards = openCards;
+  ui.version = VERSION;
+  ui.openCards = openCards;
 
-  console.info(`[PAY54_CARDS_UI] ${ENGINE_NAME} v${VERSION} ready.`);
+  console.info(
+    `[PAY54_CARDS_UI] Premium Cards UI v${VERSION} ready.`
+  );
 })();
