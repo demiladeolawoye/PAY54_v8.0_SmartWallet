@@ -1,0 +1,158 @@
+
+/* ==========================================================
+   PAY54 Enterprise Dashboard Mobile Hardening
+   File: assets/css/dashboard-mobile-hardening.css
+   Version: 1.0.0
+   Work Package: WP-TITAN-MOBILE-001
+
+   Scope: Mobile dashboard layout only.
+   Does not modify Cards UI, financial engines or security.
+========================================================== */
+
+@media screen and (max-width: 680px) {
+
+  .dashboard .dash-header {
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .dashboard .dash-header .brand {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .dashboard .dash-header .currency-pills.desktop-only {
+    display: none;
+  }
+
+  .dashboard .dash-header .mobile-only {
+    display: block;
+    min-width: 0;
+  }
+
+  .dashboard .dash-header .currency-dd-wrap {
+    flex: 0 1 110px;
+    max-width: 110px;
+  }
+
+  .dashboard .dash-header .currency-dropdown {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .dashboard .dash-header .header-actions {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .dashboard .dash-grid {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 10px;
+  }
+
+  .dashboard .dash-grid > .left,
+  .dashboard .dash-grid > .right {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .dashboard .dash-grid .card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .dashboard .balance-top {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .dashboard .balance-actions {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .dashboard .balance-amount {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: clamp(28px, 8vw, 42px);
+  }
+
+  .dashboard .money-moves-grid,
+  .dashboard .tile-grid.cols-4,
+  .dashboard .shortcut-grid,
+  .dashboard .utility-grid {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard .tile-btn,
+  .dashboard .shortcut-btn,
+  .dashboard .utility-btn {
+    min-width: 0;
+    max-width: 100%;
+    padding: 12px 8px;
+  }
+
+  .dashboard .tile-btn .t-title,
+  .dashboard .shortcut-btn .t-title,
+  .dashboard .utility-btn .t-title,
+  .dashboard .tile-btn .t-sub,
+  .dashboard .shortcut-btn .t-sub,
+  .dashboard .utility-btn .t-sub {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard .wallet-balances,
+  .dashboard #walletBalances,
+  .dashboard .balance-meta,
+  .dashboard .balance-top,
+  .dashboard .identity {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 359px) {
+
+  .dashboard .dash-grid {
+    padding-inline: 8px;
+  }
+
+  .dashboard .balance-card {
+    padding: 12px;
+  }
+
+  .dashboard .dash-header {
+    padding-inline: 8px;
+    gap: 5px;
+  }
+
+  .dashboard .dash-header .currency-dd-wrap {
+    flex-basis: 90px;
+    max-width: 90px;
+  }
+
+  .dashboard .money-moves-grid,
+  .dashboard .tile-grid.cols-4,
+  .dashboard .shortcut-grid,
+  .dashboard .utility-grid {
+    gap: 8px;
+  }
+
+  .dashboard .tile-btn,
+  .dashboard .shortcut-btn,
+  .dashboard .utility-btn {
+    padding: 10px 6px;
+  }
+}
