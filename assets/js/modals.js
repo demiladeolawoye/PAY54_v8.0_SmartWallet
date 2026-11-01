@@ -1,308 +1,588 @@
-/* =========================
-   PAY54 MODAL ENGINE v11.0.0
-   Enterprise Event Bus
-========================= */
+
 "use strict";
-/* ========================================================================
-   PAY54 ENTERPRISE EVENT BRIDGE
-======================================================================== */
 
-const EVENTS =
-window.PAY54_EVENTS || null;
+/* ==========================================================================
+   PAY54 ENTERPRISE MODAL ENGINE
+   File: assets/js/modals.js
+   Version: 11.1.0
+   Work Package: WP-TITAN-MODALS-001
 
-const MODAL_EVENTS =
-Object.freeze({
+   Responsibilities:
+   - Maintain backward-compatible PAY54 modal APIs
+   - Provide accessible dialog semantics
+   - Set and contain keyboard focus
+   - Restore focus on dismissal
+   - Support stacked dialogs safely
+   - Handle Escape for the topmost dialog only
+   - Clean up every modal through one lifecycle
+   - Preserve Enterprise Event Bus notifications
 
-  OPENED:
-    "modal.opened",
+   Security:
+   - Modal titles are rendered as text
+   - bodyHTML is trusted application markup
+   - User-supplied values must be escaped or sanitised
+     by the calling module before constructing bodyHTML
+   - This module does not execute financial operations
+========================================================================== */
 
-  CLOSED:
-    "modal.closed",
+(() => {
+  const GLOBAL = window;
+  const DOCUMENT = document;
+  const VERSION = "11.1.0";
 
-  ERROR:
-    "modal.error",
+  const MODAL_EVENTS = Object.freeze({
+    OPENED: "modal.opened",
+    CLOSED: "modal.closed",
+    ERROR: "modal.error",
+    SERVICE_CLOSED: "services.closed"
+  });
 
-  SERVICE_CLOSED:
-    "services.closed"
+  const FOCUS_SELECTOR = [
+    "a[href]",
+    "area[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    "[tabindex]:not([tabindex='-1'])",
+    "[contenteditable='true']"
+  ].join(",");
 
-});
+  const stack = [];
+  let nextId = 0;
+  let keyboardListenerInstalled = false;
 
-function publishModalEvent(
+  function publishModalEvent(eventName, payload = {}) {
+    try {
+      const events = GLOBAL.PAY54_EVENTS;
 
-  eventName,
-
-  payload = {}
-
-){
-
-  try{
-
-    if(
-
-      EVENTS &&
-
-      typeof EVENTS.publish === "function"
-
-    ){
-
-      EVENTS.publish(
-
+      if (typeof events?.publish === "function") {
+        events.publish(eventName, payload, {
+          source: "modals"
+        });
+      }
+    } catch (error) {
+      console.error(
+        "[PAY54_MODALS] Event publication failed:",
         eventName,
+        error
+      );
+    }
+  }
 
-        payload,
+  function topModal() {
+    return stack.length
+      ? stack[stack.length - 1]
+      : null;
+  }
 
-        {
+  function isVisible(element) {
+    if (
+      !(element instanceof HTMLElement) ||
+      !element.isConnected ||
+      element.hidden ||
+      element.closest("[hidden], [inert]")
+    ) {
+      return false;
+    }
 
-          source:"modals"
+    const style = GLOBAL.getComputedStyle(element);
 
-        }
+    return (
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      element.getClientRects().length > 0
+    );
+  }
 
+  function focusableElements(modal) {
+    return Array.from(
+      modal.querySelectorAll(FOCUS_SELECTOR)
+    ).filter(element => (
+      isVisible(element) &&
+      element.tabIndex >= 0 &&
+      element.getAttribute("aria-disabled") !== "true"
+    ));
+  }
+
+  function focusElement(element) {
+    if (
+      !element ||
+      typeof element.focus !== "function" ||
+      !element.isConnected
+    ) {
+      return false;
+    }
+
+    try {
+      element.focus({
+        preventScroll: true
+      });
+
+      return DOCUMENT.activeElement === element;
+    } catch (error) {
+      console.warn(
+        "[PAY54_MODALS] Focus could not be assigned.",
+        error
+      );
+      return false;
+    }
+  }
+
+  function focusInitial(record) {
+    if (
+      !record ||
+      record.closed ||
+      topModal() !== record
+    ) {
+      return;
+    }
+
+    const modal = record.modal;
+
+    if (modal.contains(DOCUMENT.activeElement)) {
+      return;
+    }
+
+    const preferred = modal.querySelector(
+      "[autofocus]:not([disabled])"
+    );
+
+    if (isVisible(preferred) && focusElement(preferred)) {
+      return;
+    }
+
+    const title = modal.querySelector(
+      ".p54-modal-title"
+    );
+
+    if (title && focusElement(title)) {
+      return;
+    }
+
+    const available = focusableElements(modal);
+
+    if (available.length && focusElement(available[0])) {
+      return;
+    }
+
+    focusElement(modal);
+  }
+
+  function updateModalStack() {
+    const active = topModal();
+
+    stack.forEach(record => {
+      const isTop = record === active;
+
+      record.backdrop.setAttribute(
+        "data-modal-active",
+        isTop ? "true" : "false"
       );
 
-    }
+      record.modal.setAttribute(
+        "aria-modal",
+        isTop ? "true" : "false"
+      );
 
-  }catch(error){
-
-  console.error(
-
-    "[PAY54_MODALS]",
-
-    eventName,
-
-    error
-
-);
-
-  }
-
-}
-
-window.PAY54_MODALS = (function(){
-
-  
-  function openModal({title="", bodyHTML="", onMount}){
-
-    const backdrop = document.createElement("div");
-
-    backdrop.className = "p54-modal-backdrop";
-
-    backdrop.innerHTML = `
-      <div class="p54-modal">
-
-        <div class="p54-modal-head">
-
-          <div class="p54-modal-title">
-            ${title}
-          </div>
-
-          <button class="p54-x" type="button">
-            ✕
-          </button>
-
-        </div>
-
-        <div class="p54-modal-body">
-          ${bodyHTML}
-        </div>
-
-      </div>
-    `;
-
-    const modal = backdrop.querySelector(".p54-modal");
-
-   function close(){
-
-  if(
-
-    !backdrop.isConnected
-
-  ){
-
-    return;
-
-  }
-
-  backdrop.remove();
-
-document.body.classList.remove(
-  "modal-open"
-);
-
-document.documentElement.classList.remove(
-  "modal-open"
-);
-
-  document.removeEventListener(
-
-    "keydown",
-
-    escClose
-
-  );
-
- publishModalEvent(
-
-  MODAL_EVENTS.CLOSED,
-
-  {
-
-    title,
-
-    closedAt:
-
-      new Date()
-        .toISOString()
-
-  }
-
-);
-
-publishModalEvent(
-
-  MODAL_EVENTS.SERVICE_CLOSED,
-
-  {
-
-    service:
-
-      title,
-
-    closedAt:
-
-      new Date()
-        .toISOString()
-
-  }
-
-);
-
-} // End close()
-
-function escClose(e){
-      if(e.key === "Escape"){
-        close();
-      }
-    }
-
-    backdrop.querySelector(".p54-x")
-      .addEventListener("click", close);
-
-    backdrop.addEventListener("click",(e)=>{
-      if(e.target === backdrop){
-        close();
+      if (isTop) {
+        record.modal.removeAttribute("aria-hidden");
+      } else {
+        record.modal.setAttribute(
+          "aria-hidden",
+          "true"
+        );
       }
     });
 
-    document.addEventListener("keydown", escClose);
+    const anyOpen = stack.length > 0;
 
-    document.body.classList.add(
-  "modal-open"
-);
+    DOCUMENT.body.classList.toggle(
+      "modal-open",
+      anyOpen
+    );
 
-document.documentElement.classList.add(
-  "modal-open"
-);
+    DOCUMENT.documentElement.classList.toggle(
+      "modal-open",
+      anyOpen
+    );
 
-  document.body.appendChild(
-  backdrop
-);
+    if (anyOpen && !keyboardListenerInstalled) {
+      DOCUMENT.addEventListener(
+        "keydown",
+        handleGlobalKeydown,
+        true
+      );
 
-publishModalEvent(
+      keyboardListenerInstalled = true;
+    } else if (
+      !anyOpen &&
+      keyboardListenerInstalled
+    ) {
+      DOCUMENT.removeEventListener(
+        "keydown",
+        handleGlobalKeydown,
+        true
+      );
 
-  MODAL_EVENTS.OPENED,
-
-  {
-
-    title,
-
-    openedAt:
-      new Date().toISOString()
-
+      keyboardListenerInstalled = false;
+    }
   }
 
-);
+  function restoreFocus(record) {
+    const active = topModal();
 
-if(typeof onMount === "function"){
+    if (active) {
+      if (
+        record.previouslyFocused &&
+        active.modal.contains(record.previouslyFocused) &&
+        focusElement(record.previouslyFocused)
+      ) {
+        return;
+      }
 
-  try{
+      focusInitial(active);
+      return;
+    }
 
-    onMount({
+    if (focusElement(record.previouslyFocused)) {
+      return;
+    }
 
-      modal,
+    const trigger = DOCUMENT.querySelector(
+      '[data-action="cards"]'
+    );
 
-      close
+    if (
+      record.title.toLowerCase().includes("card") &&
+      trigger &&
+      focusElement(trigger)
+    ) {
+      return;
+    }
+  }
 
+  function closeRecord(record, options = {}) {
+    if (!record || record.closed) {
+      return false;
+    }
+
+    record.closed = true;
+
+    const position = stack.indexOf(record);
+
+    if (position !== -1) {
+      stack.splice(position, 1);
+    }
+
+    if (record.backdrop.isConnected) {
+      record.backdrop.remove();
+    }
+
+    updateModalStack();
+
+    const closedAt = new Date().toISOString();
+
+    publishModalEvent(MODAL_EVENTS.CLOSED, {
+      title: record.title,
+      closedAt
     });
-
-  }catch(error){
 
     publishModalEvent(
-
-      MODAL_EVENTS.ERROR,
-
+      MODAL_EVENTS.SERVICE_CLOSED,
       {
-
-        title,
-
-        error:
-          error.message,
-
-        occurredAt:
-          new Date().toISOString()
-
+        service: record.title,
+        closedAt
       }
-
     );
 
-   console.error(
-    "[PAY54_MODALS]",
-    MODAL_EVENTS.ERROR,
-    error
-);
+    if (options.restoreFocus !== false) {
+      restoreFocus(record);
+    }
 
+    return true;
   }
 
-}
-return {
-  close
-};
+  function handleGlobalKeydown(event) {
+    const active = topModal();
 
-} // End openModal()
+    if (!active || active.closed) {
+      return;
+    }
 
-/* =========================================
-   CLOSE ALL MODALS
-========================================= */
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopImmediatePropagation();
 
-window.closeAllModals = function(){
+      closeRecord(active);
+      return;
+    }
 
-  document
-    .querySelectorAll(
-      ".p54-modal-backdrop"
-    )
-    .forEach(
-      element =>
-        element.remove()
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const modal = active.modal;
+    const elements = focusableElements(modal);
+
+    if (!elements.length) {
+      event.preventDefault();
+      focusElement(modal);
+      return;
+    }
+
+    const first = elements[0];
+    const last = elements[elements.length - 1];
+    const focused = DOCUMENT.activeElement;
+    const inside = modal.contains(focused);
+
+    if (!inside) {
+      event.preventDefault();
+
+      focusElement(
+        event.shiftKey ? last : first
+      );
+      return;
+    }
+
+    if (event.shiftKey && focused === first) {
+      event.preventDefault();
+      focusElement(last);
+      return;
+    }
+
+    if (!event.shiftKey && focused === last) {
+      event.preventDefault();
+      focusElement(first);
+      return;
+    }
+
+    if (
+      focused === modal ||
+      focused.classList?.contains(
+        "p54-modal-title"
+      )
+    ) {
+      event.preventDefault();
+
+      focusElement(
+        event.shiftKey ? last : first
+      );
+    }
+  }
+
+  function openModal(options = {}) {
+    const {
+      title = "",
+      bodyHTML = "",
+      onMount
+    } = options;
+
+    const normalizedTitle = String(title ?? "");
+
+    if (
+      typeof bodyHTML !== "string"
+    ) {
+      throw new TypeError(
+        "[PAY54_MODALS] bodyHTML must be a string."
+      );
+    }
+
+    nextId += 1;
+
+    const id = `pay54-modal-${nextId}`;
+    const titleId = `${id}-title`;
+
+    const previousFocus = DOCUMENT.activeElement;
+
+    const backdrop = DOCUMENT.createElement("div");
+    backdrop.className = "p54-modal-backdrop";
+
+    const modal = DOCUMENT.createElement("div");
+    modal.className = "p54-modal";
+
+    modal.setAttribute(
+      "role",
+      "dialog"
     );
 
-  document.body.classList.remove(
-    "modal-open"
+    modal.setAttribute(
+      "aria-modal",
+      "true"
+    );
+
+    modal.setAttribute(
+      "aria-labelledby",
+      titleId
+    );
+
+    modal.setAttribute(
+      "tabindex",
+      "-1"
+    );
+
+    const head = DOCUMENT.createElement("div");
+    head.className = "p54-modal-head";
+
+    const titleElement = DOCUMENT.createElement("div");
+    titleElement.className = "p54-modal-title";
+    titleElement.id = titleId;
+    titleElement.tabIndex = -1;
+    titleElement.textContent = normalizedTitle;
+
+    const closeButton = DOCUMENT.createElement("button");
+    closeButton.className = "p54-x";
+    closeButton.type = "button";
+    closeButton.textContent = "✕";
+
+    closeButton.setAttribute(
+      "aria-label",
+      "Close dialog"
+    );
+
+    const body = DOCUMENT.createElement("div");
+    body.className = "p54-modal-body";
+
+    /*
+     * bodyHTML preserves the established PAY54 API.
+     * Callers must sanitise untrusted input.
+     */
+    body.innerHTML = bodyHTML;
+
+    head.append(
+      titleElement,
+      closeButton
+    );
+
+    modal.append(
+      head,
+      body
+    );
+
+    backdrop.appendChild(modal);
+
+    const record = {
+      id,
+      title: normalizedTitle,
+      backdrop,
+      modal,
+      previouslyFocused: previousFocus,
+      closed: false
+    };
+
+    function close() {
+      return closeRecord(record);
+    }
+
+    closeButton.addEventListener(
+      "click",
+      close
+    );
+
+    backdrop.addEventListener(
+      "click",
+      event => {
+        if (
+          event.target === backdrop &&
+          topModal() === record
+        ) {
+          close();
+        }
+      }
+    );
+
+    stack.push(record);
+
+    DOCUMENT.body.appendChild(backdrop);
+
+    updateModalStack();
+
+    publishModalEvent(
+      MODAL_EVENTS.OPENED,
+      {
+        title: normalizedTitle,
+        openedAt: new Date().toISOString()
+      }
+    );
+
+    if (typeof onMount === "function") {
+      try {
+        onMount({
+          modal,
+          close
+        });
+      } catch (error) {
+        publishModalEvent(
+          MODAL_EVENTS.ERROR,
+          {
+            title: normalizedTitle,
+            error:
+              error?.message || String(error),
+            occurredAt: new Date().toISOString()
+          }
+        );
+
+        console.error(
+          "[PAY54_MODALS] Modal mount failed.",
+          error
+        );
+      }
+    }
+
+    /*
+     * Focus after onMount so application components
+     * have finished attaching their controls.
+     */
+    GLOBAL.queueMicrotask(() => {
+      focusInitial(record);
+    });
+
+    return {
+      close
+    };
+  }
+
+  function closeAllModals() {
+    while (stack.length > 0) {
+      const record = topModal();
+
+      closeRecord(record, {
+        restoreFocus: false
+      });
+    }
+
+    updateModalStack();
+  }
+
+  function health() {
+    return Object.freeze({
+      version: VERSION,
+      activeModalCount: stack.length,
+      keyboardListenerInstalled,
+      topModalTitle:
+        topModal()?.title ?? null,
+      healthy:
+        stack.every(
+          record =>
+            !record.closed &&
+            record.backdrop.isConnected
+        )
+    });
+  }
+
+  const api = Object.freeze({
+    version: VERSION,
+    openModal,
+    health
+  });
+
+  GLOBAL.PAY54_MODALS = api;
+
+  GLOBAL.openModal = openModal;
+
+  GLOBAL.closeAllModals = closeAllModals;
+
+  console.info(
+    `[PAY54_MODALS] Enterprise Modal Engine v${VERSION} ready.`
   );
-
-  document.documentElement.classList.remove(
-    "modal-open"
-  );
-
-};
-
-/* =========================================
-   GLOBAL LEGACY SUPPORT
-========================================= */
-
-window.openModal =
-openModal;
-
-return {
-  openModal
-};
-
 })();
