@@ -156,3 +156,154 @@
     padding: 10px 6px;
   }
 }
+
+/* ==========================================================
+   PAY54 MOBILE FEED RESPONSIVENESS
+   Work Package: WP-TITAN-MOBILE-001B
+   Version: 1.0.0
+
+   Scope:
+   - Recent Transactions text containment
+   - Requests & Alerts button alignment
+   - News & Insights button containment
+   - Narrow mobile viewports only
+
+   No changes to business logic or financial state.
+========================================================== */
+
+@media screen and (max-width: 680px) {
+
+  .dashboard #recentTransactions,
+  .dashboard #alertsFeed,
+  .dashboard #newsFeed {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .dashboard #recentTransactions .feed-item,
+  .dashboard #alertsFeed .feed-item,
+  .dashboard #newsFeed .feed-item {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .dashboard #recentTransactions .feed-main,
+  .dashboard #alertsFeed .feed-main,
+  .dashboard #newsFeed .feed-main {
+    min-width: 0;
+    max-width: 100%;
+    flex: 1 1 0;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard #recentTransactions .feed-title,
+  .dashboard #alertsFeed .feed-title,
+  .dashboard #newsFeed .feed-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-height: 1.35;
+  }
+
+  .dashboard #recentTransactions .feed-sub,
+  .dashboard #alertsFeed .feed-sub,
+  .dashboard #newsFeed .feed-sub {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+  }
+
+  .dashboard #recentTransactions .feed-amt {
+    min-width: 0;
+    max-width: 38%;
+    margin-left: 0;
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  .dashboard #recentTransactions .feed-amt .main,
+  .dashboard #recentTransactions .feed-amt .eq {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard #alertsFeed .feed-open-btn,
+  .dashboard #newsFeed .feed-open-btn,
+  .dashboard #alertsFeed .feed-item > .btn,
+  .dashboard #newsFeed .feed-item > .btn {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 64px;
+    max-width: 100%;
+    min-height: 38px;
+    height: auto;
+    padding: 9px 11px;
+    margin-left: auto;
+    box-sizing: border-box;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .dashboard #recentTransactions .feed-icon,
+  .dashboard #alertsFeed .feed-icon,
+  .dashboard #newsFeed .feed-icon {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media screen and (max-width: 390px) {
+
+  .dashboard #alertsFeed .feed-item,
+  .dashboard #newsFeed .feed-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 9px;
+    padding: 11px;
+  }
+
+  .dashboard #alertsFeed .feed-main,
+  .dashboard #newsFeed .feed-main {
+    flex: 1 1 calc(100% - 45px);
+    width: auto;
+    min-width: 0;
+  }
+
+  .dashboard #alertsFeed .feed-open-btn,
+  .dashboard #newsFeed .feed-open-btn,
+  .dashboard #alertsFeed .feed-item > .btn,
+  .dashboard #newsFeed .feed-item > .btn {
+    margin-left: auto;
+    align-self: flex-end;
+  }
+
+  .dashboard #recentTransactions .feed-item {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .dashboard #recentTransactions .feed-title {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .dashboard #recentTransactions .feed-sub {
+    font-size: 11px;
+  }
+
+  .dashboard #recentTransactions .feed-amt {
+    font-size: 12px;
+  }
+}
