@@ -1,0 +1,51 @@
+
+/* ==========================================================================
+   PAY54 ENTERPRISE DEPLOYMENT BOUNDARY STYLES
+   File: assets/css/deployment-boundary.css
+   Version: 1.0.0
+   Work Package: WP-P54-ARCH-007A
+========================================================================== */
+
+.pay54-preview-notice {
+  position: relative;
+  z-index: 20;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 16px;
+  background: #fff7e5;
+  color: #513400;
+  border-bottom: 1px solid #e6c985;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.pay54-preview-notice strong {
+  font-weight: 800;
+  margin-right: 6px;
+}
+
+.pay54-preview-notice span {
+  font-weight: 400;
+}
+
+@media (max-width: 600px) {
+  .pay54-preview-notice {
+    padding: 9px 12px;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .pay54-preview-notice {
+    border-bottom: 2px solid currentColor;
+  }
+}
+
+@media print {
+  .pay54-preview-notice {
+    display: block;
+  }
+}
