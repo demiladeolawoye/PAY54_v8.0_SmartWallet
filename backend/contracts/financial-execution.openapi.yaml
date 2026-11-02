@@ -1,0 +1,320 @@
+
+openapi: 3.1.0
+
+info:
+  title: PAY54 Trusted Financial Execution API
+  version: 1.0.0
+  description: >-
+    Contract for future trusted financial execution.
+    Publishing this contract does not indicate operational
+    availability, regulated status, or provider approval.
+
+servers: []
+
+tags:
+  - name: Financial Operations
+    description: Authenticated financial instruction lifecycle
+
+security:
+  - bearerAuth: []
+
+paths:
+  /v1/financial-operations:
+    post:
+      tags: [Financial Operations]
+      operationId: createFinancialOperation
+      summary: Submit one financial instruction
+      description: >-
+        The authenticated server must establish customer eligibility,
+        capability readiness, ownership, balance or funding authority,
+        risk and provider eligibility before execution.
+        Identical idempotency keys and identical request bodies
+        return the same operation. A reused key with a different
+        body is rejected. The HTTP response is not proof of settlement.
+
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOperationRequest'
+
+      responses:
+        '202':
+          description: Instruction accepted; execution may be pending
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+
+  /v1/financial-operations/{operationId}:
+    get:
+      tags: [Financial Operations]
+      operationId: getFinancialOperation
+      summary: Retrieve the authoritative operation state
+      description: >-
+        Return only operations owned by or explicitly accessible
+        to the authenticated principal. The service must not
+        infer settlement from a client callback.
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - name: operationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '200':
+          description: Operation state returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: >-
+        Unique per intended instruction; retained across retries.
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+        pattern: '^[A-Za-z0-9._:-]+$'
+
+    CorrelationId:
+      name: X-Correlation-ID
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Money:
+      type: object
+      additionalProperties: false
+      required:
+        - currency
+        - minorUnits
+      properties:
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          description: ISO 4217 currency code
+
+        minorUnits:
+          type: string
+          pattern: '^[1-9][0-9]{0,17}$'
+          description: >-
+            Positive integer minor units as a decimal string.
+
+    CreateOperationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+        - sourceWalletId
+        - amount
+        - destination
+      properties:
+        kind:
+          type: string
+          enum:
+            - WALLET_TRANSFER
+            - BANK_PAYOUT
+
+        sourceWalletId:
+          type: string
+          format: uuid
+
+        amount:
+          $ref: '#/components/schemas/Money'
+
+        destination:
+          oneOf:
+            - $ref: '#/components/schemas/WalletDestination'
+            - $ref: '#/components/schemas/BeneficiaryDestination'
+          discriminator:
+            propertyName: type
+            mapping:
+              WALLET: '#/components/schemas/WalletDestination'
+              BENEFICIARY: '#/components/schemas/BeneficiaryDestination'
+
+        quoteId:
+          type: string
+          format: uuid
+          description: >-
+            Required by the service where an FX or provider
+            quote applies.
+
+    WalletDestination:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - walletId
+      properties:
+        type:
+          const: WALLET
+        walletId:
+          type: string
+          format: uuid
+
+    BeneficiaryDestination:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - beneficiaryId
+      properties:
+        type:
+          const: BENEFICIARY
+        beneficiaryId:
+          type: string
+          format: uuid
+
+    Operation:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - kind
+        - state
+        - amount
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+
+        kind:
+          type: string
+          enum:
+            - WALLET_TRANSFER
+            - BANK_PAYOUT
+
+        state:
+          type: string
+          enum:
+            - RECEIVED
+            - VALIDATING
+            - REJECTED
+            - RESERVED
+            - SUBMITTED
+            - PROVIDER_UNKNOWN
+            - SETTLED
+            - FAILED
+            - REVERSAL_PENDING
+            - REVERSED
+
+        amount:
+          $ref: '#/components/schemas/Money'
+
+        createdAt:
+          type: string
+          format: date-time
+
+        updatedAt:
+          type: string
+          format: date-time
+
+        settledAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+
+        failureCode:
+          type:
+            - string
+            - 'null'
+
+        ledgerReference:
+          type:
+            - string
+            - 'null'
+          format: uuid
+
+        correlationId:
+          type:
+            - string
+            - 'null'
+          format: uuid
+
+    Problem:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - title
+        - status
+        - code
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        code:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+
+  responses:
+    Problem:
+      description: >-
+        Machine-readable error. The client must not assume
+        an operation was not executed on transport failure.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
