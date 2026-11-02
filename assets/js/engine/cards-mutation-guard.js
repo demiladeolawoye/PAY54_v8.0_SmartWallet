@@ -382,10 +382,13 @@
       }
     }
 
-    if (
-      typeof record.quoteId !== "string" ||
-      !record.quoteId.trim()
-    ) {
+   if (
+  record.type === "funding" &&
+  (
+    typeof record.quoteId !== "string" ||
+    !record.quoteId.trim()
+  )
+) {
       reject(
         "CARD_AUDIT_QUOTE_INVALID",
         "Card audit requires a quote reference."
