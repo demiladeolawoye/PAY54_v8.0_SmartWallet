@@ -523,9 +523,12 @@ BEGIN
     -- A production service must never directly alter expiry timestamps
     -- without its authorised lifecycle controls.
 
-    UPDATE pay54.balance_reservations
-       SET expires_at = clock_timestamp() - INTERVAL '1 second'
-     WHERE operation_id = v_expiry_operation;
+    
+UPDATE pay54.balance_reservations
+   SET created_at = clock_timestamp() - INTERVAL '3 minutes',
+       expires_at = clock_timestamp() - INTERVAL '1 minute'
+ WHERE operation_id = v_expiry_operation;
+
 
     SELECT operation_id, outcome
       INTO v_result_operation, v_outcome
