@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   ledger-integrity:
-    name: PostgreSQL Ledger Integrity
+    name: PostgreSQL Ledger Integrity and Reservation Concurrency
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
@@ -64,58 +64,69 @@ jobs:
             -c "SELECT current_database(), current_user, version();"
 
       - name: Apply ledger migration 001
-        run: |
-          psql -X -v ON_ERROR_STOP=1 \
-            -f backend/db/migrations/001_financial_ledger.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/migrations/001_financial_ledger.sql
 
       - name: Run ledger integrity tests 001
-        run: |
-          psql -X -v ON_ERROR_STOP=1 \
-            -f backend/db/tests/001_financial_ledger_integrity.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/001_financial_ledger_integrity.sql
 
       - name: Apply ledger hardening migration 002
-        run: |
-          psql -X -v ON_ERROR_STOP=1 \
-            -f backend/db/migrations/002_ledger_integrity_hardening.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/migrations/002_ledger_integrity_hardening.sql
 
       - name: Run reversal integrity tests 002
-        run: |
-          psql -X -v ON_ERROR_STOP=1 \
-            -f backend/db/tests/002_ledger_reversal_integrity.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/002_ledger_reversal_integrity.sql
 
-      - name: Verify test fixtures were rolled back
+      - name: Apply reservation migration 003
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/migrations/003_wallet_reservation.sql
+
+      - name: Run reservation integrity tests 003
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/003_wallet_reservation_integrity.sql
+
+      - name: Verify isolated tests rolled back
         run: |
           psql -X -v ON_ERROR_STOP=1 <<'SQL'
           DO $$
           BEGIN
-            IF EXISTS (
-              SELECT 1 FROM pay54.wallets
-            ) OR EXISTS (
-              SELECT 1 FROM pay54.ledger_accounts
-            ) OR EXISTS (
-              SELECT 1 FROM pay54.financial_operations
-            ) OR EXISTS (
-              SELECT 1 FROM pay54.ledger_journals
-            ) OR EXISTS (
-              SELECT 1 FROM pay54.ledger_entries
-            ) OR EXISTS (
-              SELECT 1 FROM pay54.balance_reservations
-            ) OR EXISTS (
-              SELECT 1 FROM pay54.idempotency_records
-            ) THEN
+            IF EXISTS (SELECT 1 FROM pay54.wallets)
+               OR EXISTS (SELECT 1 FROM pay54.ledger_accounts)
+               OR EXISTS (SELECT 1 FROM pay54.financial_operations)
+               OR EXISTS (SELECT 1 FROM pay54.ledger_journals)
+               OR EXISTS (SELECT 1 FROM pay54.ledger_entries)
+               OR EXISTS (SELECT 1 FROM pay54.balance_reservations)
+               OR EXISTS (SELECT 1 FROM pay54.idempotency_records)
+               OR EXISTS (SELECT 1 FROM pay54.outbox_events)
+            THEN
               RAISE EXCEPTION
-                'PAY54 test records remain after test rollback';
+                'PAY54 SQL tests persisted financial fixtures';
             END IF;
 
             RAISE NOTICE
-              'PASS: No persistent financial test records';
+              'PASS: SQL test fixtures were rolled back';
           END;
           $$;
           SQL
 
+      - name: Create separate disposable concurrency database
+        run: createdb pay54_concurrency
+
+      - name: Apply migrations to concurrency database
+        env:
+          PGDATABASE: pay54_concurrency
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/migrations/001_financial_ledger.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/migrations/002_ledger_integrity_hardening.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/migrations/003_wallet_reservation.sql
+
+      - name: Test simultaneous reservations and same-key retries
+        env:
+          PGDATABASE: pay54_concurrency
+        run: bash backend/db/tests/003_wallet_reservation_concurrency.sh
+
+      - name: Delete disposable concurrency database
+        run: dropdb pay54_concurrency
+
       - name: Report database acceptance checkpoint
         run: |
-          echo "PAY54 PostgreSQL ledger tests completed."
-          echo "Migrations 001 and 002 were applied."
-          echo "Integrity test suites 001 and 002 passed."
-          echo "No payment processing was enabled."
+          echo "PAY54 migrations 001, 002 and 003 applied successfully."
+          echo "Ledger integrity tests 001, 002 and 003 passed."
+          echo "Concurrent overspending and idempotency race tests passed."
+          echo "Financial execution API remains disabled."
