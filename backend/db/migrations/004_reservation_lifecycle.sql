@@ -111,11 +111,11 @@ BEGIN
             USING ERRCODE = 'P5412';
     END IF;
 
-    SELECT *
-      INTO v_reservation
-      FROM pay54.balance_reservations
-     WHERE operation_id = p_operation_id
-     FOR UPDATE;
+   SELECT *
+  INTO v_reservation
+  FROM pay54.balance_reservations AS r
+ WHERE r.operation_id = p_operation_id
+ FOR UPDATE;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION
@@ -438,11 +438,11 @@ BEGIN
             USING ERRCODE = 'P5412';
     END IF;
 
-    SELECT *
-      INTO v_reservation
-      FROM pay54.balance_reservations
-     WHERE operation_id = p_operation_id
-     FOR UPDATE;
+  SELECT *
+  INTO v_reservation
+  FROM pay54.balance_reservations AS r
+ WHERE r.operation_id = p_operation_id
+ FOR UPDATE;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION
