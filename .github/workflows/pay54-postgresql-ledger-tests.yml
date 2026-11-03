@@ -1,0 +1,121 @@
+
+name: PAY54 PostgreSQL Ledger Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/db/**"
+      - ".github/workflows/pay54-postgresql-ledger-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-postgresql-ledger-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ledger-integrity:
+    name: PostgreSQL Ledger Integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_ci
+          POSTGRES_PASSWORD: pay54_isolated_ci_only_2026
+          POSTGRES_DB: pay54_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pay54_ci -d pay54_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_ci
+      PGPASSWORD: pay54_isolated_ci_only_2026
+      PGDATABASE: pay54_test
+      PGSSLMODE: disable
+      PGCONNECT_TIMEOUT: "10"
+
+    steps:
+      - name: Checkout PAY54 source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Verify PostgreSQL connection
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -c "SELECT current_database(), current_user, version();"
+
+      - name: Apply ledger migration 001
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/migrations/001_financial_ledger.sql
+
+      - name: Run ledger integrity tests 001
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/001_financial_ledger_integrity.sql
+
+      - name: Apply ledger hardening migration 002
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/migrations/002_ledger_integrity_hardening.sql
+
+      - name: Run reversal integrity tests 002
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/002_ledger_reversal_integrity.sql
+
+      - name: Verify test fixtures were rolled back
+        run: |
+          psql -X -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          BEGIN
+            IF EXISTS (
+              SELECT 1 FROM pay54.wallets
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.ledger_accounts
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.financial_operations
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.ledger_journals
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.ledger_entries
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.balance_reservations
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.idempotency_records
+            ) THEN
+              RAISE EXCEPTION
+                'PAY54 test records remain after test rollback';
+            END IF;
+
+            RAISE NOTICE
+              'PASS: No persistent financial test records';
+          END;
+          $$;
+          SQL
+
+      - name: Report database acceptance checkpoint
+        run: |
+          echo "PAY54 PostgreSQL ledger tests completed."
+          echo "Migrations 001 and 002 were applied."
+          echo "Integrity test suites 001 and 002 passed."
+          echo "No payment processing was enabled."
