@@ -468,20 +468,19 @@ BEGIN
             USING ERRCODE = 'P5421';
     END IF;
 
-    IF EXISTS (
-        SELECT 1
-        FROM pay54.provider_attempts
-        WHERE operation_id = p_operation_id
-    ) OR EXISTS (
-        SELECT 1
-        FROM pay54.ledger_journals
-        WHERE operation_id = p_operation_id
-    ) THEN
-        RAISE EXCEPTION
-            'Release blocked: operation may already have executed'
-            USING ERRCODE = 'P5422';
-    END IF;
-
+   IF EXISTS (
+    SELECT 1
+    FROM pay54.provider_attempts AS pa
+    WHERE pa.operation_id = p_operation_id
+) OR EXISTS (
+    SELECT 1
+    FROM pay54.ledger_journals AS j
+    WHERE j.operation_id = p_operation_id
+) THEN
+    RAISE EXCEPTION
+        'Release blocked: operation may already have executed'
+        USING ERRCODE = 'P5422';
+END IF;
     IF p_reason = 'EXPIRED_UNSUBMITTED'
        AND v_reservation.expires_at > clock_timestamp()
     THEN
