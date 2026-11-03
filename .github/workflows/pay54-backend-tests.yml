@@ -1,0 +1,64 @@
+
+name: PAY54 Backend Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/**"
+      - ".github/workflows/pay54-backend-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-backend-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-unit-tests:
+    name: Backend Foundation and Domain Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      PAY54_HOST: "127.0.0.1"
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Verify Node.js version
+        run: node --version
+
+      - name: Check backend JavaScript syntax
+        run: npm run check
+
+      - name: Execute PAY54 automated unit tests
+        run: npm test
+
+      - name: Confirm financial execution remains disabled
+        run: |
+          node --input-type=module -e "
+          import { loadConfig } from './src/config.mjs';
+          const config = loadConfig();
+          if (config.realMoneyMode !== false) {
+            throw new Error('Financial execution safety check failed');
+          }
+          console.log('PASS: Real-money mode disabled');
+          "
