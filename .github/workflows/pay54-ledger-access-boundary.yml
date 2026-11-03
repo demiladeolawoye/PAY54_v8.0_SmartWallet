@@ -1,0 +1,143 @@
+
+name: PAY54 Direct Ledger Access Boundary
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/db/**"
+      - ".github/workflows/pay54-ledger-access-boundary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-ledger-boundary-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ledger-access-boundary:
+    name: Financial Ledger Access Isolation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_boundary_ci
+          POSTGRES_PASSWORD: pay54_disposable_boundary_ci_2026
+          POSTGRES_DB: pay54_boundary_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pay54_boundary_ci -d pay54_boundary_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_boundary_ci
+      PGPASSWORD: pay54_disposable_boundary_ci_2026
+      PGDATABASE: pay54_boundary_test
+      PGSSLMODE: disable
+      PGCONNECT_TIMEOUT: "10"
+
+    steps:
+      - name: Checkout PAY54 source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Verify isolated PostgreSQL connection
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -c "SELECT current_database(), current_user, version();"
+
+      - name: Apply PAY54 migrations 001 through 007
+        run: |
+          for migration in \
+            backend/db/migrations/001_financial_ledger.sql \
+            backend/db/migrations/002_ledger_integrity_hardening.sql \
+            backend/db/migrations/003_wallet_reservation.sql \
+            backend/db/migrations/004_reservation_lifecycle.sql \
+            backend/db/migrations/005_operation_state_integrity.sql \
+            backend/db/migrations/006_database_role_isolation.sql \
+            backend/db/migrations/007_direct_ledger_access_boundary.sql
+          do
+            echo "Applying ${migration}"
+            psql -X -v ON_ERROR_STOP=1 -f "${migration}"
+          done
+
+      - name: Test direct ledger access restrictions
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/007_direct_ledger_access_boundary.sql
+
+      - name: Repeat database role isolation tests
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/006_database_role_isolation.sql
+
+      - name: Repeat operation state integrity tests
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/005_operation_state_integrity.sql
+
+      - name: Repeat reservation lifecycle integrity tests
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/004_reservation_lifecycle_integrity.sql
+
+      - name: Verify financial execution remains disabled
+        run: |
+          psql -X -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          DECLARE
+            v_enabled BOOLEAN;
+            v_mode TEXT;
+          BEGIN
+            SELECT execution_enabled, execution_mode
+              INTO v_enabled, v_mode
+              FROM pay54.financial_execution_status();
+
+            IF v_enabled IS DISTINCT FROM FALSE
+               OR v_mode <>
+                  'DISABLED_PENDING_TRUSTED_EXECUTION'
+            THEN
+              RAISE EXCEPTION
+                'PAY54 trusted financial execution unexpectedly enabled';
+            END IF;
+
+            IF EXISTS (
+              SELECT 1 FROM pay54.financial_operations
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.ledger_entries
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.balance_reservations
+            ) THEN
+              RAISE EXCEPTION
+                'PAY54 SQL fixtures persisted unexpectedly';
+            END IF;
+
+            RAISE NOTICE
+              'PASS: Financial execution disabled and fixtures rolled back';
+          END;
+          $$;
+          SQL
+
+      - name: Report security checkpoint
+        run: |
+          echo "PAY54 migrations 001-007 installed."
+          echo "Restricted role financial access tests passed."
+          echo "Prior role, operation and lifecycle regressions passed."
+          echo "Financial execution remains disabled."
