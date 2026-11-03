@@ -1,0 +1,145 @@
+
+name: PAY54 Database Role Isolation Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/db/**"
+      - ".github/workflows/pay54-database-role-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-database-role-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  database-role-isolation:
+    name: Financial Database Role Isolation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_role_ci
+          POSTGRES_PASSWORD: pay54_disposable_role_ci_2026
+          POSTGRES_DB: pay54_role_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pay54_role_ci -d pay54_role_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_role_ci
+      PGPASSWORD: pay54_disposable_role_ci_2026
+      PGDATABASE: pay54_role_test
+      PGSSLMODE: disable
+      PGCONNECT_TIMEOUT: "10"
+
+    steps:
+      - name: Checkout PAY54 source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Verify isolated test database
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -c "SELECT current_database(), current_user, version();"
+
+      - name: Apply ledger migration 001
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/migrations/001_financial_ledger.sql
+
+      - name: Apply ledger hardening migration 002
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/migrations/002_ledger_integrity_hardening.sql
+
+      - name: Apply reservation migration 003
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/migrations/003_wallet_reservation.sql
+
+      - name: Apply reservation lifecycle migration 004
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/migrations/004_reservation_lifecycle.sql
+
+      - name: Apply operation integrity migration 005
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/migrations/005_operation_state_integrity.sql
+
+      - name: Apply database role isolation migration 006
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/migrations/006_database_role_isolation.sql
+
+      - name: Test restricted database role permissions
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/006_database_role_isolation.sql
+
+      - name: Repeat financial operation security regression 005
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/005_operation_state_integrity.sql
+
+      - name: Repeat reservation lifecycle regression 004
+        run: |
+          psql -X -v ON_ERROR_STOP=1 \
+            -f backend/db/tests/004_reservation_lifecycle_integrity.sql
+
+      - name: Verify synthetic financial records rolled back
+        run: |
+          psql -X -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          BEGIN
+            IF EXISTS (
+              SELECT 1 FROM pay54.wallets
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.financial_operations
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.balance_reservations
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.ledger_journals
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.ledger_entries
+            ) OR EXISTS (
+              SELECT 1 FROM pay54.outbox_events
+            ) THEN
+              RAISE EXCEPTION
+                'PAY54 role testing persisted financial fixtures';
+            END IF;
+
+            RAISE NOTICE
+              'PASS: No synthetic financial records persisted';
+          END;
+          $$;
+          SQL
+
+      - name: Report database role security checkpoint
+        run: |
+          echo "PAY54 migrations 001-006 applied."
+          echo "Restricted application and audit roles tested."
+          echo "Unauthorised financial table access denied."
+          echo "Existing operation and lifecycle regressions passed."
+          echo "Financial execution remains disabled."
