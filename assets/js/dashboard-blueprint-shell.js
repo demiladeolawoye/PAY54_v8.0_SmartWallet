@@ -411,7 +411,8 @@ dashboard.append(mobileCurrency, top, columns);
     find("#scanPayFab")?.classList.add("p54b-original-fab");
 
     document.body.classList.add("p54-blueprint");
-    document.documentElement.dataset.pay54Blueprint = "1.2.0";
+    document.documentElement.dataset.pay54Blueprint = "1.2.1";
+
 
     console.info(
       "[PAY54 BLUEPRINT] v1.2.0 mounted; existing financial engines and preview gate preserved."
