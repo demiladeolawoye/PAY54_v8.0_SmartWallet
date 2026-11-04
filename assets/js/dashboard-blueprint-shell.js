@@ -416,7 +416,8 @@ dashboard.append(mobileCurrency, top, columns);
 
 
     console.info(
-      "[PAY54 BLUEPRINT] v1.2.0 mounted; existing financial engines and preview gate preserved."
+    
+"[PAY54 BLUEPRINT] v1.2.1 mounted; existing financial engines and preview gate preserved."
     );
   } catch (error) {
     console.error(
