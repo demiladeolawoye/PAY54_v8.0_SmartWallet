@@ -708,3 +708,112 @@ body.p54-blueprint .p54b-shell {
     font-size: 9px;
   }
 }
+
+/* ==========================================================================
+   PAY54 PHASE 2F-A
+   First-render and desktop-shell corrections
+   Version: 1.4.0
+   ========================================================================== */
+
+/*
+ * Hide only the legacy dashboard while the approved
+ * blueprint is preparing. Keep the disclosure banner
+ * and all existing security controls intact.
+ */
+
+html.p54b-boot-pending body > .dash-header,
+html.p54b-boot-pending body > main.dash-grid {
+  visibility: hidden !important;
+}
+
+/*
+ * A lightweight loading message replaces the temporary
+ * old-dashboard flash. It is removed when boot completes.
+ */
+
+html.p54b-boot-pending body::after {
+  content: "Preparing your PAY54 dashboard…";
+  position: fixed;
+  z-index: 100;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100vw - 32px);
+  padding: 17px 24px;
+  border-radius: 14px;
+  background: #0b1544;
+  color: #ffffff;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Arial,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 12px 34px rgba(5, 13, 49, 0.18);
+  pointer-events: none;
+}
+
+/*
+ * The original 160px floating-action-button spacer
+ * is unnecessary when the blueprint is mounted.
+ * The mobile bottom navigation retains its own padding.
+ */
+
+body.p54-blueprint > .fab-spacer {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/*
+ * Extend the actual dashboard shell to the viewport
+ * while allowing it to grow naturally with longer feeds.
+ */
+
+body.p54-blueprint .p54b-shell {
+  min-height: 100dvh;
+  height: auto;
+  align-items: stretch;
+}
+
+body.p54-blueprint .p54b-sidebar {
+  min-height: 100%;
+  align-self: stretch;
+  background:
+    linear-gradient(180deg, #060a27, #080d32);
+}
+
+body.p54-blueprint .p54b-content {
+  min-height: 100%;
+}
+
+body.p54-blueprint .p54b-dashboard {
+  padding-bottom: 28px;
+}
+
+/* Mobile bottom tabs require a safe scroll clearance. */
+
+@media (max-width: 760px) {
+  body.p54-blueprint .p54b-dashboard {
+    padding-bottom:
+      calc(98px + env(safe-area-inset-bottom));
+  }
+
+  body.p54-blueprint .p54b-sidebar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.p54b-boot-pending body::after {
+    animation: none;
+    transition: none;
+  }
+}
