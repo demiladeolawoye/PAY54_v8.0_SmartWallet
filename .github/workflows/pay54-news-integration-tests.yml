@@ -1,0 +1,76 @@
+
+name: PAY54 News End-to-End Integration Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/news/**"
+      - "backend/tests/news-integration.test.mjs"
+      - ".github/workflows/pay54-news-integration-tests.yml"
+  pull_request:
+    paths:
+      - "backend/news/**"
+      - "backend/tests/news-integration.test.mjs"
+      - ".github/workflows/pay54-news-integration-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-news-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  news-end-to-end:
+    name: Secure Financial News End-to-End Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      PAY54_NEWS_ENABLED: "false"
+      PAY54_NEWS_RIGHTS_VERIFIED: "false"
+
+    steps:
+      - name: Checkout PAY54 source
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Verify runtime
+        run: node --version
+
+      - name: Validate backend news modules
+        run: |
+          node --check backend/news/news-feed-policy.mjs
+          node --check backend/news/news-service.mjs
+          node --check backend/news/news-http-handler.mjs
+          node --check backend/news/marketaux-adapter.mjs
+          node --check backend/news/news-integration.mjs
+
+      - name: Validate integration test syntax
+        run: |
+          node --check backend/tests/news-integration.test.mjs
+
+      - name: Execute synthetic end-to-end tests
+        run: |
+          node --test backend/tests/news-integration.test.mjs
+
+      - name: Execute existing news regression suite
+        run: |
+          node --test \
+            backend/tests/news-feed-policy.test.mjs \
+            backend/tests/news-service.test.mjs \
+            backend/tests/marketaux-adapter.test.mjs
+
+      - name: Confirm integration checkpoint
+        run: |
+          echo "PAY54 synthetic news integration tests passed."
+          echo "Financial news provider activation remains disabled."
+          echo "No live provider credentials were used."
+          echo "No public API was deployed."
