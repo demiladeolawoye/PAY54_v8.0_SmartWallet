@@ -1,0 +1,58 @@
+
+name: PAY54 News Provider Security Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/news/**"
+      - "backend/tests/marketaux-adapter.test.mjs"
+      - ".github/workflows/pay54-news-provider-tests.yml"
+  pull_request:
+    paths:
+      - "backend/news/**"
+      - "backend/tests/marketaux-adapter.test.mjs"
+      - ".github/workflows/pay54-news-provider-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-news-provider-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  provider-security:
+    name: Financial News Provider Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Validate adapter and test syntax
+        run: |
+          node --check backend/news/marketaux-adapter.mjs
+          node --check backend/tests/marketaux-adapter.test.mjs
+
+      - name: Run provider security tests
+        run: |
+          node --test backend/tests/marketaux-adapter.test.mjs
+
+      - name: Run existing financial news regression tests
+        run: |
+          node --test backend/tests/news-feed-policy.test.mjs
+          node --test backend/tests/news-service.test.mjs
+
+      - name: Confirm security checkpoint
+        run: |
+          echo "PAY54 news provider adapter and regression tests passed."
+          echo "No provider credentials or live financial news service activated."
