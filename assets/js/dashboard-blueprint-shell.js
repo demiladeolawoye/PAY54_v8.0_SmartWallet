@@ -326,16 +326,14 @@
 // Approved desktop blueprint:
 // Main column: Money Moves, Services, Gift Cards, News.
 // Supporting column: Recent Activity, Alerts, Utilities, Security.
+
+// PAY54 Phase 2E — approved independent dashboard columns.
+// This keeps the Gift Cards banner directly below Services,
+// regardless of the height of Recent Activity or Alerts.
+// Existing financial action handlers and data nodes are retained.
 main.append(moves, services, promo, newsBlock);
 support.append(recent, alerts, utilities, security);
 
-
-    // Desktop: the promotion and security card now share one aligned row.
-    const showcase = make("div", "p54b-showcase");
-    showcase.append(promo, security);
-
-    const newsRow = make("div", "p54b-news-row");
-    newsRow.append(newsBlock);
 
     if (recipients) {
       const details = make("details", "p54b-legacy");
