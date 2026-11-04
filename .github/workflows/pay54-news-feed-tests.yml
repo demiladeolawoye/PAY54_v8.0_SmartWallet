@@ -1,0 +1,55 @@
+
+name: PAY54 Financial News Policy Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/news/**"
+      - "backend/tests/news-feed-policy.test.mjs"
+      - ".github/workflows/pay54-news-feed-tests.yml"
+  pull_request:
+    paths:
+      - "backend/news/**"
+      - "backend/tests/news-feed-policy.test.mjs"
+      - ".github/workflows/pay54-news-feed-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-news-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  news-policy-integrity:
+    name: Financial News Validation and Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Verify Node.js
+        run: node --version
+
+      - name: Validate news policy syntax
+        run: |
+          node --check backend/news/news-feed-policy.mjs
+          node --check backend/tests/news-feed-policy.test.mjs
+
+      - name: Run news security and ordering tests
+        run: |
+          node --test backend/tests/news-feed-policy.test.mjs
+
+      - name: Confirm checkpoint
+        run: |
+          echo "PAY54 financial news policy checks passed."
