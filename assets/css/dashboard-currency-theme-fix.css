@@ -1,0 +1,206 @@
+
+/* ==========================================================================
+   PAY54 ENTERPRISE — CURRENCY AND THEME PRESENTATION
+   File: assets/css/dashboard-currency-theme-fix.css
+   Version: 1.0.0
+
+   Presentation-only enhancements for the approved dashboard.
+   No financial behaviour, wallet data or security controls changed.
+   ========================================================================== */
+
+/* Canonical currency selector: common presentation */
+
+body.p54-blueprint .currency-pills {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  align-items: center;
+  gap: 6px;
+}
+
+body.p54-blueprint .currency-pills .currency-scroll-hint {
+  display: none !important;
+}
+
+body.p54-blueprint .currency-pills button.currency {
+  box-sizing: border-box;
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: .015em;
+  white-space: nowrap;
+  text-align: center;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+body.p54-blueprint .currency-pills button.currency:focus-visible {
+  outline: 3px solid #f3b843;
+  outline-offset: 2px;
+}
+
+/* Desktop: place the single selector in the dashboard header */
+
+@media (min-width: 761px) {
+  body.p54-blueprint .dash-header > .currency-pills {
+    display: flex !important;
+    flex: 1 1 auto;
+    width: auto;
+    max-width: min(610px, 58vw);
+    margin-inline: auto;
+    justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    padding: 3px 5px;
+  }
+
+  body.p54-blueprint .dash-header
+  > .currency-pills button.currency {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  body.p54-blueprint .p54b-mobile-currencies {
+    display: none !important;
+  }
+}
+
+/* Mobile: use pills, not the old native dropdown */
+
+@media (max-width: 760px) {
+  body.p54-blueprint .dash-header .currency-dd-wrap {
+    display: none !important;
+  }
+
+  body.p54-blueprint .p54b-mobile-currencies {
+    display: block !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  body.p54-blueprint
+  .p54b-mobile-currencies > .currency-pills {
+    display: flex !important;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    gap: 5px;
+    padding: 3px 0 7px;
+    margin: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.p54-blueprint
+  .p54b-mobile-currencies
+  .currency-pills button.currency {
+    display: inline-flex !important;
+    flex: 1 0 43px;
+    align-items: center;
+    justify-content: center;
+    min-width: 43px;
+    min-height: 34px;
+    margin: 0;
+    padding: 6px 3px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  body.p54-blueprint
+  .p54b-mobile-currencies
+  .currency-pills button.currency[data-cur="ZAR"] {
+    visibility: visible !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Theme contrast — light-coloured dashboard action tiles
+   -------------------------------------------------------------------------- */
+
+body.p54-blueprint
+.p54b-dashboard
+:is(.money-moves-grid, .services-grid, .utility-grid)
+:is(.tile-btn, .utility-btn)
+.t-title {
+  color: #101935 !important;
+  font-weight: 800;
+  text-shadow: none !important;
+}
+
+body.p54-blueprint
+.p54b-dashboard
+.shortcut-grid .p54b-shortcut-label {
+  color: #101935 !important;
+  font-weight: 800;
+  text-shadow: none !important;
+}
+
+body.p54-blueprint
+.p54b-dashboard
+:is(.money-moves-grid, .services-grid, .utility-grid)
+:is(.tile-btn, .utility-btn)
+.t-sub {
+  color: #4b5875 !important;
+  text-shadow: none !important;
+}
+
+/* Card surfaces should remain readable regardless of theme */
+
+body.p54-blueprint
+.p54b-dashboard
+:is(
+  #p54b-moves,
+  #p54b-services,
+  #p54b-recent,
+  .p54b-news,
+  .p54b-security,
+  .utility-card
+) {
+  color: #101935;
+}
+
+body.p54-blueprint
+.p54b-dashboard
+:is(
+  #p54b-moves,
+  #p54b-services,
+  #p54b-recent,
+  .p54b-news,
+  .p54b-security,
+  .utility-card
+) :is(h2, h3, .feed-title, .feed-amt) {
+  color: #101935;
+}
+
+/* Explicitly preserve white headings on dark gradient cards */
+
+body.p54-blueprint
+.p54b-wallets-card :is(h2, h3),
+body.p54-blueprint
+.p54b-shortcuts .card-head :is(h2, h3),
+body.p54-blueprint
+.p54b-balance .label,
+body.p54-blueprint
+.p54b-promo :is(h2, p) {
+  color: #ffffff !important;
+}
+
+/* Maintain legibility when keyboard navigation is used */
+
+body.p54-blueprint
+.p54b-dashboard button:focus-visible {
+  outline: 3px solid #f3b843;
+  outline-offset: 2px;
+}
