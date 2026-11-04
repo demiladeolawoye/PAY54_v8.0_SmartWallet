@@ -1,31 +1,36 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400..900&display=swap");
 
-/* ==========================================================================
-   PAY54 ENTERPRISE DASHBOARD REFINEMENTS
-   File: assets/css/dashboard-blueprint-refinements.css
-   Version: 1.2.0
-   Scope: Approved desktop/mobile dashboard blueprint
+/* PAY54 Dashboard Blueprint Refinements v1.3.0
+ * Requires dashboard-blueprint-shell.css and shell JS v1.2.0.
+ * Presentation only; financial gate and disclosure untouched.
+ */
 
-   Preserves v1.1 layout, wallet behaviour, Gift Cards banner,
-   service positioning and responsive composition.
-
-   Adds unified Inter typography and visual consistency.
-   Does not affect financial engines, modals or preview disclosure.
-   ========================================================================== */
-
-body.p54-blueprint {
-  --p54b-text: #0a1437;
+body.p54-blueprint .p54b-shell {
+  --p54b-ink: #101935;
+  --p54b-muted: #4b5875;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Arial, sans-serif;
+  font-optical-sizing: auto;
   font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
-.p54-blueprint .p54b-content,
-.p54-blueprint .p54b-dashboard,
-.p54-blueprint .p54b-top,
-.p54-blueprint .p54b-columns,
-.p54-blueprint .p54b-main,
-.p54-blueprint .p54b-support,
-.p54-blueprint .p54b-promo {
+.p54-blueprint .p54b-shell :is(button,input,select,textarea) {
+  font-family: inherit;
+}
+
+.p54-blueprint .p54b-shell
+:is(button,a,input,select,textarea):focus-visible {
+  outline: 3px solid #f3b843;
+  outline-offset: 2px;
+}
+
+.p54-blueprint :is(
+  .p54b-content,.p54b-dashboard,.p54b-top,.p54b-columns,
+  .p54b-main,.p54b-support,.p54b-promo,
+  .p54b-showcase,.p54b-news-row
+) {
   min-width: 0;
   box-sizing: border-box;
 }
@@ -38,43 +43,213 @@ body.p54-blueprint {
   align-items: stretch;
 }
 
-.p54-blueprint .p54b-dashboard .card h2,
-.p54-blueprint .p54b-dashboard .card h3 {
-  font-size: 17px;
-  font-weight: 800;
-  color: var(--p54b-text);
-  letter-spacing: -0.25px;
-}
+/* TYPOGRAPHY */
 
 .p54-blueprint .p54b-greeting h1 {
-  font-size: clamp(22px, 2vw, 26px);
+  font-size: clamp(22px, 1.9vw, 26px);
+  line-height: 1.18;
+  letter-spacing: -.035em;
   font-weight: 800;
+  color: var(--p54b-ink);
 }
 
 .p54-blueprint .p54b-greeting p {
   font-size: 13px;
+  line-height: 1.4;
   font-weight: 500;
-  color: #49546c;
+  color: var(--p54b-muted);
 }
 
-.p54-blueprint .p54b-dashboard .t-title {
-  font-size: 12px;
+.p54-blueprint .p54b-dashboard .card :is(h2,h3) {
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: -.025em;
   font-weight: 800;
-  line-height: 1.18;
+  color: var(--p54b-ink);
 }
 
-.p54-blueprint .p54b-dashboard .card-head .sub,
-.p54-blueprint .p54b-dashboard .feed-sub {
-  color: #4f5c77;
+.p54-blueprint .p54b-dashboard :is(.sub,.feed-sub) {
+  font-size: 11px;
+  line-height: 1.4;
   font-weight: 500;
+  color: var(--p54b-muted);
 }
 
-.p54-blueprint .p54b-dashboard .feed-title {
-  color: #10193d;
+.p54-blueprint .p54b-balance .label {
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: .015em;
+  font-weight: 700;
+}
+
+.p54-blueprint .p54b-balance
+:is(#balanceAmount,.balance-amount) {
+  font-size: clamp(30px, 2.7vw, 36px);
+  line-height: 1.1;
+  letter-spacing: -.035em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.p54-blueprint .p54b-balance .balance-actions .btn {
+  font-size: 12px;
+  line-height: 1.25;
   font-weight: 750;
 }
 
-/* Quick Shortcuts layout */
+.p54-blueprint .p54b-wallets-card .wallet-balance-row {
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+.p54-blueprint .p54b-wallets-card .wallet-balance-amt {
+  font-size: 12px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.p54-blueprint .p54b-dashboard
+:is(.feed-title,.feed-amt) {
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.p54-blueprint .p54b-dashboard .t-title {
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  text-shadow: none;
+}
+
+.p54-blueprint .p54b-dashboard
+.money-moves-grid .t-title {
+  font-size: 12px;
+  text-align: center;
+}
+
+/* SERVICES */
+
+.p54-blueprint .p54b-dashboard .services-grid {
+  grid-template-columns: repeat(5,minmax(0,1fr));
+}
+
+.p54-blueprint .p54b-dashboard
+.services-grid > .p54b-service-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 5px;
+  min-width: 0;
+  min-height: 126px;
+  padding: 11px 7px;
+}
+
+.p54-blueprint .p54b-dashboard
+.services-grid .p54b-service-tile .t-icon {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 29px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.p54-blueprint .p54b-dashboard
+.services-grid .p54b-service-tile .t-title {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+
+.p54-blueprint .p54b-dashboard
+.services-grid .p54b-service-tile .t-sub {
+  display: block;
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  overflow: visible;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--p54b-muted);
+  text-align: left;
+  overflow-wrap: break-word;
+}
+
+.p54-blueprint .p54b-dashboard
+.money-moves-grid .tile-btn {
+  min-width: 0;
+}
+
+/* MY WALLETS */
+
+.p54-blueprint .p54b-wallets-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.p54-blueprint .p54b-wallets-card h2,
+.p54-blueprint .p54b-shortcuts h3 {
+  color: #fff !important;
+}
+
+.p54-blueprint .p54b-wallets-manage {
+  border: 0;
+  background: transparent;
+  color: #f4eaff;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.p54-blueprint .p54b-wallets-manage[hidden] {
+  display: none !important;
+}
+
+.p54-blueprint .p54b-wallet-summary {
+  margin: 0 0 8px;
+  color: #e8dbff;
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.p54-blueprint .p54b-wallets-card:not(.p54b-expanded)
+.wallet-balance-row:nth-child(n+5) {
+  display: none;
+}
+
+.p54-blueprint .p54b-wallets-card.p54b-single-wallet
+.wallet-balance-row {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  padding: 11px;
+  font-size: 13px;
+}
+
+.p54-blueprint .p54b-wallets-card.p54b-single-wallet
+.wallet-balance-amt {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.p54-blueprint .p54b-mobile-wallet-manage {
+  display: none;
+}
+
+/* SHORTCUTS */
 
 .p54-blueprint .p54b-shortcuts.card {
   display: flex;
@@ -96,139 +271,75 @@ body.p54-blueprint {
 .p54-blueprint .p54b-shortcut {
   min-height: 82px;
   padding: 10px 4px;
-  font-size: 11px;
   font-weight: 800;
   line-height: 1.15;
 }
 
 .p54-blueprint .p54b-shortcut-label {
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.22;
   text-align: center;
 }
 
-.p54-blueprint .p54b-shortcuts h3,
-.p54-blueprint .p54b-wallets-card h2 {
-  color: #fff !important;
-}
+/* SIDEBAR */
 
-/* My Wallets layout */
-
-.p54-blueprint .p54b-wallets-heading {
+.p54-blueprint .p54b-side-link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 650;
 }
 
-.p54-blueprint .p54b-wallets-manage {
-  border: 0;
-  background: transparent;
-  color: #f4eaff;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
+.p54-blueprint .p54b-nav-symbol {
+  flex: 0 0 16px;
+  text-align: center;
 }
 
-.p54-blueprint .p54b-wallets-manage[hidden] {
+.p54-blueprint .p54b-side-link.is-current {
+  background: linear-gradient(100deg,#0879f5,#9039dd);
+  font-weight: 750;
+  color: #fff;
+}
+
+.p54-blueprint .p54b-overflow[hidden] {
   display: none !important;
 }
 
-.p54-blueprint .p54b-wallet-summary {
-  margin: 0 0 8px;
-  color: #e8dbff;
-  font-size: 11px;
-  font-weight: 550;
-}
-
-.p54-blueprint
-.p54b-wallets-card:not(.p54b-expanded)
-.wallet-balance-row:nth-child(n+5) {
-  display: none;
-}
-
-.p54-blueprint
-.p54b-wallets-card.p54b-single-wallet
-.wallet-balance-row {
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  padding: 11px;
-  font-size: 13px;
-}
-
-.p54-blueprint
-.p54b-wallets-card.p54b-single-wallet
-.wallet-balance-amt {
-  font-size: 13px;
-  font-weight: 800;
-}
-
-/* Approved ten-service grid */
-
-.p54-blueprint .p54b-dashboard .services-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
-.p54-blueprint
-.p54b-dashboard
-.services-grid > .p54b-service-tile {
-  min-width: 0;
-  min-height: 126px;
-  padding: 11px 7px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  text-align: left;
-  gap: 5px;
-}
-
-.p54-blueprint
-.p54b-dashboard
-.services-grid
-.p54b-service-tile .t-icon {
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  min-height: 29px;
-  margin: 0;
-}
-
-.p54-blueprint
-.p54b-dashboard
-.services-grid
-.p54b-service-tile .t-sub {
+.p54-blueprint .p54b-overflow .t-sub {
   display: block;
-  position: static;
-  width: auto;
-  height: auto;
-  clip-path: none;
-  overflow: visible;
-  font-size: 10px;
-  line-height: 1.24;
-  font-weight: 500;
-  color: #384462;
-  text-align: left;
+  font-size: 11px;
+  line-height: 1.3;
 }
 
-.p54-blueprint
-.p54b-dashboard
-.money-moves-grid .tile-btn {
+/* DESKTOP: GIFT CARDS + SECURITY IN SAME ROW */
+
+.p54-blueprint .p54b-showcase,
+.p54-blueprint .p54b-news-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0,1.84fr) minmax(245px,.9fr);
+  gap: 10px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.p54-blueprint .p54b-showcase > *,
+.p54-blueprint .p54b-news-row > * {
+  width: 100%;
   min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
 }
-
-.p54-blueprint .p54b-mobile-wallet-manage {
-  display: none;
-}
-
-/* Required Gift Cards banner */
 
 .p54-blueprint .p54b-promo {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0,1fr) auto;
   align-items: center;
   width: 100%;
-  max-width: 100%;
   padding: 15px 17px;
   min-height: 112px;
   gap: 8px;
@@ -244,21 +355,24 @@ body.p54-blueprint {
   font-size: 19px;
   font-weight: 800;
   line-height: 1.16;
+  letter-spacing: -.025em;
 }
 
 .p54-blueprint .p54b-promo p {
-  font-size: 11px;
-  line-height: 1.3;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
   overflow-wrap: break-word;
 }
 
 .p54-blueprint .p54b-promo-cta {
+  font-size: 11px;
+  font-weight: 750;
   white-space: nowrap;
 }
 
 .p54-blueprint .p54b-gift-art {
   min-width: 0;
-  flex-shrink: 0;
   width: 143px;
   padding: 0 7px;
   justify-content: center;
@@ -270,59 +384,159 @@ body.p54-blueprint {
   height: 74px;
 }
 
-/* Secondary services */
-
-.p54-blueprint .p54b-overflow .t-sub {
-  display: block;
-  font-size: 10px;
-}
-
-.p54-blueprint .p54b-overflow[hidden] {
-  display: none !important;
-}
-
-/* Sidebar */
-
-.p54-blueprint .p54b-side-link {
+.p54-blueprint .p54b-security.card {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  min-height: 112px;
 }
 
-.p54-blueprint .p54b-nav-symbol {
-  flex: 0 0 16px;
-  text-align: center;
+.p54-blueprint .p54b-security.card h3 {
+  margin: 0 0 9px;
 }
 
-.p54-blueprint
-.p54b-sidebar-nav .p54b-side-link {
-  font-weight: 750;
+.p54-blueprint .p54b-security.card p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #495779;
 }
 
-/* Desktop top-card proportions */
+/* NEWS */
+
+.p54-blueprint .p54b-news-row .p54b-news,
+.p54-blueprint .p54b-news-row .p54b-news > .card {
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* P54 MOBILE CENTRE NAVIGATION */
+
+.p54-blueprint .p54b-bottom-item:nth-child(3)
+.p54b-bottom-icon {
+  font-family: Inter,ui-sans-serif,system-ui,sans-serif;
+  font-size: 14px;
+  font-weight: 850;
+  letter-spacing: -.075em;
+}
+
+/* RESPONSIVE DESKTOP */
 
 @media (min-width: 1160px) {
   .p54-blueprint .p54b-top {
     grid-template-columns: 1.15fr .82fr .95fr;
   }
 
-  .p54-blueprint
-  .p54b-wallets-card:not(.p54b-expanded)
+  .p54-blueprint .p54b-wallets-card:not(.p54b-expanded)
   .wallet-balance-row {
     padding-block: 6px;
   }
 }
 
-/* Existing approved mobile layout */
+@media (min-width: 761px) and (max-width: 1150px) {
+  .p54-blueprint .p54b-showcase,
+  .p54-blueprint .p54b-news-row {
+    grid-template-columns:
+      minmax(0,1.4fr) minmax(210px,.9fr);
+  }
+}
+
+/* MOBILE: EXACT SECTION ORDER AND SHARED CARD WIDTH */
 
 @media (max-width: 760px) {
+  .p54-blueprint .p54b-dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .p54-blueprint .p54b-mobile-currencies {
+    order: 0;
+  }
+
+  .p54-blueprint .p54b-top {
+    order: 1;
+  }
+
+  .p54-blueprint :is(
+    .p54b-columns,.p54b-main,.p54b-support,
+    .p54b-showcase,.p54b-news-row
+  ) {
+    display: contents;
+  }
+
+  .p54-blueprint #p54b-moves {
+    order: 2;
+  }
+
+  .p54-blueprint #p54b-services {
+    order: 3;
+  }
+
+  .p54-blueprint .p54b-promo {
+    order: 4;
+  }
+
+  .p54-blueprint #p54b-recent {
+    order: 5;
+  }
+
+  .p54-blueprint .p54b-support > .card {
+    order: 6;
+  }
+
+  .p54-blueprint .p54b-security.card {
+    order: 7;
+  }
+
+  .p54-blueprint .p54b-news {
+    order: 8;
+  }
+
+  .p54-blueprint .p54b-news,
+  .p54-blueprint .p54b-news > .card,
+  .p54-blueprint .p54b-security.card {
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-inline: 0;
+    box-sizing: border-box;
+  }
+
+  .p54-blueprint .p54b-news > .card {
+    padding: 13px;
+    border-radius: 15px;
+  }
+
+  .p54-blueprint .p54b-news .feed-item {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   .p54-blueprint .p54b-greeting h1 {
     color: #fff;
-    font-size: 19px;
+    font-size: 20px;
   }
 
   .p54-blueprint .p54b-greeting p {
-    color: #f1eaff;
+    color: #f4eefe;
+    font-size: 12px;
+  }
+
+  .p54-blueprint .p54b-balance
+  :is(#balanceAmount,.balance-amount) {
+    font-size: clamp(27px,7.5vw,30px);
+  }
+
+  .p54-blueprint .p54b-dashboard .card :is(h2,h3) {
+    font-size: 17px;
   }
 
   .p54-blueprint .p54b-top .p54b-wallets-card {
@@ -331,8 +545,7 @@ body.p54-blueprint {
     margin: 0;
   }
 
-  .p54-blueprint
-  .p54b-top
+  .p54-blueprint .p54b-top
   .p54b-wallets-card.p54b-expanded {
     display: block;
   }
@@ -351,35 +564,36 @@ body.p54-blueprint {
     border-radius: 999px;
     color: #fff;
     background: #ffffff20;
-    font-weight: 750;
     font-size: 11px;
+    font-weight: 750;
     cursor: pointer;
   }
 
-  .p54-blueprint
-  .p54b-wallets-card
-  .wallet-balance-row:nth-child(n+5) {
-    display: flex;
-  }
-
-  .p54-blueprint
-  .p54b-wallets-card.p54b-expanded
+  .p54-blueprint .p54b-wallets-card
+  .wallet-balance-row:nth-child(n+5),
+  .p54-blueprint .p54b-wallets-card.p54b-expanded
   .wallet-balance-row {
     display: flex;
   }
 
-  .p54-blueprint
-  .p54b-shortcuts .shortcut-grid {
+  .p54-blueprint .p54b-shortcuts .shortcut-grid {
     margin-block: 5px 0;
   }
 
   .p54-blueprint .p54b-shortcut {
     min-height: 64px;
-    font-size: 9px;
   }
 
-  .p54-blueprint
-  .p54b-dashboard
+  .p54-blueprint .p54b-shortcut-label {
+    font-size: 10px;
+  }
+
+  .p54-blueprint .p54b-dashboard
+  .money-moves-grid .t-title {
+    font-size: 10px;
+  }
+
+  .p54-blueprint .p54b-dashboard
   .services-grid > .p54b-service-tile {
     min-height: 70px;
     padding: 6px 2px;
@@ -389,28 +603,23 @@ body.p54-blueprint {
     gap: 2px;
   }
 
-  .p54-blueprint
-  .p54b-dashboard
-  .services-grid
-  .p54b-service-tile .t-icon {
-    justify-content: center;
+  .p54-blueprint .p54b-dashboard
+  .services-grid .p54b-service-tile .t-icon {
     font-size: 19px;
     min-height: 23px;
+    justify-content: center;
   }
 
-  .p54-blueprint
-  .p54b-dashboard
-  .services-grid
-  .p54b-service-tile .t-title {
-    font-size: 9px;
-    line-height: 1.12;
+  .p54-blueprint .p54b-dashboard
+  .services-grid .p54b-service-tile .t-title {
+    font-size: 10px;
+    font-weight: 750;
+    line-height: 1.15;
     text-align: center;
   }
 
-  .p54-blueprint
-  .p54b-dashboard
-  .services-grid
-  .p54b-service-tile .t-sub {
+  .p54-blueprint .p54b-dashboard
+  .services-grid .p54b-service-tile .t-sub {
     display: none;
   }
 
@@ -418,19 +627,18 @@ body.p54-blueprint {
     width: 100%;
     min-width: 0;
     max-width: 100%;
-    grid-template-columns: minmax(0, 1fr) 104px;
+    grid-template-columns: minmax(0,1fr) 104px;
     gap: 4px;
     padding: 11px 10px;
     min-height: 102px;
   }
 
   .p54-blueprint .p54b-promo h2 {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .p54-blueprint .p54b-promo p {
-    font-size: 9px;
-    max-width: 215px;
+    font-size: 10px;
   }
 
   .p54-blueprint .p54b-promo-cta {
@@ -451,20 +659,39 @@ body.p54-blueprint {
     margin-left: -8px;
   }
 
-  .p54-blueprint .p54b-columns,
-  .p54-blueprint .p54b-main,
-  .p54-blueprint .p54b-support {
-    width: 100%;
+  .p54-blueprint .p54b-security.card {
+    min-height: 86px;
+  }
+
+  .p54-blueprint .p54b-security.card p {
+    font-size: 11px;
   }
 
   .p54-blueprint .p54b-bottom-item {
-    cursor: pointer;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .p54-blueprint .p54b-bottom-item:nth-child(3)
+  .p54b-bottom-icon {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .p54-blueprint .p54b-dashboard
+  .services-grid .p54b-service-tile .t-title {
+    font-size: 9px;
+  }
+
+  .p54-blueprint .p54b-shortcut-label {
+    font-size: 9px;
   }
 }
 
 @media (max-width: 340px) {
   .p54-blueprint .p54b-promo {
-    grid-template-columns: minmax(0, 1fr) 80px;
+    grid-template-columns: minmax(0,1fr) 80px;
   }
 
   .p54-blueprint .p54b-gift-art {
@@ -478,384 +705,6 @@ body.p54-blueprint {
   }
 
   .p54-blueprint .p54b-promo-cta {
-    font-size: 9px;
-  }
-}
-
-/* ==========================================================================
-   PAY54 ENTERPRISE TYPOGRAPHY SYSTEM v1.2.0
-   Scoped only to the approved dashboard blueprint.
-   ========================================================================== */
-
-body.p54-blueprint .p54b-shell {
-  --p54-type-ink: #111936;
-  --p54-type-secondary: #45516d;
-  --p54-type-muted: #586581;
-
-  font-family:
-    "Inter",
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Arial,
-    sans-serif;
-
-  font-optical-sizing: auto;
-  font-synthesis: none;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-.p54-blueprint .p54b-shell button,
-.p54-blueprint .p54b-shell input,
-.p54-blueprint .p54b-shell select,
-.p54-blueprint .p54b-shell textarea {
-  font: inherit;
-}
-
-.p54-blueprint .p54b-shell button {
-  letter-spacing: normal;
-}
-
-/* Page greeting */
-
-.p54-blueprint .p54b-greeting h1 {
-  color: var(--p54-type-ink);
-  font-size: clamp(22px, 1.8vw, 26px);
-  font-weight: 800;
-  line-height: 1.18;
-  letter-spacing: -0.035em;
-}
-
-.p54-blueprint .p54b-greeting p {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--p54-type-secondary);
-}
-
-/* Consistent section headings */
-
-.p54-blueprint .p54b-dashboard .card h2,
-.p54-blueprint .p54b-dashboard .card h3 {
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
-  color: var(--p54-type-ink);
-}
-
-.p54-blueprint .p54b-dashboard .card-head .sub,
-.p54-blueprint .p54b-dashboard .sub {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.45;
-  color: var(--p54-type-secondary);
-}
-
-/* Primary wallet balance */
-
-.p54-blueprint .p54b-balance .label {
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: 0.015em;
-}
-
-.p54-blueprint .p54b-balance #balanceAmount,
-.p54-blueprint .p54b-balance .balance-amount {
-  font-size: clamp(30px, 2.6vw, 36px);
-  font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -0.035em;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-  overflow-wrap: anywhere;
-}
-
-.p54-blueprint
-.p54b-balance .balance-actions .btn {
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-/* Wallet rows and amounts */
-
-.p54-blueprint
-.p54b-wallets-card .wallet-balance-cur,
-.p54-blueprint
-.p54b-wallets-card .wallet-balance-amt,
-.p54-blueprint
-.p54b-wallets-card .wallet-balance-row {
-  font-size: 12px;
-  line-height: 1.35;
-  font-weight: 650;
-}
-
-.p54-blueprint
-.p54b-wallets-card .wallet-balance-amt {
-  font-weight: 750;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-.p54-blueprint
-.p54b-wallets-card .p54b-wallet-summary {
-  font-size: 11px;
-  line-height: 1.35;
-}
-
-/* Shortcut icons and labels */
-
-.p54-blueprint
-.p54b-shortcuts .p54b-shortcut-label {
-  font-size: 11px;
-  font-weight: 750;
-  line-height: 1.22;
-  letter-spacing: -0.01em;
-  text-align: center;
-}
-
-.p54-blueprint .p54b-shortcut-icon,
-.p54-blueprint .p54b-service-tile .t-icon,
-.p54-blueprint
-.p54b-dashboard .money-moves-grid .t-icon {
-  flex-shrink: 0;
-  line-height: 1;
-  text-align: center;
-}
-
-/* Money Moves */
-
-.p54-blueprint
-.p54b-dashboard
-.money-moves-grid .t-title {
-  font-size: 12px;
-  font-weight: 750;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  text-align: center;
-}
-
-/* Services titles and descriptions */
-
-.p54-blueprint
-.p54b-dashboard
-.services-grid
-.p54b-service-tile .t-title {
-  font-size: 13px;
-  line-height: 1.2;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  overflow-wrap: break-word;
-}
-
-.p54-blueprint
-.p54b-dashboard
-.services-grid
-.p54b-service-tile .t-sub {
-  font-size: 11px;
-  line-height: 1.35;
-  font-weight: 500;
-  color: var(--p54-type-secondary);
-  overflow-wrap: break-word;
-}
-
-/* Recent Activity */
-
-.p54-blueprint .p54b-dashboard .feed-title {
-  font-size: 12px;
-  font-weight: 750;
-  line-height: 1.3;
-  color: var(--p54-type-ink);
-}
-
-.p54-blueprint .p54b-dashboard .feed-sub {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.35;
-  color: var(--p54-type-secondary);
-}
-
-.p54-blueprint .p54b-dashboard .feed-amt,
-.p54-blueprint .p54b-dashboard .feed-amt .main {
-  font-size: 12px;
-  font-weight: 750;
-  line-height: 1.3;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Gift Cards banner */
-
-.p54-blueprint .p54b-dashboard .p54b-promo h2 {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  line-height: 1.16;
-}
-
-.p54-blueprint .p54b-dashboard .p54b-promo p {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.38;
-}
-
-.p54-blueprint .p54b-promo-cta {
-  font-size: 11px;
-  font-weight: 750;
-  line-height: 1.3;
-}
-
-/* Sidebar and navigation */
-
-.p54-blueprint .p54b-side-link {
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1.35;
-}
-
-.p54-blueprint
-.p54b-sidebar-nav .p54b-side-link.is-current {
-  font-weight: 750;
-}
-
-.p54-blueprint .p54b-bottom-item {
-  font-weight: 650;
-  line-height: 1.2;
-}
-
-/* Supporting controls */
-
-.p54-blueprint .p54b-dashboard .p54b-see-all,
-.p54-blueprint .p54b-dashboard .feed-open-btn {
-  font-size: 11px;
-  font-weight: 750;
-}
-
-.p54-blueprint
-.p54b-dashboard .utility-btn .t-title {
-  font-size: 12px;
-  font-weight: 750;
-  line-height: 1.2;
-}
-
-.p54-blueprint
-.p54b-dashboard .utility-btn .t-sub {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-.p54-blueprint
-.p54b-dashboard .p54b-overflow .t-title {
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.p54-blueprint
-.p54b-dashboard .p54b-overflow .t-sub {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-/* Keyboard accessibility */
-
-.p54-blueprint
-.p54b-shell
-:is(button, a, input, select, textarea):focus-visible {
-  outline: 3px solid #f3b843;
-  outline-offset: 2px;
-}
-
-/* Mobile typography */
-
-@media (max-width: 760px) {
-  .p54-blueprint .p54b-greeting h1 {
-    color: #fff;
-    font-size: 20px;
-    font-weight: 800;
-  }
-
-  .p54-blueprint .p54b-greeting p {
-    color: #f4eefe;
-    font-size: 12px;
-  }
-
-  .p54-blueprint .p54b-balance #balanceAmount,
-  .p54-blueprint .p54b-balance .balance-amount {
-    font-size: clamp(27px, 7.5vw, 30px);
-  }
-
-  .p54-blueprint .p54b-dashboard .card h2,
-  .p54-blueprint .p54b-dashboard .card h3 {
-    font-size: 17px;
-  }
-
-  .p54-blueprint
-  .p54b-dashboard .money-moves-grid .t-title {
-    font-size: 10px;
-    font-weight: 750;
-  }
-
-  .p54-blueprint
-  .p54b-shortcuts .p54b-shortcut-label {
-    font-size: 10px;
-    font-weight: 750;
-  }
-
-  .p54-blueprint
-  .p54b-dashboard
-  .services-grid
-  .p54b-service-tile .t-title {
-    font-size: 10px;
-    font-weight: 750;
-    line-height: 1.15;
-  }
-
-  .p54-blueprint
-  .p54b-dashboard
-  .services-grid
-  .p54b-service-tile .t-sub {
-    display: none;
-  }
-
-  .p54-blueprint
-  .p54b-dashboard .p54b-promo h2 {
-    font-size: 15px;
-  }
-
-  .p54-blueprint
-  .p54b-dashboard .p54b-promo p {
-    font-size: 10px;
-  }
-
-  .p54-blueprint .p54b-bottom-item {
-    font-size: 10px;
-    font-weight: 700;
-  }
-
-  .p54-blueprint .p54b-dashboard .feed-title {
-    font-size: 12px;
-  }
-
-  .p54-blueprint .p54b-dashboard .feed-sub {
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 360px) {
-  .p54-blueprint
-  .p54b-dashboard
-  .services-grid
-  .p54b-service-tile .t-title {
-    font-size: 9px;
-  }
-
-  .p54-blueprint
-  .p54b-shortcuts .p54b-shortcut-label {
     font-size: 9px;
   }
 }
