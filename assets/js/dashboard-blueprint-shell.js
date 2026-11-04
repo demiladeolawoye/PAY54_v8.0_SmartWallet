@@ -323,8 +323,12 @@
     const newsBlock = make("div", "p54b-news");
     newsBlock.append(news);
 
-    main.append(moves, services);
-    support.append(recent, alerts, utilities);
+// Approved desktop blueprint:
+// Main column: Money Moves, Services, Gift Cards, News.
+// Supporting column: Recent Activity, Alerts, Utilities, Security.
+main.append(moves, services, promo, newsBlock);
+support.append(recent, alerts, utilities, security);
+
 
     // Desktop: the promotion and security card now share one aligned row.
     const showcase = make("div", "p54b-showcase");
