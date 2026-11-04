@@ -817,3 +817,62 @@ body.p54-blueprint .p54b-dashboard {
     transition: none;
   }
 }
+
+/* ==========================================================
+   PAY54 PHASE 2F-B — DASHBOARD FEED PREVIEWS
+   Version: 1.0.0
+   ========================================================== */
+
+/* Only the latest five items are visible in dashboard feeds. */
+
+body.p54-blueprint
+:is(#recentTransactions, #newsFeed)
+.feed-item.p54-feed-clipped {
+  display: none !important;
+}
+
+/* Clearly distinguish demonstration news from live reporting. */
+
+body.p54-blueprint .p54-news-feed-disclosure {
+  margin: 3px 0 12px;
+  color: #65718b;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Safe balance movement state: no fabricated financial figures. */
+
+body.p54-blueprint .p54-balance-movement-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  color: #e0f2fe;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+body.p54-blueprint .p54-balance-movement-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 50%;
+  color: #e0f2fe;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  body.p54-blueprint .p54-balance-movement-status {
+    font-size: 11px;
+  }
+
+  body.p54-blueprint .p54-news-feed-disclosure {
+    font-size: 10px;
+  }
+}
