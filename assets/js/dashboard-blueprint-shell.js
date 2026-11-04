@@ -343,7 +343,8 @@ support.append(recent, alerts, utilities, security);
 
     const dashboard = make("main", "p54b-dashboard");
     source.replaceWith(dashboard);
-    dashboard.append(mobileCurrency, top, columns, showcase, newsRow);
+   
+dashboard.append(mobileCurrency, top, columns);
     content.append(dashboard);
 
     const mobileNav = make("nav", "p54b-bottom-nav");
