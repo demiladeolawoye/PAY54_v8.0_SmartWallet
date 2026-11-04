@@ -408,6 +408,9 @@
     document.body.classList.add("p54-blueprint");
     document.documentElement.dataset.pay54Blueprint = "1.2.1";
 
+    
+    // Reveal the approved dashboard only after its DOM is mounted.
+    window.PAY54_DASHBOARD_BLUEPRINT_BOOT?.release("ready");
 
     console.info(
     
@@ -419,5 +422,11 @@
       error
     );
     document.body.classList.remove("p54-blueprint");
+    
+    // Restore the original dashboard if blueprint initialisation fails.
+    window.PAY54_DASHBOARD_BLUEPRINT_BOOT?.release(
+      "blueprint-initialisation-error"
+    );
+
   }
 })();
