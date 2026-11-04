@@ -1,0 +1,58 @@
+
+name: PAY54 News Service and API Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/news/**"
+      - "backend/tests/news-service.test.mjs"
+      - ".github/workflows/pay54-news-service-tests.yml"
+  pull_request:
+    paths:
+      - "backend/news/**"
+      - "backend/tests/news-service.test.mjs"
+      - ".github/workflows/pay54-news-service-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-news-service-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  news-service-tests:
+    name: News Cache and Read-Only API Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Validate backend module syntax
+        run: |
+          node --check backend/news/news-feed-policy.mjs
+          node --check backend/news/news-service.mjs
+          node --check backend/news/news-http-handler.mjs
+          node --check backend/tests/news-service.test.mjs
+
+      - name: Run existing news policy tests
+        run: |
+          node --test backend/tests/news-feed-policy.test.mjs
+
+      - name: Run news service and API tests
+        run: |
+          node --test backend/tests/news-service.test.mjs
+
+      - name: Report validation checkpoint
+        run: |
+          echo "PAY54 news policy, cache and HTTP handler tests passed."
