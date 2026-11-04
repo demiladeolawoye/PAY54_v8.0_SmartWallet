@@ -1,5 +1,6 @@
 
-/* PAY54 Approved Dashboard Blueprint Shell v1.2.0.
+
+/* PAY54 Approved Dashboard Blueprint Shell v1.2.1.
  * Presentation only. Reuses existing PAY54 nodes and delegated action handlers.
  * Does not change ledger, cards, transactions, capability policy or execution gates.
  */
