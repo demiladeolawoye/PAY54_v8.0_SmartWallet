@@ -323,18 +323,12 @@
 
     const newsBlock = make("div", "p54b-news");
     newsBlock.append(news);
-
-// Approved desktop blueprint:
-// Main column: Money Moves, Services, Gift Cards, News.
-// Supporting column: Recent Activity, Alerts, Utilities, Security.
-
-// PAY54 Phase 2E — approved independent dashboard columns.
-// This keeps the Gift Cards banner directly below Services,
-// regardless of the height of Recent Activity or Alerts.
-// Existing financial action handlers and data nodes are retained.
-main.append(moves, services, promo, newsBlock);
-support.append(recent, alerts, utilities, security);
-
+    // PAY54 Phase 2E — approved independent dashboard columns.
+    // Keep Gift Cards immediately beneath Services.
+    // Keep Security & Control immediately beneath Utilities.
+    // Preserve existing financial action handlers and data nodes.
+    main.append(moves, services, promo, newsBlock);
+    support.append(recent, alerts, utilities, security);
 
     if (recipients) {
       const details = make("details", "p54b-legacy");
@@ -344,8 +338,8 @@ support.append(recent, alerts, utilities, security);
 
     const dashboard = make("main", "p54b-dashboard");
     source.replaceWith(dashboard);
-   
-dashboard.append(mobileCurrency, top, columns);
+
+    dashboard.append(mobileCurrency, top, columns);
     content.append(dashboard);
 
     const mobileNav = make("nav", "p54b-bottom-nav");
