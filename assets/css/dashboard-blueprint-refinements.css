@@ -1,0 +1,476 @@
+
+/*
+ * PAY54 Approved Dashboard Blueprint Refinements
+ * Version: 1.1.0
+ * Load AFTER dashboard-blueprint-shell.css.
+ * Presentation-only refinements.
+ */
+
+body.p54-blueprint {
+  --p54b-text: #0a1437;
+  font-synthesis: none;
+}
+
+.p54-blueprint .p54b-content,
+.p54-blueprint .p54b-dashboard,
+.p54-blueprint .p54b-top,
+.p54-blueprint .p54b-columns,
+.p54-blueprint .p54b-main,
+.p54-blueprint .p54b-support,
+.p54-blueprint .p54b-promo {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.p54-blueprint .p54b-dashboard {
+  width: 100%;
+}
+
+.p54-blueprint .p54b-top {
+  align-items: stretch;
+}
+
+/* Stronger typography */
+
+.p54-blueprint .p54b-dashboard .card h2,
+.p54-blueprint .p54b-dashboard .card h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--p54b-text);
+  letter-spacing: -.25px;
+}
+
+.p54-blueprint .p54b-greeting h1 {
+  font-size: clamp(22px, 2vw, 26px);
+  font-weight: 800;
+}
+
+.p54-blueprint .p54b-greeting p {
+  font-size: 13px;
+  font-weight: 500;
+  color: #49546c;
+}
+
+.p54-blueprint .p54b-dashboard .t-title {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.18;
+}
+
+.p54-blueprint .p54b-dashboard .card-head .sub,
+.p54-blueprint .p54b-dashboard .feed-sub {
+  color: #4f5c77;
+  font-weight: 500;
+}
+
+.p54-blueprint .p54b-dashboard .feed-title {
+  color: #10193d;
+  font-weight: 750;
+}
+
+/* Vertically balanced Quick Shortcuts */
+
+.p54-blueprint .p54b-shortcuts.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.p54-blueprint .p54b-shortcuts .card-head {
+  flex: 0 0 auto;
+}
+
+.p54-blueprint .p54b-shortcuts .shortcut-grid {
+  margin-block: auto;
+  align-content: center;
+  width: 100%;
+}
+
+.p54-blueprint .p54b-shortcut {
+  min-height: 82px;
+  padding: 10px 4px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.p54-blueprint .p54b-shortcut-label {
+  text-align: center;
+}
+
+.p54-blueprint .p54b-shortcuts h3,
+.p54-blueprint .p54b-wallets-card h2 {
+  color: #fff !important;
+}
+
+/* Dynamic My Wallets card */
+
+.p54-blueprint .p54b-wallets-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.p54-blueprint .p54b-wallets-manage {
+  border: 0;
+  background: transparent;
+  color: #f4eaff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.p54-blueprint .p54b-wallets-manage[hidden] {
+  display: none !important;
+}
+
+.p54-blueprint .p54b-wallet-summary {
+  margin: 0 0 8px;
+  color: #e8dbff;
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.p54-blueprint
+.p54b-wallets-card:not(.p54b-expanded)
+.wallet-balance-row:nth-child(n+5) {
+  display: none;
+}
+
+.p54-blueprint
+.p54b-wallets-card.p54b-single-wallet
+.wallet-balance-row {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  padding: 11px;
+  font-size: 13px;
+}
+
+.p54-blueprint
+.p54b-wallets-card.p54b-single-wallet
+.wallet-balance-amt {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* Exact ten-primary-service grid */
+
+.p54-blueprint .p54b-dashboard .services-grid {
+  grid-template-columns: repeat(
+    5,
+    minmax(0, 1fr)
+  );
+}
+
+.p54-blueprint
+.p54b-dashboard
+.services-grid > .p54b-service-tile {
+  min-width: 0;
+  min-height: 126px;
+  padding: 11px 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 5px;
+}
+
+.p54-blueprint
+.p54b-dashboard
+.services-grid
+.p54b-service-tile .t-icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 29px;
+  margin: 0;
+}
+
+.p54-blueprint
+.p54b-dashboard
+.services-grid
+.p54b-service-tile .t-sub {
+  display: block;
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  overflow: visible;
+  font-size: 10px;
+  line-height: 1.24;
+  font-weight: 500;
+  color: #384462;
+  text-align: left;
+}
+
+.p54-blueprint
+.p54b-dashboard
+.money-moves-grid .tile-btn {
+  min-width: 0;
+}
+
+/* Wallet management remains compact on desktop */
+
+.p54-blueprint .p54b-mobile-wallet-manage {
+  display: none;
+}
+
+/* Full-width Gift Cards banner */
+
+.p54-blueprint .p54b-promo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  padding: 15px 17px;
+  min-height: 112px;
+  gap: 8px;
+}
+
+.p54-blueprint .p54b-promo-copy {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.p54-blueprint .p54b-promo h2 {
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.16;
+}
+
+.p54-blueprint .p54b-promo p {
+  font-size: 11px;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
+.p54-blueprint .p54b-promo-cta {
+  white-space: nowrap;
+}
+
+.p54-blueprint .p54b-gift-art {
+  min-width: 0;
+  flex-shrink: 0;
+  width: 143px;
+  padding: 0 7px;
+  justify-content: center;
+}
+
+.p54-blueprint .p54b-gift {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 74px;
+}
+
+/* Secondary features remain accessible */
+
+.p54-blueprint .p54b-overflow .t-sub {
+  display: block;
+  font-size: 10px;
+}
+
+.p54-blueprint .p54b-overflow[hidden] {
+  display: none !important;
+}
+
+/* Sidebar typography */
+
+.p54-blueprint .p54b-side-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.p54-blueprint .p54b-nav-symbol {
+  flex: 0 0 16px;
+  text-align: center;
+}
+
+.p54-blueprint
+.p54b-sidebar-nav .p54b-side-link {
+  font-weight: 750;
+}
+
+@media (min-width: 1160px) {
+  .p54-blueprint .p54b-top {
+    grid-template-columns: 1.15fr .82fr .95fr;
+  }
+
+  .p54-blueprint
+  .p54b-wallets-card:not(.p54b-expanded)
+  .wallet-balance-row {
+    padding-block: 6px;
+  }
+}
+
+/* Mobile: reference layout, expandable wallets,
+   compact service titles and correctly sized banner */
+
+@media (max-width: 760px) {
+  .p54-blueprint .p54b-greeting h1 {
+    color: #fff;
+    font-size: 19px;
+  }
+
+  .p54-blueprint .p54b-greeting p {
+    color: #f1eaff;
+  }
+
+  .p54-blueprint
+  .p54b-top .p54b-wallets-card {
+    order: 1;
+    display: none;
+    margin: 0;
+  }
+
+  .p54-blueprint
+  .p54b-top
+  .p54b-wallets-card.p54b-expanded {
+    display: block;
+  }
+
+  .p54-blueprint .p54b-top .p54b-shortcuts {
+    order: 2;
+  }
+
+  .p54-blueprint .p54b-mobile-wallet-manage {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    margin-top: 7px;
+    padding: 5px 11px;
+    border: 1px solid #dbe9ff8c;
+    border-radius: 999px;
+    color: #fff;
+    background: #ffffff20;
+    font-weight: 750;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .p54-blueprint
+  .p54b-wallets-card.p54b-expanded
+  .wallet-balance-row {
+    display: flex;
+  }
+
+  .p54-blueprint
+  .p54b-shortcuts .shortcut-grid {
+    margin-block: 5px 0;
+  }
+
+  .p54-blueprint .p54b-shortcut {
+    min-height: 64px;
+    font-size: 9px;
+  }
+
+  .p54-blueprint
+  .p54b-dashboard
+  .services-grid > .p54b-service-tile {
+    min-height: 70px;
+    padding: 6px 2px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 2px;
+  }
+
+  .p54-blueprint
+  .p54b-dashboard
+  .services-grid
+  .p54b-service-tile .t-icon {
+    justify-content: center;
+    font-size: 19px;
+    min-height: 23px;
+  }
+
+  .p54-blueprint
+  .p54b-dashboard
+  .services-grid
+  .p54b-service-tile .t-title {
+    font-size: 9px;
+    line-height: 1.12;
+    text-align: center;
+  }
+
+  .p54-blueprint
+  .p54b-dashboard
+  .services-grid
+  .p54b-service-tile .t-sub {
+    display: none;
+  }
+
+  .p54-blueprint .p54b-promo {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    grid-template-columns: minmax(0, 1fr) 104px;
+    gap: 4px;
+    padding: 11px 10px;
+    min-height: 102px;
+  }
+
+  .p54-blueprint .p54b-promo h2 {
+    font-size: 14px;
+  }
+
+  .p54-blueprint .p54b-promo p {
+    font-size: 9px;
+    max-width: 215px;
+  }
+
+  .p54-blueprint .p54b-promo-cta {
+    font-size: 10px;
+    padding: 7px 10px;
+  }
+
+  .p54-blueprint .p54b-gift-art {
+    width: 104px;
+    padding: 0 4px;
+  }
+
+  .p54-blueprint .p54b-gift {
+    flex-basis: 40px;
+    width: 40px;
+    height: 57px;
+    font-size: 25px;
+    margin-left: -8px;
+  }
+
+  .p54-blueprint .p54b-columns,
+  .p54-blueprint .p54b-main,
+  .p54-blueprint .p54b-support {
+    width: 100%;
+  }
+
+  .p54-blueprint .p54b-bottom-item {
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 340px) {
+  .p54-blueprint .p54b-promo {
+    grid-template-columns: minmax(0, 1fr) 80px;
+  }
+
+  .p54-blueprint .p54b-gift-art {
+    width: 80px;
+  }
+
+  .p54-blueprint .p54b-gift {
+    flex-basis: 33px;
+    width: 33px;
+    height: 51px;
+  }
+
+  .p54-blueprint .p54b-promo-cta {
+    font-size: 9px;
+  }
+}
