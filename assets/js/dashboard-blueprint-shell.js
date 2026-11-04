@@ -1,57 +1,24 @@
 
-/* PAY54 Dashboard Blueprint shell v1.0.0 — presentation only. */
+/* PAY54 Approved Dashboard Blueprint Shell v1.1.0.
+ * Presentation only. Reuses existing PAY54 nodes and delegated action handlers.
+ * Does not change ledger, cards, transactions, capability policy or execution gates.
+ */
 (() => {
   "use strict";
-  const $ = (s, root = document) => root.querySelector(s);
-  const el = (tag, cls = "", text = "") => {
+
+  const find = (selector, root = document) =>
+    root?.querySelector(selector) ?? null;
+
+  const make = (tag, className = "", text = "") => {
     const node = document.createElement(tag);
-    if (cls) node.className = cls;
+    if (className) node.className = className;
     if (text) node.textContent = text;
     return node;
   };
-  const notice = (message) =>
-    window.PAY54_TOAST?.showToast?.(message);
-  const source = $("main.dash-grid");
-  const header = $("header.dash-header");
-  if (
-    !source ||
-    !header ||
-    document.body.classList.contains("p54-blueprint")
-  ) return;
 
-  const left = $(".left", source);
-  const right = $(".right", source);
-  const balance = $("#balanceCard", source);
-  const moves = left &&
-    $(".money-moves-grid", left)?.closest(".card");
-  const services = left &&
-    $(".services-grid", left)?.closest(".card");
-  const recent = $("#recentTransactions", source)?.closest(".card");
-  const recipients = $("#recipientDashboardWidget", source)?.closest(".card");
-  const shortcuts = right &&
-    $(".shortcut-grid", right)?.closest(".card");
-  const utilities = right &&
-    $(".utility-grid", right)?.closest(".card");
-  const alerts = right &&
-    $("#alertsFeed", right)?.closest(".card");
-  const news = right &&
-    $("#newsFeed", right)?.closest(".card");
-
-  if (
-    [
-      left, right, balance, moves, services,
-      recent, shortcuts, utilities, alerts, news
-    ].some(value => !value)
-  ) {
-    console.warn(
-      "[PAY54 BLUEPRINT] Required dashboard nodes missing; original layout preserved."
-    );
-    return;
-  }
-
-  const scrollTo = target => {
+  const scroll = (target) => {
     const node = target === "top"
-      ? header
+      ? find("header.dash-header")
       : document.getElementById(target);
 
     node?.scrollIntoView({
@@ -60,91 +27,315 @@
     });
   };
 
-  const makeNavigationButton = (
-    symbol, label, target, cls
-  ) => {
-    const button = el("button", cls);
-    button.type = "button";
-    button.append(
-      el("span", "", symbol),
-      el("span", "", label)
-    );
-    if (target === "top" && label === "Home") {
-      button.classList.add("is-current");
+  const notifyUnavailable = (label) => {
+    const message =
+      `${label} is not available in this development preview.`;
+
+    if (typeof window.PAY54_TOAST?.showToast === "function") {
+      window.PAY54_TOAST.showToast(message);
+    } else {
+      console.info(`[PAY54 BLUEPRINT] ${message}`);
     }
-    button.addEventListener("click", () => {
-      if (target === "unavailable") {
-        notice(
-          `${label} is not available in this development preview.`
-        );
-        return;
-      }
-      scrollTo(target);
-    });
-    return button;
   };
 
-  try {
-    const shell = el("div", "p54b-shell");
-    const sidebar = el("aside", "p54b-sidebar");
-    sidebar.setAttribute("aria-label", "Dashboard navigation");
-    const logo = el("div", "p54b-wordmark");
-    logo.append(
-      el("span", "", "PAY"),
-      el("strong", "", "54")
+  const source = find("main.dash-grid");
+  const header = find("header.dash-header");
+
+  if (
+    !source ||
+    !header ||
+    document.body.classList.contains("p54-blueprint")
+  ) return;
+
+  const left = find(".left", source);
+  const right = find(".right", source);
+  const balance = find("#balanceCard", source);
+  const moves =
+    find(".money-moves-grid", left)?.closest(".card");
+  const services =
+    find(".services-grid", left)?.closest(".card");
+  const recent =
+    find("#recentTransactions", source)?.closest(".card");
+  const recipients =
+    find("#recipientDashboardWidget", source)?.closest(".card");
+  const shortcuts =
+    find(".shortcut-grid", right)?.closest(".card");
+  const utilities =
+    find(".utility-grid", right)?.closest(".card");
+  const alerts =
+    find("#alertsFeed", right)?.closest(".card");
+  const news =
+    find("#newsFeed", right)?.closest(".card");
+  const walletList = find("#walletBalances", balance);
+
+  if ([
+    left, right, balance, moves, services, recent,
+    shortcuts, utilities, alerts, news, walletList
+  ].some(item => !item)) {
+    console.warn(
+      "[PAY54 BLUEPRINT] Required dashboard nodes unavailable; existing layout retained."
     );
+    return;
+  }
+
+  const serviceGrid = find(".services-grid", services);
+  const originalServices = [...serviceGrid.children];
+
+  const serviceByAction = new Map(
+    originalServices
+      .filter(node => node.dataset?.action)
+      .map(node => [node.dataset.action, node])
+  );
+
+  const shortcutGrid = find(".shortcut-grid", shortcuts);
+  const originalShortcuts = [...shortcutGrid.children];
+  const moveGrid = find(".money-moves-grid", moves);
+
+  const serviceDefs = [
+    ["🌐", "Global Transfer",
+      "Send money across borders", "fx"],
+    ["🎁", "Gift Cards",
+      "Buy, sell or convert gift cards", null],
+    ["⚡", "PAY54 Pay",
+      "Airtime, data, bills and more", "bills"],
+    ["💳", "Cards",
+      "Virtual, linked cards and controls", "cards"],
+    ["💚", "Vaults",
+      "Save, set goals and money pots", "savings"],
+    ["▱", "Money Hub",
+      "Financial products and tools", null],
+    ["✈", "Travel & Connect",
+      "eSIM, travel money and more", null],
+    ["🛍", "Marketplace",
+      "Shop, food, tickets and offers", "shop"],
+    ["▥", "Invest",
+      "Stocks, crypto and investment", "trading"],
+    ["♟", "Agent+",
+      "Cash services and local support", "agent"]
+  ];
+
+  try {
+    const shell = make("div", "p54b-shell");
+    const sidebar = make("aside", "p54b-sidebar");
+
+    sidebar.setAttribute(
+      "aria-label", "PAY54 navigation"
+    );
+
+    const logo = make("div", "p54b-wordmark");
+
+    logo.append(
+      make("span", "", "PAY"),
+      make("strong", "", "54")
+    );
+
     sidebar.append(logo);
 
-    const sideNav = el("nav", "p54b-sidebar-nav");
+    const sideNav = make("nav", "p54b-sidebar-nav");
+
+    sideNav.setAttribute(
+      "aria-label", "Desktop dashboard navigation"
+    );
+
     for (const [symbol, label, target] of [
       ["⌂", "Dashboard", "top"],
       ["⇄", "Money Moves", "p54b-moves"],
       ["▦", "Services", "p54b-services"],
       ["▤", "Transactions", "p54b-recent"],
-      ["♢", "Rewards", "unavailable"],
-      ["✉", "Messages", "unavailable"],
-      ["?", "Help & Support", "unavailable"]
+      ["♢", "Rewards", null],
+      ["✉", "Messages", null],
+      ["?", "Help & Support", null]
     ]) {
-      const button = makeNavigationButton(
-        symbol, label, target, "p54b-side-link"
+      const button = make(
+        "button", "p54b-side-link"
       );
-      if (label === "Dashboard") {
+
+      button.type = "button";
+
+      button.append(
+        make("span", "p54b-nav-symbol", symbol),
+        make("span", "", label)
+      );
+
+      if (target === "top") {
         button.classList.add("is-current");
       }
+
+      button.addEventListener("click", () =>
+        target
+          ? scroll(target)
+          : notifyUnavailable(label)
+      );
+
       sideNav.append(button);
     }
+
     sidebar.append(sideNav);
 
-    const footer = el("div", "p54b-side-footer");
+    const footer = make("div", "p54b-side-footer");
+
     footer.append(
-      el("div", "p54b-side-muted", "Switch Profile · Personal"),
-      el("div", "p54b-side-muted", "Settings")
+      make(
+        "div",
+        "p54b-side-muted",
+        "Switch Profile · Personal"
+      ),
+      make(
+        "div",
+        "p54b-side-muted",
+        "Settings"
+      )
     );
+
     sidebar.append(footer);
 
-    const content = el("div", "p54b-content");
+    const content = make("div", "p54b-content");
+
     shell.append(sidebar, content);
     header.before(shell);
     content.append(header);
 
-    $(".brand", header)?.classList.add("p54b-hidden-brand");
-
-    const greeting = el("div", "p54b-greeting");
-    greeting.append(
-      el("h1", "", "Good morning 👋"),
-      el("p", "", "Welcome to your PAY54 Dashboard")
+    find(".brand", header)?.classList.add(
+      "p54b-hidden-brand"
     );
+
+    const greeting = make(
+      "div", "p54b-greeting"
+    );
+
+    greeting.append(
+      make("h1", "", "Good morning 👋"),
+      make(
+        "p", "",
+        "Welcome to your PAY54 Dashboard"
+      )
+    );
+
     header.prepend(greeting);
 
-    const top = el("div", "p54b-top");
-    const wallets = el("section", "p54b-wallets-card card");
-    wallets.append(el("h2", "", "My Wallets"));
+    const top = make("div", "p54b-top");
+    const wallets = make(
+      "section", "p54b-wallets-card card"
+    );
 
-    const walletList = $("#walletBalances", balance);
-    if (walletList) wallets.append(walletList);
+    const walletHeading = make(
+      "div", "p54b-wallets-heading"
+    );
 
-    const balanceDelta = $(".balance-delta", balance);
-    if (balanceDelta) balanceDelta.hidden = true;
+    walletHeading.append(
+      make("h2", "", "My Wallets")
+    );
+
+    const walletManage = make(
+      "button",
+      "p54b-wallets-manage",
+      "Manage Wallets"
+    );
+
+    walletManage.type = "button";
+    walletManage.setAttribute(
+      "aria-expanded", "false"
+    );
+
+    walletHeading.append(walletManage);
+    wallets.append(walletHeading, walletList);
+
+    const walletSummary = make(
+      "p", "p54b-wallet-summary"
+    );
+
+    wallets.insertBefore(
+      walletSummary, walletList
+    );
+
+    // Count actual displayed wallets; never create demo balances.
+    const syncWalletCount = () => {
+      const count = walletList.querySelectorAll(
+        ".wallet-balance-row"
+      ).length;
+
+      wallets.dataset.walletCount = String(count);
+
+      wallets.classList.toggle(
+        "p54b-single-wallet",
+        count === 1
+      );
+
+      walletSummary.textContent =
+        count === 0
+          ? "No wallets displayed"
+          : count === 1
+            ? "Your primary wallet"
+            : `${count} displayed wallets`;
+
+      walletManage.hidden = count <= 1;
+    };
+
+    const walletObserver = new MutationObserver(
+      syncWalletCount
+    );
+
+    walletObserver.observe(walletList, {
+      childList: true,
+      subtree: true
+    });
+
+    syncWalletCount();
+
+    const mobileManage = make(
+      "button",
+      "p54b-mobile-wallet-manage",
+      "My Wallets"
+    );
+
+    mobileManage.type = "button";
+
+    mobileManage.setAttribute(
+      "aria-controls",
+      "p54b-wallet-panel"
+    );
+
+    mobileManage.setAttribute(
+      "aria-expanded", "false"
+    );
+
+    wallets.id = "p54b-wallet-panel";
+
+    const toggleWallets = () => {
+      const open = wallets.classList.toggle(
+        "p54b-expanded"
+      );
+
+      mobileManage.setAttribute(
+        "aria-expanded",
+        String(open)
+      );
+
+      walletManage.setAttribute(
+        "aria-expanded",
+        String(open)
+      );
+
+      mobileManage.textContent =
+        open ? "Hide Wallets" : "My Wallets";
+
+      walletManage.textContent =
+        open ? "Show Less" : "Manage Wallets";
+    };
+
+    mobileManage.addEventListener(
+      "click", toggleWallets
+    );
+
+    walletManage.addEventListener(
+      "click", toggleWallets
+    );
+
+    balance.append(mobileManage);
+
+    find(".balance-delta", balance)?.setAttribute(
+      "hidden", ""
+    );
 
     for (const selector of [
       ".balance-meta",
@@ -152,284 +343,448 @@
       ".trust-chip",
       "#fxTicker"
     ]) {
-      $(selector, balance)?.classList.add("p54b-conceal");
+      find(selector, balance)?.classList.add(
+        "p54b-conceal"
+      );
     }
 
     balance.classList.add("p54b-balance");
-    const balanceLabel = $(".label", balance);
-    if (balanceLabel) {
-      balanceLabel.textContent = "ACTIVE WALLET BALANCE";
+
+    const label = find(".label", balance);
+
+    if (label) {
+      label.textContent = "ACTIVE WALLET BALANCE";
     }
 
-    const currencyPills = $(".currency-pills", header);
-    const mobileCurrency = el(
+    const mobileCurrency = make(
       "div", "p54b-mobile-currencies"
     );
+
+    const currencyPills = find(
+      ".currency-pills", header
+    );
+
     if (currencyPills) {
       mobileCurrency.append(currencyPills);
     }
 
-    const shortcutGrid = $(".shortcut-grid", shortcuts);
-    const originalShortcuts = shortcutGrid
-      ? [...shortcutGrid.children]
-      : [];
+    shortcutGrid.replaceChildren();
 
-    if (shortcutGrid) {
-      shortcutGrid.replaceChildren();
+    for (const [symbol, title, action] of [
+      ["🌐", "Global Transfer", "fx"],
+      ["🎁", "Gift Cards", null],
+      ["💳", "Cards", "cards"],
+      ["⭐", "Rewards", null]
+    ]) {
+      const button = make(
+        "button", "p54b-shortcut"
+      );
 
-      for (const [symbol, label, action] of [
-        ["🌐", "Global Transfer", "fx"],
-        ["🎁", "Gift Cards", null],
-        ["💳", "Cards", "cards"],
-        ["⭐", "Rewards", null]
-      ]) {
-        const button = el("button", "p54b-shortcut");
-        button.type = "button";
-        button.append(
-          el("span", "p54b-shortcut-icon", symbol),
-          el("span", "", label)
-        );
+      button.type = "button";
 
-        if (action) {
-          button.dataset.action = action;
-          button.addEventListener("click", () => {
-            notice(
-              `${label} is part of the development preview.`
-            );
-          });
-        } else {
-          button.disabled = true;
-          button.title = `${label} is planned`;
-        }
-        shortcutGrid.append(button);
+      button.append(
+        make(
+          "span",
+          "p54b-shortcut-icon",
+          symbol
+        ),
+        make(
+          "span",
+          "p54b-shortcut-label",
+          title
+        )
+      );
+
+      if (action) {
+        button.dataset.action = action;
+      } else {
+        button.disabled = true;
+        button.title =
+          `${title} is not yet available`;
       }
+
+      shortcutGrid.append(button);
     }
 
     shortcuts.classList.add("p54b-shortcuts");
-    const shortcutsTitle = shortcuts.querySelector("h3");
+
+    const shortcutsTitle = find(
+      "h3", shortcuts
+    );
+
     if (shortcutsTitle) {
-      shortcutsTitle.textContent = "Quick Shortcuts";
+      shortcutsTitle.textContent =
+        "Quick Shortcuts";
     }
-    const shortcutsSub = shortcuts.querySelector(".sub");
+
+    const shortcutsSub = find(
+      ".sub", shortcuts
+    );
+
     if (shortcutsSub) {
       shortcutsSub.textContent =
         "Smart, high-demand actions for you";
     }
 
-    top.append(balance, wallets, shortcuts);
+    top.append(
+      balance, wallets, shortcuts
+    );
 
-    const columns = el("div", "p54b-columns");
-    const main = el("section", "p54b-main");
-    const support = el("section", "p54b-support");
+    const columns = make(
+      "div", "p54b-columns"
+    );
+
+    const main = make(
+      "section", "p54b-main"
+    );
+
+    const support = make(
+      "section", "p54b-support"
+    );
+
     columns.append(main, support);
 
     moves.id = "p54b-moves";
     services.id = "p54b-services";
     recent.id = "p54b-recent";
 
-    const recentTitle = recent.querySelector("h3");
+    const recentTitle = find("h3", recent);
+
     if (recentTitle) {
-      recentTitle.textContent = "Recent Activity";
+      recentTitle.textContent =
+        "Recent Activity";
     }
 
-    const moveGrid = $(".money-moves-grid", moves);
-    const request = $('[data-action="request"]', services);
-    if (request && moveGrid) moveGrid.append(request);
+    const request =
+      serviceByAction.get("request");
 
-    const moreMoney = el(
-      "button", "p54b-more-money", "••• More"
+    if (request) {
+      moveGrid.append(request);
+    }
+
+    const moreMoney = make(
+      "button",
+      "p54b-more-money",
+      "••• More"
     );
+
     moreMoney.type = "button";
-    moreMoney.setAttribute("aria-expanded", "false");
+
+    moreMoney.setAttribute(
+      "aria-expanded", "false"
+    );
 
     moreMoney.addEventListener("click", () => {
-      const expanded = moveGrid.classList.toggle(
-        "p54b-show-all"
-      );
+      const expanded =
+        moveGrid.classList.toggle(
+          "p54b-show-all"
+        );
+
       moreMoney.setAttribute(
-        "aria-expanded", String(expanded)
+        "aria-expanded",
+        String(expanded)
       );
-      moreMoney.textContent = expanded ? "Less" : "••• More";
+
+      moreMoney.textContent =
+        expanded ? "Less" : "••• More";
     });
+
     moveGrid.append(moreMoney);
 
-    for (const button of moveGrid.querySelectorAll(
-      ".tile-btn"
-    )) {
-      $(".t-sub", button)?.classList.add("p54b-sr-only");
-    }
-
-    const serviceGrid = $(".services-grid", services);
-    const existing = new Map(
-      [...serviceGrid.querySelectorAll("[data-action]")]
-        .map(button => [button.dataset.action, button])
+    // Preserve original service buttons and their canonical handlers.
+    const overflow = make(
+      "div", "p54b-overflow"
     );
 
-    const overflow = el("div", "p54b-overflow");
+    overflow.id =
+      "p54b-secondary-services";
+
     overflow.hidden = true;
-    for (const button of originalShortcuts) {
-      overflow.append(button);
+
+    for (const oldShortcut of originalShortcuts) {
+      overflow.append(oldShortcut);
     }
 
-    for (const [symbol, label, action] of [
-      ["🌐", "Global Transfer", "fx"],
-      ["🎁", "Gift Cards", null],
-      ["⚡", "PAY54 Pay", "bills"],
-      ["💳", "Cards", "cards"],
-      ["💚", "Vaults", "savings"],
-      ["▱", "Money Hub", null],
-      ["✈", "Travel & Connect", null],
-      ["🛍", "Marketplace", "shop"],
-      ["▥", "Invest", "trading"],
-      ["♟", "Agent+", "agent"]
-    ]) {
-      const button = action && existing.has(action)
-        ? existing.get(action)
-        : el("button", "tile-btn");
+    for (const node of originalServices) {
+      if (node !== request) {
+        overflow.append(node);
+      }
+    }
+
+    serviceGrid.replaceChildren();
+
+    for (const [
+      symbol,
+      title,
+      subtitle,
+      action
+    ] of serviceDefs) {
+      const button =
+        action && serviceByAction.has(action)
+          ? serviceByAction.get(action)
+          : make("button", "tile-btn");
 
       button.type = "button";
-      button.classList.add("p54b-service-tile");
+
+      button.classList.add(
+        "p54b-service-tile"
+      );
+
       button.replaceChildren(
-        el("span", "t-icon", symbol),
-        el("span", "t-title", label)
+        make("span", "t-icon", symbol),
+        make("span", "t-title", title),
+        make("span", "t-sub", subtitle)
       );
 
       if (!action) {
         button.disabled = true;
         button.title =
-          `${label} is planned — unavailable in preview`;
+          `${title} is planned — unavailable in development preview`;
       }
+
       serviceGrid.append(button);
     }
 
-    for (const button of existing.values()) {
-      if (!serviceGrid.contains(button)) {
-        overflow.append(button);
-      }
-    }
-
-    const viewAll = el(
-      "button", "p54b-see-all", "See All"
+    const viewAll = make(
+      "button",
+      "p54b-see-all",
+      "See All"
     );
+
     viewAll.type = "button";
-    viewAll.setAttribute("aria-expanded", "false");
+
+    viewAll.setAttribute(
+      "aria-controls",
+      overflow.id
+    );
+
+    viewAll.setAttribute(
+      "aria-expanded", "false"
+    );
 
     viewAll.addEventListener("click", () => {
       overflow.hidden = !overflow.hidden;
+
       viewAll.setAttribute(
-        "aria-expanded", String(!overflow.hidden)
+        "aria-expanded",
+        String(!overflow.hidden)
       );
+
+      viewAll.textContent =
+        overflow.hidden
+          ? "See All"
+          : "Show Less";
     });
 
     services.append(viewAll, overflow);
 
-    const servicesSub = services.querySelector(".sub");
+    const servicesSub = find(
+      ".sub", services
+    );
+
     if (servicesSub) {
       servicesSub.textContent =
         "All your PAY54 services in one place";
     }
 
-    const promotion = el("section", "p54b-promo");
-    promotion.setAttribute(
-      "aria-label", "Gift Cards development preview"
+    const promo = make(
+      "section", "p54b-promo"
     );
 
-    const promotionCopy = el("div", "p54b-promo-copy");
-    promotionCopy.append(
-      el("h2", "", "Gift Cards Now on PAY54"),
-      el(
+    promo.setAttribute(
+      "aria-label",
+      "Gift Cards development preview"
+    );
+
+    const promoCopy = make(
+      "div", "p54b-promo-copy"
+    );
+
+    promoCopy.append(
+      make(
+        "h2", "",
+        "Gift Cards Now on PAY54"
+      ),
+      make(
         "p", "",
         "Buy, sell and convert gift cards — planned service"
       )
     );
 
-    const promotionCTA = el(
+    const cta = make(
       "button",
       "p54b-promo-cta",
       "Explore Gift Cards →"
     );
-    promotionCTA.type = "button";
-    promotionCTA.disabled = true;
-    promotionCTA.title =
-      "Gift Cards is not yet available";
-    promotionCopy.append(promotionCTA);
 
-    const artwork = el("div", "p54b-gift-art");
-    for (const [symbol, cls] of [
+    cta.type = "button";
+    cta.disabled = true;
+    cta.title =
+      "Gift Cards is not yet available";
+
+    promoCopy.append(cta);
+
+    const art = make(
+      "div", "p54b-gift-art"
+    );
+
+    art.setAttribute(
+      "aria-hidden", "true"
+    );
+
+    for (const [symbol, className] of [
       ["a", "amazon"],
       ["●", "apple"],
       ["▶", "play"]
     ]) {
-      artwork.append(
-        el("span", `p54b-gift ${cls}`, symbol)
+      art.append(
+        make(
+          "span",
+          `p54b-gift ${className}`,
+          symbol
+        )
       );
     }
-    promotion.append(promotionCopy, artwork);
 
-    const security = el("section", "p54b-security card");
+    promo.append(
+      promoCopy, art
+    );
+
+    const security = make(
+      "section",
+      "p54b-security card"
+    );
+
     security.append(
-      el("h3", "", "🛡 Security & Control"),
-      el(
+      make(
+        "h3", "",
+        "🛡 Security & Control"
+      ),
+      make(
         "p", "",
         "Development preview · No regulated status implied"
       )
     );
 
-    const newsBrief = el("div", "p54b-news");
-    newsBrief.append(news);
-
-    main.append(moves, services, promotion, newsBrief);
-    support.append(recent, alerts, utilities, security);
-
-    if (recipients) {
-      const legacy = el("details", "p54b-legacy");
-      legacy.append(
-        el("summary", "", "Recipients"),
-        recipients
-      );
-      main.append(legacy);
-    }
-
-    const dashboard = el("main", "p54b-dashboard");
-    source.replaceWith(dashboard);
-    dashboard.append(mobileCurrency, top, columns);
-    content.append(dashboard);
-
-    const mobileNav = el("nav", "p54b-bottom-nav");
-    mobileNav.setAttribute(
-      "aria-label", "Mobile navigation"
+    const newsBlock = make(
+      "div", "p54b-news"
     );
 
-    for (const [symbol, label, target] of [
+    newsBlock.append(news);
+
+    main.append(
+      moves,
+      services,
+      promo,
+      newsBlock
+    );
+
+    support.append(
+      recent,
+      alerts,
+      utilities,
+      security
+    );
+
+    if (recipients) {
+      const details = make(
+        "details", "p54b-legacy"
+      );
+
+      details.append(
+        make(
+          "summary", "",
+          "Recipients"
+        ),
+        recipients
+      );
+
+      main.append(details);
+    }
+
+    const dashboard = make(
+      "main", "p54b-dashboard"
+    );
+
+    source.replaceWith(dashboard);
+
+    dashboard.append(
+      mobileCurrency,
+      top,
+      columns
+    );
+
+    content.append(dashboard);
+
+    const mobileNav = make(
+      "nav", "p54b-bottom-nav"
+    );
+
+    mobileNav.setAttribute(
+      "aria-label",
+      "Mobile navigation"
+    );
+
+    for (const [symbol, title, target] of [
       ["⌂", "Home", "top"],
       ["⇄", "Money Moves", "p54b-moves"],
       ["54", "PAY54", "top"],
       ["▦", "Services", "p54b-services"],
       ["◷", "Transactions", "p54b-recent"]
     ]) {
-      mobileNav.append(
-        makeNavigationButton(
-          symbol, label, target, "p54b-bottom-item"
-        )
+      const button = make(
+        "button", "p54b-bottom-item"
       );
+
+      button.type = "button";
+
+      button.append(
+        make(
+          "span",
+          "p54b-bottom-icon",
+          symbol
+        ),
+        make("span", "", title)
+      );
+
+      if (title === "Home") {
+        button.classList.add(
+          "is-current"
+        );
+      }
+
+      button.addEventListener(
+        "click",
+        () => scroll(target)
+      );
+
+      mobileNav.append(button);
     }
 
     content.append(mobileNav);
-    $("#scanPayFab")?.classList.add(
+
+    find("#scanPayFab")?.classList.add(
       "p54b-original-fab"
     );
 
-    document.body.classList.add("p54-blueprint");
+    document.body.classList.add(
+      "p54-blueprint"
+    );
+
     document.documentElement.dataset.pay54Blueprint =
-      "1.0.0";
+      "1.1.0";
 
     console.info(
-      "[PAY54 BLUEPRINT] Presentation layer mounted; financial engines unchanged."
+      "[PAY54 BLUEPRINT] v1.1.0 mounted; existing financial engines and preview gate preserved."
     );
   } catch (error) {
     console.error(
-      "[PAY54 BLUEPRINT] Integration failed", error
+      "[PAY54 BLUEPRINT] Presentation integration error; financial state untouched.",
+      error
     );
-    document.body.classList.remove("p54-blueprint");
+
+    document.body.classList.remove(
+      "p54-blueprint"
+    );
   }
 })();
