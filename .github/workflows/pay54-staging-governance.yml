@@ -1,0 +1,52 @@
+
+name: PAY54 Staging Deployment Governance Audit
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/tests/staging-release-governance.mjs"
+      - ".github/workflows/pay54-staging-governance.yml"
+      - ".github/workflows/pay54-staging-deploy.yml"
+      - ".github/workflows/pay54-staging-infrastructure-tests.yml"
+      - "infrastructure/staging/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-governance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  staging-governance-audit:
+    name: Staging Identity and Release Approval Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Audit PAY54 staging identity and GitHub approval rules
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node backend/tests/staging-release-governance.mjs
+
+      - name: Verify the audit cannot provision infrastructure
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -f .github/workflows/pay54-staging-governance.yml || \
+            ! grep -Eq '^[[:space:]]*(terraform[[:space:]]+(apply|destroy)|gcloud[[:space:]]+run[[:space:]]+deploy)' \
+              .github/workflows/pay54-staging-governance.yml
+          echo 'PASS: No provisioning commands in the governance audit workflow.'
