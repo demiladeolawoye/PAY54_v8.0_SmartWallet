@@ -1,0 +1,98 @@
+
+name: PAY54 Staging Identity Security Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/deployment/staging-identity-policy.mjs"
+      - "backend/tests/staging-identity-policy.test.mjs"
+      - ".github/workflows/pay54-staging-identity-tests.yml"
+
+  pull_request:
+    paths:
+      - "backend/deployment/staging-identity-policy.mjs"
+      - "backend/tests/staging-identity-policy.test.mjs"
+      - ".github/workflows/pay54-staging-identity-tests.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-identity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  identity-security:
+    name: PAY54 Deployment Identity and Infrastructure Policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Check identity policy JavaScript syntax
+        run: |
+          node --check backend/deployment/staging-identity-policy.mjs
+          node --check backend/tests/staging-identity-policy.test.mjs
+
+      - name: Run staging identity security tests
+        run: |
+          node --test backend/tests/staging-identity-policy.test.mjs
+
+      - name: Verify GitHub workflow permission boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import fs from "node:fs";
+
+          const path =
+            ".github/workflows/pay54-staging-identity-tests.yml";
+
+          const source = fs.readFileSync(path, "utf8");
+
+          assert.match(
+            source,
+            /^permissions:\s*\n\s+contents:\s*read\s*$/m
+          );
+
+          assert.doesNotMatch(
+            source,
+            /^\s+id-token:\s*write\s*$/m
+          );
+
+          assert.doesNotMatch(
+            source,
+            /^\s+packages:\s*write\s*$/m
+          );
+
+          console.log(
+            "PASS: No cloud identity or publishing permissions granted"
+          );
+          NODE
+
+      - name: Report infrastructure security checkpoint
+        run: |
+          echo "PAY54 staging identity contract validated."
+          echo "Synthetic GitHub identities only."
+          echo "OIDC credentials were not requested."
+          echo "Google Cloud credentials were not requested."
+          echo "No cloud resources were created."
+          echo "No containers were published."
+          echo "No deployment was performed."
+          echo "Financial execution and news providers remain disabled."
