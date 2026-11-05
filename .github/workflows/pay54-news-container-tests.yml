@@ -1,0 +1,187 @@
+
+name: PAY54 News Container Security Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/news/**"
+      - "backend/server/**"
+      - "backend/tests/news-staging-container.test.mjs"
+      - "backend/Dockerfile.news"
+      - "backend/.dockerignore"
+      - ".github/workflows/pay54-news-container-tests.yml"
+  pull_request:
+    paths:
+      - "backend/news/**"
+      - "backend/server/**"
+      - "backend/tests/news-staging-container.test.mjs"
+      - "backend/Dockerfile.news"
+      - "backend/.dockerignore"
+      - ".github/workflows/pay54-news-container-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-news-container-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  container-security:
+    name: Isolated News Container Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Validate staging source
+        run: |
+          node --check backend/server/start-staging-news-server.mjs
+          node --check backend/server/news-server.mjs
+          node --check backend/tests/news-staging-container.test.mjs
+
+      - name: Run staging launcher regression tests
+        run: |
+          node --test backend/tests/news-staging-container.test.mjs
+
+      - name: Build isolated container without publishing
+        run: |
+          docker build \
+            --file backend/Dockerfile.news \
+            --tag pay54-news-staging:ci \
+            backend
+
+      - name: Verify non-root container identity
+        run: |
+          UID_VALUE="$(docker run --rm \
+            --entrypoint id \
+            pay54-news-staging:ci -u)"
+
+          test "$UID_VALUE" != "0"
+
+          echo "Container is running as non-root UID $UID_VALUE"
+
+      - name: Verify disabled provider and staging environment
+        run: |
+          docker run --rm \
+            --entrypoint node \
+            pay54-news-staging:ci \
+            -e "const assert=require('node:assert/strict'); \
+            assert.equal(process.env.PAY54_DEPLOYMENT_ENV,'staging'); \
+            assert.equal(process.env.PAY54_NEWS_ENABLED,'false'); \
+            assert.equal(process.env.PAY54_FINANCIAL_EXECUTION_ENABLED,'false'); \
+            assert.equal(process.env.PAY54_CUSTOMER_DATA_ENABLED,'false');"
+
+      - name: Start restricted container and smoke test HTTP
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CONTAINER_ID="$(docker run -d \
+            --read-only \
+            --cap-drop=ALL \
+            --security-opt=no-new-privileges \
+            --pids-limit=64 \
+            --memory=256m \
+            --cpus=1 \
+            -p 127.0.0.1:18080:8080 \
+            pay54-news-staging:ci)"
+
+          cleanup() {
+            docker logs "$CONTAINER_ID" || true
+            docker rm -f "$CONTAINER_ID" >/dev/null 2>&1 || true
+          }
+
+          trap cleanup EXIT
+
+          READY=0
+
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail \
+              http://127.0.0.1:18080/health/live \
+              > /tmp/pay54-news-health.json; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+
+          test "$READY" = "1"
+
+          node -e "
+            const fs=require('node:fs');
+            const assert=require('node:assert/strict');
+            const data=JSON.parse(
+              fs.readFileSync('/tmp/pay54-news-health.json','utf8')
+            );
+            assert.equal(data.service,'pay54-news');
+            assert.equal(data.financialExecution,'disabled');
+          "
+
+          STATUS="$(curl --silent \
+            --output /tmp/pay54-news-response.json \
+            --write-out '%{http_code}' \
+            http://127.0.0.1:18080/api/v1/news)"
+
+          test "$STATUS" = "503"
+
+          node -e "
+            const fs=require('node:fs');
+            const assert=require('node:assert/strict');
+            const data=JSON.parse(
+              fs.readFileSync('/tmp/pay54-news-response.json','utf8')
+            );
+            assert.equal(data.status,'unavailable');
+            assert.deepEqual(data.items,[]);
+          "
+
+          for route in \
+            /api/v1/transfers \
+            /api/v1/wallets \
+            /api/v1/ledger; do
+            STATUS="$(curl --silent \
+              --output /dev/null \
+              --write-out '%{http_code}' \
+              "http://127.0.0.1:18080$route")"
+            test "$STATUS" = "404"
+          done
+
+      - name: Verify container rejects provider activation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          set +e
+          timeout 15s docker run --rm \
+            --env PAY54_NEWS_ENABLED=true \
+            pay54-news-staging:ci \
+            > /tmp/pay54-negative.log 2>&1
+          STATUS=$?
+          set -e
+
+          test "$STATUS" = "1"
+
+          grep -q \
+            "Staging startup rejected" \
+            /tmp/pay54-negative.log
+
+      - name: Confirm build-only release checkpoint
+        run: |
+          echo "PAY54 staging container built and tested."
+          echo "No registry push was performed."
+          echo "No cloud deployment was performed."
+          echo "External news provider remains disabled."
+          echo "Financial execution remains disabled."
