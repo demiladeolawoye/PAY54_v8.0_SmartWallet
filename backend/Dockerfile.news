@@ -1,0 +1,38 @@
+
+# syntax=docker/dockerfile:1
+
+# ============================================================================
+# PAY54 ENTERPRISE — ISOLATED NEWS STAGING CONTAINER
+# File: backend/Dockerfile.news
+# Version: 1.0.0
+#
+# Staging-only image. No production credentials, package installation,
+# financial engines, customer records or application build tools.
+# ============================================================================
+
+FROM node:24-bookworm-slim
+
+LABEL org.opencontainers.image.title="PAY54 News Staging"
+LABEL org.opencontainers.image.description="Isolated read-only financial news staging runtime"
+LABEL org.opencontainers.image.vendor="PAY54"
+LABEL org.opencontainers.image.version="1.0.0"
+
+ENV NODE_ENV=production \
+    PAY54_DEPLOYMENT_ENV=staging \
+    PAY54_NEWS_ENABLED=false \
+    PAY54_NEWS_RIGHTS_VERIFIED=false \
+    PAY54_FINANCIAL_EXECUTION_ENABLED=false \
+    PAY54_CUSTOMER_DATA_ENABLED=false \
+    PORT=8080 \
+    HOME=/tmp
+
+WORKDIR /opt/pay54
+
+COPY --chown=node:node news/ ./news/
+COPY --chown=node:node server/ ./server/
+
+USER node
+
+EXPOSE 8080
+
+CMD ["node", "server/start-staging-news-server.mjs"]
