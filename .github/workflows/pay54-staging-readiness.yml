@@ -1,0 +1,74 @@
+
+name: PAY54 Staging Readiness Audit
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/tests/staging-readiness.audit.mjs"
+      - "backend/tests/staging-infrastructure.test.mjs"
+      - ".github/workflows/pay54-staging-infrastructure-tests.yml"
+      - ".github/workflows/pay54-staging-readiness.yml"
+
+  pull_request:
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/tests/staging-readiness.audit.mjs"
+      - "backend/tests/staging-infrastructure.test.mjs"
+      - ".github/workflows/pay54-staging-infrastructure-tests.yml"
+      - ".github/workflows/pay54-staging-readiness.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  staging-readiness:
+    name: PAY54 Staging Readiness Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      CI: "true"
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      TF_VAR_authorized_provisioning: "false"
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Check readiness audit syntax
+        run: |
+          node --check backend/tests/staging-readiness.audit.mjs
+
+      - name: Execute read-only infrastructure readiness audit
+        run: |
+          node backend/tests/staging-readiness.audit.mjs
+
+      - name: Confirm provisioning remains disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "$TF_VAR_authorized_provisioning" = "false"
+
+          echo "PASS: Provisioning disabled."
+          echo "PASS: No cloud credentials requested."
+          echo "PASS: No Terraform apply or destroy executed."
+          echo "PASS: No PAY54 financial execution activated."
