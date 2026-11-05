@@ -1,0 +1,75 @@
+
+{
+  "schemaVersion": "1.0.0",
+  "phase": "2G-O",
+  "purpose": "Read-only inventory of evidence required before independent PAY54 staging approval",
+  "scope": "staging",
+  "deploymentAuthorized": false,
+  "provisioningAuthorized": false,
+  "financialExecutionAuthorized": false,
+  "controls": [
+    {
+      "id": "STG-01",
+      "name": "Independent release reviewer and approval enforcement",
+      "accountableRole": "Release Manager",
+      "verifierRole": "Independent Security Reviewer",
+      "acceptanceCriteria": "GitHub environment settings demonstrate a named independent reviewer, prevent_self_review enabled, no bypass path, and a recorded approved change request.",
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    {
+      "id": "STG-02",
+      "name": "Verified Google Cloud project and billing",
+      "accountableRole": "Cloud Platform Owner",
+      "verifierRole": "Finance and Security Reviewer",
+      "acceptanceCriteria": "Approved project ID and number, organisational ownership, billing linkage, region restrictions and immutable repository/owner IDs independently matched.",
+      "status": "NOT_CONFIGURED",
+      "evidence": []
+    },
+    {
+      "id": "STG-03",
+      "name": "Secret Manager access controls",
+      "accountableRole": "Principal Security Engineer",
+      "verifierRole": "Independent Security Reviewer",
+      "acceptanceCriteria": "Approved secrets inventory and access policy, dedicated service identity, least-privilege grants, rotation/revocation process, and no secrets in source or CI logs.",
+      "status": "NOT_CONFIGURED",
+      "evidence": []
+    },
+    {
+      "id": "STG-04",
+      "name": "Budget and cost alerts",
+      "accountableRole": "Cloud Platform Owner",
+      "verifierRole": "Finance Reviewer",
+      "acceptanceCriteria": "Staging cost ceiling, billing budget and alert thresholds, named alert recipients and notification delivery independently verified.",
+      "status": "NOT_CONFIGURED",
+      "evidence": []
+    },
+    {
+      "id": "STG-05",
+      "name": "Private networking and egress security",
+      "accountableRole": "Principal DevSecOps Engineer",
+      "verifierRole": "Independent Security Reviewer",
+      "acceptanceCriteria": "Documented ingress, private service access, outbound destination allowlist, DNS/TLS controls, application authentication and network test evidence.",
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    {
+      "id": "STG-06",
+      "name": "Signed container provenance",
+      "accountableRole": "Principal DevSecOps Engineer",
+      "verifierRole": "Independent Security Reviewer",
+      "acceptanceCriteria": "Build provenance, SBOM, dependency and vulnerability review, signed image digest, approved registry image and immutable deployment reference verified.",
+      "status": "NOT_CONFIGURED",
+      "evidence": []
+    },
+    {
+      "id": "STG-07",
+      "name": "Formal cloud provisioning authorisation",
+      "accountableRole": "Group CTO",
+      "verifierRole": "Independent Release Approver",
+      "acceptanceCriteria": "Signed release decision references the approved change, all previous controls verified, documented rollback plan, delegated authority and explicit provisioning scope.",
+      "status": "BLOCKED",
+      "evidence": []
+    }
+  ]
+}
