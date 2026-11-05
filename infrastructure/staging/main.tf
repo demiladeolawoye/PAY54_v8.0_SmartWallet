@@ -124,7 +124,7 @@ resource "terraform_data" "provisioning_authorisation" {
       condition = (
         can(regex("^[a-z][a-z0-9-]{4,28}[a-z0-9]$", coalesce(var.project_id, "invalid"))) &&
         can(regex("^[1-9][0-9]*$", coalesce(var.project_number, "invalid"))) &&
-        can(regex("^[1-9][0-9]*$", 	coalesce(var.github_repository_id, "invalid"))) &&
+        can(regex("^[1-9][0-9]*$", coalesce(var.github_repository_id, "invalid"))) &&
         can(regex("^[1-9][0-9]*$", coalesce(var.github_owner_id, "invalid")))
       )
       error_message = "PAY54 staging infrastructure identifiers are missing or malformed."
