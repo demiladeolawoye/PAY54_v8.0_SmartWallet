@@ -1,0 +1,131 @@
+
+name: PAY54 Staging Independent Verification Audit
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/staging-evidence-register.json"
+      - "backend/governance/staging-evidence-submissions.json"
+      - "backend/governance/staging-evidence-intake.mjs"
+      - "backend/governance/staging-independent-reviews.json"
+      - "backend/governance/staging-independent-verification.mjs"
+      - "backend/tests/staging-independent-verification.test.mjs"
+      - ".github/workflows/pay54-staging-independent-verification.yml"
+
+  pull_request:
+    paths:
+      - "backend/governance/staging-evidence-register.json"
+      - "backend/governance/staging-evidence-submissions.json"
+      - "backend/governance/staging-evidence-intake.mjs"
+      - "backend/governance/staging-independent-reviews.json"
+      - "backend/governance/staging-independent-verification.mjs"
+      - "backend/tests/staging-independent-verification.test.mjs"
+      - ".github/workflows/pay54-staging-independent-verification.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-verification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  independent-verification:
+    name: PAY54 Independent Review Policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      PAY54_STAGING_PROVISIONING: "false"
+      PAY54_FINANCIAL_EXECUTION: "false"
+
+    steps:
+      - name: Checkout PAY54 source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Run independent verification regression tests
+        run: node --test backend/tests/staging-independent-verification.test.mjs
+
+      - name: Validate staged evidence and review register
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node --input-type=module <<'NODE'
+          import {
+            readFileSync,
+            appendFileSync
+          } from 'node:fs';
+
+          import {
+            validateEvidenceIntake
+          } from './backend/governance/staging-evidence-intake.mjs';
+
+          import {
+            validateIndependentReviews,
+            renderIndependentVerificationSummary
+          } from './backend/governance/staging-independent-verification.mjs';
+
+          const read = path =>
+            JSON.parse(readFileSync(path, 'utf8'));
+
+          const baseline = read(
+            'backend/governance/staging-evidence-register.json'
+          );
+
+          const intake = read(
+            'backend/governance/staging-evidence-submissions.json'
+          );
+
+          const reviews = read(
+            'backend/governance/staging-independent-reviews.json'
+          );
+
+          const intakeResult =
+            validateEvidenceIntake(baseline, intake);
+
+          const result = validateIndependentReviews(
+            intake,
+            intakeResult,
+            reviews
+          );
+
+          const report =
+            renderIndependentVerificationSummary(result);
+
+          console.log(report);
+
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            appendFileSync(
+              process.env.GITHUB_STEP_SUMMARY,
+              report + '\n'
+            );
+          }
+
+          if (!result.valid) {
+            process.exitCode = 1;
+          }
+          NODE
+
+      - name: Confirm no release authorisation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "$PAY54_STAGING_PROVISIONING" = "false"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+
+          echo 'PASS: No deployment, cloud authentication, financial execution or provisioning.'
+          echo 'PASS: Independent verification is not granted by metadata-only checks.'
