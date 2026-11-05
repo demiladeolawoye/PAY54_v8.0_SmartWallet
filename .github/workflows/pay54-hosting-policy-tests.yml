@@ -1,0 +1,54 @@
+
+name: PAY54 Backend Hosting Policy Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/deployment/**"
+      - "backend/tests/hosting-policy.test.mjs"
+      - ".github/workflows/pay54-hosting-policy-tests.yml"
+  pull_request:
+    paths:
+      - "backend/deployment/**"
+      - "backend/tests/hosting-policy.test.mjs"
+      - ".github/workflows/pay54-hosting-policy-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-hosting-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hosting-policy-tests:
+    name: Private Staging Release Boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PAY54 source
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Validate hosting policy source
+        run: |
+          node --check backend/deployment/hosting-policy.mjs
+          node --check backend/tests/hosting-policy.test.mjs
+
+      - name: Run staging policy tests
+        run: |
+          node --test backend/tests/hosting-policy.test.mjs
+
+      - name: Confirm release policy checkpoint
+        run: |
+          echo "PAY54 staging hosting policy tests passed."
+          echo "No cloud deployment was performed."
+          echo "Public ingress and financial execution remain prohibited."
