@@ -1,0 +1,67 @@
+
+name: PAY54 Staging Release Security Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/deployment/**"
+      - "backend/tests/hosting-policy.test.mjs"
+      - "backend/tests/staging-release-policy.test.mjs"
+      - ".github/workflows/pay54-staging-release-policy-tests.yml"
+  pull_request:
+    paths:
+      - "backend/deployment/**"
+      - "backend/tests/hosting-policy.test.mjs"
+      - "backend/tests/staging-release-policy.test.mjs"
+      - ".github/workflows/pay54-staging-release-policy-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  staging-release-security:
+    name: PAY54 Private Staging Release Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Validate security policy modules
+        run: |
+          node --check backend/deployment/hosting-policy.mjs
+          node --check backend/deployment/staging-release-policy.mjs
+          node --check backend/tests/hosting-policy.test.mjs
+          node --check backend/tests/staging-release-policy.test.mjs
+
+      - name: Run hosting and release security regression tests
+        run: |
+          node --test \
+            backend/tests/hosting-policy.test.mjs \
+            backend/tests/staging-release-policy.test.mjs
+
+      - name: Verify release boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "PAY54 staging release policies validated."
+          echo "No Google Cloud credentials requested."
+          echo "No container was published."
+          echo "No cloud deployment was performed."
+          echo "No live financial or news provider capabilities enabled."
