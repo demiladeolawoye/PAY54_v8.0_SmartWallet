@@ -1,0 +1,241 @@
+
+# ============================================================================
+# PAY54 ENTERPRISE — SECURE STAGING DEPLOYMENT PREPARATION
+# File: .github/workflows/pay54-staging-deploy.yml
+# Version: 1.0.0
+#
+# Phase 2G-M: Validation-only deployment workflow identity.
+#
+# Security boundary:
+# - No deployment or infrastructure provisioning.
+# - No Google Cloud authentication or workload identity token.
+# - No environment secrets or write-capable GitHub token.
+# - No container publishing or financial execution.
+# ============================================================================
+
+name: PAY54 Secure Staging Deployment Preparation
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - ".github/workflows/pay54-staging-deploy.yml"
+      - "infrastructure/staging/**"
+      - "backend/tests/staging-infrastructure.test.mjs"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-preparation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  staging-preparation:
+    name: Validate PAY54 Staging Deployment Boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_STAGING_EXECUTION: "DISABLED"
+      PAY54_FINANCIAL_EXECUTION: "false"
+
+    steps:
+      - name: Checkout PAY54 source without retained credentials
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Validate approved GitHub workflow context
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "$GITHUB_REPOSITORY" = \
+            "demiladeolawoye/PAY54_v8.0_SmartWallet"
+
+          test "$GITHUB_REF" = \
+            "refs/heads/project-titan"
+
+          case "$GITHUB_EVENT_NAME" in
+            push|workflow_dispatch)
+              ;;
+            *)
+              echo "Unapproved staging event."
+              exit 1
+              ;;
+          esac
+
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_STAGING_EXECUTION" = "DISABLED"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+
+          echo "PASS: Approved repository and branch."
+          echo "PASS: Approved validation event."
+          echo "PASS: Provisioning and financial execution disabled."
+
+      - name: Verify Terraform security boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import { readFileSync } from "node:fs";
+
+          const tf = readFileSync(
+            "infrastructure/staging/main.tf",
+            "utf8"
+          );
+
+          const workflow = readFileSync(
+            ".github/workflows/pay54-staging-deploy.yml",
+            "utf8"
+          );
+
+          const checks = [
+            [
+              /variable\s+"authorized_provisioning"\s*\{[^}]*default\s*=\s*false/s,
+              "Provisioning disabled by default"
+            ],
+            [
+              /enabled\s*=\s*var\.authorized_provisioning/,
+              "Provisioning requires explicit authorisation"
+            ],
+            [
+              /region\s*=\s*"europe-west2"/,
+              "London staging region"
+            ],
+            [
+              /resource\s+"google_iam_workload_identity_pool_provider"\s+"github"\s*\{[\s\S]*?disabled\s*=\s*true/,
+              "GitHub cloud federation disabled"
+            ],
+            [
+              /ingress\s*=\s*"INGRESS_TRAFFIC_INTERNAL_ONLY"/,
+              "Internal-only Cloud Run ingress"
+            ],
+            [
+              /invoker_iam_disabled\s*=\s*false/,
+              "Cloud Run authentication required"
+            ],
+            [
+              /deletion_protection\s*=\s*true/,
+              "Deletion protection required"
+            ],
+            [
+              /refs\/heads\/project-titan/,
+              "Trusted staging branch"
+            ],
+            [
+              /pay54-staging-deploy\.yml/,
+              "Exact deployment workflow identity"
+            ],
+            [
+              /assertion\.repository_id/,
+              "Immutable repository identity"
+            ],
+            [
+              /assertion\.repository_owner_id/,
+              "Immutable repository owner identity"
+            ],
+            [
+              /assertion\.workflow_ref/,
+              "Exact workflow trust condition"
+            ]
+          ];
+
+          for (const [pattern, description] of checks) {
+            assert.match(tf, pattern, description);
+            console.log(`PASS: ${description}`);
+          }
+
+          for (const forbidden of [
+            "roles/owner",
+            "roles/editor",
+            "roles/run.admin",
+            "roles/artifactregistry.admin",
+            'member = "allUsers"',
+            'member = "allAuthenticatedUsers"',
+            'ingress = "INGRESS_TRAFFIC_ALL"'
+          ]) {
+            assert.equal(
+              tf.includes(forbidden),
+              false,
+              `Forbidden infrastructure configuration: ${forbidden}`
+            );
+          }
+
+          assert.match(
+            workflow,
+            /permissions:\s*\n\s+contents:\s*read/,
+            "Workflow must use read-only GitHub permissions"
+          );
+
+          assert.doesNotMatch(
+            workflow,
+            /^\s+id-token:\s*write\s*$/m,
+            "Cloud identity token permission is forbidden"
+          );
+
+          assert.doesNotMatch(
+            workflow,
+            /^\s+environment:\s*pay54-staging\s*$/m,
+            "Validation workflow must not start a staging deployment"
+          );
+
+          assert.doesNotMatch(
+            workflow,
+            /\$\{\{\s*secrets\./,
+            "Validation workflow must not access GitHub secrets"
+          );
+
+          assert.doesNotMatch(
+            workflow,
+            /uses:\s*google-github-actions\/auth@/,
+            "Google Cloud authentication is forbidden"
+          );
+
+          console.log(
+            "PASS: Workflow is read-only and does not authenticate to cloud services."
+          );
+          NODE
+
+      - name: Run existing staging infrastructure security tests
+        run: |
+          node --test backend/tests/staging-infrastructure.test.mjs
+
+      - name: Report PAY54 validation-only checkpoint
+        if: success()
+        shell: bash
+        run: |
+          {
+            echo "## PAY54 Phase 2G-M — Staging Preparation"
+            echo ""
+            echo "**Status: VALIDATION PASSED — NOT DEPLOYED**"
+            echo ""
+            echo "| Control | Result |"
+            echo "|---|---|"
+            echo "| Repository and branch | VERIFIED |"
+            echo "| Terraform source security checks | PASSED |"
+            echo "| Existing infrastructure regression tests | PASSED |"
+            echo "| Cloud authentication | DISABLED |"
+            echo "| Infrastructure provisioning | DISABLED |"
+            echo "| Container deployment | NOT PERFORMED |"
+            echo "| Financial execution | DISABLED |"
+            echo "| Independent reviewer approval | OUTSTANDING |"
+            echo ""
+            echo "This workflow does not authorise staging deployment."
+            echo "A separate reviewed release is required before cloud activation."
+          } >> "$GITHUB_STEP_SUMMARY"
