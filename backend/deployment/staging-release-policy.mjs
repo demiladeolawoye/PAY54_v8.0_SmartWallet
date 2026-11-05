@@ -140,8 +140,15 @@ export function validateStagingReleaseContract(contract) {
     violations
   );
 
-  const hostingResult =
-    validateHostingManifest(contract.hostingManifest);
+ const hostingResult =
+  isRecord(contract.hostingManifest)
+    ? validateHostingManifest(contract.hostingManifest)
+    : {
+        valid: false,
+        violations: [
+          "Hosting manifest must be a plain object"
+        ]
+      };
 
   if (!hostingResult.valid) {
     for (const violation of hostingResult.violations) {
