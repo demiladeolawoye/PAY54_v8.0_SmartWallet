@@ -1,0 +1,57 @@
+
+name: PAY54 Staging Evidence Intake Audit
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/staging-evidence-register.json"
+      - "backend/governance/staging-evidence-audit.mjs"
+      - "backend/governance/staging-evidence-submissions.json"
+      - "backend/governance/staging-evidence-intake.mjs"
+      - "backend/tests/staging-evidence-intake.test.mjs"
+      - ".github/workflows/pay54-staging-evidence-intake.yml"
+
+  pull_request:
+    paths:
+      - "backend/governance/staging-evidence-register.json"
+      - "backend/governance/staging-evidence-audit.mjs"
+      - "backend/governance/staging-evidence-submissions.json"
+      - "backend/governance/staging-evidence-intake.mjs"
+      - "backend/tests/staging-evidence-intake.test.mjs"
+      - ".github/workflows/pay54-staging-evidence-intake.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-intake-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  staging-evidence-intake:
+    name: PAY54 Read-only Evidence Intake
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PAY54 source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Validate baseline register and evidence intake
+        run: |
+          node --test backend/tests/staging-evidence-register.test.mjs backend/tests/staging-evidence-intake.test.mjs
+
+      - name: Publish candidate evidence report
+        run: node backend/governance/staging-evidence-intake.mjs
