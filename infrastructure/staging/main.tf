@@ -122,10 +122,10 @@ resource "terraform_data" "provisioning_authorisation" {
 
     precondition {
       condition = (
-        can(regex("^[a-z][a-z0-9-]{4,28}[a-z0-9]$", coalesce(var.project_id, ""))) &&
-        can(regex("^[1-9][0-9]*$", coalesce(var.project_number, ""))) &&
-        can(regex("^[1-9][0-9]*$", coalesce(var.github_repository_id, ""))) &&
-        can(regex("^[1-9][0-9]*$", coalesce(var.github_owner_id, "")))
+        can(regex("^[a-z][a-z0-9-]{4,28}[a-z0-9]$", coalesce(var.project_id, "invalid"))) &&
+        can(regex("^[1-9][0-9]*$", coalesce(var.project_number, "invalid"))) &&
+        can(regex("^[1-9][0-9]*$", 	coalesce(var.github_repository_id, "invalid"))) &&
+        can(regex("^[1-9][0-9]*$", coalesce(var.github_owner_id, "invalid")))
       )
       error_message = "PAY54 staging infrastructure identifiers are missing or malformed."
     }
@@ -133,7 +133,7 @@ resource "terraform_data" "provisioning_authorisation" {
     precondition {
       condition = can(regex(
         "^europe-west2-docker[.]pkg[.]dev/${coalesce(var.project_id, "invalid")}/pay54-staging-images/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$",
-        coalesce(var.container_image, "")
+        coalesce(var.container_image, "invalid")
       ))
       error_message = "PAY54 requires an approved regional Artifact Registry image pinned to a SHA-256 digest."
     }
