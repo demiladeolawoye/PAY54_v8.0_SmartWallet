@@ -58,10 +58,10 @@ jobs:
         run: |
           node --test backend/tests/staging-infrastructure.test.mjs
 
-              - name: Format Terraform in isolated CI workspace
+      - name: Check Terraform formatting
         working-directory: infrastructure/staging
         run: |
-          terraform fmt
+          terraform fmt -check -diff
 
       - name: Initialise Terraform without remote backend
         working-directory: infrastructure/staging
