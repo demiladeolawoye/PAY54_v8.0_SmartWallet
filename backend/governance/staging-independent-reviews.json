@@ -1,0 +1,11 @@
+
+{
+  "schemaVersion": "1.0.0",
+  "phase": "2G-Q",
+  "scope": "staging",
+  "policy": "AUTHENTICATED_INDEPENDENT_ATTESTATION_REQUIRED",
+  "deploymentAuthorized": false,
+  "provisioningAuthorized": false,
+  "financialExecutionAuthorized": false,
+  "reviews": []
+}
