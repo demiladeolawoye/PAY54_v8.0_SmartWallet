@@ -1,0 +1,70 @@
+
+name: PAY54 News Runtime Security Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/news/**"
+      - "backend/server/**"
+      - "backend/tests/news-server.test.mjs"
+      - ".github/workflows/pay54-news-runtime-tests.yml"
+  pull_request:
+    paths:
+      - "backend/news/**"
+      - "backend/server/**"
+      - "backend/tests/news-server.test.mjs"
+      - ".github/workflows/pay54-news-runtime-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-news-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime-security:
+    name: PAY54 News Runtime and Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      PAY54_NEWS_ENABLED: "false"
+      PAY54_NEWS_RIGHTS_VERIFIED: "false"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Check runtime source syntax
+        run: |
+          node --check backend/server/news-server.mjs
+          node --check backend/server/start-news-server.mjs
+          node --check backend/tests/news-server.test.mjs
+
+      - name: Test read-only HTTP runtime
+        run: |
+          node --test backend/tests/news-server.test.mjs
+
+      - name: Test full news regression suite
+        run: |
+          node --test \
+            backend/tests/news-feed-policy.test.mjs \
+            backend/tests/news-service.test.mjs \
+            backend/tests/marketaux-adapter.test.mjs \
+            backend/tests/news-integration.test.mjs
+
+      - name: Report checkpoint
+        run: |
+          echo "PAY54 read-only news runtime tests passed."
+          echo "External news provider remains disabled."
+          echo "No public server was deployed."
+          echo "No financial execution functionality changed."
