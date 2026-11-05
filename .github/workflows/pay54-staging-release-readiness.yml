@@ -1,0 +1,73 @@
+
+name: PAY54 Staging Release Readiness Audit
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/tests/staging-infrastructure.test.mjs"
+      - "backend/tests/staging-release-readiness.test.mjs"
+      - ".github/workflows/pay54-staging-infrastructure-tests.yml"
+      - ".github/workflows/pay54-staging-deploy.yml"
+      - ".github/workflows/pay54-staging-release-readiness.yml"
+
+  pull_request:
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/tests/staging-infrastructure.test.mjs"
+      - "backend/tests/staging-release-readiness.test.mjs"
+      - ".github/workflows/pay54-staging-infrastructure-tests.yml"
+      - ".github/workflows/pay54-staging-deploy.yml"
+      - ".github/workflows/pay54-staging-release-readiness.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-release-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    name: Read-only PAY54 Staging Release Assessment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_FINANCIAL_EXECUTION: "false"
+      PAY54_NEWS_PROVIDER_ENABLED: "false"
+      PAY54_PRODUCTION_MODE: "false"
+
+    steps:
+      - name: Checkout repository without persisted credentials
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Audit staging source controls and report outstanding evidence
+        run: node --test backend/tests/staging-release-readiness.test.mjs
+
+      - name: Confirm protected non-deployment boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+          test "$PAY54_NEWS_PROVIDER_ENABLED" = "false"
+          test "$PAY54_PRODUCTION_MODE" = "false"
+
+          echo "PASS: No cloud authentication or provisioning attempted."
+          echo "PASS: No financial execution or production features activated."
+          echo "BLOCKED: Staging deployment requires separate independently verified approval."
