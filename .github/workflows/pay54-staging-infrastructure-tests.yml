@@ -1,0 +1,101 @@
+
+name: PAY54 Staging Infrastructure Security Tests
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/tests/staging-infrastructure.test.mjs"
+      - ".github/workflows/pay54-staging-infrastructure-tests.yml"
+
+  pull_request:
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/tests/staging-infrastructure.test.mjs"
+      - ".github/workflows/pay54-staging-infrastructure-tests.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-infrastructure-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  infrastructure-security:
+    name: PAY54 Private Infrastructure Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      TF_VAR_authorized_provisioning: "false"
+
+    steps:
+      - name: Checkout PAY54 repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.14.6"
+          terraform_wrapper: false
+
+      - name: Run PAY54 infrastructure security tests
+        run: |
+          node --test backend/tests/staging-infrastructure.test.mjs
+
+      - name: Check Terraform formatting
+        working-directory: infrastructure/staging
+        run: |
+          terraform fmt -check -diff
+
+      - name: Initialise Terraform without remote backend
+        working-directory: infrastructure/staging
+        run: |
+          terraform init -backend=false -input=false -no-color
+
+      - name: Validate Terraform provider and resource schema
+        working-directory: infrastructure/staging
+        run: |
+          terraform validate -no-color
+
+      - name: Verify that provisioning cannot run in CI
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "$TF_VAR_authorized_provisioning" = "false"
+
+          if grep -Eq \
+            '^[[:space:]]*(terraform[[:space:]]+apply|terraform[[:space:]]+destroy|gcloud[[:space:]]+run[[:space:]]+deploy)' \
+            .github/workflows/pay54-staging-infrastructure-tests.yml
+          then
+            echo "Unsafe deployment command detected."
+            exit 1
+          fi
+
+          echo "PASS: Infrastructure provisioning disabled."
+          echo "PASS: No cloud credentials requested."
+          echo "PASS: No Google Cloud resources created."
+          echo "PASS: No container deployment attempted."
+
+      - name: Report PAY54 security checkpoint
+        run: |
+          echo "PAY54 Phase 2G-J infrastructure checks completed."
+          echo "Terraform configuration was validated."
+          echo "Deployment identity remains inactive."
+          echo "Production and financial execution remain disabled."
