@@ -1,0 +1,67 @@
+
+name: PAY54 Staging Git Source Verification
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/staging-provenance-verifier.mjs"
+      - "backend/tests/staging-provenance-verifier.test.mjs"
+      - "backend/governance/staging-source-candidates.json"
+      - ".github/workflows/pay54-staging-source-verification.yml"
+  pull_request:
+    paths:
+      - "backend/governance/staging-provenance-verifier.mjs"
+      - "backend/tests/staging-provenance-verifier.test.mjs"
+      - "backend/governance/staging-source-candidates.json"
+      - ".github/workflows/pay54-staging-source-verification.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-source-verification-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-source:
+    name: PAY54 Read-only Source Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout unprivileged source with complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Execute Git source verification regression tests
+        run: node --test backend/tests/staging-provenance-verifier.test.mjs
+
+      - name: Verify optional source candidate register
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -f backend/governance/staging-source-candidates.json ]]; then
+            node backend/governance/staging-provenance-verifier.mjs backend/governance/staging-source-candidates.json
+          else
+            echo 'No source candidate register exists; no evidence verified.'
+          fi
+
+          {
+            echo '## PAY54 Phase 2G-S — Git source verification'
+            echo 'Read-only check only. No independent reviewer approval.'
+            echo 'Release: BLOCKED.'
+            echo 'Provisioning: DISABLED.'
+            echo 'Financial execution: DISABLED.'
+          } >> "$GITHUB_STEP_SUMMARY"
