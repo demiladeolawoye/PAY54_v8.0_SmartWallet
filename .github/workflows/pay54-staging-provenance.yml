@@ -1,0 +1,111 @@
+
+name: PAY54 Staging Evidence Provenance Audit
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/staging-provenance-candidates.json"
+      - "backend/governance/staging-provenance-policy.mjs"
+      - "backend/tests/staging-provenance-policy.test.mjs"
+      - ".github/workflows/pay54-staging-provenance.yml"
+
+  pull_request:
+    paths:
+      - "backend/governance/staging-provenance-candidates.json"
+      - "backend/governance/staging-provenance-policy.mjs"
+      - "backend/tests/staging-provenance-policy.test.mjs"
+      - ".github/workflows/pay54-staging-provenance.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-provenance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  provenance-audit:
+    name: PAY54 Read-only Provenance Policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      PAY54_STAGING_PROVISIONING: "false"
+      PAY54_FINANCIAL_EXECUTION: "false"
+
+    steps:
+      - name: Checkout PAY54 source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Test provenance security policy
+        run: |
+          node --test backend/tests/staging-provenance-policy.test.mjs
+
+      - name: Validate candidate provenance records
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node --input-type=module <<'NODE'
+          import {
+            readFileSync,
+            appendFileSync
+          } from "node:fs";
+
+          import {
+            validateProvenanceCandidates,
+            renderProvenanceSummary
+          } from "./backend/governance/staging-provenance-policy.mjs";
+
+          const records = JSON.parse(
+            readFileSync(
+              "backend/governance/staging-provenance-candidates.json",
+              "utf8"
+            )
+          );
+
+          const result =
+            validateProvenanceCandidates(records);
+
+          const report =
+            renderProvenanceSummary(result);
+
+          console.log(report);
+
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            appendFileSync(
+              process.env.GITHUB_STEP_SUMMARY,
+              report + "\n"
+            );
+          }
+
+          if (!result.valid) {
+            process.exitCode = 1;
+          }
+          NODE
+
+      - name: Confirm release remains blocked
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "$PAY54_STAGING_PROVISIONING" = "false"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+
+          echo "PASS: No cloud credentials."
+          echo "PASS: No infrastructure provisioning."
+          echo "PASS: No deployment."
+          echo "PASS: No financial execution."
+          echo "PASS: No approval inferred from evidence metadata."
