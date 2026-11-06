@@ -45,18 +45,19 @@ jobs:
 
     steps:
       - name: Checkout PAY54 source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Configure Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
           package-manager-cache: false
 
       - name: Run independent verification regression tests
-        run: node --test backend/tests/staging-independent-verification.test.mjs
+        run: |
+          node --test backend/tests/staging-independent-verification.test.mjs
 
       - name: Validate staged evidence and review register
         shell: bash
@@ -67,30 +68,30 @@ jobs:
           import {
             readFileSync,
             appendFileSync
-          } from 'node:fs';
+          } from "node:fs";
 
           import {
             validateEvidenceIntake
-          } from './backend/governance/staging-evidence-intake.mjs';
+          } from "./backend/governance/staging-evidence-intake.mjs";
 
           import {
             validateIndependentReviews,
             renderIndependentVerificationSummary
-          } from './backend/governance/staging-independent-verification.mjs';
+          } from "./backend/governance/staging-independent-verification.mjs";
 
           const read = path =>
-            JSON.parse(readFileSync(path, 'utf8'));
+            JSON.parse(readFileSync(path, "utf8"));
 
           const baseline = read(
-            'backend/governance/staging-evidence-register.json'
+            "backend/governance/staging-evidence-register.json"
           );
 
           const intake = read(
-            'backend/governance/staging-evidence-submissions.json'
+            "backend/governance/staging-evidence-submissions.json"
           );
 
           const reviews = read(
-            'backend/governance/staging-independent-reviews.json'
+            "backend/governance/staging-independent-reviews.json"
           );
 
           const intakeResult =
@@ -110,7 +111,7 @@ jobs:
           if (process.env.GITHUB_STEP_SUMMARY) {
             appendFileSync(
               process.env.GITHUB_STEP_SUMMARY,
-              report + '\n'
+              report + "\n"
             );
           }
 
@@ -127,5 +128,5 @@ jobs:
           test "$PAY54_STAGING_PROVISIONING" = "false"
           test "$PAY54_FINANCIAL_EXECUTION" = "false"
 
-          echo 'PASS: No deployment, cloud authentication, financial execution or provisioning.'
-          echo 'PASS: Independent verification is not granted by metadata-only checks.'
+          echo "PASS: No deployment, cloud authentication, financial execution or provisioning."
+          echo "PASS: Independent verification is not granted by metadata-only checks."
