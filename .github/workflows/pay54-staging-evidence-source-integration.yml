@@ -1,0 +1,73 @@
+
+name: PAY54 Staging Evidence Source Integration
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/staging-evidence-source-integration.mjs"
+      - "backend/governance/staging-evidence-source-bindings.json"
+      - "backend/governance/staging-evidence-register.json"
+      - "backend/governance/staging-evidence-submissions.json"
+      - "backend/governance/staging-evidence-audit.mjs"
+      - "backend/governance/staging-evidence-intake.mjs"
+      - "backend/governance/staging-provenance-verifier.mjs"
+      - "backend/tests/staging-evidence-source-integration.test.mjs"
+      - ".github/workflows/pay54-staging-evidence-source-integration.yml"
+  pull_request:
+    paths:
+      - "backend/governance/staging-evidence-source-integration.mjs"
+      - "backend/governance/staging-evidence-source-bindings.json"
+      - "backend/governance/staging-evidence-register.json"
+      - "backend/governance/staging-evidence-submissions.json"
+      - "backend/governance/staging-evidence-audit.mjs"
+      - "backend/governance/staging-evidence-intake.mjs"
+      - "backend/governance/staging-provenance-verifier.mjs"
+      - "backend/tests/staging-evidence-source-integration.test.mjs"
+      - ".github/workflows/pay54-staging-evidence-source-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-evidence-integration-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-integration:
+    name: PAY54 Read-only Evidence Mapping
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout unprivileged repository history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Validate integration regression suite
+        run: node --test backend/tests/staging-evidence-source-integration.test.mjs
+
+      - name: Integrate source evidence without approving release
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          file="backend/governance/staging-evidence-source-bindings.json"
+          if [[ ! -f "$file" ]]; then
+            file="$(mktemp)"
+            trap 'rm -f "$file"' EXIT
+            printf '%s\n' '{"schemaVersion":"1.0.0","phase":"2G-T","scope":"staging","bindings":[]}' > "$file"
+          fi
+          node backend/governance/staging-evidence-source-integration.mjs "$file"
