@@ -1,0 +1,65 @@
+
+name: PAY54 STG-04 Cloud Security Readiness
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/security/staging-cloud-readiness.mjs"
+      - "backend/tests/staging-cloud-readiness.test.mjs"
+      - "backend/security/staging-secret-policy.mjs"
+      - "infrastructure/staging/main.tf"
+      - ".github/workflows/pay54-staging-cloud-readiness.yml"
+
+  pull_request:
+    paths:
+      - "backend/security/staging-cloud-readiness.mjs"
+      - "backend/tests/staging-cloud-readiness.test.mjs"
+      - "backend/security/staging-secret-policy.mjs"
+      - "infrastructure/staging/main.tf"
+      - ".github/workflows/pay54-staging-cloud-readiness.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-stg04-cloud-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-readiness:
+    name: STG-04 Offline Cloud Readiness Assessment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_CLOUD_AUTH: "disabled"
+
+    steps:
+      - name: Checkout unprivileged source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Run STG-04 security regression
+        run: node --test backend/tests/staging-cloud-readiness.test.mjs
+
+      - name: Publish offline readiness report
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_CLOUD_AUTH" = "disabled"
+
+          node backend/security/staging-cloud-readiness.mjs >> "$GITHUB_STEP_SUMMARY"
