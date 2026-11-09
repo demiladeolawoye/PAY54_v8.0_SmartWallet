@@ -1,0 +1,63 @@
+
+name: PAY54 STG-05 Egress Threat Model
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/governance/staging-egress-threat-model.*"
+      - "backend/tests/staging-egress-threat-model.test.mjs"
+      - ".github/workflows/pay54-staging-egress-threat-model.yml"
+
+  pull_request:
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/governance/staging-egress-threat-model.*"
+      - "backend/tests/staging-egress-threat-model.test.mjs"
+      - ".github/workflows/pay54-staging-egress-threat-model.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-stg05-egress-threat-model-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-threat-model:
+    name: Offline threat-model validation only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    env:
+      PAY54_FINANCIAL_EXECUTION: "false"
+      TF_VAR_authorized_provisioning: "false"
+
+    steps:
+      - name: Checkout without retained credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Test fail-closed model contract
+        run: node --test backend/tests/staging-egress-threat-model.test.mjs
+
+      - name: Assess real staging Terraform assumptions
+        run: node backend/governance/staging-egress-threat-model.mjs
+
+      - name: Assert infrastructure execution remains disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+          echo "Source-only threat model completed. STG-05 remains NOT_VERIFIED."
