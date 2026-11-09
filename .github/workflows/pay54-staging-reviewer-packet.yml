@@ -1,0 +1,65 @@
+
+name: PAY54 Staging Reviewer Evidence Packet
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/staging-reviewer-packet.mjs"
+      - "backend/governance/staging-evidence-*.mjs"
+      - "backend/governance/staging-evidence-*.json"
+      - "backend/governance/staging-observations.json"
+      - "backend/governance/staging-release-gate.mjs"
+      - "backend/tests/staging-reviewer-packet.test.mjs"
+      - ".github/workflows/pay54-staging-reviewer-packet.yml"
+  pull_request:
+    paths:
+      - "backend/governance/staging-reviewer-packet.mjs"
+      - "backend/governance/staging-evidence-*.mjs"
+      - "backend/governance/staging-evidence-*.json"
+      - "backend/governance/staging-observations.json"
+      - "backend/governance/staging-release-gate.mjs"
+      - "backend/tests/staging-reviewer-packet.test.mjs"
+      - ".github/workflows/pay54-staging-reviewer-packet.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-reviewer-packet-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare-offline-review:
+    name: Offline review packet and release-block checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_FINANCIAL_EXECUTION: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout read-only source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Run reviewer packet regression tests
+        run: node --test backend/tests/staging-reviewer-packet.test.mjs
+
+      - name: Generate read-only reviewer packet
+        run: node backend/governance/staging-reviewer-packet.mjs
+
+      - name: Confirm no provisioning or financial execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+          echo "Review packet prepared. No release authorisation granted."
