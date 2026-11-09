@@ -1,0 +1,65 @@
+<CodeBlock language="yaml" editable>
+name: PAY54 Consolidated Staging Release Gate
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/staging-evidence-*.mjs"
+      - "backend/governance/staging-evidence-*.json"
+      - "backend/governance/staging-release-gate.mjs"
+      - "backend/tests/staging-release-gate.test.mjs"
+      - ".github/workflows/pay54-staging-*.yml"
+  pull_request:
+    paths:
+      - "backend/governance/staging-evidence-*.mjs"
+      - "backend/governance/staging-evidence-*.json"
+      - "backend/governance/staging-release-gate.mjs"
+      - "backend/tests/staging-release-gate.test.mjs"
+      - ".github/workflows/pay54-staging-*.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-staging-release-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-release-gate:
+    name: Read-only evidence and release-block verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+env:
+      PAY54_FINANCIAL_EXECUTION: "false"
+      TF_VAR_authorized_provisioning: "false"
+
+steps:
+
+- name: Checkout unprivileged source
+uses: actions/checkout@v4
+with:
+persist-credentials: false
+
+- name: Configure Node.js 24
+uses: actions/setup-node@v4
+with:
+node-version: "24"
+
+- name: Execute consolidated gate regression tests
+run: node --test backend/tests/staging-release-gate.test.mjs
+
+- name: Assess existing evidence contracts without cloud access
+run: node backend/governance/staging-release-gate.mjs
+
+- name: Confirm non-provisioning boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+          echo "Staging release is blocked. No cloud login, apply or deploy was attempted."
+</CodeBlock>
