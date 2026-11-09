@@ -121,21 +121,18 @@ test(
       assessStagingRelease(baseline, intake)
     );
 
-assert.match(
-summary,
-/Source-policy integrity: **PASS**/
-);
+    assert.ok(
+      summary.includes("Source-policy integrity: **PASS**")
+    );
 
-assert.match(
-summary,
-/Staging release: **BLOCKED**/
-);
+    assert.ok(
+      summary.includes("Staging release: **BLOCKED**")
+    );
 
-assert.match(
-summary,
-/Independently authenticated approvals: **0**/
-);
-}
+    assert.ok(
+      summary.includes("Independently authenticated approvals: **0**")
+    );
+  }
 );
 
 test("actual checkout is assessed without file modification", () => {
