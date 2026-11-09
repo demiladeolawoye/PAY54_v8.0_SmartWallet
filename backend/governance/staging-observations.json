@@ -1,0 +1,63 @@
+
+{
+  "schemaVersion": "1.0.0",
+  "phase": "2G-V",
+  "scope": "staging",
+  "sourceClass": "USER_PROVIDED_CONSOLE_SCREENSHOTS",
+  "authentication": "NOT_AUTHENTICATED",
+  "reviewState": "INDEPENDENT_REVIEW_REQUIRED",
+  "deploymentAuthorized": false,
+  "provisioningAuthorized": false,
+  "financialExecutionAuthorized": false,
+  "observations": [
+    {
+      "id": "OBS-STG01-001",
+      "controlId": "STG-01",
+      "finding": "GitHub staging environment restricted to project-titan; no named independent required reviewer established.",
+      "sourceReference": "PAY54 conversation screenshots: GitHub staging environment and governance audit",
+      "assessment": "PARTIAL_OBSERVATION"
+    },
+    {
+      "id": "OBS-STG02-001",
+      "controlId": "STG-02",
+      "finding": "Google Cloud project pay54-staging-uk-01 and active billing linkage shown; organisation ownership not established.",
+      "sourceReference": "PAY54 conversation screenshots: project dashboard and billing management",
+      "assessment": "PARTIAL_OBSERVATION"
+    },
+    {
+      "id": "OBS-STG03-001",
+      "controlId": "STG-03",
+      "finding": "Secret Manager API shown enabled; global and regional secret lists empty; service account list empty; Secret Manager Data Access categories configured. Runtime IAM enforcement and key restrictions unverified.",
+      "sourceReference": "PAY54 conversation screenshots: Secret Manager, IAM and audit settings",
+      "assessment": "PARTIAL_OBSERVATION"
+    },
+    {
+      "id": "OBS-STG04-001",
+      "controlId": "STG-04",
+      "finding": "Monthly GBP 25 alert-only billing budget and 50, 80 and 100 percent thresholds shown; alert delivery not independently tested. Budget is not a hard spend cap.",
+      "sourceReference": "PAY54 conversation screenshots: Cloud Billing budgets",
+      "assessment": "PARTIAL_OBSERVATION"
+    },
+    {
+      "id": "OBS-STG05-001",
+      "controlId": "STG-05",
+      "finding": "Infrastructure source describes restricted ingress but no deployed network or effective egress controls have been independently inspected.",
+      "sourceReference": "PAY54 conversation screenshots: staging readiness GitHub Actions",
+      "assessment": "NOT_RUNTIME_VERIFIED"
+    },
+    {
+      "id": "OBS-STG06-001",
+      "controlId": "STG-06",
+      "finding": "No independently validated signed container image, SBOM or deployment digest was presented.",
+      "sourceReference": "PAY54 conversation screenshots: staging readiness and release gate",
+      "assessment": "NOT_RUNTIME_VERIFIED"
+    },
+    {
+      "id": "OBS-STG07-001",
+      "controlId": "STG-07",
+      "finding": "Existing consolidated gate reports release blocked, provisioning disabled, financial execution disabled and zero authenticated approvals.",
+      "sourceReference": "PAY54 conversation screenshots: Phase 2G-U consolidated gate",
+      "assessment": "BLOCKING_GAP"
+    }
+  ]
+}
