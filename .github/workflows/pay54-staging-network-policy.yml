@@ -1,0 +1,59 @@
+
+name: PAY54 STG-05 Terraform Network Policy
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/governance/staging-network-policy.mjs"
+      - "backend/tests/staging-network-policy.test.mjs"
+      - ".github/workflows/pay54-staging-network-policy.yml"
+  pull_request:
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/governance/staging-network-policy.mjs"
+      - "backend/tests/staging-network-policy.test.mjs"
+      - ".github/workflows/pay54-staging-network-policy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-stg05-network-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-policy-check:
+    name: Read-only Terraform security regression gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_FINANCIAL_EXECUTION: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout unprivileged source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Test source policy and fail-closed behaviour
+        run: node --test backend/tests/staging-network-policy.test.mjs
+
+      - name: Audit PAY54 staging Terraform source
+        run: node backend/governance/staging-network-policy.mjs
+
+      - name: Confirm no activation permissions
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+          echo "STG-05 remains NOT_VERIFIED. No Terraform or cloud deployment performed."
