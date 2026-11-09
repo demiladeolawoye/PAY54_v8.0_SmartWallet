@@ -1,4 +1,3 @@
-<CodeBlock language="javascript" editable>
 "use strict";
 
 /* PAY54 Phase 2G-U — consolidated release gate regression tests v1.0.0 */
@@ -145,4 +144,4 @@ test("actual checkout is assessed without file modification", () => {
 assert.equal(report.integrityPassed, true);
   assertBlocked(report);
 });
-</CodeBlock>
+
