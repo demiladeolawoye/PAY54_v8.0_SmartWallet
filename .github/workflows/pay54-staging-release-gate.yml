@@ -1,4 +1,3 @@
-<CodeBlock language="yaml" editable>
 name: PAY54 Consolidated Staging Release Gate
 
 on:
@@ -62,4 +61,4 @@ run: node backend/governance/staging-release-gate.mjs
           test "$TF_VAR_authorized_provisioning" = "false"
           test "$PAY54_FINANCIAL_EXECUTION" = "false"
           echo "Staging release is blocked. No cloud login, apply or deploy was attempted."
-</CodeBlock>
+
