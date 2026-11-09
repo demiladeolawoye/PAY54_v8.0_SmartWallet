@@ -1,0 +1,65 @@
+
+{
+  "schemaVersion": "1.0.0",
+  "phase": "2G-Z",
+  "controlId": "STG-05",
+  "workload": "pay54-news-staging",
+  "region": "europe-west2",
+  "sourcePath": "infrastructure/staging/main.tf",
+  "evidenceClass": "USER_SUPPLIED_TERRAFORM_SOURCE",
+  "decision": "DESIGN_ONLY_NOT_APPROVED",
+  "externalDestinations": [],
+  "destinationInventoryStatus": "NOT_ESTABLISHED",
+  "privateDatabaseRequired": "UNDETERMINED",
+  "networkArchitecture": "UNDECIDED",
+  "threats": [
+    {
+      "id": "EG-01",
+      "scenario": "The runtime connects to an unapproved public endpoint or exfiltrates data",
+      "trustBoundary": "Cloud Run runtime to public internet",
+      "currentEvidence": "No explicit Cloud Run VPC all-traffic egress or destination restrictions in supplied Terraform",
+      "requiredMitigation": "Agree destination allowlist, outbound network enforcement architecture and denied-destination negative tests",
+      "status": "OPEN"
+    },
+    {
+      "id": "EG-02",
+      "scenario": "A public caller reaches a service intended to be internal",
+      "trustBoundary": "External client to Cloud Run ingress",
+      "currentEvidence": "Cloud Run source declares internal ingress and IAM invoker checks enabled",
+      "requiredMitigation": "Independently verify effective ingress, invoker IAM and external-denial test in Google Cloud",
+      "status": "OPEN"
+    },
+    {
+      "id": "EG-03",
+      "scenario": "Runtime identity is overprivileged or obtains long-lived credentials",
+      "trustBoundary": "Cloud Run identity to Google Cloud APIs and secrets",
+      "currentEvidence": "Dedicated runtime service account declared, but effective IAM and key issuance not verified",
+      "requiredMitigation": "Independently review effective least-privilege grants, inherited IAM and key restrictions",
+      "status": "OPEN"
+    },
+    {
+      "id": "EG-04",
+      "scenario": "Unapproved dependency or DNS redirect leads traffic to an attacker",
+      "trustBoundary": "Runtime DNS/TLS and third-party providers",
+      "currentEvidence": "No authenticated outbound destination inventory or TLS enforcement evidence available",
+      "requiredMitigation": "Verify providers, domains, authentication, TLS and DNS controls; test denied hosts",
+      "status": "OPEN"
+    },
+    {
+      "id": "EG-05",
+      "scenario": "Network infrastructure is enabled before security review",
+      "trustBoundary": "GitHub CI to Google Cloud staging",
+      "currentEvidence": "Provisioning defaults off; workload federation provider declared disabled",
+      "requiredMitigation": "Retain separate approval and identity boundary, protected GitHub environment, signed provenance and review",
+      "status": "OPEN"
+    },
+    {
+      "id": "EG-06",
+      "scenario": "Private database or internal service is inadvertently exposed",
+      "trustBoundary": "Cloud Run runtime to data services",
+      "currentEvidence": "No database connectivity or private service topology established in supplied Terraform",
+      "requiredMitigation": "Confirm whether database access is required; if required, design private route and deny public access",
+      "status": "OPEN"
+    }
+  ]
+}
