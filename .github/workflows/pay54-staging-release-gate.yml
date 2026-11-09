@@ -32,33 +32,31 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
 
-env:
+    env:
       PAY54_FINANCIAL_EXECUTION: "false"
       TF_VAR_authorized_provisioning: "false"
 
-steps:
+    steps:
+      - name: Checkout unprivileged source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-- name: Checkout unprivileged source
-uses: actions/checkout@v4
-with:
-persist-credentials: false
+      - name: Configure Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
 
-- name: Configure Node.js 24
-uses: actions/setup-node@v4
-with:
-node-version: "24"
+      - name: Execute consolidated gate regression tests
+        run: node --test backend/tests/staging-release-gate.test.mjs
 
-- name: Execute consolidated gate regression tests
-run: node --test backend/tests/staging-release-gate.test.mjs
+      - name: Assess existing evidence contracts without cloud access
+        run: node backend/governance/staging-release-gate.mjs
 
-- name: Assess existing evidence contracts without cloud access
-run: node backend/governance/staging-release-gate.mjs
-
-- name: Confirm non-provisioning boundary
+      - name: Confirm non-provisioning boundary
         shell: bash
         run: |
           set -euo pipefail
           test "$TF_VAR_authorized_provisioning" = "false"
           test "$PAY54_FINANCIAL_EXECUTION" = "false"
           echo "Staging release is blocked. No cloud login, apply or deploy was attempted."
-
