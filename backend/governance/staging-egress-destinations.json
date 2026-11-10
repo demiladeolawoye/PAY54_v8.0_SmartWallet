@@ -1,0 +1,50 @@
+
+{
+  "schemaVersion": "1.0.0",
+  "phase": "2G-AB",
+  "control": "STG-05",
+  "projectId": "pay54-staging-uk-01",
+  "region": "europe-west2",
+  "workload": "pay54-news-staging",
+  "evidenceClass": "DESIGN_ONLY_UNAUTHENTICATED",
+  "inventoryStatus": "NOT_ESTABLISHED",
+  "enforcementStatus": "NOT_IMPLEMENTED",
+  "defaultOutboundDecision": "DENY_PENDING_IMPLEMENTATION",
+  "approvedDestinations": [],
+  "proposedDestinations": [],
+  "unresolvedDependencies": [
+    {
+      "id": "DEP-01",
+      "category": "News or information provider APIs",
+      "question": "Which contracted providers, exact destinations and request flows are needed?"
+    },
+    {
+      "id": "DEP-02",
+      "category": "Google Cloud APIs and metadata",
+      "question": "Which Google API calls and metadata endpoint paths are required by the runtime?"
+    },
+    {
+      "id": "DEP-03",
+      "category": "DNS resolution and TLS validation",
+      "question": "What resolver, certificate validation and redirect policies will be enforced?"
+    },
+    {
+      "id": "DEP-04",
+      "category": "Private data services",
+      "question": "Does the news workload require a database or other private service?"
+    },
+    {
+      "id": "DEP-05",
+      "category": "Package and image dependencies",
+      "question": "Can all software and container dependencies be resolved before runtime?"
+    },
+    {
+      "id": "DEP-06",
+      "category": "Logging and security telemetry",
+      "question": "Which outbound observability paths are necessary and how will denials be evidenced?"
+    }
+  ],
+  "releaseApproval": "BLOCKED",
+  "cloudProvisioning": "DISABLED",
+  "financialExecution": "DISABLED"
+}
