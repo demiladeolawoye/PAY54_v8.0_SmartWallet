@@ -4,8 +4,8 @@
 /* ==========================================================================
    PAY54 ENTERPRISE — ISOLATED FINANCIAL NEWS SERVER
    File: backend/news/news-server.mjs
-   Version: 1.1.0
-   Phase: 2G-AK
+   Version: 1.2.0
+   Phase: 2G-AL
 
    Local development and test runtime only.
 
@@ -17,7 +17,8 @@
    - No financial operations
    - No cloud provisioning
    - No credentials exposed through HTTP
-   - Read-only request guard and bounded concurrency
+   - Bounded read-only requests and request deadlines
+   - Stalled idle connections are closed
    ========================================================================== */
 
 import { createServer } from "node:http";
@@ -27,15 +28,19 @@ import { fileURLToPath } from "node:url";
 
 import { loadConfig } from "../src/config.mjs";
 import { createNewsIntegration } from "./news-integration.mjs";
+
 import {
   wrapNewsRequestHandler
 } from "./news-runtime-security.mjs";
 
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 const SERVICE_NAME = "pay54-isolated-news";
 
 const MAX_CONCURRENT_REQUESTS = 32;
 const MAX_REQUEST_TARGET_BYTES = 2048;
+
+const REQUEST_DEADLINE_MS = 8000;
+const IDLE_CONNECTION_TIMEOUT_MS = 10000;
 
 const RESPONSE_HEADERS = Object.freeze({
   "Cache-Control": "no-store",
@@ -48,7 +53,11 @@ const RESPONSE_HEADERS = Object.freeze({
 });
 
 function writeResponse(res, statusCode, payload) {
-  if (res.headersSent || res.writableEnded) {
+  if (
+    res.headersSent ||
+    res.writableEnded ||
+    res.destroyed
+  ) {
     return;
   }
 
@@ -66,6 +75,7 @@ function validateRuntime(config, environment) {
   if (
     !config ||
     typeof config !== "object" ||
+    Array.isArray(config) ||
     !environment ||
     typeof environment !== "object" ||
     Array.isArray(environment)
@@ -164,7 +174,8 @@ export function createIsolatedNewsServer({
   }
 
   const requestHandler = (req, res) => {
-    const pathname = (req.url ?? "").split("?", 1)[0];
+    const pathname = (req.url ?? "")
+      .split("?", 1)[0];
 
     if (pathname === "/health/live") {
       writeResponse(res, 200, {
@@ -192,7 +203,9 @@ export function createIsolatedNewsServer({
 
     if (pathname === integration.route) {
       return Promise.resolve()
-        .then(() => integration.handleRequest(req, res))
+        .then(() =>
+          integration.handleRequest(req, res)
+        )
         .catch(() => {
           if (!res.headersSent) {
             writeResponse(res, 503, {
@@ -212,16 +225,12 @@ export function createIsolatedNewsServer({
     });
   };
 
-  /*
-   * Request hardening is applied before any route is processed.
-   * The wrapper rejects unsupported methods, invalid request
-   * targets and requests exceeding the concurrency limit.
-   */
   const security = wrapNewsRequestHandler(
     requestHandler,
     {
       maxConcurrentRequests: MAX_CONCURRENT_REQUESTS,
-      maxTargetBytes: MAX_REQUEST_TARGET_BYTES
+      maxTargetBytes: MAX_REQUEST_TARGET_BYTES,
+      requestDeadlineMs: REQUEST_DEADLINE_MS
     }
   );
 
@@ -229,15 +238,25 @@ export function createIsolatedNewsServer({
     security.listener
   );
 
-  /*
-   * Preserve existing connection timeouts.
-   * Limit accepted HTTP headers to reduce parser exposure.
-   */
   server.headersTimeout = 10_000;
   server.requestTimeout = 15_000;
   server.keepAliveTimeout = 5_000;
   server.maxRequestsPerSocket = 100;
   server.maxHeadersCount = 64;
+
+  /*
+   * Node's request and headers timeouts are supplemented by
+   * an explicit socket inactivity limit.
+   *
+   * A partial request that remains inactive cannot occupy
+   * a local server connection indefinitely.
+   */
+  server.setTimeout(
+    IDLE_CONNECTION_TIMEOUT_MS,
+    socket => {
+      socket.destroy();
+    }
+  );
 
   return server;
 }
@@ -265,7 +284,10 @@ export async function startIsolatedNewsServer({
     server.once("error", onError);
     server.once("listening", onListening);
 
-    server.listen(config.port, config.host);
+    server.listen(
+      config.port,
+      config.host
+    );
   });
 
   console.info(
@@ -278,7 +300,8 @@ export async function startIsolatedNewsServer({
 
 const isDirectExecution =
   typeof process.argv[1] === "string" &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  resolve(process.argv[1]) ===
+    fileURLToPath(import.meta.url);
 
 if (isDirectExecution) {
   startIsolatedNewsServer().catch(error => {
