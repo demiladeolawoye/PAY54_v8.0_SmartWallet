@@ -1,39 +1,53 @@
 
 "use strict";
 
-/**
- * PAY54 Enterprise — News Runtime Request Guard
- * File: backend/news/news-runtime-security.mjs
- * Version: 1.0.0
- * Phase: 2G-AK
- *
- * A non-provisioning, provider-independent request-listener wrapper.
- * Does not bind ports, enable news providers or accept financial instructions.
- */
+/* ==========================================================================
+   PAY54 ENTERPRISE — NEWS RUNTIME REQUEST GUARD
+   File: backend/news/news-runtime-security.mjs
+   Version: 1.1.0
+   Phase: 2G-AL
+
+   Responsibilities:
+   - Enforce read-only HTTP methods
+   - Reject malformed request targets
+   - Bound concurrent requests
+   - Enforce request completion deadlines
+   - Release capacity on completion or disconnection
+   - Return safe, credential-free errors
+
+   This module does not bind a network port, activate providers,
+   provision infrastructure or execute financial operations.
+   ========================================================================== */
+
+const VERSION = "1.1.0";
 
 const SECURITY_HEADERS = Object.freeze({
-  "cache-control": "no-store",
-  "content-type": "application/json; charset=utf-8",
-  "x-content-type-options": "nosniff",
-  "referrer-policy": "no-referrer",
-  "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
-  "x-frame-options": "DENY"
+  "Cache-Control": "no-store",
+  "Content-Type": "application/json; charset=utf-8",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+  "Content-Security-Policy":
+    "default-src 'none'; frame-ancestors 'none'",
+  "X-Frame-Options": "DENY"
 });
 
 function reject(res, status, code, allow) {
-  if (res.headersSent || res.writableEnded) return;
+  if (res.writableEnded || res.destroyed) {
+    return;
+  }
 
-  res.setHeader("Cache-Control", "no-store");
-  res.setHeader("Content-Type", "application/json; charset=utf-8");
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("Referrer-Policy", "no-referrer");
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'none'; frame-ancestors 'none'"
-  );
-  res.setHeader("X-Frame-Options", "DENY");
+  if (res.headersSent) {
+    res.destroy();
+    return;
+  }
 
-  if (allow) res.setHeader("Allow", allow);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+    res.setHeader(name, value);
+  }
+
+  if (allow) {
+    res.setHeader("Allow", allow);
+  }
 
   const payload = JSON.stringify({
     status: "unavailable",
@@ -43,15 +57,22 @@ function reject(res, status, code, allow) {
   res.writeHead(status, {
     "Content-Length": Buffer.byteLength(payload)
   });
+
   res.end(payload);
 }
 
-export function wrapNewsRequestHandler(handler, {
-  maxConcurrentRequests = 32,
-  maxTargetBytes = 2048
-} = {}) {
+export function wrapNewsRequestHandler(
+  handler,
+  {
+    maxConcurrentRequests = 32,
+    maxTargetBytes = 2048,
+    requestDeadlineMs = 8000
+  } = {}
+) {
   if (typeof handler !== "function") {
-    throw new TypeError("A request handler function is required");
+    throw new TypeError(
+      "A request handler function is required"
+    );
   }
 
   if (
@@ -59,7 +80,9 @@ export function wrapNewsRequestHandler(handler, {
     maxConcurrentRequests < 1 ||
     maxConcurrentRequests > 10000
   ) {
-    throw new RangeError("Invalid concurrent request limit");
+    throw new RangeError(
+      "Invalid concurrent request limit"
+    );
   }
 
   if (
@@ -67,17 +90,38 @@ export function wrapNewsRequestHandler(handler, {
     maxTargetBytes < 128 ||
     maxTargetBytes > 8192
   ) {
-    throw new RangeError("Invalid request-target byte limit");
+    throw new RangeError(
+      "Invalid request-target byte limit"
+    );
+  }
+
+  if (
+    !Number.isSafeInteger(requestDeadlineMs) ||
+    requestDeadlineMs < 100 ||
+    requestDeadlineMs > 60000
+  ) {
+    throw new RangeError(
+      "Invalid request deadline"
+    );
   }
 
   let active = 0;
 
   const listener = (req, res) => {
-    if (res.headersSent || res.writableEnded) return;
+    if (
+      res.headersSent ||
+      res.writableEnded ||
+      res.destroyed
+    ) {
+      return;
+    }
 
-    for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
-      if (!res.hasHeader(key)) {
-        res.setHeader(key, value);
+    for (
+      const [name, value] of
+      Object.entries(SECURITY_HEADERS)
+    ) {
+      if (!res.hasHeader(name)) {
+        res.setHeader(name, value);
       }
     }
 
@@ -91,40 +135,90 @@ export function wrapNewsRequestHandler(handler, {
       target.startsWith("//") ||
       target.includes("#")
     ) {
-      reject(res, 400, "invalid_request_target");
+      reject(
+        res,
+        400,
+        "invalid_request_target"
+      );
+
       return;
     }
 
-    // All routes protected by this wrapper must be read-only.
     if (req.method !== "GET") {
-      reject(res, 405, "method_not_allowed", "GET");
+      reject(
+        res,
+        405,
+        "method_not_allowed",
+        "GET"
+      );
+
       return;
     }
 
     if (active >= maxConcurrentRequests) {
-      reject(res, 503, "capacity_unavailable");
+      reject(
+        res,
+        503,
+        "capacity_unavailable"
+      );
+
       return;
     }
 
     active += 1;
 
     let released = false;
+    let deadline;
 
     const release = () => {
-      if (released) return;
+      if (released) {
+        return;
+      }
+
       released = true;
+
+      clearTimeout(deadline);
+
       active -= 1;
     };
 
     res.once("finish", release);
     res.once("close", release);
 
+    deadline = setTimeout(() => {
+      if (released) {
+        return;
+      }
+
+      reject(
+        res,
+        503,
+        "request_deadline_exceeded"
+      );
+    }, requestDeadlineMs);
+
+    deadline.unref?.();
+
     try {
-      Promise.resolve(handler(req, res)).catch(() => {
-        reject(res, 503, "service_unavailable");
+      Promise.resolve(
+        handler(req, res)
+      ).catch(() => {
+        if (!released) {
+          reject(
+            res,
+            503,
+            "service_unavailable"
+          );
+        }
       });
     } catch {
-      reject(res, 503, "service_unavailable");
+      if (!released) {
+        reject(
+          res,
+          503,
+          "service_unavailable"
+        );
+      }
     }
   };
 
@@ -132,9 +226,10 @@ export function wrapNewsRequestHandler(handler, {
     listener,
 
     health: () => Object.freeze({
-      version: "1.0.0",
+      version: VERSION,
       activeRequests: active,
       maxConcurrentRequests,
+      requestDeadlineMs,
       readOnly: true
     })
   });
