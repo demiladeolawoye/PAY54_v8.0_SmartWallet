@@ -4,8 +4,8 @@
 /* ==========================================================================
    PAY54 ENTERPRISE — ISOLATED FINANCIAL NEWS SERVER
    File: backend/news/news-server.mjs
-   Version: 1.0.0
-   Phase: 2G-AJ
+   Version: 1.1.0
+   Phase: 2G-AK
 
    Local development and test runtime only.
 
@@ -17,6 +17,7 @@
    - No financial operations
    - No cloud provisioning
    - No credentials exposed through HTTP
+   - Read-only request guard and bounded concurrency
    ========================================================================== */
 
 import { createServer } from "node:http";
@@ -26,9 +27,15 @@ import { fileURLToPath } from "node:url";
 
 import { loadConfig } from "../src/config.mjs";
 import { createNewsIntegration } from "./news-integration.mjs";
+import {
+  wrapNewsRequestHandler
+} from "./news-runtime-security.mjs";
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 const SERVICE_NAME = "pay54-isolated-news";
+
+const MAX_CONCURRENT_REQUESTS = 32;
+const MAX_REQUEST_TARGET_BYTES = 2048;
 
 const RESPONSE_HEADERS = Object.freeze({
   "Cache-Control": "no-store",
@@ -41,6 +48,10 @@ const RESPONSE_HEADERS = Object.freeze({
 });
 
 function writeResponse(res, statusCode, payload) {
+  if (res.headersSent || res.writableEnded) {
+    return;
+  }
+
   const body = JSON.stringify(payload);
 
   res.writeHead(statusCode, {
@@ -56,7 +67,8 @@ function validateRuntime(config, environment) {
     !config ||
     typeof config !== "object" ||
     !environment ||
-    typeof environment !== "object"
+    typeof environment !== "object" ||
+    Array.isArray(environment)
   ) {
     throw new TypeError(
       "Valid runtime configuration is required"
@@ -151,17 +163,10 @@ export function createIsolatedNewsServer({
     );
   }
 
-  const server = createServer((req, res) => {
+  const requestHandler = (req, res) => {
     const pathname = (req.url ?? "").split("?", 1)[0];
 
     if (pathname === "/health/live") {
-      if (req.method !== "GET") {
-        writeResponse(res, 405, {
-          error: "method_not_allowed"
-        });
-        return;
-      }
-
       writeResponse(res, 200, {
         status: "ok",
         service: SERVICE_NAME,
@@ -186,7 +191,7 @@ export function createIsolatedNewsServer({
     }
 
     if (pathname === integration.route) {
-      Promise.resolve()
+      return Promise.resolve()
         .then(() => integration.handleRequest(req, res))
         .catch(() => {
           if (!res.headersSent) {
@@ -200,19 +205,39 @@ export function createIsolatedNewsServer({
             res.end();
           }
         });
-
-      return;
     }
 
     writeResponse(res, 404, {
       error: "route_not_found"
     });
-  });
+  };
 
+  /*
+   * Request hardening is applied before any route is processed.
+   * The wrapper rejects unsupported methods, invalid request
+   * targets and requests exceeding the concurrency limit.
+   */
+  const security = wrapNewsRequestHandler(
+    requestHandler,
+    {
+      maxConcurrentRequests: MAX_CONCURRENT_REQUESTS,
+      maxTargetBytes: MAX_REQUEST_TARGET_BYTES
+    }
+  );
+
+  const server = createServer(
+    security.listener
+  );
+
+  /*
+   * Preserve existing connection timeouts.
+   * Limit accepted HTTP headers to reduce parser exposure.
+   */
   server.headersTimeout = 10_000;
   server.requestTimeout = 15_000;
   server.keepAliveTimeout = 5_000;
   server.maxRequestsPerSocket = 100;
+  server.maxHeadersCount = 64;
 
   return server;
 }
