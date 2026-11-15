@@ -14,7 +14,7 @@ test("source mutations to RLS, signature verification and revocation are rejecte
  const source=loadAccountAuthSources();
  const changes=[
   {jws:source.jws.replace("verify(null,","fakeVerify(null,")},
-  {jws:source.jws.replace("revocationGuard.check","noop.check")},
+  {jws:source.jws.replace("await revocationGuard.check","await noop.check")},
   {keys:source.keys.replace("ed25519","rsa")},
   {revocation:source.revocation.replace("revoked!==false","revoked===false")},
   {rls:source.rls.replace("USING (false)","USING (true)")},
