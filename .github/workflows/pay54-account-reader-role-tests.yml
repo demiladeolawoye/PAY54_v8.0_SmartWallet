@@ -1,0 +1,75 @@
+name: PAY54 Account Reader Role Isolation
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/migrations/012_account_read_role_baseline.sql"
+      - "backend/db/tests/012_account_read_role_baseline.sql"
+      - ".github/workflows/pay54-account-reader-role-tests.yml"
+  pull_request:
+    paths:
+      - "backend/db/migrations/012_account_read_role_baseline.sql"
+      - "backend/db/tests/012_account_read_role_baseline.sql"
+      - ".github/workflows/pay54-account-reader-role-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-account-reader-role-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  isolation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_reader_ci
+          POSTGRES_PASSWORD: pay54_disposable_reader_ci_2026
+          POSTGRES_DB: pay54_reader_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_reader_ci -d pay54_reader_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_reader_ci
+      PGPASSWORD: pay54_disposable_reader_ci_2026
+      PGDATABASE: pay54_reader_test
+      PGSSLMODE: disable
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_REAL_MONEY_MODE: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Apply source migrations in ephemeral DB
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011,012}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Verify no account or ledger access
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/012_account_read_role_baseline.sql
+      - name: Repeat prior account and ledger security tests
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/011_wallet_eligibility_view.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/010_wallet_binding_lifecycle_guard.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/007_direct_ledger_access_boundary.sql
+      - name: Confirm no live execution
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
