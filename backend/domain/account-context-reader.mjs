@@ -63,12 +63,13 @@ export function createAccountContextReader({ query, resolveAuthenticatedPrincipa
     const allowed = [];
     for (const row of result.rows) {
       const mapped = mapRow(row);
-      if (authorizeAccountContext({
-        principalId: principal,
-        account: mapped.account,
-        membership: mapped.membership,
-        operation: "view"
-      })) allowed.push(mapped.account);
+      if ((accountId === null || mapped.account.accountId === accountId.toLowerCase()) &&
+        authorizeAccountContext({
+          principalId: principal,
+          account: mapped.account,
+          membership: mapped.membership,
+          operation: "view"
+        })) allowed.push(mapped.account);
     }
     return Object.freeze(allowed);
   };
