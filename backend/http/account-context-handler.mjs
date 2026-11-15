@@ -39,7 +39,9 @@ export function createAccountContextHandler({query,principalResolver}) {
     const rawUrl=request?.url;
     if(typeof rawUrl!=="string" || Buffer.byteLength(rawUrl,"utf8")>2048 ||
        !rawUrl.startsWith("/") || rawUrl.startsWith("//") ||
-       rawUrl.includes(String.fromCharCode(92)) || rawUrl.includes("#")){
+       rawUrl.includes(String.fromCharCode(92)) || rawUrl.includes("#") ||
+       rawUrl.includes("%") || rawUrl.includes("/../") ||
+       rawUrl.includes("/./") || rawUrl.endsWith("/..") || rawUrl.endsWith("/.")){
       reply(400,{error:"bad_request"});return true;
     }
     let target;
