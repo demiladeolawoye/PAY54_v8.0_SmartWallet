@@ -1,0 +1,98 @@
+name: PAY54 Account Security Integration
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/migrations/010_wallet_binding_lifecycle_guard.sql"
+      - "backend/db/tests/010_wallet_binding_lifecycle_guard.sql"
+      - "backend/db/migrations/011_wallet_eligibility_view.sql"
+      - "backend/db/tests/011_wallet_eligibility_view.sql"
+      - "backend/domain/account-*.mjs"
+      - "backend/domain/trusted-account-principal.mjs"
+      - "backend/http/account-context-handler.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - "backend/tests/trusted-account-principal.test.mjs"
+      - ".github/workflows/pay54-account-security-integration.yml"
+  pull_request:
+    paths:
+      - "backend/db/migrations/010_wallet_binding_lifecycle_guard.sql"
+      - "backend/db/tests/010_wallet_binding_lifecycle_guard.sql"
+      - "backend/db/migrations/011_wallet_eligibility_view.sql"
+      - "backend/db/tests/011_wallet_eligibility_view.sql"
+      - "backend/domain/account-*.mjs"
+      - "backend/domain/trusted-account-principal.mjs"
+      - "backend/http/account-context-handler.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - "backend/tests/trusted-account-principal.test.mjs"
+      - ".github/workflows/pay54-account-security-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-account-security-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrated-account-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_account_integrated_ci
+          POSTGRES_PASSWORD: pay54_disposable_account_integrated_2026
+          POSTGRES_DB: pay54_account_integrated_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_account_integrated_ci -d pay54_account_integrated_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_account_integrated_ci
+      PGPASSWORD: pay54_disposable_account_integrated_2026
+      PGDATABASE: pay54_account_integrated_test
+      PGSSLMODE: disable
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_REAL_MONEY_MODE: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Apply PAY54 migrations 001–011 to isolated database
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Run latest account lifecycle and permission isolation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in 011 010 009 008 007; do
+            for f in backend/db/tests/${suite}_*.sql; do
+              psql -X -v ON_ERROR_STOP=1 -f "$f"
+            done
+          done
+      - name: Run source-only Node.js account tests
+        run: |
+          node --test backend/tests/account-*.test.mjs backend/tests/trusted-account-principal.test.mjs
+      - name: Check safe mode
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          echo "Isolated CI only, no production DB, no cloud authentication, no money movement."
