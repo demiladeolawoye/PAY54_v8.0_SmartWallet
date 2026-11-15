@@ -18,7 +18,7 @@ test("source mutations to RLS, signature verification and revocation are rejecte
   {keys:source.keys.replace("ed25519","rsa")},
   {revocation:source.revocation.replace("revoked!==false","revoked===false")},
   {rls:source.rls.replace("USING (false)","USING (true)")},
-  {adapter:source.adapter.replace("verifier.verifyCompactJws","verifier.skipVerification")}
+  {adapter:source.adapter.replace("return verifier.verifyCompactJws","return verifier.skipVerification")}
  ];
  for(const change of changes){
    assert.equal(assessAccountAuthSecurity({...source,...change}).passed,false,
