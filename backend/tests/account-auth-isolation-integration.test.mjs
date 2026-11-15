@@ -51,7 +51,9 @@ test("forged session, unverified account key and tampered token deny before data
  const binding=createAccountReadBinding({principalResolver:identity,
   transaction:{execute:async()=>{calls++;return {rows:[]};}}});
  const token=issue(P);
- const tampered=token.slice(0,-2)+"AA";
+ const parts=token.split(".");
+ parts[2]=(parts[2].startsWith("A")?"B":"A")+parts[2].slice(1);
+ const tampered=parts.join(".");
  for(const signedSession of [tampered,"bad",undefined]){
   await assert.rejects(()=>binding.query({signedSession},"ACCOUNT_LIST"),/SESSION_INVALID|ACCOUNT_AUTH_REQUIRED/);
  }
