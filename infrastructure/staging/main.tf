@@ -55,6 +55,21 @@ variable "container_image" {
   nullable    = true
 }
 
+variable "staging_subnet_cidr" {
+  description = "Approved non-overlapping private CIDR for the staging Direct VPC egress subnet. Required only for separately authorised provisioning."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition = var.staging_subnet_cidr == null ? true : (
+      can(cidrhost(var.staging_subnet_cidr, 0)) &&
+      can(regex("^(10[.]|172[.](1[6-9]|2[0-9]|3[01])[.]|192[.]168[.])", var.staging_subnet_cidr))
+    )
+    error_message = "The staging subnet must use an explicitly reviewed RFC1918 IPv4 CIDR."
+  }
+}
+
 variable "authorized_provisioning" {
   description = "Explicit separate provisioning authorisation. Never enabled by CI."
   type        = bool
@@ -115,9 +130,10 @@ resource "terraform_data" "provisioning_authorisation" {
         var.project_number != null &&
         var.github_repository_id != null &&
         var.github_owner_id != null &&
-        var.container_image != null
+        var.container_image != null &&
+        var.staging_subnet_cidr != null
       )
-      error_message = "PAY54 staging provisioning requires all five verified infrastructure inputs."
+      error_message = "PAY54 staging provisioning requires verified identity, image, project and approved network CIDR inputs."
     }
 
     precondition {
@@ -254,6 +270,63 @@ resource "google_artifact_registry_repository_iam_member" "deployer_image_reader
   member     = "serviceAccount:${google_service_account.deployer[0].email}"
 }
 
+# STG-05 source-only network foundation.
+# All resources remain disabled unless independently authorised provisioning is enabled.
+# compute.googleapis.com is intentionally NOT added to the automatic API activation list.
+# Before any provisioning: inventory existing networks, approve non-overlapping CIDR,
+# cost, effective firewall precedence, required platform routes and Compute API access.
+resource "google_compute_network" "staging" {
+  count = local.enabled ? 1 : 0
+
+  project                 = var.project_id
+  name                    = "pay54-staging-private"
+  auto_create_subnetworks = false
+  routing_mode            = "REGIONAL"
+
+  depends_on = [
+    terraform_data.provisioning_authorisation
+  ]
+}
+
+resource "google_compute_subnetwork" "staging" {
+  count = local.enabled ? 1 : 0
+
+  project       = var.project_id
+  name          = "pay54-staging-egress-london"
+  region        = local.region
+  network       = google_compute_network.staging[0].id
+  ip_cidr_range = var.staging_subnet_cidr
+
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "EXCLUDE_ALL_METADATA"
+  }
+}
+
+# Denies internet and private-network IPv4 egress for tagged Cloud Run instances.
+# Effective hierarchical firewall policy, special Google platform paths and IPv6
+# must still be independently evaluated; this rule is not runtime attestation.
+resource "google_compute_firewall" "egress_deny" {
+  count = local.enabled ? 1 : 0
+
+  project            = var.project_id
+  name               = "pay54-staging-deny-outbound"
+  network            = google_compute_network.staging[0].name
+  direction          = "EGRESS"
+  priority           = 1000
+  target_tags        = ["pay54-staging-egress"]
+  destination_ranges = ["0.0.0.0/0"]
+
+  deny {
+    protocol = "all"
+  }
+
+  log_config {
+    metadata = "EXCLUDE_ALL_METADATA"
+  }
+}
+
 resource "google_cloud_run_v2_service" "news_staging" {
   count = local.enabled ? 1 : 0
 
@@ -273,6 +346,16 @@ resource "google_cloud_run_v2_service" "news_staging" {
   template {
     service_account = google_service_account.runtime[0].email
 
+    vpc_access {
+      egress = "ALL_TRAFFIC"
+
+      network_interfaces {
+        network    = google_compute_network.staging[0].id
+        subnetwork = google_compute_subnetwork.staging[0].id
+        tags       = ["pay54-staging-egress"]
+      }
+    }
+
     containers {
       image = var.container_image
 
@@ -291,7 +374,8 @@ resource "google_cloud_run_v2_service" "news_staging" {
 
   depends_on = [
     google_project_service.required,
-    google_artifact_registry_repository.images
+    google_artifact_registry_repository.images,
+    google_compute_firewall.egress_deny
   ]
 }
 
