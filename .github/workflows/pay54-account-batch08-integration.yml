@@ -1,0 +1,110 @@
+name: PAY54 Batch 08 Authenticated Actor Integration
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/tests/016_role_identity_rls_proof.sql"
+      - "backend/db/tests/017_role_identity_adversarial.sql"
+      - "backend/db/tests/018_role_identity_rollback.sql"
+      - "backend/db/account-*.mjs"
+      - "backend/security/account-*.mjs"
+      - "backend/domain/account-*.mjs"
+      - "backend/http/account-*.mjs"
+      - "backend/governance/account-*.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - ".github/workflows/pay54-account-batch08-integration.yml"
+  pull_request:
+    paths:
+      - "backend/db/tests/016_role_identity_rls_proof.sql"
+      - "backend/db/tests/017_role_identity_adversarial.sql"
+      - "backend/db/tests/018_role_identity_rollback.sql"
+      - "backend/db/account-*.mjs"
+      - "backend/security/account-*.mjs"
+      - "backend/domain/account-*.mjs"
+      - "backend/http/account-*.mjs"
+      - "backend/governance/account-*.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - ".github/workflows/pay54-account-batch08-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch08-actor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-only-account-actor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_batch08_ci
+          POSTGRES_PASSWORD: pay54_disposable_batch08_ci_2026
+          POSTGRES_DB: pay54_batch08_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_batch08_ci -d pay54_batch08_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_batch08_ci
+      PGPASSWORD: pay54_disposable_batch08_ci_2026
+      PGDATABASE: pay54_batch08_test
+      PGSSLMODE: disable
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_REAL_MONEY_MODE: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Install PostgreSQL client for disposable CI only
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Apply unchanged PAY54 migrations 001–013 to isolated PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011,012,013}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$file"
+          done
+      - name: Verify positive and negative RLS actor proofs, rollback and existing money isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in 016 017 018 015 014 013 012 011 010 009 008 007; do
+            for file in backend/db/tests/${suite}_*.sql; do
+              psql -X -v ON_ERROR_STOP=1 -f "$file"
+            done
+          done
+      - name: Account-source security governance audits
+        run: |
+          node backend/governance/account-rls-audit.mjs
+          node backend/governance/account-auth-security.mjs
+          node backend/governance/account-source-security.mjs
+          node backend/governance/account-batch07-safety.mjs
+          node backend/governance/account-db-identity-safety.mjs
+      - name: Syntax and account security regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/db/account-*.mjs backend/security/account-*.mjs backend/domain/account-*.mjs backend/http/account-*.mjs backend/governance/account-*.mjs; do
+            node --check "$file"
+          done
+          node --test backend/tests/account-*.test.mjs backend/tests/trusted-account-principal.test.mjs
+      - name: Preserve cloud provisioning and real-money disablement
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          echo "Source and disposable CI only: no production role, credentials, IAM, cloud or payment activation."
