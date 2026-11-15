@@ -26,7 +26,6 @@ BEGIN
  IF EXISTS(SELECT 1 FROM pg_roles WHERE rolname='pay54_account_reader_role'
  AND (rolcanlogin OR rolbypassrls OR rolsuper)) THEN
  RAISE EXCEPTION 'Reader role gained login or RLS bypass'; END IF;
- FOREACH entry IN ARRAY ARRAY[]::record[] LOOP NULL; END LOOP;
  IF has_table_privilege('pay54_account_reader_role','pay54.account_contexts','SELECT') OR
  has_table_privilege('pay54_account_reader_role','pay54.account_memberships','SELECT') OR
  has_table_privilege('pay54_account_reader_role','pay54.personal_wallet_bindings','SELECT') OR
