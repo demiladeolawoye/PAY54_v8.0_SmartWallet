@@ -4,27 +4,10 @@
  * return balances, grant DB access or execute account/wallet operations.
  * query must be a separately authorised read-only PostgreSQL adapter. */
 import { evaluatePersonalWalletAccess } from "./account-wallet-eligibility.mjs";
+import { buildAccountQuery } from "../db/account-query-catalogue.mjs";
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const valid=value=>typeof value==="string"&&UUID.test(value);
-
-const SQL=[
-  "SELECT a.id AS account_id, a.legal_owner_subject AS owner_id,",
-  "a.account_type, a.display_name, a.status AS account_status,",
-  "a.verification_status, m.principal_subject, m.role,",
-  "m.status AS membership_status, w.id AS wallet_id,",
-  "w.owner_subject AS wallet_owner, w.status AS wallet_status,",
-  "b.account_id AS binding_account_id, b.wallet_id AS binding_wallet_id",
-  "FROM pay54.account_contexts a",
-  "JOIN pay54.account_memberships m ON m.account_id=a.id",
-  "JOIN pay54.personal_wallet_bindings b ON b.account_id=a.id",
-  "JOIN pay54.wallets w ON w.id=b.wallet_id",
-  "WHERE a.id=$1::uuid AND m.principal_subject=$2::uuid",
-  "AND a.account_type='PERSONAL' AND a.status='ACTIVE'",
-  "AND a.verification_status='VERIFIED' AND m.status='ACTIVE'",
-  "AND w.status='ACTIVE' AND w.owner_subject=a.legal_owner_subject",
-  "ORDER BY w.id LIMIT 100"
-].join("\n");
 
 export function createAccountWalletReader({query,resolveAuthenticatedPrincipal}) {
   if(typeof query!=="function"||typeof resolveAuthenticatedPrincipal!=="function"){
@@ -35,7 +18,8 @@ export function createAccountWalletReader({query,resolveAuthenticatedPrincipal})
       if(!valid(accountId))throw new Error("INVALID_ACCOUNT_ID");
       const principalId=await resolveAuthenticatedPrincipal(request);
       if(!valid(principalId))throw new Error("ACCOUNT_AUTH_REQUIRED");
-      const result=await query(SQL,[accountId.toLowerCase(),principalId.toLowerCase()]);
+      const definition=buildAccountQuery("PERSONAL_WALLET_IDS",principalId,accountId);
+      const result=await query(definition.sql,definition.params);
       if(!result || !Array.isArray(result.rows) || result.rows.length>100){
         throw new Error("ACCOUNT_WALLET_STORE_UNAVAILABLE");
       }
