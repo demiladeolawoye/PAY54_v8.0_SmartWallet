@@ -212,8 +212,8 @@ test("network implementation work cannot enable provisioning or federation", () 
 
 test("source report explicitly retains the network-release block", () => {
   const summary = renderStagingNetworkPolicy(assessStagingNetworkPolicy(stagingTerraform));
-  assert.match(summary, /STG-05 security approval: \\*\\*NOT_VERIFIED\\*\\*/);
-  assert.match(summary, /Staging release: \\*\\*BLOCKED\\*\\*/);
-  assert.match(summary, /Cloud provisioning: \\*\\*DISABLED\\*\\*/);
-  assert.match(summary, /Financial execution: \\*\\*DISABLED\\*\\*/);
+  assert.match(summary, /STG-05 security approval: \*\*NOT_VERIFIED\*\*/);
+  assert.match(summary, /Staging release: \*\*BLOCKED\*\*/);
+  assert.match(summary, /Cloud provisioning: \*\*DISABLED\*\*/);
+  assert.match(summary, /Financial execution: \*\*DISABLED\*\*/);
 });
