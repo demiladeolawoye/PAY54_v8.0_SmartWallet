@@ -1,0 +1,102 @@
+name: PAY54 Account Catalogue and Isolation Integration
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/account-*.mjs"
+      - "backend/domain/account-*.mjs"
+      - "backend/http/account-*.mjs"
+      - "backend/security/account-access-audit.mjs"
+      - "backend/governance/account-source-security.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - "backend/db/tests/013_account_privilege_matrix.sql"
+      - "assets/js/dashboard/account-view-cache.mjs"
+      - ".github/workflows/pay54-account-catalogue-integration.yml"
+  pull_request:
+    paths:
+      - "backend/db/account-*.mjs"
+      - "backend/domain/account-*.mjs"
+      - "backend/http/account-*.mjs"
+      - "backend/security/account-access-audit.mjs"
+      - "backend/governance/account-source-security.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - "backend/db/tests/013_account_privilege_matrix.sql"
+      - "assets/js/dashboard/account-view-cache.mjs"
+      - ".github/workflows/pay54-account-catalogue-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-account-catalogue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  account-isolation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_catalogue_ci
+          POSTGRES_PASSWORD: pay54_disposable_catalogue_ci_2026
+          POSTGRES_DB: pay54_catalogue_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_catalogue_ci -d pay54_catalogue_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_catalogue_ci
+      PGPASSWORD: pay54_disposable_catalogue_ci_2026
+      PGDATABASE: pay54_catalogue_test
+      PGSSLMODE: disable
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_REAL_MONEY_MODE: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Apply PAY54 source migrations only in disposable database
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011,012}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Verify reader privileges and historic financial protections
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in 013 012 011 010 009 008 007; do
+            for f in backend/db/tests/${suite}_*.sql; do
+              psql -X -v ON_ERROR_STOP=1 -f "$f"
+            done
+          done
+      - name: Verify account JavaScript and security contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in backend/db/account-*.mjs backend/domain/account-*.mjs backend/http/account-*.mjs backend/security/account-access-audit.mjs backend/governance/account-source-security.mjs; do
+            node --check "$f"
+          done
+          node backend/governance/account-source-security.mjs
+          node --test backend/tests/account-*.test.mjs backend/tests/trusted-account-principal.test.mjs
+      - name: Preserve provisioning and financial restrictions
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          echo "Account source/CI verification only. No deployment, no funds, no credentials."
