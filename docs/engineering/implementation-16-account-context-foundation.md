@@ -44,7 +44,7 @@ Existing Batch 01 modules `account-model.mjs`, `account-membership.mjs` and `acc
 ## Test evidence
 
 - Disposable PostgreSQL workflow `PAY54 Account Context Database Isolation` run `43744907396` completed **success**. The workflow applies migrations 001–008 to an isolated PostgreSQL 16 service, runs rollback-only account tests and repeats ledger-access restrictions.
-- The backend tests include the reader's forged-response and unauthorised-access negative tests. A test initially exposed an incorrect result filter; source commit `85f2f22ad23b9f357eefd8b7f9041dc62cb033c2` adds the independent requested-account-ID check. Final CI status must be recorded after GitHub reports completion.
+- The backend tests include the reader's forged-response and unauthorised-access negative tests. A test initially exposed an incorrect result filter; source commit `85f2f22ad23b9f357eefd8b7f9041dc62cb033c2` adds the independent requested-account-ID check. The corrected backend suite finished **success** in GitHub Actions run `43745150496`, commit `85f2f22ad23b9f357eefd8b7f9041dc62cb033c2`. The initial failing run `43745065521` exposed the issue and remains part of the audit trail.
 
 ## Excluded from this approval
 
