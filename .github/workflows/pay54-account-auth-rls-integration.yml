@@ -1,0 +1,103 @@
+name: PAY54 Account Authentication and RLS Integration
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/migrations/013_account_rls_denial.sql"
+      - "backend/db/tests/014_account_rls_denial.sql"
+      - "backend/security/account-*.mjs"
+      - "backend/governance/account-auth-security.mjs"
+      - "backend/governance/account-rls-audit.mjs"
+      - "backend/domain/account-*.mjs"
+      - "backend/http/account-*.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - ".github/workflows/pay54-account-auth-rls-integration.yml"
+  pull_request:
+    paths:
+      - "backend/db/migrations/013_account_rls_denial.sql"
+      - "backend/db/tests/014_account_rls_denial.sql"
+      - "backend/security/account-*.mjs"
+      - "backend/governance/account-auth-security.mjs"
+      - "backend/governance/account-rls-audit.mjs"
+      - "backend/domain/account-*.mjs"
+      - "backend/http/account-*.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - ".github/workflows/pay54-account-auth-rls-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: pay54-account-auth-rls-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-account-auth:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_auth_rls_ci
+          POSTGRES_PASSWORD: pay54_disposable_auth_rls_ci_2026
+          POSTGRES_DB: pay54_auth_rls_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_auth_rls_ci -d pay54_auth_rls_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_auth_rls_ci
+      PGPASSWORD: pay54_disposable_auth_rls_ci_2026
+      PGDATABASE: pay54_auth_rls_test
+      PGSSLMODE: disable
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Apply PAY54 migrations 001–013 in isolated PostgreSQL only
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011,012,013}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$file"
+          done
+      - name: Verify deny-only RLS and financial access constraints
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in 014 013 012 011 010 009 008 007; do
+            for file in backend/db/tests/${suite}_*.sql; do
+              psql -X -v ON_ERROR_STOP=1 -f "$file"
+            done
+          done
+      - name: Source security guards and backend account tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node backend/governance/account-rls-audit.mjs
+          node backend/governance/account-auth-security.mjs
+          node backend/governance/account-source-security.mjs
+          for f in backend/security/account-*.mjs backend/domain/account-*.mjs backend/http/account-*.mjs backend/governance/account-*.mjs; do
+            node --check "$f"
+          done
+          node --test backend/tests/account-*.test.mjs backend/tests/trusted-account-principal.test.mjs
+      - name: Verify cloud and financial operation locks remain disabled
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          echo "No account route, cloud role, DB login, live migration or financial transaction activated."
