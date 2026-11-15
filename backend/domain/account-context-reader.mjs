@@ -5,6 +5,7 @@
  * No HTTP endpoint, no privileges, no financial or cloud activation. */
 
 import { validateAccountDescriptor } from "./account-model.mjs";
+import { buildAccountQuery } from "../db/account-query-catalogue.mjs";
 import { validateAccountMembership, authorizeAccountContext } from "./account-membership.mjs";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -38,7 +39,8 @@ export function createAccountContextReader({ query, resolveAuthenticatedPrincipa
     if (!isUuid(principal)) throw new Error("ACCOUNT_AUTH_REQUIRED");
     if (accountId !== null && !isUuid(accountId)) throw new Error("INVALID_ACCOUNT_ID");
 
-    const sql = [
+    const canonicalList = accountId === null ? buildAccountQuery("ACCOUNT_LIST",principal) : null;
+    const sql = canonicalList?.sql ?? [
       "SELECT a.id AS account_id, a.legal_owner_subject AS legal_owner_id,",
       " a.account_type AS type, a.display_name, a.status, a.verification_status,",
       " m.principal_subject AS principal_id, m.role, m.status AS membership_status",
@@ -54,7 +56,7 @@ export function createAccountContextReader({ query, resolveAuthenticatedPrincipa
     ].filter(Boolean).join("\n");
 
     const values = accountId === null
-      ? [principal.toLowerCase()]
+      ? canonicalList.params
       : [principal.toLowerCase(), accountId.toLowerCase()];
 
     const result = await query(sql, values);
