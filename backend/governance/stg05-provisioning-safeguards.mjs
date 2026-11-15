@@ -26,8 +26,12 @@ const EXPECTED = Object.freeze([
 ]);
 
 function scrub(source) {
-  return source.replace(/^\\s*(?:#|\\/\\/).*$/gm, "");
+  return source.split("\n").filter(line => {
+    const trimmed = line.trimStart();
+    return !trimmed.startsWith("#") && !trimmed.startsWith("//");
+  }).join("\n");
 }
+
 function section(source, type, name) {
   const header = new RegExp('\\b' + type + '\\s+"' + name + '"\\s*\\{', "g");
   const hits = [...source.matchAll(header)];
