@@ -33,6 +33,8 @@ export function createAccountReadTransaction({ pool, assertReadStatement }) {
       try {
         await client.query("BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED READ ONLY");
         opened = true;
+        await client.query("SET LOCAL lock_timeout = '1000ms'");
+        await client.query("SET LOCAL row_security = on");
         await client.query("SET LOCAL statement_timeout = '3000ms'");
         await client.query("SET LOCAL idle_in_transaction_session_timeout = '3000ms'");
         result = await client.query(sql, params);
