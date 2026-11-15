@@ -19,7 +19,7 @@ test("unapproved RLS grants, GUC-based identity, role login and mutable transact
   {migration:src.migration+"\ncurrent_setting('pay54.subject')"},
   {roles:src.roles.replace("  NOLOGIN NOINHERIT","  LOGIN NOINHERIT")},
   {transaction:src.transaction.replace("BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED READ ONLY","BEGIN")},
-  {scope:src.scope.replace("assertTenantAccountAccess","allowAllAccounts")}
+  {scope:src.scope.replace("const verdict=assertTenantAccountAccess(","const verdict=allowAllAccounts(")}
  ];
  for(const attack of attacks)assert.equal(
    assessBatch07Safety({...src,...attack}).passed,false,Object.keys(attack)[0]);
