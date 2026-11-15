@@ -13,6 +13,8 @@
  * No deployment or financial execution.
  */
 
+import { assessStagingNetworkPolicy } from "./staging-network-policy.mjs";
+
 import {
   readFileSync,
   appendFileSync
@@ -182,9 +184,16 @@ export function assessEgressThreatModel(
     ],
     [
       "NO_EGRESS_ENFORCEMENT_CLAIM",
-      !/vpc_access\s*\{[\s\S]*?egress\s*=\s*"ALL_TRAFFIC"/.test(
-        terraform
-      )
+      (() => {
+        const attached = /vpc_access\\s*\\{[\\s\\S]*?egress\\s*=\\s*"ALL_TRAFFIC"/.test(terraform);
+        if (!attached) return true;
+        // A source declaration is accepted only when the existing STG-05
+        // policy validates the entire gated topology. Never runtime evidence.
+        const source = assessStagingNetworkPolicy(terraform);
+        return source.sourceIntegrity === "PASS" &&
+          source.findings.some(f => f.id === "NETWORK_FOUNDATION" && f.status === "PASS_SOURCE") &&
+          source.findings.some(f => f.id === "CONTROLLED_EGRESS" && f.status === "NOT_VERIFIED");
+      })()
     ]
   ].map(([id, passed]) => ({
     id,
