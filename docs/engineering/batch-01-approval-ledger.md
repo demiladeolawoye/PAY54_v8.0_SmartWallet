@@ -20,7 +20,7 @@ The assistant can execute only during an active conversation or an explicitly in
 | --- | --- | --- | --- |
 | 01 | Reconcile Project Titan authoritative baseline | COMPLETE — SOURCE VERIFIED | `project-titan` head `f27728219cfdd1d7b7ccc95ccc8b1da7b603aa01` and STG-05 source checked before batch changes |
 | 02 | Create explicit bounded batch approval ledger | COMPLETE — THIS COMMIT | This ledger, commit record and explicit safety boundary |
-| 03 | Verify current Terraform formatting and schema CI | PENDING | Recorded passing workflow with commit SHA |
+| 03 | Verify current Terraform formatting and schema CI | COMPLETE — VERIFIED BASELINE | GitHub Actions run `43736581156` on `e40949272fcd705d9dfa933de5925ce2bb9bce76`: Terraform fmt, init without remote backend, validate, infrastructure security tests and CI no-apply gate all passed; infrastructure source unchanged since that run |
 | 04 | Review and harden staging network provisioning safeguards | PENDING | Defensive source patch/tests; no gate enabling |
 | 05 | Extend adversarial STG-05 network tests | PENDING | Mutation tests that fail on unsafe network changes |
 | 06 | Verify threat model and egress inventory consistency | PENDING | Offline regression evidence; zero approved destinations |
