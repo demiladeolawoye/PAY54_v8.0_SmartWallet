@@ -217,3 +217,70 @@ test("source report explicitly retains the network-release block", () => {
   assert.match(summary, /Cloud provisioning: \*\*DISABLED\*\*/);
   assert.match(summary, /Financial execution: \*\*DISABLED\*\*/);
 });
+
+/* STG-05 fail-closed network resource contract mutation tests (offline only). */
+function proposedNetworkFixture() {
+  const original = "template { service_account = google_service_account.runtime[0].email }";
+  const connected = 'template { service_account = google_service_account.runtime[0].email vpc_access { egress = "ALL_TRAFFIC" network_interfaces { network = google_compute_network.staging[0].id subnetwork = google_compute_subnetwork.staging[0].id tags = ["pay54-staging-egress"] } } }';
+  const originalFixture = fixture();
+  assert.ok(originalFixture.includes(original));
+  return originalFixture.replace(original, connected) + [
+    'variable "staging_subnet_cidr" { type = string default = null nullable = true }',
+    'resource "google_compute_network" "staging" { count = local.enabled ? 1 : 0 project = var.project_id auto_create_subnetworks = false }',
+    'resource "google_compute_subnetwork" "staging" { count = local.enabled ? 1 : 0 region = local.region network = google_compute_network.staging[0].id ip_cidr_range = var.staging_subnet_cidr }',
+    'resource "google_compute_firewall" "egress_deny" { count = local.enabled ? 1 : 0 direction = "EGRESS" network = google_compute_network.staging[0].name target_tags = ["pay54-staging-egress"] destination_ranges = ["0.0.0.0/0"] deny { protocol = "all" } }'
+  ].join("\n");
+}
+
+test("complete proposed network topology passes source inspection but never attests release", () => {
+  const report = assessStagingNetworkPolicy(proposedNetworkFixture());
+  assert.equal(report.sourceIntegrity, "PASS", JSON.stringify(report.findings));
+  assert.equal(report.findings.find(f => f.id === "NETWORK_FOUNDATION").status, "PASS_SOURCE");
+  assert.equal(report.findings.find(f => f.id === "CONTROLLED_EGRESS").status, "NOT_VERIFIED");
+  noRelease(report);
+});
+
+test("partial network resources are rejected", () => {
+  const full = proposedNetworkFixture();
+  for (const type of ["google_compute_network", "google_compute_subnetwork", "google_compute_firewall"]) {
+    const partial = full.split("\n").filter(line => !line.includes('resource "' + type + '"')).join("\n");
+    const report = assessStagingNetworkPolicy(partial);
+    assert.equal(report.sourceIntegrity, "FAIL", type);
+    noRelease(report);
+  }
+});
+
+test("insecure networking mutations fail source policy", () => {
+  const full = proposedNetworkFixture();
+  const mutations = [
+    ["auto_create_subnetworks = false", "auto_create_subnetworks = true"],
+    ["region = local.region network =", 'region = "us-central1" network ='],
+    ["ip_cidr_range = var.staging_subnet_cidr", 'ip_cidr_range = "10.0.0.0/24"'],
+    ["default = null nullable = true", "default = null nullable = false"],
+    ['egress = "ALL_TRAFFIC"', 'egress = "PRIVATE_RANGES_ONLY"'],
+    ['direction = "EGRESS"', 'direction = "INGRESS"'],
+    ['destination_ranges = ["0.0.0.0/0"]', 'destination_ranges = ["10.0.0.0/8"]'],
+    ['deny { protocol = "all" }', 'allow { protocol = "all" }'],
+    ['tags = ["pay54-staging-egress"]', 'tags = ["uncontrolled"]']
+  ];
+  for (const [good, bad] of mutations) {
+    assert.ok(full.includes(good), good);
+    const report = assessStagingNetworkPolicy(full.replace(good, bad));
+    assert.equal(report.sourceIntegrity, "FAIL", good);
+    assert.equal(report.findings.find(f => f.id === "NETWORK_FOUNDATION").status, "FAIL_SOURCE", good);
+    noRelease(report);
+  }
+});
+
+test("new VPC without the original provisioning gate is rejected", () => {
+  const full = proposedNetworkFixture();
+  const unsafe = full.replace(
+    'resource "google_compute_network" "staging" { count = local.enabled ? 1 : 0',
+    'resource "google_compute_network" "staging" { count = 1'
+  );
+  assert.notEqual(full, unsafe);
+  const report = assessStagingNetworkPolicy(unsafe);
+  assert.equal(report.sourceIntegrity, "FAIL");
+  assert.equal(report.findings.find(f => f.id === "GATED_RESOURCES").status, "FAIL_SOURCE");
+  noRelease(report);
+});
