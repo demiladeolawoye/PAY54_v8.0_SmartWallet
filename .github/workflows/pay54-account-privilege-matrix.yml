@@ -1,0 +1,68 @@
+name: PAY54 Account Privilege Matrix
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/tests/013_account_privilege_matrix.sql"
+      - ".github/workflows/pay54-account-privilege-matrix.yml"
+  pull_request:
+    paths:
+      - "backend/db/tests/013_account_privilege_matrix.sql"
+      - ".github/workflows/pay54-account-privilege-matrix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-account-privilege-matrix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  negative-sql:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_privilege_ci
+          POSTGRES_PASSWORD: pay54_disposable_privilege_ci_2026
+          POSTGRES_DB: pay54_privilege_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_privilege_ci -d pay54_privilege_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_privilege_ci
+      PGPASSWORD: pay54_disposable_privilege_ci_2026
+      PGDATABASE: pay54_privilege_test
+      PGSSLMODE: disable
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Create disposable PAY54 schema 001–012
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011,012}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Assert restricted role privilege matrix
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/013_account_privilege_matrix.sql
+      - name: Preserve disabled modes
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
