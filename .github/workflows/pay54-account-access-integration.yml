@@ -1,0 +1,98 @@
+name: PAY54 Account Read Access Integration
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/migrations/012_account_read_role_baseline.sql"
+      - "backend/db/tests/012_account_read_role_baseline.sql"
+      - "backend/db/account-*.mjs"
+      - "backend/security/account-access-audit.mjs"
+      - "backend/domain/account-*.mjs"
+      - "backend/http/account-context-handler.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - ".github/workflows/pay54-account-access-integration.yml"
+  pull_request:
+    paths:
+      - "backend/db/migrations/012_account_read_role_baseline.sql"
+      - "backend/db/tests/012_account_read_role_baseline.sql"
+      - "backend/db/account-*.mjs"
+      - "backend/security/account-access-audit.mjs"
+      - "backend/domain/account-*.mjs"
+      - "backend/http/account-context-handler.mjs"
+      - "backend/tests/account-*.test.mjs"
+      - ".github/workflows/pay54-account-access-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-account-access-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_access_ci
+          POSTGRES_PASSWORD: pay54_disposable_access_ci_2026
+          POSTGRES_DB: pay54_access_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_access_ci -d pay54_access_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_access_ci
+      PGPASSWORD: pay54_disposable_access_ci_2026
+      PGDATABASE: pay54_access_test
+      PGSSLMODE: disable
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_REAL_MONEY_MODE: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Apply source migrations 001–012 in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011,012}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Validate restricted role and ledger permissions
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/012_account_read_role_baseline.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/011_wallet_eligibility_view.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/010_wallet_binding_lifecycle_guard.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/007_direct_ledger_access_boundary.sql
+      - name: Check account source JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/db/account-*.mjs backend/security/account-access-audit.mjs backend/domain/account-*.mjs backend/http/account-context-handler.mjs; do
+            node --check "$file"
+          done
+      - name: Run account security regression tests
+        run: |
+          node --test backend/tests/account-*.test.mjs backend/tests/trusted-account-principal.test.mjs
+      - name: Verify financial and provisioning modes stay disabled
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          echo "No live database or Google Cloud access; no money execution."
