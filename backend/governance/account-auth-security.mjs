@@ -24,7 +24,7 @@ export function assessAccountAuthSecurity({jws,keys,revocation,adapter,rls}){
   issues.push("REVOCATION_FAIL_OPEN");
  }
  if(!/createTrustedAccountPrincipalResolver/.test(adapter)||
-    !/verifier\.verifyCompactJws/.test(adapter))issues.push("UNTRUSTED_SESSION_ADAPTER");
+    !/return\s+verifier\.verifyCompactJws\(/.test(adapter))issues.push("UNTRUSTED_SESSION_ADAPTER");
  const combined=[jws,keys,revocation,adapter].join("\n");
  if(/\.listen\(|createServer\(|\.apply\(|terraform apply|GRANT SELECT/i.test(combined)){
   issues.push("UNAUTHORISED_ACTIVATION");
