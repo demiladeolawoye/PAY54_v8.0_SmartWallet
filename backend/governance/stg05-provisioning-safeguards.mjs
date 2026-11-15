@@ -26,7 +26,7 @@ const EXPECTED = Object.freeze([
 ]);
 
 function scrub(source) {
-  return source.replace(/#[^\n]*|\/\/[^\n]*/g, "");
+  return source.replace(/^\\s*(?:#|\\/\\/).*$/gm, "");
 }
 function section(source, type, name) {
   const header = new RegExp('\\b' + type + '\\s+"' + name + '"\\s*\\{', "g");
