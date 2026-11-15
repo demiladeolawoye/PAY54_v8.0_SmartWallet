@@ -36,3 +36,24 @@ test("verifier failures propagate without fallback to request identity",async()=
   const r=createTrustedAccountPrincipalResolver({verifyServerSession:async()=>{throw Error("session-unavailable")}});
   await assert.rejects(()=>r.resolve({principalId:ID}),/session-unavailable/);
 });
+
+test("expired and unexpectedly long-lived server sessions are rejected",async()=>{
+ const farFuture=createTrustedAccountPrincipalResolver({verifyServerSession:async()=>session({expiresAt:Math.floor(Date.now()/1000)+25*3600})});
+ await assert.rejects(()=>farFuture.resolve({}),/ACCOUNT_AUTH_REQUIRED/);
+ const expired=createTrustedAccountPrincipalResolver({verifyServerSession:async()=>session({expiresAt:Math.floor(Date.now()/1000)-1})});
+ await assert.rejects(()=>expired.resolve({}),/ACCOUNT_AUTH_REQUIRED/);
+});
+test("optional session time claims reject future issuance and not-before",async()=>{
+ const now=Math.floor(Date.now()/1000);
+ for(const value of [
+  session({issuedAt:now+90}),
+  session({issuedAt:now-25*3600}),
+  session({issuedAt:now+3700}),
+  session({notBefore:now+100}),
+  session({issuedAt:"invalid"}),
+  session({notBefore:"invalid"})
+ ]){
+  const resolver=createTrustedAccountPrincipalResolver({verifyServerSession:async()=>value});
+  await assert.rejects(()=>resolver.resolve({}),/ACCOUNT_AUTH_REQUIRED/);
+ }
+});
