@@ -67,3 +67,30 @@ test("invalid IDs, unsupported methods and store failures never leak data",async
   assert.equal(r.status,503);
   assert.equal(JSON.stringify(r.body).includes("connection"),false);
 });
+
+test("account handler rejects malformed, oversized and suspicious paths before DB access",async()=>{
+ const invalid=[
+  "/api/v1/account-contexts?accountId="+A,
+  "/api/v1/account-contexts/%32"+A.slice(2),
+  "/api/v1/account-contexts/../account-contexts",
+  "/api/v1/account-contexts/"+A+"?page=1",
+  "/api/v1/account-contexts/"+A+"#fragment",
+  "/api/v1/account-contexts/"+A+"\\\\unexpected",
+  "/api/v1/account-contexts/"+"a".repeat(2049)
+ ];
+ let count=0;
+ const h=createAccountContextHandler({principalResolver,query:async()=>{
+   count++;return {rows:[row]};
+ }});
+ for(const url of invalid){
+   const r=response();
+   await h({url,method:"GET",session:true},r);
+   assert.notEqual(r.status,200,url);
+ }
+ assert.equal(count,0);
+});
+test("safe unknown routes are not intercepted and request lists remain private",async()=>{
+ const r=response();
+ assert.equal(await create()({url:"/not-an-account-route",method:"GET"},r),false);
+ assert.equal(r.headersSent,false);
+});
