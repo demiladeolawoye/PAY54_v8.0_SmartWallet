@@ -26,6 +26,54 @@ const RESOURCE_TYPES = Object.freeze([
   "google_service_account_iam_member.deployer_runtime_user"
 ]);
 
+// STG-05 network declarations are permitted only as a complete, reviewed set.
+// All existing project-titan resource addresses remain authoritative.
+const NETWORK_RESOURCE_TYPES = Object.freeze([
+  "google_compute_network.staging",
+  "google_compute_subnetwork.staging",
+  "google_compute_firewall.egress_deny"
+]);
+
+function containsAll(source, patterns) {
+  return patterns.every(pattern => pattern.test(source ?? ""));
+}
+
+function hasRequiredNetworkSafety(source, resourceBlockFn, cloudRun, variableFn) {
+  const network = resourceBlockFn("google_compute_network.staging");
+  const subnet = resourceBlockFn("google_compute_subnetwork.staging");
+  const firewall = resourceBlockFn("google_compute_firewall.egress_deny");
+  const cidr = variableFn("staging_subnet_cidr");
+  const access = cloudRun && block(cloudRun, "vpc_access", null);
+  const networkInterfaces = access && block(access, "network_interfaces", null);
+
+  return containsAll(network, [
+    /\bcount\s*=\s*local\.enabled\s*\?\s*1\s*:\s*0\b/,
+    /\bauto_create_subnetworks\s*=\s*false\b/,
+    /\bproject\s*=\s*var\.project_id\b/
+  ]) && containsAll(subnet, [
+    /\bcount\s*=\s*local\.enabled\s*\?\s*1\s*:\s*0\b/,
+    /\bregion\s*=\s*local\.region\b/,
+    /\bnetwork\s*=\s*google_compute_network\.staging\[0\]\.id\b/,
+    /\bip_cidr_range\s*=\s*var\.staging_subnet_cidr\b/
+  ]) && containsAll(cidr, [
+    /\bdefault\s*=\s*null\b/,
+    /\bnullable\s*=\s*true\b/
+  ]) && containsAll(firewall, [
+    /\bcount\s*=\s*local\.enabled\s*\?\s*1\s*:\s*0\b/,
+    /\bdirection\s*=\s*"EGRESS"/,
+    /\bnetwork\s*=\s*google_compute_network\.staging\[0\]\.name\b/,
+    /\bdestination_ranges\s*=\s*\["0\.0\.0\.0\/0"\]/,
+    /\btarget_tags\s*=\s*\["pay54-staging-egress"\]/,
+    /\bdeny\s*\{\s*protocol\s*=\s*"all"\s*\}/
+  ]) && containsAll(access, [
+    /\begress\s*=\s*"ALL_TRAFFIC"/
+  ]) && containsAll(networkInterfaces, [
+    /\bnetwork\s*=\s*google_compute_network\.staging\[0\]\.id\b/,
+    /\bsubnetwork\s*=\s*google_compute_subnetwork\.staging\[0\]\.id\b/,
+    /\btags\s*=\s*\["pay54-staging-egress"\]/
+  ]);
+}
+
 function stripComments(source) {
   // Only strips # and // comments outside strings. Terraform heredocs are not
   // supported by this source gate; unexpected constructs require manual review.
@@ -106,17 +154,39 @@ export function assessStagingNetworkPolicy(original) {
     truth(local, /\benabled\s*=\s*var\.authorized_provisioning\b/),
     "Explicit false default and local gate must remain present.");
 
-  const unguarded = RESOURCE_TYPES.filter(id => !truth(resourceBlock(source, id), /\b(?:count\s*=\s*local\.enabled\s*\?\s*1\s*:\s*0|for_each\s*=\s*local\.enabled\s*\?\s*local\.required_apis\s*:\s*toset\(\[\]\))/));
+  const resourceSet = [...RESOURCE_TYPES, ...NETWORK_RESOURCE_TYPES];
+  const unguarded = resourceSet.filter(id => (RESOURCE_TYPES.includes(id) || resourceBlock(source, id) !== null) && !truth(resourceBlock(source, id), /\b(?:count\s*=\s*local\.enabled\s*\?\s*1\s*:\s*0|for_each\s*=\s*local\.enabled\s*\?\s*local\.required_apis\s*:\s*toset\(\[\]\))/));
   check("GATED_RESOURCES", "All expected resources are gated", unguarded.length === 0,
     unguarded.length ? `Missing or unguarded: ${unguarded.join(", ")}` : "All known resources are conditional on the provisioning gate.");
 
   const declarations = [...source.matchAll(/\bresource\s+"([a-zA-Z0-9_]+)"\s+"([a-zA-Z0-9_]+)"\s*\{/g)]
     .map(m => `${m[1]}.${m[2]}`);
-  const unexpected = declarations.filter(id => !RESOURCE_TYPES.includes(id));
+  const declared = new Set(declarations);
+  const networkCount = NETWORK_RESOURCE_TYPES.filter(id => declared.has(id)).length;
+  const networkComplete = networkCount === NETWORK_RESOURCE_TYPES.length;
+  const baselineComplete = RESOURCE_TYPES.every(id => declared.has(id));
+  const unexpected = declarations.filter(id => !resourceSet.includes(id));
   const duplicates = declarations.filter((id, i) => declarations.indexOf(id) !== i);
-  check("RESOURCE_INVENTORY", "No unknown or duplicate infrastructure resources",
-    unexpected.length === 0 && duplicates.length === 0 && declarations.length === RESOURCE_TYPES.length,
-    `Declared resources: ${declarations.length}; unexpected: ${unexpected.join(", ") || "none"}; duplicates: ${duplicates.join(", ") || "none"}.`);
+  check("RESOURCE_INVENTORY", "Only reviewed, complete infrastructure resources are permitted",
+    unexpected.length === 0 && duplicates.length === 0 && baselineComplete &&
+    (networkCount === 0 || networkComplete) &&
+    declarations.length === RESOURCE_TYPES.length + networkCount,
+    `Declared resources: ${declarations.length}; network resources: ${networkCount}; unexpected: ${unexpected.join(", ") || "none"}; duplicates: ${duplicates.join(", ") || "none"}.`);
+
+  // Existing legacy Terraform may remain unchanged during the design checkpoint.
+  // After networking begins, all three declarations and their controls are mandatory.
+  if (networkCount > 0) {
+    check("NETWORK_FOUNDATION", "Dedicated staging network is complete and fail-closed",
+      networkComplete &&
+      hasRequiredNetworkSafety(source, id => resourceBlock(source, id), cloudRun, variable),
+      "Dedicated VPC, subnet, outbound deny and Cloud Run ALL_TRAFFIC/tag attachment must agree.");
+  } else {
+    findings.push({
+      id: "NETWORK_FOUNDATION", title: "Dedicated staging network implementation",
+      status: "NOT_IMPLEMENTED",
+      detail: "No Terraform network resources declared; STG-05 remains blocked."
+    });
+  }
 
   check("AUTH_INPUTS", "Provisioning requires verified inputs and image digest",
     truth(auth, /var\.project_id\s*!=\s*null/) &&
