@@ -185,7 +185,7 @@ export function assessEgressThreatModel(
     [
       "NO_EGRESS_ENFORCEMENT_CLAIM",
       (() => {
-        const attached = /vpc_access\\s*\\{[\\s\\S]*?egress\\s*=\\s*"ALL_TRAFFIC"/.test(terraform);
+        const attached = /vpc_access\s*\{[\s\S]*?egress\s*=\s*"ALL_TRAFFIC"/.test(terraform););
         if (!attached) return true;
         // A source declaration is accepted only when the existing STG-05
         // policy validates the entire gated topology. Never runtime evidence.
