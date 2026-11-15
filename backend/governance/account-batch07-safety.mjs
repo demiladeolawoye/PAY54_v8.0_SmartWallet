@@ -19,7 +19,7 @@ export function assessBatch07Safety(inventory) {
     ["TRUSTED_IDENTITY",/requireTrustedPrincipal\s*\(/.test(inventory.identity) &&
       /WeakSet/.test(read("backend/security/account-identity-envelope.mjs"))],
     ["CURRENT_MEMBERSHIP",/assertTenantAccountAccess\s*\(/.test(inventory.scope)],
-    ["RESTRICTIVE_RLS",/AS RESTRICTIVE FOR SELECT TO pay54_account_reader_role USING \(false\)/.test(inventory.migration)],
+    ["RESTRICTIVE_RLS",(inventory.migration.match(/AS RESTRICTIVE FOR SELECT TO pay54_account_reader_role USING \(false\)/g)||[]).length===3 && ["pay54_reader_account_deny","pay54_reader_membership_deny","pay54_reader_wallet_binding_deny"].every(name=>inventory.migration.includes("CREATE POLICY "+name))],
     ["NO_READER_SELECT_GRANT",!/GRANT\s+(?:SELECT|ALL)\s+ON\s+/i.test(inventory.migration)],
     ["NO_DB_TENANT_GUC",!/current_setting\s*\(|set_config\s*\(/i.test(inventory.migration)],
     ["CANONICAL_PARAMETER_SQL",/buildAccountQuery\s*\(/.test(inventory.queries)],
