@@ -94,3 +94,22 @@ test("safe unknown routes are not intercepted and request lists remain private",
  assert.equal(await create()({url:"/not-an-account-route",method:"GET"},r),false);
  assert.equal(r.headersSent,false);
 });
+
+test("account responses cannot be cached by proxies or displayed cross-origin",async()=>{
+ const h=create();
+ const ok=response();
+ await h({url:"/api/v1/account-contexts",method:"GET",session:true},ok);
+ assert.equal(ok.status,200);
+ assert.equal(ok.headers["Cross-Origin-Resource-Policy"],"same-origin");
+ assert.equal(ok.headers["Vary"],"Cookie, Authorization");
+ assert.equal(ok.headers["Pragma"],"no-cache");
+ assert.equal(ok.headers["Expires"],"0");
+ assert.equal(ok.headers["X-Frame-Options"],"DENY");
+ assert.equal(ok.headers["Access-Control-Allow-Origin"],undefined);
+ const denied=response();
+ await h({url:"/api/v1/account-contexts",method:"GET",session:true,
+   headers:{origin:"https://unauthorised.example"}},denied);
+ assert.equal(denied.status,403);
+ assert.equal(denied.headers["Access-Control-Allow-Origin"],undefined);
+ assert.equal(denied.headers["Cache-Control"],"no-store, private");
+});
