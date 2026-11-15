@@ -46,6 +46,8 @@ test("one clean read-only transaction per operation, with no mutable session sta
   const commands=item.statements.map(x=>x.sql);
   assert.deepEqual(commands,[
    "BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED READ ONLY",
+   "SET LOCAL lock_timeout = '1000ms'",
+   "SET LOCAL row_security = on",
    "SET LOCAL statement_timeout = '3000ms'",
    "SET LOCAL idle_in_transaction_session_timeout = '3000ms'",
    sql,
