@@ -1,0 +1,51 @@
+name: PAY54 STG-05 Provisioning Safeguards
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/governance/stg05-provisioning-safeguards.mjs"
+      - "backend/tests/stg05-provisioning-safeguards.test.mjs"
+      - ".github/workflows/pay54-stg05-provisioning-safeguards.yml"
+  pull_request:
+    paths:
+      - "infrastructure/staging/**"
+      - "backend/governance/stg05-provisioning-safeguards.mjs"
+      - "backend/tests/stg05-provisioning-safeguards.test.mjs"
+      - ".github/workflows/pay54-stg05-provisioning-safeguards.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-stg05-provisioning-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_FINANCIAL_EXECUTION: "false"
+    steps:
+      - name: Checkout without persisted GitHub credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Run independent safeguards and mutation tests
+        run: node --test backend/tests/stg05-provisioning-safeguards.test.mjs
+      - name: Inspect actual staging Terraform
+        run: node backend/governance/stg05-provisioning-safeguards.mjs
+      - name: Verify execution remains disabled
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+          echo "Offline STG-05 source checks only. No deployment or cloud authentication."
