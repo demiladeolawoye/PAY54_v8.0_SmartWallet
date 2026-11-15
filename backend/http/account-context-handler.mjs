@@ -12,8 +12,14 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 const HEADERS=Object.freeze({
   "Content-Type":"application/json; charset=utf-8",
   "Cache-Control":"no-store, private",
+  "Pragma":"no-cache",
+  "Expires":"0",
+  "Vary":"Cookie, Authorization",
+  "Cross-Origin-Resource-Policy":"same-origin",
   "X-Content-Type-Options":"nosniff",
+  "X-Frame-Options":"DENY",
   "Referrer-Policy":"no-referrer",
+  "Permissions-Policy":"camera=(), microphone=(), geolocation=()",
   "Content-Security-Policy":"default-src 'none'; frame-ancestors 'none'"
 });
 
@@ -52,6 +58,10 @@ export function createAccountContextHandler({query,principalResolver}) {
     if(pathname!==BASE && !pathname.startsWith(BASE+"/"))return false;
     if(target.search || pathname.includes("%") || pathname.length>128){
       reply(400,{error:"bad_request"});return true;
+    }
+    if (request?.headers?.origin) {
+      // No cross-site account reads until a separately approved origin policy.
+      reply(403,{error:"cross_origin_forbidden"});return true;
     }
     if(request.method!=="GET"){
       reply(405,{error:"method_not_allowed"},{Allow:"GET"});return true;
