@@ -1,0 +1,43 @@
+"use strict";
+import test from "node:test";
+import assert from "node:assert/strict";
+import {createAccountSwitchPreview} from "../../assets/js/dashboard/account-switch-selection.mjs";
+const A="22222222-2222-4222-8222-222222222222";
+const B="33333333-3333-4333-8333-333333333333";
+test("profile picker is nonactivating and keyboard reachable",()=>{
+  const picker=createAccountSwitchPreview({accountIds:[A,B],selectedAccountId:A});
+  let s=picker.reduce(picker.initialState,{type:"OPEN"});
+  assert.equal(s.open,true);
+  assert.equal(s.focusedIndex,0);
+  s=picker.reduce(s,{type:"ARROW_DOWN"});
+  assert.equal(s.focusedIndex,1);
+  const intent=picker.createSelectionIntent(s);
+  assert.equal(intent.requestedAccountId,B);
+  assert.equal(intent.pendingServerAuthorisation,true);
+  assert.equal(intent.financialExecutionEnabled,false);
+  assert.equal(intent.accountContextChanged,false);
+  assert.equal(s.effectiveFinancialContextChanged,false);
+  s=picker.reduce(s,{type:"ESCAPE"});
+  assert.equal(s.open,false);
+  assert.throws(()=>picker.createSelectionIntent(s),/SELECTION_UNAVAILABLE/);
+});
+test("Home, End, wrap and empty profiles are safe",()=>{
+  const picker=createAccountSwitchPreview({accountIds:[A,B]});
+  let s=picker.reduce(picker.initialState,{type:"OPEN"});
+  s=picker.reduce(s,{type:"END"});
+  assert.equal(s.focusedIndex,1);
+  s=picker.reduce(s,{type:"ARROW_DOWN"});
+  assert.equal(s.focusedIndex,0);
+  s=picker.reduce(s,{type:"ARROW_UP"});
+  assert.equal(s.focusedIndex,1);
+  s=picker.reduce(s,{type:"HOME"});
+  assert.equal(s.focusedIndex,0);
+  const empty=createAccountSwitchPreview({accountIds:[]});
+  assert.throws(()=>empty.createSelectionIntent(empty.reduce(empty.initialState,{type:"OPEN"})),/SELECTION_UNAVAILABLE/);
+});
+test("forged or duplicate account ID lists are rejected",()=>{
+  assert.throws(()=>createAccountSwitchPreview({accountIds:[A,A]}),TypeError);
+  assert.throws(()=>createAccountSwitchPreview({accountIds:[A],selectedAccountId:B}),TypeError);
+  assert.throws(()=>createAccountSwitchPreview({accountIds:["malformed"]}),TypeError);
+  assert.throws(()=>createAccountSwitchPreview({accountIds:[A],selectedAccountId:"not-uuid"}),TypeError);
+});
