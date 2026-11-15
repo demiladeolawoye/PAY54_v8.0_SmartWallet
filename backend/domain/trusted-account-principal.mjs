@@ -15,10 +15,21 @@ export function createTrustedAccountPrincipalResolver({ verifyServerSession }) {
   return Object.freeze({
     async resolve(request) {
       const session = await verifyServerSession(request);
+      const now = Math.floor(Date.now() / 1000);
+      const maxSessionSeconds = 24 * 60 * 60;
+      const issuedAtValid = session?.issuedAt === undefined ||
+        (Number.isSafeInteger(session.issuedAt) && session.issuedAt <= now + 60 &&
+         session.issuedAt >= now - maxSessionSeconds &&
+         session.issuedAt < session.expiresAt);
+      const notBeforeValid = session?.notBefore === undefined ||
+        (Number.isSafeInteger(session.notBefore) && session.notBefore <= now);
       if (!session || typeof session !== "object" ||
           session.authenticated !== true || session.revoked !== false ||
-          !UUID.test(session.subjectId) || !Number.isSafeInteger(session.expiresAt) ||
-          session.expiresAt <= Math.floor(Date.now() / 1000)) {
+          typeof session.subjectId !== "string" || !UUID.test(session.subjectId) ||
+          !Number.isSafeInteger(session.expiresAt) ||
+          session.expiresAt <= now ||
+          session.expiresAt > now + maxSessionSeconds ||
+          !issuedAtValid || !notBeforeValid) {
         throw new Error("ACCOUNT_AUTH_REQUIRED");
       }
       const principal = Object.freeze({ subjectId: session.subjectId.toLowerCase() });
