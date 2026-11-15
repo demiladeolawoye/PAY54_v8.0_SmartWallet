@@ -13,7 +13,7 @@ export function assessAccountAuthSecurity({jws,keys,revocation,adapter,rls}){
  }
  const issues=[];
  if(!auditAccountRlsSource(rls).passed)issues.push("RLS_DENIAL_WEAKENED");
- if(!/\bverify\(null,/.test(jws)||!/EdDSA/.test(jws)||!/revocationGuard\.check/.test(jws)||
+ if(!/\bverify\(null,/.test(jws)||!/EdDSA/.test(jws)||!/await\s+revocationGuard\.check\(/.test(jws)||
     !/payload\.iss!==issuer/.test(jws)||!/payload\.aud!==audience/.test(jws)){
    issues.push("SIGNED_AUTH_WEAKENED");
  }
