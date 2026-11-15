@@ -1,0 +1,81 @@
+name: PAY54 Account Authenticated DB Actor Proof
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/tests/016_role_identity_rls_proof.sql"
+      - "backend/db/tests/017_role_identity_adversarial.sql"
+      - "backend/db/tests/018_role_identity_rollback.sql"
+      - ".github/workflows/pay54-account-db-identity-proof.yml"
+  pull_request:
+    paths:
+      - "backend/db/tests/016_role_identity_rls_proof.sql"
+      - "backend/db/tests/017_role_identity_adversarial.sql"
+      - "backend/db/tests/018_role_identity_rollback.sql"
+      - ".github/workflows/pay54-account-db-identity-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: pay54-db-identity-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  role-auth-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_role_proof_ci
+          POSTGRES_PASSWORD: pay54_disposable_role_proof_ci_2026
+          POSTGRES_DB: pay54_role_proof
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_role_proof_ci -d pay54_role_proof"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_role_proof_ci
+      PGPASSWORD: pay54_disposable_role_proof_ci_2026
+      PGDATABASE: pay54_role_proof
+      PGSSLMODE: disable
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_REAL_MONEY_MODE: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install PostgreSQL test client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Apply historic migrations to disposable database
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011,012,013}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$file"
+          done
+      - name: Simulate authenticated SQL actor roles and deny cross-tenant access
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/db/tests/{016,017,018}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$file"
+          done
+      - name: Recheck existing account and financial database isolation
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/015_account_rls_cross_tenant.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/014_account_rls_denial.sql
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/013_account_privilege_matrix.sql
+      - name: Confirm no cloud provisioning or payments
+        run: |
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
