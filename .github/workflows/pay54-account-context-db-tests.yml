@@ -1,0 +1,88 @@
+name: PAY54 Account Context Database Isolation
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/db/migrations/008_account_context_foundation.sql"
+      - "backend/db/tests/008_account_context_isolation.sql"
+      - ".github/workflows/pay54-account-context-db-tests.yml"
+  pull_request:
+    paths:
+      - "backend/db/migrations/008_account_context_foundation.sql"
+      - "backend/db/tests/008_account_context_isolation.sql"
+      - ".github/workflows/pay54-account-context-db-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-account-context-sql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  account-context:
+    name: Isolated PostgreSQL 16 Account Domain
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_account_ci
+          POSTGRES_PASSWORD: pay54_disposable_account_ci_2026
+          POSTGRES_DB: pay54_account_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pay54_account_ci -d pay54_account_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_account_ci
+      PGPASSWORD: pay54_disposable_account_ci_2026
+      PGDATABASE: pay54_account_test
+      PGSSLMODE: disable
+      PGCONNECT_TIMEOUT: "10"
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Apply verified financial migrations to disposable database
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration in backend/db/migrations/00{1,2,3,4,5,6,7}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          done
+
+      - name: Apply non-financial account-context migration 008
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/migrations/008_account_context_foundation.sql
+
+      - name: Test cross-account ownership and restricted-role access
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/008_account_context_isolation.sql
+
+      - name: Repeat financial execution and ledger privilege controls
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/007_direct_ledger_access_boundary.sql
+
+      - name: Confirm no financial execution and no cloud provisioning
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          echo "Account-context schema verified in ephemeral PostgreSQL only."
+          echo "No live database, Google Cloud or financial service was accessed."
