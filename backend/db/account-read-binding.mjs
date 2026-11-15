@@ -8,6 +8,7 @@
 import {requireTrustedPrincipal} from "../domain/trusted-account-principal.mjs";
 import {buildAccountQuery} from "./account-query-catalogue.mjs";
 import {assertAccountReadStatement} from "./account-sql-policy.mjs";
+import {freezeAccountReadRows} from "./account-read-results.mjs";
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export function createAccountReadBinding({principalResolver,transaction}) {
@@ -24,10 +25,7 @@ export function createAccountReadBinding({principalResolver,transaction}) {
       const result=await transaction.execute({
         principal,sql:definition.sql,params:definition.params
       });
-      if(!result||!Array.isArray(result.rows)||result.rows.length>100){
-        throw new Error("ACCOUNT_READ_UNAVAILABLE");
-      }
-      return Object.freeze({rows:Object.freeze(result.rows.map(row=>Object.freeze({...row})))});
+      return freezeAccountReadRows(result);
     }
   });
 }
