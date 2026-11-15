@@ -3,6 +3,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { assessStagingNetworkPolicy, renderStagingNetworkPolicy } from "../governance/staging-network-policy.mjs";
 
 const ids = [
@@ -132,3 +133,87 @@ test("source-only report documents unresolved egress and security boundary", () 
 });
 
 test("empty source is rejected", () => assert.throws(() => assessStagingNetworkPolicy("")));
+
+/* ==========================================================================
+   STG-05 implementation-readiness regression cases
+   Verify the authoritative Terraform source without cloud access.
+   These tests do not certify networking enforcement or authorise provisioning.
+   ========================================================================== */
+
+const stagingTerraform = readFileSync(
+  new URL("../../infrastructure/staging/main.tf", import.meta.url),
+  "utf8"
+);
+
+test("repository staging Terraform satisfies existing source-security baseline", () => {
+  const report = assessStagingNetworkPolicy(stagingTerraform);
+  assert.equal(report.sourceIntegrity, "PASS", JSON.stringify(report.findings));
+  noRelease(report);
+});
+
+test("network controls remain explicitly unverified until independent attestation", () => {
+  const report = assessStagingNetworkPolicy(stagingTerraform);
+  const egress = report.findings.find(f => f.id === "CONTROLLED_EGRESS");
+  assert.ok(egress, "Missing controlled egress finding");
+  assert.equal(egress.status, "NOT_VERIFIED");
+  assert.equal(report.sourceOnly, true);
+  noRelease(report);
+});
+
+test("Cloud Run ALL_TRAFFIC declaration alone never certifies outbound enforcement", () => {
+  const sample = fixture().replace(
+    "template { service_account = google_service_account.runtime[0].email }",
+    'template { service_account = google_service_account.runtime[0].email vpc_access { egress = "ALL_TRAFFIC" } }'
+  );
+  const report = assessStagingNetworkPolicy(sample);
+  assert.equal(report.sourceIntegrity, "PASS", JSON.stringify(report.findings));
+  assert.equal(report.findings.find(f => f.id === "CONTROLLED_EGRESS").status, "NOT_VERIFIED");
+  noRelease(report);
+});
+
+test("an ungated VPC cannot be silently introduced into the staging configuration", () => {
+  const sample = stagingTerraform +
+    '\nresource "google_compute_network" "staging" { auto_create_subnetworks = false }\n';
+  const report = assessStagingNetworkPolicy(sample);
+  assert.equal(report.sourceIntegrity, "FAIL");
+  assert.equal(report.findings.find(f => f.id === "RESOURCE_INVENTORY").status, "FAIL_SOURCE");
+  noRelease(report);
+});
+
+test("a newly added but gated firewall still requires reviewed resource contracts", () => {
+  const sample = stagingTerraform +
+    '\nresource "google_compute_firewall" "egress_deny" { count = local.enabled ? 1 : 0 direction = "EGRESS" }\n';
+  const report = assessStagingNetworkPolicy(sample);
+  assert.equal(report.sourceIntegrity, "FAIL");
+  assert.equal(report.findings.find(f => f.id === "RESOURCE_INVENTORY").status, "FAIL_SOURCE");
+  noRelease(report);
+});
+
+test("duplicate infrastructure resource declarations fail closed", () => {
+  const sample = stagingTerraform +
+    '\nresource "google_service_account" "runtime" { count = local.enabled ? 1 : 0 }\n';
+  const report = assessStagingNetworkPolicy(sample);
+  assert.equal(report.sourceIntegrity, "FAIL");
+  assert.equal(report.findings.find(f => f.id === "RESOURCE_INVENTORY").status, "FAIL_SOURCE");
+  noRelease(report);
+});
+
+test("network implementation work cannot enable provisioning or federation", () => {
+  for (const mutation of [
+    stagingTerraform.replace("default     = false", "default     = true"),
+    stagingTerraform.replace("disabled = true", "disabled = false")
+  ]) {
+    assert.notEqual(mutation, stagingTerraform, "Mutation fixture failed to change source");
+    const report = assessStagingNetworkPolicy(mutation);
+    assert.equal(report.sourceIntegrity, "FAIL");
+    noRelease(report);
+  }
+});
+
+test("source report explicitly retains the network-release block", () => {
+  const summary = renderStagingNetworkPolicy(assessStagingNetworkPolicy(stagingTerraform));
+  assert.match(summary, /STG-05 security approval: \\*\\*NOT_VERIFIED\\*\\*/);
+  assert.match(summary, /Staging release: \\*\\*BLOCKED\\*\\*/);
+  assert.match(summary, /Cloud provisioning: \\*\\*DISABLED\\*\\*/);
+  assert.match(summary, /Financial execution: \\*\\*DISABLED\\*\\*/);
+});
