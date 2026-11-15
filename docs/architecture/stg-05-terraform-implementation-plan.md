@@ -1,15 +1,28 @@
 # PAY54 Project Titan — STG-05 Terraform Implementation and Regression Plan
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Phase:** 2G-AN  
 **Control:** STG-05 — Private Networking and Egress Security  
 **Document class:** Repository-verified, offline implementation plan  
 **Prepared:** 15 November 2026  
-**Decision status:** DESIGN_SPECIFIED — NOT IMPLEMENTED OR APPROVED  
+**Decision status:** SOURCE_IMPLEMENTED — NOT DEPLOYED OR APPROVED  
 **Staging release:** BLOCKED  
 **Cloud provisioning:** DISABLED  
 **External destinations:** None approved  
 **Financial execution:** DISABLED
+
+## Current checkpoint — 15 November 2026
+
+The following source-only milestones have been completed after the initial design snapshot below:
+
+- `infrastructure/staging/main.tf` now contains a dedicated custom-mode VPC, regional subnet, targeted outbound-deny firewall and Cloud Run Direct VPC `ALL_TRAFFIC` attachment; all resources retain `authorized_provisioning=false` by default.
+- The reviewed subnet input remains **null** pending an independently approved, non-overlapping IPv4 network. Terraform validation now requires a canonical RFC1918 IPv4 subnet sized /24, /25 or /26. This is a source-input constraint, **not** approval to allocate any given CIDR.
+- `backend/governance/staging-network-policy.mjs`, associated network tests, infrastructure tests and threat-model reconciliation are committed, with offline GitHub Actions security suites reporting success.
+- Operator-provided Google Cloud observations are recorded in `docs/architecture/stg-05-observed-cloud-network-inventory-2026-11-15.md`. They show the project's `default` auto-mode VPC with `europe-west2` subnet `10.154.0.0/20`, default ingress allow rules and an Internet default route **on the default VPC only**. The operator enabled `compute.googleapis.com` during evidence gathering.
+- **No PAY54 custom VPC is confirmed deployed.** Effective firewall policy, connected-network IPAM, cloud spend, IAM, signed provenance, independent review and release authorisation are still outstanding.
+- **STG-05 remains NOT_VERIFIED. Staging release remains BLOCKED.** No real-money or provider activation is authorised.
+
+The historical source SHAs and prospective implementation sequence preserved below describe the earlier checkpoint and should not be treated as current-file SHAs.
 
 ## 1. Purpose and authoritative source
 
@@ -147,7 +160,7 @@ A future implementation pull request should include changed-file inventory, full
 - ADR-005: committed to `project-titan`; source inspected.
 - Existing staging Terraform: inspected; unchanged.
 - Network design and regression sequence: documented here.
-- STG-05 Terraform implementation: **NOT IMPLEMENTED**.
+- STG-05 Terraform implementation: **SOURCE IMPLEMENTED, NOT DEPLOYED OR INDEPENDENTLY VERIFIED**.
 - Static network integration tests: **NOT RUN FOR NEW DESIGN**.
 - Authenticated cloud inventory: **NOT VERIFIED**.
 - Independent security review: **NOT VERIFIED**.
