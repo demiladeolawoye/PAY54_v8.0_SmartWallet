@@ -39,25 +39,10 @@ export function createAccountContextReader({ query, resolveAuthenticatedPrincipa
     if (!isUuid(principal)) throw new Error("ACCOUNT_AUTH_REQUIRED");
     if (accountId !== null && !isUuid(accountId)) throw new Error("INVALID_ACCOUNT_ID");
 
-    const canonicalList = accountId === null ? buildAccountQuery("ACCOUNT_LIST",principal) : null;
-    const sql = canonicalList?.sql ?? [
-      "SELECT a.id AS account_id, a.legal_owner_subject AS legal_owner_id,",
-      " a.account_type AS type, a.display_name, a.status, a.verification_status,",
-      " m.principal_subject AS principal_id, m.role, m.status AS membership_status",
-      "FROM pay54.account_contexts a",
-      "JOIN pay54.account_memberships m ON m.account_id = a.id",
-      "WHERE m.principal_subject = $1::uuid",
-      "AND m.status = 'ACTIVE'",
-      "AND a.status = 'ACTIVE'",
-      "AND a.verification_status = 'VERIFIED'",
-      accountId === null ? "" : "AND a.id = $2::uuid",
-      "ORDER BY a.created_at, a.id",
-      "LIMIT 100"
-    ].filter(Boolean).join("\n");
-
-    const values = accountId === null
-      ? canonicalList.params
-      : [principal.toLowerCase(), accountId.toLowerCase()];
+    const definition = accountId === null
+      ? buildAccountQuery("ACCOUNT_LIST",principal)
+      : buildAccountQuery("ACCOUNT_SELECT",principal,accountId);
+    const { sql, params: values } = definition;
 
     const result = await query(sql, values);
     if (!result || !Array.isArray(result.rows)) throw new Error("ACCOUNT_STORE_UNAVAILABLE");
