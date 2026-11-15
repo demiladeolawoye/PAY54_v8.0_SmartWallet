@@ -17,7 +17,7 @@ test("unapproved RLS grants, GUC-based identity, role login and mutable transact
   {migration:src.migration.replace("AS RESTRICTIVE","AS PERMISSIVE")},
   {migration:src.migration+"\nGRANT SELECT ON pay54.account_contexts TO pay54_account_reader_role;"},
   {migration:src.migration+"\ncurrent_setting('pay54.subject')"},
-  {roles:src.roles.replace("NOLOGIN","LOGIN")},
+  {roles:src.roles.replace("  NOLOGIN NOINHERIT","  LOGIN NOINHERIT")},
   {transaction:src.transaction.replace("BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED READ ONLY","BEGIN")},
   {scope:src.scope.replace("assertTenantAccountAccess","allowAllAccounts")}
  ];
