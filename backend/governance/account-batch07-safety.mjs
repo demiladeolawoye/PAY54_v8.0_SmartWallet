@@ -24,7 +24,7 @@ export function assessBatch07Safety(inventory) {
     ["NO_DB_TENANT_GUC",!/current_setting\s*\(|set_config\s*\(/i.test(inventory.migration)],
     ["CANONICAL_PARAMETER_SQL",/buildAccountQuery\s*\(/.test(inventory.queries)],
     ["READ_ONLY_TRANSACTION",/BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED READ ONLY/.test(inventory.transaction)],
-    ["NO_LOGIN_READER",/NOLOGIN/.test(inventory.roles) && /NOBYPASSRLS/.test(inventory.roles)],
+    ["NO_LOGIN_READER",/CREATE ROLE pay54_account_reader_role\s+NOLOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE\s+NOREPLICATION NOBYPASSRLS;/.test(inventory.roles)],
     ["NO_DEPLOY_COMMANDS",!/terraform\s+apply|gcloud\s+run\s+deploy|psql\s+-h\s+.*production/i.test(
       inventory.identity+"\n"+inventory.scope+"\n"+inventory.transaction)]
   ].map(([name,passed])=>Object.freeze({name,passed:Boolean(passed)}));
