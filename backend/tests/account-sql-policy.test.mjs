@@ -41,10 +41,14 @@ test("query mutation and invalid parameters fail closed",()=>{
  assert.throws(()=>assertAccountReadStatement(SELECT,[P,"bad"],P),/UNAPPROVED_ACCOUNT_QUERY/);
  assert.throws(()=>assertAccountReadStatement(LIST,[P,P],P),/UNAPPROVED_ACCOUNT_QUERY/);
 });
-test("source-maintained account SQL still contains critical scoped restrictions",()=>{
+test("canonical SQL catalog preserves server principal and account scoping",()=>{
+ const all=readFileSync(new URL("../db/account-query-catalogue.mjs",import.meta.url),"utf8");
+ assert.match(all,/m\.principal_subject = \$1::uuid/);
+ assert.match(all,/a\.id = \$2::uuid/);
+ assert.match(all,/m\.principal_subject=\$2::uuid/);
  const reader=readFileSync(new URL("../domain/account-context-reader.mjs",import.meta.url),"utf8");
- assert.match(reader,/m\.principal_subject = \$1::uuid/);
- assert.match(reader,/a\.id = \$2::uuid/);
  const wallet=readFileSync(new URL("../domain/account-wallet-reader.mjs",import.meta.url),"utf8");
- assert.match(wallet,/m\.principal_subject=\$2::uuid/);
+ assert.match(reader,/buildAccountQuery\("ACCOUNT_LIST"/);
+ assert.match(reader,/buildAccountQuery\("ACCOUNT_SELECT"/);
+ assert.match(wallet,/buildAccountQuery\("PERSONAL_WALLET_IDS"/);
 });
