@@ -15,6 +15,7 @@ test("view policy eligibility never enables actual financial execution",()=>{
 test("a maker cannot approve their own financial operation",()=>{
   assert.equal(ask("approve",{initiatorId:P}).reason,"MAKER_CHECKER_CONFLICT");
   assert.equal(ask("approve").reason,"MAKER_ID_REQUIRED");
+  assert.equal(ask("approve",{initiatorId:"untrusted-maker"}).reason,"MAKER_ID_REQUIRED");
   assert.equal(ask("approve",{initiatorId:OTHER}).permitted,true);
   assert.equal(ask("approve",{initiatorId:OTHER}).executionEnabled,false);
 });
