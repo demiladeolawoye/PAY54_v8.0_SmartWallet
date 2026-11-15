@@ -17,7 +17,7 @@ test("oversized, poisoned, nested or unexpected results fail closed",()=>{
   {rows:[{a:Infinity}]},{rows:[{a:"x".repeat(1025)}]},
   {rows:[{bad_name:"ok","constructor!":"bad"}]},
   {rows:[{...Object.fromEntries(Array.from({length:25},(_,i)=>["field_"+i,i]))}]},
-  {rows:[{"__proto__":"some","a":"ok"}]}
+  {rows:[{["__proto__"]:"some",a:"ok"}]}
  ];
  for(const result of invalid.filter(x=>x===null||!Array.isArray(x?.rows)||x.rows.length>0)){
   assert.throws(()=>freezeAccountReadRows(result),/ACCOUNT_RESULT_UNAVAILABLE/);
