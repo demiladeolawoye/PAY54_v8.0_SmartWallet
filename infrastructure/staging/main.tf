@@ -2,7 +2,7 @@
 # ============================================================================
 # PAY54 ENTERPRISE — PRIVATE STAGING INFRASTRUCTURE
 # File: infrastructure/staging/main.tf
-# Version: 1.0.0
+# Version: 1.1.0
 #
 # Provisioning is disabled by default.
 # CI performs static validation only.
@@ -63,10 +63,12 @@ variable "staging_subnet_cidr" {
 
   validation {
     condition = var.staging_subnet_cidr == null ? true : (
-      can(cidrhost(var.staging_subnet_cidr, 0)) &&
-      can(regex("^(10[.]|172[.](1[6-9]|2[0-9]|3[01])[.]|192[.]168[.])", var.staging_subnet_cidr))
+      can(cidrnetmask(var.staging_subnet_cidr)) &&
+      can(regex("^(10[.]|172[.](1[6-9]|2[0-9]|3[01])[.]|192[.]168[.])", var.staging_subnet_cidr)) &&
+      can(regex("/2[4-6]$", var.staging_subnet_cidr)) &&
+      try(cidrhost(var.staging_subnet_cidr, 0) == split("/", var.staging_subnet_cidr)[0], false)
     )
-    error_message = "The staging subnet must use an explicitly reviewed RFC1918 IPv4 CIDR."
+    error_message = "The staging subnet must be a canonical RFC1918 IPv4 network, sized /24 to /26, with independent IPAM approval."
   }
 }
 
