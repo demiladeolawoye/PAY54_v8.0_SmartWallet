@@ -36,11 +36,21 @@ export function createAccountContextHandler({query,principalResolver}) {
       response.writeHead(status,{...HEADERS,...extra,"Content-Length":Buffer.byteLength(body)});
       response.end(body);
     };
-    let pathname;
-    try {pathname=new URL(request?.url??"", "http://localhost").pathname;}catch{
+    const rawUrl=request?.url;
+    if(typeof rawUrl!=="string" || Buffer.byteLength(rawUrl,"utf8")>2048 ||
+       !rawUrl.startsWith("/") || rawUrl.startsWith("//") ||
+       rawUrl.includes("\\\\") || rawUrl.includes("#")){
       reply(400,{error:"bad_request"});return true;
     }
+    let target;
+    try{target=new URL(rawUrl,"http://localhost");}catch{
+      reply(400,{error:"bad_request"});return true;
+    }
+    const pathname=target.pathname;
     if(pathname!==BASE && !pathname.startsWith(BASE+"/"))return false;
+    if(target.search || pathname.includes("%") || pathname.length>128){
+      reply(400,{error:"bad_request"});return true;
+    }
     if(request.method!=="GET"){
       reply(405,{error:"method_not_allowed"},{Allow:"GET"});return true;
     }
