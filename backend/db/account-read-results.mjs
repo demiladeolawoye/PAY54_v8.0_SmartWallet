@@ -14,7 +14,7 @@ export function freezeAccountReadRows(input) {
     }
     const keys=Object.keys(row);
     if(keys.length>24)throw new Error("ACCOUNT_RESULT_UNAVAILABLE");
-    const result=Object.create(null);
+    const result={};
     for(const key of keys){
       if(!FIELD.test(key))throw new Error("ACCOUNT_RESULT_UNAVAILABLE");
       const value=row[key];
