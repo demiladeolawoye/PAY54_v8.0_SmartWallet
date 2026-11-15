@@ -34,5 +34,5 @@ test("missing authentication or unapproved query never reaches executor",async()
 test("unavailable or oversized results deny rather than disclose",async()=>{
  const bad=createAccountReadBinding({principalResolver:trusted,
   transaction:{execute:async()=>({rows:Array.from({length:101},()=>({}))})}});
- await assert.rejects(()=>bad.query({verified:true},"ACCOUNT_LIST"),/ACCOUNT_READ_UNAVAILABLE/);
+ await assert.rejects(()=>bad.query({verified:true},"ACCOUNT_LIST"),/ACCOUNT_RESULT_UNAVAILABLE/);
 });
