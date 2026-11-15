@@ -18,7 +18,7 @@ export function auditAccountRlsSource(source){
  if(/\bGRANT\s+(?:SELECT|ALL|INSERT|UPDATE|DELETE|EXECUTE)\b/i.test(source)){
    problems.push("UNAPPROVED_GRANT");
  }
- if(/current_setting\s*\(|CREATE\s+ROLE\s+|BYPASSRLS|SECURITY\s+DEFINER/i.test(source)){
+ if(/current_setting\s*\(|CREATE\s+ROLE\s+|\\bBYPASSRLS\\b|SECURITY\s+DEFINER/i.test(source)){
    problems.push("UNTRUSTED_RLS_AUTHORITY");
  }
  if(!/COMMIT;/.test(source))problems.push("MISSING_TRANSACTION_COMMIT");
