@@ -259,3 +259,50 @@ test("IaC does not embed active payment capabilities", () => {
     );
   }
 });
+
+
+/* STG-05 — Required but unset network addressing, unchanged cloud activation. */
+test("staging subnet CIDR requires canonical private IPv4 and approved /24–/26 size", () => {
+  requireSource(
+    /variable\s+"staging_subnet_cidr"\s*\{[\s\S]*?\bdefault\s*=\s*null[\s\S]*?\bnullable\s*=\s*true/,
+    "CIDR must never be preselected or activated by default"
+  );
+  requireSource(/can\(cidrnetmask\(var\.staging_subnet_cidr\)\)/,
+    "IPv4-only subnet validation");
+  requireSource(/can\(regex\("\/2\[4-6\]\$",\s*var\.staging_subnet_cidr\)\)/,
+    "Cloud Run-compatible reviewed CIDR size");
+  requireSource(/cidrhost\(var\.staging_subnet_cidr,\s*0\)\s*==\s*split\("\/",\s*var\.staging_subnet_cidr\)\[0\]/,
+    "canonical subnet network boundary");
+  requireSource(/var\.staging_subnet_cidr\s*!=\s*null/,
+    "missing CIDR cannot be used to authorise provisioning");
+});
+
+test("PAY54 private VPC remains separate from the observed default network", () => {
+  requireSource(/resource\s+"google_compute_network"\s+"staging"\s*\{/,
+    "dedicated custom-mode PAY54 network");
+  requireSource(/auto_create_subnetworks\s*=\s*false/,
+    "custom-mode network rather than default auto subnets");
+  requireSource(/name\s*=\s*"pay54-staging-private"/,
+    "dedicated network name");
+  assert.doesNotMatch(source, /resource\s+"google_compute_network"\s+"default"/);
+});
+
+test("required Terraform APIs do not automatically enable Compute Engine", () => {
+  const list = source.match(/\brequired_apis\s*=\s*toset\(\[([\s\S]*?)\]\)/);
+  assert.ok(list, "Explicit required_apis inventory must exist");
+  assert.doesNotMatch(list[1], /compute\.googleapis\.com/,
+    "Compute API activation is a separate cloud governance event");
+});
+
+test("unapproved outbound internet connectivity remains denied in source", () => {
+  requireSource(/resource\s+"google_compute_firewall"\s+"egress_deny"/,
+    "targeted outbound firewall");
+  requireSource(/destination_ranges\s*=\s*\["0\.0\.0\.0\/0"\]/,
+    "complete IPv4 egress restriction");
+  requireSource(/deny\s*\{\s*protocol\s*=\s*"all"\s*\}/,
+    "deny all protocols for the tagged workload");
+  requireSource(/egress\s*=\s*"ALL_TRAFFIC"/,
+    "Direct VPC all-traffic routing");
+  assert.doesNotMatch(source, /resource\s+"google_compute_router_nat"/,
+    "No Cloud NAT before approved outbound gateway");
+});
