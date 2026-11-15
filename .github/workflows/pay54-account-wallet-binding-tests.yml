@@ -1,0 +1,80 @@
+name: PAY54 Account Wallet Binding Isolation
+
+on:
+  push:
+    branches:
+      - project-titan
+    paths:
+      - "backend/db/migrations/009_personal_wallet_binding.sql"
+      - "backend/db/tests/009_personal_wallet_binding.sql"
+      - ".github/workflows/pay54-account-wallet-binding-tests.yml"
+  pull_request:
+    paths:
+      - "backend/db/migrations/009_personal_wallet_binding.sql"
+      - "backend/db/tests/009_personal_wallet_binding.sql"
+      - ".github/workflows/pay54-account-wallet-binding-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-account-wallet-binding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  account-wallet-binding:
+    name: PostgreSQL 16 Legacy Wallet Isolation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_binding_ci
+          POSTGRES_PASSWORD: pay54_disposable_binding_ci_2026
+          POSTGRES_DB: pay54_binding_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pay54_binding_ci -d pay54_binding_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_binding_ci
+      PGPASSWORD: pay54_disposable_binding_ci_2026
+      PGDATABASE: pay54_binding_test
+      PGSSLMODE: disable
+      PGCONNECT_TIMEOUT: "10"
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout PAY54 without retained credentials
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Apply source-only schema in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration in backend/db/migrations/00{1,2,3,4,5,6,7,8,9}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Verify wallet ownership binding and rollback
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/009_personal_wallet_binding.sql
+      - name: Recheck financial execution isolation
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/007_direct_ledger_access_boundary.sql
+      - name: Recheck account context isolation
+        run: psql -X -v ON_ERROR_STOP=1 -f backend/db/tests/008_account_context_isolation.sql
+      - name: No live execution
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          echo "Disposable database isolation tests passed; no cloud or financial operations."
