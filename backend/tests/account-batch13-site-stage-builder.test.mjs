@@ -56,3 +56,14 @@ test("386: destination inside source is denied",()=>{
    /PAY54_STAGE_SOURCE_TARGET_OVERLAP/);
  }finally{f.cleanup();}
 });
+
+test("400: candidate staging refuses high-confidence credential marker without copying",()=>{
+ const f=fixture();
+ try{
+  writeFileSync(join(f.source,"assets/js/app.js"),
+   "const accidentallyPublic='ghp_"+"Z".repeat(36)+"';");
+  assert.throws(()=>stagePay54SiteCandidate(f.source,f.target),
+   /PAY54_STAGE_SECRET_MARKERS_PRESENT/);
+  assert.deepEqual(readdirSync(f.target),[]);
+ }finally{f.cleanup();}
+});
