@@ -15,7 +15,7 @@ function fixture(){
  mkdirSync(join(source,"assets/js"),{recursive:true});
  mkdirSync(target);
  writeFileSync(join(source,"dashboard.html"),
-  '<html><head><link rel="stylesheet" href="assets/css/dashboard.css"></head><body><button>Send</button></body></html>');
+  '<html lang="en"><head><meta name="viewport" content="width=device-width"><title>PAY54 Dashboard</title><link rel="stylesheet" href="assets/css/dashboard.css"></head><body><main><button>Send</button></main></body></html>');
  writeFileSync(join(source,"assets/css/dashboard.css"),"body{font-family:system-ui}");
  writeFileSync(join(source,"assets/js/app.js"),"throw new Error('must never run')");
  return {root,source,target,clean:()=>rmSync(root,{recursive:true,force:true})};
