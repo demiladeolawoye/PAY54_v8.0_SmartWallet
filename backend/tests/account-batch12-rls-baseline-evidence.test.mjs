@@ -16,7 +16,8 @@ const relations=[
 ].map(relation_name=>({
  relation_name,rls_enabled:true,rls_forced:true,
  reader_select:false,reader_insert:false,reader_update:false,
- reader_delete:false,restrictive_reader_deny:true
+ reader_delete:false,reader_truncate:false,reader_references:false,
+ reader_trigger:false,reader_owns_relation:false,restrictive_reader_deny:true
 }));
 const inspect=(patch={})=>assessPay54AccountRlsBaseline({
  relations:patch.relations??relations,role:patch.role??role
@@ -40,6 +41,10 @@ test("356: PostgreSQL queries inspect catalogs only and make no privilege change
  }
  assert.match(PAY54_ACCOUNT_RLS_BASELINE_SQL,/pg_policy/);
  assert.match(PAY54_ACCOUNT_RLS_BASELINE_SQL,/pg_get_expr/);
+ assert.match(PAY54_ACCOUNT_RLS_BASELINE_SQL,/TRUNCATE/);
+ assert.match(PAY54_ACCOUNT_RLS_BASELINE_SQL,/REFERENCES/);
+ assert.match(PAY54_ACCOUNT_RLS_BASELINE_SQL,/TRIGGER/);
+ assert.match(PAY54_ACCOUNT_RLS_BASELINE_SQL,/reader_owns_relation/);
 });
 test("356: any table grant, missing forced RLS or deny policy blocks",()=>{
  for(const patch of [
@@ -47,6 +52,10 @@ test("356: any table grant, missing forced RLS or deny policy blocks",()=>{
   {reader_insert:true},
   {reader_update:true},
   {reader_delete:true},
+  {reader_truncate:true},
+  {reader_references:true},
+  {reader_trigger:true},
+  {reader_owns_relation:true},
   {rls_enabled:false},
   {rls_forced:false},
   {restrictive_reader_deny:false}
