@@ -16,7 +16,7 @@ function fixture(){
  mkdirSync(join(source,"assets/css"),{recursive:true});
  mkdirSync(out);
  writeFileSync(join(source,"dashboard.html"),
-  '<html><head><link rel="stylesheet" href="assets/css/dashboard.css"></head><body><button>Pay</button></body></html>');
+  '<html lang="en"><head><meta name="viewport" content="width=device-width"><title>PAY54 Dashboard</title><link rel="stylesheet" href="assets/css/dashboard.css"></head><body><main><button>Pay</button></main></body></html>');
  writeFileSync(join(source,"assets/css/dashboard.css"),"body{background:#fff}");
  const sha="c".repeat(40);
  createPay54FounderPreviewBundle(source,out,sha);
