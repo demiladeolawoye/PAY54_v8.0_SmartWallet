@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 56 | Not fixed | Items 312–367 committed; latest static-site candidate backend regression passed, Pages release risk remains open |
+| Batch 12 source-only engineering | Milestone-gated | 56 | Not fixed | Items 312–367 committed; latest static-site candidate passed all 10 backend/account CI workflows, Pages release risk remains open |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -279,7 +279,7 @@ Source-only owner decision: docs/engineering/batch-12-staging-trust-owner-decisi
 
 ## Batch 12 Pages artifact publication review — 364–367
 
-**Source tested:** cc1bb9e54293493304c0084fd18a791d6a983e54; Backend run 43915040557 SUCCESS. All account/security workflows except Account Security Integration had finished successfully at this snapshot; confirm the final run separately. No deployment strategy or current GitHub Pages configuration was modified.
+**Source tested:** cc1bb9e54293493304c0084fd18a791d6a983e54; Backend run 43915040557 SUCCESS. All ten account/backend-security workflows completed SUCCESS on this exact executable SHA, including Account Security Integration run 43915040642. Backend run 43915040557, Account Boundary 43915040480, Account Read Access 43915040729, Account Catalogue/Isolation 43915040588, Account Authentication/RLS 43915040505, Batch 07 43915040677, Batch 08 43915040605, Batch 09 43915040575 and Batch 10 43915040731. GitHub Pages deployment succeeded separately, run 43915039521, without proving site publication safety. No deployment strategy or current GitHub Pages configuration was modified.
 
 **Concrete Pages evidence:** Run 43913053580 on commit abc5fd241c1999004a0b54f3dd3100f9d651cc5d uploaded a GitHub Pages artifact (ID 14247733115, size 1,136,185 bytes). Build logs list backend/ files and backend/tests among build inputs. Deploy logs report https://demiladeolawoye.github.io/PAY54_v8.0_SmartWallet/ as the public destination. Individual file reachability is UNKNOWN because live HTTP probes from the available environment failed. The repository itself is PUBLIC. The website's current packaging therefore needs urgent owner review; no confirmed secrets compromise or live exposure is asserted.
 
