@@ -49,9 +49,16 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   const result=createPay54BalanceVisualQA(process.argv[2]);
   process.stdout.write(JSON.stringify(result)+"\n");
  }catch(error){
-  process.stderr.write(
-   JSON.stringify({error:error?.message??"PAY54_VISUAL_QA_FAILED"})+"\n"
-  );
+  const report={error:error?.message??"PAY54_VISUAL_QA_FAILED"};
+  if(report.error==="PAY54_STAGE_PUBLICATION_BOUNDARY_DENIED"){
+   const paths=inspectPay54StaticSiteCandidate(ROOT).candidatePaths;
+   const forbiddenPart=/^(?:backend|infra|infrastructure|terraform|test|tests|fixtures|docs|documentation|secrets|private|internal|coverage)$/i;
+   const sensitive=/(?:^|[._-])(?:secret|credential|password|token|backup|private\\.key|id_rsa|service\\.account)(?:[._-]|$)/i;
+   report.blockedCandidatePaths=paths.filter(path=>
+    path.split("/").some(part=>forbiddenPart.test(part)||sensitive.test(part))).slice(0,30);
+   report.candidateCount=paths.length;
+  }
+  process.stderr.write(JSON.stringify(report)+"\\n");
   process.exitCode=1;
  }
 }
