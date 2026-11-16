@@ -295,7 +295,7 @@
     arrow.className =
       "p54-balance-movement-symbol";
 
-    arrow.textContent = "↗";
+    arrow.textContent = "—";
 
     arrow.setAttribute(
       "aria-hidden",
@@ -307,7 +307,7 @@
     );
 
     label.textContent =
-      "Balance movement · Not yet calculated";
+      "Movement unavailable · Verified history required";
 
     row.append(arrow, label);
 
