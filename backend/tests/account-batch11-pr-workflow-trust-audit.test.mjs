@@ -71,7 +71,7 @@ test("304: untrusted PR title, body and branch expressions are flagged",()=>{
   });
   assert.equal(report.highRiskWorkflowCount,1,field);
   assert.equal(report.findings[0].untrustedExpressionDetected,true);
-  assert.equal(report.releaseAuthorized,undefined);
+  assert.equal(report.releaseAuthorized,false);
   assert.equal(report.productionRelease,"BLOCKED");
  }
 });
