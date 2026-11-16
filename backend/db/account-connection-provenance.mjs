@@ -18,10 +18,16 @@ export function createAccountConnectionProvenance({reviewedRoleCapabilities}){
    const observed=projectAccountActorAttestation(
      await client.query(ACCOUNT_ACTOR_ATTESTATION_SQL));
    const external=await reviewedRoleCapabilities(expected.roleName);
-   if(external!==true)throw new Error("ACCOUNT_CONNECTION_UNTRUSTED");
+   if(!external||typeof external!=="object"||
+      external.hasFinancialPrivilege!==false||
+      external.canAssumeOtherTenantRoles!==false||
+      external.validatedInTransaction!==true){
+     throw new Error("ACCOUNT_CONNECTION_UNTRUSTED");
+   }
    return assertAccountDbActorPolicy({expectedRole:expected.roleName,
-     metadata:{...observed,hasFinancialPrivilege:false,
-       canAssumeOtherTenantRoles:false,inTransaction:true}});
+     metadata:{...observed,hasFinancialPrivilege:external.hasFinancialPrivilege,
+       canAssumeOtherTenantRoles:external.canAssumeOtherTenantRoles,
+       inTransaction:external.validatedInTransaction}});
   }
  });
 }
