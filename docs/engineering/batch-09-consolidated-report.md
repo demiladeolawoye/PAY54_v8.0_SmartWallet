@@ -60,7 +60,7 @@ Standalone disposable PostgreSQL ACL tests use two **test-created NOLOGIN** acto
 |---|---|---|---|
 | PAY54 Batch 09 Account Actor and RLS Integration | `43842199471` | `947137ffe24edf76edcb89a21b6f8f981bc93141` | **SUCCESS** |
 | PAY54 Account Boundary Tests | `43842199480` | `947137ffe24edf76edcb89a21b6f8f981bc93141` | **SUCCESS** |
-| PAY54 Backend Tests | `43842199353` | `947137ffe24edf76edcb89a21b6f8f981bc93141` | **PENDING at initial report authoring, not counted as success** |
+| PAY54 Backend Tests | `43842199353` | `947137ffe24edf76edcb89a21b6f8f981bc93141` | **SUCCESS (verified 2026-11-16)** |
 
 The integrated workflow executes PAY54 source migrations 001–013 only in disposable PostgreSQL 16, standalone tenant ACL suites 019–021, historical isolation suites 007–018, offline source security checks, syntax validation and Node account tests. It checks that cloud provisioning and real-money environment flags remain disabled. The final report/ledger documentation commits do not change the source tested in these workflows.
 
@@ -84,7 +84,7 @@ The integrated workflow executes PAY54 source migrations 001–013 only in dispo
 3. **No live verification infrastructure:** Durable revocation, atomic replay, production account membership/ownership sources, user session transport, CSRF protections and secure login are pending.
 4. **No durable audit pipeline:** Event delivery, tamper resistance, retention and incident review have not undergone independent operational validation.
 5. **No operational/compliance release:** KYC/KYB, legal beneficial ownership, provider agreements, STG-01..STG-07, STG-05 cloud egress/network, independent security testing and fintech financial reconciliations remain open.
-6. **Full backend zero-regression check:** The dedicated full-backend run was still pending at initial report preparation, and must be verified before a broad whole-backend test success claim.
+6. **Full backend zero-regression check:** The dedicated full-backend run `43842199353` subsequently completed **SUCCESS** on the same source commit as the two focused workflows. No outstanding CI failure remains for the reported source revision.
 
 ## 6. CTO recommendation — item 212
 
@@ -92,4 +92,4 @@ The next source-only scope should produce a **deployable-design review of isolat
 
 **STOP AFTER 211. Item 212 and any new batch require separate explicit user approval.**
 
-**Final classification:** BATCH_09_30_OF_30_SOURCE_COMPLETE; ACCOUNT_INTEGRATION_CI_SUCCESS; LIVE_DB_RLS_ACCESS_DISABLED; CLOUD_PROVISIONING_DISABLED; FINANCIAL_EXECUTION_DISABLED; STAGING_RELEASE_BLOCKED.
+**Final classification:** BATCH_09_30_OF_30_SOURCE_COMPLETE; ACCOUNT_INTEGRATION_AND_FULL_BACKEND_CI_SUCCESS; LIVE_DB_RLS_ACCESS_DISABLED; CLOUD_PROVISIONING_DISABLED; FINANCIAL_EXECUTION_DISABLED; STAGING_RELEASE_BLOCKED.
