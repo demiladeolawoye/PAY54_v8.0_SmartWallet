@@ -67,3 +67,12 @@ test("677: inert data-srcset does not count as an image source",()=>{
   assert.deepEqual(r.rejectedReferences,[]);
  }finally{f.dispose();}
 });
+
+test("679: page scoping restricts HTML asset audit to approved root site pages",()=>{
+ const f=fixture('<img src="assets/img/logo.svg">');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.checkedLocalReferences,1);
+  assert.equal(r.complete,true);
+ }finally{f.dispose();}
+});
