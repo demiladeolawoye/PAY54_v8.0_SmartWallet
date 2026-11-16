@@ -497,3 +497,41 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **Signatures are not proof of release:** source-only signed evidence cannot verify key provenance, real signer identity, actual operational facts, live GitHub settings or regulatory/partner permissions, and always returns `releaseAuthorised:false`. No deployment, merge, Pages settings edit, branch rule change, key creation, customer database access, live financial execution or cloud provisioning has been authorised.
 
 **Review request state:** Batch 14 is a draft stacked PR against Batch 13, itself an unmerged draft. Release remains BLOCKED. Production workstreams P-01 through P-14 remain separately tracked.
+
+
+## Batch 14 final source-only closure — Implementations 446–467
+
+**Founder-approved cycle:** 418–467 = 50 numbered deliverables. Last source deliverable is this engineering-board closure. The Batch 14 PR remains DRAFT and stacked on unmerged Batch 13; source completion is NOT operational acceptance.
+
+| Item | Implementation | Status |
+| --- | --- | --- |
+| 446 | Correct missing clock error before combined evidence assessment | Committed; exact failing regressions corrected |
+| 447 | Compare externally provided Pages artifact manifest against selected source file digests | Committed |
+| 448 | Negative tests for unapproved backend files, missing files, digest changes and unsafe paths | Committed |
+| 449 | Integrate artifact integrity tests into CI | Committed |
+| 450 | Assess supplied Pages settings against restricted publication and protected environment policy | Committed |
+| 451 | Pages settings nonactivation, broad-source and insecure-setting negative tests | Committed |
+| 452 | Include Pages settings source evidence tests in CI | Committed |
+| 453 | Review literal JavaScript imports and static asset URLs in selected public files | Committed |
+| 454 | Literal module, missing dependency and dynamic-import uncertainty tests | Committed |
+| 455 | Correct source import scanner to include side-effect imports | Committed |
+| 456 | Integrate JS dependency review in Batch 14 CI | Committed |
+| 457 | Validate independently supplied rollback rehearsal, immutable archive and RTO metadata | Committed |
+| 458 | Rollback refusal, stale rehearsal and independent owner regression tests | Committed |
+| 459 | Run rollback evidence tests through CI | Committed |
+| 460 | Require exact-SHA mobile, desktop, accessibility, performance and wallet acceptance evidence | Committed |
+| 461 | Frontend evidence missing/failing/forged/expired negative tests | Committed |
+| 462 | Include frontend acceptance evidence tests in CI | Committed |
+| 463 | Enforce P0 non-waivable release-exception security policy | Committed |
+| 464 | Short-lived exception, regulatory/ledger non-bypass and separation regression | Committed |
+| 465 | Integrate risk exception tests into Batch 14 CI | Committed |
+| 466 | Source-only release readiness, operational owner and no-go closure report | Committed |
+| 467 | CTO board reconciliation and approval checkpoint | Committed via this update |
+
+**Count:** 50/50 source deliverables committed, with 0 outstanding numbered tasks in this source batch. This does **not** resolve open P0/P1 operational workstreams; implementation counts and production readiness are separate. Do not treat documentation alone as risk remediation.
+
+**Known regression and correction:** source revision `8a2a36faa462b169c5142a2067a4e0c8b349730e` failed Batch 14 run `43936702562` and Account Boundary run `43936702543` because omitted review time was rejected with a different error code than the combined packet test expected. Item 446 fixed the input validation order. Account Boundary passed on subsequent run `43936890375`. Confirm the complete final source branch CI on the final commit before claiming all workflows passed.
+
+**Security status:** GitHub Pages actual settings, deployed artifact, external public path reachability, branch protection, deployer/IAM trust, operational signing registry, dynamic website behaviour, tenant database security, production partners and financial/regulatory approvals remain independently UNVERIFIED. No Pages deployment, merge, secrets, customer data, production database privileges or real-money operations were changed. Production remains BLOCKED.
+
+**Next batch:** 468–517 only after the Founder approves this closure. Prioritise independently evidenced P-01 Pages publication containment and safe deployment change proposal, branch/deployer access review, full website/QA and PostgreSQL/account isolation gates. Do not automatically merge existing draft PRs or deploy source changes.
