@@ -47,3 +47,16 @@ test("376: security-rejected input cannot become production ready",()=>{
   assert.deepEqual(r.issues.map(x=>x.category),["HTML_UNSAFE","CSS_UNSAFE"]);
  }finally{f.cleanup();}
 });
+
+test("408: external JavaScript with missing SRI requires manual review even if local links pass",()=>{
+ const f=fixture({html:'<script src="https://cdn.example.invalid/app.js"></script>',css:"body{}"});
+ try{
+  const r=inspectPay54PublicationReadiness(f.root);
+  assert.equal(r.sourceDependencyStatus,"PASS");
+  assert.equal(r.thirdPartyScriptCount,1);
+  assert.equal(r.thirdPartyScriptReviewStatus,"REVIEW_REQUIRED");
+  assert.equal(r.thirdPartyScriptFindings[0].ruleId,"MISSING_VALID_SRI");
+  assert.equal(r.thirdPartyBytesVerified,false);
+  assert.equal(r.productionRelease,"BLOCKED");
+ }finally{f.cleanup();}
+});
