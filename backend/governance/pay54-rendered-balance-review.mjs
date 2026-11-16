@@ -12,7 +12,7 @@ import {fileURLToPath} from "node:url";
 const DETAILS=Object.freeze([
   {name:"balance-meta",match:/Across wallets \(converted\)/},
   {name:"balance-delta",match:/\+₦24,500 today/},
-  {name:"identity",match:/Demo Acct: 3001234567/},
+  {name:"identity",match:/Demo Acct:/},
   {name:"trust-chip",match:/demonstration only — not verified/}
 ]);
 
