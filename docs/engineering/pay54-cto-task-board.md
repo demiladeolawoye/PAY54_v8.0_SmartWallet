@@ -386,3 +386,31 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **Standing operational boundaries:** The staging builder is never invoked by GitHub Pages publishing; it only copies reviewed local source files into an explicitly supplied empty directory. It neither addresses the currently configured Pages workflow nor establishes public URL reachability. No website configuration or production release is activated.
 
 **Batch position:** 368–388 = 21 committed deliverables, 389–417 = 29 remaining before the agreed 50-item owner approval checkpoint. Do not artificially fill the 29 slots. Continue only with valuable source hardening and independently evidenced operational acceptance.
+
+
+## Batch 13 continuation — publication integrity and credential-source gates (389–404)
+
+| Item | Implementation | Evidence/status |
+|---|---|---|
+| 389 | Read-only staged-site verifier compares exact candidate paths, byte counts, SHA-256 digests and denies symlinks | Committed |
+| 390 | Offline mutation, hidden-file, missing-asset, symlink and nested-root regression tests | Committed |
+| 391 | Include stage-verification security checks in dedicated CI | Dedicated CI run 43931417364 SUCCESS |
+| 392 | Strict opt-in GitHub Pages header-only reachability probe (no body, no redirects, fixed origin) | Committed; never auto-invoked against live URL |
+| 393 | Offline HTTP classification, origin/path refusal and inconclusive-evidence tests | Committed |
+| 394 | Dedicated CI integration for header-probe regressions | Dedicated CI run 43931660116 SUCCESS |
+| 395 | Read-only high-confidence credential marker scanner over selected public-source text files | Committed |
+| 396 | Credential finding redaction, known marker and public-source scope tests | Committed |
+| 397 | Marker regression CI syntax/test integration | Committed |
+| 398 | Fail source-policy CI when actual selected site assets contain sensitive markers | Dedicated CI run 43932067473 SUCCESS |
+| 399 | Staging builder denies candidate construction on detected sensitive markers | Committed |
+| 400 | Adversarial stage-builder test requires no written output on secret marker detection | Dedicated CI run 43932226699 SUCCESS |
+| 401 | Third-party script origin, transport, SRI metadata inventory, source-only | Committed |
+| 402 | External script SRI, transport, comment and non-attestation tests | Committed |
+| 403 | Dedicated CI includes external-script source review | Dedicated CI run 43932449771 SUCCESS |
+| 404 | Reconcile code/test evidence, release denial and remaining Batch 13 tasks | Committed via this update |
+
+**Batch 13 count:** 368–404 = 37 source deliverables; 405–417 = 13 remaining. This is the preapproval progress record, not a request for early owner approval. Source-only releases are blocked pending actual Pages settings/public reachability, independent sensitive-source and CDN review, legal/provider verification, authenticated backend integration, device regression, and owner-approved publication/rollback decisions. Repo remains public, Pages source boundary remains unverified, and no live Pages configuration, deployments, financial operations, database privileges or cloud resources were changed.
+
+**CI accuracy:** The dedicated Batch 13 workflow ran successfully on `d695696f2b5a161bdc6cf7a6a14ac6dd0c121e58` (run `43932449771`). Account and backend suites on that revision were not yet all finished when this board was prepared. Earlier workflow cancellations from rapid PR commits are not test failures and are not clean-success evidence. Do not claim a full 11/11 result on any revision without independent confirmation.
+
+**P-01 remains OPEN:** direct public probing was attempted from both browsing and container environments but could not access the Pages host. No claim of verified public file reachability or absence of exposure is permitted. The opt-in HEAD-only probe is merely source code for a controlled later inspection.
