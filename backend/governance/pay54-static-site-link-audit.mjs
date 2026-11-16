@@ -12,7 +12,7 @@ import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inv
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const ATTRIBUTE=/\b(?:src|href)\s*=\s*(["'])(.*?)\1/gi;
 const PAGE=/^[^/]+\.html$/i;
-const EXTERNAL=/^(?:https?:|data:|mailto:|tel:|blob:|javascript:|\/\/)/i;
+const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
 
 export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
@@ -26,12 +26,12 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
    const raw=match[2].trim();
    if(!raw||raw.startsWith("#"))continue;
    if(EXTERNAL.test(raw)){
-    if(raw.toLowerCase().startsWith("javascript:")||raw.startsWith("//")){
+    if(/^(?:javascript:|data:|blob:|\/\/)/i.test(raw)){
      rejected.push({page,reference:raw,reason:"UNSAFE_URL"});
     }else external.push({page,reference:raw});
     continue;
    }
-   if(SCHEME.test(raw)||raw.includes("\\")||/%2f|%5c|%00/i.test(raw)){
+   if(SCHEME.test(raw)||raw.startsWith("/")||raw.includes("\\")||/%2f|%5c|%00/i.test(raw)){
     rejected.push({page,reference:raw,reason:"UNSAFE_PATH"});continue;
    }
    const pathOnly=raw.split(/[?#]/,1)[0];
