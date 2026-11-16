@@ -7,6 +7,7 @@ import {join} from "node:path";
 import {createPay54FounderPreviewBundle}
  from "../governance/pay54-create-founder-preview.mjs";
 
+const SHA="e".repeat(40);
 function fixture(){
  const root=mkdtempSync(join(tmpdir(),"pay54-founder-bundle-"));
  const source=join(root,"source"),target=join(root,"out");
@@ -22,8 +23,13 @@ function fixture(){
 test("534: founder preview artifact contains no engine and cannot execute a transaction",()=>{
  const f=fixture();
  try{
-  const r=createPay54FounderPreviewBundle(f.source,f.target);
+  const r=createPay54FounderPreviewBundle(f.source,f.target,SHA);
   assert.equal(r.hosted,false);
+  assert.equal(r.sourceCommitSha,SHA);
+  assert.match(r.contentManifestSha256,/^[a-f0-9]{64}$/);
+  const m=JSON.parse(readFileSync(join(f.target,"preview/preview-manifest.json"),"utf8"));
+  assert.equal(m.sourceCommitSha,SHA);
+  assert.equal(m.scriptsIncluded,false);
   assert.equal(r.userDataUsed,false);
   assert.equal(r.sourceScriptsBundled,false);
   assert.equal(r.financialTransactionsEnabled,false);
