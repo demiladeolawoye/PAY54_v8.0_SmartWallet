@@ -56,3 +56,12 @@ The repository itself is public; its GitHub source visibility and the website's 
 | Founder release and containment approval | Founder | NOT GRANTED |
 
 **Conclusion:** Confirmed overbroad artifact packaging. Live exposure and impact are unknown. Continue source-only remediation and preserve production release BLOCKED.
+
+
+## Additional offline marker scan — value-free summary
+
+The downloaded artifact was scanned offline for five high-confidence marker classes: private-key headers, GitHub classic/fine-grained token formats, AWS access-key IDs and a live-secret prefix. **One private-key header marker** appeared in the packaged backend test fixture `backend/tests/account-batch11-proposed-site-content-review.test.mjs`. No matching file was identified for the other scanned classes.
+
+The matching path is a test file, so this is **not evidence that a usable signing key exists or that credentials were compromised**. The marker was not printed, exported or included in the repository. Security must independently determine whether the fixture is synthetic and whether other unscanned credential formats or sensitive configuration values were included. This bounded scan cannot certify absence of secrets; the overbroad Pages package remains confirmed and P0 OPEN.
+
+The artifact's actual website reachability and active deployment version remain unverified.
