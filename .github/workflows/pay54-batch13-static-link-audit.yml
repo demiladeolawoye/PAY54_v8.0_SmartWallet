@@ -70,6 +70,8 @@ jobs:
           node --check backend/tests/account-batch13-site-secret-markers.test.mjs
       - name: Execute adversarial Batch 13 regression
         run: node --test backend/tests/account-batch13-*.test.mjs
+      - name: Check actual selected public source for high-confidence secret markers
+        run: node backend/governance/pay54-static-site-secret-markers.mjs
       - name: Keep deployment and financial execution blocked
         run: |
           test "$PAY54_REAL_MONEY_MODE" = "false"
