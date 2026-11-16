@@ -51,7 +51,7 @@ test("573: balance context uses mobile responsive styling without fixed-height t
 
 test("573: refreshed assets are requested while preview claims remain unverified",()=>{
  const s=html();
- assert.match(s,/dashboard-blueprint-refinements\.css\?v=1\.5\.3/);
+ assert.match(s,/dashboard-blueprint-refinements\.css\?v=1\.5\.4/);
  assert.match(s,/dashboard-blueprint-shell\.js\?v=1\.2\.4/);
  assert.match(s,/preview-claims-guard\.js\?v=1\.0\.1/);
  assert.doesNotMatch(s,/Security &amp; Financial compliance active/);
