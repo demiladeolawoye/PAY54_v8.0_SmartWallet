@@ -20,6 +20,12 @@ const INLINE_EVENT=/(?<![\w:-])on(?:click|load|error|submit|change|input|focus|b
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
+function htmlResourceMarkup(source){
+ return source
+  .replace(/<!--[\s\S]*?-->/g,"")
+  .replace(/(<script\b[^>]*>)[\s\S]*?(<\/script\s*>)/gi,"$1$2")
+  .replace(/(<style\b[^>]*>)[\s\S]*?(<\/style\s*>)/gi,"$1$2");
+}
 
 export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  const inventory=inspectPay54StaticSiteCandidate(sourceRoot);
@@ -28,31 +34,32 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  let checked=0;
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
+  const markup=htmlResourceMarkup(html);
   // Inline event handler attributes execute browser JavaScript outside the
   // ordinary referenced script graph and require a separate XSS review.
-  if(INLINE_EVENT.test(html)){
+  if(INLINE_EVENT.test(markup)){
    rejected.push({page,reference:"inline-event",reason:"INLINE_EVENT_HANDLER_REQUIRES_REVIEW"});
   }
   INLINE_EVENT.lastIndex=0;
   // Active object/embed elements can load plugins and arbitrary framed
   // resources that a src/href-only graph cannot safely attest.
-  if(EMBEDDED_OBJECT.test(html)){
+  if(EMBEDDED_OBJECT.test(markup)){
    rejected.push({page,reference:"embedded-object",reason:"ACTIVE_EMBEDDED_OBJECT_REQUIRES_REVIEW"});
   }
   EMBEDDED_OBJECT.lastIndex=0;
   // Base URL rewriting and refresh redirects are not part of the reviewed
   // PAY54 static-site navigation graph. Refuse them until independently audited.
-  if(BASE_TAG.test(html)){
+  if(BASE_TAG.test(markup)){
    rejected.push({page,reference:"base",reason:"DOCUMENT_BASE_URL_REQUIRES_REVIEW"});
   }
   BASE_TAG.lastIndex=0;
-  if(META_REFRESH.test(html)){
+  if(META_REFRESH.test(markup)){
    rejected.push({page,reference:"meta-refresh",reason:"ACTIVE_REDIRECT_REQUIRES_REVIEW"});
   }
   META_REFRESH.lastIndex=0;
   // HTML form action destinations may post customer data. Require a
   // separately reviewed capability and server-side policy before publication.
-  for(const action of html.matchAll(ACTIVE_FORM)){
+  for(const action of markup.matchAll(ACTIVE_FORM)){
    const destination=(action[2]??action[3]??"").trim();
    if(destination){
     rejected.push({page,reference:"form-action",reason:"FORM_SUBMISSION_REQUIRES_REVIEW"});
@@ -60,13 +67,13 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
   }
   // Responsive image candidate sets require dedicated parsing and byte-level
   // review. Never silently certify them as a complete first-party graph.
-  for(const candidate of html.matchAll(RESPONSIVE)){
+  for(const candidate of markup.matchAll(RESPONSIVE)){
    const raw=(candidate[2]??candidate[3]??"").trim();
    if(raw){
     rejected.push({page,reference:"srcset",reason:"RESPONSIVE_SOURCE_SET_REQUIRES_REVIEW"});
    }
   }
-  for(const match of html.matchAll(ATTRIBUTE)){
+  for(const match of markup.matchAll(ATTRIBUTE)){
    const raw=(match[2]??match[3]??"").trim();
    if(!raw||raw.startsWith("#"))continue;
    if(EXTERNAL.test(raw)){
