@@ -765,3 +765,40 @@ The founder approved continuing security-first release-readiness work without by
 **Change requests:** CR-RELEASE-01 (active Pages evidence), CR-CARD-01 (provider/feature disposition), CR-PAGES-02 (restricted output/deployer/rollback), CR-UX-02 (founder layout approval), CR-QA-02 (sandbox/accessibility/device) and CR-FINTECH-03 (regulated UK–Nigeria readiness) remain OPEN.
 
 **Founder checkpoint:** Batch 17 source cycle complete. Proposed Batch 18 is 618–667 and requires a separate approval. Any public site publication also requires an independent Security/Release/Founder acceptance of actual live settings, artifact and rollback plan.
+
+
+## Batch 18 founder engineering checkpoint — 618–667 (50/50 source deliverables)
+
+**Founder approval:** Continue after verified Batch 17 source closure, prioritising Pages overpublication P0 and development linked-card publication incompatibility. New changes use DRAFT PR #6 stacked on unmerged PRs #5, #4, #3, #2, #1. The existing public Pages site, real money, GitHub Settings, credentials, user accounts and live deployment remain UNCHANGED.
+
+| IDs | Implemented audited source work | Status |
+| --- | --- | --- |
+| 618–620 | First-party HTML dependency inventory, forbidden/missing/traversal tests and dedicated source-only workflow | COMMITTED |
+| 621–624 | Owner Pages provenance packet, adversarial tests, active-deployment checklist and evidence tests | COMMITTED |
+| 625–628 | Linked-card provider-vs-backend-disabled preview decision, tests and integrated no-go source matrix | COMMITTED |
+| 629–630 | Exact-head SHA offline founder dashboard ZIP, manifest verification and actual balance detail integration test | COMMITTED |
+| 631–632 | Repo-declared Pages workflow inventory and tests; active config remains NOT VERIFIED | COMMITTED |
+| 633–636 | SHA-256 tar byte attestation, adversarial tests, downloaded Pages archive-to-site comparison and tests | COMMITTED |
+| 637–639 | Development-only browser/runtime script audit, tests and real-source NO-GO CI | COMMITTED |
+| 640–641 | Prevent unexpected tar directory and trailing-data masking, with tests | COMMITTED |
+| 642–643 | Known-good archive retention/rollback rehearsal evidence and negative tests | COMMITTED |
+| 644–647 | Historical vs current Pages exposure classifier, security response planning and adversarial tests | COMMITTED |
+| 648–650 | Release-SHA-specific dashboard mobile/tablet/desktop/accessibility QA checks, tests and CI | COMMITTED |
+| 651–652 | Source release scorecard and real-repository vs clean fixture regression tests | COMMITTED |
+| 653–654 | Least-privileged protected Pages deployer/OIDC evidence checks and tests | COMMITTED |
+| 655–658 | Final cross-domain NO-GO matrix, tests, workflow enforcement and nondeploying workflow scope tests | COMMITTED |
+| 659–660 | Linked-card production provider/feature-gate decision and regulated obligations tests | COMMITTED |
+| 661–662 | Protected Pages release/rollback runbook and evidence gates | COMMITTED |
+| 663–664 | Founder dashboard acceptance, synthetic demo-status and current commit UX test requirements | COMMITTED |
+| 665–666 | CTO founder closure report, change requests and full implementation truth tests | COMMITTED |
+| 667 | CTO source board final reconciled 50-item checkpoint | COMMITTED via this change |
+
+**Batch 18 source completion: 50/50.** This is not a customer production release, actual Pages containment, certified browser E2E, contract acceptance or P0 closure. The source changes are stacked in DRAFT PR #6. Final commit SHA must be checked against **all** relevant GitHub Actions before claiming final-run green.
+
+**Known verified facts:** Batch 17 final SHA `3a25285a96fd2f92e52d18786674864b5f1b2984` had 12/12 Actions PASS. Historical Pages archive `14252395793` contained 348 backend, 150 docs and one infrastructure source file, which proves packaging failure **only**. The current dashboard source still references excluded development provider `assets/js/infrastructure/payments/providers/linked-card-development.js`. Approved restricted publishing correctly stays NO-GO. Current public-file accessibility, live Pages settings, actual deployed artifact, source sensitivity and protected deployer remain NOT INDEPENDENTLY VERIFIED.
+
+**Founder deliverable:** Batch18 dedicated CI packages the exact reviewed source's inert dashboard HTML/CSS/images as a short-lived SHA-bound artifact for review. No source JavaScript, customer account access, payment operations or public Pages deployment are included. A visual snapshot is not proof of bank processing or full accessibility acceptance.
+
+**Open change requests/operational decisions:** CR-PAGES-01 live current settings and active artifact verification; CR-CARD-01 linked-card production provider or explicitly disabled preview with backend gating; CR-DEPLOYER-01 protected Pages identity/rulesets; CR-ROLLBACK-01 retained safe rollback and rehearsal; CR-UX-01 founder mobile/desktop visual review and source-specific QA; CR-AUTH-01 authenticated account/RLS sandbox E2E; CR-LAUNCH-01 UK–Nigeria partner/compliance and settlement readiness.
+
+**Next planned batch:** 668–717 (Batch 19) only after new founder approval. Site-settings changes, merges, credential actions or live release still require distinct Founder + Security + Release Manager operational approval. Maintain zero-regression policy and preserve all functioning dashboards, accounts, services and payment engines.
