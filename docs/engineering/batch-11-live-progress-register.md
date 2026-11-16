@@ -46,6 +46,19 @@
 | 295 | Immutable action pinning and mutable tag adversarial tests | `2730f9cc1173085e6f0e29de6cbeabf41b270041` | VERIFIED DEDICATED CI |
 | 296 | Independent SHA verification and least-privilege Actions change request | `520f4d0c523a84d12d66a798da3f3e41c0ade253` | COMMITTED |
 | 297 | Updated CTO task board, progress register and remaining security actions | This register | COMMITTED |
+| 298 | Source-level PR/privileged-trigger workflow trust risk checks | `af8175c7a7af0b0c8b82c6c73f3b568889bc0f41` | VERIFIED |
+| 299 | PR escalation and checkout-credential adversarial tests | `1b5161c6433245303c1d4a7608cb1cf80b903bd1` | VERIFIED |
+| 300 | Actual repository-wide read-only Actions workflow inventory CLI | `e93a3c768ac08cbd962fdf02d207e70afbcb79b4` | VERIFIED |
+| 301 | Filesystem/symlink/oversized workflow inventory regressions | `568b8b50df74323c1c4a84d0d2bb460f7538ca6d` | VERIFIED |
+| 302 | Read-only GitHub Actions whole-inventory step in dedicated CI | `9dd83a948fbbb8885f5304a22a4207c01ff3d407` | VERIFIED |
+| 303 | Risk signal for untrusted PR title/body/branch/workflow-run expressions | `a66314343c1ae6af005f78ebe1783edb173fc74c` | VERIFIED |
+| 304 | Expression downgrade regressions, corrected false-vs-undefined assertion | `905e827ce0eaed22337dff71b9a067bb08d73e35`; fix `2971f0b754f66f3a0d755f95856b20107d16faf4` | VERIFIED AFTER FIX |
+| 305 | Compose existing staging trust/provisioning/supply-chain validators | `5fd7e4e72d30bfa836f249903a20ad9014ad980c` | VERIFIED |
+| 306 | Adversarial STG-05 readiness and release nonactivation tests | `43d17c4c9b29766e7e497f1a3036d39a24e4faaa` | VERIFIED |
+| 307 | Staging independent acceptance and failure-drill runbook | `6023b25c1e3e44bd50c9f282dd39274e1bca1e40` | COMMITTED |
+| 308 | Verified complete eleven-workflow regression matrix | `d68fd3c7e86dd47a9873dc2bf39cad5f4b58ed37` | COMMITTED |
+| 309 | Founder approval and change-request ledger | `000b074aac059ce9d8dc4f27e3310d7e2a98310b` | COMMITTED |
+| 310 | CTO task board and live progress reconciliation | This document | COMMITTED |
 
 ## Source regression
 
@@ -75,6 +88,12 @@ A previous failing backup-exclusion regression at `047465154255a5c4b8262a141cc80
 
 `docs/engineering/pay54-cto-task-board.md` is the live backlog, with 14 distinct production-readiness workstreams, separate from 14 remaining Batch 11 source deliverables. Existing staging workflow tags are mutable (source concern only). CR-SEC-11-01 requests independently verified immutable upstream Action SHAs; no guessed SHA or live credential/deploy action has been introduced.
 
+## Final technical verification and Batch 11 closing checkpoint
+
+49/50 approved source-only deliverables have been committed through item 310. Final consolidated report is item 311. All eleven GitHub Actions source/backend/account/synthetic SQL workflows passed on executable source commit `2971f0b754f66f3a0d755f95856b20107d16faf4`, as detailed with exact run IDs in `docs/engineering/batch-11-final-regression-evidence.md`. Earlier failed source revisions remain retained; the Item 304 test had expected an absent field when the policy correctly returned explicit `releaseAuthorized:false`. No weakened policy was required for the passing result.
+
+Operational Founder decisions, immutably pinned dependency change requests and the full UK–Nigeria launch workstream matrix remain open in `docs/engineering/batch-11-founder-approval-and-change-request-ledger.md` and `docs/engineering/pay54-cto-task-board.md`.
+
 ## Security concern to resolve before live use
 
 An internally issued receipt object only proves source provenance, not that the audit backend persisted an event. All real account data must remain denied until audit write credentials and independently verified durable receipts are deployed and independently tested. In-process WeakSet identity alone is not a cryptographic integrity control or distributed idempotency guarantee.
@@ -96,4 +115,4 @@ An internally issued receipt object only proves source provenance, not that the 
 
 Prioritise Pages source transparency, release evidence provenance, audit integrity and risk reduction, then inspect existing tests before introducing new modules. Avoid artificial tasks to reach 50. Maintain current approved source-only boundaries. Warn ahead of chat limit and include latest HEAD, CI run IDs, exact completed/pending item numbers and all Founder decisions in the handover.
 
-**Next source item:** 298. **Stop for new approval:** item 312.
+**Next source item:** 311. **Stop for new approval:** item 312.
