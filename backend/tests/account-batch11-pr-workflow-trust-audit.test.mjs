@@ -55,3 +55,31 @@ test("299: duplicate, path traversal and invalid source inventories are rejected
    /PAY54_WORKFLOW_TRUST_INVENTORY_INVALID/);
  }
 });
+
+test("304: untrusted PR title, body and branch expressions are flagged",()=>{
+ for(const field of [
+  "github.event.pull_request.title",
+  "github.event.pull_request.body",
+  "github.event.pull_request.head.ref",
+  "github.head_ref",
+  "github.event.workflow_run.head_branch"
+ ]){
+  const trigger=field.includes("workflow_run")?"workflow_run":"pull_request";
+  const expression="$"+"{{ "+field+" }}";
+  const report=assessPay54PullRequestWorkflowTrust({
+   workflows:[{path,content:"on:\n  "+trigger+":\nsteps:\n  - run: echo "+expression+"\n"}]
+  });
+  assert.equal(report.highRiskWorkflowCount,1,field);
+  assert.equal(report.findings[0].untrustedExpressionDetected,true);
+  assert.equal(report.releaseAuthorized,undefined);
+  assert.equal(report.productionRelease,"BLOCKED");
+ }
+});
+test("304: an unrelated expression without risky triggers does not pass for an independent security review",()=>{
+ const report=assessPay54PullRequestWorkflowTrust({
+  workflows:[{path,content:"on:\n  push:\nsteps:\n  - run: echo ok\n"}]
+ });
+ assert.equal(report.highRiskWorkflowCount,0);
+ assert.equal(report.githubEnvironmentRulesVerified,false);
+ assert.equal(report.releaseAuthorized,false);
+});
