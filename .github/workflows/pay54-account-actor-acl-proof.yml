@@ -1,0 +1,82 @@
+name: PAY54 Batch 09 Database Actor ACL Proof
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/db/tests/019_account_role_acl_proof.sql"
+      - "backend/db/tests/020_account_role_acl_adversarial.sql"
+      - "backend/db/tests/021_account_role_acl_rollback.sql"
+      - ".github/workflows/pay54-account-actor-acl-proof.yml"
+  pull_request:
+    paths:
+      - "backend/db/tests/019_account_role_acl_proof.sql"
+      - "backend/db/tests/020_account_role_acl_adversarial.sql"
+      - "backend/db/tests/021_account_role_acl_rollback.sql"
+      - ".github/workflows/pay54-account-actor-acl-proof.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pay54-actor-acl-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  actor-acl-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pay54_batch09_ci
+          POSTGRES_PASSWORD: pay54_disposable_batch09_ci_2026
+          POSTGRES_DB: pay54_actor_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pay54_batch09_ci -d pay54_actor_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: pay54_batch09_ci
+      PGPASSWORD: pay54_disposable_batch09_ci_2026
+      PGDATABASE: pay54_actor_test
+      PGSSLMODE: disable
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_REAL_MONEY_MODE: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Create disposable PAY54 schema from source migrations 001–013
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/db/migrations/{001,002,003,004,005,006,007,008,009,010,011,012,013}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$file"
+          done
+      - name: Validate test-owned positive and negative account actor policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/db/tests/{019,020,021}_*.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$file"
+          done
+      - name: Verify PAY54 dormant reader and old ledger isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in 015 014 013 012 011 010 009 008 007; do
+            for file in backend/db/tests/${suite}_*.sql; do
+              psql -X -v ON_ERROR_STOP=1 -f "$file"
+            done
+          done
+      - name: Confirm no live money or cloud activation
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
