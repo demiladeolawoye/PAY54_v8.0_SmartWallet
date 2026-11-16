@@ -122,8 +122,19 @@
     };
 
     const footer = make("div", "p54b-side-footer");
+    const accountSwitcher = make(
+      "button", "p54b-side-muted p54b-account-switch-unavailable",
+      "Personal account · Switch unavailable"
+    );
+    accountSwitcher.type = "button";
+    accountSwitcher.disabled = true;
+    accountSwitcher.title = "Secure Personal and Business switching requires the authenticated PAY54 service";
+    accountSwitcher.setAttribute(
+      "aria-label",
+      "Personal account preview. Switching accounts is not available."
+    );
     footer.append(
-      make("div", "p54b-side-muted", "Switch Profile · Personal"),
+      accountSwitcher,
       make("div", "p54b-side-muted", "Settings")
     );
     sidebar.append(footer);
