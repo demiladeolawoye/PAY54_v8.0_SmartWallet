@@ -6,7 +6,7 @@
  * Copies only approved local CSS/images/fonts. Restricts CSP, blocks forms,
  * frames and network connections. No hosted deployment occurs here.
  */
-import {readFileSync,writeFileSync,mkdirSync,readdirSync,lstatSync,rmSync,copyFileSync} from "node:fs";
+import {readFileSync,writeFileSync,mkdirSync,readdirSync,lstatSync,rmSync,copyFileSync,renameSync} from "node:fs";
 import {randomUUID} from "node:crypto";
 import {resolve,relative,join,dirname,isAbsolute,extname} from "node:path";
 import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
@@ -20,7 +20,7 @@ const blockOverlap=(one,two)=>{
 };
 const POLICY=[
  "default-src 'none'",
- "style-src 'self'",
+ "style-src 'self' 'unsafe-inline'",
  "img-src 'self' data:",
  "font-src 'self'",
  "script-src 'none'",
@@ -80,7 +80,7 @@ export function buildPay54DashboardOfflinePreview(sourceRoot,emptyOutputRoot){
  html=html.replace(/<a\b[^>]*>/gi,'<span class="p54-preview-link">')
   .replace(/<\/a\s*>/gi,"</span>");
  html=html.replace(/<link\b[^>]*>/gi,tag=>
-  /\brel\s*=\s*(?:"stylesheet"|'stylesheet'|stylesheet)\b/i.test(tag)?"":tag);
+  /\brel\s*=\s*["\']?stylesheet["\']?/i.test(tag)?"":tag);
  // Restore local stylesheet references from the original source's exact tags,
  // leaving any script, modulepreload or remote link outside the preview.
  const original=readFileSync(join(source,"dashboard.html"),"utf8");
@@ -120,7 +120,7 @@ export function buildPay54DashboardOfflinePreview(sourceRoot,emptyOutputRoot){
   writeFileSync(join(temp,"index.html"),html,{flag:"wx",mode:0o644});
   const final=join(target,"preview");
   // The caller supplied an empty target and all files are source-only.
-  const {renameSync}=awaitImportlessRename();
+
   renameSync(temp,final);
   return Object.freeze({
    schema:"pay54.offline-founder-dashboard-preview.v1",
@@ -135,8 +135,3 @@ export function buildPay54DashboardOfflinePreview(sourceRoot,emptyOutputRoot){
   });
  }catch(error){rmSync(temp,{recursive:true,force:true});throw error;}
 }
-function awaitImportlessRename(){
- // Static Node import is used below by the bundler and tests; no dynamic import.
- return {renameSync: rename};
-}
-import {renameSync as rename} from "node:fs";
