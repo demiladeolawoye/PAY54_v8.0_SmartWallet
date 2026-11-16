@@ -14,6 +14,8 @@ import {inspectPay54PublicationTree}
  from "./pay54-publication-tree-inspector.mjs";
 import {recordPay54OfflinePreviewManifest}
  from "./pay54-preview-artifact-manifest.mjs";
+import {auditPay54OfflinePreviewMarkup}
+ from "./pay54-offline-preview-markup-audit.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 export function createPay54FounderPreviewBundle(sourceRoot,emptyTarget,sourceCommitSha){
@@ -26,6 +28,10 @@ export function createPay54FounderPreviewBundle(sourceRoot,emptyTarget,sourceCom
   throw new Error("PAY54_FOUNDER_PREVIEW_TREE_DENIED");
  }
  const index=readFileSync(join(result.outputDirectory,"index.html"),"utf8");
+ const markup=auditPay54OfflinePreviewMarkup(index);
+ if(!markup.sourceMarkupCheckPassed){
+  throw new Error("PAY54_FOUNDER_PREVIEW_MARKUP_DENIED");
+ }
  if(!index.includes("PAY54 OFFLINE VISUAL PREVIEW")||
   !index.includes("script-src 'none'")||
   !index.includes("connect-src 'none'")||
