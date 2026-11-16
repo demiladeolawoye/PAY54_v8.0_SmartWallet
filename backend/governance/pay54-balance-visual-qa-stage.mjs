@@ -12,6 +12,7 @@ import {resolve,join} from "node:path";
 import {fileURLToPath} from "node:url";
 import {stagePay54SiteCandidate} from "./pay54-static-site-stage-builder.mjs";
 import {inspectPay54PublicationTree} from "./pay54-publication-tree-inspector.mjs";
+import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 export function createPay54BalanceVisualQA(directory,source=ROOT){
