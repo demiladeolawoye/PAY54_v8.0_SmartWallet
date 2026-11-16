@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 source progress items 312–329)
+**Last reviewed:** 2026-11-16 (Batch 12 source progress items 312–338)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 18 | Not fixed | Items 312–329 committed; latest source checks in progress, production gates remain open |
+| Batch 12 source-only engineering | Milestone-gated | 27 | Not fixed | Items 312–338 including source-only account switch safety and dashboard disclosure; production gates remain open |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -64,8 +64,17 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 327 | Cross-country, legal entity, FX, invalid recipient route tests | COMMITTED |
 | 328 | End-to-end Personal/Business, P2P, corridor and Balance Movement integration roadmap | COMMITTED |
 | 329 | Enforce reviewed canonical country codes following CI regression | COMMITTED; CI VERIFYING |
+| 330 | Pure account-scoped response fence to prevent stale data after switch/logout | COMMITTED |
+| 331 | Regression tests: stale responses, forged/replayed tickets and principal change | COMMITTED |
+| 332 | Replace misleading switch-profile text with explicitly disabled account-switch button | COMMITTED |
+| 333 | Test public account-switcher preview state remains non-activating | COMMITTED |
+| 334 | Dashboard styling for disabled account switching | COMMITTED |
+| 335 | Update dashboard HTML asset revisions for browser cache refresh | COMMITTED |
+| 336 | Update legacy account context tests for new disabled switcher wording | COMMITTED |
+| 337 | Cross-module integration regression for picker, cache, response fence and logout | COMMITTED |
+| 338 | Update CTO task board, CI evidence and outstanding live integration work | COMMITTED |
 
-Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next implementation should prioritise authenticated backend account switching, trusted ledger snapshot integration, global directory privacy and legally contracted corridor adapters. Source-only work does not enable transfers.
+Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next integration milestone: authenticated server-side account switching with independently verified tenant RLS, trusted account-scoped ledger snapshot integration, private global directory and contracted corridor adapters. New source-only account response fencing is not yet wired to real customer queries and must not be described as production-ready. Source-only work does not enable transfers.
 
 ## Batch 11 closure and next approval boundary
 
@@ -116,8 +125,8 @@ Do not implement hollow tasks to exhaust item numbers. If fewer controls are gen
 | CR-SEC-11-02 | Protected environments and deployer identity | Founder/DevSecOps approve branch rules, independent deployer and OIDC before IAM changes | SECURITY / UNAUTHORISED |
 | CR-SEC-11-03 | Pages public artefact allowlist | Inspect and contain actual publication exposure before changing Pages settings | SECURITY / REVIEW |
 | CR-12-UX-01 | Frequent people dashboard | Source moved without cloning; release QA and mobile review still required | SOURCE COMMITTED / QA PENDING |
-| CR-12-ACC-01 | Personal/Business switch | Preview only; independent backend membership and RLS integration required | P0 OPEN |
-| CR-12-WAL-01 | Balance movement | Precise source formula and honest unavailable UI; verified ledger snapshots not connected | P1 PARTIAL |
+| CR-12-ACC-01 | Personal/Business switch | Preview-only UI now labelled unavailable; account-scoped stale read fence and negative tests committed, but no mounted authenticated backend switch | P0 OPEN |
+| CR-12-WAL-01 | Balance movement | Exact 7/30/90-day formula and honest unavailable UI; independently verified ledger snapshots and account-scoped frontend presentation not connected | P1 PARTIAL |
 | CR-12-FX-01 | Global Nigeria-bound corridors | UK, US, EEA candidate countries, CA, AU and selected Asian markets planned; zero live authorization | SOURCE COMMITTED |
 | CR-12-P2P-01 | PAY54-to-PAY54 universal transfer | Routing classification source exists; live account, FX, settlement and provider routing not implemented | P0 OPEN |
 
@@ -132,3 +141,11 @@ Do not implement hollow tasks to exhaust item numbers. If fewer controls are gen
 ## Progress maintenance
 
 Update this board after each meaningful implementation block and use exact commit SHAs and GitHub Actions run evidence. Warn ahead of chat-length limits with a handover. **No unattended background work is implied.** Batch 11 is closed 50/50. Founder has approved starting Batch 12 source-only planning with items 312–314 now committed; no new batch quota has been imposed. No production/customer/infra/crypto execution activation authorised.
+
+## Batch 12 latest CI and product acceptance checkpoint
+
+- Earlier account response fence source+tests: commit fab703a002fe94c26b44b7e2520e6fb3aeeaa3c2, Backend run 43899576803 SUCCESS. Other account tests also passed for this revision.
+- The interim dashboard wording change broke a legacy test expecting the former static label; this was a **test expectation**, not a security bypass. Corrected in backend/tests/account-context-contract.test.mjs at commit c479a69e9417f54dec62255c0e6b78c8d061f964. Intermediate failed runs remain in GitHub history.
+- Latest integration test source: commit 20dcc61068476c649ab0b06c35c8f4b7a8f623e6. Its result is pending verification; do not claim the full suite passed until the exact source revision has been checked.
+- User-facing Personal/Business switching remains disabled. The browser code is a preview and protection for future integration, not a real authenticated selection. Pages publishing status must be independently reviewed.
+
