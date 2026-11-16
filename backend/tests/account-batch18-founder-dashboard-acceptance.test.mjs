@@ -14,7 +14,7 @@ test("664: founder balance review retains visible account context but not verifi
   "3001234567","@pay54-user","Level 2","demonstration only — not verified"]){
   assert.ok(s.includes(phrase),phrase);
  }
- assert.match(s,/not.*genuine account credentials, settled funds, verified KYC/);
+ assert.match(s,/must never be represented as genuine account credentials, settled funds, verified KYC/);
 });
 test("664: prior visual screenshots cannot attest a future release commit",()=>{
  const s=read();
