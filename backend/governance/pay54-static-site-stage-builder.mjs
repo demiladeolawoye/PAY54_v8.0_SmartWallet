@@ -16,6 +16,8 @@ import {inspectPay54PublicationReadiness}
  from "./pay54-publication-source-readiness.mjs";
 import {hashPay54StaticSiteCandidate}
  from "./pay54-static-site-content-integrity.mjs";
+import {inspectPay54StaticSiteSecrets}
+ from "./pay54-static-site-secret-markers.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const sha=bytes=>createHash("sha256").update(bytes).digest("hex");
@@ -39,6 +41,10 @@ export function stagePay54SiteCandidate(sourceRoot=ROOT,destinationRoot){
  const report=inspectPay54PublicationReadiness(source);
  if(report.sourceDependencyStatus!=="PASS"){
   throw new Error("PAY54_STAGE_LINK_REVIEW_FAILED");
+ }
+ const secretReview=inspectPay54StaticSiteSecrets(source);
+ if(!secretReview.sourceMarkerReviewPassed){
+  throw new Error("PAY54_STAGE_SECRET_MARKERS_PRESENT");
  }
  const manifest=hashPay54StaticSiteCandidate(source);
  const staging=join(target,".pay54-stage-"+randomUUID());
