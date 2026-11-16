@@ -91,7 +91,7 @@ export function createAccountViewResponseFence(){
     acceptedForPresentation:accepted,
     financialExecutionEnabled:false,
     serverResponseAuthenticated:false,
-    reason:accepted?"FRESH_VIEW_TICKET":"STALE_SUPERSEDED_OR_DIFFERENT_ACCOUNT"
+    reason:accepted?"FRESH_VIEW_TICKET":"STALE_OR_DIFFERENT_ACCOUNT"
    });
   },
   snapshot(){
