@@ -138,3 +138,19 @@ test("687: embedded objects are rejected even without conventional src or href",
   }finally{f.dispose();}
  }
 });
+
+test("695: inline onerror and onclick event handlers require an independent XSS review",()=>{
+ const f=fixture('<img src="assets/img/logo.svg" onerror="fetch(\'/accounts\')">');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.ok(r.rejectedReferences.some(x=>x.reason==="INLINE_EVENT_HANDLER_REQUIRES_REVIEW"));
+ }finally{f.dispose();}
+});
+test("695: inert PAY54 data-onclick documentation is not treated as executable",()=>{
+ const f=fixture('<button data-onclick="send" data-action="send">Send</button>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,true);
+ }finally{f.dispose();}
+});
