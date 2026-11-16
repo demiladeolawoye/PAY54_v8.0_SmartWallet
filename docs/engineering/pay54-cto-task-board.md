@@ -467,3 +467,33 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **Known safety limits:** The release-evidence evaluator checks the shape, freshness and consistency of owner-supplied records; it cannot verify authenticity of GitHub settings, signatures or approvals and always returns `releaseAuthorised:false`. The GitHub control evaluator checks a supplied snapshot only and does not read or change live rulesets, Pages, credentials or deployers. These controls do not independently attest legal, provider, tenant database or real-money production readiness.
 
 **Critical open work:** P-01 actual GitHub Pages settings/public artifact and evidence-based remediation; P-02 branch/environment/deployer verification; P-05 independent tenant PostgreSQL/RLS review; end-to-end customer journey and mobile QA; operational privacy and real partner authorisations. Do not activate, merge or deploy on the basis of 50-item source completion.
+
+
+## Batch 14 signed release evidence checkpoint — items 428–445
+
+| Item | Deliverable | Source state |
+| --- | --- | --- |
+| 428 | Canonical Ed25519 evidence receipt verifier using independently supplied public key | COMMITTED |
+| 429 | Signed receipt mutation, identity and key-substitution negative tests | COMMITTED |
+| 430 | Dedicated CI runs cryptographic receipt tests | COMMITTED |
+| 431 | Compose nine-gate receipt verification against trusted key registry | COMMITTED |
+| 432 | Missing/duplicate/forged receipt and unknown-key regressions | COMMITTED |
+| 433 | Integrate signed bundle tests into Batch 14 CI | COMMITTED |
+| 434 | Refuse reused evidence identifiers across distinct gates | COMMITTED |
+| 435 | Signed evidence ID replay regression | COMMITTED |
+| 436 | Operational signer key-custody, trust, revocation and separation runbook | COMMITTED |
+| 437 | Trust and custody policy negative-activation tests | COMMITTED |
+| 438 | CI enforces signing trust runbook invariants | COMMITTED |
+| 439 | Signed receipt expiry and future-date gate | COMMITTED |
+| 440 | Correct strict receipt review-time parser regex | COMMITTED |
+| 441 | Receipt time-window and required-clock tests | COMMITTED |
+| 442 | Composed metadata completeness and cryptographic signed receipt consistency report | COMMITTED |
+| 443 | Adversarial receipt/metadata divergence tests | COMMITTED |
+| 444 | Include cross-check suite in dedicated CI | COMMITTED |
+| 445 | CTO evidence checkpoint and truthful release-state reconciliation | COMMITTED via this update |
+
+**Count:** 418–445 = 28 source deliverables, 446–467 = 22 remaining. The previous exact CI run `43936277353` for code checkpoint `b2bc1d1e1bd992fedb42e87fa1cc1fc40aeaa753` was SUCCESS on the dedicated Batch 14 suite; following code revisions include new expiry and cross-check controls and require their own exact-run evidence. Last executable SHA before this board update: `8a2a36faa462b169c5142a2067a4e0c8b349730e`.
+
+**Signatures are not proof of release:** source-only signed evidence cannot verify key provenance, real signer identity, actual operational facts, live GitHub settings or regulatory/partner permissions, and always returns `releaseAuthorised:false`. No deployment, merge, Pages settings edit, branch rule change, key creation, customer database access, live financial execution or cloud provisioning has been authorised.
+
+**Review request state:** Batch 14 is a draft stacked PR against Batch 13, itself an unmerged draft. Release remains BLOCKED. Production workstreams P-01 through P-14 remain separately tracked.
