@@ -16,6 +16,8 @@ import {recordPay54OfflinePreviewManifest}
  from "./pay54-preview-artifact-manifest.mjs";
 import {auditPay54OfflinePreviewMarkup}
  from "./pay54-offline-preview-markup-audit.mjs";
+import {auditPay54OfflinePreviewResources}
+ from "./pay54-offline-preview-resource-audit.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 export function createPay54FounderPreviewBundle(sourceRoot,emptyTarget,sourceCommitSha){
@@ -31,6 +33,10 @@ export function createPay54FounderPreviewBundle(sourceRoot,emptyTarget,sourceCom
  const markup=auditPay54OfflinePreviewMarkup(index);
  if(!markup.sourceMarkupCheckPassed){
   throw new Error("PAY54_FOUNDER_PREVIEW_MARKUP_DENIED");
+ }
+ const resources=auditPay54OfflinePreviewResources(index);
+ if(!resources.sourceReferencesLocal){
+  throw new Error("PAY54_FOUNDER_PREVIEW_REMOTE_RESOURCE_DENIED");
  }
  if(!index.includes("PAY54 OFFLINE VISUAL PREVIEW")||
   !index.includes("script-src 'none'")||
