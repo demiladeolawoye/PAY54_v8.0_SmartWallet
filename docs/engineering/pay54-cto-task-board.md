@@ -414,3 +414,30 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **CI accuracy:** The dedicated Batch 13 workflow ran successfully on `d695696f2b5a161bdc6cf7a6a14ac6dd0c121e58` (run `43932449771`). Account and backend suites on that revision were not yet all finished when this board was prepared. Earlier workflow cancellations from rapid PR commits are not test failures and are not clean-success evidence. Do not claim a full 11/11 result on any revision without independent confirmation.
 
 **P-01 remains OPEN:** direct public probing was attempted from both browsing and container environments but could not access the Pages host. No claim of verified public file reachability or absence of exposure is permitted. The opt-in HEAD-only probe is merely source code for a controlled later inspection.
+
+
+## Batch 13 closure — items 405–417 (50/50 source items committed)
+
+**Approval boundary:** Batch 13 source-only implementations 368–417 are recorded as committed. A completed source batch does not mean a production go-live or Pages release is authorised. Hold the PR as DRAFT and do not merge or deploy pending independent owner decision and evidence.
+
+| Item | Actual deliverable | State |
+| --- | --- | --- |
+| 405 | Audit unquoted HTML src/href references | COMMITTED |
+| 406 | Negative tests for unquoted local, missing and executable URLs | COMMITTED |
+| 407 | Include third-party script SRI exceptions in combined publication readiness | COMMITTED |
+| 408 | Combined readiness regression flags missing SRI without false release approval | COMMITTED |
+| 409 | CI rejects HTTP transport for externally referenced JavaScript | COMMITTED |
+| 410 | Candidate staging refuses unreviewed remote script source | COMMITTED |
+| 411 | Staging regressions deny missing SRI without copying any files | COMMITTED |
+| 412 | Source security CI triggered by top-level HTML and asset changes | COMMITTED |
+| 413 | Regression contract for workflow trigger and least privilege | COMMITTED |
+| 414 | Integrate workflow invariant tests into source-only CI | COMMITTED |
+| 415 | Pages evidence/containment and go-no-go owner runbook | COMMITTED |
+| 416 | Release-denial and independent acceptance contract tests | COMMITTED |
+| 417 | CI integration of runbook acceptance tests and this 50-item closure ledger | COMMITTED |
+
+**Current code checkpoint:** `142e841f2f6956f79a93acf1c2313c5344ec1d66` before this board update. The new runbook regression is wired to Batch 13 CI; final workflow results on this exact revision must be retrieved and recorded after Actions complete. Do not claim CI PASS for a revision until it is confirmed. Earlier run `43932776559` passed the Batch 13 suite on a previous revision, but is not evidence for today's closing changes.
+
+**Outstanding production-readiness P-01 — critical:** GitHub Pages settings/publishing source, deployed artifact inventory, sensitive-file public reachability, branch rulesets, external CDN attestation, full mobile/desktop/accessibility regression and rollback approval remain independently unverified. Current source-only diagnostics are not complete dynamic asset analysis, external incident investigation, or real deployment attestation. Source-only staging can never be considered public deployment proof.
+
+**Next batch:** 418–467 may be planned only after Founder approval of the 368–417 closure report. Do not recycle completed IDs or treat production workstreams P-01–P-14 as completed. Separately approval-gate any repository settings, identity/credentials, cloud/database privileges, real payment execution, live Pages remediation, or deployment modification. Proposed next focus: evidence-driven Pages containment, independent GitHub ruleset/deployer review, full static and dynamic dependency tests, branch release/rollback automation, PostgreSQL security gate verification, then authenticated Personal/Business account integration.
