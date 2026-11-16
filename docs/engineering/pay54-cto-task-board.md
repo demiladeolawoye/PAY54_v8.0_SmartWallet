@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 opened, items 312–314)
+**Last reviewed:** 2026-11-16 (Batch 12 source progress items 312–316)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 charter and crypto source design | Unbounded / milestone-gated | 3 | Not fixed | 312 charter, 313 country gates and 314 crypto architecture committed |
+| Batch 12 charter and crypto source design | Unbounded / milestone-gated | 5 | Not fixed | 312–316 architecture, country gates, pure crypto state machine and regressions committed |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -49,8 +49,10 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 312 | Production-readiness charter and decomposed launch epics | COMMITTED |
 | 313 | UK–Nigeria feature and crypto capability default-deny matrix | COMMITTED |
 | 314 | Crypto partner-led architecture, quote/custody/settlement and failure design | COMMITTED |
+| 315 | Pure immutable crypto intent lifecycle; provider/funds execution blocked | COMMITTED, CI VERIFYING |
+| 316 | Adversarial quote, confirmation, replay, actor and settlement tests | COMMITTED, CI VERIFYING |
 
-Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next proposed source item: 315 (crypto state-machine design and negative tests).
+Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next proposed source item: 317 (independently reviewed capability/partner enablement contract, no live activation).
 
 ## Batch 11 closure and next approval boundary
 
