@@ -7,9 +7,11 @@
  * It cannot authorise deployment or incident closure.
  */
 
-export function classifyPay54PagesArtifactRisk({
- archiveReview,publicReachability,contentSensitivity
-}={}){
+export function classifyPay54PagesArtifactRisk(input={}){
+ if(!input||typeof input!=="object"||Array.isArray(input)){
+  throw new TypeError("PAY54_PAGES_TAR_REVIEW_REQUIRED");
+ }
+ const {archiveReview,publicReachability,contentSensitivity}=input;
  if(!archiveReview||archiveReview.schema!=="pay54.pages-tar-member-index.v1"){
   throw new TypeError("PAY54_PAGES_TAR_REVIEW_REQUIRED");
  }
