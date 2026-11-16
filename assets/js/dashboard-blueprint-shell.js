@@ -197,10 +197,18 @@
     walletManage.addEventListener("click", toggleWallets);
     balance.append(mobileManage);
 
-    find(".balance-delta", balance)?.setAttribute("hidden", "");
-    for (const selector of [".balance-meta", ".identity", ".trust-chip", "#fxTicker"]) {
-      find(selector, balance)?.classList.add("p54b-conceal");
+    // Keep source dashboard account and status information visible.
+    // The public development preview claims guard supplies explicit
+    // demonstration-only language; this presentation layer must not hide it.
+    for (const selector of [".balance-meta", ".balance-delta", ".identity", ".trust-chip"]) {
+      const detail = find(selector, balance);
+      if (!detail) continue;
+      detail.removeAttribute("hidden");
+      detail.classList.remove("p54b-conceal");
+      detail.classList.add("p54b-balance-detail");
     }
+    // The optional FX ticker has its own data-readiness requirements.
+    find("#fxTicker", balance)?.classList.add("p54b-conceal");
     balance.classList.add("p54b-balance");
     const label = find(".label", balance);
     if (label) label.textContent = "ACTIVE WALLET BALANCE";
