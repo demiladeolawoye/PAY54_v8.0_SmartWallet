@@ -45,7 +45,7 @@ test("534: empty output requirement prevents replacing or mixing existing files"
  const f=fixture();
  try{
   writeFileSync(join(f.target,"private.txt"),"synthetic");
-  assert.throws(()=>createPay54FounderPreviewBundle(f.source,f.target),
+  assert.throws(()=>createPay54FounderPreviewBundle(f.source,f.target,SHA),
    /EMPTY_TARGET_REQUIRED/);
  }finally{f.clean();}
 });
