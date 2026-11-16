@@ -1,0 +1,53 @@
+name: PAY54 Batch 19 Exact-Release Evidence
+
+on:
+  pull_request:
+    branches:
+      - cto/batch18-linked-card-preview-boundary-618-667
+      - project-titan
+    paths:
+      - "backend/governance/pay54-batch19-*.mjs"
+      - "backend/tests/account-batch19-*.test.mjs"
+      - ".github/workflows/pay54-batch19-release-evidence.yml"
+      - "docs/engineering/pay54-batch19-*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch19-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-evidence:
+    name: fail-closed-release-identity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout reviewed commit without stored credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Verify complete source modules and regression suites
+        run: |
+          set -euo pipefail
+          for file in backend/governance/pay54-batch19-*.mjs backend/tests/account-batch19-*.test.mjs; do
+            test -f "$file"
+            node --check "$file"
+          done
+          node --test backend/tests/account-batch19-*.test.mjs
+      - name: Confirm no release permissions or financial activation
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = false
+          test "$TF_VAR_authorized_provisioning" = false
+          echo "Batch 19 source-only review: no Pages publish, no financial execution."
