@@ -441,3 +441,29 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **Outstanding production-readiness P-01 — critical:** GitHub Pages settings/publishing source, deployed artifact inventory, sensitive-file public reachability, branch rulesets, external CDN attestation, full mobile/desktop/accessibility regression and rollback approval remain independently unverified. Current source-only diagnostics are not complete dynamic asset analysis, external incident investigation, or real deployment attestation. Source-only staging can never be considered public deployment proof.
 
 **Next batch:** 418–467 may be planned only after Founder approval of the 368–417 closure report. Do not recycle completed IDs or treat production workstreams P-01–P-14 as completed. Separately approval-gate any repository settings, identity/credentials, cloud/database privileges, real payment execution, live Pages remediation, or deployment modification. Proposed next focus: evidence-driven Pages containment, independent GitHub ruleset/deployer review, full static and dynamic dependency tests, branch release/rollback automation, PostgreSQL security gate verification, then authenticated Personal/Business account integration.
+
+
+## Batch 14 opening checkpoint — Implementations 418–427
+
+**Founder approval:** Source-only engineering batch 418–467 approved after completion of Batch 13. 50-item cycle and checkpoint remain mandatory, but implementation counts must reflect real commits, not proposals. This stacked draft PR builds on unmerged Batch 13 PR #1 and does not merge or change live PAY54 settings.
+
+| ID | Committed deliverable | State |
+| --- | --- | --- |
+| 418 | Nine-gate source-only release-evidence completeness evaluator with commit matching and independent review requirements | COMMITTED |
+| 419 | Negative tests for missing, duplicate, stale, future, forged or unreviewed release evidence | COMMITTED |
+| 420 | Dedicated Batch 14 read-only, pinned-action workflow with nonactivation assertions | COMMITTED |
+| 421 | Read-only GitHub branch-rules and OIDC/deployer evidence policy | COMMITTED |
+| 422 | Branch approval, rule bypass, credential and deployer negative regressions | COMMITTED |
+| 423 | Include independent GitHub release-controls regression in Batch 14 CI | COMMITTED |
+| 424 | Independent evidence-capture procedure, release acceptance and privacy rules | COMMITTED |
+| 425 | Operational runbook completeness, owner and privacy regression | COMMITTED |
+| 426 | Add runbook regression and relevant paths to Batch 14 CI | COMMITTED |
+| 427 | Source-only CTO checkpoint, evidence caveats and 50-item tracking | COMMITTED via this update |
+
+**Counts:** 10 of 50 source deliverables committed for Batch 14. Remaining numbered scope: 428–467 (40 genuine tasks, not artificially filled).
+
+**Latest executable checkpoint before this board change:** `18b45f19133b9345e9728eac5415f16bcc1be092`. Dedicated Batch 14 CI run `43935558075` and broader account/backend workflows had begun but their final results must be verified before describing this revision as CI passed.
+
+**Known safety limits:** The release-evidence evaluator checks the shape, freshness and consistency of owner-supplied records; it cannot verify authenticity of GitHub settings, signatures or approvals and always returns `releaseAuthorised:false`. The GitHub control evaluator checks a supplied snapshot only and does not read or change live rulesets, Pages, credentials or deployers. These controls do not independently attest legal, provider, tenant database or real-money production readiness.
+
+**Critical open work:** P-01 actual GitHub Pages settings/public artifact and evidence-based remediation; P-02 branch/environment/deployer verification; P-05 independent tenant PostgreSQL/RLS review; end-to-end customer journey and mobile QA; operational privacy and real partner authorisations. Do not activate, merge or deploy on the basis of 50-item source completion.
