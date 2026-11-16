@@ -30,7 +30,7 @@ async function makeActor(subject=S){
 }
 test("source-only verified principal, DB metadata, membership, lease, revocation, audit compose safely",async()=>{
  const actor=await makeActor(),steps=[];
- const guard=createAccountConnectionProvenance({reviewedRoleCapabilities:async()=>true});
+ const guard=createAccountConnectionProvenance({reviewedRoleCapabilities:async()=>({hasFinancialPrivilege:false,canAssumeOtherTenantRoles:false,validatedInTransaction:true})});
  const identity=await guard.verify({dbPrincipal:actor,client:{query:async()=>({rows:[actorRow]})}});
  assert.equal(identity.liveCredentialAttested,false);
  const membershipGate=createAccountCurrentMembership({loadCurrent:async()=>{
