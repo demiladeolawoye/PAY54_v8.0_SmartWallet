@@ -1,4 +1,4 @@
-name: PAY54 Batch 17 Restricted Dashboard Visual QA Artifact
+name: PAY54 Batch 17 Isolated Browser Visual QA
 
 on:
   pull_request:
@@ -10,7 +10,6 @@ on:
       - assets/css/**
       - assets/js/**
       - assets/img/**
-      - backend/governance/pay54-balance-visual-qa-stage.mjs
       - .github/workflows/pay54-batch17-visual-qa-artifact.yml
   workflow_dispatch:
 
@@ -22,8 +21,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  visual-qa-artifact:
-    name: verified-offline-visual-qa-only
+  visual-qa:
+    name: local-dashboard-browser-screenshots-only
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
@@ -31,31 +30,52 @@ jobs:
       PAY54_REAL_MONEY_MODE: "false"
       TF_VAR_authorized_provisioning: "false"
     steps:
-      - name: Checkout exact PR head without persisted credentials
+      - name: Checkout exact review commit without persisted credentials
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Node 24
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: "24"
-      - name: Verify security policy and create restricted local QA snapshot
+      - name: Confirm isolated browser and source under review
         run: |
-          node --check backend/governance/pay54-balance-visual-qa-stage.mjs
-          mkdir -p "$RUNNER_TEMP/pay54-balance-visual-qa"
-          node backend/governance/pay54-balance-visual-qa-stage.mjs "$RUNNER_TEMP/pay54-balance-visual-qa"
-          test -f "$RUNNER_TEMP/pay54-balance-visual-qa/site/dashboard.html"
-          test ! -e "$RUNNER_TEMP/pay54-balance-visual-qa/site/backend"
-          test ! -e "$RUNNER_TEMP/pay54-balance-visual-qa/site/docs"
-          test ! -e "$RUNNER_TEMP/pay54-balance-visual-qa/site/infrastructure"
+          test -f dashboard.html
+          test -f assets/js/dashboard-blueprint-shell.js
+          test -f assets/js/core/preview-claims-guard.js
           test "$PAY54_REAL_MONEY_MODE" = "false"
           test "$TF_VAR_authorized_provisioning" = "false"
-      - name: Upload seven-day QA-only archive (never GitHub Pages)
+          command -v google-chrome
+          google-chrome --version
+          mkdir -p "$RUNNER_TEMP/pay54-visual-qa"
+      - name: Render local dashboard only without outbound network
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="file://$GITHUB_WORKSPACE/dashboard.html"
+          for preset in "desktop:1440:1000" "tablet:768:1024" "mobile:390:844"; do
+            IFS=: read -r device width height <<< "$preset"
+            profile="$RUNNER_TEMP/pay54-visual-qa/browser-$device"
+            mkdir -p "$profile"
+            google-chrome --headless --no-sandbox --disable-gpu \
+              --disable-extensions --disable-background-networking \
+              --no-first-run --no-default-browser-check --disable-sync \
+              --no-proxy-server \
+              --host-resolver-rules="MAP * 0.0.0.0, EXCLUDE localhost" \
+              --user-data-dir="$profile" \
+              --window-size="$width,$height" \
+              --force-device-scale-factor=1 \
+              --virtual-time-budget=4500 \
+              --screenshot="$RUNNER_TEMP/pay54-visual-qa/$device.png" \
+              "$base" 2>"$RUNNER_TEMP/pay54-visual-qa/$device-browser.log"
+            test -s "$RUNNER_TEMP/pay54-visual-qa/$device.png"
+            echo "$device screenshot generated"
+          done
+          # Browser logs may contain development-only identifiers; exclude from artifact.
+          rm -f "$RUNNER_TEMP"/pay54-visual-qa/*-browser.log
+          rm -rf "$RUNNER_TEMP"/pay54-visual-qa/browser-*
+      - name: Upload screenshot-only artifact for QA review (NOT GitHub Pages)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: pay54-batch17-dashboard-qa-${{ github.event.pull_request.head.sha || github.sha }}
-          path: ${{ runner.temp }}/pay54-balance-visual-qa/site/
+          name: pay54-batch17-visual-screenshots-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-visual-qa/*.png
           retention-days: 7
           if-no-files-found: error
           include-hidden-files: false
