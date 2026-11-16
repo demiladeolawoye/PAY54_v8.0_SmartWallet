@@ -15,6 +15,7 @@ async function principal(){
   assertRoleMapping:()=>true});
 }
 test("reviewed database role and intact session actor produce advisory provenance",async()=>{
+ const dbPrincipal=await principal();
  const result=await createAccountConnectionProvenance({
   reviewedRoleCapabilities:async()=>({hasFinancialPrivilege:false,canAssumeOtherTenantRoles:false,validatedInTransaction:true})
  }).verify({dbPrincipal,client:{query:async()=>({rows:[row]})}});
