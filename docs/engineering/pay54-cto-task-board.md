@@ -684,3 +684,15 @@ Founder provided live GitHub Pages screenshot demonstrating that four existing b
 **Demo safety:** The values `3001234567`, `@pay54-user`, `Level 2` and `₦24,500` remain samples. Device/PIN security and financial compliance are explicitly **not verified**. No live bank credentials, KYC, ledger, FX, customer wallet, account-switching or regulated operations were enabled.
 
 **Visibility:** The correction is on draft PR #5 stacked on unmerged draft PR #4 → #3 → #2 → #1. The public Pages site shown in the founder screenshot has **not** been updated. The separately confirmed older overbroad Pages artifact security P0 stays OPEN. Site publication must be separately approved and proven to exclude backend/docs/infrastructure sources, and must have full browser regression and rollback evidence.
+
+
+### Batch 17 cross-suite regression correction — 579–580
+
+| Implementation | Work | Status |
+| --- | --- | --- |
+| 579 | Update legacy Batch 12 dashboard visual cache-version assertions from blueprint 1.2.3/refinements 1.5.2 to reviewed 1.2.4/1.5.3 | COMMITTED |
+| 580 | Correct test regex escaping and reconcile independent CI evidence | COMMITTED via this update |
+
+The existing account-boundary workflow initially failed **one of 624 tests** only because an older source-level test asserted the superseded dashboard asset query versions; the remaining 623 passed. The assertion is now updated without weakening the financial or accessibility checks. The next exact-run Account Boundary workflow `43957419774` completed **SUCCESS**, as did the dedicated Batch 17 balance-visibility workflow `43957419473`, both on commit `2080f67e4d10c2db68881b1b8ce40bbad791b185`. Other backend/security workflows on the same commit were still completing at the time of this board amendment.
+
+**Reconciled count:** 568–580 = 13 source/audit items. 581–617 remain within the approved 50-item Batch 17 cycle. Full browser-based visual comparison to the founder screenshot and a separately approved, safe deployment remain outstanding. Historical Pages overpublication P0 remains open; do not merge stacked PRs or publish the repository root.
