@@ -82,6 +82,17 @@ jobs:
             }
             console.log("Security and Founder operational approval remains independent");
           '
+      - name: Verify final source-only CTO release disposition remains NO-GO
+        run: |
+          node --input-type=module -e '
+            import {inspectPay54FinalGoNoGo} from "./backend/governance/pay54-batch18-final-gonogo.mjs";
+            const r=inspectPay54FinalGoNoGo();
+            if(r.releaseDecision!=="NO_GO"||r.productionRelease!=="BLOCKED"||
+               r.pagesSettingsModified!==false||r.customerMoneyEnabled!==false){
+              throw new Error("PAY54_BATCH18_RELEASE_BOUNDARY_REGRESSION");
+            }
+            console.log("Source-only publication governance safe; production release remains blocked");
+          '
       - name: Build a new inert PAY54 balance dashboard review package (not Pages)
         run: |
           mkdir -p "$RUNNER_TEMP/pay54-batch18-founder-preview"
