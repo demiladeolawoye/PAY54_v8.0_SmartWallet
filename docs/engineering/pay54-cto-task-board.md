@@ -696,3 +696,33 @@ Founder provided live GitHub Pages screenshot demonstrating that four existing b
 The existing account-boundary workflow initially failed **one of 624 tests** only because an older source-level test asserted the superseded dashboard asset query versions; the remaining 623 passed. The assertion is now updated without weakening the financial or accessibility checks. The next exact-run Account Boundary workflow `43957419774` completed **SUCCESS**, as did the dedicated Batch 17 balance-visibility workflow `43957419473`, both on commit `2080f67e4d10c2db68881b1b8ce40bbad791b185`. Other backend/security workflows on the same commit were still completing at the time of this board amendment.
 
 **Reconciled count:** 568–580 = 13 source/audit items. 581–617 remain within the approved 50-item Batch 17 cycle. Full browser-based visual comparison to the founder screenshot and a separately approved, safe deployment remain outstanding. Historical Pages overpublication P0 remains open; do not merge stacked PRs or publish the repository root.
+
+
+## Batch 17 visual QA and Pages containment checkpoint — 581–598
+
+**Founder approval:** Continue with browser QA and secure release planning, while keeping the public GitHub Pages site unchanged until P0 is investigated and a separate restricted deployment approved. The approved 50-item source cycle remains 568–617; no automatic production release follows.
+
+| Item | Implemented or verified source deliverable | State |
+| --- | --- | --- |
+| 581 | Added strict, local read-only full-site QA staging procedure using existing publication boundary | Committed; refused unsafe candidate |
+| 582 | Added isolated GitHub Actions non-Pages QA artifact workflow | Committed |
+| 583–584 | Diagnosed refusal using candidate path-only inspection without weakening policy | Committed |
+| 585 | Replaced disallowed source artifact upload with screenshot-only offline Chromium visual QA | Committed |
+| 586–587 | Created synthetic dashboard layout fixture from actual source HTML/CSS/blueprint, no login or financial scripts; wired CI | Committed |
+| 588 | Fixed Money Moves tablet label collisions using adaptive 3/4-column grid | Committed |
+| 589–591 | Incremented CSS cache version and updated both legacy and current dashboard regression contract tests | Committed |
+| 592–593 | Added rendered-browser DOM validator and account label assertion compatibility | Committed |
+| 594–595 | Added adverse DOM validation tests and headless Chromium rendered DOM acceptance to CI | Committed |
+| 596 | Published exact-source visual QA, archive evidence and P0 NO-GO report | Committed |
+| 597 | Added CI-verifiable governance tests for exact visual evidence and no-deployment constraints | Committed |
+| 598 | CTO ledger reconciliation and founder release decision | Committed via this update |
+
+**Batch total:** Implementations 568–598 = **31/50 source deliverables**. Items 599–617 remain unimplemented, not assumed complete. Earlier dedicated balance test regressions and GitHub Pages P0 remain tracked separately.
+
+**Browser validation on exact feature SHA `3b4106cfd1539ae0c162d3c23ad522335d28099e`:** 12/12 GitHub Actions workflows SUCCESS; isolated screenshot run `43963717157` SUCCESS and rendered-DOM acceptance PASS. Synthetic desktop (1440×1000), tablet (768×1024), and mobile (390×844) screenshots artifact `14275592537` (`sha256:e5d3098912771385d72925379db8a775b59af0bbfb25b210a3c871d4461ecc38`). Tablet Money Moves collision fixed in the reviewed screenshot; four approved demo-only balance sections visually present.
+
+**Important separate security finding:** Strict real-site staging correctly refused asset `assets/js/infrastructure/payments/providers/linked-card-development.js`, a development linked-card simulation under forbidden infrastructure path. Nothing was deployed; the publisher policy was not relaxed. Historic GitHub Pages artifact `14252395793` independently contained backend/docs/infrastructure sources, while actual current active Pages deployment/URLs and sensitivity remain unverified. **P0 OPEN, production NO-GO** until Founder/Security owner accepts risk treatment, protected deployer, restricted output and rollback.
+
+**Authentication validation:** Unmodified protected dashboard opened without credentials redirected to login. Synthetic visual fixture is separate and does not test money movement or authenticated user flows. No real data or provider credentials were used.
+
+**Next:** Independently verify current Pages Settings and deployment; resolve the development provider publication boundary without regressions; perform real authenticated sandbox journey, device/accessibility and rollback checks; only then seek separately approved restricted deployment. Review PR #5 remains DRAFT and unmerged.
