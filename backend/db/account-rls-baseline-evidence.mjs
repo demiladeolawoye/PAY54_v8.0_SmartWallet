@@ -19,6 +19,10 @@ export const PAY54_ACCOUNT_RLS_BASELINE_SQL=Object.freeze([
  "       has_table_privilege('pay54_account_reader_role',c.oid,'INSERT') AS reader_insert,",
  "       has_table_privilege('pay54_account_reader_role',c.oid,'UPDATE') AS reader_update,",
  "       has_table_privilege('pay54_account_reader_role',c.oid,'DELETE') AS reader_delete,",
+ "       has_table_privilege('pay54_account_reader_role',c.oid,'TRUNCATE') AS reader_truncate,",
+ "       has_table_privilege('pay54_account_reader_role',c.oid,'REFERENCES') AS reader_references,",
+ "       has_table_privilege('pay54_account_reader_role',c.oid,'TRIGGER') AS reader_trigger,",
+ "       (c.relowner=(SELECT oid FROM pg_roles WHERE rolname='pay54_account_reader_role')) AS reader_owns_relation,",
  "       EXISTS (SELECT 1 FROM pg_policy p JOIN pg_roles r",
  "               ON r.oid=ANY(p.polroles)",
  "               WHERE p.polrelid=c.oid",
@@ -52,7 +56,9 @@ export function assessPay54AccountRlsBaseline({relations,role}={}){
  const seen=new Set();
  const findings=[];
  const booleanFields=["rls_enabled","rls_forced","reader_select",
-  "reader_insert","reader_update","reader_delete","restrictive_reader_deny"];
+  "reader_insert","reader_update","reader_delete","reader_truncate",
+  "reader_references","reader_trigger","reader_owns_relation",
+  "restrictive_reader_deny"];
  for(const item of relations){
   if(!plainRow(item)||!RELATIONS.includes(item.relation_name)||
      seen.has(item.relation_name)||
@@ -64,7 +70,9 @@ export function assessPay54AccountRlsBaseline({relations,role}={}){
    findings.push("RLS_NOT_FORCED:"+item.relation_name);
   if(!item.restrictive_reader_deny)
    findings.push("RESTRICTIVE_DENY_MISSING:"+item.relation_name);
-  if(item.reader_select||item.reader_insert||item.reader_update||item.reader_delete)
+  if(item.reader_select||item.reader_insert||item.reader_update||item.reader_delete||
+     item.reader_truncate||item.reader_references||item.reader_trigger||
+     item.reader_owns_relation)
    findings.push("ACCOUNT_READER_TABLE_ACCESS:"+item.relation_name);
  }
  if(RELATIONS.some(name=>!seen.has(name))||
