@@ -4,7 +4,7 @@
 /* ==========================================================================
    PAY54 ENTERPRISE PREVIEW CLAIMS GUARD
    File: assets/js/core/preview-claims-guard.js
-   Version: 1.0.0
+   Version: 1.0.1
    Work Package: WP-P54-ARCH-007C
 
    Purpose:
@@ -22,7 +22,7 @@
   const W = window;
   const D = document;
 
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const GLOBAL_NAME = "PAY54_PREVIEW_CLAIMS_GUARD";
 
   if (W[GLOBAL_NAME] !== undefined) {
@@ -54,16 +54,20 @@
 
   const RULES = Object.freeze([
     Object.freeze({
+      selector: ".balance-meta",
+      text: "Across wallets (converted) • FX wallets enabled (demo) • Device + PIN security not verified"
+    }),
+    Object.freeze({
       selector: ".balance-delta",
-      text: "Demonstration balances — not real funds"
+      text: "↑ +₦24,500 today · sample movement (not verified)"
     }),
     Object.freeze({
       selector: ".identity",
-      text: "Demo account · Identity verification not active"
+      text: "Demo Acct: 3001234567 · Demo Tag: @pay54-user · KYC: Level 2 sample (unverified)"
     }),
     Object.freeze({
       selector: ".trust-chip",
-      text: "Development preview · No regulated status implied"
+      text: "🔒 Security & financial compliance: demonstration only — not verified"
     })
   ]);
 
@@ -177,7 +181,7 @@
     apply();
 
     console.info(
-      "[PAY54_CLAIMS] Preview claims guard v1.0.0 ready."
+      "[PAY54_CLAIMS] Preview claims guard v1.0.1 ready."
     );
   }
 
