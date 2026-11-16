@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 account-context reader 312–354)
+**Last reviewed:** 2026-11-16 (Batch 12 staging/RLS acceptance 312–359)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 43 | Not fixed | Items 312–354; latest executable source 352 passed 10 account/backend workflows; Pages separate |
+| Batch 12 source-only engineering | Milestone-gated | 48 | Not fixed | Items 312–359 committed; item 357 correction passing completed CI; operational approvals open |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -89,12 +89,17 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 352 | Session revocation, principal change and HTTP no-disclosure regression tests | CI VERIFIED |
 | 353 | Independent PostgreSQL RLS and authenticated account switching operational gate register | COMMITTED |
 | 354 | Update CTO task board with evidence and remaining operational dependencies | COMMITTED |
+| 355 | Read-only PostgreSQL RLS and account-reader permission catalogue policy | COMMITTED; CI VERIFIED |
+| 356 | Denial tests for reader grants, RLS policy drift and privilege escalation | COMMITTED; CI VERIFIED |
+| 357 | Correct source attestation test field after intermediate CI failure | COMMITTED; CI VERIFIED |
+| 358 | Private-staging, database identity and Founder evidence acceptance packet | COMMITTED |
+| 359 | CTO task board, current GitHub access limitations and regression checkpoint | COMMITTED |
 
 Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next integration milestone: authenticated server-side account switching with independently verified tenant RLS, trusted account-scoped ledger snapshot integration, private global directory and contracted corridor adapters. New source-only account response fencing is not yet wired to real customer queries and must not be described as production-ready. Source-only work does not enable transfers.
 
 ## Batch 11 closure and Batch 12 approval boundary
 
-Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–354. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
+Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–359. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
 
 Avoid hollow deliverables to meet arbitrary counts; next work is driven by operational acceptance criteria, independent RLS checks and genuine business integration dependencies.
 
@@ -228,3 +233,18 @@ Item 351 closes a session-revocation window in the shared read-only account read
 Item 353 identifies a fundamental runtime dependency: migrations 012/013 deliberately provide a NOLOGIN, NO-SELECT account reader with RESTRICTIVE RLS deny policies. The current backend account context handler is unmounted. A future live account switch will require independently reviewed PostgreSQL role/tenant mapping and a separately authorised migration/deployment; source-level tests cannot give it access.
 
 **No account selection is activated and no customer data, cloud resources or financial transactions were accessed.** Next concrete milestone: the Founder and independent Security/DBA team verify the protected private-staging environment, RLS and credential controls in docs/engineering/batch-12-account-operational-gates.md.
+
+
+## Batch 12 private-staging / RLS assurance checkpoint — items 355–359
+
+**Latest executable source under regression:** \`dc35228e2595ecf31bb4ef7eb1ae5e16525b5de5\`.
+
+The item 355 read-only, catalog-only SQL policy describes what the existing unassigned PostgreSQL account reader must look like. Item 356 adds positive/negative source validation for three forced RLS tables, the RESTRICTIVE denial, missing role memberships and all account table privileges. **No query was executed against a real customer database.**
+
+An intermediate CI failure at \`237ba55d235f60c152c5749669c333f20516ed7f\` was caused by a test assertion using the nonexistent \`customerReadAccessApproved\` field rather than the correct \`customerDataAccessApproved\` denial property. This was corrected at \`dc35228e2595ecf31bb4ef7eb1ae5e16525b5de5\`, without weakening the policy. CI results on the corrected SHA must be verified before claiming completion.
+
+**GitHub owner security findings:** a read-only GitHub REST rulesets listing for this repository returned \`[]\` at review. This does not prove legacy branch-protection settings are absent. The Pages settings API could not be read through the available GitHub connection. Founder/DevSecOps must inspect repository Settings → Rules → Rulesets, Settings → Branches, Settings → Environments and Settings → Pages directly, including any deployer and public-artefact exposure.
+
+**Acceptance packet:** \`docs/engineering/batch-12-private-staging-db-acceptance-packet.md\`. Required evidence includes independently verified project identity, private network and egress controls, trusted OIDC/deployer, database TLS, actual RLS role and grant checks, durable audit, signed reviewer disposition and rollback. None of those real-world security gates were proven by the current source-only implementation.
+
+**Current operational status:** Real Personal/Business switching not enabled; production account SELECT denied; no cloud/IAM provisioning, cryptocurrency execution or money movement performed. Next stage requires the repository owner and an independent DBA/security reviewer to establish real staging evidence. Do not silently activate migration 013 replacements or grant access.
