@@ -10,7 +10,7 @@ import {fileURLToPath} from "node:url";
 import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
-const ATTRIBUTE=/\b(?:src|href)\s*=\s*(["'])(.*?)\1/gi;
+const ATTRIBUTE=/\b(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
@@ -23,7 +23,7 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
   for(const match of html.matchAll(ATTRIBUTE)){
-   const raw=match[2].trim();
+   const raw=(match[2]??match[3]??"").trim();
    if(!raw||raw.startsWith("#"))continue;
    if(EXTERNAL.test(raw)){
     if(/^(?:javascript:|data:|blob:|\/\/)/i.test(raw)){
