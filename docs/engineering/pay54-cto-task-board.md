@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 account selection and ledger review 312–350)
+**Last reviewed:** 2026-11-16 (Batch 12 account-context reader 312–354)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 39 | Not fixed | Items 312–350; last executable source 348 verified across 11 workflows, operational gates remain open |
+| Batch 12 source-only engineering | Milestone-gated | 43 | Not fixed | Items 312–354; latest executable source 352 passed 10 account/backend workflows; Pages separate |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -85,12 +85,16 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 348 | Business membership revocation and legal-owner race tests | VERIFIED SOURCE |
 | 349 | Independent acceptance matrix for real authenticated account switching | COMMITTED |
 | 350 | Update task board with exact CI evidence and unresolved deployment gates | COMMITTED |
+| 351 | Post-query authenticated principal revalidation in shared backend account-context reader | CI VERIFIED |
+| 352 | Session revocation, principal change and HTTP no-disclosure regression tests | CI VERIFIED |
+| 353 | Independent PostgreSQL RLS and authenticated account switching operational gate register | COMMITTED |
+| 354 | Update CTO task board with evidence and remaining operational dependencies | COMMITTED |
 
 Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next integration milestone: authenticated server-side account switching with independently verified tenant RLS, trusted account-scoped ledger snapshot integration, private global directory and contracted corridor adapters. New source-only account response fencing is not yet wired to real customer queries and must not be described as production-ready. Source-only work does not enable transfers.
 
 ## Batch 11 closure and Batch 12 approval boundary
 
-Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–350. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
+Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–354. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
 
 Avoid hollow deliverables to meet arbitrary counts; next work is driven by operational acceptance criteria, independent RLS checks and genuine business integration dependencies.
 
@@ -196,3 +200,31 @@ Item 343 makes the existing browser account-response fence reject outdated concu
 **Live blockers:** No production account switch, new token/credential grant, real database RLS proof, trusted verified ledger history, payment authority, or customer account API route is enabled. Real integration and independent tests remain necessary; consult docs/engineering/batch-12-account-context-acceptance.md.
 
 **Next meaningful work:** protected backend session switching and account-scoped data APIs *only after* independent tenant/RLS/identity acceptance; otherwise improve non-executable tests, mobile experience and verified provider contract interfaces.
+
+
+## Batch 12 account-reader security checkpoint — items 351–354
+
+**Last executable source:** \`a8358000ec524908a916cf3e16cf724c68b2ad76\`.
+
+The following 10 backend/account CI workflows completed SUCCESS for the exact revision:
+
+| Workflow | Run |
+|---|---:|
+| PAY54 Backend Tests | 43906265264 |
+| Account Boundary Tests | 43906265172 |
+| Account Security Integration | 43906265072 |
+| Account Read Access Integration | 43906264998 |
+| Account Catalogue and Isolation Integration | 43906265387 |
+| Account Authentication and RLS Integration | 43906265384 |
+| Batch 07 Account Security Integration | 43906265611 |
+| Batch 08 Authenticated Actor Integration | 43906265245 |
+| Batch 09 Account Actor and RLS Integration | 43906265305 |
+| Batch 10 Synthetic Role and Audit Source Tests | 43906265100 |
+
+The separate GitHub Pages build completed SUCCESS (run 43906264249); this is not proof of publication security.
+
+Item 351 closes a session-revocation window in the shared read-only account reader: the authenticated subject is checked again after the awaited database query and before releasing account results. Item 352 tests logout/revocation mid-query, principal switch, unauthenticated denial before SQL and handler non-disclosure.
+
+Item 353 identifies a fundamental runtime dependency: migrations 012/013 deliberately provide a NOLOGIN, NO-SELECT account reader with RESTRICTIVE RLS deny policies. The current backend account context handler is unmounted. A future live account switch will require independently reviewed PostgreSQL role/tenant mapping and a separately authorised migration/deployment; source-level tests cannot give it access.
+
+**No account selection is activated and no customer data, cloud resources or financial transactions were accessed.** Next concrete milestone: the Founder and independent Security/DBA team verify the protected private-staging environment, RLS and credential controls in docs/engineering/batch-12-account-operational-gates.md.
