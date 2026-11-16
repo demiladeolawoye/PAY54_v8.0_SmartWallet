@@ -25,7 +25,7 @@ export function assessPay54SignedReleaseBundle({
  }
  const referenceMs=Date.parse(reviewTime);
  if(typeof reviewTime!=="string"||!Number.isFinite(referenceMs)||
-  !/^\\d{4}-\\d{2}-\\d{2}T/.test(reviewTime)){
+  !/^\d{4}-\d{2}-\d{2}T/.test(reviewTime)){
   throw new Error("PAY54_SIGNED_BUNDLE_REVIEW_TIME_REQUIRED");
  }
  const failures=[];
