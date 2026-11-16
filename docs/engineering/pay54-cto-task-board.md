@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 52 | Not fixed | Items 312–363 committed; latest revised SQL baseline passed six workflow checks, four account-security checks pending |
+| Batch 12 source-only engineering | Milestone-gated | 52 | Not fixed | Items 312–363 committed; latest revised SQL baseline passed all ten backend/account security workflows |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -94,8 +94,8 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 357 | Correct source attestation test field after intermediate CI failure | COMMITTED; CI VERIFIED |
 | 358 | Private-staging, database identity and Founder evidence acceptance packet | COMMITTED |
 | 359 | CTO task board, current GitHub access limitations and regression checkpoint | COMMITTED |
-| 360 | Expand live PostgreSQL catalog evidence to all seven table privileges plus ownership | COMMITTED; CI PARTIALLY VERIFIED |
-| 361 | Adversarial tests for TRUNCATE, REFERENCES, TRIGGER and table ownership | COMMITTED; CI PARTIALLY VERIFIED |
+| 360 | Expand read-only PostgreSQL catalog evidence to all seven table privileges plus ownership | CI VERIFIED |
+| 361 | Adversarial tests for TRUNCATE, REFERENCES, TRIGGER and table ownership | CI VERIFIED |
 | 362 | Independent staging approval and real GitHub branch-protection visibility decision | COMMITTED |
 | 363 | Reconcile CTO task board with latest verified/pending workflow results | COMMITTED |
 
@@ -267,7 +267,7 @@ Completed CI checks for the exact source revision at this checkpoint:
 - Account Read Access Integration: run 43912664560 — SUCCESS.
 - Account Catalogue and Isolation Integration: run 43912664517 — SUCCESS.
 - Account Authentication and RLS Integration: run 43912664668 — SUCCESS.
-- Four other batch account-security workflows were still running at this checkpoint; do not claim green until verified.
+- The remaining four batch account-security workflows subsequently passed: Batch 07 run 43912664610, Batch 08 run 43912664563, Batch 09 run 43912664541, Batch 10 run 43912664551. **All ten backend/account-security workflows PASSED** at this exact executable-source SHA. Separate GitHub Pages run 43912663648 also succeeded; it is not security clearance.
 
 A GitHub REST request for actual branch protection returned HTTP 403 (Resource not accessible by integration). Repository rulesets listed no rulesets; that cannot be equated with no branch protection. Pages settings were not independently accessible. Founder must review Settings > Rules, Branches, Environments and Pages, and supply sanitized evidence before staging or deployer activation.
 
