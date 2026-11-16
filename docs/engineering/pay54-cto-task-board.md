@@ -370,3 +370,19 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **P-01 remains P0 OPEN.** Only local publication-source candidates have been inspected, not actual production GitHub Pages settings, artifact bytes or real backend URL reachability. Public endpoint checks were inconclusive from the available browsing environment. Do not mark a confirmed data breach and do not mark the publication safe. No Pages settings, protected branch settings or credentials were changed.
 
 **Release:** Not authorised. Maintain immutable evidence and review boundary. The draft PR is for source-only review and must not be merged or deployed automatically.
+
+
+## Batch 13 publication staging checkpoint — items 385–388
+
+| Item | Actual deliverable | Status |
+|---|---|---|
+| 385 | Local offline, empty-target static site stage builder, copies only approved files and verifies bytes | COMMITTED; no Pages deployment |
+| 386 | Negative tests for source/target overlap, nonempty targets and missing asset safety | COMMITTED |
+| 387 | Integrate stage builder syntax checks and adversarial tests into the dedicated Batch 13 workflow | CI VERIFIED |
+| 388 | Update CTO task board with deployment boundary, exact test revision and outstanding work | COMMITTED via this update |
+
+**Exact dedicated CI evidence:** run `43930808124` on code commit `36044714af854cf36c185bd7dcc555c6b181447a` completed SUCCESS. Other account/security workflows on this revision were still running when checked, so do not infer 10/10 success for this exact commit.
+
+**Standing operational boundaries:** The staging builder is never invoked by GitHub Pages publishing; it only copies reviewed local source files into an explicitly supplied empty directory. It neither addresses the currently configured Pages workflow nor establishes public URL reachability. No website configuration or production release is activated.
+
+**Batch position:** 368–388 = 21 committed deliverables, 389–417 = 29 remaining before the agreed 50-item owner approval checkpoint. Do not artificially fill the 29 slots. Continue only with valuable source hardening and independently evidenced operational acceptance.
