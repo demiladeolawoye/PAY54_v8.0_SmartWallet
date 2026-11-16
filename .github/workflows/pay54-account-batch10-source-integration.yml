@@ -11,6 +11,7 @@ on:
       - "backend/db/account-*.mjs"
       - "backend/tests/account-*.test.mjs"
       - "backend/governance/account-batch10-source-audit.mjs"
+      - "backend/governance/account-batch10-release-boundary.mjs"
       - ".github/workflows/pay54-account-batch10-source-integration.yml"
   pull_request:
     paths:
@@ -22,6 +23,7 @@ on:
       - "backend/db/account-*.mjs"
       - "backend/tests/account-*.test.mjs"
       - "backend/governance/account-batch10-source-audit.mjs"
+      - "backend/governance/account-batch10-release-boundary.mjs"
       - ".github/workflows/pay54-account-batch10-source-integration.yml"
   workflow_dispatch:
 permissions:
@@ -93,6 +95,7 @@ jobs:
       - name: Verify immutable Batch 10 source safety invariants
         run: |
           node backend/governance/account-batch10-source-audit.mjs
+          node --test backend/tests/account-batch10-release-boundary.test.mjs
       - name: Verify nonactivation boundary
         shell: bash
         run: |
