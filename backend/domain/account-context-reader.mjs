@@ -45,6 +45,12 @@ export function createAccountContextReader({ query, resolveAuthenticatedPrincipa
     const { sql, params: values } = definition;
 
     const result = await query(sql, values);
+    // A session may be revoked or switched while the database query awaits.
+    // Do not expose the old principal's account list after that boundary.
+    const freshPrincipal = await resolveAuthenticatedPrincipal(request);
+    if (!isUuid(freshPrincipal) || freshPrincipal.toLowerCase() !== principal.toLowerCase()) {
+      throw new Error("ACCOUNT_AUTH_REQUIRED");
+    }
     if (!result || !Array.isArray(result.rows)) throw new Error("ACCOUNT_STORE_UNAVAILABLE");
 
     const allowed = [];
