@@ -5,7 +5,7 @@
  * Supplementary to a restrictive CSP. Refuses scheme-relative URLs, mailto,
  * live APIs, external URLs, srcset and URL traversal without fetching them.
  */
-const ATTR=/\b(srcset|src|href|action|poster)\s*=\s*(?:(["'])(.*?)\2|([^\s>]+))/gi;
+const ATTR=/(?<![\w:-])\b(srcset|src|href|action|poster)\s*=\s*(?:(["'])(.*?)\2|([^\s>]+))/gi;
 const LOCAL=/^assets\/(?:css|img|images|fonts)\/[A-Za-z0-9._/-]+(?:\?[A-Za-z0-9._=&%-]+)?$/;
 const DATA_IMAGE=/^data:image\/(?:svg\+xml|png|jpeg|webp|gif);base64,[a-zA-Z0-9+/]+=*$/;
 export function auditPay54OfflinePreviewResources(html){
