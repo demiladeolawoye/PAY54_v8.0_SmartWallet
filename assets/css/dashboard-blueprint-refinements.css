@@ -989,3 +989,34 @@ body.p54-blueprint .p54b-balance .trust-chip {
     width: 100%;
   }
 }
+
+/* PAY54 Batch 17 — prevent tablet Money Moves text collision.
+   Below the mobile breakpoint, the mobile five-action composition remains
+   unchanged. Large desktops retain the established seven-item row. */
+@media (min-width: 761px) and (max-width: 1150px) {
+  body.p54-blueprint .p54b-dashboard .money-moves-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body.p54-blueprint .p54b-dashboard .money-moves-grid .tile-btn {
+    min-width: 0;
+    min-height: 78px;
+    padding: 9px 5px;
+  }
+
+  body.p54-blueprint .p54b-dashboard .money-moves-grid .tile-btn .t-title {
+    display: block;
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  body.p54-blueprint .p54b-dashboard .money-moves-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
