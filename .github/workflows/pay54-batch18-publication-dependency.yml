@@ -67,6 +67,21 @@ jobs:
             }
             console.log("Real Pages customer release remains blocked pending development provider and P0 gates");
           '
+      - name: Verify rollback, visual QA and Pages exposure do not self-authorise release
+        run: |
+          node --input-type=module -e '
+            import {reviewPay54RollbackEvidence} from "./backend/governance/pay54-batch18-rollback-evidence.mjs";
+            import {reviewPay54DashboardReleaseQA} from "./backend/governance/pay54-batch18-dashboard-release-qa.mjs";
+            import {planPay54PagesContainmentReview} from "./backend/governance/pay54-batch18-containment-review.mjs";
+            const rollback=reviewPay54RollbackEvidence({});
+            const qa=reviewPay54DashboardReleaseQA({});
+            const incident=planPay54PagesContainmentReview({historicalArtifactOverbroad:true});
+            if(rollback.deploymentAuthorised||qa.customerReleaseApproved||incident.liveSiteSuspended||
+               rollback.productionRelease!=="BLOCKED"||qa.productionRelease!=="BLOCKED"){
+              throw new Error("PAY54_REVIEW_ONLY_OPERATIONAL_GATE_ESCALATED");
+            }
+            console.log("Security and Founder operational approval remains independent");
+          '
       - name: Build a new inert PAY54 balance dashboard review package (not Pages)
         run: |
           mkdir -p "$RUNNER_TEMP/pay54-batch18-founder-preview"
