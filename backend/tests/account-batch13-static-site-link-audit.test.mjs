@@ -47,3 +47,28 @@ test("369: HTTPS CDN links are recorded without assuming trust",()=>{
   assert.equal(r.externalReferences.length,1);
  }finally{f.cleanup();}
 });
+
+test("380: data and blob URL schemes cannot bypass the HTML publication gate",()=>{
+ const f=fixture('<a href="data:text/html,%3Cscript%3E">bad</a><a href="blob:https://host/123">bad</a>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.equal(r.rejectedReferences.length,2);
+ }finally{f.cleanup();}
+});
+test("380: site-root-relative links are rejected on project-path Pages deployments",()=>{
+ const f=fixture('<script src="/assets/js/app.js"></script>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.equal(r.rejectedReferences[0].reason,"UNSAFE_PATH");
+ }finally{f.cleanup();}
+});
+test("380: mail and telephone references are inventoried, never treated as local files",()=>{
+ const f=fixture('<a href="mailto:support@example.invalid">Mail</a><a href="tel:+4400000000">Call</a>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,true);
+  assert.equal(r.externalReferences.length,2);
+ }finally{f.cleanup();}
+});
