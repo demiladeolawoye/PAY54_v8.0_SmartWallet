@@ -26,6 +26,9 @@
 | 275 | Correct newline-in-string test fixture after CI failure | `af26662fd7504bca27c83aa6db9b95c3e62cad17` | COMMITTED, REVERIFICATION REQUIRED |
 | 276 | Add syntax preflight for account test fixtures in synthetic PostgreSQL CI | `30e2c35edd8063c52ec35b927d2e43e7477b39cd` | COMMITTED, REVERIFICATION REQUIRED |
 | 277 | Update implementation register, regression evidence and Founder risks | This document | COMMITTED |
+| 278 | Deny-by-default proposed static-site manifest and protected-path policy | `421a2d92cbcbbc89db34ec7312f6cb71ec68726a` | COMMITTED |
+| 279 | Public-site manifest adversarial source/private-file regression | `3b336777dc2e1537c8abe9a141c84238a2e073be` | CI PENDING |
+| 280 | Record security/CI evidence and remaining publication requirements | This register | COMMITTED |
 
 ## Source regression
 
@@ -36,6 +39,10 @@ GitHub-managed `pages build and deployment` run `43865644521` completed SUCCESS 
 ## Batch 11 source testing after item 270
 
 At source commit `1f54fabcafdb5ff78f26fb048aa26e59f6b93153`, workflows found a real JavaScript syntax error in a new adversarial publication-boundary test fixture (an unescaped newline inside a string). GitHub job `133308141881` demonstrated the failure; this was **not** treated as a passing run. The malformed fixture was fixed at commit `af26662fd7504bca27c83aa6db9b95c3e62cad17`, and the Batch 10/11 source workflow added an explicit test-fixture `node --check` gate at `30e2c35edd8063c52ec35b927d2e43e7477b39cd`. Full CI re-verification against the corrected source and updated workflow is pending; no successful result is claimed before it is observed.
+
+### Latest follow-up verification
+
+The corrected fixture source commit `af26662fd7504bca27c83aa6db9b95c3e62cad17` passed Backend Tests run `43870198384`, Account Boundary `43870198115`, Account Security Integration `43870197999`, Account Read Access `43870198303`, Account Catalogue and Isolation `43870198142`, Account Authentication/RLS `43870198317` and other account workflows. The updated SQL/source workflow at commit `30e2c35edd8063c52ec35b927d2e43e7477b39cd` passed run `43870232831`. All interim failed runs from the malformed test fixture remain retained as evidence, not counted as successful. The new manifest tests on `3b336777dc2e1537c8abe9a141c84238a2e073be` are awaiting their own CI results.
 
 ## Security concern to resolve before live use
 
@@ -58,4 +65,4 @@ An internally issued receipt object only proves source provenance, not that the 
 
 Prioritise Pages source transparency, release evidence provenance, audit integrity and risk reduction, then inspect existing tests before introducing new modules. Avoid artificial tasks to reach 50. Maintain current approved source-only boundaries. Warn ahead of chat limit and include latest HEAD, CI run IDs, exact completed/pending item numbers and all Founder decisions in the handover.
 
-**Next source item:** 278. **Stop for new approval:** item 312.
+**Next source item:** 281. **Stop for new approval:** item 312.
