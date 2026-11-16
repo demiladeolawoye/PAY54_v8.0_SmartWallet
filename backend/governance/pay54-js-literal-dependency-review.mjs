@@ -13,7 +13,7 @@ import {inspectPay54StaticSiteCandidate}
  from "./pay54-static-site-candidate-inventory.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
-const IMPORT=/\b(?:import\s*(?:\(\s*|[^;\n]*?\s+from\s*)|export\s+[^;\n]*?\s+from\s*)(["'])([^"'\n]+)\1/g;
+const IMPORT=/\b(?:import\s*(?:\(\s*|[^;\n]*?\s+from\s*)|import\s*|export\s+[^;\n]*?\s+from\s*)(["'])([^"'\n]+)\1/g;
 const URL_LITERAL=/\bnew\s+URL\s*\(\s*(["'])([^"'\n]+)\1\s*,\s*import\.meta\.url\s*\)/g;
 const DYNAMIC=/\bimport\s*\(\s*(?!["'])/g;
 const PATH=/^\.{1,2}\//;
