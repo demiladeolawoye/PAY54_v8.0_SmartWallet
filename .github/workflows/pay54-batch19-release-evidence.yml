@@ -50,6 +50,32 @@ jobs:
           done
           node --test backend/tests/account-batch19-*.test.mjs
           node --test backend/tests/account-batch18-cto-release-scorecard.test.mjs
+      - name: Produce SHA-bound PAY54 inert offline founder dashboard
+        env:
+          PAY54_PREVIEW_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/pay54-batch19-founder"
+          node backend/governance/pay54-create-founder-preview.mjs "$RUNNER_TEMP/pay54-batch19-founder"
+          test -f "$RUNNER_TEMP/pay54-batch19-founder/preview/index.html"
+          test ! -e "$RUNNER_TEMP/pay54-batch19-founder/preview/assets/js"
+          test ! -e "$RUNNER_TEMP/pay54-batch19-founder/preview/backend"
+          PAY54_PREVIEW_DIR="$RUNNER_TEMP/pay54-batch19-founder/preview" node --input-type=module -e '
+            import {verifyPay54OfflineFounderPreview} from "./backend/governance/pay54-verify-founder-preview.mjs";
+            const r=verifyPay54OfflineFounderPreview(process.env.PAY54_PREVIEW_DIR);
+            if(!r.localArtifactIntegrityPassed||
+               r.sourceCommitSha!==process.env.PAY54_PREVIEW_SOURCE_SHA||
+               r.realMoneyEnabled!==false||r.productionRelease!=="BLOCKED"){
+              throw new Error("PAY54_BATCH19_PREVIEW_INTEGRITY_REFUSED");
+            }
+          '
+      - name: Upload seven-day inert founder balance preview (not GitHub Pages)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-batch19-offline-founder-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-batch19-founder/preview/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
       - name: Confirm no release permissions or financial activation
         run: |
           test "$PAY54_REAL_MONEY_MODE" = false
