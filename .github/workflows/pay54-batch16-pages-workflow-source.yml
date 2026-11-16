@@ -10,6 +10,7 @@ on:
       - "backend/governance/pay54-dashboard-offline-preview.mjs"
       - "backend/governance/pay54-dashboard-preview-readiness.mjs"
       - "backend/governance/pay54-create-founder-preview.mjs"
+      - "backend/governance/pay54-preview-artifact-manifest.mjs"
       - "docs/engineering/pay54-dashboard-preview-acceptance.md"
       - "backend/tests/account-batch16-*.test.mjs"
       - ".github/workflows/pay54-batch16-pages-workflow-source.yml"
@@ -31,6 +32,7 @@ jobs:
       PAY54_ENV: test
       PAY54_REAL_MONEY_MODE: "false"
       TF_VAR_authorized_provisioning: "false"
+      PAY54_PREVIEW_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Checkout with no persisted credentials
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -47,6 +49,8 @@ jobs:
           node --check backend/governance/pay54-dashboard-offline-preview.mjs
           node --check backend/governance/pay54-dashboard-preview-readiness.mjs
           node --check backend/governance/pay54-create-founder-preview.mjs
+          node --check backend/governance/pay54-preview-artifact-manifest.mjs
+          node --check backend/tests/account-batch16-preview-artifact-manifest.test.mjs
           node --check backend/tests/account-batch16-pages-workflow-source.test.mjs
           node --check backend/tests/account-batch16-dashboard-preview-acceptance.test.mjs
           node --check backend/tests/account-batch16-dashboard-offline-preview.test.mjs
@@ -61,6 +65,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pay54-founder-artifact"
           node backend/governance/pay54-create-founder-preview.mjs "$RUNNER_TEMP/pay54-founder-artifact"
           test -f "$RUNNER_TEMP/pay54-founder-artifact/preview/index.html"
+          test -f "$RUNNER_TEMP/pay54-founder-artifact/preview/preview-manifest.json"
           test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/assets/js"
           test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/backend"
           test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/docs"
@@ -69,7 +74,7 @@ jobs:
       - name: Upload inert dashboard preview for founder review (NOT Pages deployment)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: pay54-dashboard-offline-${{ github.sha }}
+          name: pay54-dashboard-offline-${{ github.event.pull_request.head.sha || github.sha }}
           path: ${{ runner.temp }}/pay54-founder-artifact/preview/
           retention-days: 7
           if-no-files-found: error
