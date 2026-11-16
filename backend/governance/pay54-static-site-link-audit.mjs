@@ -12,6 +12,7 @@ import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inv
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const ATTRIBUTE=/(?<![\w:-])(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
 const RESPONSIVE=/(?<![\w:-])srcset\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
+const ACTIVE_FORM=/(?<![\w:-])(?:action|formaction)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
@@ -23,6 +24,14 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  let checked=0;
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
+  // HTML form action destinations may post customer data. Require a
+  // separately reviewed capability and server-side policy before publication.
+  for(const action of html.matchAll(ACTIVE_FORM)){
+   const destination=(action[2]??action[3]??"").trim();
+   if(destination){
+    rejected.push({page,reference:"form-action",reason:"FORM_SUBMISSION_REQUIRES_REVIEW"});
+   }
+  }
   // Responsive image candidate sets require dedicated parsing and byte-level
   // review. Never silently certify them as a complete first-party graph.
   for(const candidate of html.matchAll(RESPONSIVE)){
