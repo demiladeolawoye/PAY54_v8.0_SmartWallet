@@ -14,10 +14,12 @@ const VALID_OPS=new Set(["ACCOUNT_LIST","ACCOUNT_SELECT"]);
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const VALID_OUTCOMES=new Set(["ALLOWED","DENIED","ERROR"]);
 
-export function createAccountAuditReceiptGate({emit,makeId=randomUUID}={}) {
- if (typeof emit!=="function" || typeof makeId!=="function") {
+export function createAccountAuditReceiptGate({emit,makeId=randomUUID,maxEvents=10000}={}) {
+ if (typeof emit!=="function" || typeof makeId!=="function" ||
+     !Number.isSafeInteger(maxEvents) || maxEvents<1 || maxEvents>20000) {
   throw new TypeError("ACCOUNT_AUDIT_RECEIPT_CONFIG_INVALID");
  }
+ const usedEventIds=new Set();
  return Object.freeze({
   async publish({operation,outcome,reason}) {
    if (!VALID_OPS.has(operation) || !VALID_OUTCOMES.has(outcome) ||
@@ -26,9 +28,12 @@ export function createAccountAuditReceiptGate({emit,makeId=randomUUID}={}) {
     throw new Error("ACCOUNT_AUDIT_RECEIPT_DENIED");
    }
    const eventId=makeId();
-   if (typeof eventId!=="string" || !UUID.test(eventId)) {
+   if (typeof eventId!=="string" || !UUID.test(eventId) ||
+       usedEventIds.has(eventId) || usedEventIds.size>=maxEvents) {
     throw new Error("ACCOUNT_AUDIT_RECEIPT_DENIED");
    }
+   // Reserve before awaiting the writer; failed writes remain un-replayable.
+   usedEventIds.add(eventId);
    const event=Object.freeze({
     schema:"PAY54_ACCOUNT_AUDIT_RECEIPT_V1",
     eventId,operation,outcome,reason,
