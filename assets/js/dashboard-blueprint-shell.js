@@ -330,10 +330,15 @@
     main.append(moves, services, promo, newsBlock);
     support.append(recent, alerts, utilities, security);
 
+    // Preserve the existing recipient widget and its handlers but avoid a
+    // redundant full-width legacy card on the home screen.
     if (recipients) {
-      const details = make("details", "p54b-legacy");
-      details.append(make("summary", "", "Recipients"), recipients);
-      main.append(details);
+      const recipientWidget = find("#recipientDashboardWidget", recipients);
+      if (recipientWidget) {
+        const details = make("details", "p54b-frequent-people");
+        details.append(make("summary", "", "Frequent people"), recipientWidget);
+        moves.append(details);
+      }
     }
 
     const dashboard = make("main", "p54b-dashboard");
