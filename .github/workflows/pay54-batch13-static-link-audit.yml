@@ -6,10 +6,12 @@ on:
     paths:
       - "backend/governance/pay54-static-site-link-audit.mjs"
       - "backend/governance/pay54-css-asset-link-audit.mjs"
+      - "backend/governance/pay54-publication-source-readiness.mjs"
       - "backend/governance/pay54-static-site-candidate-inventory.mjs"
       - "backend/governance/pay54-public-site-manifest.mjs"
       - "backend/tests/account-batch13-static-site-link-audit.test.mjs"
       - "backend/tests/account-batch13-css-asset-link-audit.test.mjs"
+      - "backend/tests/account-batch13-publication-readiness.test.mjs"
       - ".github/workflows/pay54-batch13-static-link-audit.yml"
   workflow_dispatch:
 
@@ -42,8 +44,10 @@ jobs:
         run: |
           node --check backend/governance/pay54-static-site-link-audit.mjs
           node --check backend/governance/pay54-css-asset-link-audit.mjs
+          node --check backend/governance/pay54-publication-source-readiness.mjs
           node --check backend/tests/account-batch13-static-site-link-audit.test.mjs
           node --check backend/tests/account-batch13-css-asset-link-audit.test.mjs
+          node --check backend/tests/account-batch13-publication-readiness.test.mjs
       - name: Execute adversarial Batch 13 regression
         run: node --test backend/tests/account-batch13-*.test.mjs
       - name: Keep deployment and financial execution blocked
