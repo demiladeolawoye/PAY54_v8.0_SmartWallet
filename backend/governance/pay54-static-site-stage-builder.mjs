@@ -18,6 +18,8 @@ import {hashPay54StaticSiteCandidate}
  from "./pay54-static-site-content-integrity.mjs";
 import {inspectPay54StaticSiteSecrets}
  from "./pay54-static-site-secret-markers.mjs";
+import {auditPay54ExternalScripts}
+ from "./pay54-external-script-source-review.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const sha=bytes=>createHash("sha256").update(bytes).digest("hex");
@@ -45,6 +47,10 @@ export function stagePay54SiteCandidate(sourceRoot=ROOT,destinationRoot){
  const secretReview=inspectPay54StaticSiteSecrets(source);
  if(!secretReview.sourceMarkerReviewPassed){
   throw new Error("PAY54_STAGE_SECRET_MARKERS_PRESENT");
+ }
+ const externalScripts=auditPay54ExternalScripts(source);
+ if(externalScripts.manualIntegrityReviewRequired){
+  throw new Error("PAY54_STAGE_EXTERNAL_SCRIPT_REVIEW_REQUIRED");
  }
  const manifest=hashPay54StaticSiteCandidate(source);
  const staging=join(target,".pay54-stage-"+randomUUID());
