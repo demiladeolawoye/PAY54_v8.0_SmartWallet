@@ -17,12 +17,12 @@
 | 266 | Offline security invariant checks enforce receipt provenance | `4801ce53e7ca25ea8e8f4d5a8d211845b7dfdd3c` | COMMITTED |
 | 267 | Mutation regressions reject removal of receipt-origin/consumption checks | `9f3348546be673c4c30f23e3fe20ccc147dfdd46` | VERIFIED |
 | 268 | GitHub Pages publication evidence risk and nonapproval policy | `2f9407c64b2f2931b3a50ad6088054e5105d6812` | COMMITTED |
-| 269 | Pages publication and forged self-approval regression tests | `9f819ac1a0eb965b4570514ab2de5b044a010a0f` | CI PENDING |
+| 269 | Pages publication and forged self-approval regression tests | `9f819ac1a0eb965b4570514ab2de5b044a010a0f` | VERIFIED |
 | 270 | Live Batch 11 implementation and Founder action register | This document | COMMITTED |
 
 ## Source regression
 
-At executable source commit `9f3348546be673c4c30f23e3fe20ccc147dfdd46`, the **entire ten-workflow backend/account security matrix** was observed SUCCESS, including the Batch 10 synthetic PostgreSQL and source audit workflow `43865644935`, full Backend Tests `43865644981`, Account Boundary `43865644915`, Security Integration `43865645184`, and historical Batch 07/08/09 account suites. Later source work (268–269) requires its own verification and must not be considered verified merely because older tests passed.
+At executable source commit `9f3348546be673c4c30f23e3fe20ccc147dfdd46`, the **entire ten-workflow backend/account security matrix** was observed SUCCESS, including the Batch 10 synthetic PostgreSQL and source audit workflow `43865644935`, full Backend Tests `43865644981`, Account Boundary `43865644915`, Security Integration `43865645184`, and historical Batch 07/08/09 account suites. The complete ten-workflow backend/account-security matrix for executable source commit `9f819ac1a0eb965b4570514ab2de5b044a010a0f` subsequently completed SUCCESS, including Backend Tests `43865912347`, Batch 10 SQL/source checks `43865912361`, Account Boundary `43865912453`, Account Security Integration `43865912433`, Account Read Access `43865912428`, Account Catalogue/Isolation `43865912520`, Account Authentication/RLS `43865912351`, Batch 07 `43865912572`, Batch 08 `43865912333`, and Batch 09 `43865912282`. GitHub Pages run `43865911532` was also SUCCESS; this observation **does not establish approved public publishing**.
 
 GitHub-managed `pages build and deployment` run `43865644521` completed SUCCESS on the same security source SHA. Current GitHub integration could not access `/pages` (unsupported endpoint), returned 403 for branch protection, and exposed no rulesets through its public read route. Accordingly, branch protections, Page source and actual public content are **UNKNOWN**, not verified secure.
 
