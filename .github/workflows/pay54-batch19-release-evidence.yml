@@ -10,6 +10,9 @@ on:
       - "backend/tests/account-batch19-*.test.mjs"
       - ".github/workflows/pay54-batch19-release-evidence.yml"
       - "docs/engineering/pay54-batch19-*.md"
+      - "backend/governance/pay54-static-site-link-audit.mjs"
+      - "backend/governance/pay54-batch18-cto-release-scorecard.mjs"
+      - "backend/tests/account-batch18-cto-release-scorecard.test.mjs"
   workflow_dispatch:
 
 permissions:
@@ -46,6 +49,7 @@ jobs:
             node --check "$file"
           done
           node --test backend/tests/account-batch19-*.test.mjs
+          node --test backend/tests/account-batch18-cto-release-scorecard.test.mjs
       - name: Confirm no release permissions or financial activation
         run: |
           test "$PAY54_REAL_MONEY_MODE" = false
