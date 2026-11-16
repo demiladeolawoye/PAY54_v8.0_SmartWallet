@@ -7,12 +7,17 @@
  * No money movement, mutation, provider dispatch or market enablement.
  */
 const COUNTRY=/^[A-Z]{2}$/;
+const REVIEWED_MARKETS=new Set([
+ "GB","NG","US","DE","FR","NL","ES","IE","CA","AU","SG","AE","JP",
+ "KE","GH"
+]);
 const CURRENCY=/^[A-Z]{3}$/;
 const WALLET_ID=/^[a-zA-Z0-9_-]{12,96}$/;
 function checkWallet(w){
  if(!w||typeof w!=="object"||Array.isArray(w)||
     typeof w.walletId!=="string"||!WALLET_ID.test(w.walletId)||
     typeof w.country!=="string"||!COUNTRY.test(w.country)||
+    !REVIEWED_MARKETS.has(w.country)||
     typeof w.currency!=="string"||!CURRENCY.test(w.currency)||
     typeof w.ledgerDomain!=="string"||!WALLET_ID.test(w.ledgerDomain)||
     typeof w.legalEntity!=="string"||!WALLET_ID.test(w.legalEntity)){
