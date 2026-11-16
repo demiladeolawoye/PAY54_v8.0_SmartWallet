@@ -6,7 +6,7 @@
  * repository contents. A candidate manifest is NOT actual public-site evidence.
  */
 import {readdirSync,lstatSync} from "node:fs";
-import {resolve,relative,join,sep} from "node:path";
+import {resolve,join} from "node:path";
 import {fileURLToPath} from "node:url";
 import {assessPay54PublicSiteManifest}
  from "./pay54-public-site-manifest.mjs";
@@ -20,17 +20,22 @@ const ROOT_PAGES=new Set([
 const ALLOWED_ASSETS=new Set(["js","css","img","images","fonts"]);
 const ALLOWED_EXT=/\.(?:js|mjs|css|png|jpg|jpeg|svg|webp|gif|ico|woff2|woff)$/i;
 const MAX_FILES=500,MAX_FILE_BYTES=3_000_000;
-function walk(base,subpath,paths){
+function walk(base,subpath,paths,excluded){
  for(const entry of readdirSync(join(base,subpath),{withFileTypes:true})){
   const path=[subpath,entry.name].filter(Boolean).join("/");
   const info=lstatSync(join(base,path));
   if(info.isSymbolicLink())throw new Error("PAY54_SITE_CANDIDATE_SYMLINK_DENIED");
   if(info.isDirectory()){
-   walk(base,path,paths);
+   walk(base,path,paths,excluded);
   }else if(info.isFile()){
    if(info.size>MAX_FILE_BYTES)throw new Error("PAY54_SITE_CANDIDATE_FILE_OVERSIZED");
-   if(path.split("/").some(part=>part.startsWith(".")))continue;
-   if(!ALLOWED_EXT.test(path))continue;
+   if(path.split("/").some(part=>part.startsWith("."))||
+      !ALLOWED_EXT.test(path)||
+      !assessPay54PublicSiteManifest({paths:[path]})
+        .sourceManifestStructurallySafe){
+    excluded.push(path);
+    continue;
+   }
    paths.push(path);
    if(paths.length>MAX_FILES)throw new Error("PAY54_SITE_CANDIDATE_TOO_MANY_FILES");
   }else throw new Error("PAY54_SITE_CANDIDATE_FILE_TYPE_DENIED");
@@ -42,6 +47,16 @@ export function inspectPay54StaticSiteCandidate(sourceRoot=ROOT){
  }
  const root=resolve(sourceRoot);
  const paths=[];
+ const excluded=[];
+ const assetsRoot=join(root,"assets");
+ try{
+  const assetsInfo=lstatSync(assetsRoot);
+  if(!assetsInfo.isDirectory()||assetsInfo.isSymbolicLink()){
+   throw new Error("PAY54_SITE_CANDIDATE_ASSETS_ROOT_INVALID");
+  }
+ }catch(error){
+  if(error.code!=="ENOENT")throw error;
+ }
  for(const page of ROOT_PAGES){
   const path=join(root,page);
   let info;
@@ -58,7 +73,7 @@ export function inspectPay54StaticSiteCandidate(sourceRoot=ROOT){
   if(!info.isDirectory()||info.isSymbolicLink()){
    throw new Error("PAY54_SITE_CANDIDATE_ASSET_DIRECTORY_INVALID");
   }
-  walk(root,"assets/"+category,paths);
+  walk(root,"assets/"+category,paths,excluded);
  }
  paths.sort();
  if(paths.length<1||paths.length>MAX_FILES){
@@ -78,10 +93,12 @@ export function inspectPay54StaticSiteCandidate(sourceRoot=ROOT){
  }
  return Object.freeze({
   candidatePaths:Object.freeze(paths),
+  excludedSourcePaths:Object.freeze(excluded.sort()),
   candidateCount:paths.length,
   rootPages:paths.filter(x=>ROOT_PAGES.has(x)).length,
   excludesBackendAndInfrastructure:true,
   sourceInventoryOnly:true,
+  fullAssetDependencyGraphVerified:false,
   actualPagesArtifactInspected:false,
   actualLiveUrlsVerified:false,
   repoPagesSettingsVerified:false,
