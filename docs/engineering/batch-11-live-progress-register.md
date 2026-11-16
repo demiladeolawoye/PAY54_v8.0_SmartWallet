@@ -29,6 +29,16 @@
 | 278 | Deny-by-default proposed static-site manifest and protected-path policy | `421a2d92cbcbbc89db34ec7312f6cb71ec68726a` | COMMITTED |
 | 279 | Public-site manifest adversarial source/private-file regression | `3b336777dc2e1537c8abe9a141c84238a2e073be` | CI PENDING |
 | 280 | Record security/CI evidence and remaining publication requirements | This register | COMMITTED |
+| 281 | Combine source CI, Pages evidence and proposed manifest into fail-closed release reconciliation | `31812939fd3b85bc2185f3d126ea43ce76a43ebe` | VERIFIED |
+| 282 | Cross-revision, fake approval and unsafe manifest integration tests | `9be8d7e523f35aa2cd3586fc61147df2546aa51d` | VERIFIED |
+| 283 | Bounded proposed static site content scanner with privacy-safe findings | `66dc864e9e04650c0081e0ca1454fcb0a2b4af33` | VERIFIED |
+| 284 | Detect private-key markers, generic secrets, HTTP scripts and source-map leaks | `46659a97b5e309625ff37d735f19b6933ef4336f` | VERIFIED |
+| 285 | Reject backup, debug, archived and temporary site files and directories | `50d535575bc1fdf8b970186ed5bf5beb023bd3f5`; fix `38e98ea1792ab1bb910b1e17788d2389dfb7e093` | VERIFIED |
+| 286 | Regression tests for backup files and nested archived folders | `047465154255a5c4b8262a141cc80eff69a0fa03` | VERIFIED AFTER FIX |
+| 287 | Repository-grounded Pages exposure review and incident containment runbook | `838b539712e0e44c0eca1a25df840da5c9f10d37` | COMMITTED |
+| 288 | Dedicated, read-only publication-governance CI including syntax checks | `babc9666775361af172086210cf3d37582635564`; fix `b941aef8f4cf48b33a67e10c8b415b39c894fc10` | VERIFIED |
+| 289 | Reconciled source test evidence and unresolved release risks | `c709fcf272b20abf34993c9ad9a78c873feddd59` | COMMITTED |
+| 290 | Update Batch 11 implementation and Founder action register | This document | COMMITTED |
 
 ## Source regression
 
@@ -43,6 +53,14 @@ At source commit `1f54fabcafdb5ff78f26fb048aa26e59f6b93153`, workflows found a r
 ### Latest follow-up verification
 
 The corrected fixture source commit `af26662fd7504bca27c83aa6db9b95c3e62cad17` passed Backend Tests run `43870198384`, Account Boundary `43870198115`, Account Security Integration `43870197999`, Account Read Access `43870198303`, Account Catalogue and Isolation `43870198142`, Account Authentication/RLS `43870198317` and other account workflows. The updated SQL/source workflow at commit `30e2c35edd8063c52ec35b927d2e43e7477b39cd` passed run `43870232831`. All interim failed runs from the malformed test fixture remain retained as evidence, not counted as successful. The new manifest tests on `3b336777dc2e1537c8abe9a141c84238a2e073be` are awaiting their own CI results.
+
+## Latest Batch 11 publication regression evidence
+
+**29 of 50 meaningful source-only deliverables (262–290) committed.** All relevant backend/account security workflows completed SUCCESS on executable source commit `46659a97b5e309625ff37d735f19b6933ef4336f`, including Backend run `43872213021` and Batch 10 SQL/source run `43872214018`. A later backup/folder policy fix at `38e98ea1792ab1bb910b1e17788d2389dfb7e093` passed Backend run `43872436327`. The dedicated Batch 11 publication governance source workflow passed at `b941aef8f4cf48b33a67e10c8b415b39c894fc10`, run `43872732145`, exercising the latest code and targeted tests.
+
+A previous failing backup-exclusion regression at `047465154255a5c4b8262a141cc80eff69a0fa03` was investigated and corrected. The GitHub push-protection block on a synthetic provider-key-like test fixture prevented that file from being committed; a generic, non-provider-specific fixture was used instead. Exact scope, failures and residual risks are in `docs/engineering/batch-11-publication-regression-evidence.md`.
+
+**No automated success proves Pages settings, public artefact visibility, real credential custody, durable audit or production deployment approval.**
 
 ## Security concern to resolve before live use
 
@@ -65,4 +83,4 @@ An internally issued receipt object only proves source provenance, not that the 
 
 Prioritise Pages source transparency, release evidence provenance, audit integrity and risk reduction, then inspect existing tests before introducing new modules. Avoid artificial tasks to reach 50. Maintain current approved source-only boundaries. Warn ahead of chat limit and include latest HEAD, CI run IDs, exact completed/pending item numbers and all Founder decisions in the handover.
 
-**Next source item:** 281. **Stop for new approval:** item 312.
+**Next source item:** 291. **Stop for new approval:** item 312.
