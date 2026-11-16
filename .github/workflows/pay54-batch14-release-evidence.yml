@@ -11,6 +11,7 @@ on:
       - "backend/governance/pay54-signed-release-evidence.mjs"
       - "backend/governance/pay54-signed-release-bundle.mjs"
       - "backend/governance/pay54-release-evidence-packet-review.mjs"
+      - "backend/governance/pay54-pages-artifact-evidence-review.mjs"
       - "docs/engineering/pay54-batch14-signed-evidence-trust-policy.md"
       - "docs/engineering/pay54-batch14-release-evidence-operations.md"
       - "backend/tests/account-batch14-*.test.mjs"
@@ -49,8 +50,10 @@ jobs:
           node --check backend/governance/pay54-signed-release-evidence.mjs
           node --check backend/governance/pay54-signed-release-bundle.mjs
           node --check backend/governance/pay54-release-evidence-packet-review.mjs
+          node --check backend/governance/pay54-pages-artifact-evidence-review.mjs
           node --check backend/tests/account-batch14-signed-evidence-trust-policy.test.mjs
           node --check backend/tests/account-batch14-release-evidence-packet.test.mjs
+          node --check backend/tests/account-batch14-pages-artifact-evidence.test.mjs
           node --check backend/tests/account-batch14-release-evidence-review.test.mjs
           node --check backend/tests/account-batch14-github-release-controls.test.mjs
           node --check backend/tests/account-batch14-evidence-operations.test.mjs
