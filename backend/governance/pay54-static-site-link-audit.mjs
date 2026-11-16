@@ -11,7 +11,7 @@ import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inv
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const ATTRIBUTE=/(?<![\w:-])(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
-const PAGE=/^[^/]+\.html$/i;
+const RESPONSIVE=/(?<![\w:-])srcset\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
 
@@ -22,6 +22,14 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  let checked=0;
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
+  // Responsive image candidate sets require dedicated parsing and byte-level
+  // review. Never silently certify them as a complete first-party graph.
+  for(const candidate of html.matchAll(RESPONSIVE)){
+   const raw=(candidate[2]??candidate[3]??"").trim();
+   if(raw){
+    rejected.push({page,reference:"srcset",reason:"RESPONSIVE_SOURCE_SET_REQUIRES_REVIEW"});
+   }
+  }
   for(const match of html.matchAll(ATTRIBUTE)){
    const raw=(match[2]??match[3]??"").trim();
    if(!raw||raw.startsWith("#"))continue;
