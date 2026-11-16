@@ -16,7 +16,7 @@ async function principal(){
 }
 test("reviewed database role and intact session actor produce advisory provenance",async()=>{
  const result=await createAccountConnectionProvenance({
-  reviewedRoleCapabilities:async()=>true
+  reviewedRoleCapabilities:async()=>({hasFinancialPrivilege:false,canAssumeOtherTenantRoles:false,validatedInTransaction:true})
  }).verify({dbPrincipal:await principal(),client:{query:async()=>({rows:[row]})}});
  assert.equal(result.liveCredentialAttested,false);
  assert.equal(result.financialExecutionEnabled,false);
@@ -28,7 +28,7 @@ test("role switching, bypass, inherited membership and external review failures 
   {row_security_enabled:false},{customer_table_ownership_count:1}
  ]){
   await assert.rejects(()=>createAccountConnectionProvenance({
-   reviewedRoleCapabilities:async()=>true
+   reviewedRoleCapabilities:async()=>({hasFinancialPrivilege:false,canAssumeOtherTenantRoles:false,validatedInTransaction:true})
   }).verify({dbPrincipal:await principal(),client:{query:async()=>({rows:[{...row,...change}]})}}),
     /ACCOUNT_DB_ACTOR_UNTRUSTED/);
  }
