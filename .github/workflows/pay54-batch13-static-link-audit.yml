@@ -4,6 +4,8 @@ on:
   pull_request:
     branches: [project-titan]
     paths:
+      - "*.html"
+      - "assets/**"
       - "backend/governance/pay54-static-site-link-audit.mjs"
       - "backend/governance/pay54-css-asset-link-audit.mjs"
       - "backend/governance/pay54-publication-source-readiness.mjs"
