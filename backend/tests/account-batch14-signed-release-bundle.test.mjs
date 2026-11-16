@@ -59,3 +59,13 @@ test("432: signer for an unknown release gate cannot be accepted",()=>{
  assert.ok(r.failures.some(x=>x.reason==="UNSUPPORTED_GATE"));
  assert.ok(r.failures.some(x=>x.reason==="MISSING_RECEIPT"));
 });
+
+test("435: replay of one evidence ID across distinct release gates is denied",()=>{
+ const input=records();
+ const second={...input[1].claims,evidenceId:input[0].claims.evidenceId};
+ input[1]={claims:second,signatureBase64:sign(null,Buffer.from(JSON.stringify(second)),privateKey).toString("base64")};
+ const result=assess(input);
+ assert.equal(result.signaturesValidAndComplete,false);
+ assert.ok(result.failures.some(x=>x.reason==="REPLAYED_EVIDENCE_ID"));
+ assert.equal(result.productionRelease,"BLOCKED");
+});
