@@ -17,11 +17,12 @@ async function principal(){
 test("reviewed database role and intact session actor produce advisory provenance",async()=>{
  const result=await createAccountConnectionProvenance({
   reviewedRoleCapabilities:async()=>({hasFinancialPrivilege:false,canAssumeOtherTenantRoles:false,validatedInTransaction:true})
- }).verify({dbPrincipal:await principal(),client:{query:async()=>({rows:[row]})}});
+ }).verify({dbPrincipal,client:{query:async()=>({rows:[row]})}});
  assert.equal(result.liveCredentialAttested,false);
  assert.equal(result.financialExecutionEnabled,false);
 });
 test("role switching, bypass, inherited membership and external review failures deny",async()=>{
+ const dbPrincipal=await principal();
  for(const change of [
   {session_user_name:"postgres"},{current_user_name:"pay54_tenant_other_0001"},
   {bypass_rls:true},{memberships_count:1},{superuser:true},
@@ -29,11 +30,11 @@ test("role switching, bypass, inherited membership and external review failures 
  ]){
   await assert.rejects(()=>createAccountConnectionProvenance({
    reviewedRoleCapabilities:async()=>({hasFinancialPrivilege:false,canAssumeOtherTenantRoles:false,validatedInTransaction:true})
-  }).verify({dbPrincipal:await principal(),client:{query:async()=>({rows:[{...row,...change}]})}}),
+  }).verify({dbPrincipal,client:{query:async()=>({rows:[{...row,...change}]})}}),
     /ACCOUNT_DB_ACTOR_UNTRUSTED/);
  }
  await assert.rejects(()=>createAccountConnectionProvenance({
   reviewedRoleCapabilities:async()=>false
- }).verify({dbPrincipal:await principal(),client:{query:async()=>({rows:[row]})}}),
+ }).verify({dbPrincipal,client:{query:async()=>({rows:[row]})}}),
   /ACCOUNT_CONNECTION_UNTRUSTED/);
 });
