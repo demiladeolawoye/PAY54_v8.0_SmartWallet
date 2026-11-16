@@ -13,6 +13,7 @@ on:
       - "backend/governance/pay54-preview-artifact-manifest.mjs"
       - "backend/governance/pay54-verify-founder-preview.mjs"
       - "backend/governance/pay54-offline-preview-markup-audit.mjs"
+      - "backend/governance/pay54-offline-preview-resource-audit.mjs"
       - "docs/engineering/pay54-dashboard-preview-acceptance.md"
       - "docs/engineering/pay54-founder-offline-dashboard-preview-guide.md"
       - "backend/tests/account-batch16-*.test.mjs"
@@ -55,6 +56,8 @@ jobs:
           node --check backend/governance/pay54-preview-artifact-manifest.mjs
           node --check backend/governance/pay54-verify-founder-preview.mjs
           node --check backend/governance/pay54-offline-preview-markup-audit.mjs
+          node --check backend/governance/pay54-offline-preview-resource-audit.mjs
+          node --check backend/tests/account-batch16-offline-preview-resources.test.mjs
           node --check backend/tests/account-batch16-offline-preview-markup-audit.test.mjs
           node --check backend/tests/account-batch16-founder-preview-guide.test.mjs
           node --check backend/tests/account-batch16-verify-founder-preview.test.mjs
