@@ -104,3 +104,20 @@ test("529: untrusted remote CSS dependencies cannot enter a local visual preview
   assert.deepEqual(readdirSync(f.output),[]);
  }finally{f.clean();}
 });
+
+test("537: SVG carrying executable markup or external references fails before packaging",()=>{
+ for(const malicious of [
+  '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject>unsafe</foreignObject></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg"><image href="https://example.org/a.png"/></svg>'
+ ]){
+  const f=fixture();
+  try{
+   writeFileSync(join(f.source,"assets/img/logo.svg"),malicious);
+   assert.throws(()=>buildPay54DashboardOfflinePreview(f.source,f.output),
+    /SVG_ACTIVE_CONTENT_DENIED/);
+   assert.deepEqual(readdirSync(f.output),[]);
+  }finally{f.clean();}
+ }
+});
