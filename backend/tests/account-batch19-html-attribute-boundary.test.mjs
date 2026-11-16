@@ -109,3 +109,17 @@ test("683: meta http-equiv refresh needs independent redirect review",()=>{
   assert.ok(r.rejectedReferences.some(x=>x.reason==="ACTIVE_REDIRECT_REQUIRES_REVIEW"));
  }finally{f.dispose();}
 });
+
+test("685: double-encoded traversal and resource paths fail closed",()=>{
+ const refs=["assets/img/%252e%252e/backend/key.svg",
+  "assets/img/%252fbackend%252fsource.svg"];
+ for(const path of refs){
+  const f=fixture('<img src="'+path+'">');
+  try{
+   const r=auditPay54StaticSiteLinks(f.root);
+   assert.equal(r.complete,false,path);
+   assert.ok(r.rejectedReferences.some(x=>
+    x.reason==="DOUBLE_ENCODED_PATH"),path);
+  }finally{f.dispose();}
+ }
+});
