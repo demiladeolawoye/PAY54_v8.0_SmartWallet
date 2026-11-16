@@ -35,7 +35,7 @@ function classify(value,page,candidates){
  try{decoded=decodeURIComponent(pathOnly);}catch{
   return {kind:"rejected",page,reference:raw,reason:"INVALID_ENCODING"};
  }
- if(!decoded||decoded.split("/").includes("..")||decoded.includes("\\")||decoded.includes("\0")){
+ if(!decoded||/%2e/i.test(pathOnly)||decoded.includes("\\")||decoded.includes("\0")){
   return {kind:"rejected",page,reference:raw,reason:"PATH_TRAVERSAL"};
  }
  const path=posix.normalize(posix.join(posix.dirname(page),decoded));
