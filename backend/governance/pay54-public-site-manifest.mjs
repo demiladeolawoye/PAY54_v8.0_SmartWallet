@@ -13,6 +13,8 @@ const DENY_SEGMENTS=new Set([
  "backend",".github","docs","security","secrets","private","internal",
  "tests","test","node_modules",".git","credentials","config","keys"
 ]);
+const DENY_NAME_PATTERN=/(?:^|[._ -])(?:backup|backups|lastworking|old|archive|archived|temp|temporary|draft|debug)(?:[._ -]|$)/i;
+const DENY_EXTENSIONS=/\.(?:bak|old|orig|tmp|log|map|sql|pem|key|zip|7z|tar|gz)$/i;
 const DENY_FILES=new Set([
  ".env",".env.local",".env.production",".npmrc","package-lock.json",
  "pnpm-lock.yaml","yarn.lock","dockerfile","readme.md","license"
@@ -22,7 +24,8 @@ function pathApproved(path){
     path.startsWith("/")||path.endsWith("/")||
     path.split("/").some(x=>x==="."||x===".."||DENY_SEGMENTS.has(x.toLowerCase())))return false;
  const name=path.split("/").at(-1).toLowerCase();
- if(DENY_FILES.has(name)||name.startsWith(".env")||
+ if(DENY_FILES.has(name)||DENY_NAME_PATTERN.test(name)||
+    DENY_EXTENSIONS.test(name)||name.startsWith(".env")||
     name.endsWith(".map")||name.endsWith(".pem")||
     name.endsWith(".key")||name.endsWith(".sql")||
     !SAFE_EXT.test(name))return false;
