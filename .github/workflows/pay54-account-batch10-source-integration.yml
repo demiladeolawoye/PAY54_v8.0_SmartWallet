@@ -88,7 +88,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in backend/db/account-*.mjs backend/domain/account-*.mjs backend/security/account-*.mjs; do
+          for f in backend/db/account-*.mjs backend/domain/account-*.mjs backend/security/account-*.mjs backend/tests/account-*.test.mjs; do
             node --check "$f"
           done
           node --test backend/tests/account-*.test.mjs backend/tests/trusted-account-principal.test.mjs
