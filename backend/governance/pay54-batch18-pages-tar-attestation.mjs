@@ -82,10 +82,18 @@ export function verifyPay54PagesTarAgainstSource(tar,manifest){
     expectedFile.sha256!==sha256(tar.subarray(offset+BLOCK,offset+BLOCK+size))){
     failures.push("FILE_DIGEST_MISMATCH");
    }
-  }else if(size!==0)failures.push("DIRECTORY_WITH_CONTENT");
+  }else if(type===53){
+   if(size!==0)failures.push("DIRECTORY_WITH_CONTENT");
+   if(![...byPath.keys()].some(x=>x.startsWith(path+"/"))){
+    failures.push("UNEXPECTED_DIRECTORY");
+   }
+  }
   offset+=BLOCK+aligned;
  }
  if(zeros!==2)throw new Error("PAY54_TAR_ATTEST_TERMINATOR_MISSING");
+ if(tar.subarray(offset+BLOCK).some(x=>x!==0)){
+  failures.push("NONZERO_TRAILING_ARCHIVE_DATA");
+ }
  const missing=[...byPath.keys()].filter(x=>!seen.has(x));
  if(missing.length)failures.push("EXPECTED_MEMBERS_MISSING");
  return Object.freeze({
