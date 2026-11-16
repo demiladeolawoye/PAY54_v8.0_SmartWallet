@@ -1,0 +1,58 @@
+"use strict";
+
+import {randomUUID} from "node:crypto";
+
+/*
+ * PAY54 Batch 10 item 230 — source-only durable-audit RECEIPT CONTRACT.
+ * A callback saying 'persisted' is not proof of physical durability.
+ * Before live use, an independent reviewer must attest the actual append-only
+ * store, retention, tenant-isolation, consistency and outage behaviour.
+ * No customer data or account identifier is included in emitted events.
+ */
+
+const VALID_OPS=new Set(["ACCOUNT_LIST","ACCOUNT_SELECT"]);
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const VALID_OUTCOMES=new Set(["ALLOWED","DENIED","ERROR"]);
+
+export function createAccountAuditReceiptGate({emit,makeId=randomUUID}={}) {
+ if (typeof emit!=="function" || typeof makeId!=="function") {
+  throw new TypeError("ACCOUNT_AUDIT_RECEIPT_CONFIG_INVALID");
+ }
+ return Object.freeze({
+  async publish({operation,outcome,reason}) {
+   if (!VALID_OPS.has(operation) || !VALID_OUTCOMES.has(outcome) ||
+       reason!==(outcome==="ALLOWED"?"POLICY_OK":
+         outcome==="DENIED"?"POLICY_DENIED":"UNAVAILABLE")) {
+    throw new Error("ACCOUNT_AUDIT_RECEIPT_DENIED");
+   }
+   const eventId=makeId();
+   if (typeof eventId!=="string" || !UUID.test(eventId)) {
+    throw new Error("ACCOUNT_AUDIT_RECEIPT_DENIED");
+   }
+   const event=Object.freeze({
+    schema:"PAY54_ACCOUNT_AUDIT_RECEIPT_V1",
+    eventId,operation,outcome,reason,
+    financialExecutionEnabled:false
+   });
+   let acknowledgement;
+   try {
+    acknowledgement=await emit(event);
+   } catch {
+    throw new Error("ACCOUNT_AUDIT_UNAVAILABLE");
+   }
+   if (!acknowledgement || typeof acknowledgement!=="object" ||
+       Object.keys(acknowledgement).length!==3 ||
+       acknowledgement.eventId!==eventId ||
+       acknowledgement.accepted!==true ||
+       acknowledgement.persistenceConfirmed!==true) {
+    throw new Error("ACCOUNT_AUDIT_UNAVAILABLE");
+   }
+   return Object.freeze({
+    eventId,receiptAccepted:true,
+    sourceAckOnly:true,
+    durableStorageIndependentlyVerified:false,
+    financialExecutionEnabled:false
+   });
+  }
+ });
+}
