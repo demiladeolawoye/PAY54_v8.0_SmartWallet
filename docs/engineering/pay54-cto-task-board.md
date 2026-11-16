@@ -352,3 +352,21 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **Current source-only security interpretation:** Static HTML and CSS checks are useful but are not the complete runtime dependency graph, do not independently inspect Pages settings, do not inspect published artifacts, do not verify real public reachability, and do not prove that no secrets have been committed. Pages publication remediation and branch-protection verification remain **OPEN**. A GitHub Pages build success is never enough to close P-01. Production release remains **BLOCKED**.
 
 **Batch bookkeeping:** Items 368–378 = 11 source deliverables committed, 39 remaining in planned 50-item Batch 13. Do not count any unimplemented proposals as completed. Individual issues may remain blocked after the 50-item source batch; delivery counts do not imply market/operational launch readiness.
+
+
+## Batch 13 continuation checkpoint — items 379–384
+
+| Item | Verified source deliverable | Status |
+|---|---|---|
+| 379 | HTML gate rejects unsafe data/blob and root-relative URL forms | COMMITTED |
+| 380 | Negative tests for executable schemes, project-root paths and telephone/email exceptions | COMMITTED |
+| 381 | Restricted candidate content SHA-256 catalogue | COMMITTED |
+| 382 | Deterministic hash and excluded-backend source regression tests | COMMITTED |
+| 383 | Dedicated workflow adds source integrity checks and tests | CI VERIFIED: Batch 13 run 43930436612 SUCCESS on commit 9c37b355b777981314a97bc62d6dbe94fd62b24d |
+| 384 | Updated CTO Batch 13 progress, nonactivation and evidence register | COMMITTED via this update |
+
+**Status:** Items 368–384 = 17 committed source deliverables; items 385–417 = 33 remaining toward the agreed 50-item approval checkpoint. This count records source deliverables, not deployments or independent operational acceptance. At last CI check, the dedicated publication suite and Batch 11 publication suite had succeeded; remaining nine account/backend workflows on this revision were still running or pending and must not be declared passed without evidence.
+
+**P-01 remains P0 OPEN.** Only local publication-source candidates have been inspected, not actual production GitHub Pages settings, artifact bytes or real backend URL reachability. Public endpoint checks were inconclusive from the available browsing environment. Do not mark a confirmed data breach and do not mark the publication safe. No Pages settings, protected branch settings or credentials were changed.
+
+**Release:** Not authorised. Maintain immutable evidence and review boundary. The draft PR is for source-only review and must not be merged or deployed automatically.
