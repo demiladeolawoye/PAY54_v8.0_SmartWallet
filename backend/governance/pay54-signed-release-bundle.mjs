@@ -14,7 +14,7 @@ import {inspectPay54SignedReleaseReceipt}
 
 const SHA=/^[0-9a-f]{40}$/;
 export function assessPay54SignedReleaseBundle({
- commitSha,receipts,trustedKeys
+ commitSha,receipts,trustedKeys,reviewTime
 }={}){
  if(!SHA.test(commitSha??"")){
   throw new Error("PAY54_SIGNED_BUNDLE_COMMIT_REQUIRED");
@@ -22,6 +22,11 @@ export function assessPay54SignedReleaseBundle({
  if(!Array.isArray(receipts)||receipts.length>100||!trustedKeys||
   typeof trustedKeys!=="object"||Array.isArray(trustedKeys)){
   throw new TypeError("PAY54_SIGNED_BUNDLE_INPUT_INVALID");
+ }
+ const referenceMs=Date.parse(reviewTime);
+ if(typeof reviewTime!=="string"||!Number.isFinite(referenceMs)||
+  !/^\\d{4}-\\d{2}-\\d{2}T/.test(reviewTime)){
+  throw new Error("PAY54_SIGNED_BUNDLE_REVIEW_TIME_REQUIRED");
  }
  const failures=[];
  const seen=new Set();
@@ -41,6 +46,12 @@ export function assessPay54SignedReleaseBundle({
    continue;
   }
   evidenceIds.add(evidenceId);
+  const signedAt=Date.parse(receipt.claims.reviewedAt);
+  if(!Number.isFinite(signedAt)||signedAt>referenceMs||
+   referenceMs-signedAt>7*24*60*60*1000){
+   failures.push({gate,reason:"RECEIPT_STALE_OR_FUTURE"});
+   continue;
+  }
   const signer=receipt.claims.signer;
   const trustedKey=Object.hasOwn(trustedKeys,signer)?trustedKeys[signer]:null;
   if(typeof trustedKey!=="string"){
