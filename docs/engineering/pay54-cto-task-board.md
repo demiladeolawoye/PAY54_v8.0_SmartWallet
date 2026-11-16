@@ -324,3 +324,31 @@ Item 372 adds a separately staged, never-deployed frontend snapshot that copies 
 Pages build/deploy run 43917703697 also succeeded on the same source revision, but this **does not verify publication safety**. The documentation-only follow-on commits are not part of that executable CI snapshot.
 
 **Open release gate:** actual owner-verified GitHub Settings > Pages/Rules/Branches/Environments; public file reachability; dynamic asset links and known CDN integrity; mobile/desktop full regression; approval of a restricted Pages Actions workflow, safely pinned actions and rollback. Do not claim an existing Pages root source has been replaced. Personal/Business account switching, customer DB SELECT and all money/crypto operations remain disabled.
+
+
+## Batch 13 security publication hardening — items 368–378 (draft PR, not deployed)
+
+**Approved cadence:** 50 genuine implementations, numbered 368–417; owner approval checkpoint after item 417. The branch and pull request remain isolated from the working `project-titan` branch. No automatic deployment, merge, live Pages setting, credentials, real financial execution, or cloud provisioning is authorised by this programme.
+
+| Item | Deliverable | Evidence / state |
+|---|---|---|
+| 368 | Read-only HTML-linked asset audit against existing candidate inventory | Committed |
+| 369 | HTML link negative tests: missing files, unsafe schemes, traversal | Committed |
+| 370 | Dedicated source-only Batch 13 GitHub Actions validation workflow with read-only token and pinned action revisions | CI verified |
+| 371 | CSS URL/import asset inventory with source-only policy | Committed |
+| 372 | CSS adversarial regression and safe image data URI coverage | Committed |
+| 373 | Execute HTML and CSS suites through dedicated CI | Committed; first run exposed two test failures |
+| 374 | Correct CSS-relative path resolution inside approved assets, deny escaped traversal | Dedicated CI verified; previously failing cases now pass |
+| 375 | Combined deterministic source publication report and SHA-256 manifest path digest | Committed |
+| 376 | Combined readiness success/failure and non-authorisation regression tests | Committed |
+| 377 | Expand CI to test combined publication report | Dedicated CI run 43929947182 SUCCESS |
+| 378 | CTO source-only checkpoint, implementation traceability and production gate reconciliation | Committed via this board update |
+
+**Latest checked Batch 13 code revision before this board update:** `d84a5745b155f56bcb50a2726dab17a6d080998a`.
+**Latest dedicated Batch 13 CI run:** `43929947182` — SUCCESS. Ten broader account and backend workflows were in progress when this checkpoint was prepared; previous revision `fecd4dc60e98f094967912c743fcf9ece56b18a2` passed all ten. Keep the current revision's broader-workflow results UNKNOWN until verified.
+
+**Intermediate failure evidence:** Batch 13 run `43929536467` failed two CSS-relative-path tests. The correct behaviour was implemented in item 374 and subsequently the dedicated CI passed. Do not erase this regression history.
+
+**Current source-only security interpretation:** Static HTML and CSS checks are useful but are not the complete runtime dependency graph, do not independently inspect Pages settings, do not inspect published artifacts, do not verify real public reachability, and do not prove that no secrets have been committed. Pages publication remediation and branch-protection verification remain **OPEN**. A GitHub Pages build success is never enough to close P-01. Production release remains **BLOCKED**.
+
+**Batch bookkeeping:** Items 368–378 = 11 source deliverables committed, 39 remaining in planned 50-item Batch 13. Do not count any unimplemented proposals as completed. Individual issues may remain blocked after the 50-item source batch; delivery counts do not imply market/operational launch readiness.
