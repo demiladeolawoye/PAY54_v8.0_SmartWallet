@@ -72,3 +72,22 @@ test("380: mail and telephone references are inventoried, never treated as local
   assert.equal(r.externalReferences.length,2);
  }finally{f.cleanup();}
 });
+
+test("406: unquoted HTML script and stylesheet references are audited",()=>{
+ const f=fixture('<script src=assets/js/app.js></script><link href=assets/css/missing.css>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.equal(r.checkedLocalReferences,2);
+  assert.deepEqual(r.missingLocalReferences.map(x=>x.resolved),
+   ["assets/css/missing.css"]);
+ }finally{f.cleanup();}
+});
+test("406: unquoted potentially executable URL is rejected",()=>{
+ const f=fixture('<a href=javascript:alert(1)>bad</a>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.equal(r.rejectedReferences[0].reason,"UNSAFE_URL");
+ }finally{f.cleanup();}
+});
