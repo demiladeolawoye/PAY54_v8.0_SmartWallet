@@ -904,3 +904,18 @@ body.p54-blueprint .p54b-frequent-people[open] #recipientDashboardWidget {
   max-width: 100%;
   overflow-wrap: anywhere;
 }
+
+
+/* PAY54 Batch 12 — disabled account switch is a truthful preview state. */
+body.p54-blueprint .p54b-account-switch-unavailable {
+  display: block;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: not-allowed;
+  opacity: .82;
+  pointer-events: none;
+}
+body.p54-blueprint .p54b-account-switch-unavailable:disabled {
+  background: transparent;
+}
