@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 staging/ACL verification 312–363)
+**Last reviewed:** 2026-11-16 (Batch 12 Pages artifact risk review 312–367)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 52 | Not fixed | Items 312–363 committed; latest revised SQL baseline passed all ten backend/account security workflows |
+| Batch 12 source-only engineering | Milestone-gated | 56 | Not fixed | Items 312–367 committed; latest static-site candidate backend regression passed, Pages release risk remains open |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -98,12 +98,16 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 361 | Adversarial tests for TRUNCATE, REFERENCES, TRIGGER and table ownership | CI VERIFIED |
 | 362 | Independent staging approval and real GitHub branch-protection visibility decision | COMMITTED |
 | 363 | Reconcile CTO task board with latest verified/pending workflow results | COMMITTED |
+| 364 | Read-only static-site candidate inventory restricted to UI source and assets | SOURCE CI VERIFIED |
+| 365 | Real repo static inventory tests: backup exclusion, symlink denial and size limits | SOURCE CI VERIFIED |
+| 366 | GitHub Pages artifact overbroad publication evidence and separate owner containment decision | COMMITTED |
+| 367 | CTO task board reconciliation for Pages publication and owner decisions | COMMITTED |
 
 Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next integration milestone: authenticated server-side account switching with independently verified tenant RLS, trusted account-scoped ledger snapshot integration, private global directory and contracted corridor adapters. New source-only account response fencing is not yet wired to real customer queries and must not be described as production-ready. Source-only work does not enable transfers.
 
 ## Batch 11 closure and Batch 12 approval boundary
 
-Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–363. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
+Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–367. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
 
 Avoid hollow deliverables to meet arbitrary counts; next work is driven by operational acceptance criteria, independent RLS checks and genuine business integration dependencies.
 
@@ -272,3 +276,13 @@ Completed CI checks for the exact source revision at this checkpoint:
 A GitHub REST request for actual branch protection returned HTTP 403 (Resource not accessible by integration). Repository rulesets listed no rulesets; that cannot be equated with no branch protection. Pages settings were not independently accessible. Founder must review Settings > Rules, Branches, Environments and Pages, and supply sanitized evidence before staging or deployer activation.
 
 Source-only owner decision: docs/engineering/batch-12-staging-trust-owner-decision.md. Remaining operational priority is independent database peer/TLS and tenant RLS attestation, protected release identities, validated private cloud/network evidence, durable audit and a specifically approved staging release. No customer-data grant, live account switching or money movement authorised.
+
+## Batch 12 Pages artifact publication review — 364–367
+
+**Source tested:** cc1bb9e54293493304c0084fd18a791d6a983e54; Backend run 43915040557 SUCCESS. All account/security workflows except Account Security Integration had finished successfully at this snapshot; confirm the final run separately. No deployment strategy or current GitHub Pages configuration was modified.
+
+**Concrete Pages evidence:** Run 43913053580 on commit abc5fd241c1999004a0b54f3dd3100f9d651cc5d uploaded a GitHub Pages artifact (ID 14247733115, size 1,136,185 bytes). Build logs list backend/ files and backend/tests among build inputs. Deploy logs report https://demiladeolawoye.github.io/PAY54_v8.0_SmartWallet/ as the public destination. Individual file reachability is UNKNOWN because live HTTP probes from the available environment failed. The repository itself is PUBLIC. The website's current packaging therefore needs urgent owner review; no confirmed secrets compromise or live exposure is asserted.
+
+**Source-only candidate:** backend/governance/pay54-static-site-candidate-inventory.mjs evaluates reviewed root HTML and selected assets, excluding backend, docs, private paths and dashboard backup. Candidate is not a verified deployable website: required asset-link completeness and visual regression remain untested. Tests are in backend/tests/account-batch12-static-site-candidate.test.mjs. No Pages changes have been made.
+
+**Full evidence / owner action plan:** docs/security/batch-12-pages-artifact-exposure-evidence.md. Founder and DevSecOps should inspect Settings > Pages, Rules, Branches and Environments, gather public reachability evidence and authorise any containment/replacement through a separately reviewed release. PostgreSQL, runtime identity, compliance and payment execution remain BLOCKED.
