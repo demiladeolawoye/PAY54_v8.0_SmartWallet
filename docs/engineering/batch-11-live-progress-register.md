@@ -39,6 +39,13 @@
 | 288 | Dedicated, read-only publication-governance CI including syntax checks | `babc9666775361af172086210cf3d37582635564`; fix `b941aef8f4cf48b33a67e10c8b415b39c894fc10` | VERIFIED |
 | 289 | Reconciled source test evidence and unresolved release risks | `c709fcf272b20abf34993c9ad9a78c873feddd59` | COMMITTED |
 | 290 | Update Batch 11 implementation and Founder action register | This document | COMMITTED |
+| 291 | Staging Terraform and workflow trust offline policy | `901033ec4cf2b5e7c343540539cee1f9fdab0727` | COMMITTED; DEDICATED CI PASSED |
+| 292 | Staging trust and unauthorised provisioning mutation regressions | `6453cbcc2aa1ce13ca978d8ca91fce8a0a6a5bf6` | VERIFIED |
+| 293 | Founder task board, realistic remaining counts and production blockers | `ae8abb7cf799974da9f433f52432beb2e661b4c3` | COMMITTED |
+| 294 | GitHub Actions mutable dependency-tag source review | `c0934df9c613e6d43e5d3cee531c85118e6733b0` | COMMITTED |
+| 295 | Immutable action pinning and mutable tag adversarial tests | `2730f9cc1173085e6f0e29de6cbeabf41b270041` | VERIFIED DEDICATED CI |
+| 296 | Independent SHA verification and least-privilege Actions change request | `520f4d0c523a84d12d66a798da3f3e41c0ade253` | COMMITTED |
+| 297 | Updated CTO task board, progress register and remaining security actions | This register | COMMITTED |
 
 ## Source regression
 
@@ -62,6 +69,12 @@ A previous failing backup-exclusion regression at `047465154255a5c4b8262a141cc80
 
 **No automated success proves Pages settings, public artefact visibility, real credential custody, durable audit or production deployment approval.**
 
+## Batch 11 implementation 291–297 checkpoint
+
+36/50 meaningful approved source-only deliverables are committed, 14 remain (298–311). A full ten-workflow backend/account plus synthetic SQL regression matrix passed at source SHA `6453cbcc2aa1ce13ca978d8ca91fce8a0a6a5bf6`. New GitHub Actions dependency inventory and adversarial tests passed the dedicated Batch 11 publication governance CI at SHA `2730f9cc1173085e6f0e29de6cbeabf41b270041`, run `43876325593`. Other workflows for that latter SHA may have been pending and must not be labelled successful without verification.
+
+`docs/engineering/pay54-cto-task-board.md` is the live backlog, with 14 distinct production-readiness workstreams, separate from 14 remaining Batch 11 source deliverables. Existing staging workflow tags are mutable (source concern only). CR-SEC-11-01 requests independently verified immutable upstream Action SHAs; no guessed SHA or live credential/deploy action has been introduced.
+
 ## Security concern to resolve before live use
 
 An internally issued receipt object only proves source provenance, not that the audit backend persisted an event. All real account data must remain denied until audit write credentials and independently verified durable receipts are deployed and independently tested. In-process WeakSet identity alone is not a cryptographic integrity control or distributed idempotency guarantee.
@@ -83,4 +96,4 @@ An internally issued receipt object only proves source provenance, not that the 
 
 Prioritise Pages source transparency, release evidence provenance, audit integrity and risk reduction, then inspect existing tests before introducing new modules. Avoid artificial tasks to reach 50. Maintain current approved source-only boundaries. Warn ahead of chat limit and include latest HEAD, CI run IDs, exact completed/pending item numbers and all Founder decisions in the handover.
 
-**Next source item:** 291. **Stop for new approval:** item 312.
+**Next source item:** 298. **Stop for new approval:** item 312.
