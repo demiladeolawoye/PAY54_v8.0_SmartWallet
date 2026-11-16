@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 Pages artifact risk review 312–367)
+**Last reviewed:** 2026-11-16 (Batch 12 Pages review-only replacement package 312–375)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 56 | Not fixed | Items 312–367 committed; latest static-site candidate passed all 10 backend/account CI workflows, Pages release risk remains open |
+| Batch 12 source-only engineering | Milestone-gated | 64 | Not fixed | Items 312–375 committed; frontend-only package source passed 10 backend/security CI workflows, Pages release risk still open |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -102,12 +102,20 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 365 | Real repo static inventory tests: backup exclusion, symlink denial and size limits | SOURCE CI VERIFIED |
 | 366 | GitHub Pages artifact overbroad publication evidence and separate owner containment decision | COMMITTED |
 | 367 | CTO task board reconciliation for Pages publication and owner decisions | COMMITTED |
+| 368 | Static HTML/CSS/ESM dependency validation for candidate Pages site | VERIFIED SOURCE |
+| 369 | Local resource, unsafe URL, CSS relative import and CDN tests | VERIFIED SOURCE |
+| 370 | Permit only eight reviewed frontend security scripts under assets/js/security | VERIFIED SOURCE |
+| 371 | Regression for browser security modules and backend/private exclusions | VERIFIED SOURCE |
+| 372 | Stage isolated frontend-only review package with SHA-256 file hashes | VERIFIED SOURCE |
+| 373 | Staging byte-level, denied path and missing dependency regression | VERIFIED SOURCE |
+| 374 | Pages replacement acceptance, rollback and browser QA requirements | COMMITTED |
+| 375 | CTO board and exact last-source regression confirmation | COMMITTED |
 
 Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next integration milestone: authenticated server-side account switching with independently verified tenant RLS, trusted account-scoped ledger snapshot integration, private global directory and contracted corridor adapters. New source-only account response fencing is not yet wired to real customer queries and must not be described as production-ready. Source-only work does not enable transfers.
 
 ## Batch 11 closure and Batch 12 approval boundary
 
-Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–367. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
+Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–375. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
 
 Avoid hollow deliverables to meet arbitrary counts; next work is driven by operational acceptance criteria, independent RLS checks and genuine business integration dependencies.
 
@@ -286,3 +294,33 @@ Source-only owner decision: docs/engineering/batch-12-staging-trust-owner-decisi
 **Source-only candidate:** backend/governance/pay54-static-site-candidate-inventory.mjs evaluates reviewed root HTML and selected assets, excluding backend, docs, private paths and dashboard backup. Candidate is not a verified deployable website: required asset-link completeness and visual regression remain untested. Tests are in backend/tests/account-batch12-static-site-candidate.test.mjs. No Pages changes have been made.
 
 **Full evidence / owner action plan:** docs/security/batch-12-pages-artifact-exposure-evidence.md. Founder and DevSecOps should inspect Settings > Pages, Rules, Branches and Environments, gather public reachability evidence and authorise any containment/replacement through a separately reviewed release. PostgreSQL, runtime identity, compliance and payment execution remain BLOCKED.
+
+
+## Pages candidate build and staging checkpoint — items 368–375
+
+**Verified executable-source SHA:** 9fa996bd385b6714087038306a6532e8e7e5ff14.
+
+The existing Pages source is overbroad. Build logs for Pages run 43913053580 included backend sources; individual public endpoint reachability remains unverified. The source-only replacement work has not changed Pages publishing settings, the Pages workflow, credentials or DNS. Routine GitHub Pages automatic builds of the branch may continue to publish the old site until owner-approved publication changes take effect.
+
+Items 368–369 created an HTML/CSS/local ES module dependency audit that fails if a proposed static site would lack essential referenced assets, resolve outside the site root or rely on unreviewed external script URLs. The initial regression failed because the existing manifest policy excluded the actual browser security directory, causing eight valid dashboard scripts to appear missing. Items 370–371 narrowly allowlisted **only those eight actual frontend security modules**, with explicit negative tests for backend security sources and extra private files. This is a correction of the build boundary, not a weakening of the money/account authorisation model.
+
+Item 372 adds a separately staged, never-deployed frontend snapshot that copies only vetted files and records SHA-256 file hashes; item 373 checks the real-repo staged output, exact hashes, exclusion of backend/backups, dependency failures and staging/source separation. Item 374 documents full browser, CSP/SRI, dynamic asset, accessibility, release, rollback and owner approval requirements.
+
+**Exact successful CI workflows on SHA 9fa996bd:**
+
+| Workflow | Run |
+|---|---:|
+| PAY54 Backend Tests | 43917704348 |
+| Account Boundary Tests | 43917704268 |
+| Account Security Integration | 43917704279 |
+| Account Read Access Integration | 43917704213 |
+| Account Catalogue and Isolation Integration | 43917704170 |
+| Account Authentication and RLS Integration | 43917704848 |
+| Batch 07 Account Security Integration | 43917704303 |
+| Batch 08 Authenticated Actor Integration | 43917704448 |
+| Batch 09 Account Actor and RLS Integration | 43917704195 |
+| Batch 10 Synthetic Role and Audit Source Tests | 43917704370 |
+
+Pages build/deploy run 43917703697 also succeeded on the same source revision, but this **does not verify publication safety**. The documentation-only follow-on commits are not part of that executable CI snapshot.
+
+**Open release gate:** actual owner-verified GitHub Settings > Pages/Rules/Branches/Environments; public file reachability; dynamic asset links and known CDN integrity; mobile/desktop full regression; approval of a restricted Pages Actions workflow, safely pinned actions and rollback. Do not claim an existing Pages root source has been replaced. Personal/Business account switching, customer DB SELECT and all money/crypto operations remain disabled.
