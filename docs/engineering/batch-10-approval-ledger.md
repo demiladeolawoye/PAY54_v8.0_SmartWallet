@@ -58,7 +58,7 @@
 | 258 | Exact regression and workflow SHA evidence | `ff3627c157c098a90451f928fcca0b1ca21869c1` | COMMITTED |
 | 259 | No-deploy release and Founder approval decision matrix | `91e583a1ac0efe051068add07e6584b82d84573a` | COMMITTED |
 | 260 | Batch 10 approval ledger and source stop boundary | This document | COMMITTED |
-| 261 | Consolidated Batch 10 final report | Pending evidence document | PENDING |
+| 261 | Consolidated Batch 10 final report | `docs/engineering/batch-10-consolidated-report.md`; `efe2b5a0da773e27b420a1ef3de8acc1953f3d7e`, corrected `6a88a3b2dbbdf11c8ca4ed31bf525f9aa867440a` | COMPLETE |
 
 ## Approval and prohibition ledger
 
@@ -90,5 +90,7 @@
 6. Cloud/staging network, region, egress, operating costs and incident preparedness.
 7. Separate feature change requests for Cards, WhatsApp, marketplace, rewards, FX, stablecoins and other rails.
 8. Written release approval only after independently verified production gates.
+
+**Batch 10 source closure: 50/50 committed.** Ten successful backend/security workflows are documented in `docs/engineering/batch-10-regression-evidence.md`. Independently assured production readiness remains BLOCKED.
 
 **STOP after item 261.** This file is an engineering approval ledger, not authorisation to create customer data access or move money.
