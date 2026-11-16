@@ -67,3 +67,24 @@ test("400: candidate staging refuses high-confidence credential marker without c
   assert.deepEqual(readdirSync(f.target),[]);
  }finally{f.cleanup();}
 });
+
+test("411: candidate staging refuses external script without valid SRI metadata",()=>{
+ const f=fixture();
+ try{
+  writeFileSync(join(f.source,"index.html"),
+   '<script src="https://cdn.example.invalid/unpinned.js"></script>');
+  assert.throws(()=>stagePay54SiteCandidate(f.source,f.target),
+   /PAY54_STAGE_EXTERNAL_SCRIPT_REVIEW_REQUIRED/);
+  assert.deepEqual(readdirSync(f.target),[]);
+ }finally{f.cleanup();}
+});
+test("411: source with declared SRI remains only a candidate, not a live attestation",()=>{
+ const f=fixture();
+ try{
+  writeFileSync(join(f.source,"index.html"),
+   '<script src="https://cdn.example.invalid/pinned.js" integrity="sha384-AAAAAAAAAAAAAAAAAAAA" crossorigin="anonymous"></script>');
+  const r=stagePay54SiteCandidate(f.source,f.target);
+  assert.equal(r.productionRelease,"BLOCKED");
+  assert.equal(r.actualPagesSettingsModified,false);
+ }finally{f.cleanup();}
+});
