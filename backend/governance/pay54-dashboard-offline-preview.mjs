@@ -116,6 +116,15 @@ export function buildPay54DashboardOfflinePreview(sourceRoot,emptyOutputRoot){
    if(!meta.isFile()||meta.isSymbolicLink())throw new Error("PAY54_PREVIEW_SOURCE_UNSAFE");
    mkdirSync(dirname(to),{recursive:true});
    const original=readFileSync(from);
+   if(extname(path).toLowerCase()===".svg"){
+    const svg=original.toString("utf8");
+    if(/<\s*(?:script|foreignObject|iframe|object|embed)\b/i.test(svg)||
+     /\son[a-z]+\s*=/i.test(svg)||
+     /(?:javascript:|<\!ENTITY|<\!DOCTYPE)/i.test(svg)||
+     /(?:href|xlink:href)\s*=\s*["\'](?:https?:|\/\/)/i.test(svg)){
+     throw new Error("PAY54_PREVIEW_SVG_ACTIVE_CONTENT_DENIED");
+    }
+   }
    copyFileSync(from,to);
    const copy=readFileSync(to);
    if(original.length!==copy.length||hash(original)!==hash(copy)){
