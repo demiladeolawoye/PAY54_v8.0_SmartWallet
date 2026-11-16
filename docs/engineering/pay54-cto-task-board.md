@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 11 50/50 closure)
+**Last reviewed:** 2026-11-16 (Batch 12 opened, items 312–314)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,6 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
+| Batch 12 charter and crypto source design | Unbounded / milestone-gated | 3 | Not fixed | 312 charter, 313 country gates and 314 crypto architecture committed |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -40,6 +41,16 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 309 | Founder decision and enterprise change request ledger | COMMITTED |
 | 310 | Live task board and Batch 11 progress reconciliation | COMMITTED |
 | 311 | Consolidated closure, 50/50 completion and no-live-release decision | COMMITTED |
+
+## Batch 12 opening source-only deliverables
+
+| Item | Deliverable | State |
+|---|---|---|
+| 312 | Production-readiness charter and decomposed launch epics | COMMITTED |
+| 313 | UK–Nigeria feature and crypto capability default-deny matrix | COMMITTED |
+| 314 | Crypto partner-led architecture, quote/custody/settlement and failure design | COMMITTED |
+
+Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next proposed source item: 315 (crypto state-machine design and negative tests).
 
 ## Batch 11 closure and next approval boundary
 
@@ -83,7 +94,7 @@ Do not implement hollow tasks to exhaust item numbers. If fewer controls are gen
 | CR-04 | FX/payment orchestration intelligence | Quote transparency, multi-provider failover, SLA routing and configurable country profiles | CORE STRATEGIC |
 | CR-05 | PAY54 Points and rewards | Self-funded unit economics and abuse prevention before cash-equivalent redemption | BUSINESS CASE |
 | CR-06 | SELLIBUY marketplace | Separate marketplace legal, trust/safety, buyer/seller protection and checkout scope | PRODUCT DISCOVERY |
-| CR-07 | Crypto/stablecoins | Regulatory/custody/Travel Rule and partner approval before any real integration | FUTURE / REGULATED |
+| CR-07 | Crypto/stablecoins | Source architecture and UK–Nigeria capability matrix committed. Actual exchange, custody, Travel Rule and regulated permissions remain unapproved | SOURCE DESIGN COMPLETE / LIVE OFF |
 | CR-08 | Travel/newcomer cards and cross-border services | Focused UK–Nigeria launch use case, verified customer onboarding and permitted card issuance | STRATEGIC |
 | CR-09 | PAY54 differentiated fintech UX | Lightweight home, universal search/intents, relevant actions, accessible low-navigation design | DESIGN / TEST |
 | CR-SEC-11-01 | Immutable GitHub Actions pins | Confirm publisher SHA, review upstream sources, pin and automate updates with provenance controls | SECURITY / OWNER REVIEW |
@@ -100,4 +111,4 @@ Do not implement hollow tasks to exhaust item numbers. If fewer controls are gen
 
 ## Progress maintenance
 
-Update this board after each meaningful implementation block and use exact commit SHAs and GitHub Actions run evidence. Warn ahead of chat-length limits with a handover. **No unattended background work is implied.** Batch 11 is closed at 50/50 source-only items. Item 312 and any new Batch 12 scope require separate Founder approval. No production/customer/infra activation authorised.
+Update this board after each meaningful implementation block and use exact commit SHAs and GitHub Actions run evidence. Warn ahead of chat-length limits with a handover. **No unattended background work is implied.** Batch 11 is closed 50/50. Founder has approved starting Batch 12 source-only planning with items 312–314 now committed; no new batch quota has been imposed. No production/customer/infra/crypto execution activation authorised.
