@@ -657,3 +657,30 @@ Founder approved source-only 50-item Batch 16 (518–567) and read-only investig
 **Critical P0 remains OPEN:** A historical GitHub Pages artifact `14252395793` (run `43917703697`) contained 348 backend, 150 documentation and one infrastructure source file. The active live Pages deployment, actual public-file reachability, exposure of sensitive material, live setting protections and remedy remain independently UNVERIFIED. Founder/Security/DevSecOps must separately authorise operational investigation and any containment, deployment, credential or environment change.
 
 **Next cycle:** Batch 17 would be 568–617 and requires independent Founder approval. Prioritise actual Pages containment evidence, verified GitHub deployer controls, authenticated Personal/Business account and PostgreSQL RLS integration, and independent mobile/desktop/accessibility and rollback acceptance. Preserve all existing working dashboard modules; do not introduce real-money features through a visual preview.
+
+
+## Batch 17 balance context visibility fix — implementations 568–578
+
+Founder provided live GitHub Pages screenshot demonstrating that four existing balance details were missing; approved targeted implementation. The verified cause was the blueprint script adding `p54b-conceal` and `hidden` to the existing balance metadata, movement, identity and security disclosure nodes. Source-only changes preserve ledger, card, transaction, backend and KYC authorisation boundaries.
+
+| Implementation | Committed work | Status |
+| --- | --- | --- |
+| 568 | Remove blueprint concealment from balance metadata, movement, identity and status nodes; retain FX ticker isolation | COMMITTED |
+| 569 | Keep requested detail text visible in existing HTML while making demonstration and non-verification explicit | COMMITTED |
+| 570 | Align public preview claims guard (v1.0.1) with four safe displayed balance context nodes | COMMITTED |
+| 571 | Restore responsive accessible balance-detail presentation and prevent blue-card clipping | COMMITTED |
+| 572 | Bump CSS, guard and blueprint asset query versions to avoid cached old presentation | COMMITTED |
+| 573 | Source contract tests for restored details and scoped responsive styles | COMMITTED |
+| 574 | VM-executed public/nonpublic claims guard and idempotence regression tests | COMMITTED |
+| 575 | Dedicated read-only Batch 17 GitHub Actions workflow, no deployment | COMMITTED |
+| 576 | Update blueprint diagnostic version to v1.2.4 | COMMITTED |
+| 577 | Root-cause analysis, frontend acceptance and release boundaries | COMMITTED |
+| 578 | CTO board reconciliation and follow-up verification gate | COMMITTED via this update |
+
+**Count:** 11/50 source implementations in Batch 17; 579–617 remain in the 50-item founder-approved engineering cycle if continuation is requested. No batch closure or automatic advancement.
+
+**Validation:** Dedicated Batch 17 workflow run `43956907041` PASSED on source revision `76c481b508bd5a21fc04bfb932a16a49cb74123e`. The CTO board commit has a new source SHA and must not be counted as having all other workflows passed until reconciled. Browser visual QA and responsive checks are not yet independently certified.
+
+**Demo safety:** The values `3001234567`, `@pay54-user`, `Level 2` and `₦24,500` remain samples. Device/PIN security and financial compliance are explicitly **not verified**. No live bank credentials, KYC, ledger, FX, customer wallet, account-switching or regulated operations were enabled.
+
+**Visibility:** The correction is on draft PR #5 stacked on unmerged draft PR #4 → #3 → #2 → #1. The public Pages site shown in the founder screenshot has **not** been updated. The separately confirmed older overbroad Pages artifact security P0 stays OPEN. Site publication must be separately approved and proven to exclude backend/docs/infrastructure sources, and must have full browser regression and rollback evidence.
