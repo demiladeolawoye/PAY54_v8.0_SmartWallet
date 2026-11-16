@@ -172,7 +172,7 @@ Update this board after each meaningful implementation block and use exact commi
 
 **Verified executable source revision:** f3b934854e63852ddd66bf779f080fcf2a43a25c.
 
-The following **eleven** backend/account-security workflows returned SUCCESS on that exact revision:
+The following **ten** backend/account-security workflows returned SUCCESS on that exact revision:
 
 | Workflow | Run ID | Status |
 |---|---:|---|
@@ -187,7 +187,7 @@ The following **eleven** backend/account-security workflows returned SUCCESS on 
 | Batch 09 Account Actor and RLS Integration | 43902024122 | SUCCESS |
 | Batch 10 Synthetic Role and Audit Source Tests | 43902024105 | SUCCESS |
 
-Correction: The ten rows above cover the ten backend/account workflows returned by GitHub (not eleven). GitHub Pages build and deployment also succeeded on the same revision (run 43902022757), making **eleven workflows total including Pages**. A Pages success does not verify publication safety. The committed documentation-only changes that follow this executable revision are not included in its CI matrix.
+The separate GitHub Pages build and deployment workflow also succeeded for the same revision (run 43902022757), making **eleven workflows total: ten backend/account workflows plus Pages**. A Pages success does not verify publication safety. The committed documentation-only changes that follow this executable revision are not included in its CI matrix.
 
 Source implementation 341: authenticated, one-use intent review using the existing trusted principal and account reader. Item 347 adds a second account membership verification before even returning minimal display data; tests explicitly catch revocation and changed account ownership.
 
