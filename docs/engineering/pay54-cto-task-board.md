@@ -594,3 +594,34 @@ Founder approved source-only 50-item Batch 16 (518–567) and read-only investig
 **Preview recommendation:** developer-local or separately approved, access-controlled synthetic-data preview after restricted source-tree staging and device/browser smoke tests. A source-code validator does not appear as a new dashboard button or screen.
 
 **Next source focus:** archived Pages workflow-source comparison, independent current settings evidence, evidence-preserving active deployment audit, exact-source dashboard static dependency checks, safe preview acceptance and QA. Do not manufacture items or merge draft PRs. Product launch remains BLOCKED.
+
+
+## Batch 16 offline dashboard-preview engineering checkpoint (525–539)
+
+| ID | Committed implementation | Verification |
+| --- | --- | --- |
+| 525 | Offline sanitized founder dashboard snapshot generated from existing HTML and copied visual-only assets | COMMITTED |
+| 526 | Synthetic snapshot tests deny scripts, active forms, remote styles and overlapping output directories | COMMITTED |
+| 527 | Dedicated Batch 16 source CI integrates offline preview security tests | COMMITTED |
+| 528 | Verify staged CSS/image and preview HTML byte integrity | COMMITTED |
+| 529 | Verify original asset byte fidelity and reject remote CSS dependencies | COMMITTED |
+| 530 | Real-source offline snapshot dry run that destroys temporary output and reports stable refusal codes | COMMITTED |
+| 531 | Readiness smoke tests prohibit network URLs, hosted preview or financial mode | COMMITTED |
+| 532 | CI requires successful actual PAY54 dashboard offline source smoke | COMMITTED |
+| 533 | Production-safe offline preview packaging generator with no source scripts | COMMITTED |
+| 534 | Adversarial preview package tests for script-free inert output | COMMITTED |
+| 535 | Pinned Node 24 `actions/upload-artifact` creates seven-day temporary offline founder ZIP, NOT GitHub Pages | COMMITTED |
+| 536 | Reject active script/remote references in copied SVG visual assets | COMMITTED |
+| 537 | SVG injection, inline handlers and remote resource tests | COMMITTED |
+| 538 | Strengthened visual-preview workflow CI safety checks | COMMITTED |
+| 539 | CTO source-evidence reconciliation and founder download checkpoint | COMMITTED via this update |
+
+**Count:** 518–539 = 22/50 committed Batch 16 items. Next 540; owner approval remains at 567, not earlier.
+
+**Verified code checkpoint:** `6c3af29fb632bdf8cbff1332c9f76b06da06a515`, all 11 pull-request CI workflows SUCCESS. Dedicated Batch 16 run `43950815521` produced an inert short-lived Actions artifact (ID `14265894292`). A preceding dedicated successful run `43950162980` generated artifact `14266816736` which was downloaded, independently inspected as 12 files with no JS/backend/docs/infrastructure, and used to prepare a self-contained offline HTML snapshot for founder review.
+
+**Founder access:** Offline HTML and ZIP artifacts were provided through this ChatGPT conversation. The preview retains existing dashboard layout, disables runtime JavaScript, disallows API connections and does not demonstrate real transactions or authenticate customers. Chromium local screenshot automation was attempted but did not complete; no browser visual QA result is asserted.
+
+**P0 still OPEN:** The previously inspected Pages deployment artifact included internal backend/docs/infrastructure source. This founder offline artifact is a different, restricted Actions artifact and **is not deployed to GitHub Pages**. Current live Pages settings, public source reachability, secrets exposure and any active remediation remain independently unverified. Do not merge, deploy, change credentials, activate payments or assume P0 closed.
+
+**Next engineering focus:** Preview provenance and sensitivity checks, accessible display-only review, product QA evidence, independently observable Pages settings/public reachability, and separately approved future production containment. Preserve the existing functional dashboard and avoid UI regressions.
