@@ -46,7 +46,12 @@ export function assessBatch10Source(sources){
    /durableStorageIndependentlyVerified:false/.test(sources.receipt)],
   ["DISCLOSURE_REQUIRES_AUDIT",
    /const receipt=await audit\.publish/.test(sources.auditedRead) &&
-   /receipt\.receiptAccepted!==true/.test(sources.auditedRead)],
+   /consumeAccountAuditReceipt\(receipt/.test(sources.auditedRead)],
+  ["ISSUED_RECEIPT_PROVENANCE",
+   /issuedReceipts\.has\(receipt\)/.test(sources.receipt) &&
+   /consumedReceipts\.has\(receipt\)/.test(sources.receipt) &&
+   /issuedReceipts\.add\(receipt\)/.test(sources.receipt) &&
+   /consumedReceipts\.add\(receipt\)/.test(sources.receipt)],
   ["SYNTHETIC_ROLES_AND_ROLLBACK",
    sources.sql022.includes("CREATE ROLE pay54_ci_batch10_alpha NOLOGIN") &&
    sources.sql022.includes("session_user = current_user") &&
