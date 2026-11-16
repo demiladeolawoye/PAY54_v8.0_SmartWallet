@@ -79,3 +79,28 @@ test("526: unapproved external stylesheet is rejected",()=>{
    /STYLESHEET_NOT_APPROVED/);
  }finally{f.clean();}
 });
+
+test("529: visual CSS and image assets preserve exact source bytes",()=>{
+ const f=fixture();
+ try{
+  const report=buildPay54DashboardOfflinePreview(f.source,f.output);
+  assert.ok(report.copiedVisualAssets.includes("assets/css/dashboard.css"));
+  assert.ok(report.copiedVisualAssets.includes("assets/img/logo.svg"));
+  for(const file of report.copiedVisualAssets){
+   const source=readFileSync(join(f.source,file));
+   const preview=readFileSync(join(f.output,"preview",file));
+   assert.deepEqual(preview,source);
+  }
+  assert.equal(report.copiedVisualAssets.some(x=>x.endsWith(".js")),false);
+ }finally{f.clean();}
+});
+test("529: untrusted remote CSS dependencies cannot enter a local visual preview",()=>{
+ const f=fixture();
+ try{
+  writeFileSync(join(f.source,"assets/css/dashboard.css"),
+   '@import url("https://cdn.example.invalid/preview.css");');
+  assert.throws(()=>buildPay54DashboardOfflinePreview(f.source,f.output),
+   /CSS_DEPENDENCY_UNVERIFIED/);
+  assert.deepEqual(readdirSync(f.output),[]);
+ }finally{f.clean();}
+});
