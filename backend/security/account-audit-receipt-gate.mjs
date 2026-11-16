@@ -13,6 +13,29 @@ import {randomUUID} from "node:crypto";
 const VALID_OPS=new Set(["ACCOUNT_LIST","ACCOUNT_SELECT"]);
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const VALID_OUTCOMES=new Set(["ALLOWED","DENIED","ERROR"]);
+const issuedReceipts=new WeakSet();
+const consumedReceipts=new WeakSet();
+
+/* Consumes exactly one authentic in-process audit receipt, for the expected
+ * decision. Neither this provenance check nor a sink acknowledgement proves
+ * durable storage. Fail closed for copied, forged or replayed receipts.
+ */
+export function consumeAccountAuditReceipt(receipt,{operation,outcome,reason}={}) {
+ if(!receipt || typeof receipt!=="object" ||
+    !issuedReceipts.has(receipt) || consumedReceipts.has(receipt) ||
+    receipt.operation!==operation || receipt.outcome!==outcome ||
+    receipt.reason!==reason || receipt.receiptAccepted!==true ||
+    receipt.sourceAckOnly!==true ||
+    receipt.durableStorageIndependentlyVerified!==false ||
+    receipt.financialExecutionEnabled!==false) {
+  throw new Error("ACCOUNT_AUDIT_RECEIPT_UNTRUSTED");
+ }
+ consumedReceipts.add(receipt);
+ return Object.freeze({acceptedForSourceDisclosure:true,
+  durableStorageIndependentlyVerified:false,
+  financialExecutionEnabled:false});
+}
+
 
 export function createAccountAuditReceiptGate({emit,makeId=randomUUID,maxEvents=10000}={}) {
  if (typeof emit!=="function" || typeof makeId!=="function" ||
@@ -52,12 +75,14 @@ export function createAccountAuditReceiptGate({emit,makeId=randomUUID,maxEvents=
        acknowledgement.persistenceConfirmed!==true) {
     throw new Error("ACCOUNT_AUDIT_UNAVAILABLE");
    }
-   return Object.freeze({
-    eventId,receiptAccepted:true,
+   const receipt=Object.freeze({
+    eventId,operation,outcome,reason,receiptAccepted:true,
     sourceAckOnly:true,
     durableStorageIndependentlyVerified:false,
     financialExecutionEnabled:false
    });
+   issuedReceipts.add(receipt);
+   return receipt;
   }
  });
 }
