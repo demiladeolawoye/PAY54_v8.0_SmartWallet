@@ -76,6 +76,9 @@ jobs:
         run: node --test backend/tests/account-batch13-*.test.mjs
       - name: Check actual selected public source for high-confidence secret markers
         run: node backend/governance/pay54-static-site-secret-markers.mjs
+      - name: Reject insecure external script transports without claiming SRI attestation
+        run: |
+          node --input-type=module -e 'import {auditPay54ExternalScripts} from "./backend/governance/pay54-external-script-source-review.mjs"; const report=auditPay54ExternalScripts(); console.log("External scripts:",report.externalScriptCount,"Manual-review findings:",report.findings.length); if(report.findings.some(f=>f.ruleId==="INSECURE_EXTERNAL_SCRIPT")) process.exit(1);'
       - name: Keep deployment and financial execution blocked
         run: |
           test "$PAY54_REAL_MONEY_MODE" = "false"
