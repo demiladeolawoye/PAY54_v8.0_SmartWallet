@@ -726,3 +726,42 @@ The existing account-boundary workflow initially failed **one of 624 tests** onl
 **Authentication validation:** Unmodified protected dashboard opened without credentials redirected to login. Synthetic visual fixture is separate and does not test money movement or authenticated user flows. No real data or provider credentials were used.
 
 **Next:** Independently verify current Pages Settings and deployment; resolve the development provider publication boundary without regressions; perform real authenticated sandbox journey, device/accessibility and rollback checks; only then seek separately approved restricted deployment. Review PR #5 remains DRAFT and unmerged.
+
+
+## Batch 17 final source engineering checkpoint — implementations 599–617
+
+The founder approved continuing security-first release-readiness work without bypassing the existing Pages P0 or enabling live financial operations. This block records the last 19 source deliverables in the 50-item cycle.
+
+| Item | Committed deliverable | Status |
+| --- | --- | --- |
+| 599 | Prohibit nested infrastructure/infra/terraform paths in public-site candidate manifest | COMMITTED |
+| 600 | Verify infrastructure remains in source but never enters static publication candidate; missing dependency blocks staging | COMMITTED |
+| 601 | Add development-provider negative tests and manifest policy to dedicated CI | COMMITTED |
+| 602 | Implement source-only Pages release preflight with redacted dependency and blocker report | COMMITTED |
+| 603 | Test safe local candidate, development dependency denial and no-live-deployment authority | COMMITTED |
+| 604 | Add actual PAY54 repository provider NO-GO preflight check in CI | COMMITTED |
+| 605 | Implement read-only linked-card script dependency and load-order assessment | COMMITTED |
+| 606 | Verify simulation provider exclusion, absent provider and incorrect load order | COMMITTED |
+| 607 | Extend CI to linked-card dependency contract tests | COMMITTED |
+| 608 | Assert real repository remains NONDEPLOYABLE despite visual QA, until dev-card dependency and P0 resolved | COMMITTED |
+| 609 | Correct legacy source-dependency positive test to expect explicit real-site NO-GO | COMMITTED |
+| 610 | Correct legacy stage test; preserve positive safe synthetic file-hash, backup and backend exclusion tests | COMMITTED |
+| 611 | Combine canonical preflight and linked-card assessments into source-only release readiness verdict | COMMITTED |
+| 612 | Test clean source cannot grant Pages or financial authority; actual site remains blocked | COMMITTED |
+| 613 | Include composite release readiness assertions in Batch17 CI | COMMITTED |
+| 614 | Document owner Pages evidence, development provider options, protected deployer and rollback approval | COMMITTED |
+| 615 | Add governance tests preserving uncertainty and non-bypassable release gates | COMMITTED |
+| 616 | Full CTO founder Batch17 closure report and pending change requests | COMMITTED |
+| 617 | Final task board reconciliation and next-cycle founder checkpoint | This commit |
+
+**Batch 17 implementation total:** 568–617 = **50/50 source deliverables**. No work beyond item 617 is implied. Source completion is not production acceptance.
+
+**Verified visual baseline:** Exact feature source SHA `3b4106cfd1539ae0c162d3c23ad522335d28099e`, 12/12 workflows SUCCESS, isolated Chromium desktop/tablet/mobile screenshots and rendered DOM PASS. Later source security revisions and the final exact board commit must be checked independently; historical PASS does not automatically transfer to newer SHAs.
+
+**Correctly unresolved:** The actual public-site dependency graph references `assets/js/infrastructure/payments/providers/linked-card-development.js` which is now prohibited by public manifest selection. Current site staging/production release is NO-GO. A real provider contract or independently approved feature-level fail-closed suspension is required before a restricted production candidate can be complete.
+
+**P0:** Historic Pages artifact `14252395793` contained 348 backend, 150 docs and one infrastructure file. Active live Pages source/deployed archive, public internal-file reachability, content sensitivity, current deployer and GitHub Pages settings are NOT independently verified. Do not treat historical package contents as confirmation of a public breach. No git branch merge, Pages config edit, IAM change, credential rotation, production database grant, payment, card issue or FX settlement was undertaken.
+
+**Change requests:** CR-RELEASE-01 (active Pages evidence), CR-CARD-01 (provider/feature disposition), CR-PAGES-02 (restricted output/deployer/rollback), CR-UX-02 (founder layout approval), CR-QA-02 (sandbox/accessibility/device) and CR-FINTECH-03 (regulated UK–Nigeria readiness) remain OPEN.
+
+**Founder checkpoint:** Batch 17 source cycle complete. Proposed Batch 18 is 618–667 and requires a separate approval. Any public site publication also requires an independent Security/Release/Founder acceptance of actual live settings, artifact and rollback plan.
