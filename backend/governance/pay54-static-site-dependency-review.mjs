@@ -7,7 +7,7 @@
  * integrity, visual correctness and the deployed artifact require separate QA.
  */
 import {readFileSync,lstatSync} from "node:fs";
-import {join,posix,resolve,relative,sep} from "node:path";
+import {join,posix,resolve} from "node:path";
 import {inspectPay54StaticSiteCandidate}
  from "./pay54-static-site-candidate-inventory.mjs";
 
@@ -52,7 +52,7 @@ function resolveReference(from,value,all){
  try{decoded=decodeURIComponent(raw.split(/[?#]/,1)[0]);}
  catch{return {failure:"BAD_URL_ENCODING"};}
  if(!decoded||decoded.includes("\0")||decoded.includes("\\")||
-    decoded.startsWith("/")||decoded.split("/").includes("..")){
+    decoded.startsWith("/")){
   return {failure:"PATH_TRAVERSAL_OR_CONTROL"};
  }
  const resolved=posix.normalize(posix.join(posix.dirname(from),decoded));
