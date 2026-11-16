@@ -8,6 +8,7 @@ on:
     paths:
       - "backend/governance/pay54-release-evidence-review.mjs"
       - "backend/governance/pay54-github-release-controls-review.mjs"
+      - "backend/governance/pay54-signed-release-evidence.mjs"
       - "docs/engineering/pay54-batch14-release-evidence-operations.md"
       - "backend/tests/account-batch14-*.test.mjs"
       - ".github/workflows/pay54-batch14-release-evidence.yml"
@@ -42,9 +43,11 @@ jobs:
         run: |
           node --check backend/governance/pay54-release-evidence-review.mjs
           node --check backend/governance/pay54-github-release-controls-review.mjs
+          node --check backend/governance/pay54-signed-release-evidence.mjs
           node --check backend/tests/account-batch14-release-evidence-review.test.mjs
           node --check backend/tests/account-batch14-github-release-controls.test.mjs
           node --check backend/tests/account-batch14-evidence-operations.test.mjs
+          node --check backend/tests/account-batch14-signed-release-evidence.test.mjs
       - name: Run source-only governance tests
         run: node --test backend/tests/account-batch14-*.test.mjs
       - name: Confirm no release privilege or real-money activation
