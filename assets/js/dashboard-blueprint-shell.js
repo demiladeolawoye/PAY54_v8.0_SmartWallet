@@ -1,6 +1,6 @@
 
 
-/* PAY54 Approved Dashboard Blueprint Shell v1.2.1.
+/* PAY54 Approved Dashboard Blueprint Shell v1.2.4.
  * Presentation only. Reuses existing PAY54 nodes and delegated action handlers.
  * Does not change ledger, cards, transactions, capability policy or execution gates.
  */
@@ -430,7 +430,7 @@
     find("#scanPayFab")?.classList.add("p54b-original-fab");
 
     document.body.classList.add("p54-blueprint");
-    document.documentElement.dataset.pay54Blueprint = "1.2.1";
+    document.documentElement.dataset.pay54Blueprint = "1.2.4";
 
     
     // Reveal the approved dashboard only after its DOM is mounted.
@@ -438,7 +438,7 @@
 
     console.info(
     
-"[PAY54 BLUEPRINT] v1.2.1 mounted; existing financial engines and preview gate preserved."
+"[PAY54 BLUEPRINT] v1.2.4 mounted; existing financial engines and preview gate preserved."
     );
   } catch (error) {
     console.error(
