@@ -11,6 +11,7 @@ on:
       - assets/js/**
       - assets/img/**
       - .github/workflows/pay54-batch17-visual-qa-artifact.yml
+      - backend/governance/pay54-balance-visual-fixture.mjs
   workflow_dispatch:
 
 permissions:
@@ -44,12 +45,15 @@ jobs:
           test "$TF_VAR_authorized_provisioning" = "false"
           command -v google-chrome
           google-chrome --version
+          node --check backend/governance/pay54-balance-visual-fixture.mjs
+          node backend/governance/pay54-balance-visual-fixture.mjs
+          test -s .pay54-balance-visual-fixture.html
           mkdir -p "$RUNNER_TEMP/pay54-visual-qa"
       - name: Render local dashboard only without outbound network
         shell: bash
         run: |
           set -euo pipefail
-          base="file://$GITHUB_WORKSPACE/dashboard.html"
+          base="file://$GITHUB_WORKSPACE/.pay54-balance-visual-fixture.html"
           for preset in "desktop:1440:1000" "tablet:768:1024" "mobile:390:844"; do
             IFS=: read -r device width height <<< "$preset"
             profile="$RUNNER_TEMP/pay54-visual-qa/browser-$device"
@@ -68,7 +72,7 @@ jobs:
             test -s "$RUNNER_TEMP/pay54-visual-qa/$device.png"
             echo "$device screenshot generated"
           done
-          # Browser logs may contain development-only identifiers; exclude from artifact.
+          # The original protected dashboard is not used for the visual screenshot.\n          # The synthetic fixture excludes authentication and all financial engines.\n          # Browser logs may contain development-only identifiers; exclude from artifact.
           rm -f "$RUNNER_TEMP"/pay54-visual-qa/*-browser.log
           rm -rf "$RUNNER_TEMP"/pay54-visual-qa/browser-*
       - name: Upload screenshot-only artifact for QA review (NOT GitHub Pages)
