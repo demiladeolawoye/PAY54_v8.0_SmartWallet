@@ -25,6 +25,7 @@ export function assessPay54SignedReleaseBundle({
  }
  const failures=[];
  const seen=new Set();
+ const evidenceIds=new Set();
  for(const receipt of receipts){
   const gate=receipt?.claims?.gate;
   if(!PAY54_RELEASE_GATES.includes(gate)){
@@ -34,6 +35,12 @@ export function assessPay54SignedReleaseBundle({
    failures.push({gate,reason:"DUPLICATE_RECEIPT"});continue;
   }
   seen.add(gate);
+  const evidenceId=receipt.claims.evidenceId;
+  if(evidenceIds.has(evidenceId)){
+   failures.push({gate,reason:"REPLAYED_EVIDENCE_ID"});
+   continue;
+  }
+  evidenceIds.add(evidenceId);
   const signer=receipt.claims.signer;
   const trustedKey=Object.hasOwn(trustedKeys,signer)?trustedKeys[signer]:null;
   if(typeof trustedKey!=="string"){
