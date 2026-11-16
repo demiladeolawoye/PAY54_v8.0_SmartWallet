@@ -7,6 +7,7 @@ on:
       - project-titan
     paths:
       - "backend/governance/pay54-pages-workflow-source-audit.mjs"
+      - "backend/governance/pay54-dashboard-offline-preview.mjs"
       - "docs/engineering/pay54-dashboard-preview-acceptance.md"
       - "backend/tests/account-batch16-*.test.mjs"
       - ".github/workflows/pay54-batch16-pages-workflow-source.yml"
@@ -40,8 +41,10 @@ jobs:
       - name: Syntax checks
         run: |
           node --check backend/governance/pay54-pages-workflow-source-audit.mjs
+          node --check backend/governance/pay54-dashboard-offline-preview.mjs
           node --check backend/tests/account-batch16-pages-workflow-source.test.mjs
           node --check backend/tests/account-batch16-dashboard-preview-acceptance.test.mjs
+          node --check backend/tests/account-batch16-dashboard-offline-preview.test.mjs
       - name: Run offline source security tests
         run: node --test backend/tests/account-batch16-*.test.mjs
       - name: Verify deployment and real money are disabled
