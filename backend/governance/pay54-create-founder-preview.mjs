@@ -12,9 +12,14 @@ import {buildPay54DashboardOfflinePreview}
  from "./pay54-dashboard-offline-preview.mjs";
 import {inspectPay54PublicationTree}
  from "./pay54-publication-tree-inspector.mjs";
+import {recordPay54OfflinePreviewManifest}
+ from "./pay54-preview-artifact-manifest.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
-export function createPay54FounderPreviewBundle(sourceRoot,emptyTarget){
+export function createPay54FounderPreviewBundle(sourceRoot,emptyTarget,sourceCommitSha){
+ if(!/^[a-f0-9]{40}$/.test(sourceCommitSha??"")){
+  throw new Error("PAY54_FOUNDER_PREVIEW_SOURCE_SHA_REQUIRED");
+ }
  const result=buildPay54DashboardOfflinePreview(sourceRoot,emptyTarget);
  const tree=inspectPay54PublicationTree(result.outputDirectory);
  if(!tree.sourcePolicyPassed){
@@ -28,8 +33,13 @@ export function createPay54FounderPreviewBundle(sourceRoot,emptyTarget){
   result.copiedVisualAssets.some(path=>/\.(?:m?js|html)$/i.test(path))){
   throw new Error("PAY54_FOUNDER_PREVIEW_RUNTIME_DENIED");
  }
+ const provenance=recordPay54OfflinePreviewManifest({
+  previewRoot:result.outputDirectory,sourceCommitSha
+ });
  return Object.freeze({
   schema:"pay54.offline-founder-artifact.v1",
+  sourceCommitSha,
+  contentManifestSha256:provenance.manifestSha256,
   copiedVisualAssets:result.copiedVisualAssets.length,
   staticFileCount:tree.fileCount,
   fileManifestSha256:tree.manifestSha256,
@@ -48,9 +58,13 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   if(typeof target!=="string"||!target.trim()){
    throw new Error("PAY54_FOUNDER_PREVIEW_TARGET_REQUIRED");
   }
-  const result=createPay54FounderPreviewBundle(ROOT,resolve(target));
+  const result=createPay54FounderPreviewBundle(
+   ROOT,resolve(target),process.env.PAY54_PREVIEW_SOURCE_SHA
+  );
   process.stdout.write(JSON.stringify({
-   schema:result.schema,staticFileCount:result.staticFileCount,
+   schema:result.schema,sourceCommitSha:result.sourceCommitSha,
+   contentManifestSha256:result.contentManifestSha256,
+   staticFileCount:result.staticFileCount,
    fileManifestSha256:result.fileManifestSha256,
    hosted:false,financialTransactionsEnabled:false,
    productionRelease:"BLOCKED"
