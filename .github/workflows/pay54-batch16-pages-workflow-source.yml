@@ -1,0 +1,111 @@
+name: PAY54 Batch 16 Pages Workflow Source Boundary
+
+on:
+  pull_request:
+    branches:
+      - cto/batch15-publication-boundary-468-517
+      - project-titan
+    paths:
+      - "backend/governance/pay54-pages-workflow-source-audit.mjs"
+      - "backend/governance/pay54-dashboard-offline-preview.mjs"
+      - "backend/governance/pay54-dashboard-preview-readiness.mjs"
+      - "backend/governance/pay54-create-founder-preview.mjs"
+      - "backend/governance/pay54-preview-artifact-manifest.mjs"
+      - "backend/governance/pay54-verify-founder-preview.mjs"
+      - "backend/governance/pay54-offline-preview-markup-audit.mjs"
+      - "backend/governance/pay54-offline-preview-resource-audit.mjs"
+      - "docs/engineering/pay54-dashboard-preview-acceptance.md"
+      - "docs/engineering/pay54-founder-offline-dashboard-preview-guide.md"
+      - "docs/engineering/pay54-pages-active-deployment-evidence-request.md"
+      - "docs/engineering/pay54-batch16-closure-report.md"
+      - "backend/tests/account-batch16-*.test.mjs"
+      - ".github/workflows/pay54-batch16-pages-workflow-source.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch16-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-boundary:
+    name: check-workflow-source-without-deployment
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_PREVIEW_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout with no persisted credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Syntax checks
+        run: |
+          node --check backend/governance/pay54-pages-workflow-source-audit.mjs
+          node --check backend/governance/pay54-dashboard-offline-preview.mjs
+          node --check backend/governance/pay54-dashboard-preview-readiness.mjs
+          node --check backend/governance/pay54-create-founder-preview.mjs
+          node --check backend/governance/pay54-preview-artifact-manifest.mjs
+          node --check backend/governance/pay54-verify-founder-preview.mjs
+          node --check backend/governance/pay54-offline-preview-markup-audit.mjs
+          node --check backend/governance/pay54-offline-preview-resource-audit.mjs
+          node --check backend/tests/account-batch16-offline-preview-resources.test.mjs
+          node --check backend/tests/account-batch16-offline-preview-markup-audit.test.mjs
+          node --check backend/tests/account-batch16-founder-preview-guide.test.mjs
+          node --check backend/tests/account-batch16-active-pages-evidence-request.test.mjs
+          node --check backend/tests/account-batch16-closure-report.test.mjs
+          node --check backend/tests/account-batch16-verify-founder-preview.test.mjs
+          node --check backend/tests/account-batch16-preview-artifact-manifest.test.mjs
+          node --check backend/tests/account-batch16-pages-workflow-source.test.mjs
+          node --check backend/tests/account-batch16-dashboard-preview-acceptance.test.mjs
+          node --check backend/tests/account-batch16-dashboard-offline-preview.test.mjs
+          node --check backend/tests/account-batch16-dashboard-preview-readiness.test.mjs
+          node --check backend/tests/account-batch16-founder-preview-artifact.test.mjs
+      - name: Run offline source security tests
+        run: node --test backend/tests/account-batch16-*.test.mjs
+      - name: Check current dashboard snapshot against repository source without publishing
+        run: node backend/governance/pay54-dashboard-preview-readiness.mjs
+      - name: Create offline founder dashboard artifact (not GitHub Pages)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pay54-founder-artifact"
+          node backend/governance/pay54-create-founder-preview.mjs "$RUNNER_TEMP/pay54-founder-artifact"
+          test -f "$RUNNER_TEMP/pay54-founder-artifact/preview/index.html"
+          test -f "$RUNNER_TEMP/pay54-founder-artifact/preview/preview-manifest.json"
+          test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/assets/js"
+          test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/backend"
+          test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/docs"
+          test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/infrastructure"
+          node --check backend/governance/pay54-dashboard-offline-preview.mjs
+      - name: Independently compare staged preview files with its SHA256 manifest
+        run: |
+          PAY54_PREVIEW_DIR="$RUNNER_TEMP/pay54-founder-artifact/preview" node --input-type=module -e '
+            import {verifyPay54OfflineFounderPreview} from "./backend/governance/pay54-verify-founder-preview.mjs";
+            const result=verifyPay54OfflineFounderPreview(process.env.PAY54_PREVIEW_DIR);
+            if(!result.localArtifactIntegrityPassed ||
+               result.sourceCommitSha!==process.env.PAY54_PREVIEW_SOURCE_SHA ||
+               result.productionRelease!=="BLOCKED") process.exit(1);
+            console.log("Offline visual bundle verified, source:",result.sourceCommitSha);
+          '
+      - name: Upload inert dashboard preview for founder review (NOT Pages deployment)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-dashboard-offline-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-founder-artifact/preview/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
+      - name: Verify deployment and real money are disabled
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          echo "No Pages deployment or financial operation performed."
