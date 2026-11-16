@@ -20,6 +20,8 @@ export function createAccountViewResponseFence(){
  let activeAccountId=null;
  let principalEpoch=null;
  const live=new WeakMap();
+ const latestRequestByResource=new Map();
+ let nextRequestOrdinal=0;
  const assertGeneration=()=>{
   if(!Number.isSafeInteger(generation)||generation===Number.MAX_SAFE_INTEGER){
    throw new Error("PAY54_ACCOUNT_VIEW_EPOCH_EXHAUSTED");
@@ -28,6 +30,8 @@ export function createAccountViewResponseFence(){
  const invalidate=()=>{
   assertGeneration();
   generation++;
+  latestRequestByResource.clear();
+  nextRequestOrdinal=0;
   activeAccountId=null;
   principalEpoch=null;
  };
@@ -57,11 +61,17 @@ export function createAccountViewResponseFence(){
       principalVersion!==principalEpoch||!RESOURCES.has(resource)){
     throw new Error("PAY54_ACCOUNT_VIEW_NOT_CURRENT");
    }
+   if(!Number.isSafeInteger(nextRequestOrdinal)||
+      nextRequestOrdinal===Number.MAX_SAFE_INTEGER){
+    throw new Error("PAY54_ACCOUNT_VIEW_REQUEST_EPOCH_EXHAUSTED");
+   }
+   const ordinal=++nextRequestOrdinal;
+   latestRequestByResource.set(resource,ordinal);
    const ticket=Object.freeze({
     accountId:activeAccountId,resource,principalVersion,
     presentationOnly:true,financialExecutionEnabled:false
    });
-   live.set(ticket,generation);
+   live.set(ticket,Object.freeze({generation,ordinal}));
    return ticket;
   },
   acceptResponse(ticket,{accountId,principalVersion,resource}={}){
@@ -70,7 +80,9 @@ export function createAccountViewResponseFence(){
     throw new Error("PAY54_ACCOUNT_VIEW_TICKET_INVALID");
    }
    live.delete(ticket);
-   const accepted=issued===generation&&activeAccountId!==null&&
+   const accepted=issued.generation===generation&&
+    latestRequestByResource.get(ticket.resource)===issued.ordinal&&
+    activeAccountId!==null&&
     principalEpoch===principalVersion&&
     accountId===activeAccountId&&ticket.accountId===accountId&&
     ticket.principalVersion===principalVersion&&
@@ -79,7 +91,7 @@ export function createAccountViewResponseFence(){
     acceptedForPresentation:accepted,
     financialExecutionEnabled:false,
     serverResponseAuthenticated:false,
-    reason:accepted?"FRESH_VIEW_TICKET":"STALE_OR_DIFFERENT_ACCOUNT"
+    reason:accepted?"FRESH_VIEW_TICKET":"STALE_SUPERSEDED_OR_DIFFERENT_ACCOUNT"
    });
   },
   snapshot(){
