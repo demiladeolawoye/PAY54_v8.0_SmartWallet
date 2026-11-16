@@ -571,3 +571,26 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **Operational P0 resolution required:** Security/Founder independent Pages source and active-artifact review, authorised minimal public path checks, content/credential impact assessment, separately approved containment and restricted artifact deployment, mobile/desktop/regression and rollback evidence. P0 stays OPEN until confirmed risk treatment.
 
 **Batch position:** 50/50 source deliverables (468–517). Batch 16 (518–567) is a proposal requiring separate Founder approval; preserve the stacked draft PRs until independent review. Do not manufacture work to advance implementation counts.
+
+
+## Batch 16 opening — safe dashboard visibility and Pages workflow controls (518–524)
+
+Founder approved source-only 50-item Batch 16 (518–567) and read-only investigation of the existing GitHub Pages P0 finding. New work is on draft PR #4, stacked on unmerged Batch 15 PR #3 (then PR #2 and PR #1).
+
+| ID | Genuine committed deliverable | Status |
+| --- | --- | --- |
+| 518 | Offline Pages workflow source audit for root upload, duplicate upload, broad permissions and credential persistence | COMMITTED |
+| 519 | Unsafe upload path, repeated upload and credential persistence negative tests | COMMITTED |
+| 520 | Dedicated read-only Batch 16 workflow for source-audit regressions | COMMITTED |
+| 521 | Founder dashboard visibility and isolated preview acceptance plan | COMMITTED |
+| 522 | Dashboard preview no-live-money and public deployment truth assertions | COMMITTED |
+| 523 | CI integration for dashboard source visibility and safe preview controls | CI verified: dedicated run `43947835908` SUCCESS |
+| 524 | CTO progress reconciliation, actual preview limitation and separate operational approval gates | COMMITTED via this update |
+
+**Current engineering position:** 7/50 Batch 16 source items committed; items 525–567 remain in this approved cycle. No source-only work has been deployed. The existing dashboard can be inspected via its historical GitHub Pages path if the website is accessible in a user's browser, but both project and dashboard URLs could not be fetched using the available web tool on 2026-11-16. No claim of verified live availability or safety is made.
+
+**P0 confirmed:** earlier GitHub Pages artifact `14252395793` contained internal backend/docs/infrastructure content. The currently active deployment, its settings and the public reachability of those source files are unverified. Real-world containments, changes to Pages settings, credential rotation and deployment of an isolated authenticated preview require separate authorised security and founder change control.
+
+**Preview recommendation:** developer-local or separately approved, access-controlled synthetic-data preview after restricted source-tree staging and device/browser smoke tests. A source-code validator does not appear as a new dashboard button or screen.
+
+**Next source focus:** archived Pages workflow-source comparison, independent current settings evidence, evidence-preserving active deployment audit, exact-source dashboard static dependency checks, safe preview acceptance and QA. Do not manufacture items or merge draft PRs. Product launch remains BLOCKED.
