@@ -10,7 +10,7 @@ import {fileURLToPath} from "node:url";
 import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
-const ATTRIBUTE=/\b(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
+const ATTRIBUTE=/(?<![\\w:-])(?:src|href)\\s*=\\s*(?:(["\'])(.*?)\\1|([^\\s>]+))/gi;
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
