@@ -53,6 +53,20 @@ jobs:
           done
       - name: Execute fail-closed source and release regression tests
         run: node --test backend/tests/account-batch18-*.test.mjs
+      - name: Assert real PAY54 source is not yet a customer-facing production release
+        run: |
+          node --input-type=module -e '
+            import {assessPay54Batch18ReleaseMatrix} from "./backend/governance/pay54-batch18-release-matrix.mjs";
+            import {inventoryPay54BrowserDevelopmentScripts} from "./backend/governance/pay54-batch18-development-script-inventory.mjs";
+            const r=assessPay54Batch18ReleaseMatrix();
+            const d=inventoryPay54BrowserDevelopmentScripts();
+            if(r.releaseApproved||r.productionRelease!=="BLOCKED"||
+               r.categories.restrictedSource!=="BLOCKED"||
+               !d.matches.some(x=>x.releaseClassification==="DEVELOPMENT_PROVIDER_FORBIDDEN_IN_PUBLIC_RELEASE")){
+              throw new Error("PAY54_REAL_SITE_EXPECTED_NO_GO_DISAPPEARED_WITHOUT_REVIEW");
+            }
+            console.log("Real Pages customer release remains blocked pending development provider and P0 gates");
+          '
       - name: Build a new inert PAY54 balance dashboard review package (not Pages)
         run: |
           mkdir -p "$RUNNER_TEMP/pay54-batch18-founder-preview"
