@@ -92,3 +92,20 @@ test("681: inert data-action and data-formaction remain ordinary UI metadata",()
   assert.equal(r.complete,true);
  }finally{f.dispose();}
 });
+
+test("683: base href cannot silently redirect all first-party asset references",()=>{
+ const f=fixture('<base href="https://malicious.example.invalid/"><img src="assets/img/logo.svg">');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.ok(r.rejectedReferences.some(x=>x.reason==="DOCUMENT_BASE_URL_REQUIRES_REVIEW"));
+ }finally{f.dispose();}
+});
+test("683: meta http-equiv refresh needs independent redirect review",()=>{
+ const f=fixture('<meta http-equiv="refresh" content="0;url=https://other.example.invalid/"><h1>PAY54</h1>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.ok(r.rejectedReferences.some(x=>x.reason==="ACTIVE_REDIRECT_REQUIRES_REVIEW"));
+ }finally{f.dispose();}
+});
