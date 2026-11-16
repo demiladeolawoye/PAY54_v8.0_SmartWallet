@@ -76,3 +76,27 @@ test("469: source inspector refuses missing root and symlink root",()=>{
   finally{rmSync(alias,{force:true});}
  }finally{f.clean();}
 });
+
+test("481: internal documentation remains excluded even if renamed into static assets",()=>{
+ const f=fixture();
+ try{
+  mkdirSync(join(f.root,"assets/docs"),{recursive:true});
+  writeFileSync(join(f.root,"assets/docs/strategy.html"),"internal draft");
+  const result=inspectPay54PublicationTree(f.root);
+  assert.equal(result.sourcePolicyPassed,false);
+  assert.ok(result.findings.some(x=>
+   x.path==="assets/docs"&&x.reason==="INTERNAL_OR_SENSITIVE_PATH"));
+ }finally{f.clean();}
+});
+test("481: README, configuration and infrastructure-style source cannot publish",()=>{
+ const f=fixture();
+ try{
+  writeFileSync(join(f.root,"README.md"),"# internal notes");
+  mkdirSync(join(f.root,"infrastructure"));
+  writeFileSync(join(f.root,"infrastructure/main.tf"),"synthetic");
+  const r=inspectPay54PublicationTree(f.root);
+  assert.equal(r.sourcePolicyPassed,false);
+  assert.ok(r.findings.some(x=>x.path==="infrastructure"));
+  assert.ok(r.findings.some(x=>x.path==="README.md"));
+ }finally{f.clean();}
+});
