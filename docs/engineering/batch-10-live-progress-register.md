@@ -28,22 +28,44 @@
 | 226 | One-use non-authorising account switch preview | `31489b8d8c09512b9ba717d0421b5fa6602117f6` | COMMITTED |
 | 227 | Cross-account intent, replay and unavailable membership tests | `6944d60315ab75dba8727446737c2d2931d0c434` | COMMITTED |
 
+| 228 | Server-loaded Personal/Business ownership review | `3dfd1355efe18d2aa1df6788bd24139b00a01fa3` | COMMITTED |
+| 229 | Owner, membership, status and cross-tenant adversarial tests | `b44e1f1d2c6fc4406d7d361fa194323e868cb965` | COMMITTED |
+| 230 | Strict non-secret audit receipt acknowledgement policy | `a2bf54eeec311464b13e59ad088313807171ce99` | COMMITTED |
+| 231 | Audit receipt denial/spoof/outage tests | `f6749ed1c3a4b74f394c81e848bce3f9e012f561` | COMMITTED |
+| 232 | Receipt-audited read fail-closed disclosure boundary | `b1609f6bb853a03407d97390cb78f359af50f762` | COMMITTED |
+| 233 | Audit-first read and error-redaction tests | `71f5763b9665737ca4b065795163580d2b6ded8b` | COMMITTED |
+| 234 | Delayed/rejected audit receipt race tests | `8208f75a9e02e62c3092afc295d85a2964424109` | COMMITTED |
+| 235 | Audit durability and Pages publication threat review | `e4d91cf2e93725f893a360cce612480ed4231819` | COMMITTED |
+| 236 | Disposable PostgreSQL session/current role attestation SQL | `2954dbdb70929a298151c76914d6befb489aa034` | COMMITTED |
+| 237 | Synthetic PostgreSQL GUC impersonation denial SQL | `0d5f93d8c28f8d424eb47f22478fedd49e651e28` | COMMITTED |
+| 238 | Synthetic PostgreSQL rollback and zero-customer-grant proof | `53d3f72c06dec2f86f308b1c250e40937b6bc3a8` | COMMITTED |
+| 239 | Disposable PostgreSQL/Node Batch 10 CI workflow | `494682328155ddcd810489591fb8d81ea7a89796` | COMMITTED |
+| 240 | Batch 10 offline source security invariant audit | `0c07b7199feeb81354cdd23698802c1b58db66c6` | COMMITTED |
+| 241 | Source invariant adversarial mutation tests | `0dd3f8e4bb8d2c7ad1b9d98d0a9b5623ac2f239c` | COMMITTED |
+| 242 | Per-role bounded test checkout budget | `4b836d0737ff502bf038b13e4395bef212b79ce5` | COMMITTED |
+| 243 | Checkout saturation and cancellation cleanup tests | `523b61a9c485d2cd396c68f293dfa18c32d1db2a` | COMMITTED |
+| 244 | TLS endpoint hostname/fingerprint config review | `46a6eb94286dcfc58297c2a9fae2e190a091de69` | COMMITTED |
+| 245 | TLS downgrade/hostname mismatch adversarial tests | `2dcb4e371a110ec9789c01b68aac072de38852da` | COMMITTED |
+| 246 | Bounded one-use audit event ID reservation | `ccfa3bf859bca3a2958dc87dd3a4a8bd26b773e6` | COMMITTED |
+| 247 | Concurrent audit ID replay/timeout tests | `4655c19483bb6b83a1d5b470f206e9943296794b` | COMMITTED |
+| 248 | One-use tenant/account/epoch credential request fence | `f053560c3fd6b8d352202ea8aac6b912e1ce5352` | COMMITTED |
+| 249 | Request-fence expiry/replay/forgery tests | `d30c9e69a9f0919e8bd3be6313be28197ab5412e` | COMMITTED |
+| 250 | Integrated repeated tenant lease and pool budget stress test | `0a761a7838471c250466f73c81399c0b805ad151` | COMMITTED |
+| 251 | Account audit non-disclosure integration test | `d0db80fa2f037ab0ade15bb14cd03d5e2b18ff81` | COMMITTED |
+| 252 | Independent security review packet | `8542ad5627b7bb05bb07cdda9738761778d8ee91` | COMMITTED |
+| 253 | Tenant database credential lifecycle runbook | `62dbd2eaa369f9943be4a1588cece0628b47c6ed` | COMMITTED |
+| 254 | Tenant isolation and audit resilience drill matrix | `d20b0d1c9770cc276c06230b8ed344fd5fec1098` | COMMITTED |
+| 255 | Source-only nonactivation release policy | `eb9f170d877be9c20b45910001944c0d4673f309` | COMMITTED |
+| 256 | Adversarial release and self-asserted approval rejection tests | `9d0b67788bd12f7afd402753dd866fa3288a4026` | COMMITTED |
+| 257 | CI enforcement of release nonactivation and source audit | `597e656d00882b94c15cc20c8e466af24b032afa` | COMMITTED |
+
 **CI evidence for source commit `b977ab10` (prior to 217–227):** PAY54 Backend Tests run `43854581508`, Account Boundary Tests run `43854581510`, Account Security Integration run `43854581557`, Account Read Access Integration run `43854581506`, Account Catalogue and Isolation Integration run `43854581673` confirmed SUCCESS. All previously pending account and backend workflows for this SHA were subsequently observed SUCCESS; the Pages build/deployment also completed successfully. Newer source changes 217–227 require their own CI verification. This is **not** an independent security sign-off.
 
-**Current source progress:** 16 of 50 item-level deliverables (212–227) committed. Latest source test commit `6944d60315ab75dba8727446737c2d2931d0c434`. All nine relevant backend/account workflows on that source SHA completed SUCCESS: Backend `43859999142`; Account Boundary `43859998974`; Account Security `43859999119`; Account Read Access `43859999111`; Account Catalogue/Isolation `43859999083`; Account Auth/RLS `43859999069`; Batch 07 `43859999180`; Batch 08 `43859999103`; Batch 09 `43859999028`. GitHub Pages `43859998852` was CANCELLED (not a security-test failure). Documentation commits are not test evidence.
+**Historical progress checkpoint:** 16 of 50 items (212–227) committed. Latest source test commit `6944d60315ab75dba8727446737c2d2931d0c434`. All nine relevant backend/account workflows on that source SHA completed SUCCESS: Backend `43859999142`; Account Boundary `43859998974`; Account Security `43859999119`; Account Read Access `43859999111`; Account Catalogue/Isolation `43859999083`; Account Auth/RLS `43859999069`; Batch 07 `43859999180`; Batch 08 `43859999103`; Batch 09 `43859999028`. GitHub Pages `43859998852` was CANCELLED (not a security-test failure). Documentation commits are not test evidence.
 
-## Remaining implementation plan: 228–261
+## Latest implementation progress
 
-| IDs | Planned workstream | Status | Evidence required |
-|---|---|---|---|
-| 228–229 | Further Personal/Business ownership and account-switch review; regression gaps | OPEN | Authenticated actor vs current authoritative account data |
-| 230–235 | Audit durability design, redaction, cancellation/races, deny-by-default failure semantics | OPEN | Adversarial and integration evidence |
-| 236–241 | Disposable PostgreSQL adversarial role/RLS proof, test-only grants, no live customer SELECT | OPEN | PostgreSQL CI, rollback and unchanged migrations |
-| 242–251 | Cross-tenant load, rotation, pool contamination, source static audit, failure-injection tests | OPEN | Repeatable security/quality automation |
-| 252–256 | Security review packet, operational contracts, compliance/deployment boundaries | OPEN | Source-only handover and explicit stop lines |
-| 257–261 | Full integration, release nonactivation, regression run, approval ledger, consolidated closure | OPEN | Exact CI run IDs/SHAs and Founder decision table |
-
-Plans are hypotheses pending code inspection and may be reshaped where existing modules already cover the proposed work. Never create an item solely to reach a batch target.
+**46/50** item-level source deliverables (212–257) committed. Remaining **258–261** are CI closure, release evidence, approval register and consolidated report. The full ten-workflow security/backend matrix passed at source commit `d0db80fa2f037ab0ade15bb14cd03d5e2b18ff81` (item 251). **Post-251 CI on latest code and the updated CI policy must pass before final Batch 10 closure.** Older canceled intermediate workflow runs are superseded by later passing source tests, not silently counted as successes.
 
 ## Outstanding Founder actions / change requests
 
@@ -62,4 +84,4 @@ Plans are hypotheses pending code inspection and may be reshaped where existing 
 All new Batch 10 modules are **source-only and unmounted**. They do not load secrets, verify signatures/TLS, connect to PostgreSQL, grant SELECT, change PAY54 migrations, enable wallet money execution, launch rails, provision infrastructure or produce a live security attestation. Automatic existing GitHub Actions may run on branch pushes. A passing source test is not customer-data or production-release approval.
 
 ## Next continuation
-Resume at **228**, inspect existing implementation before adding code, commit each meaningful change, keep the register current and stop only at 261 or sooner if further work is not justified. At item 262 seek new Founder authorisation. Warn ahead of conversational context exhaustion and carry forward commit hashes and pending CI.
+Resume at **258**, inspect existing implementation before adding code, commit each meaningful change, keep the register current and stop only at 261 or sooner if further work is not justified. At item 262 seek new Founder authorisation. Warn ahead of conversational context exhaustion and carry forward commit hashes and pending CI.
