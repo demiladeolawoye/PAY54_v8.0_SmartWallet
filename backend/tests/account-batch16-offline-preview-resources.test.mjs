@@ -40,3 +40,10 @@ test("559: srcset requires independent preview asset review",()=>{
 test("559: unsafe input is rejected",()=>{
  assert.throws(()=>auditPay54OfflinePreviewResources(null),/HTML_REQUIRED/);
 });
+
+test("559: inert data-action metadata is not mistaken for an outbound HTML resource",()=>{
+ const r=auditPay54OfflinePreviewResources(
+  '<button disabled data-action="send" data-src="demo" type="button">Send</button>');
+ assert.equal(r.examinedReferences,0);
+ assert.equal(r.sourceReferencesLocal,true);
+});
