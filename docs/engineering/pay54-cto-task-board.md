@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 source progress items 312–316)
+**Last reviewed:** 2026-11-16 (Batch 12 source progress items 312–329)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 charter and crypto source design | Unbounded / milestone-gated | 5 | Not fixed | 312–316 architecture, country gates, pure crypto state machine and regressions committed |
+| Batch 12 source-only engineering | Milestone-gated | 18 | Not fixed | Items 312–329 committed; latest source checks in progress, production gates remain open |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -51,8 +51,21 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 314 | Crypto partner-led architecture, quote/custody/settlement and failure design | COMMITTED |
 | 315 | Pure immutable crypto intent lifecycle; provider/funds execution blocked | COMMITTED, CI VERIFYING |
 | 316 | Adversarial quote, confirmation, replay, actor and settlement tests | COMMITTED, CI VERIFYING |
+| 317 | Default-disabled global Nigeria-bound corridor registry | COMMITTED |
+| 318 | Market and corridor availability denial tests | COMMITTED |
+| 319 | Exact minor-unit 7/30/90-day balance-movement projection | COMMITTED |
+| 320 | Balance period, currency, identity and snapshot regression | COMMITTED |
+| 321 | Compact Frequent people dashboard widget while retaining original DOM handlers | COMMITTED |
+| 322 | Accessible compact dashboard disclosure styling | COMMITTED |
+| 323 | Neutral movement-unavailable status instead of misleading positive trend arrow | COMMITTED |
+| 324 | Dashboard script and stylesheet cache-bust revision | COMMITTED |
+| 325 | Dashboard widget preservation and asset-load regression | COMMITTED |
+| 326 | PAY54-to-PAY54 internal vs regulated transfer route preview | COMMITTED; VALIDATION FIXED |
+| 327 | Cross-country, legal entity, FX, invalid recipient route tests | COMMITTED |
+| 328 | End-to-end Personal/Business, P2P, corridor and Balance Movement integration roadmap | COMMITTED |
+| 329 | Enforce reviewed canonical country codes following CI regression | COMMITTED; CI VERIFYING |
 
-Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next proposed source item: 317 (independently reviewed capability/partner enablement contract, no live activation).
+Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next implementation should prioritise authenticated backend account switching, trusted ledger snapshot integration, global directory privacy and legally contracted corridor adapters. Source-only work does not enable transfers.
 
 ## Batch 11 closure and next approval boundary
 
@@ -102,6 +115,11 @@ Do not implement hollow tasks to exhaust item numbers. If fewer controls are gen
 | CR-SEC-11-01 | Immutable GitHub Actions pins | Confirm publisher SHA, review upstream sources, pin and automate updates with provenance controls | SECURITY / OWNER REVIEW |
 | CR-SEC-11-02 | Protected environments and deployer identity | Founder/DevSecOps approve branch rules, independent deployer and OIDC before IAM changes | SECURITY / UNAUTHORISED |
 | CR-SEC-11-03 | Pages public artefact allowlist | Inspect and contain actual publication exposure before changing Pages settings | SECURITY / REVIEW |
+| CR-12-UX-01 | Frequent people dashboard | Source moved without cloning; release QA and mobile review still required | SOURCE COMMITTED / QA PENDING |
+| CR-12-ACC-01 | Personal/Business switch | Preview only; independent backend membership and RLS integration required | P0 OPEN |
+| CR-12-WAL-01 | Balance movement | Precise source formula and honest unavailable UI; verified ledger snapshots not connected | P1 PARTIAL |
+| CR-12-FX-01 | Global Nigeria-bound corridors | UK, US, EEA candidate countries, CA, AU and selected Asian markets planned; zero live authorization | SOURCE COMMITTED |
+| CR-12-P2P-01 | PAY54-to-PAY54 universal transfer | Routing classification source exists; live account, FX, settlement and provider routing not implemented | P0 OPEN |
 
 ## Founder decisions required
 
