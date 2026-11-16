@@ -69,6 +69,11 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
    try{decoded=decodeURIComponent(pathOnly);}catch{
     rejected.push({page,reference:raw,reason:"INVALID_ENCODING"});continue;
    }
+   // A second URL-decoding layer must never turn apparently harmless
+   // path bytes into separators or traversal after the first review.
+   if(/%[a-f0-9]{2}/i.test(decoded)){
+    rejected.push({page,reference:raw,reason:"DOUBLE_ENCODED_PATH"});continue;
+   }
    if(decoded.includes("\\")||decoded.includes("\0")||decoded.split("/").includes("..")){
     rejected.push({page,reference:raw,reason:"PATH_TRAVERSAL"});continue;
    }
