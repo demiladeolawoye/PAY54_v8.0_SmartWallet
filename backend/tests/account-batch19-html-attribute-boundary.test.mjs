@@ -76,3 +76,19 @@ test("679: page scoping restricts HTML asset audit to approved root site pages",
   assert.equal(r.complete,true);
  }finally{f.dispose();}
 });
+
+test("681: form submission action destinations require independent review",()=>{
+ const f=fixture('<form method="post" action="https://unknown.example.invalid/kyc"><input name="id"></form>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.ok(r.rejectedReferences.some(x=>x.reason==="FORM_SUBMISSION_REQUIRES_REVIEW"));
+ }finally{f.dispose();}
+});
+test("681: inert data-action and data-formaction remain ordinary UI metadata",()=>{
+ const f=fixture('<div data-action="send" data-formaction="synthetic"><button>Submit</button></div>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,true);
+ }finally{f.dispose();}
+});
