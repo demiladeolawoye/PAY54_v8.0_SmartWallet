@@ -7,13 +7,14 @@
  * frames and network connections. No hosted deployment occurs here.
  */
 import {readFileSync,writeFileSync,mkdirSync,readdirSync,lstatSync,rmSync,copyFileSync,renameSync} from "node:fs";
-import {randomUUID} from "node:crypto";
+import {randomUUID,createHash} from "node:crypto";
 import {resolve,relative,join,dirname,isAbsolute,extname} from "node:path";
 import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
 import {auditPay54CssAssetLinks} from "./pay54-css-asset-link-audit.mjs";
 
 const MIME_EXT=new Set([".css",".svg",".png",".webp",".jpg",".jpeg",".gif",".ico",".woff",".woff2"]);
 const MAX_HTML=400_000;
+const hash=bytes=>createHash("sha256").update(bytes).digest("hex");
 const blockOverlap=(one,two)=>{
  const r=relative(one,two);
  return !r||(!r.startsWith("..")&&!isAbsolute(r));
@@ -114,10 +115,18 @@ export function buildPay54DashboardOfflinePreview(sourceRoot,emptyOutputRoot){
    const meta=lstatSync(from);
    if(!meta.isFile()||meta.isSymbolicLink())throw new Error("PAY54_PREVIEW_SOURCE_UNSAFE");
    mkdirSync(dirname(to),{recursive:true});
+   const original=readFileSync(from);
    copyFileSync(from,to);
+   const copy=readFileSync(to);
+   if(original.length!==copy.length||hash(original)!==hash(copy)){
+    throw new Error("PAY54_PREVIEW_ASSET_COPY_INTEGRITY_FAILED");
+   }
    copied.push(path);
   }
   writeFileSync(join(temp,"index.html"),html,{flag:"wx",mode:0o644});
+  if(hash(readFileSync(join(temp,"index.html")))!==hash(Buffer.from(html))){
+   throw new Error("PAY54_PREVIEW_HTML_WRITE_INTEGRITY_FAILED");
+  }
   const final=join(target,"preview");
   // The caller supplied an empty target and all files are source-only.
 
