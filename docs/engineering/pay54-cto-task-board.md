@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 account-switch source checkpoint 312–340)
+**Last reviewed:** 2026-11-16 (Batch 12 account selection and ledger review 312–350)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 29 | Not fixed | Items 312–340 including corrected UI regression; source-only, production gates remain open |
+| Batch 12 source-only engineering | Milestone-gated | 39 | Not fixed | Items 312–350; last executable source 348 verified across 11 workflows, operational gates remain open |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -49,8 +49,8 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 312 | Production-readiness charter and decomposed launch epics | COMMITTED |
 | 313 | UK–Nigeria feature and crypto capability default-deny matrix | COMMITTED |
 | 314 | Crypto partner-led architecture, quote/custody/settlement and failure design | COMMITTED |
-| 315 | Pure immutable crypto intent lifecycle; provider/funds execution blocked | COMMITTED, CI VERIFYING |
-| 316 | Adversarial quote, confirmation, replay, actor and settlement tests | COMMITTED, CI VERIFYING |
+| 315 | Pure immutable crypto intent lifecycle; provider/funds execution blocked | COMMITTED; SOURCE CI VERIFIED |
+| 316 | Adversarial quote, confirmation, replay, actor and settlement tests | COMMITTED; SOURCE CI VERIFIED |
 | 317 | Default-disabled global Nigeria-bound corridor registry | COMMITTED |
 | 318 | Market and corridor availability denial tests | COMMITTED |
 | 319 | Exact minor-unit 7/30/90-day balance-movement projection | COMMITTED |
@@ -63,7 +63,7 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 326 | PAY54-to-PAY54 internal vs regulated transfer route preview | COMMITTED; VALIDATION FIXED |
 | 327 | Cross-country, legal entity, FX, invalid recipient route tests | COMMITTED |
 | 328 | End-to-end Personal/Business, P2P, corridor and Balance Movement integration roadmap | COMMITTED |
-| 329 | Enforce reviewed canonical country codes following CI regression | COMMITTED; CI VERIFYING |
+| 329 | Enforce reviewed canonical country codes following CI regression | COMMITTED; BACKEND CI PASSED |
 | 330 | Pure account-scoped response fence to prevent stale data after switch/logout | COMMITTED |
 | 331 | Regression tests: stale responses, forged/replayed tickets and principal change | COMMITTED |
 | 332 | Replace misleading switch-profile text with explicitly disabled account-switch button | COMMITTED |
@@ -73,21 +73,26 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 336 | Update legacy account context tests for new disabled switcher wording | COMMITTED |
 | 337 | Cross-module integration regression for picker, cache, response fence and logout | COMMITTED |
 | 338 | Update CTO task board, CI evidence and outstanding live integration work | COMMITTED |
-| 339 | Correct dashboard test asset-version mismatch after disabled switch update | COMMITTED; CI RUNNING |
+| 339 | Correct dashboard test asset-version mismatch after disabled switch update | VERIFIED |
 | 340 | Record exact account isolation status and Batch 12 regression findings | COMMITTED |
+| 341 | Authenticated one-use Personal/Business account selection review, unmounted | VERIFIED SOURCE |
+| 342 | Forgery, replay, role, session change and expiry tests | VERIFIED SOURCE |
+| 343 | Latest-request-wins race guard for same-account resources | VERIFIED SOURCE |
+| 344 | Per-resource concurrency, replay and account-switch negative tests | VERIFIED SOURCE |
+| 345 | Account-scoped balance snapshot review with fresh identity/membership checks | VERIFIED SOURCE |
+| 346 | Invalid ledger snapshot, role revocation and account leakage negative tests | VERIFIED SOURCE |
+| 347 | Second account membership review after identity check | VERIFIED SOURCE |
+| 348 | Business membership revocation and legal-owner race tests | VERIFIED SOURCE |
+| 349 | Independent acceptance matrix for real authenticated account switching | COMMITTED |
+| 350 | Update task board with exact CI evidence and unresolved deployment gates | COMMITTED |
 
 Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next integration milestone: authenticated server-side account switching with independently verified tenant RLS, trusted account-scoped ledger snapshot integration, private global directory and contracted corridor adapters. New source-only account response fencing is not yet wired to real customer queries and must not be described as production-ready. Source-only work does not enable transfers.
 
-## Batch 11 closure and next approval boundary
+## Batch 11 closure and Batch 12 approval boundary
 
-These are proposed priorities, not fabricated completed work. Scope will change if investigation identifies more meaningful work or proves controls already exist.
+Batch 11 source-only work (262–311) is closed 50/50. Batch 12 was subsequently approved for source-only implementation and now includes items 312–350. **That approval does not authorise** real customer database access, Github Pages settings changes, production/staging promotion, cloud credentials, real account switching, payment/crypto execution or market activation. New operational IAM, database and release actions need independent evidence and specific Founder approval.
 
-| Priority | Items | Next meaningful deliverables | Depends on | Status |
-|---|---|---|---|---|
-| P0 | 311 | Consolidated Batch 11 source-only closure, independent-evidence limits and explicit stop | Exact CI evidence and Founder register | COMPLETE |
-| Approval | 312+ | New batch, separate Founder approval before implementation | Batch 11 closure | NOT AUTHORISED |
-
-Do not implement hollow tasks to exhaust item numbers. If fewer controls are genuinely needed, close the batch with a justified decision and request new approval only for the next separate scope.
+Avoid hollow deliverables to meet arbitrary counts; next work is driven by operational acceptance criteria, independent RLS checks and genuine business integration dependencies.
 
 ## Wider production-readiness task board: unresolved gates
 
@@ -142,7 +147,7 @@ Do not implement hollow tasks to exhaust item numbers. If fewer controls are gen
 
 ## Progress maintenance
 
-Update this board after each meaningful implementation block and use exact commit SHAs and GitHub Actions run evidence. Warn ahead of chat-length limits with a handover. **No unattended background work is implied.** Batch 11 is closed 50/50. Founder has approved starting Batch 12 source-only planning with items 312–314 now committed; no new batch quota has been imposed. No production/customer/infra/crypto execution activation authorised.
+Update this board after each meaningful implementation block and use exact commit SHAs and GitHub Actions run evidence. Warn ahead of chat-length limits with a handover. **No unattended background work is implied.** Batch 11 is closed 50/50. Founder approved Batch 12 source-only engineering through the present account-isolation block; items 312–350 are recorded and no fixed batch quota has been imposed. No production/customer/infra/crypto execution activation authorised.
 
 ## Batch 12 latest CI and product acceptance checkpoint
 
@@ -161,3 +166,33 @@ Update this board after each meaningful implementation block and use exact commi
 - An integration test now links the existing picker, preview-only account cache and stale-response fence to deny old data after a pending Business switch, logout and principal change (item 337; commit 20dcc61068476c649ab0b06c35c8f4b7a8f623e6).
 - Intermediate CI failures reflected stale test expectations, not a bypass: the existing context test expected an old footer label; the dashboard UX test expected asset version 1.2.2 while source had 1.2.3. The second test was corrected at commit f2591af9cedfc4b7e2fc32a758500c62be821eda (item 339). Verify the entire new CI matrix before treating the latest source as validated.
 - Work remains: authenticated live Personal/Business account selection, independently tested server-side membership and RLS, production-ready wallet/recipient/card scope enforcement, trust-backed ledger snapshots and real global PAY54 transfer/provider integrations. The current frontend fence is not wired to live authenticated queries and does not confer server access rights. No live activation was performed.
+
+
+## Batch 12 source integration checkpoint — items 341–350
+
+**Verified executable source revision:** f3b934854e63852ddd66bf779f080fcf2a43a25c.
+
+The following **eleven** backend/account-security workflows returned SUCCESS on that exact revision:
+
+| Workflow | Run ID | Status |
+|---|---:|---|
+| PAY54 Backend Tests | 43902024076 | SUCCESS |
+| Account Boundary Tests | 43902024108 | SUCCESS |
+| Account Security Integration | 43902024119 | SUCCESS |
+| Account Read Access Integration | 43902024109 | SUCCESS |
+| Account Catalogue and Isolation Integration | 43902024069 | SUCCESS |
+| Account Authentication and RLS Integration | 43902024132 | SUCCESS |
+| Batch 07 Account Security Integration | 43902024134 | SUCCESS |
+| Batch 08 Authenticated Actor Integration | 43902024158 | SUCCESS |
+| Batch 09 Account Actor and RLS Integration | 43902024122 | SUCCESS |
+| Batch 10 Synthetic Role and Audit Source Tests | 43902024105 | SUCCESS |
+
+Correction: The ten rows above cover the ten backend/account workflows returned by GitHub (not eleven). GitHub Pages build and deployment also succeeded on the same revision (run 43902022757), making **eleven workflows total including Pages**. A Pages success does not verify publication safety. The committed documentation-only changes that follow this executable revision are not included in its CI matrix.
+
+Source implementation 341: authenticated, one-use intent review using the existing trusted principal and account reader. Item 347 adds a second account membership verification before even returning minimal display data; tests explicitly catch revocation and changed account ownership.
+
+Item 343 makes the existing browser account-response fence reject outdated concurrent reads for the same account resource without changing existing error strings. Item 345 composes the source-only balance projection with authorised account reads and identity/membership revalidation. Neither grants account selection authority nor independently attests a real ledger snapshot.
+
+**Live blockers:** No production account switch, new token/credential grant, real database RLS proof, trusted verified ledger history, payment authority, or customer account API route is enabled. Real integration and independent tests remain necessary; consult docs/engineering/batch-12-account-context-acceptance.md.
+
+**Next meaningful work:** protected backend session switching and account-scoped data APIs *only after* independent tenant/RLS/identity acceptance; otherwise improve non-executable tests, mobile experience and verified provider contract interfaces.
