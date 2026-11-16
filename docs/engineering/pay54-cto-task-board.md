@@ -1,5 +1,5 @@
 # PAY54 Enterprise Platform — CTO Task Board
-**Last reviewed:** 2026-11-16 (Batch 12 source progress items 312–338)
+**Last reviewed:** 2026-11-16 (Batch 12 account-switch source checkpoint 312–340)
 **Repository:** demiladeolawoye/PAY54_v8.0_SmartWallet
 **Working branch:** project-titan
 **Owner:** PAY54 Enterprise Engineering Office
@@ -12,7 +12,7 @@
 | Batch 10 (212–261) | 50 | 50 | 0 | Source deliverables complete; production assurance still open |
 | Batch 11 (262–311) | 50 | 50 | 0 | All source-only items committed; real-world release gates remain open |
 | Batch 11 earlier task board checkpoint (293) | 50 | 32 | 18 | Historical checkpoint before items 294–297 |
-| Batch 12 source-only engineering | Milestone-gated | 27 | Not fixed | Items 312–338 including source-only account switch safety and dashboard disclosure; production gates remain open |
+| Batch 12 source-only engineering | Milestone-gated | 29 | Not fixed | Items 312–340 including corrected UI regression; source-only, production gates remain open |
 | Wider PAY54 launch | Not yet baselined | Not quantifiable | Unknown | Requires real provider, compliance, customer, testing and operations readiness reviews |
 
 A source commit is **not** proof of production readiness. Status "committed" means code/docs exist; "verified" means named CI tests passed for the relevant revision; "operationally approved" requires independent evidence and an explicit Founder decision.
@@ -73,6 +73,8 @@ A source commit is **not** proof of production readiness. Status "committed" mea
 | 336 | Update legacy account context tests for new disabled switcher wording | COMMITTED |
 | 337 | Cross-module integration regression for picker, cache, response fence and logout | COMMITTED |
 | 338 | Update CTO task board, CI evidence and outstanding live integration work | COMMITTED |
+| 339 | Correct dashboard test asset-version mismatch after disabled switch update | COMMITTED; CI RUNNING |
+| 340 | Record exact account isolation status and Batch 12 regression findings | COMMITTED |
 
 Batch 12 is intentionally governed by operational milestones; a new arbitrary 50-item count is **not** a promise of launch readiness. This approval is for source-only architecture/planning, not live transaction execution. Next integration milestone: authenticated server-side account switching with independently verified tenant RLS, trusted account-scoped ledger snapshot integration, private global directory and contracted corridor adapters. New source-only account response fencing is not yet wired to real customer queries and must not be described as production-ready. Source-only work does not enable transfers.
 
@@ -149,3 +151,13 @@ Update this board after each meaningful implementation block and use exact commi
 - Latest integration test source: commit 20dcc61068476c649ab0b06c35c8f4b7a8f623e6. Its result is pending verification; do not claim the full suite passed until the exact source revision has been checked.
 - User-facing Personal/Business switching remains disabled. The browser code is a preview and protection for future integration, not a real authenticated selection. Pages publishing status must be independently reviewed.
 
+
+## Batch 12 items 330–340 verification and release boundaries
+
+- Source-only stale account response fence: assets/js/dashboard/account-view-response-fence.mjs (item 330; commit 85dc8709baa6ecad15fa7c121c8efbc917664a78).
+- Stale response and one-use ticket tests: backend/tests/account-batch12-account-view-fence.test.mjs (item 331; commit fab703a002fe94c26b44b7e2520e6fb3aeeaa3c2). Backend and account-security source CI passed for that source revision.
+- Existing public preview footer updated from a misleading static "Switch Profile · Personal" label to a visibly disabled "Personal account · Switch unavailable" button (item 332), with keyboard/label assertions and responsive style (items 333–335). No account context or money movement is activated.
+- Original account context test was updated to preserve its non-activating requirements (item 336; commit c479a69e9417f54dec62255c0e6b78c8d061f964).
+- An integration test now links the existing picker, preview-only account cache and stale-response fence to deny old data after a pending Business switch, logout and principal change (item 337; commit 20dcc61068476c649ab0b06c35c8f4b7a8f623e6).
+- Intermediate CI failures reflected stale test expectations, not a bypass: the existing context test expected an old footer label; the dashboard UX test expected asset version 1.2.2 while source had 1.2.3. The second test was corrected at commit f2591af9cedfc4b7e2fc32a758500c62be821eda (item 339). Verify the entire new CI matrix before treating the latest source as validated.
+- Work remains: authenticated live Personal/Business account selection, independently tested server-side membership and RLS, production-ready wallet/recipient/card scope enforcement, trust-backed ledger snapshots and real global PAY54 transfer/provider integrations. The current frontend fence is not wired to live authenticated queries and does not confer server access rights. No live activation was performed.
