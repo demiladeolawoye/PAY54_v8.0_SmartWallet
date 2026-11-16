@@ -94,5 +94,9 @@ test("496: malformed tar size fields are not interpreted as safe numbers",()=>{
  const modified=Buffer.from(valid);
  modified.fill(0,124,136);
  modified.write("not-a-number",124,"ascii");
+ modified.fill(32,148,156);
+ let checksum=0;
+ for(const byte of modified.subarray(0,BLOCK))checksum+=byte;
+ modified.write(checksum.toString(8).padStart(6,"0")+"\0 ",148,"ascii");
  assert.throws(()=>inspectPay54PagesTarMembers(modified),/INVALID_OCTAL_FIELD/);
 });
