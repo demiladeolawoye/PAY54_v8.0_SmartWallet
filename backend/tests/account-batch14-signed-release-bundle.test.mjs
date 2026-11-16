@@ -23,7 +23,7 @@ function records(){
  });
 }
 const assess=(receipts,keys={"security-owner":pem})=>assessPay54SignedReleaseBundle({
- commitSha:COMMIT,receipts,trustedKeys:keys
+ commitSha:COMMIT,receipts,trustedKeys:keys,reviewTime:"2026-11-16T21:00:00.000Z"
 });
 
 test("432: all signed gate receipts still cannot authorise a release",()=>{
@@ -68,4 +68,22 @@ test("435: replay of one evidence ID across distinct release gates is denied",()
  assert.equal(result.signaturesValidAndComplete,false);
  assert.ok(result.failures.some(x=>x.reason==="REPLAYED_EVIDENCE_ID"));
  assert.equal(result.productionRelease,"BLOCKED");
+});
+
+test("441: signed bundle denies stale and future evidence even with valid signatures",()=>{
+ const variants=["2026-10-01T20:00:00.000Z","2026-11-17T20:00:00.000Z"];
+ for(const time of variants){
+  const items=records();
+  const claims={...items[0].claims,reviewedAt:time};
+  items[0]={claims,signatureBase64:sign(null,Buffer.from(JSON.stringify(claims)),privateKey).toString("base64")};
+  const result=assess(items);
+  assert.equal(result.signaturesValidAndComplete,false);
+  assert.ok(result.failures.some(x=>x.reason==="RECEIPT_STALE_OR_FUTURE"));
+ }
+});
+test("441: invalid review clock cannot be used to approve evidence",()=>{
+ assert.throws(()=>assessPay54SignedReleaseBundle({
+  commitSha:COMMIT,receipts:records(),
+  trustedKeys:{"security-owner":pem}
+ }),/REVIEW_TIME_REQUIRED/);
 });
