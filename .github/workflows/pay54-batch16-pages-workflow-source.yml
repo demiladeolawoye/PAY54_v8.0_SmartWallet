@@ -9,6 +9,7 @@ on:
       - "backend/governance/pay54-pages-workflow-source-audit.mjs"
       - "backend/governance/pay54-dashboard-offline-preview.mjs"
       - "backend/governance/pay54-dashboard-preview-readiness.mjs"
+      - "backend/governance/pay54-create-founder-preview.mjs"
       - "docs/engineering/pay54-dashboard-preview-acceptance.md"
       - "backend/tests/account-batch16-*.test.mjs"
       - ".github/workflows/pay54-batch16-pages-workflow-source.yml"
@@ -44,14 +45,33 @@ jobs:
           node --check backend/governance/pay54-pages-workflow-source-audit.mjs
           node --check backend/governance/pay54-dashboard-offline-preview.mjs
           node --check backend/governance/pay54-dashboard-preview-readiness.mjs
+          node --check backend/governance/pay54-create-founder-preview.mjs
           node --check backend/tests/account-batch16-pages-workflow-source.test.mjs
           node --check backend/tests/account-batch16-dashboard-preview-acceptance.test.mjs
           node --check backend/tests/account-batch16-dashboard-offline-preview.test.mjs
           node --check backend/tests/account-batch16-dashboard-preview-readiness.test.mjs
+          node --check backend/tests/account-batch16-founder-preview-artifact.test.mjs
       - name: Run offline source security tests
         run: node --test backend/tests/account-batch16-*.test.mjs
       - name: Check current dashboard snapshot against repository source without publishing
         run: node backend/governance/pay54-dashboard-preview-readiness.mjs
+      - name: Create offline founder dashboard artifact (not GitHub Pages)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pay54-founder-artifact"
+          node backend/governance/pay54-create-founder-preview.mjs "$RUNNER_TEMP/pay54-founder-artifact"
+          test -f "$RUNNER_TEMP/pay54-founder-artifact/preview/index.html"
+          test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/assets/js"
+          test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/backend"
+          test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/docs"
+          test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/infrastructure"
+      - name: Upload inert dashboard preview for founder review (NOT Pages deployment)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-dashboard-offline-${{ github.sha }}
+          path: ${{ runner.temp }}/pay54-founder-artifact/preview/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
       - name: Verify deployment and real money are disabled
         run: |
           test "$PAY54_REAL_MONEY_MODE" = "false"
