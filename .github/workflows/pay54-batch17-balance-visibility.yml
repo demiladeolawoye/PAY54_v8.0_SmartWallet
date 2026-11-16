@@ -1,0 +1,53 @@
+name: PAY54 Batch 17 Dashboard Balance Visibility
+
+on:
+  pull_request:
+    branches:
+      - cto/batch16-pages-remediation-518-567
+      - project-titan
+    paths:
+      - "dashboard.html"
+      - "assets/js/dashboard-blueprint-shell.js"
+      - "assets/js/core/preview-claims-guard.js"
+      - "assets/css/dashboard-blueprint-refinements.css"
+      - "backend/tests/account-batch17-*.test.mjs"
+      - ".github/workflows/pay54-batch17-balance-visibility.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch17-balance-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  balance-visibility:
+    name: balance-visibility-and-preview-claims
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout without stored GitHub credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Set up Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Syntax check balance presentation and safety modules
+        run: |
+          node --check assets/js/dashboard-blueprint-shell.js
+          node --check assets/js/core/preview-claims-guard.js
+          node --check backend/tests/account-batch17-balance-context.test.mjs
+          node --check backend/tests/account-batch17-preview-balance-claims.test.mjs
+      - name: Run balance visibility and demo-claims regression tests
+        run: node --test backend/tests/account-batch17-*.test.mjs
+      - name: Assert production modes disabled
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
