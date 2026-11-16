@@ -16,6 +16,7 @@ const ACTIVE_FORM=/(?<![\w:-])(?:action|formaction)\s*=\s*(?:(["'])(.*?)\1|([^\s
 const BASE_TAG=/<base\b[^>]*>/gi;
 const META_REFRESH=/<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["']?refresh\b)[^>]*>/gi;
 const EMBEDDED_OBJECT=/<(?:object|embed)\b[^>]*>/gi;
+const INLINE_EVENT=/(?<![\w:-])on(?:click|load|error|submit|change|input|focus|blur|mouseover|pointerdown|keydown)\s*=/gi;
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
@@ -27,6 +28,12 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  let checked=0;
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
+  // Inline event handler attributes execute browser JavaScript outside the
+  // ordinary referenced script graph and require a separate XSS review.
+  if(INLINE_EVENT.test(html)){
+   rejected.push({page,reference:"inline-event",reason:"INLINE_EVENT_HANDLER_REQUIRES_REVIEW"});
+  }
+  INLINE_EVENT.lastIndex=0;
   // Active object/embed elements can load plugins and arbitrary framed
   // resources that a src/href-only graph cannot safely attest.
   if(EMBEDDED_OBJECT.test(html)){
