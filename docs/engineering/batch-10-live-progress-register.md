@@ -59,13 +59,18 @@
 | 256 | Adversarial release and self-asserted approval rejection tests | `9d0b67788bd12f7afd402753dd866fa3288a4026` | COMMITTED |
 | 257 | CI enforcement of release nonactivation and source audit | `597e656d00882b94c15cc20c8e466af24b032afa` | COMMITTED |
 
+| 258 | Exact regression and GitHub Actions SHA evidence | `ff3627c157c098a90451f928fcca0b1ca21869c1` | COMPLETE |
+| 259 | Nonactivation release and Founder decision matrix | `91e583a1ac0efe051068add07e6584b82d84573a` | COMPLETE |
+| 260 | Batch 10 approved scope and implementation ledger | `docs/engineering/batch-10-approval-ledger.md` | COMPLETE |
+| 261 | Batch 10 consolidated security and engineering report | `docs/engineering/batch-10-consolidated-report.md` | COMPLETE |
+
 **CI evidence for source commit `b977ab10` (prior to 217–227):** PAY54 Backend Tests run `43854581508`, Account Boundary Tests run `43854581510`, Account Security Integration run `43854581557`, Account Read Access Integration run `43854581506`, Account Catalogue and Isolation Integration run `43854581673` confirmed SUCCESS. All previously pending account and backend workflows for this SHA were subsequently observed SUCCESS; the Pages build/deployment also completed successfully. Newer source changes 217–227 require their own CI verification. This is **not** an independent security sign-off.
 
 **Historical progress checkpoint:** 16 of 50 items (212–227) committed. Latest source test commit `6944d60315ab75dba8727446737c2d2931d0c434`. All nine relevant backend/account workflows on that source SHA completed SUCCESS: Backend `43859999142`; Account Boundary `43859998974`; Account Security `43859999119`; Account Read Access `43859999111`; Account Catalogue/Isolation `43859999083`; Account Auth/RLS `43859999069`; Batch 07 `43859999180`; Batch 08 `43859999103`; Batch 09 `43859999028`. GitHub Pages `43859998852` was CANCELLED (not a security-test failure). Documentation commits are not test evidence.
 
 ## Latest implementation progress
 
-**46/50** item-level source deliverables (212–257) committed. Remaining **258–261** are CI closure, release evidence, approval register and consolidated report. The full ten-workflow security/backend matrix passed at source commit `d0db80fa2f037ab0ade15bb14cd03d5e2b18ff81` (item 251). **Post-251 CI on latest code and the updated CI policy must pass before final Batch 10 closure.** Older canceled intermediate workflow runs are superseded by later passing source tests, not silently counted as successes.
+**50/50** item-level source-only deliverables (212–261) committed. Final full account/backend regression matrix passed at source commit `9d0b67788bd12f7afd402753dd866fa3288a4026` and the updated Batch 10 disposable PostgreSQL/release policy workflow passed at commit `597e656d00882b94c15cc20c8e466af24b032afa` (run `43863833778`). Exact evidence in `docs/engineering/batch-10-regression-evidence.md`. Cancelling superseded intermediate runs is not treated as a success. No production, customer data or financial execution permission follows from source closure.
 
 ## Outstanding Founder actions / change requests
 
@@ -84,4 +89,4 @@
 All new Batch 10 modules are **source-only and unmounted**. They do not load secrets, verify signatures/TLS, connect to PostgreSQL, grant SELECT, change PAY54 migrations, enable wallet money execution, launch rails, provision infrastructure or produce a live security attestation. Automatic existing GitHub Actions may run on branch pushes. A passing source test is not customer-data or production-release approval.
 
 ## Next continuation
-Resume at **258**, inspect existing implementation before adding code, commit each meaningful change, keep the register current and stop only at 261 or sooner if further work is not justified. At item 262 seek new Founder authorisation. Warn ahead of conversational context exhaustion and carry forward commit hashes and pending CI.
+**STOP: Batch 10 source-only implementations 212–261 complete.** Await explicit Founder approval for implementation **262**. Preserve the source-only restrictions unless separate approval is given for live environment actions; independent security sign-off, Pages-publication review, provider contracts, cloud controls and production readiness remain OPEN. Carry this register and the consolidated report into the next chat before the conversation limit.
