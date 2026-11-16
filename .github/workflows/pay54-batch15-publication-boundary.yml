@@ -9,6 +9,7 @@ on:
       - "backend/governance/pay54-publication-tree-inspector.mjs"
       - "backend/governance/pay54-static-site-stage-builder.mjs"
       - "backend/governance/pay54-publication-candidate-attestation.mjs"
+      - "docs/engineering/pay54-pages-artifact-p0-finding-20261116.md"
       - "backend/tests/account-batch15-*.test.mjs"
       - ".github/workflows/pay54-batch15-publication-boundary.yml"
   workflow_dispatch:
@@ -46,6 +47,7 @@ jobs:
           node --check backend/tests/account-batch15-publication-tree-inspector.test.mjs
           node --check backend/tests/account-batch15-stage-integration.test.mjs
           node --check backend/tests/account-batch15-candidate-attestation.test.mjs
+          node --check backend/tests/account-batch15-pages-artifact-finding.test.mjs
       - name: Run Batch 15 source-only security tests
         run: node --test backend/tests/account-batch15-*.test.mjs
       - name: Assert deployment and money modes remain disabled
