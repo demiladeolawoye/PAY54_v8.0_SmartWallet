@@ -30,7 +30,7 @@
 
 **CI evidence for source commit `b977ab10` (prior to 217–227):** PAY54 Backend Tests run `43854581508`, Account Boundary Tests run `43854581510`, Account Security Integration run `43854581557`, Account Read Access Integration run `43854581506`, Account Catalogue and Isolation Integration run `43854581673` confirmed SUCCESS. All previously pending account and backend workflows for this SHA were subsequently observed SUCCESS; the Pages build/deployment also completed successfully. Newer source changes 217–227 require their own CI verification. This is **not** an independent security sign-off.
 
-**Current source progress:** 16 of 50 item-level deliverables (212–227) committed. Latest source test commit `6944d60315ab75dba8727446737c2d2931d0c434`. Regression conclusion for that SHA to be recorded when runs finish. Documentation commits are not test evidence.
+**Current source progress:** 16 of 50 item-level deliverables (212–227) committed. Latest source test commit `6944d60315ab75dba8727446737c2d2931d0c434`. All nine relevant backend/account workflows on that source SHA completed SUCCESS: Backend `43859999142`; Account Boundary `43859998974`; Account Security `43859999119`; Account Read Access `43859999111`; Account Catalogue/Isolation `43859999083`; Account Auth/RLS `43859999069`; Batch 07 `43859999180`; Batch 08 `43859999103`; Batch 09 `43859999028`. GitHub Pages `43859998852` was CANCELLED (not a security-test failure). Documentation commits are not test evidence.
 
 ## Remaining implementation plan: 228–261
 
