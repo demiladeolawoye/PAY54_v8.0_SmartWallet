@@ -54,12 +54,28 @@ export function createAuthenticatedAccountSelectionReview({
      throw new Error("ACCOUNT_SELECTION_REVIEW_DENIED");
     }
     const projected=projectAccountForSwitcher(account);
-    if(projected.accountId!==target.toLowerCase()){
+    // A membership can be revoked while the first account read is pending.
+    // Revalidate it before returning even a display-only account candidate.
+    const freshAccount=await accountReader.selectForRequest(request,target);
+    const finalPrincipal=requireTrustedPrincipal(
+      await principalResolver.resolve(request)
+    );
+    const finished=now();
+    if(projected.accountId!==target.toLowerCase()||
+       freshAccount.accountId!==account.accountId||
+       freshAccount.type!==account.type||
+       freshAccount.legalOwnerId!==account.legalOwnerId||
+       freshAccount.status!=="ACTIVE"||
+       freshAccount.verificationStatus!=="VERIFIED"||
+       finalPrincipal!==before||
+       !Number.isSafeInteger(finished)||finished<start||
+       finished-start>maxReviewMs){
      throw new Error("ACCOUNT_SELECTION_REVIEW_DENIED");
     }
     return Object.freeze({
      account:projected,
      identityRechecked:true,
+     membershipRechecked:true,
      accountReaderAuthorisationRequired:true,
      reviewOnly:true,
      sessionSwitched:false,
