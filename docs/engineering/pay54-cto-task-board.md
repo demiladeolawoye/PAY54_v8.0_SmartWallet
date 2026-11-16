@@ -625,3 +625,35 @@ Founder approved source-only 50-item Batch 16 (518–567) and read-only investig
 **P0 still OPEN:** The previously inspected Pages deployment artifact included internal backend/docs/infrastructure source. This founder offline artifact is a different, restricted Actions artifact and **is not deployed to GitHub Pages**. Current live Pages settings, public source reachability, secrets exposure and any active remediation remain independently unverified. Do not merge, deploy, change credentials, activate payments or assume P0 closed.
 
 **Next engineering focus:** Preview provenance and sensitivity checks, accessible display-only review, product QA evidence, independently observable Pages settings/public reachability, and separately approved future production containment. Preserve the existing functional dashboard and avoid UI regressions.
+
+
+## Batch 16 final CTO closure — 518–567 (50/50 source deliverables)
+
+**Founder approval:** Source-only development and read-only investigation approved. Batch 16 review branch `cto/batch16-pages-remediation-518-567` remains DRAFT PR #4, stacked on unmerged PR #3/#2/#1. No production deployment or merge authorisation follows from this source progress.
+
+| IDs | Concrete implementation scope | State |
+| --- | --- | --- |
+| 518–520 | Pages workflow upload-root audit, negative tests, read-only CI | COMMITTED |
+| 521–524 | Founder dashboard preview acceptance, automated safeguards, CTO board | COMMITTED |
+| 525–527 | Inert dashboard source visual snapshot, adversarial tests, CI | COMMITTED |
+| 528–532 | Byte verification, remote CSS blocking, real-repository source smoke | COMMITTED |
+| 533–535 | Offline founder ZIP package, tests, seven-day pinned Actions download | COMMITTED |
+| 536–539 | Unsafe SVG refusal, tests and founder artifact checkpoint | COMMITTED |
+| 540–545 | Exact GitHub PR-head checkout, source SHA/asset manifest and CI | COMMITTED |
+| 546–548 | Independent extracted-preview SHA validation and upload enforcement | COMMITTED |
+| 549–554 | Landmark, mobile source markup, disabled UI control assurance and CI | COMMITTED |
+| 555–557 | Founder offline preview instructions and verification tests | COMMITTED |
+| 558–561 | Offline HTML URL, remote reference and srcset source restrictions | COMMITTED |
+| 562–564 | Active Pages P0 evidence request and no-activation review rules | COMMITTED |
+| 565–566 | Source engineering founder closure report and automated truth/acceptance tests | COMMITTED |
+| 567 | CTO board reconciliation and 50-item founder approval checkpoint | COMMITTED via this update |
+
+**Batch status:** 50/50 source implementations (518–567). No uncompleted numbered items within this source cycle. This is not a claim of production readiness, operational P0 closure, or complete browser/device QA.
+
+**Latest executable revision before board update:** `3023b4a1c85d98d4360074325d306d9a10f4c558`; the dedicated Batch 16 CI and existing ten account/security workflows must be evaluated on the exact final commit before claiming full regression success. An earlier manifest-change source test failed because a fixture omitted the now-required SHA, then was corrected. The passing test run and its artifact IDs must be recorded precisely rather than inferred from a successful source commit.
+
+**Founder artifact delivery:** Offline HTML snapshot and verified ZIP download supplied in this conversation. Source-only CI produced short-lived restricted Actions artifacts containing dashboard markup, visual CSS/image assets and a SHA-256 manifest. Artifacts do NOT include runtime JavaScript, `backend/`, `docs/` or `infrastructure/`, and they do NOT deploy GitHub Pages. A developer-local screenshot attempt did not complete, so real visual browser QA is still a requirement.
+
+**Critical P0 remains OPEN:** A historical GitHub Pages artifact `14252395793` (run `43917703697`) contained 348 backend, 150 documentation and one infrastructure source file. The active live Pages deployment, actual public-file reachability, exposure of sensitive material, live setting protections and remedy remain independently UNVERIFIED. Founder/Security/DevSecOps must separately authorise operational investigation and any containment, deployment, credential or environment change.
+
+**Next cycle:** Batch 17 would be 568–617 and requires independent Founder approval. Prioritise actual Pages containment evidence, verified GitHub deployer controls, authenticated Personal/Business account and PostgreSQL RLS integration, and independent mobile/desktop/accessibility and rollback acceptance. Preserve all existing working dashboard modules; do not introduce real-money features through a visual preview.
