@@ -29,3 +29,13 @@ test("478: live containment requires separate founder and security approval",()=
  assert.match(body,/Founder release and containment approval/);
  assert.match(body,/NOT GRANTED/);
 });
+
+test("495: artifact marker evidence is recorded without exposing key bytes or claiming compromise",()=>{
+ const doc=read();
+ assert.match(doc,/One private-key header marker/);
+ assert.match(doc,/backend\/tests\/account-batch11-proposed-site-content-review\.test\.mjs/);
+ assert.match(doc,/not evidence that a usable signing key exists/);
+ assert.match(doc,/bounded scan cannot certify absence of secrets/);
+ assert.match(doc,/P0 OPEN/);
+ assert.doesNotMatch(doc,/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/);
+});
