@@ -23,8 +23,8 @@ test("325: recipient widget moved, not cloned or converted into a second full-si
 test("325: accessible keyboard disclosure styling and cache-bust loads exist",()=>{
  assert.match(css,/\.p54b-frequent-people > summary:focus-visible/);
  assert.match(css,/\.p54b-frequent-people\[open\] #recipientDashboardWidget/);
- assert.match(html,/dashboard-blueprint-shell\\.js\\?v=1\\.2\\.4/);
- assert.match(html,/dashboard-blueprint-refinements\\.css\\?v=1\\.5\\.3/);
+ assert.match(html,/dashboard-blueprint-shell\.js\?v=1\.2\.4/);
+ assert.match(html,/dashboard-blueprint-refinements\.css\?v=1\.5\.3/);
  assert.match(html,/dashboard-feed-preview\.js\?v=1\.0\.1/);
 });
 test("325: false rising arrow and fake balance movement have been removed",()=>{
