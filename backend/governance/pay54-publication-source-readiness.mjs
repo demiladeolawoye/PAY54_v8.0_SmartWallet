@@ -10,12 +10,14 @@ import {fileURLToPath} from "node:url";
 import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
 import {auditPay54StaticSiteLinks} from "./pay54-static-site-link-audit.mjs";
 import {auditPay54CssAssetLinks} from "./pay54-css-asset-link-audit.mjs";
+import {auditPay54ExternalScripts} from "./pay54-external-script-source-review.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 export function inspectPay54PublicationReadiness(sourceRoot=ROOT){
  const inventory=inspectPay54StaticSiteCandidate(sourceRoot);
  const html=auditPay54StaticSiteLinks(sourceRoot);
  const css=auditPay54CssAssetLinks(sourceRoot);
+ const thirdParty=auditPay54ExternalScripts(sourceRoot);
  const digest=createHash("sha256").update(inventory.candidatePaths.join("\n")).digest("hex");
  const issues=Object.freeze([
   ...html.missingLocalReferences.map(x=>({...x,category:"HTML_MISSING"})),
@@ -31,6 +33,10 @@ export function inspectPay54PublicationReadiness(sourceRoot=ROOT){
   htmlCheckedReferences:html.checkedLocalReferences,
   cssCheckedReferences:css.checkedLocalReferences,
   externalReferenceCount:html.externalReferences.length+css.externalReferences.length,
+  thirdPartyScriptCount:thirdParty.externalScriptCount,
+  thirdPartyScriptFindings:thirdParty.findings,
+  thirdPartyScriptReviewStatus:thirdParty.manualIntegrityReviewRequired?"REVIEW_REQUIRED":"NO_SOURCE_FINDINGS",
+  thirdPartyBytesVerified:false,
   issues,
   sourceDependencyStatus:ready?"PASS":"FAIL",
   actualArtifactInspected:false,
