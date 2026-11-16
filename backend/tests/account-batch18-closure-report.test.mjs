@@ -27,7 +27,7 @@ test("666: report does not equate historical Pages archive contents with current
 test("666: working linked-card development module is not promoted or silently removed",()=>{
  const s=read();
  assert.match(s,/assets\/js\/infrastructure\/payments\/providers\/linked-card-development\.js/);
- assert.match(s,/No mock has been promoted or relocated/);
+ assert.match(s,/no mock has been promoted or relocated/i);
  assert.match(s,/DECISION OPEN/);
 });
 test("666: no source CI or founder approval silently deploys or funds money",()=>{
