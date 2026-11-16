@@ -12,6 +12,8 @@ on:
       - assets/img/**
       - .github/workflows/pay54-batch17-visual-qa-artifact.yml
       - backend/governance/pay54-balance-visual-fixture.mjs
+      - backend/governance/pay54-rendered-balance-review.mjs
+      - backend/tests/account-batch17-rendered-balance-review.test.mjs
   workflow_dispatch:
 
 permissions:
@@ -75,6 +77,26 @@ jobs:
           # The original protected dashboard is not used for the visual screenshot.\n          # The synthetic fixture excludes authentication and all financial engines.\n          # Browser logs may contain development-only identifiers; exclude from artifact.
           rm -f "$RUNNER_TEMP"/pay54-visual-qa/*-browser.log
           rm -rf "$RUNNER_TEMP"/pay54-visual-qa/browser-*
+      - name: Assert browser-mounted balance DOM still shows demo-safe details
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check backend/governance/pay54-rendered-balance-review.mjs
+          node --test backend/tests/account-batch17-rendered-balance-review.test.mjs
+          browser_profile="$RUNNER_TEMP/pay54-balance-dom-profile"
+          mkdir -p "$browser_profile"
+          google-chrome --headless --no-sandbox --disable-gpu \
+            --disable-extensions --disable-background-networking \
+            --no-first-run --no-default-browser-check --disable-sync \
+            --no-proxy-server \
+            --host-resolver-rules="MAP * 0.0.0.0, EXCLUDE localhost" \
+            --user-data-dir="$browser_profile" \
+            --virtual-time-budget=4500 \
+            --dump-dom "file://$GITHUB_WORKSPACE/.pay54-balance-visual-fixture.html" \
+            > "$RUNNER_TEMP/pay54-balance-dom.html" 2>/dev/null
+          node backend/governance/pay54-rendered-balance-review.mjs \
+            "$RUNNER_TEMP/pay54-balance-dom.html"
+          rm -rf "$browser_profile" "$RUNNER_TEMP/pay54-balance-dom.html"
       - name: Upload screenshot-only artifact for QA review (NOT GitHub Pages)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
