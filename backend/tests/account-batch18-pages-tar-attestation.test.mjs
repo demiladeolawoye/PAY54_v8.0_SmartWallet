@@ -64,3 +64,27 @@ test("634: malformed checksums and unsafe manifest paths never become positive m
   {files:[expected("backend/../index.html","safe")]}
  ),/EXPECTED_MEMBER_INVALID/);
 });
+
+test("641: an unexpected internal directory is not allowed even without file payloads",()=>{
+ const data="PAY54 static";
+ const directory=tarFile("backend/","");
+ directory[156]=53;
+ directory.fill(32,148,156);
+ let sum=0;for(const byte of directory.subarray(0,BLOCK))sum+=byte;
+ directory.write(sum.toString(8).padStart(6,"0")+"\0 ",148,"ascii");
+ const r=verifyPay54PagesTarAgainstSource(
+  archive(tarFile("index.html",data),directory),
+  {files:[expected("index.html",data)]}
+ );
+ assert.equal(r.exactSourceBytesMatched,false);
+ assert.ok(r.mismatches.includes("UNEXPECTED_DIRECTORY"));
+});
+test("641: nonzero trailing data after standard tar end blocks cannot be hidden",()=>{
+ const data="PAY54 static";
+ const tampered=Buffer.concat([
+  archive(tarFile("index.html",data)),Buffer.alloc(BLOCK,1)
+ ]);
+ const r=verifyPay54PagesTarAgainstSource(tampered,{files:[expected("index.html",data)]});
+ assert.equal(r.exactSourceBytesMatched,false);
+ assert.ok(r.mismatches.includes("NONZERO_TRAILING_ARCHIVE_DATA"));
+});
