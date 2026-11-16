@@ -1,4 +1,5 @@
 "use strict";
+import {consumeAccountAuditReceipt} from "./account-audit-receipt-gate.mjs";
 
 /*
  * PAY54 Batch 10 item 232 — audited display-only result gate.
@@ -33,12 +34,9 @@ export function createAccountReceiptAuditedRead({read,audit}={}) {
     const receipt=await audit.publish({
      operation:"ACCOUNT_SELECT",outcome:"ALLOWED",reason:"POLICY_OK"
     });
-    if (!receipt || receipt.receiptAccepted!==true ||
-        receipt.sourceAckOnly!==true ||
-        receipt.durableStorageIndependentlyVerified!==false ||
-        receipt.financialExecutionEnabled!==false) {
-     throw new Error("ACCOUNT_AUDIT_UNAVAILABLE");
-    }
+    consumeAccountAuditReceipt(receipt,{
+     operation:"ACCOUNT_SELECT",outcome:"ALLOWED",reason:"POLICY_OK"
+    });
     return value;
    } catch {
     throw new Error("ACCOUNT_READ_DENIED");
