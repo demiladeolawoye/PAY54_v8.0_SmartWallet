@@ -44,3 +44,30 @@ test("279: duplicates, malformed manifests and folder-only entries deny",()=>{
   paths:["assets/"]
  }).sourceManifestStructurallySafe,false);
 });
+
+
+test("370: allow exactly eight reviewed browser security scripts, never internal security source",()=>{
+ const safe=[
+  "development-auth-bridge.js","index.js","sanitizer.js",
+  "secure-storage.js","session-manager.js","transaction-guard.js",
+  "validator.js","xss.js"
+ ].map(file=>"assets/js/security/"+file);
+ const approved=assessPay54PublicSiteManifest({paths:safe});
+ assert.equal(approved.sourceManifestStructurallySafe,true);
+ assert.deepEqual(approved.disallowedPaths,[]);
+ assert.equal(approved.publicationApproved,false);
+ const forbidden=[
+  "assets/js/security/private.js",
+  "assets/js/security/secrets.js",
+  "assets/js/security/credentials.js",
+  "assets/js/security/keys.js",
+  "assets/js/security/index.js.map",
+  "backend/security/index.js",
+  "assets/security/index.js",
+  "docs/security/index.js",
+  "assets/js/internal/index.js"
+ ];
+ const report=assessPay54PublicSiteManifest({paths:forbidden});
+ assert.equal(report.sourceManifestStructurallySafe,false);
+ assert.deepEqual(report.disallowedPaths,forbidden.slice().sort());
+});
