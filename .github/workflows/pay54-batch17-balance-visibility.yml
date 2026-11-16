@@ -12,6 +12,7 @@ on:
       - "assets/css/dashboard-blueprint-refinements.css"
       - "backend/tests/account-batch17-*.test.mjs"
       - "backend/governance/pay54-public-site-manifest.mjs"
+      - "backend/governance/pay54-pages-release-preflight.mjs"
       - ".github/workflows/pay54-batch17-balance-visibility.yml"
   workflow_dispatch:
 
@@ -48,8 +49,21 @@ jobs:
           node --check backend/tests/account-batch17-preview-balance-claims.test.mjs
           node --check backend/governance/pay54-public-site-manifest.mjs
           node --check backend/tests/account-batch17-publication-dependency-boundary.test.mjs
+          node --check backend/governance/pay54-pages-release-preflight.mjs
+          node --check backend/tests/account-batch17-pages-release-preflight.test.mjs
       - name: Run balance visibility and demo-claims regression tests
         run: node --test backend/tests/account-batch17-*.test.mjs
+      - name: Confirm current Pages source remains nondeployable until provider replacement
+        run: |
+          node --input-type=module -e '
+            import {assessPay54PagesReleasePreflight} from "./backend/governance/pay54-pages-release-preflight.mjs";
+            const r=assessPay54PagesReleasePreflight();
+            if(r.sourceReviewPassed||r.productionRelease!=="BLOCKED"||
+               !r.blockers.includes("DEVELOPMENT_PROVIDER_IN_FORBIDDEN_PUBLICATION_PATH")){
+              throw new Error("PAY54_EXPECTED_PROVIDER_PUBLICATION_GATE_NOT_PRESENT");
+            }
+            console.log("Publication remains correctly blocked: development provider outside site boundary");
+          '
       - name: Assert production modes disabled
         run: |
           test "$PAY54_REAL_MONEY_MODE" = "false"
