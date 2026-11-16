@@ -1,0 +1,55 @@
+name: PAY54 Batch 11 Publication Governance Source Tests
+
+on:
+  push:
+    branches: [project-titan]
+    paths:
+      - "backend/governance/pay54-*.mjs"
+      - "backend/tests/account-batch11-*.test.mjs"
+      - ".github/workflows/pay54-batch11-publication-governance.yml"
+  pull_request:
+    paths:
+      - "backend/governance/pay54-*.mjs"
+      - "backend/tests/account-batch11-*.test.mjs"
+      - ".github/workflows/pay54-batch11-publication-governance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch11-publication-\${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-publication-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Syntax preflight for all publication policy and Batch 11 test source
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in backend/governance/pay54-*.mjs backend/tests/account-batch11-*.test.mjs; do
+            node --check "$file"
+          done
+      - name: Offline publication and release evidence regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch11-*.test.mjs
+      - name: Prohibit new publication or real-money activation
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          echo "Test-only. No GitHub Pages deployment, cloud provisioning or financial execution."
