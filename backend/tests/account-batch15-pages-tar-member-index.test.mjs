@@ -75,3 +75,24 @@ test("483: missing index prevents treating tar as a complete static site",()=>{
  const report=inspectPay54PagesTarMembers(tar([{path:"assets/js/app.js",body:"export {}"}]));
  assert.equal(report.archiveSourceBoundaryPassed,false);
 });
+
+test("496: duplicate tar entries remain unsafe even when path is allowlisted",()=>{
+ const report=inspectPay54PagesTarMembers(tar([
+  {path:"index.html",body:"first"},
+  {path:"index.html",body:"second"}
+ ]));
+ assert.equal(report.archiveSourceBoundaryPassed,false);
+ assert.ok(report.findings.includes("DUPLICATE_TAR_MEMBER"));
+});
+test("496: an archive without the two terminating zero blocks fails closed",()=>{
+ const valid=tar([{path:"index.html",body:"home"}]);
+ const truncated=valid.subarray(0,valid.length-512);
+ assert.throws(()=>inspectPay54PagesTarMembers(truncated),/TERMINATOR_MISSING/);
+});
+test("496: malformed tar size fields are not interpreted as safe numbers",()=>{
+ const valid=tar([{path:"index.html",body:"home"}]);
+ const modified=Buffer.from(valid);
+ modified.fill(0,124,136);
+ modified.write("not-a-number",124,"ascii");
+ assert.throws(()=>inspectPay54PagesTarMembers(modified),/INVALID_OCTAL_FIELD/);
+});
