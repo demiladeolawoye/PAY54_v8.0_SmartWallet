@@ -3,7 +3,7 @@
 **Reporting date:** 2026-11-16  
 **Repository:** `demiladeolawoye/PAY54_v8.0_SmartWallet`  
 **Branch:** `project-titan`  
-**Starting baseline:** `db3f0da250eeb8f65b1781a6e2495611cee61544` (includes prior progress register); preceding Batch 09 baseline `244237f65238ec8747e364176130cc2d07133f5e`.  
+**Starting baseline:** `244237f65238ec8747e364176130cc2d07133f5e` (verified Batch 09 closure). Batch 10 started from that branch state, and earlier Batch 10 checkpoint `db3f0da250eeb8f65b1781a6e2495611cee61544` preceded implementation 228.  
 **Founder approval:** Batch 10 source-only **212–261**, 50 meaningful deliverables.  
 **Result:** **50/50 source-only implementations committed**, subject to the explicit assurance limits below.
 
