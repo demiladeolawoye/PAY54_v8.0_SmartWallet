@@ -28,7 +28,7 @@ const EXTENSIONS=new Set([
 ]);
 const FORBIDDEN_PARTS=new Set([
  ".git",".github","backend","infra","infrastructure","terraform",
- "node_modules","test","tests","fixtures","secrets","private",
+ "node_modules","test","tests","fixtures","docs","documentation","secrets","private",
  "internal","coverage","vendor-private",".well-known-private"
 ]);
 const FORBIDDEN_NAMES=/(?:^|[._-])(?:secret|credential|password|token|backup|private.key|id_rsa|service.account)(?:[._-]|$)/i;
