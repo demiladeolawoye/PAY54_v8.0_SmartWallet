@@ -25,7 +25,7 @@ test("356: restricted baseline is a source review, not operational authorization
  const result=inspect();
  assert.equal(result.sourceBaselinePassed,true);
  assert.equal(result.findings.length,0);
- assert.equal(result.customerReadAccessApproved,false);
+ assert.equal(result.customerDataAccessApproved,false);
  assert.equal(result.catalogResultProvenanceVerified,false);
  assert.equal(result.liveDatabaseIdentityIndependentlyVerified,false);
  assert.equal(result.rlsActivationApproved,false);
