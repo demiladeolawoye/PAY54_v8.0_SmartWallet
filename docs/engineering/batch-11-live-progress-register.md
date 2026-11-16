@@ -59,6 +59,7 @@
 | 308 | Verified complete eleven-workflow regression matrix | `d68fd3c7e86dd47a9873dc2bf39cad5f4b58ed37` | COMMITTED |
 | 309 | Founder approval and change-request ledger | `000b074aac059ce9d8dc4f27e3310d7e2a98310b` | COMMITTED |
 | 310 | CTO task board and live progress reconciliation | This document | COMMITTED |
+| 311 | Consolidated Batch 11 closure, 50/50 source deliverables and NO-GO live release | `dde1f452237b0386fa0366dec4df158f399f8091` | CLOSED |
 
 ## Source regression
 
@@ -90,7 +91,7 @@ A previous failing backup-exclusion regression at `047465154255a5c4b8262a141cc80
 
 ## Final technical verification and Batch 11 closing checkpoint
 
-49/50 approved source-only deliverables have been committed through item 310. Final consolidated report is item 311. All eleven GitHub Actions source/backend/account/synthetic SQL workflows passed on executable source commit `2971f0b754f66f3a0d755f95856b20107d16faf4`, as detailed with exact run IDs in `docs/engineering/batch-11-final-regression-evidence.md`. Earlier failed source revisions remain retained; the Item 304 test had expected an absent field when the policy correctly returned explicit `releaseAuthorized:false`. No weakened policy was required for the passing result.
+All 50/50 approved source-only deliverables through item 311 have been committed. The consolidated report is `docs/engineering/batch-11-consolidated-closure-report.md`; real-money and customer-data production launch is NO-GO. All eleven GitHub Actions source/backend/account/synthetic SQL workflows passed on executable source commit `2971f0b754f66f3a0d755f95856b20107d16faf4`, as detailed with exact run IDs in `docs/engineering/batch-11-final-regression-evidence.md`. Earlier failed source revisions remain retained; the Item 304 test had expected an absent field when the policy correctly returned explicit `releaseAuthorized:false`. No weakened policy was required for the passing result.
 
 Operational Founder decisions, immutably pinned dependency change requests and the full UK–Nigeria launch workstream matrix remain open in `docs/engineering/batch-11-founder-approval-and-change-request-ledger.md` and `docs/engineering/pay54-cto-task-board.md`.
 
@@ -115,4 +116,4 @@ An internally issued receipt object only proves source provenance, not that the 
 
 Prioritise Pages source transparency, release evidence provenance, audit integrity and risk reduction, then inspect existing tests before introducing new modules. Avoid artificial tasks to reach 50. Maintain current approved source-only boundaries. Warn ahead of chat limit and include latest HEAD, CI run IDs, exact completed/pending item numbers and all Founder decisions in the handover.
 
-**Next source item:** 311. **Stop for new approval:** item 312.
+**Batch 11 CLOSED: 50/50. Do not begin item 312 without a separate Founder approval.**
