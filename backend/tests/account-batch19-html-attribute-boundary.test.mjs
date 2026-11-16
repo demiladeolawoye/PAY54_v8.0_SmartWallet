@@ -154,3 +154,25 @@ test("695: inert PAY54 data-onclick documentation is not treated as executable",
   assert.equal(r.complete,true);
  }finally{f.dispose();}
 });
+
+test("697: strings inside inline JavaScript and CSS are not mistaken for active HTML resources",()=>{
+ const html=[
+  '<script>const html = "src=\\\"fake/missing.js\\\"";</script>',
+  '<style>body::before{content:"href=\\\"fake/link.css\\\"";}</style>',
+  '<img src="assets/img/logo.svg">'
+ ].join("");
+ const f=fixture(html);
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.checkedLocalReferences,1);
+  assert.equal(r.complete,true);
+ }finally{f.dispose();}
+});
+test("697: old links in HTML comments do not become nonexistent live dependencies",()=>{
+ const f=fixture('<!-- <script src="backend/private.js"></script> --><img src="assets/img/logo.svg">');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.checkedLocalReferences,1);
+  assert.equal(r.complete,true);
+ }finally{f.dispose();}
+});
