@@ -61,3 +61,20 @@ test("619: an absent asset is not interpreted as a permitted deployable asset",(
   assert.equal(r.publicDependencyGraphComplete,false);
  }finally{f.clean();}
 });
+
+test("702: first-party dependency inventory ignores commented and inline-script fake links",()=>{
+ const f=fixture("assets/js/app.js");
+ try{
+  const page=join(f.root,"index.html");
+  const html=[
+   '<!-- <script src="backend/internal.js"></script> -->',
+   '<script>const example = \'src="assets/js/not-real.js"\';</script>',
+   '<script src="assets/js/app.js"></script>'
+  ].join("");
+  writeFileSync(page,html);
+  const r=inspectPay54FirstPartyHtmlDependencies(f.root);
+  assert.equal(r.publicDependencyGraphComplete,true);
+  assert.equal(r.checkedReferences,1);
+  assert.deepEqual(r.findings,[]);
+ }finally{f.clean();}
+});
