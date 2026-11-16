@@ -31,7 +31,6 @@ export function createAccountRolePinnedPool({connectForBinding,reviewConnection}
         throw new Error("ACCOUNT_PINNED_POOL_CLIENT_SHARED");
       }
       checkedOut.add(client);
-      let discard=true;
       try {
         const observed=await reviewConnection(client,issued);
         if (!observed || typeof observed !== "object" ||
@@ -40,7 +39,7 @@ export function createAccountRolePinnedPool({connectForBinding,reviewConnection}
             observed.rotationEpoch !== issued.rotationEpoch ||
             observed.endpointId !== issued.endpointId ||
             observed.financialPrivilegeAbsent !== true ||
-            observed.nonSwitchable === false) {
+            observed.nonSwitchable !== true) {
           throw new Error("ACCOUNT_PINNED_POOL_ACTOR_MISMATCH");
         }
         const value=await callback(client);
@@ -52,10 +51,9 @@ export function createAccountRolePinnedPool({connectForBinding,reviewConnection}
             after.rotationEpoch !== issued.rotationEpoch ||
             after.endpointId !== issued.endpointId ||
             after.financialPrivilegeAbsent !== true ||
-            after.nonSwitchable === false) {
+            after.nonSwitchable !== true) {
           throw new Error("ACCOUNT_PINNED_POOL_ACTOR_CHANGED");
         }
-        discard=false;
         return value;
       } finally {
         checkedOut.delete(client);
