@@ -13,6 +13,8 @@ const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const ATTRIBUTE=/(?<![\w:-])(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
 const RESPONSIVE=/(?<![\w:-])srcset\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
 const ACTIVE_FORM=/(?<![\w:-])(?:action|formaction)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
+const BASE_TAG=/<base\b[^>]*>/gi;
+const META_REFRESH=/<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["']?refresh\b)[^>]*>/gi;
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
@@ -24,6 +26,16 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  let checked=0;
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
+  // Base URL rewriting and refresh redirects are not part of the reviewed
+  // PAY54 static-site navigation graph. Refuse them until independently audited.
+  if(BASE_TAG.test(html)){
+   rejected.push({page,reference:"base",reason:"DOCUMENT_BASE_URL_REQUIRES_REVIEW"});
+  }
+  BASE_TAG.lastIndex=0;
+  if(META_REFRESH.test(html)){
+   rejected.push({page,reference:"meta-refresh",reason:"ACTIVE_REDIRECT_REQUIRES_REVIEW"});
+  }
+  META_REFRESH.lastIndex=0;
   // HTML form action destinations may post customer data. Require a
   // separately reviewed capability and server-side policy before publication.
   for(const action of html.matchAll(ACTIVE_FORM)){
