@@ -14,6 +14,8 @@ test("652: actual PAY54 CTO source report identifies blocked public source and n
  assert.equal(r.releaseSourceStatus,"BLOCKED");
  assert.ok(r.executableInlineScripts>=1);
  assert.equal(r.inlineScriptReviewRequired,true);
+ assert.ok(Number.isSafeInteger(r.staticJsImportReviewFindings));
+ assert.equal(r.fullRuntimeDependencyGraphVerified,false);
  assert.equal(r.activePagesSettings,"NOT_INDEPENDENTLY_VERIFIED");
  assert.equal(r.publicContentReachability,"NOT_INDEPENDENTLY_VERIFIED");
  assert.equal(r.deployed,false);
@@ -31,6 +33,8 @@ test("652: clean local source still cannot claim public or financial release",()
   assert.equal(r.releaseSourceStatus,"SOURCE_CHECK_PASS");
  assert.equal(r.executableInlineScripts,0);
  assert.equal(r.inlineScriptReviewRequired,false);
+ assert.equal(r.staticJsImportReviewFindings,0);
+ assert.equal(r.dynamicJsImportExpressions,0);
   assert.equal(r.releaseApproved,false);
   assert.equal(r.deployed,false);
   assert.equal(r.financialExecutionEnabled,false);
