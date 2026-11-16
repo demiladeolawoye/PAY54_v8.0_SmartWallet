@@ -49,3 +49,21 @@ test("674: javascript and relative traversal in actual attrs are denied",()=>{
   assert.ok(r.rejectedReferences.some(x=>x.reason==="PATH_TRAVERSAL"));
  }finally{f.dispose();}
 });
+
+test("677: responsive srcset cannot bypass static-publication first-party review",()=>{
+ const f=fixture('<img src="assets/img/logo.svg" srcset="https://cdn.example.invalid/private.png 2x">');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,false);
+  assert.ok(r.rejectedReferences.some(x=>
+   x.reason==="RESPONSIVE_SOURCE_SET_REQUIRES_REVIEW"));
+ }finally{f.dispose();}
+});
+test("677: inert data-srcset does not count as an image source",()=>{
+ const f=fixture('<button data-srcset="preview" data-action="send">Send</button>');
+ try{
+  const r=auditPay54StaticSiteLinks(f.root);
+  assert.equal(r.complete,true);
+  assert.deepEqual(r.rejectedReferences,[]);
+ }finally{f.dispose();}
+});
