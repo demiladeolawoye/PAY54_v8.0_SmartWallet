@@ -123,3 +123,18 @@ test("685: double-encoded traversal and resource paths fail closed",()=>{
   }finally{f.dispose();}
  }
 });
+
+test("687: embedded objects are rejected even without conventional src or href",()=>{
+ for(const tag of [
+  '<object data="https://thirdparty.invalid/plugin"></object>',
+  '<embed type="application/x-shockwave-flash" src="https://thirdparty.invalid/card">'
+ ]){
+  const f=fixture(tag);
+  try{
+   const r=auditPay54StaticSiteLinks(f.root);
+   assert.equal(r.complete,false);
+   assert.ok(r.rejectedReferences.some(x=>
+    x.reason==="ACTIVE_EMBEDDED_OBJECT_REQUIRES_REVIEW"));
+  }finally{f.dispose();}
+ }
+});
