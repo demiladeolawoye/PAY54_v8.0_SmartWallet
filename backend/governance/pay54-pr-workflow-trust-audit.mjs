@@ -35,12 +35,14 @@ export function assessPay54PullRequestWorkflowTrust({workflows}={}){
   const writePermission=hasLine(source,/^\s*(?:contents|actions|checks|deployments|packages|pull-requests|id-token):\s*write\s*$/m);
   const secretsReference=hasLine(source,/\$\{\{\s*secrets\./);
   const cloudIdentity=hasLine(source,/\b(?:google-github-actions\/auth|aws-actions\/configure-aws-credentials|azure\/login)@/);
+  const untrustedExpression=hasLine(source,/\x24\{\{\s*github\.(?:event\.pull_request\.(?:title|body|head\.ref|head\.label)|head_ref|event\.workflow_run\.(?:head_branch|display_title))\b/);
   const dangerousBuildContext=(pullRequestTarget||workflowRun)&&(
     checkout||secretsReference||cloudIdentity||writePermission
   );
   const potentialWorkflowRisk=Boolean(dangerousBuildContext||
     (untrustedPullRequest&&(secretsReference||cloudIdentity||writePermission))||
-    (checkout&&!credentialPersistenceDisabled));
+    (checkout&&!credentialPersistenceDisabled)||
+    ((pullRequestTarget||untrustedPullRequest||workflowRun)&&untrustedExpression));
   results.push(Object.freeze({
     path:file.path,
     pullRequestTarget,
@@ -51,6 +53,7 @@ export function assessPay54PullRequestWorkflowTrust({workflows}={}){
     writePermissionDetected:writePermission,
     secretsReferenceDetected:secretsReference,
     cloudIdentityDetected:cloudIdentity,
+    untrustedExpressionDetected:untrustedExpression,
     needsIndependentReview:potentialWorkflowRisk
   }));
  }
