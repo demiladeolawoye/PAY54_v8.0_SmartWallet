@@ -11,6 +11,7 @@ on:
       - "backend/governance/pay54-dashboard-preview-readiness.mjs"
       - "backend/governance/pay54-create-founder-preview.mjs"
       - "backend/governance/pay54-preview-artifact-manifest.mjs"
+      - "backend/governance/pay54-verify-founder-preview.mjs"
       - "docs/engineering/pay54-dashboard-preview-acceptance.md"
       - "backend/tests/account-batch16-*.test.mjs"
       - ".github/workflows/pay54-batch16-pages-workflow-source.yml"
@@ -50,6 +51,8 @@ jobs:
           node --check backend/governance/pay54-dashboard-preview-readiness.mjs
           node --check backend/governance/pay54-create-founder-preview.mjs
           node --check backend/governance/pay54-preview-artifact-manifest.mjs
+          node --check backend/governance/pay54-verify-founder-preview.mjs
+          node --check backend/tests/account-batch16-verify-founder-preview.test.mjs
           node --check backend/tests/account-batch16-preview-artifact-manifest.test.mjs
           node --check backend/tests/account-batch16-pages-workflow-source.test.mjs
           node --check backend/tests/account-batch16-dashboard-preview-acceptance.test.mjs
@@ -71,6 +74,16 @@ jobs:
           test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/docs"
           test ! -d "$RUNNER_TEMP/pay54-founder-artifact/preview/infrastructure"
           node --check backend/governance/pay54-dashboard-offline-preview.mjs
+      - name: Independently compare staged preview files with its SHA256 manifest
+        run: |
+          PAY54_PREVIEW_DIR="$RUNNER_TEMP/pay54-founder-artifact/preview" node --input-type=module -e '
+            import {verifyPay54OfflineFounderPreview} from "./backend/governance/pay54-verify-founder-preview.mjs";
+            const result=verifyPay54OfflineFounderPreview(process.env.PAY54_PREVIEW_DIR);
+            if(!result.localArtifactIntegrityPassed ||
+               result.sourceCommitSha!==process.env.PAY54_PREVIEW_SOURCE_SHA ||
+               result.productionRelease!=="BLOCKED") process.exit(1);
+            console.log("Offline visual bundle verified, source:",result.sourceCommitSha);
+          '
       - name: Upload inert dashboard preview for founder review (NOT Pages deployment)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
