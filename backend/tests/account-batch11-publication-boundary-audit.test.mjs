@@ -54,8 +54,7 @@ test("272: invalid source evidence, duplicate paths and crafted workflow paths d
   {workflowInventory:null},
   {workflowInventory:["../../secrets.yml"]},
   {workflowInventory:[".github/workflows/deploy.yml",".github/workflows/deploy.yml"]},
-  {workflowInventory:[".github/workflows/evil.yml
-on: write"]}
+  {workflowInventory:[".github/workflows/evil.yml"+String.fromCharCode(10)+"on: write"]}
  ]){
   assert.throws(()=>assessPay54PublicationBoundary({...params,...patch}),
    /PAY54_PUBLICATION_INVENTORY_UNTRUSTED/);
