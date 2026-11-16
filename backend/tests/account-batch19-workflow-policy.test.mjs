@@ -23,3 +23,15 @@ test("693: review workflow cannot provision, publish Pages or enable real custom
  assert.match(s,/PAY54_REAL_MONEY_MODE: "false"/);
  assert.match(s,/TF_VAR_authorized_provisioning: "false"/);
 });
+
+test("710: offline founder dashboard artifact is seven days and SHA-verified before upload",()=>{
+ const s=readFileSync(WORKFLOW,"utf8");
+ assert.match(s,/pay54-create-founder-preview\.mjs/);
+ assert.match(s,/verifyPay54OfflineFounderPreview/);
+ assert.match(s,/localArtifactIntegrityPassed/);
+ assert.match(s,/sourceCommitSha!==process\.env\.PAY54_PREVIEW_SOURCE_SHA/);
+ assert.match(s,/retention-days: 7/);
+ assert.match(s,/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9/);
+ assert.doesNotMatch(s,/upload-pages-artifact/);
+ assert.doesNotMatch(s,/deploy-pages/);
+});
