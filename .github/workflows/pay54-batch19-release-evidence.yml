@@ -1,0 +1,83 @@
+name: PAY54 Batch 19 Exact-Release Evidence
+
+on:
+  pull_request:
+    branches:
+      - cto/batch18-linked-card-preview-boundary-618-667
+      - project-titan
+    paths:
+      - "backend/governance/pay54-batch19-*.mjs"
+      - "backend/tests/account-batch19-*.test.mjs"
+      - ".github/workflows/pay54-batch19-release-evidence.yml"
+      - "docs/engineering/pay54-batch19-*.md"
+      - "backend/governance/pay54-static-site-link-audit.mjs"
+      - "backend/governance/pay54-batch18-cto-release-scorecard.mjs"
+      - "backend/tests/account-batch18-cto-release-scorecard.test.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch19-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-evidence:
+    name: fail-closed-release-identity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout reviewed commit without stored credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Verify complete source modules and regression suites
+        run: |
+          set -euo pipefail
+          for file in backend/governance/pay54-batch19-*.mjs backend/tests/account-batch19-*.test.mjs; do
+            test -f "$file"
+            node --check "$file"
+          done
+          node --test backend/tests/account-batch19-*.test.mjs
+          node --test backend/tests/account-batch18-cto-release-scorecard.test.mjs
+      - name: Produce SHA-bound PAY54 inert offline founder dashboard
+        env:
+          PAY54_PREVIEW_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/pay54-batch19-founder"
+          node backend/governance/pay54-create-founder-preview.mjs "$RUNNER_TEMP/pay54-batch19-founder"
+          test -f "$RUNNER_TEMP/pay54-batch19-founder/preview/index.html"
+          test ! -e "$RUNNER_TEMP/pay54-batch19-founder/preview/assets/js"
+          test ! -e "$RUNNER_TEMP/pay54-batch19-founder/preview/backend"
+          PAY54_PREVIEW_DIR="$RUNNER_TEMP/pay54-batch19-founder/preview" node --input-type=module -e '
+            import {verifyPay54OfflineFounderPreview} from "./backend/governance/pay54-verify-founder-preview.mjs";
+            const r=verifyPay54OfflineFounderPreview(process.env.PAY54_PREVIEW_DIR);
+            if(!r.localArtifactIntegrityPassed||
+               r.sourceCommitSha!==process.env.PAY54_PREVIEW_SOURCE_SHA||
+               r.realMoneyEnabled!==false||r.productionRelease!=="BLOCKED"){
+              throw new Error("PAY54_BATCH19_PREVIEW_INTEGRITY_REFUSED");
+            }
+          '
+      - name: Upload seven-day inert founder balance preview (not GitHub Pages)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-batch19-offline-founder-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-batch19-founder/preview/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
+      - name: Confirm no release permissions or financial activation
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = false
+          test "$TF_VAR_authorized_provisioning" = false
+          echo "Batch 19 source-only review: no Pages publish, no financial execution."

@@ -8,12 +8,20 @@ import {readFileSync} from "node:fs";
 import {resolve, posix} from "node:path";
 import {fileURLToPath} from "node:url";
 import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
+import {projectPay54HtmlResourceMarkup} from "./pay54-html-resource-markup.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
-const ATTRIBUTE=/\b(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
+const ATTRIBUTE=/(?<![\w:-])(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
+const RESPONSIVE=/(?<![\w:-])srcset\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
+const ACTIVE_FORM=/(?<![\w:-])(?:action|formaction)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
+const BASE_TAG=/<base\b[^>]*>/gi;
+const META_REFRESH=/<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["']?refresh\b)[^>]*>/gi;
+const EMBEDDED_OBJECT=/<(?:object|embed)\b[^>]*>/gi;
+const INLINE_EVENT=/(?<![\w:-])on(?:click|load|error|submit|change|input|focus|blur|mouseover|pointerdown|keydown)\s*=/gi;
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
+
 
 export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  const inventory=inspectPay54StaticSiteCandidate(sourceRoot);
@@ -22,7 +30,46 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  let checked=0;
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
-  for(const match of html.matchAll(ATTRIBUTE)){
+  const markup=projectPay54HtmlResourceMarkup(html);
+  // Inline event handler attributes execute browser JavaScript outside the
+  // ordinary referenced script graph and require a separate XSS review.
+  if(INLINE_EVENT.test(markup)){
+   rejected.push({page,reference:"inline-event",reason:"INLINE_EVENT_HANDLER_REQUIRES_REVIEW"});
+  }
+  INLINE_EVENT.lastIndex=0;
+  // Active object/embed elements can load plugins and arbitrary framed
+  // resources that a src/href-only graph cannot safely attest.
+  if(EMBEDDED_OBJECT.test(markup)){
+   rejected.push({page,reference:"embedded-object",reason:"ACTIVE_EMBEDDED_OBJECT_REQUIRES_REVIEW"});
+  }
+  EMBEDDED_OBJECT.lastIndex=0;
+  // Base URL rewriting and refresh redirects are not part of the reviewed
+  // PAY54 static-site navigation graph. Refuse them until independently audited.
+  if(BASE_TAG.test(markup)){
+   rejected.push({page,reference:"base",reason:"DOCUMENT_BASE_URL_REQUIRES_REVIEW"});
+  }
+  BASE_TAG.lastIndex=0;
+  if(META_REFRESH.test(markup)){
+   rejected.push({page,reference:"meta-refresh",reason:"ACTIVE_REDIRECT_REQUIRES_REVIEW"});
+  }
+  META_REFRESH.lastIndex=0;
+  // HTML form action destinations may post customer data. Require a
+  // separately reviewed capability and server-side policy before publication.
+  for(const action of markup.matchAll(ACTIVE_FORM)){
+   const destination=(action[2]??action[3]??"").trim();
+   if(destination){
+    rejected.push({page,reference:"form-action",reason:"FORM_SUBMISSION_REQUIRES_REVIEW"});
+   }
+  }
+  // Responsive image candidate sets require dedicated parsing and byte-level
+  // review. Never silently certify them as a complete first-party graph.
+  for(const candidate of markup.matchAll(RESPONSIVE)){
+   const raw=(candidate[2]??candidate[3]??"").trim();
+   if(raw){
+    rejected.push({page,reference:"srcset",reason:"RESPONSIVE_SOURCE_SET_REQUIRES_REVIEW"});
+   }
+  }
+  for(const match of markup.matchAll(ATTRIBUTE)){
    const raw=(match[2]??match[3]??"").trim();
    if(!raw||raw.startsWith("#"))continue;
    if(EXTERNAL.test(raw)){
@@ -38,6 +85,11 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
    let decoded;
    try{decoded=decodeURIComponent(pathOnly);}catch{
     rejected.push({page,reference:raw,reason:"INVALID_ENCODING"});continue;
+   }
+   // A second URL-decoding layer must never turn apparently harmless
+   // path bytes into separators or traversal after the first review.
+   if(/%[a-f0-9]{2}/i.test(decoded)){
+    rejected.push({page,reference:raw,reason:"DOUBLE_ENCODED_PATH"});continue;
    }
    if(decoded.includes("\\")||decoded.includes("\0")||decoded.split("/").includes("..")){
     rejected.push({page,reference:raw,reason:"PATH_TRAVERSAL"});continue;

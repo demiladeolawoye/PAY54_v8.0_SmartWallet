@@ -13,6 +13,7 @@ test("656: real PAY54 release is NO-GO while provider and Pages risk remain open
  assert.equal(r.sourceDependencySafe,false);
  assert.ok(r.findings.includes("PUBLICATION_DEPENDENCY_GRAPH_BLOCKED"));
  assert.ok(r.findings.includes("DEVELOPMENT_RUNTIME_REQUIRES_REVIEW"));
+ assert.ok(r.findings.includes("INLINE_EXECUTABLE_SCRIPT_MANUAL_REVIEW_REQUIRED"));
  assert.ok(r.findings.includes("HISTORIC_PAGES_P0_SECURITY_ASSESSMENT_REQUIRED"));
  assert.equal(r.pagesSettingsModified,false);
  assert.equal(r.customerMoneyEnabled,false);
@@ -25,6 +26,7 @@ test("656: a clean synthetic source cannot replace independent live site authori
   writeFileSync(join(root,"dashboard.html"),"<html><body>Preview</body></html>");
   const r=inspectPay54FinalGoNoGo({sourceRoot:root});
   assert.equal(r.sourceDependencySafe,true);
+ assert.equal(r.findings.includes("INLINE_EXECUTABLE_SCRIPT_MANUAL_REVIEW_REQUIRED"),false);
   assert.equal(r.releaseDecision,"NO_GO");
   assert.ok(r.findings.includes("ACTIVE_PAGES_ENVIRONMENT_INDEPENDENT_VERIFICATION_REQUIRED"));
   assert.equal(r.independentProductionReviewComplete,false);
