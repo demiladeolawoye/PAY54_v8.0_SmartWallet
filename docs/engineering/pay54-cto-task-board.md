@@ -535,3 +535,39 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **Security status:** GitHub Pages actual settings, deployed artifact, external public path reachability, branch protection, deployer/IAM trust, operational signing registry, dynamic website behaviour, tenant database security, production partners and financial/regulatory approvals remain independently UNVERIFIED. No Pages deployment, merge, secrets, customer data, production database privileges or real-money operations were changed. Production remains BLOCKED.
 
 **Next batch:** 468–517 only after the Founder approves this closure. Prioritise independently evidenced P-01 Pages publication containment and safe deployment change proposal, branch/deployer access review, full website/QA and PostgreSQL/account isolation gates. Do not automatically merge existing draft PRs or deploy source changes.
+
+
+## Batch 15 closure — 468–517 (50/50 source deliverables)
+
+**Founder-approved scope:** 50 genuine source-level implementations, with the next approval checkpoint after item 517. All deliverables are committed on draft PR #3 stacked on unmerged Batch 14 PR #2 and Batch 13 PR #1. No source batch completion overrides the operational release gates.
+
+| IDs | Implemented delivery | Confirmed evidence/state |
+| --- | --- | --- |
+| 468–470 | Static publication tree inspection, adverse file/path tests, CI | Source committed |
+| 471–473 | Enforce safe tree boundary in isolated stage builder; tests and CI | Source committed |
+| 474–476 | Source/stage SHA-256 attestation and adversarial mutation tests | Source committed |
+| 477–479 | Direct GitHub Pages artifact P0 finding, verifiable report and CI | **Confirmed overbroad artifact packaging** |
+| 480–481 | Deny docs/infrastructure source paths, negative tests | Source committed |
+| 482–484 | Bounded tar archive member inspection, checksum and traversal tests, CI | Source committed |
+| 485–487 | Packaging/reachability/secret exposure classification separation | Source committed |
+| 488–490 | Pages artifact source SHA, workflow run and archive digest provenance | Source committed |
+| 491–493 | Value-free credential-marker evidence assessment and CI | Source committed |
+| 494–496 | Record bounded test-fixture marker scan, redaction and malformed archive regression | Source committed |
+| 497–499 | Source-only authorised response evidence assessment for HEAD/404/GET digest observations | Source committed |
+| 500–502 | Restricted Pages dry-run upload plan; root and backend rejection tests | Source committed |
+| 503–505 | Financial production acceptance evidence (tenant RLS, ledger, safeguarding, KYC/AML, UK–Nigeria partners) | Source committed |
+| 506–508 | Personal/Business account cutover actor, tenant isolation and replay safety gates | Source committed |
+| 509–511 | Combined source-only release posture always blocked on unresolved P0 | Source committed |
+| 512–514 | Owner/security containment and rollback playbook, nonactivation CI | Source committed |
+| 515–516 | Founder closure report, change-request register and approval-gate tests | Source committed |
+| 517 | CTO task-board reconciliation, next checkpoint and production refusal | This commit |
+
+**Direct P0 finding:** GitHub Pages run `43917703697` produced artifact `14252395793` from `project-titan` SHA `9fa996bd385b6714087038306a6532e8e7e5ff14`. Read-only inspection of its nested `artifact.tar` found **616 regular files**, including **348 under `backend/`**, **150 under `docs/`**, and **one under `infrastructure/`**. This definitively verifies an overbroad publication archive. The active live Pages site, actual internal-file URL reachability and real secret disclosure remain **UNVERIFIED**. One private-key header marker was detected in a packaged backend test file, not independently assessed as a working credential.
+
+**Latest executable revision prior to this task-board update:** `e189dac18e4e8bec0435c9d88c56f9fbac4ee879`. The final Batch 15 workflow must be inspected on the exact final board commit before claiming all CI green. Previous passing CI revisions are evidence for their own SHA only. Do not equate a cancelled run with a pass.
+
+**Zero-regression and release boundaries:** No production GitHub Pages publishing, new deployer account, branch/ruleset change, IAM key, customer data, database grant, real-money activation, account context switching or credential rotation has been performed. All source-only controls deliberately retain `productionRelease:"BLOCKED"`.
+
+**Operational P0 resolution required:** Security/Founder independent Pages source and active-artifact review, authorised minimal public path checks, content/credential impact assessment, separately approved containment and restricted artifact deployment, mobile/desktop/regression and rollback evidence. P0 stays OPEN until confirmed risk treatment.
+
+**Batch position:** 50/50 source deliverables (468–517). Batch 16 (518–567) is a proposal requiring separate Founder approval; preserve the stacked draft PRs until independent review. Do not manufacture work to advance implementation counts.
