@@ -22,7 +22,8 @@ const DENY_FILES=new Set([
 function pathApproved(path){
  if(typeof path!=="string"||!PATH.test(path)||path.includes("//")||
     path.startsWith("/")||path.endsWith("/")||
-    path.split("/").some(x=>x==="."||x===".."||DENY_SEGMENTS.has(x.toLowerCase())))return false;
+    path.split("/").some(x=>x==="."||x===".."||DENY_SEGMENTS.has(x.toLowerCase())||
+      DENY_NAME_PATTERN.test(x)))return false;
  const name=path.split("/").at(-1).toLowerCase();
  if(DENY_FILES.has(name)||DENY_NAME_PATTERN.test(name)||
     DENY_EXTENSIONS.test(name)||name.startsWith(".env")||
