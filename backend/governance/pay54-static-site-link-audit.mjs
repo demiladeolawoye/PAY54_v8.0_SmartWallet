@@ -8,6 +8,7 @@ import {readFileSync} from "node:fs";
 import {resolve, posix} from "node:path";
 import {fileURLToPath} from "node:url";
 import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
+import {projectPay54HtmlResourceMarkup} from "./pay54-html-resource-markup.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const ATTRIBUTE=/(?<![\w:-])(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
@@ -20,12 +21,7 @@ const INLINE_EVENT=/(?<![\w:-])on(?:click|load|error|submit|change|input|focus|b
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
-function htmlResourceMarkup(source){
- return source
-  .replace(/<!--[\s\S]*?-->/g,"")
-  .replace(/(<script\b[^>]*>)[\s\S]*?(<\/script\s*>)/gi,"$1$2")
-  .replace(/(<style\b[^>]*>)[\s\S]*?(<\/style\s*>)/gi,"$1$2");
-}
+
 
 export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  const inventory=inspectPay54StaticSiteCandidate(sourceRoot);
@@ -34,7 +30,7 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  let checked=0;
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
-  const markup=htmlResourceMarkup(html);
+  const markup=projectPay54HtmlResourceMarkup(html);
   // Inline event handler attributes execute browser JavaScript outside the
   // ordinary referenced script graph and require a separate XSS review.
   if(INLINE_EVENT.test(markup)){
