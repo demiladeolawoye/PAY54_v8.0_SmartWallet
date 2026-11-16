@@ -17,6 +17,7 @@ on:
       - "docs/engineering/pay54-dashboard-preview-acceptance.md"
       - "docs/engineering/pay54-founder-offline-dashboard-preview-guide.md"
       - "docs/engineering/pay54-pages-active-deployment-evidence-request.md"
+      - "docs/engineering/pay54-batch16-closure-report.md"
       - "backend/tests/account-batch16-*.test.mjs"
       - ".github/workflows/pay54-batch16-pages-workflow-source.yml"
   workflow_dispatch:
@@ -62,6 +63,7 @@ jobs:
           node --check backend/tests/account-batch16-offline-preview-markup-audit.test.mjs
           node --check backend/tests/account-batch16-founder-preview-guide.test.mjs
           node --check backend/tests/account-batch16-active-pages-evidence-request.test.mjs
+          node --check backend/tests/account-batch16-closure-report.test.mjs
           node --check backend/tests/account-batch16-verify-founder-preview.test.mjs
           node --check backend/tests/account-batch16-preview-artifact-manifest.test.mjs
           node --check backend/tests/account-batch16-pages-workflow-source.test.mjs
