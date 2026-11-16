@@ -22,9 +22,10 @@ export function inspectPay54InlineScripts(root=ROOT){
  const scripts=[];
  for(const page of inventory.candidatePaths.filter(p=>p.endsWith(".html"))){
   const html=readFileSync(join(base,page),"utf8");
+  const activeHtml=html.replace(/<!--[\s\S]*?-->/g,"");
   if(html.length>3_000_000)throw new Error("PAY54_INLINE_SCRIPT_PAGE_OVERSIZED");
   let count=0;
-  for(const m of html.matchAll(SCRIPT)){
+  for(const m of activeHtml.matchAll(SCRIPT)){
    if(++count>300)throw new Error("PAY54_INLINE_SCRIPT_COUNT_LIMIT");
    const attr=m[1],body=m[2];
    if(/\bsrc\s*=/i.test(attr)||!body.trim())continue;
