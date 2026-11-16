@@ -14,6 +14,7 @@ on:
       - "backend/governance/pay54-public-site-manifest.mjs"
       - "backend/governance/pay54-pages-release-preflight.mjs"
       - "backend/governance/pay54-linked-card-publication-dependency.mjs"
+      - "backend/governance/pay54-batch17-deployment-readiness.mjs"
       - ".github/workflows/pay54-batch17-balance-visibility.yml"
   workflow_dispatch:
 
@@ -54,6 +55,8 @@ jobs:
           node --check backend/tests/account-batch17-pages-release-preflight.test.mjs
           node --check backend/governance/pay54-linked-card-publication-dependency.mjs
           node --check backend/tests/account-batch17-linked-card-publication.test.mjs
+          node --check backend/governance/pay54-batch17-deployment-readiness.mjs
+          node --check backend/tests/account-batch17-deployment-readiness.test.mjs
       - name: Run balance visibility and demo-claims regression tests
         run: node --test backend/tests/account-batch17-*.test.mjs
       - name: Confirm current Pages source remains nondeployable until provider replacement
@@ -67,6 +70,8 @@ jobs:
             }
             console.log("Publication remains correctly blocked: development provider outside site boundary");
           '
+      - name: Verify founder source-only release classification has no deployment authority
+        run: node backend/governance/pay54-batch17-deployment-readiness.mjs
       - name: Assert production modes disabled
         run: |
           test "$PAY54_REAL_MONEY_MODE" = "false"
