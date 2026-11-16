@@ -48,6 +48,32 @@ jobs:
         run: |
           set -euo pipefail
           node --test backend/tests/account-batch11-*.test.mjs
+      - name: Inspect all checked-out GitHub Actions workflows (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node backend/governance/pay54-workflow-inventory-cli.mjs > "$RUNNER_TEMP/pay54-workflow-inventory.json"
+          node --input-type=module -e '
+            import {readFileSync,appendFileSync} from "node:fs";
+            const report=JSON.parse(readFileSync(process.env.RUNNER_TEMP+"/pay54-workflow-inventory.json","utf8"));
+            if(!report.inventoryReviewedFromDisk||report.workflowCount<1||report.productionRelease!=="BLOCKED"||report.financialExecutionEnabled!==false){
+              throw new Error("WORKFLOW_SOURCE_AUDIT_INVALID");
+            }
+            const summary=[
+              "## PAY54 GitHub Actions source inventory",
+              "",
+              "Source inspection only — no GitHub settings, deployed environments or upstream signatures verified.",
+              "",
+              "| Source observation | Count |",
+              "| --- | ---: |",
+              "| Workflow files inspected | "+report.workflowCount+" |",
+              "| Files needing manual trust review | "+report.highRiskWorkflowCount+" |",
+              "| Mutable external Action references | "+report.mutableExternalActionCount+" |",
+              "",
+              "**Staging and production releases: BLOCKED.**"
+            ].join("\n")+"\n";
+            appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
+          '
       - name: Prohibit new publication or real-money activation
         run: |
           test "$PAY54_REAL_MONEY_MODE" = "false"
