@@ -1,0 +1,49 @@
+name: PAY54 Batch 14 Release Evidence Source Tests
+
+on:
+  pull_request:
+    branches:
+      - project-titan
+      - cto/batch13-pages-link-audit-368-369
+    paths:
+      - "backend/governance/pay54-release-evidence-review.mjs"
+      - "backend/tests/account-batch14-*.test.mjs"
+      - ".github/workflows/pay54-batch14-release-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch14-source-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  governance-regression:
+    name: test-release-evidence-without-activation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout source without persisted credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Set up Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Syntax gate
+        run: |
+          node --check backend/governance/pay54-release-evidence-review.mjs
+          node --check backend/tests/account-batch14-release-evidence-review.test.mjs
+      - name: Run source-only governance tests
+        run: node --test backend/tests/account-batch14-*.test.mjs
+      - name: Confirm no release privilege or real-money activation
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          echo "Evidence completeness does not authorise a PAY54 deployment."
