@@ -919,3 +919,104 @@ body.p54-blueprint .p54b-account-switch-unavailable {
 body.p54-blueprint .p54b-account-switch-unavailable:disabled {
   background: transparent;
 }
+
+/* ========================================================================
+   PAY54 Balance Context Visibility — source-only development preview
+   Preserve disclosure, sample movement and account context after blueprint
+   reordering. No actual security, KYC or regulatory assertion is implied.
+   ======================================================================== */
+body.p54-blueprint .p54b-balance.card {
+  height: auto;
+  min-height: 0;
+}
+
+body.p54-blueprint .p54b-balance .p54b-balance-detail {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 8px 0 0;
+  color: #e6f1ff;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-wrap: pretty;
+}
+
+body.p54-blueprint .p54b-balance .balance-meta {
+  color: #d8ecff;
+}
+
+body.p54-blueprint .p54b-balance .balance-delta {
+  color: #bdf8dc;
+  font-weight: 750;
+}
+
+body.p54-blueprint .p54b-balance .identity {
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, .26);
+  color: #f5f8ff;
+}
+
+body.p54-blueprint .p54b-balance .identity strong {
+  color: #fff;
+}
+
+body.p54-blueprint .p54b-balance .trust-chip {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 10px;
+  background: rgba(6, 26, 81, .25);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  body.p54-blueprint .p54b-balance .p54b-balance-detail {
+    font-size: 11px;
+    line-height: 1.55;
+  }
+
+  body.p54-blueprint .p54b-balance .trust-chip {
+    width: 100%;
+  }
+}
+
+/* PAY54 Batch 17 — prevent tablet Money Moves text collision.
+   Below the mobile breakpoint, the mobile five-action composition remains
+   unchanged. Large desktops retain the established seven-item row. */
+@media (min-width: 761px) and (max-width: 1150px) {
+  body.p54-blueprint .p54b-dashboard .money-moves-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body.p54-blueprint .p54b-dashboard .money-moves-grid .tile-btn {
+    min-width: 0;
+    min-height: 78px;
+    padding: 9px 5px;
+  }
+
+  body.p54-blueprint .p54b-dashboard .money-moves-grid .tile-btn .t-title {
+    display: block;
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  body.p54-blueprint .p54b-dashboard .money-moves-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

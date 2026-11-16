@@ -657,3 +657,111 @@ Founder approved source-only 50-item Batch 16 (518–567) and read-only investig
 **Critical P0 remains OPEN:** A historical GitHub Pages artifact `14252395793` (run `43917703697`) contained 348 backend, 150 documentation and one infrastructure source file. The active live Pages deployment, actual public-file reachability, exposure of sensitive material, live setting protections and remedy remain independently UNVERIFIED. Founder/Security/DevSecOps must separately authorise operational investigation and any containment, deployment, credential or environment change.
 
 **Next cycle:** Batch 17 would be 568–617 and requires independent Founder approval. Prioritise actual Pages containment evidence, verified GitHub deployer controls, authenticated Personal/Business account and PostgreSQL RLS integration, and independent mobile/desktop/accessibility and rollback acceptance. Preserve all existing working dashboard modules; do not introduce real-money features through a visual preview.
+
+
+## Batch 17 balance context visibility fix — implementations 568–578
+
+Founder provided live GitHub Pages screenshot demonstrating that four existing balance details were missing; approved targeted implementation. The verified cause was the blueprint script adding `p54b-conceal` and `hidden` to the existing balance metadata, movement, identity and security disclosure nodes. Source-only changes preserve ledger, card, transaction, backend and KYC authorisation boundaries.
+
+| Implementation | Committed work | Status |
+| --- | --- | --- |
+| 568 | Remove blueprint concealment from balance metadata, movement, identity and status nodes; retain FX ticker isolation | COMMITTED |
+| 569 | Keep requested detail text visible in existing HTML while making demonstration and non-verification explicit | COMMITTED |
+| 570 | Align public preview claims guard (v1.0.1) with four safe displayed balance context nodes | COMMITTED |
+| 571 | Restore responsive accessible balance-detail presentation and prevent blue-card clipping | COMMITTED |
+| 572 | Bump CSS, guard and blueprint asset query versions to avoid cached old presentation | COMMITTED |
+| 573 | Source contract tests for restored details and scoped responsive styles | COMMITTED |
+| 574 | VM-executed public/nonpublic claims guard and idempotence regression tests | COMMITTED |
+| 575 | Dedicated read-only Batch 17 GitHub Actions workflow, no deployment | COMMITTED |
+| 576 | Update blueprint diagnostic version to v1.2.4 | COMMITTED |
+| 577 | Root-cause analysis, frontend acceptance and release boundaries | COMMITTED |
+| 578 | CTO board reconciliation and follow-up verification gate | COMMITTED via this update |
+
+**Count:** 11/50 source implementations in Batch 17; 579–617 remain in the 50-item founder-approved engineering cycle if continuation is requested. No batch closure or automatic advancement.
+
+**Validation:** Dedicated Batch 17 workflow run `43956907041` PASSED on source revision `76c481b508bd5a21fc04bfb932a16a49cb74123e`. The CTO board commit has a new source SHA and must not be counted as having all other workflows passed until reconciled. Browser visual QA and responsive checks are not yet independently certified.
+
+**Demo safety:** The values `3001234567`, `@pay54-user`, `Level 2` and `₦24,500` remain samples. Device/PIN security and financial compliance are explicitly **not verified**. No live bank credentials, KYC, ledger, FX, customer wallet, account-switching or regulated operations were enabled.
+
+**Visibility:** The correction is on draft PR #5 stacked on unmerged draft PR #4 → #3 → #2 → #1. The public Pages site shown in the founder screenshot has **not** been updated. The separately confirmed older overbroad Pages artifact security P0 stays OPEN. Site publication must be separately approved and proven to exclude backend/docs/infrastructure sources, and must have full browser regression and rollback evidence.
+
+
+### Batch 17 cross-suite regression correction — 579–580
+
+| Implementation | Work | Status |
+| --- | --- | --- |
+| 579 | Update legacy Batch 12 dashboard visual cache-version assertions from blueprint 1.2.3/refinements 1.5.2 to reviewed 1.2.4/1.5.3 | COMMITTED |
+| 580 | Correct test regex escaping and reconcile independent CI evidence | COMMITTED via this update |
+
+The existing account-boundary workflow initially failed **one of 624 tests** only because an older source-level test asserted the superseded dashboard asset query versions; the remaining 623 passed. The assertion is now updated without weakening the financial or accessibility checks. The next exact-run Account Boundary workflow `43957419774` completed **SUCCESS**, as did the dedicated Batch 17 balance-visibility workflow `43957419473`, both on commit `2080f67e4d10c2db68881b1b8ce40bbad791b185`. Other backend/security workflows on the same commit were still completing at the time of this board amendment.
+
+**Reconciled count:** 568–580 = 13 source/audit items. 581–617 remain within the approved 50-item Batch 17 cycle. Full browser-based visual comparison to the founder screenshot and a separately approved, safe deployment remain outstanding. Historical Pages overpublication P0 remains open; do not merge stacked PRs or publish the repository root.
+
+
+## Batch 17 visual QA and Pages containment checkpoint — 581–598
+
+**Founder approval:** Continue with browser QA and secure release planning, while keeping the public GitHub Pages site unchanged until P0 is investigated and a separate restricted deployment approved. The approved 50-item source cycle remains 568–617; no automatic production release follows.
+
+| Item | Implemented or verified source deliverable | State |
+| --- | --- | --- |
+| 581 | Added strict, local read-only full-site QA staging procedure using existing publication boundary | Committed; refused unsafe candidate |
+| 582 | Added isolated GitHub Actions non-Pages QA artifact workflow | Committed |
+| 583–584 | Diagnosed refusal using candidate path-only inspection without weakening policy | Committed |
+| 585 | Replaced disallowed source artifact upload with screenshot-only offline Chromium visual QA | Committed |
+| 586–587 | Created synthetic dashboard layout fixture from actual source HTML/CSS/blueprint, no login or financial scripts; wired CI | Committed |
+| 588 | Fixed Money Moves tablet label collisions using adaptive 3/4-column grid | Committed |
+| 589–591 | Incremented CSS cache version and updated both legacy and current dashboard regression contract tests | Committed |
+| 592–593 | Added rendered-browser DOM validator and account label assertion compatibility | Committed |
+| 594–595 | Added adverse DOM validation tests and headless Chromium rendered DOM acceptance to CI | Committed |
+| 596 | Published exact-source visual QA, archive evidence and P0 NO-GO report | Committed |
+| 597 | Added CI-verifiable governance tests for exact visual evidence and no-deployment constraints | Committed |
+| 598 | CTO ledger reconciliation and founder release decision | Committed via this update |
+
+**Batch total:** Implementations 568–598 = **31/50 source deliverables**. Items 599–617 remain unimplemented, not assumed complete. Earlier dedicated balance test regressions and GitHub Pages P0 remain tracked separately.
+
+**Browser validation on exact feature SHA `3b4106cfd1539ae0c162d3c23ad522335d28099e`:** 12/12 GitHub Actions workflows SUCCESS; isolated screenshot run `43963717157` SUCCESS and rendered-DOM acceptance PASS. Synthetic desktop (1440×1000), tablet (768×1024), and mobile (390×844) screenshots artifact `14275592537` (`sha256:e5d3098912771385d72925379db8a775b59af0bbfb25b210a3c871d4461ecc38`). Tablet Money Moves collision fixed in the reviewed screenshot; four approved demo-only balance sections visually present.
+
+**Important separate security finding:** Strict real-site staging correctly refused asset `assets/js/infrastructure/payments/providers/linked-card-development.js`, a development linked-card simulation under forbidden infrastructure path. Nothing was deployed; the publisher policy was not relaxed. Historic GitHub Pages artifact `14252395793` independently contained backend/docs/infrastructure sources, while actual current active Pages deployment/URLs and sensitivity remain unverified. **P0 OPEN, production NO-GO** until Founder/Security owner accepts risk treatment, protected deployer, restricted output and rollback.
+
+**Authentication validation:** Unmodified protected dashboard opened without credentials redirected to login. Synthetic visual fixture is separate and does not test money movement or authenticated user flows. No real data or provider credentials were used.
+
+**Next:** Independently verify current Pages Settings and deployment; resolve the development provider publication boundary without regressions; perform real authenticated sandbox journey, device/accessibility and rollback checks; only then seek separately approved restricted deployment. Review PR #5 remains DRAFT and unmerged.
+
+
+## Batch 17 final source engineering checkpoint — implementations 599–617
+
+The founder approved continuing security-first release-readiness work without bypassing the existing Pages P0 or enabling live financial operations. This block records the last 19 source deliverables in the 50-item cycle.
+
+| Item | Committed deliverable | Status |
+| --- | --- | --- |
+| 599 | Prohibit nested infrastructure/infra/terraform paths in public-site candidate manifest | COMMITTED |
+| 600 | Verify infrastructure remains in source but never enters static publication candidate; missing dependency blocks staging | COMMITTED |
+| 601 | Add development-provider negative tests and manifest policy to dedicated CI | COMMITTED |
+| 602 | Implement source-only Pages release preflight with redacted dependency and blocker report | COMMITTED |
+| 603 | Test safe local candidate, development dependency denial and no-live-deployment authority | COMMITTED |
+| 604 | Add actual PAY54 repository provider NO-GO preflight check in CI | COMMITTED |
+| 605 | Implement read-only linked-card script dependency and load-order assessment | COMMITTED |
+| 606 | Verify simulation provider exclusion, absent provider and incorrect load order | COMMITTED |
+| 607 | Extend CI to linked-card dependency contract tests | COMMITTED |
+| 608 | Assert real repository remains NONDEPLOYABLE despite visual QA, until dev-card dependency and P0 resolved | COMMITTED |
+| 609 | Correct legacy source-dependency positive test to expect explicit real-site NO-GO | COMMITTED |
+| 610 | Correct legacy stage test; preserve positive safe synthetic file-hash, backup and backend exclusion tests | COMMITTED |
+| 611 | Combine canonical preflight and linked-card assessments into source-only release readiness verdict | COMMITTED |
+| 612 | Test clean source cannot grant Pages or financial authority; actual site remains blocked | COMMITTED |
+| 613 | Include composite release readiness assertions in Batch17 CI | COMMITTED |
+| 614 | Document owner Pages evidence, development provider options, protected deployer and rollback approval | COMMITTED |
+| 615 | Add governance tests preserving uncertainty and non-bypassable release gates | COMMITTED |
+| 616 | Full CTO founder Batch17 closure report and pending change requests | COMMITTED |
+| 617 | Final task board reconciliation and next-cycle founder checkpoint | This commit |
+
+**Batch 17 implementation total:** 568–617 = **50/50 source deliverables**. No work beyond item 617 is implied. Source completion is not production acceptance.
+
+**Verified visual baseline:** Exact feature source SHA `3b4106cfd1539ae0c162d3c23ad522335d28099e`, 12/12 workflows SUCCESS, isolated Chromium desktop/tablet/mobile screenshots and rendered DOM PASS. Later source security revisions and the final exact board commit must be checked independently; historical PASS does not automatically transfer to newer SHAs.
+
+**Correctly unresolved:** The actual public-site dependency graph references `assets/js/infrastructure/payments/providers/linked-card-development.js` which is now prohibited by public manifest selection. Current site staging/production release is NO-GO. A real provider contract or independently approved feature-level fail-closed suspension is required before a restricted production candidate can be complete.
+
+**P0:** Historic Pages artifact `14252395793` contained 348 backend, 150 docs and one infrastructure file. Active live Pages source/deployed archive, public internal-file reachability, content sensitivity, current deployer and GitHub Pages settings are NOT independently verified. Do not treat historical package contents as confirmation of a public breach. No git branch merge, Pages config edit, IAM change, credential rotation, production database grant, payment, card issue or FX settlement was undertaken.
+
+**Change requests:** CR-RELEASE-01 (active Pages evidence), CR-CARD-01 (provider/feature disposition), CR-PAGES-02 (restricted output/deployer/rollback), CR-UX-02 (founder layout approval), CR-QA-02 (sandbox/accessibility/device) and CR-FINTECH-03 (regulated UK–Nigeria readiness) remain OPEN.
+
+**Founder checkpoint:** Batch 17 source cycle complete. Proposed Batch 18 is 618–667 and requires a separate approval. Any public site publication also requires an independent Security/Release/Founder acceptance of actual live settings, artifact and rollback plan.
