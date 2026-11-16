@@ -1,0 +1,61 @@
+name: PAY54 Batch 17 Restricted Dashboard Visual QA Artifact
+
+on:
+  pull_request:
+    branches:
+      - cto/batch16-pages-remediation-518-567
+      - project-titan
+    paths:
+      - dashboard.html
+      - assets/css/**
+      - assets/js/**
+      - assets/img/**
+      - backend/governance/pay54-balance-visual-qa-stage.mjs
+      - .github/workflows/pay54-batch17-visual-qa-artifact.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch17-visual-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual-qa-artifact:
+    name: verified-offline-visual-qa-only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout exact PR head without persisted credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Verify security policy and create restricted local QA snapshot
+        run: |
+          node --check backend/governance/pay54-balance-visual-qa-stage.mjs
+          mkdir -p "$RUNNER_TEMP/pay54-balance-visual-qa"
+          node backend/governance/pay54-balance-visual-qa-stage.mjs "$RUNNER_TEMP/pay54-balance-visual-qa"
+          test -f "$RUNNER_TEMP/pay54-balance-visual-qa/site/dashboard.html"
+          test ! -e "$RUNNER_TEMP/pay54-balance-visual-qa/site/backend"
+          test ! -e "$RUNNER_TEMP/pay54-balance-visual-qa/site/docs"
+          test ! -e "$RUNNER_TEMP/pay54-balance-visual-qa/site/infrastructure"
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+      - name: Upload seven-day QA-only archive (never GitHub Pages)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-batch17-dashboard-qa-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-balance-visual-qa/site/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
