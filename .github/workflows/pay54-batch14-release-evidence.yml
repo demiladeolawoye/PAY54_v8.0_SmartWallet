@@ -14,6 +14,7 @@ on:
       - "backend/governance/pay54-pages-artifact-evidence-review.mjs"
       - "backend/governance/pay54-pages-settings-evidence-review.mjs"
       - "backend/governance/pay54-js-literal-dependency-review.mjs"
+      - "backend/governance/pay54-rollback-evidence-review.mjs"
       - "docs/engineering/pay54-batch14-signed-evidence-trust-policy.md"
       - "docs/engineering/pay54-batch14-release-evidence-operations.md"
       - "backend/tests/account-batch14-*.test.mjs"
@@ -55,11 +56,13 @@ jobs:
           node --check backend/governance/pay54-pages-artifact-evidence-review.mjs
           node --check backend/governance/pay54-pages-settings-evidence-review.mjs
           node --check backend/governance/pay54-js-literal-dependency-review.mjs
+          node --check backend/governance/pay54-rollback-evidence-review.mjs
           node --check backend/tests/account-batch14-signed-evidence-trust-policy.test.mjs
           node --check backend/tests/account-batch14-release-evidence-packet.test.mjs
           node --check backend/tests/account-batch14-pages-artifact-evidence.test.mjs
           node --check backend/tests/account-batch14-pages-settings-evidence.test.mjs
           node --check backend/tests/account-batch14-js-literal-dependencies.test.mjs
+          node --check backend/tests/account-batch14-rollback-evidence.test.mjs
           node --check backend/tests/account-batch14-release-evidence-review.test.mjs
           node --check backend/tests/account-batch14-github-release-controls.test.mjs
           node --check backend/tests/account-batch14-evidence-operations.test.mjs
