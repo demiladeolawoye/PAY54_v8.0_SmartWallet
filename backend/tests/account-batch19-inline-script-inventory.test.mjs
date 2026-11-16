@@ -44,3 +44,13 @@ test("689: sourced scripts do not get falsely counted as inline",()=>{
   assert.equal(r.executableInlineScriptCount,0);
  }finally{f.clean();}
 });
+
+test("704: inline script inventory ignores commented-out code but retains real active scripts",()=>{
+ const f=fixture('<!-- <script>fetch("/private")</script> -->'+
+  '<script>console.log("visible");</script>');
+ try{
+  const r=inspectPay54InlineScripts(f.root);
+  assert.equal(r.executableInlineScriptCount,1);
+  assert.equal(r.scripts[0].dynamicRuntimeReviewRequired,false);
+ }finally{f.clean();}
+});
