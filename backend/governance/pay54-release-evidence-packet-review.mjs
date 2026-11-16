@@ -15,7 +15,11 @@ import {assessPay54SignedReleaseBundle}
 export function reviewPay54ReleaseEvidencePacket({
  commitSha,evidence,receipts,trustedKeys,reviewTime
 }={}){
- const time=typeof reviewTime==="string"?new Date(reviewTime):new Date(NaN);
+ if(typeof reviewTime!=="string"||!/^\d{4}-\d{2}-\d{2}T/.test(reviewTime)||
+  !Number.isFinite(Date.parse(reviewTime))){
+  throw new Error("PAY54_SIGNED_BUNDLE_REVIEW_TIME_REQUIRED");
+ }
+ const time=new Date(reviewTime);
  const metadata=assessPay54ReleaseEvidence({
   commitSha,evidence
  },{now:time});
