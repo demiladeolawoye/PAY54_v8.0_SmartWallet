@@ -6,6 +6,8 @@ import { createPay54AccountDirectoryService as createService }
 
 const actor = "11111111-1111-4111-8111-111111111111";
 const personal = "22222222-2222-4222-8222-222222222222";
+const trustedSession = Object.freeze({ sessionId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", principalId: actor,
+  status: "ACTIVE", version: 1, issuedAtMs: 1000, expiresAtMs: 2000 });
 const account = {
   accountId: personal, legalOwnerId: actor, type: "PERSONAL",
   displayName: "Personal", status: "ACTIVE", verificationStatus: "VERIFIED"
@@ -17,9 +19,10 @@ const member = {
 test("771: directory lookup runs only after trusted active session resolution", async () => {
   const calls = [];
   const service = createService({
+    getTrustedServerTimeMs: () => 1500,
     resolveAuthenticatedSession: async ctx => {
       calls.push("session:" + ctx.marker);
-      return { status: "ACTIVE", principalId: actor };
+      return trustedSession;
     },
     loadPrincipalAccountDirectory: async id => {
       calls.push("db:" + id);
@@ -34,10 +37,12 @@ test("771: directory lookup runs only after trusted active session resolution", 
 });
 
 test("771: anonymous and revoked sessions never invoke repository", async () => {
-  for (const value of [null, { status: "REVOKED", principalId: actor },
+  for (const value of [null, { ...trustedSession, status: "REVOKED" },
+    { ...trustedSession, expiresAtMs: 1500 },
     { status: "ACTIVE" }]) {
     let calls = 0;
     const service = createService({
+      getTrustedServerTimeMs: () => 1500,
       resolveAuthenticatedSession: async () => value,
       loadPrincipalAccountDirectory: async () => { calls++; throw Error("should not run"); }
     });
@@ -53,7 +58,8 @@ test("771: untrusted repository failure and malformed rows fail closed", async (
     async () => ({ accounts: [{ ...account, balance: 100 }], memberships: [member] })
   ]) {
     const service = createService({
-      resolveAuthenticatedSession: async () => ({ status: "ACTIVE", principalId: actor }),
+      getTrustedServerTimeMs: () => 1500,
+      resolveAuthenticatedSession: async () => trustedSession,
       loadPrincipalAccountDirectory: reader
     });
     await assert.rejects(service.listAuthorisedAccounts({}), /SERVICE_UNAVAILABLE/);
@@ -63,6 +69,7 @@ test("771: untrusted repository failure and malformed rows fail closed", async (
 test("771: missing trusted dependencies and session exceptions fail closed", async () => {
   assert.throws(() => createService({}), /SERVICE_UNAVAILABLE/);
   const service = createService({
+    getTrustedServerTimeMs: () => 1500,
     resolveAuthenticatedSession: async () => { throw new Error("no token"); },
     loadPrincipalAccountDirectory: async () => ({ accounts: [account], memberships: [member] })
   });
