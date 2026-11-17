@@ -195,3 +195,36 @@ body.p54-blueprint .p54b-account-sidebar-status {
     display: none;
   }
 }
+
+/* The approved mobile header has two purposeful rows. The greeting must not
+   collapse into a 70–90px column when the account selector is visible. */
+@media (max-width: 600px) {
+  body.p54-blueprint .dash-header {
+    flex-wrap: wrap;
+    align-content: flex-start;
+    row-gap: 7px;
+  }
+
+  body.p54-blueprint .p54b-greeting {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  body.p54-blueprint .header-actions {
+    display: flex;
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+
+  body.p54-blueprint .p54b-account-context {
+    margin-left: 0;
+  }
+
+  body.p54-blueprint .p54b-account-context-trigger {
+    max-width: min(240px, 62vw);
+  }
+}
