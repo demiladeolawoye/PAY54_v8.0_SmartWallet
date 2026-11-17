@@ -24,6 +24,10 @@ const pool = (row = session) => {
     connect: async () => ({
       query: async (sql, values) => {
         calls.push({ sql, values });
+        if (sql.includes("FROM pg_class c")) return { rows: [{
+          runtime_role: "pay54_auth_reader", restricted: true,
+          table_count: 1, forced_rls: true, can_select: true, can_write: false
+        }] };
         if (sql.includes("current_setting")) return { rows: [{ digest }] };
         if (sql.includes("FROM pay54.auth_sessions")) return { rows: row ? [row] : [] };
         return { rows: [] };
@@ -53,7 +57,7 @@ test("823: PostgreSQL session comes only from a digest-scoped read-only transact
   assert.equal(actual.version, 4);
   assert.ok(Object.isFrozen(actual));
   assert.equal(p.calls[0].sql, "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
-  assert.deepEqual(p.calls[1].values, [digest]);
+  assert.deepEqual(p.calls[2].values, [digest]);
   assert.ok(p.calls.some(call => call.sql.includes("FROM pay54.auth_sessions")));
   assert.equal(p.calls.at(-1).sql, "COMMIT");
   assert.equal(JSON.stringify(p.calls).includes(token), false);
