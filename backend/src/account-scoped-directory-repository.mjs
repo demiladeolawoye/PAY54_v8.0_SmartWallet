@@ -36,8 +36,22 @@ export function createPay54ScopedDirectoryRepository({ withScopedReadTransaction
           // transaction-local actor identity and database RLS.
           const accounts = await transaction.listAccounts();
           const memberships = await transaction.listMemberships();
-          if (!Array.isArray(accounts) || !Array.isArray(memberships)) deny();
-          return { accounts, memberships };
+          if (!Array.isArray(accounts) || !Array.isArray(memberships) ||
+              accounts.length > 1000 || memberships.length > 1000) deny();
+          // Snapshot inside the trusted transaction. Never expose live driver
+          // row references that can change after the transaction closes.
+          const snapshot = rows => rows.map(row => {
+            if (!row || typeof row !== "object" || Array.isArray(row)) deny();
+            const copy = Object.create(null);
+            for (const key of Object.keys(row)) {
+              if (!Object.hasOwn(row, key) || key === "__proto__" ||
+                  key === "constructor" || key === "prototype" ||
+                  typeof row[key] !== "string") deny();
+              copy[key] = row[key];
+            }
+            return Object.freeze(copy);
+          });
+          return { accounts: snapshot(accounts), memberships: snapshot(memberships) };
         });
       } catch {
         deny();
