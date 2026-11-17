@@ -29,7 +29,7 @@ test("783: end-to-end composition exposes verified personal view without switchi
     }
   });
   const result = await service.listAuthorisedAccounts({});
-  assert.deepEqual(calls, ["auth", "scope:" + principal, "accounts", "membership"]);
+  assert.deepEqual(calls, ["auth", "scope:" + principal, "accounts", "membership", "auth"]);
   assert.equal(result.accounts.length, 1);
   assert.equal(result.accounts[0].accountId, accountId);
   assert.equal(result.accounts[0].financialOperationAuthorised, false);
