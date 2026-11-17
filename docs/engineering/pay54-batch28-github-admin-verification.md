@@ -1,7 +1,17 @@
 <!-- PAY54 Batch 28 / 1230 -->
 # PAY54 Administrator Verification — Actual GitHub Pages and Release Controls
 
-**Scope:** Manually verify live GitHub administration settings without changing them. This is the source of truth for CR-PAGES-01, CR-DEPLOY-01 and CR-MERGE-01 while the connected GitHub integration lacks administration permission.
+**Scope:** Screenshot-supported live GitHub Pages observation plus immediate publication-risk containment, followed by independent administrator verification. Connected GitHub integration has no Pages administration mutation or protected-branch read permission.
+
+## Confirmed Pages Settings evidence — Founder screenshot, 17 November 2026
+
+The Founder supplied a screenshot of the repository's own GitHub **Settings → Pages** page. It shows the Pages site **LIVE** at `https://demiladeolawoye.github.io/PAY54_v8.0_SmartWallet/`, source **Deploy from a branch**, branch **project-titan**, publishing directory **/(root)**, blank custom domain, and **Enforce HTTPS** checked/required. GitHub displayed **Last deployed yesterday** (interpreted relative to screenshot date as **16 November 2026**), with the `github-pages` environment and Pages build/deployment workflow.
+
+**Confirmed security finding:** Active root-source publication of `project-titan` is an unsafe hosting configuration. Backend, governance, database and infrastructure source live in the project root. A screenshot of the settings establishes the source configuration, **not** actual public availability of any particular backend file, secret or customer record. Attempts to independently fetch the public site through the available browsing/runtime environment were inconclusive because the address could not be accessed.
+
+**Immediate incident-containment recommendation:** An authorised repository administrator should click **Unpublish site** in Settings → Pages, confirm the warning and preserve evidence that the site is unpublished. This intentionally suspends the existing Pages website until a reviewed isolated deployment is ready. The current GitHub connector cannot perform this action and no unpublish has been executed automatically. Preserve the screenshots, deployment SHA/history and relevant private evidence. Review actual public-source availability and secret exposure separately; never declare no breach from a 404 alone.
+
+**Control:** Do not resume Pages publication from `project-titan` root. Do not switch to `main` root or to `/docs` without reviewing a complete independently verified static-only build; GitHub Pages source settings cannot target the independent `public-preview` subdirectory directly as a generic branch folder. A future GitHub Actions static-artifact publishing workflow requires separate Source/Release/Security approval.
 
 ## Observed 17 November 2026
 
@@ -15,12 +25,12 @@
 
 These steps are **read-only**. The administrator can record the fields below in a private ticket. Avoid copying secrets, environment values, key material, user tokens, private repository archives, financial/customer information or detailed security evidence into public GitHub Issues/PR comments.
 
-### A. Identify actual website publication
+### A. Contain unsafe Pages publication and validate actual website state
 
-1. Sign into GitHub as a repository administrator and open **Settings → Pages** for `demiladeolawoye/PAY54_v8.0_SmartWallet`.
+1. Sign into GitHub as a repository administrator, preserve the confirmed Settings → Pages screenshot, and open **Settings → Pages** for `demiladeolawoye/PAY54_v8.0_SmartWallet`.
 2. Record the **Build and deployment Source** (Deploy from a branch versus GitHub Actions).
 3. If branch publishing is selected, record the exact **branch and directory** (`/` versus `/docs`). A repository-root public build is **unsafe** here because backend, governance and infrastructure source exist at root.
-4. Record the **custom domain**, **Enforce HTTPS** indication, and displayed public URL. Do not change publishing settings until a verified static artifact and rollback are ready.
+4. Record the **custom domain**, **Enforce HTTPS** indication, and displayed public URL. **Unpublish** the currently live unsafe root-source Pages site as the authorised containment action; do not replace it with another repository-root source.
 5. Open **Actions → Deployments** / **Environments** (where available) and identify the most recent actual `github-pages` deployment, source workflow, commit SHA and status.
 6. Independently check whether sensitive repository paths or backups are accessible under the live site. Do not share sensitive response contents publicly. Escalate verified exposure as an incident with timestamps and preservation instructions.
 
@@ -45,9 +55,9 @@ These steps are **read-only**. The administrator can record the fields below in 
 
 | Evidence field | State until operator verifies |
 | --- | --- |
-| Pages source and directory | NOT VERIFIED |
-| Pages live deployment SHA and provenance | NOT VERIFIED |
-| Public content and historical sensitive exposure | NOT VERIFIED |
+| Pages source and directory | **CONFIRMED LIVE**: branch project-titan, /(root), from Founder screenshot |
+| Pages latest deployment time and SHA | Screenshot reports last deployed 16 Nov 2026; exact SHA NOT VERIFIED |
+| Public content and historical sensitive exposure | NOT VERIFIED; incident-risk assessment OPEN |
 | `main` branch protection / administrator bypass | NOT VERIFIED (403) |
 | `project-titan` branch protection / administrator bypass | NOT VERIFIED (403) |
 | Effective repository rulesets | ZERO VISIBLE via connected read API, independently unverified |
@@ -62,4 +72,4 @@ If the active website actually serves repository backend, SQL, private documenta
 
 Do not send GitHub personal-access tokens or cloud secrets to ChatGPT. Administrator screenshots can be redacted to show **settings state** only; screenshots are not a substitute for a signed security assessment.
 
-**CTO disposition:** Await real settings and deployment evidence. No merge or publication permission is granted by this runbook.
+**CTO disposition:** Unsafe live Pages source settings **CONFIRMED**. Immediate authorised unpublication is recommended; execution has not been verified. Exact published artifact, exposure, historical content and protected deployer remain unverified. No merge or new publication permission is granted.
