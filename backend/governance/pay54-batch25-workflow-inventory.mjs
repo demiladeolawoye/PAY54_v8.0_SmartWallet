@@ -15,9 +15,9 @@ const patterns=Object.freeze({
  pagesWrite:/^\s+pages:\s*write\s*(?:#.*)?$/mi,
  idTokenWrite:/^\s+id-token:\s*write\s*(?:#.*)?$/mi,
  contentWrite:/^\s+contents:\s*write\s*(?:#.*)?$/mi,
- deployPages:/^\s*uses:\s*actions\/deploy-pages@/mi,
- uploadPagesArtifact:/^\s*uses:\s*actions\/upload-pages-artifact@/mi,
- cloudAuth:/^\s*uses:\s*(?:google-github-actions\/auth|aws-actions\/configure-aws-credentials|azure\/login)@/mi,
+ deployPages:/^\s*(?:-\s*)?uses:\s*actions\/deploy-pages@/mi,
+ uploadPagesArtifact:/^\s*(?:-\s*)?uses:\s*actions\/upload-pages-artifact@/mi,
+ cloudAuth:/^\s*(?:-\s*)?uses:\s*(?:google-github-actions\/auth|aws-actions\/configure-aws-credentials|azure\/login)@/mi,
  terraformApply:/^\s*(?:run:\s*)?(?:terraform|tofu)\s+apply\b/mi,
  pagesPublishBranch:/^\s*publish_branch:\s*\S+/mi
 });
