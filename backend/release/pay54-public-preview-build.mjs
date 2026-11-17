@@ -21,6 +21,8 @@ import {fileURLToPath} from "node:url";
 import {createHash} from "node:crypto";
 import {verifyPay54StaticReleaseDirectory}
  from "../governance/pay54-batch25-static-release-verify.mjs";
+import {verifyPay54NonfinancialPreviewSource}
+ from "./pay54-static-preview-policy.mjs";
 
 const SOURCE=resolve(dirname(fileURLToPath(import.meta.url)),"../../public-preview");
 const FILES=Object.freeze(["index.html","assets/css/preview.css"]);
@@ -67,11 +69,7 @@ export function buildPay54PublicPreview({
   });
   const html=sourceFiles[0].bytes.toString("utf8");
   const css=sourceFiles[1].bytes.toString("utf8");
-  if(!html.includes("Product preview — not live banking")||
-     !html.includes("No funds or personal financial information")||
-     !html.includes('href="assets/css/preview.css"')||
-     /<script\b|\bon(?:click|load|error)\s*=|<form\b|<iframe\b/i.test(html) ||
-     /@import|url\s*\(|expression\s*\(/i.test(css))deny();
+  verifyPay54NonfinancialPreviewSource({html,css});
   temp=mkdtempSync(join(parent,".pay54-preview-build-"));
   for(const {path,bytes} of sourceFiles){
    const file=join(temp,path);
