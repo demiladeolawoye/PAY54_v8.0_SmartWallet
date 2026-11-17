@@ -31,7 +31,11 @@ const ROLE_SQL = `SELECT current_user AS role_name,
   'pay54.rotate_account_context_session(bytea,bytea,uuid,bytea,bytea,uuid,bigint,uuid,uuid,timestamptz)',
   'EXECUTE') AS may_rotate,
  has_table_privilege(current_user,'pay54.ledger_entries','INSERT,UPDATE,DELETE')
-   AS may_write_ledger`;
+   AS may_write_ledger,
+ has_table_privilege(current_user,'pay54.auth_sessions','INSERT,UPDATE,DELETE')
+   AS may_write_sessions,
+ has_table_privilege(current_user,'pay54.account_context_audit','INSERT')
+   AS may_append_audit`;
 
 const ROTATE_SQL = `SELECT rotated_session_id::text AS "sessionId",
  rotated_session_version::text AS "version"
@@ -112,7 +116,9 @@ export function createPay54PostgresSessionRotation({
           posture.role_name !== "pay54_session_rotate_role" ||
           posture.restricted !== true ||
           posture.may_rotate !== true ||
-          posture.may_write_ledger !== false) deny();
+          posture.may_write_ledger !== false ||
+          posture.may_write_sessions !== false ||
+          posture.may_append_audit !== false) deny();
 
       const values = [
         Buffer.from(digestPay54BearerToken(existingToken), "hex"),
