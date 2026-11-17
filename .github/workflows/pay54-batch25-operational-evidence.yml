@@ -1,0 +1,144 @@
+name: PAY54 Batch 25 Release Boundary and Operational Evidence
+
+on:
+  pull_request:
+    branches:
+      - cto/batch24-auth-staging-918-967
+      - project-titan
+    paths:
+      - "backend/governance/pay54-batch25-*.mjs"
+      - "backend/tests/account-batch25-*.test.mjs"
+      - "backend/security/pay54-batch25-*.mjs"
+      - "backend/src/postgres-staging-issuer-pool.mjs"
+      - "backend/src/postgres-staging-role-probe.mjs"
+      - "backend/governance/pay54-batch23-migration-drift.mjs"
+      - "docs/engineering/pay54-batch25-*.md"
+      - ".github/workflows/pay54-batch25-operational-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch25-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_STAGING_EXECUTION: DISABLED
+      PAY54_FINANCIAL_EXECUTION: "false"
+    steps:
+      - name: Checkout immutable PR SHA without persisted credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Setup pinned Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Verify PR source is exact draft-head checkout
+        if: github.event_name == 'pull_request'
+        env:
+          PAY54_REVIEW_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PAY54_REVIEW_HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PAY54_REVIEW_BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          PAY54_REVIEW_PR_DRAFT: ${{ github.event.pull_request.draft }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {execFileSync} from "node:child_process";
+          import {verifyPay54Batch25ReviewProvenance}
+            from "./backend/governance/pay54-batch25-source-provenance.mjs";
+          const result=verifyPay54Batch25ReviewProvenance({
+            repositoryFullName:process.env.GITHUB_REPOSITORY,
+            pullRequestHeadSha:process.env.PAY54_REVIEW_HEAD_SHA,
+            checkedOutSha:execFileSync("git",["rev-parse","HEAD"],
+              {encoding:"utf8"}).trim(),
+            pullRequestHeadBranch:process.env.PAY54_REVIEW_HEAD_BRANCH,
+            pullRequestBaseBranch:process.env.PAY54_REVIEW_BASE_BRANCH,
+            eventName:process.env.GITHUB_EVENT_NAME,
+            isDraft:process.env.PAY54_REVIEW_PR_DRAFT==="true"
+          });
+          if(result.productionDeploymentAuthorised)process.exit(1);
+          console.log("Verified exact draft PR head; no deployment permission");
+          NODE
+      - name: Syntax and complete Batch25 regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          modules=(backend/governance/pay54-batch25-*.mjs
+            backend/governance/pay54-batch23-migration-drift.mjs
+            backend/src/postgres-staging-issuer-pool.mjs
+            backend/src/postgres-staging-role-probe.mjs
+            backend/security/pay54-batch25-*.mjs
+            backend/tests/account-batch25-*.test.mjs)
+          tests=(backend/tests/account-batch25-*.test.mjs)
+          test "${#modules[@]}" -gt 2
+          test "${#tests[@]}" -gt 0
+          for path in "${modules[@]}"; do node --check "$path"; done
+          node --test "${tests[@]}"
+      - name: Verify source root is unsafe for Pages publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {assessPay54TrackedRepositoryRoot}
+            from "./backend/governance/pay54-batch25-publication-risk.mjs";
+          const risk=assessPay54TrackedRepositoryRoot();
+          if(!risk.sourceRootPublicationBlocked ||
+             risk.remotePublishedArtifactInspected ||
+             risk.deploymentAuthorised ||
+             risk.sensitiveFileCount<1) process.exit(1);
+          console.log(JSON.stringify({
+            sourceRootPublicationBlocked:risk.sourceRootPublicationBlocked,
+            sensitiveFileCount:risk.sensitiveFileCount,
+            activePagesSourceVerified:risk.activePagesSourceVerified,
+            stagingOrProductionDeployment:false
+          }));
+          NODE
+      - name: Generate immutable operational red-line register
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {assessPay54OperationalBlockersInCheckout}
+            from "./backend/governance/pay54-batch25-operational-blockers.mjs";
+          const report=assessPay54OperationalBlockersInCheckout();
+          if(report.productionReleaseAuthorised ||
+             report.stagingReleaseAuthorised ||
+             !report.sourceFindings.sourceRootPublicationBlocked ||
+             !report.sourceFindings.linkedCardDevelopmentScriptPresent ||
+             report.blockerCount<8) process.exit(1);
+          console.log(JSON.stringify({
+            blockerCount:report.blockerCount,
+            sourceRootPublicationBlocked:true,
+            developmentCardProviderPresent:true,
+            productionRelease:"NO-GO"
+          }));
+          NODE
+      - name: Preserve previous trusted identity and session tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch24-*.test.mjs
+          node --test backend/tests/account-batch23-*.test.mjs
+          node --test backend/tests/account-batch21-http-no-switch.test.mjs
+          node --test backend/tests/account-batch21-no-money-side-effects.test.mjs
+      - name: Confirm no cloud permissions or runtime activation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_STAGING_EXECUTION" = "DISABLED"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+          echo "Source evidence only; no website publish, DB provision, account-switch or funds"
