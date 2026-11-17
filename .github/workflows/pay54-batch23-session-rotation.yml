@@ -100,6 +100,19 @@ jobs:
             docker exec -i "$PG_CONTAINER" psql -X -U postgres -d pay54_batch23_ci \
               -v ON_ERROR_STOP=1 < "$file"
           done
+      - name: Verify replay contention with two concurrent PostgreSQL clients
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash backend/db/tests/batch23/003_concurrent_rotation.sh
+      - name: Retain denied backend account and payment endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch21-http-no-switch.test.mjs
+          node --test backend/tests/account-batch21-no-money-side-effects.test.mjs
       - name: Execute Batch 23 Node security tests
         shell: bash
         run: |
