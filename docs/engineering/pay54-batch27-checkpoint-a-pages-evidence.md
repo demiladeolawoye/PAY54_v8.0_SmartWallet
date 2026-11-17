@@ -1,3 +1,4 @@
+<!-- PAY54 Batch 27 / 1107 -->
 # PAY54 Batch 27 — Checkpoint A: Actual Pages Evidence and Release Preconditions (1107)
 
 **Batch authority:** Founder-approved 120-action engineering batch (1068–1187), with verification at 40, 80 and 120. **Checkpoint A scope:** actions 1068–1107, inclusive. These are source engineering actions (modules, negative-path tests, CI and an operator procedure), not forty new banking features.
