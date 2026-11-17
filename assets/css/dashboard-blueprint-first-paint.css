@@ -66,6 +66,11 @@ html.p54b-boot-failed .p54b-boot-status-failed {
   text-underline-offset: 3px;
 }
 
+.p54b-boot-status .p54b-boot-retry {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .p54b-boot-status a:focus-visible {
   outline: 3px solid #ffdc65;
   outline-offset: 4px;
