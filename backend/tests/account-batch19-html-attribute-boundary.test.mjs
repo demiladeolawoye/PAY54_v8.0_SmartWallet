@@ -173,6 +173,6 @@ test("697: old links in HTML comments do not become nonexistent live dependencie
  try{
   const r=auditPay54StaticSiteLinks(f.root);
   assert.equal(r.checkedLocalReferences,1);
-  assert.equal(r.complete,true);
+  assert.equal(r.complete,true,JSON.stringify(r));
  }finally{f.dispose();}
 });
