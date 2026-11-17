@@ -2,14 +2,9 @@
 -- Must be run as a database superuser AFTER migrations 001 and 002.
 \set ON_ERROR_STOP on
 
-CREATE ROLE pay54_ci_account_reader NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
-CREATE ROLE pay54_ci_session_reader NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
-GRANT USAGE ON SCHEMA pay54 TO pay54_ci_account_reader, pay54_ci_session_reader;
-GRANT SELECT ON pay54.accounts, pay54.account_memberships TO pay54_ci_account_reader;
-GRANT SELECT ON pay54.auth_sessions TO pay54_ci_session_reader;
 
-INSERT INTO pay54.accounts
- (account_id, legal_owner_id, account_type, display_name, account_status, verification_status)
+INSERT INTO pay54.account_contexts
+ (id, legal_owner_subject, account_type, display_name, status, verification_status)
 VALUES
  ('11111111-1111-4111-8111-111111111111','11111111-1111-4111-8111-111111111111',
  'PERSONAL','User A','ACTIVE','VERIFIED'),
@@ -18,7 +13,7 @@ VALUES
  ('33333333-3333-4333-8333-333333333333','11111111-1111-4111-8111-111111111111',
  'BUSINESS','Business A','ACTIVE','VERIFIED');
 
-INSERT INTO pay54.account_memberships(account_id, principal_id, member_role, member_status)
+INSERT INTO pay54.account_memberships(account_id, principal_subject, role, status)
 VALUES
  ('11111111-1111-4111-8111-111111111111','11111111-1111-4111-8111-111111111111',
  'PERSONAL_OWNER','ACTIVE'),
@@ -41,29 +36,29 @@ INSERT INTO pay54.auth_sessions(
  'ACTIVE', 1, now() - interval '1 hour', now() + interval '1 hour'
 );
 
-SET ROLE pay54_ci_account_reader;
+SET ROLE pay54_account_directory_read_role;
 BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;
 SELECT set_config('pay54.actor_id','11111111-1111-4111-8111-111111111111',true);
 -- Actor A sees their personal account and owned business, not User B.
 SELECT 1/(CASE WHEN count(*)=2 THEN 1 ELSE 0 END) AS actor_a_accounts
- FROM pay54.accounts;
+ FROM pay54.account_contexts;
 SELECT 1/(CASE WHEN count(*)=2 THEN 1 ELSE 0 END) AS actor_a_memberships
  FROM pay54.account_memberships;
 SELECT 1/(CASE WHEN count(*)=0 THEN 1 ELSE 0 END) AS actor_a_must_not_see_b
- FROM pay54.accounts WHERE account_id='22222222-2222-4222-8222-222222222222';
+ FROM pay54.account_contexts WHERE account_id='22222222-2222-4222-8222-222222222222';
 COMMIT;
 
 BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;
 SELECT set_config('pay54.actor_id','22222222-2222-4222-8222-222222222222',true);
 -- Actor B sees their personal account plus permitted Business viewer, not A.
 SELECT 1/(CASE WHEN count(*)=2 THEN 1 ELSE 0 END) AS actor_b_accounts
- FROM pay54.accounts;
+ FROM pay54.account_contexts;
 SELECT 1/(CASE WHEN count(*)=0 THEN 1 ELSE 0 END) AS actor_b_must_not_see_a
- FROM pay54.accounts WHERE account_id='11111111-1111-4111-8111-111111111111';
+ FROM pay54.account_contexts WHERE account_id='11111111-1111-4111-8111-111111111111';
 COMMIT;
 RESET ROLE;
 
-SET ROLE pay54_ci_session_reader;
+SET ROLE pay54_session_read_role;
 BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;
 SELECT set_config('pay54.session_digest',repeat('ab',32),true);
 SELECT 1/(CASE WHEN count(*)=1 THEN 1 ELSE 0 END) AS matching_digest_session
@@ -78,9 +73,9 @@ COMMIT;
 RESET ROLE;
 
 -- Runtime roles must not be granted DML.
-SELECT 1/(CASE WHEN has_table_privilege('pay54_ci_account_reader',
- 'pay54.accounts','INSERT,UPDATE,DELETE,TRUNCATE') = false
+SELECT 1/(CASE WHEN has_table_privilege('pay54_account_directory_read_role',
+ 'pay54.account_contexts','INSERT,UPDATE,DELETE,TRUNCATE') = false
  THEN 1 ELSE 0 END) AS no_account_write_rights;
-SELECT 1/(CASE WHEN has_table_privilege('pay54_ci_session_reader',
+SELECT 1/(CASE WHEN has_table_privilege('pay54_session_read_role',
  'pay54.auth_sessions','INSERT,UPDATE,DELETE,TRUNCATE') = false
  THEN 1 ELSE 0 END) AS no_session_write_rights;
