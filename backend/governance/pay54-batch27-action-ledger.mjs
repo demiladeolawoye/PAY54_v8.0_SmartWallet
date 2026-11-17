@@ -29,9 +29,9 @@ export function assessPay54Batch27ActionSourceSet({
      source.length>2*1024*1024)deny();
   // Use a canonical first action per source/test file. Only the workflow
   // carries an independently committed second action (1144).
+  const matched=[...source.matchAll(SOURCE)];
   const matches=path.endsWith("pay54-batch27-operational-evidence.yml")
-   ? [...source.matchAll(SOURCE)]
-   : [source.match(SOURCE)].filter(Boolean);
+   ? matched : matched.slice(0,1);
   if(matches.length===0){unmatched.push(path);continue;}
   // A single test file can repeat its own action ID in separate tests;
   // independently committed revisions to the same workflow can have
