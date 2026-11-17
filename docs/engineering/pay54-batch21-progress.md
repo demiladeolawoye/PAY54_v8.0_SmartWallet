@@ -4,7 +4,7 @@
 **Review PR:** #9 (draft; stacked on draft PR #8)
 **Starting source:** Batch 20 final verified SHA `713411976ae56a8e3d9f59f68609661d7f599991`
 **Scope:** 768–817, fifty auditable implementations.
-**Current status:** 18/50 committed as source-only changes; 32 pending.
+**Current status:** 21/50 committed as source-only changes; 29 pending.
 **Production:** NO-GO. No merge, deployment, active account switching or financial operation.
 
 | Number | Delivered | Acceptance and actual limitation |
@@ -30,7 +30,11 @@
 | 784 | Expanded dedicated Batch 21 workflow | Syntax checks for repository and composition; test glob covers new adversarial tests |
 | 785 | Updated engineering register | Current committed count and remaining source work reconciled |
 
-## Outstanding work 786–817
+| 786 | Hardened scoped repository | Copy and freeze bounded database row snapshots during scoped read, reject non-string or malformed fields |
+| 787 | Repository mutation and oversized-row tests | Verify detached copies, frozen records and fail-closed abnormal row shapes |
+| 788 | Reconciled CTO security register | Record remaining active backend/database and audit requirements |
+
+## Outstanding work 789–817
 
 Implementation is NOT claimed for this range. Prioritise real server-owned account directory storage, authenticated session persistence and independently verified PostgreSQL RLS with negative test evidence, then concurrency/CSRF/replay-safe account rebinding, ten-domain cache isolation, transaction permission propagation, full device QA and independent deployment/rollback evidence. These tasks depend on provisioned trusted services and signed security/compliance decisions, not synthetic mocks alone.
 
