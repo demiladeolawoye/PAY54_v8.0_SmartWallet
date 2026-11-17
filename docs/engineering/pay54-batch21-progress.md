@@ -4,7 +4,7 @@
 **Review PR:** #9 (draft; stacked on draft PR #8)
 **Starting source:** Batch 20 final verified SHA `713411976ae56a8e3d9f59f68609661d7f599991`
 **Scope:** 768–817, fifty auditable implementations.
-**Current status:** 11/50 committed as source-only changes; 39 pending.
+**Current status:** 12/50 committed as source-only changes; 38 pending.
 **Production:** NO-GO. No merge, deployment, active account switching or financial operation.
 
 | Number | Delivered | Acceptance and actual limitation |
@@ -21,7 +21,9 @@
 | 777 | Updated directory service integration tests | Expired-session denials and trusted clock handling |
 | 778 | Updated Batch 21 CI workflow | Enforce syntax coverage of session preflight and account-directory tests |
 
-## Outstanding work 779–817
+| 779 | Updated implementation progress register | Reconciled security additions and outstanding source scope |
+
+## Outstanding work 780–817
 
 Implementation is NOT claimed for this range. Prioritise server-owned account directory storage, authenticated session validation and RLS with negative test evidence, then concurrency/CSRF/replay-safe account rebinding, ten-domain cache isolation, transaction permission propagation, full device QA and independent deployment/rollback evidence. These tasks depend on provisioned trusted services and signed security/compliance decisions, not synthetic mocks alone.
 
