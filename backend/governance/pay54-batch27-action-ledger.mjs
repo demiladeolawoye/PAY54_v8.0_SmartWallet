@@ -12,7 +12,7 @@ import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 const MIN=1068,MAX=1187;
 const deny=()=>{throw new Error("PAY54_BATCH27_ACTION_LEDGER_DENIED");};
-const SOURCE=/(?:Batch\s*27\s*[/:-]\s*|\btest\s*\(\s*["'])(10[6-9][0-9]|11[0-8][0-9])\b/i;
+const SOURCE=/(?:Batch\s*27\s*[/:-]\s*|\btest\s*\(\s*["'])(10[6-9][0-9]|11[0-8][0-9])\b/gi;
 export function assessPay54Batch27ActionSourceSet({
  sources,throughId=MAX
 }={}){
@@ -27,11 +27,16 @@ export function assessPay54Batch27ActionSourceSet({
      !/(?:pay54-batch27|account-batch27)/i.test(path) ||
      typeof source!=="string"||source.length<20 ||
      source.length>2*1024*1024)deny();
-  const match=source.match(SOURCE);
-  if(!match){unmatched.push(path);continue;}
-  const id=Number(match[1]);
-  if(id<MIN || id>MAX ||ids.has(id))deny();
-  ids.add(id);
+  const matches=[...source.matchAll(SOURCE)];
+  if(matches.length===0){unmatched.push(path);continue;}
+  // A single test file can repeat its own action ID in separate tests;
+  // independently committed revisions to the same workflow can have
+  // multiple distinct IDs. Cross-file action IDs remain unique.
+  const localIds=new Set(matches.map(match=>Number(match[1])));
+  for(const id of localIds){
+   if(id<MIN || id>MAX ||ids.has(id))deny();
+   ids.add(id);
+  }
  }
  const missing=[];
  for(let id=MIN;id<=throughId;id++)if(!ids.has(id))missing.push(id);
