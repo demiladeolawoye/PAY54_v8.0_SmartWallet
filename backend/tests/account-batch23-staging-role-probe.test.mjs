@@ -30,7 +30,8 @@ function pool(role, { unsafe = false, fail = false } = {}) {
           if (sql.startsWith("SELECT current_user AS role_name"))
             return { rows: [{
               role_name: role, restricted: !unsafe,
-              may_rotate: !unsafe, may_write_ledger: unsafe
+              may_rotate: !unsafe, may_write_ledger: unsafe,
+              may_write_sessions: unsafe, may_append_audit: unsafe
             }] };
           return { rows: [] };
         },
