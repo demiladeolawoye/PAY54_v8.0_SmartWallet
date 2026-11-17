@@ -21,6 +21,8 @@ test("1026: signed Pages reviewer statement is not independent proof of public s
 test("1026: forged author, stale statement, wrong SHA or modified conclusion denied",()=>{
  for(const v of [
   {trustedReviewerPublicKey:foreign.publicKey},
+  {trustedReviewerPublicKey:pair.privateKey},
+  {trustedReviewerPublicKey:pair.privateKey.export({format:"pem",type:"pkcs8"})},
   {expectedCommitSha:"c".repeat(40)},
   {trustedNowMs:now+86400001},
   {statement:{...statement,decision:"NO_SOURCE_MATCH"}},
