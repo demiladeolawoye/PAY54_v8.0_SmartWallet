@@ -29,7 +29,7 @@
 
  <form onsubmit="signup(event)" autocomplete="off">
   <input
-    id="signup-name"
+    id="signup-name" aria-label="Demo full name"
     type="text"
     placeholder="Full name"
     required
@@ -40,7 +40,7 @@
   >
 
   <input
-    id="signup-email"
+    id="signup-email" aria-label="Demo email address"
     type="email"
     placeholder="Email"
     required
@@ -51,7 +51,7 @@
   >
 <div class="phone-field">
 
-<select id="signup-country">
+<select id="signup-country" aria-label="Demo country calling code">
 <option value="+44">🇬🇧 +44</option>
 <option value="+234">🇳🇬 +234</option>
 <option value="+233">🇬🇭 +233</option>
@@ -60,7 +60,7 @@
 </select>
 
 <input
-id="signup-phone"
+id="signup-phone" aria-label="Demo telephone number"
 type="tel"
 placeholder="Telephone"
 required
@@ -69,7 +69,7 @@ required
 </div>
 
   <input
-    id="signup-pin"
+    id="signup-pin" aria-label="Create a four-digit demo PIN"
     type="password"
     placeholder="Create PIN"
     required
@@ -79,7 +79,7 @@ required
   >
 
   <input
-    id="signup-confirm-pin"
+    id="signup-confirm-pin" aria-label="Confirm demo PIN"
     type="password"
     placeholder="Confirm PIN"
     required
