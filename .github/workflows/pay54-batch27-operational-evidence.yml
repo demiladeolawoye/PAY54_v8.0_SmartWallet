@@ -1,4 +1,5 @@
 # PAY54 Batch 27 / 1076 — source-only security workflow
+# PAY54 Batch 27 / 1144 — enforce auditable implementation action provenance
 name: PAY54 Batch 27 Operational Evidence Security
 on:
   pull_request:
