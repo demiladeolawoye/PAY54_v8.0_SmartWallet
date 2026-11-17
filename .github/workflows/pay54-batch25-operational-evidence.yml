@@ -43,6 +43,33 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "24"
+      - name: Verify PR source is exact draft-head checkout
+        if: github.event_name == 'pull_request'
+        env:
+          PAY54_REVIEW_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PAY54_REVIEW_HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PAY54_REVIEW_BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          PAY54_REVIEW_PR_DRAFT: ${{ github.event.pull_request.draft }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {execFileSync} from "node:child_process";
+          import {verifyPay54Batch25ReviewProvenance}
+            from "./backend/governance/pay54-batch25-source-provenance.mjs";
+          const result=verifyPay54Batch25ReviewProvenance({
+            repositoryFullName:process.env.GITHUB_REPOSITORY,
+            pullRequestHeadSha:process.env.PAY54_REVIEW_HEAD_SHA,
+            checkedOutSha:execFileSync("git",["rev-parse","HEAD"],
+              {encoding:"utf8"}).trim(),
+            pullRequestHeadBranch:process.env.PAY54_REVIEW_HEAD_BRANCH,
+            pullRequestBaseBranch:process.env.PAY54_REVIEW_BASE_BRANCH,
+            eventName:process.env.GITHUB_EVENT_NAME,
+            isDraft:process.env.PAY54_REVIEW_PR_DRAFT==="true"
+          });
+          if(result.productionDeploymentAuthorised)process.exit(1);
+          console.log("Verified exact draft PR head; no deployment permission");
+          NODE
       - name: Syntax and complete Batch25 regression
         shell: bash
         run: |
