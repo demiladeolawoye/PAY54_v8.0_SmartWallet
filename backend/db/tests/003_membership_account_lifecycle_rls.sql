@@ -16,7 +16,7 @@ ROLLBACK;
 
 BEGIN;
 UPDATE pay54.account_contexts SET status = 'SUSPENDED'
- WHERE account_id='33333333-3333-4333-8333-333333333333';
+ WHERE id='33333333-3333-4333-8333-333333333333';
 SET ROLE pay54_account_directory_read_role;
 SELECT set_config('pay54.actor_id','11111111-1111-4111-8111-111111111111',true);
 SELECT 1/(CASE WHEN count(*)=1 THEN 1 ELSE 0 END)
