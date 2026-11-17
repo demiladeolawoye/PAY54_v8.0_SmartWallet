@@ -1,11 +1,8 @@
 -- PAY54 Batch 22 / 844 — append-only audit test in disposable PostgreSQL.
 \set ON_ERROR_STOP on
 
-CREATE ROLE pay54_ci_audit_writer NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
-GRANT USAGE ON SCHEMA pay54 TO pay54_ci_audit_writer;
-GRANT INSERT ON pay54.account_context_audit TO pay54_ci_audit_writer;
 
-SET ROLE pay54_ci_audit_writer;
+SET ROLE pay54_context_audit_insert_role;
 BEGIN;
 SELECT set_config('pay54.actor_id','11111111-1111-4111-8111-111111111111',true);
 INSERT INTO pay54.account_context_audit (
@@ -45,6 +42,6 @@ BEGIN
 END
 $$;
 
-SELECT 1/(CASE WHEN has_table_privilege('pay54_ci_audit_writer',
+SELECT 1/(CASE WHEN has_table_privilege('pay54_context_audit_insert_role',
  'pay54.account_context_audit','UPDATE,DELETE,TRUNCATE')=false
  THEN 1 ELSE 0 END) AS audit_writer_cannot_rewrite;
