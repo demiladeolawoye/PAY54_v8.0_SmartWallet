@@ -65,6 +65,14 @@ jobs:
           test ! -e "$dest/.github"
           test ! -e "$dest/dashboard.html"
           echo "Offline-only static candidate inspected; no artifact uploaded/deployed"
+      - name: Upload inert two-file preview for founder review (not GitHub Pages)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-marketing-preview-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-static-public-preview/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
       - name: Retain current financial denial and source root risk
         shell: bash
         run: |
