@@ -55,9 +55,9 @@ export function createPay54BalanceVisualFixture({sourceRoot=ROOT}={}){
   '</aside>';
  html=html.replace(/<body\b[^>]*>/i,match=>match+banner);
  html=html.replace("</body>",
-  '<script>window.PAY54_SECURITY = {session: {isAuthenticated: () => true}}; window.PAY54_ACCOUNT_CONTEXT_TEST_ONLY = true;</script>\\n'+
-  '<script src="assets/js/ui/account-context-selector.js"></script>\\n'+
-  '<script src="assets/js/dashboard-blueprint-shell.js"></script>\\n</body>');
+  '<script>window.PAY54_SECURITY = {session: {isAuthenticated: () => true}}; window.PAY54_ACCOUNT_CONTEXT_TEST_ONLY = true;</script>\n'+
+  '<script src="assets/js/ui/account-context-selector.js"></script>\n'+
+  '<script src="assets/js/dashboard-blueprint-shell.js"></script>\n</body>');
  writeFileSync(path,html,{flag:"wx",mode:0o644});
  return Object.freeze({
   fixtureFile:path,
