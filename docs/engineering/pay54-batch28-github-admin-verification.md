@@ -3,6 +3,14 @@
 
 **Scope:** Screenshot-supported live GitHub Pages observation plus immediate publication-risk containment, followed by independent administrator verification. Connected GitHub integration has no Pages administration mutation or protected-branch read permission.
 
+## Confirmed containment from Founder screen recording — 17 November 2026
+
+The Founder supplied a 34.7-second screen recording of the repository's GitHub **Settings → Pages** interface. The recording shows selection of **Unpublish site**, a confirmation dialog, the confirmation action, and a blue GitHub success banner reading **"GitHub Pages unpublished."** The prior **"Your site is live at..."** banner is absent afterward. This provides direct UI evidence that the operator successfully unpublished the Pages site during the recording.
+
+**Updated CR-PAGES-01 assessment:** immediate unsafe-root **Pages publication containment is evidenced as completed**, while actual public HTTPS reachability, CDN cache disappearance, historical source/secret exposure and the public GitHub repository remain separately **UNVERIFIED / OPEN**. The interface retains **Deploy from a branch → project-titan → /(root)** settings even while unpublished; do not click **Save** or republish that source. A later Pages settings change could reintroduce this risk.
+
+**Current handling:** Preserve the recording securely as an incident/change audit artifact; do not publish it to a public PR. A separately authorised Security reviewer should independently confirm the previously served URLs no longer deliver a live Pages artifact, inspect historical GitHub Pages deployments for the period of exposure, assess public repository history for actual sensitive secrets, and track any required key rotation/privacy action. The observed banner is evidence of a successful GitHub control action, not proof that no historical disclosure took place.
+
 ## Confirmed Pages Settings evidence — Founder screenshot, 17 November 2026
 
 The Founder supplied a screenshot of the repository's own GitHub **Settings → Pages** page. It shows the Pages site **LIVE** at `https://demiladeolawoye.github.io/PAY54_v8.0_SmartWallet/`, source **Deploy from a branch**, branch **project-titan**, publishing directory **/(root)**, blank custom domain, and **Enforce HTTPS** checked/required. GitHub displayed **Last deployed yesterday** (interpreted relative to screenshot date as **16 November 2026**), with the `github-pages` environment and Pages build/deployment workflow.
@@ -11,7 +19,7 @@ The Founder supplied a screenshot of the repository's own GitHub **Settings → 
 
 **Public-repository caveat:** GitHub identifies PAY54's repository as **PUBLIC**. Unpublishing Pages removes the website endpoint but **does not make tracked repository source private**: all committed code and reachable Git history in a public repo may still be accessible through GitHub. Independently audit current and historic commits for real credentials, private keys, regulated data and customer personal information. If any such material exists, follow incident containment, secret rotation, privacy reporting and carefully planned repository-history remediation under Security approval. Never assume unpublishing the site erases public Git history.
 
-**Immediate incident-containment recommendation:** An authorised repository administrator should click **Unpublish site** in Settings → Pages, confirm the warning and preserve evidence that the site is unpublished. This intentionally suspends the existing Pages website until a reviewed isolated deployment is ready. The current GitHub connector cannot perform this action and no unpublish has been executed automatically. Preserve the screenshots, deployment SHA/history and relevant private evidence. Review actual public-source availability and secret exposure separately; never declare no breach from a 404 alone.
+**Containment completed in the Founder recording:** An authorised operator clicked **Unpublish site** and GitHub showed **GitHub Pages unpublished.** The current GitHub connector itself still lacks Pages administration mutation, and no programmatic change was attempted. A future republishing step requires separate independent release approval. Preserve the screenshots, deployment SHA/history and relevant private evidence. Review actual public-source availability and secret exposure separately; never declare no breach from a 404 alone.
 
 **Control:** Do not resume Pages publication from `project-titan` root. Do not switch to `main` root or to `/docs` without reviewing a complete independently verified static-only build; GitHub Pages source settings cannot target the independent `public-preview` subdirectory directly as a generic branch folder. A future GitHub Actions static-artifact publishing workflow requires separate Source/Release/Security approval.
 
@@ -32,7 +40,7 @@ These steps are **read-only**. The administrator can record the fields below in 
 1. Sign into GitHub as a repository administrator, preserve the confirmed Settings → Pages screenshot, and open **Settings → Pages** for `demiladeolawoye/PAY54_v8.0_SmartWallet`.
 2. Record the **Build and deployment Source** (Deploy from a branch versus GitHub Actions).
 3. If branch publishing is selected, record the exact **branch and directory** (`/` versus `/docs`). A repository-root public build is **unsafe** here because backend, governance and infrastructure source exist at root.
-4. Record the **custom domain**, **Enforce HTTPS** indication, and displayed public URL. **Unpublish** the currently live unsafe root-source Pages site as the authorised containment action; do not replace it with another repository-root source.
+4. Record the **custom domain**, **Enforce HTTPS** indication, and displayed public URL. **Unpublication is confirmed in the Founder recording.** Do not republish or change the retained unsafe branch/root source; independently verify the resulting public URL and historical exposure.
 5. Open **Actions → Deployments** / **Environments** (where available) and identify the most recent actual `github-pages` deployment, source workflow, commit SHA and status.
 6. Independently check whether sensitive repository paths or backups are accessible under the live site. Do not share sensitive response contents publicly. Escalate verified exposure as an incident with timestamps and preservation instructions.
 
@@ -59,6 +67,7 @@ These steps are **read-only**. The administrator can record the fields below in 
 | --- | --- |
 | Pages source and directory | **CONFIRMED LIVE**: branch project-titan, /(root), from Founder screenshot |
 | Pages latest deployment time and SHA | Screenshot reports last deployed 16 Nov 2026; exact SHA NOT VERIFIED |
+| Unpublication action | **CONFIRMED** by GitHub success banner in Founder recording |
 | Public content and historical sensitive exposure | NOT VERIFIED; incident-risk assessment OPEN |
 | `main` branch protection / administrator bypass | NOT VERIFIED (403) |
 | `project-titan` branch protection / administrator bypass | NOT VERIFIED (403) |
@@ -74,4 +83,4 @@ If the active website actually serves repository backend, SQL, private documenta
 
 Do not send GitHub personal-access tokens or cloud secrets to ChatGPT. Administrator screenshots can be redacted to show **settings state** only; screenshots are not a substitute for a signed security assessment.
 
-**CTO disposition:** Unsafe live Pages source settings **CONFIRMED**. Immediate authorised unpublication is recommended; execution has not been verified. Exact published artifact, exposure, historical content and protected deployer remain unverified. No merge or new publication permission is granted.
+**CTO disposition:** Unsafe Pages source settings **CONFIRMED** and **unpublication action successfully completed**, evidenced by the recording. Historic publication, URL/CDN propagation, leaked secrets/data and protected deployer remain unverified. No merge or new publication permission is granted.
