@@ -898,3 +898,34 @@ The founder approved continuing security-first release-readiness work without by
 **Cumulative Batch 20:** Implementations 718–754 = **37/50 committed**; 755–767 not implemented. An approved production Personal↔Business backend switch remains outstanding and must never be represented as active. Draft PR #8 remains unmerged and no live Pages settings or financial operations were changed.
 
 **Security gates unchanged:** Historic Pages overpacking P0, currently active Pages source/exposure/settings, development linked-card provider exclusion, protected deployer/rollback and regulated-money readiness all remain release blockers. Do not merge or deploy based only on the synthetic UI acceptance.
+
+
+## Batch 20 final engineering checkpoint — 755–767 (50/50 source implementations)
+
+**Founder approval:** Continue after verified 37/50 checkpoint and complete secure account context switching contracts and release checks. This approved engineering phase does **not** authorise Pages release, GitHub branch merge, actual customer account selection, payment processing or production secrets/settings changes.
+
+| Item | Completed and committed deliverable | State |
+| --- | --- | --- |
+| 755 | `backend/domain/account-context-selection.mjs`: canonical principal, account descriptor and membership authorisation proposal (read-only, no switch) | COMMITTED |
+| 756 | Wrong actor, target account, role, suspended membership, invalid descriptor negative tests | COMMITTED |
+| 757 | `backend/domain/account-context-rebind.mjs`: trusted session expiry/version/actor consistency, replay and session rotation prerequisites | COMMITTED |
+| 758 | Rebinding replay/stale generation, expired/revoked, identical account and forged proposal tests | COMMITTED |
+| 759 | `backend/domain/account-context-cache-plan.mjs`: ten-domain bank/card/transaction cache refresh and in-flight request cancellation contract | COMMITTED |
+| 760 | Source/destination mismatch and nonexecuting cache refresh tests | COMMITTED |
+| 761 | `backend/src/server.mjs`: fail-closed 503 no-store for unprovisioned account enumeration, selection and refresh | COMMITTED |
+| 762 | Real loopback HTTP denial tests for GET/POST, correlation IDs, no customer-ID reflection and preserved health/finance boundaries | COMMITTED |
+| 763 | Cross-layer Personal→Business integration tests prove no browser session or money switch is claimed | COMMITTED |
+| 764 | Production account context cutover runbook: identity, RLS, CSRF, session replacement, account cache, audit and financial gating | COMMITTED |
+| 765 | Cutover governance negative tests ensure account viewer cannot trigger payments and P0 gates remain | COMMITTED |
+| 766 | Full CTO Batch20 founder closure report and pending operational change register | COMMITTED |
+| 767 | Reconcile 718–767 = **50/50 source work items** and preserve live launch NO-GO | COMMITTED via this change |
+
+**Batch 20 source cycle: 50/50 committed.** This is not a claim of 50 running production features. Existing wallet, ledger, money movement, card, KYC, account/session, Pay Bills, dashboard and mobile assets are preserved. The account selector is visible in the new dashboard review branch; **real Personal↔Business switching remains UNAVAILABLE** because a trusted membership directory, session switch authority and live PostgreSQL RLS have not been connected. Backend now returns explicit `503 ACCOUNT_CONTEXT_SERVICE_UNAVAILABLE` on account-context endpoints rather than a fraudulent success.
+
+**Visual/UI evidence:** Synthetic Chrome 1440×900 and 390×844 fixture showed approved new layout, readable mobile selector and no legacy old dashboard; exact prior visual source SHA `8a44fcf8325b1d09aee58eafe92b114ecd048abb`, run `44050046510`. This does not prove actual authorised customer switching or live Pages appearance.
+
+**Final CI:** Check all eleven applicable Actions runs on the exact final task-board commit before claiming 11/11 pass. Earlier verified commit `6f3a8b4b40d686d0edcf8f3088bd917af637c854` passed 11/11 prior to new backend contracts. No results are inherited to a later SHA.
+
+**Release blocker register:** CR-PAGES-01 historical artifact overpacking (actual current reachability/sensitivity unverified); CR-CARD-01 excluded development-only linked-card provider; CR-ACCOUNT-02 authenticated real backend RLS/session switching still unimplemented; CR-DEPLOY-01 protected deployer/byte-verified artifact/safe rollback; CR-UX-03 live authenticated first-paint/accessibility/mobile acceptance; CR-FINTECH-01 UK–Nigeria regulated partner, KYC/AML/safeguarding and settlement acceptance.
+
+**Founder checkpoint:** Batch 21 (768–817) requires new approval. Keep PR #8 and the stacked PRs as DRAFT/unmerged. Actual Pages, payment, credential, database, identity and account-switch deployment actions require independent Founder + Security + Release Manager change approval. **Production decision: NO-GO.**
