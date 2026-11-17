@@ -13,6 +13,10 @@ const makePool = ({ failOn, rows = [], actorOverride } = {}) => {
     async query(sql, values) {
       calls.push({ sql, values });
       if (failOn && sql.startsWith(failOn)) throw Error("db failed");
+      if (sql.includes("FROM pg_class c")) return { rows: [{
+        runtime_role: "pay54_read", restricted: true,
+        table_count: 2, forced_rls: true, can_select: true, can_write: false
+      }] };
       if (sql.startsWith("SELECT current_setting"))
         return { rows: [{ actor_id: actorOverride ?? actor }] };
       return { rows };
@@ -37,8 +41,8 @@ test("820: scoped read uses parameterized actor binding and read-only transactio
   });
   assert.equal(value, "checked");
   assert.equal(pool.calls[0].sql, "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
-  assert.deepEqual(pool.calls[1].values, [actor]);
-  assert.equal(pool.calls[1].sql, "SELECT set_config('pay54.actor_id', $1::text, true)");
+  assert.deepEqual(pool.calls[2].values, [actor]);
+  assert.equal(pool.calls[2].sql, "SELECT set_config('pay54.actor_id', $1::text, true)");
   assert.ok(pool.calls.some(x => x.sql.includes("FROM pay54.accounts")));
   assert.ok(pool.calls.some(x => x.sql.includes("FROM pay54.account_memberships")));
   assert.equal(pool.calls.at(-1).sql, "COMMIT");
