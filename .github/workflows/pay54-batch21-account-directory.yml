@@ -8,6 +8,8 @@ on:
     paths:
       - "backend/domain/account-context-directory.mjs"
       - "backend/domain/account-read-session.mjs"
+      - "backend/src/account-scoped-directory-repository.mjs"
+      - "backend/src/account-directory-composition.mjs"
       - "backend/src/account-directory-service.mjs"
       - "backend/tests/account-batch21-*.test.mjs"
       - ".github/workflows/pay54-batch21-account-directory.yml"
@@ -43,6 +45,8 @@ jobs:
           set -euo pipefail
           node --check backend/domain/account-context-directory.mjs
           node --check backend/domain/account-read-session.mjs
+          node --check backend/src/account-scoped-directory-repository.mjs
+          node --check backend/src/account-directory-composition.mjs
           node --check backend/src/account-directory-service.mjs
           for file in backend/tests/account-batch21-*.test.mjs; do node --check "$file"; done
       - name: Execute directory and retained selection security tests
