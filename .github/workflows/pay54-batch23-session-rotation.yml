@@ -9,6 +9,8 @@ on:
       - "backend/db/migrations/018_account_session_rotation.sql"
       - "backend/db/tests/batch23/**"
       - "backend/src/postgres-session-rotation.mjs"
+      - "backend/governance/pay54-batch23-*.mjs"
+      - "docs/engineering/pay54-batch23-*.md"
       - "backend/tests/account-batch23-*.test.mjs"
       - ".github/workflows/pay54-batch23-session-rotation.yml"
   workflow_dispatch:
@@ -117,11 +119,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in backend/src/postgres-session-rotation.mjs backend/tests/account-batch23-*.test.mjs; do
+          for file in backend/src/postgres-session-rotation.mjs backend/governance/pay54-batch23-*.mjs backend/tests/account-batch23-*.test.mjs; do
             if [ -f "$file" ]; then node --check "$file"; fi
           done
           shopt -s nullglob
           tests=(backend/tests/account-batch23-*.test.mjs)
-          if (( ${#tests[@]} )); then node --test "${tests[@]}"; fi
+          test "${#tests[@]}" -gt 0
+          node --test "${tests[@]}"
           test "${PAY54_REAL_MONEY_MODE:-false}" = "false"
           test "${TF_VAR_authorized_provisioning:-false}" = "false"
