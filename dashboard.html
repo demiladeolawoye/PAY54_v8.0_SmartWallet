@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="p54b-boot-pending">
 <head>
 
 <meta charset="UTF-8">
@@ -26,8 +26,10 @@
   "
 >
 
+<!-- PAY54 first-paint safety: CSS blocks the legacy view before dashboard modules load. -->
+<link rel="stylesheet" href="assets/css/dashboard-blueprint-first-paint.css?v=2.0.0">
 <!-- PAY54 Approved Dashboard First-Render Controller -->
-<script src="assets/js/dashboard-blueprint-boot.js?v=1.0.0"></script>
+<script src="assets/js/dashboard-blueprint-boot.js?v=2.0.0"></script>
 
 <title>PAY54 — Dashboard</title>
 
@@ -67,6 +69,10 @@
 
 </head>
 <body class="dashboard light">
+  <div id="p54bBootStatus" class="p54b-boot-status" role="status" aria-live="polite" aria-atomic="true">
+    <span class="p54b-boot-status-pending">Preparing your PAY54 dashboard…</span>
+    <span class="p54b-boot-status-failed">Your PAY54 dashboard could not load. <a href="dashboard.html" class="p54b-boot-retry">Try again</a> or <a href="login.html">return to sign in</a>.</span>
+  </div>
 
   <!-- HEADER -->
   <header class="dash-header">
