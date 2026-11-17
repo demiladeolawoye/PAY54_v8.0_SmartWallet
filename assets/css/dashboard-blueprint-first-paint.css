@@ -1,0 +1,85 @@
+/* ==========================================================================
+   PAY54 FIRST-PAINT DASHBOARD TRANSITION v2.0.0
+   Loaded before all scripts, layout CSS and other dashboard modules.
+   No legacy dashboard pixels may be painted during approved blueprint boot.
+   The error state remains an accessible, nonfinancial recovery screen.
+   ========================================================================== */
+
+html.p54b-boot-pending body,
+html.p54b-boot-failed body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #f5f7fe;
+}
+
+/* Hide all pre-blueprint interactive legacy surfaces without disabling any
+   security, wallet or payment JavaScript. Mounting the blueprint is the only
+   path back to an interactive dashboard view. */
+html:is(.p54b-boot-pending, .p54b-boot-failed) body > header.dash-header,
+html:is(.p54b-boot-pending, .p54b-boot-failed) body > main.dash-grid,
+html:is(.p54b-boot-pending, .p54b-boot-failed) body > .fab-spacer,
+html:is(.p54b-boot-pending, .p54b-boot-failed) body > #scanPayFab,
+html:is(.p54b-boot-pending, .p54b-boot-failed) body > #toastContainer {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* The status is placed in the initial HTML, so assistive technology can
+   announce the loading state without an inline script or pseudo-element. */
+.p54b-boot-status {
+  display: none;
+  box-sizing: border-box;
+}
+
+html:is(.p54b-boot-pending, .p54b-boot-failed) .p54b-boot-status {
+  display: block;
+  position: fixed;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2147483600;
+  width: min(440px, calc(100vw - 32px));
+  padding: 22px 25px;
+  border: 1px solid #dce3f8;
+  border-radius: 16px;
+  background: #0b1544;
+  box-shadow: 0 14px 36px rgb(5 13 49 / 18%);
+  color: #fff;
+  font: 700 15px/1.55 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  text-align: center;
+}
+
+.p54b-boot-status-failed {
+  display: none;
+}
+
+html.p54b-boot-failed .p54b-boot-status-pending {
+  display: none;
+}
+
+html.p54b-boot-failed .p54b-boot-status-failed {
+  display: inline;
+}
+
+.p54b-boot-status a {
+  color: #ffdc65;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.p54b-boot-status a:focus-visible {
+  outline: 3px solid #ffdc65;
+  outline-offset: 4px;
+}
+
+/* The initial script and DOM must both confirm blueprint success before the
+   original dashboard can become visible. */
+html:not(.p54b-boot-pending, .p54b-boot-failed) .p54b-boot-status {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p54b-boot-status {
+    transition: none;
+    animation: none;
+  }
+}
