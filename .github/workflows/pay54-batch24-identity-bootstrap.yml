@@ -11,6 +11,8 @@ on:
       - "backend/db/tests/batch24/**"
       - "backend/security/identity-*.mjs"
       - "backend/src/postgres-bootstrap-*.mjs"
+      - "backend/src/postgres-session-rotation.mjs"
+      - "backend/security/session-bootstrap-recovery.mjs"
       - "backend/tests/account-batch24-*.test.mjs"
       - "backend/governance/pay54-batch24-*.mjs"
       - "docs/engineering/pay54-batch24-*.md"
@@ -58,6 +60,8 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           scripts=(backend/security/identity-*.mjs
+            backend/security/session-bootstrap-recovery.mjs
+            backend/src/postgres-session-rotation.mjs
             backend/src/postgres-bootstrap-*.mjs
             backend/governance/pay54-batch24-*.mjs
             backend/tests/account-batch24-*.test.mjs)
@@ -120,6 +124,13 @@ jobs:
             docker exec -i "$PG_CONTAINER" psql -X -U postgres -d pay54_batch24_ci \
               -v ON_ERROR_STOP=1 < "$file"
           done
+      - name: Prove two simultaneous assertion submissions consume one JTI
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash backend/db/tests/batch24/011_concurrent_assertion_replay.sh
       - name: Preserve HTTP 503 and account security denial
         shell: bash
         run: |
