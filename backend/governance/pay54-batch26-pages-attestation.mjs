@@ -19,8 +19,13 @@ export function verifyPay54PagesAttestation({statement,signature,
     statement.commitSha!==expectedCommitSha ||
     typeof signature!=="string" ||
     !/^[A-Za-z0-9_-]{86}$/.test(signature))deny();
- let key;try{key=createPublicKey(trustedReviewerPublicKey);}catch{deny();}
- if(key.asymmetricKeyType!=="ed25519")deny();
+ let key;
+ try{
+  key=trustedReviewerPublicKey?.type==="public"
+   ? trustedReviewerPublicKey
+   : createPublicKey(trustedReviewerPublicKey);
+ }catch{deny();}
+ if(key?.type!=="public" || key.asymmetricKeyType!=="ed25519")deny();
  const bytes=Buffer.from(signature,"base64url");
  if(bytes.length!==64||bytes.toString("base64url")!==signature ||
     !verify(null,encodePay54PagesAttestation(statement),key,bytes))deny();
