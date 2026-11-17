@@ -38,7 +38,9 @@ export function verifyPay54RotationMigrationSource({
       !/INSERT INTO pay54\.account_context_audit/i.test(source) ||
       !/REVOKE ALL ON FUNCTION pay54\.rotate_account_context_session/i.test(source) ||
       !/TO pay54_session_rotate_role/i.test(source) ||
-      /SECURITY DEFINER/i.test(source) ||
+      !/OWNER TO pay54_session_rotate_executor_role/i.test(source) ||
+      !/CREATE ROLE pay54_session_rotate_executor_role NOLOGIN NOINHERIT NOSUPERUSER/i.test(source) ||
+      !/GRANT EXECUTE ON FUNCTION pay54\\.rotate_account_context_session/i.test(source) ||
       /\bGRANT\s+(?:ALL|INSERT|UPDATE|DELETE)\s+ON\s+pay54\.(?:ledger_entries|financial_operations|wallets)/i.test(source)
   ) deny();
 
@@ -46,7 +48,8 @@ export function verifyPay54RotationMigrationSource({
     schema: "pay54.rotation-migration-source-check.v1",
     baselineMigrationCount: 17,
     additiveMigration: "018_account_session_rotation.sql",
-    functionRunsAsInvokingRole: true,
+    restrictedSecurityDefinerOwnerRequired: true,
+    publicAndCallerDirectDmlForbidden: true,
     productionMigrationAuthorised: false,
     realAccountSwitchEnabled: false
   });
