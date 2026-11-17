@@ -122,21 +122,7 @@
     };
 
     const footer = make("div", "p54b-side-footer");
-    const accountSwitcher = make(
-      "button", "p54b-side-muted p54b-account-switch-unavailable",
-      "Personal account · Switch unavailable"
-    );
-    accountSwitcher.type = "button";
-    accountSwitcher.disabled = true;
-    accountSwitcher.title = "Secure Personal and Business switching requires the authenticated PAY54 service";
-    accountSwitcher.setAttribute(
-      "aria-label",
-      "Personal account preview. Switching accounts is not available."
-    );
-    footer.append(
-      accountSwitcher,
-      make("div", "p54b-side-muted", "Settings")
-    );
+    footer.append(make("div", "p54b-side-muted", "Settings"));
     sidebar.append(footer);
 
     const content = make("div", "p54b-content");
@@ -144,6 +130,22 @@
     header.before(shell);
     content.append(header);
     find(".brand", header)?.classList.add("p54b-hidden-brand");
+
+    // CR-ACCOUNT-02: the visible Personal/Business context control is
+    // presentation-only until independently verified server-side switching,
+    // account authorisation and RLS exist. Never copy wallet data between
+    // accounts or treat browser-selected labels as trusted account context.
+    const contextController = window.PAY54_ACCOUNT_CONTEXT_SELECTOR;
+    if (typeof contextController?.mount === "function") {
+      contextController.mount({
+        headerActions: find(".header-actions", header),
+        sidebarFooter: footer
+      });
+    } else {
+      const label = make("span", "p54b-account-sidebar-status",
+        "Account switching unavailable");
+      footer.prepend(label);
+    }
 
     const greeting = make("div", "p54b-greeting");
     greeting.append(
