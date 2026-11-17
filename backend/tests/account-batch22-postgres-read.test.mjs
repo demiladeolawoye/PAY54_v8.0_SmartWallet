@@ -53,7 +53,7 @@ test("820: binding mismatch or query failure rolls back and does not leak client
   for (const options of [
     { actorOverride: "99999999-9999-4999-8999-999999999999" },
     { failOn: "SELECT current_setting" },
-    { failOn: "SELECT account_id" }
+    { failOn: "SELECT id" }
   ]) {
     const pool = makePool(options);
     const run = make({ pool });
