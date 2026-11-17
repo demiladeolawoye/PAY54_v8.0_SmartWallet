@@ -58,16 +58,16 @@ export function verifyPay54StaticReleaseDirectory({
    if(totalBytes>maxTotalBytes || entries.length>=maxFiles)deny();
    const bytes=readFileSync(absolute);
    if(bytes.length!==stat.size)deny();
-   // Content inspection complements path checks; it does not claim to prove
-   // the absence of all secrets, but rejects common credential artifacts.
-   if(/\\.(?:html|css|js|mjs|svg|webmanifest|txt)$/i.test(name)){
+   // Reject unsafe token material and publicly linked source maps in
+   // human-readable static assets; this is not a comprehensive secret scan.
+   if(/\.(?:html|css|js|mjs|svg|webmanifest|txt)$/i.test(name)){
     const text=bytes.toString("utf8");
     if(Buffer.from(text,"utf8").compare(bytes)!==0)deny();
     if(/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/i.test(text) ||
        /(?:github_pat_|ghp_)[a-zA-Z0-9_]{20,}/.test(text) ||
        /AKIA[0-9A-Z]{16}/.test(text) ||
-       /(?:^|[\\s"'=])sk_live_[A-Za-z0-9]{16,}/.test(text) ||
-       /(?:[\\r\\n]|^)\\s*(?:\/\/|\/\\*|\*)[#@]?\\s*sourceMappingURL\\s*=/i.test(text)
+       /(?:^|[\s"'=])sk_live_[A-Za-z0-9]{16,}/.test(text) ||
+       /(?:[\r\n]|^)\s*(?:\/\/|\/\*|\*)[#@]?\s*sourceMappingURL\s*=/i.test(text)
     )deny();
    }
    entries.push(Object.freeze({
