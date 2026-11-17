@@ -4,7 +4,7 @@
 **Review PR:** #9 (draft; stacked on draft PR #8)
 **Starting source:** Batch 20 final verified SHA `713411976ae56a8e3d9f59f68609661d7f599991`
 **Scope:** 768–817, fifty auditable implementations.
-**Current status:** 5/50 committed as source-only changes; 45 pending.
+**Current status:** 11/50 committed as source-only changes; 39 pending.
 **Production:** NO-GO. No merge, deployment, active account switching or financial operation.
 
 | Number | Delivered | Acceptance and actual limitation |
@@ -14,8 +14,14 @@
 | 770 | `backend/src/account-directory-service.mjs` | Trusted session/repository port; no live principal/session authority or HTTP endpoint |
 | 771 | `backend/tests/account-batch21-directory-service.test.mjs` | No anonymous lookup; service denies failed/invalid store and membership |
 | 772 | `.github/workflows/pay54-batch21-account-directory.yml` | Read-only pinned Node CI for new tests and retained Batch 20 boundary tests; new-head conclusion must be checked |
+| 773 | `docs/engineering/pay54-batch21-progress.md` | Founder-facing source/change/P0 register |
+| 774 | `backend/domain/account-read-session.mjs` | Server session freshness preflight: active, versioned, issued and unexpired |
+| 775 | `backend/tests/account-batch21-read-session.test.mjs` | Adversarial expired/revoked/malformed session validation |
+| 776 | Updated `backend/src/account-directory-service.mjs` | Session preflight must pass before repository access |
+| 777 | Updated directory service integration tests | Expired-session denials and trusted clock handling |
+| 778 | Updated Batch 21 CI workflow | Enforce syntax coverage of session preflight and account-directory tests |
 
-## Outstanding work 773–817
+## Outstanding work 779–817
 
 Implementation is NOT claimed for this range. Prioritise server-owned account directory storage, authenticated session validation and RLS with negative test evidence, then concurrency/CSRF/replay-safe account rebinding, ten-domain cache isolation, transaction permission propagation, full device QA and independent deployment/rollback evidence. These tasks depend on provisioned trusted services and signed security/compliance decisions, not synthetic mocks alone.
 
