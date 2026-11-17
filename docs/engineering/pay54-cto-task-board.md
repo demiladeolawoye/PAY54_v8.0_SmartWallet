@@ -878,3 +878,23 @@ The founder approved continuing security-first release-readiness work without by
 **Cumulative Batch 20 items completed:** 718–746 = **29/50 source deliverables**. Items 747–767 remain pending. The added account-context selector is visible and safe to inspect in the source review branch; it does **not** provide a working Business account transition. Actual authenticated multi-account switching cannot be accepted until trusted backend account discovery/change APIs, tenant RLS enforcement and exact-session rebind/cross-account cache safety are in place.
 
 **Regression note:** Three legacy security workflows initially failed because old assertions required the removed disabled sidebar label. Those checks have been upgraded to enforce the same no-client-only-switching policy against the new control; the full current-commit CI conclusions are separately reconciled before declaring success.
+
+
+### Batch 20 synthetic-browser acceptance and mobile refinement — items 747–754
+
+| Item | Implemented deliverable | State |
+| --- | --- | --- |
+| 747 | Update synthetic source-only dashboard fixture for first-paint pending mode and account selector with no finance/auth scripts | COMMITTED |
+| 748 | Tests distinguish real pending dashboard from synthetic fixture; no live data or scripts | COMMITTED |
+| 749 | Headless Chromium exact-source desktop/mobile account-selector screenshots with DOM acceptance and 7-day Actions artifact | COMMITTED |
+| 750 | Respect unchanged dashboard CSP by generating a hidden test-only external session mock instead of blocked inline JavaScript | COMMITTED |
+| 751 | Tests prove the synthetic mock is separate from live dashboard and never implies a real session | COMMITTED |
+| 752 | Ensure CI removes synthetic mock/profile/HTML and uploads screenshots only | COMMITTED |
+| 753 | Refine mobile header into readable greeting and account-controls rows without hiding avatar | COMMITTED |
+| 754 | Mobile layout regression contract and source tests | COMMITTED |
+
+**Visual evidence:** Synthetic Chrome run `44050046510` on commit `8a44fcf8325b1d09aee58eafe92b114ecd048abb`, artifact `14312788218`, digest `sha256:9a411e1e86fce0bb0ed39a28fefdb3e525cf6972939a49ab8b95b7b4fa6f5eb9`; desktop 1440×900 and mobile 390×844 screenshots inspected, selector and approved dashboard visually present, balance details preserved, old dashboard not visible. This is a **synthetic visual fixture**, not a real authenticated multi-account financial flow.
+
+**Cumulative Batch 20:** Implementations 718–754 = **37/50 committed**; 755–767 not implemented. An approved production Personal↔Business backend switch remains outstanding and must never be represented as active. Draft PR #8 remains unmerged and no live Pages settings or financial operations were changed.
+
+**Security gates unchanged:** Historic Pages overpacking P0, currently active Pages source/exposure/settings, development linked-card provider exclusion, protected deployer/rollback and regulated-money readiness all remain release blockers. Do not merge or deploy based only on the synthetic UI acceptance.
