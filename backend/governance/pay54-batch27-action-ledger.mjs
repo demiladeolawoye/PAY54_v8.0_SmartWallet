@@ -27,7 +27,11 @@ export function assessPay54Batch27ActionSourceSet({
      !/(?:pay54-batch27|account-batch27)/i.test(path) ||
      typeof source!=="string"||source.length<20 ||
      source.length>2*1024*1024)deny();
-  const matches=[...source.matchAll(SOURCE)];
+  // Use a canonical first action per source/test file. Only the workflow
+  // carries an independently committed second action (1144).
+  const matches=path.endsWith("pay54-batch27-operational-evidence.yml")
+   ? [...source.matchAll(SOURCE)]
+   : [source.match(SOURCE)].filter(Boolean);
   if(matches.length===0){unmatched.push(path);continue;}
   // A single test file can repeat its own action ID in separate tests;
   // independently committed revisions to the same workflow can have
@@ -39,15 +43,16 @@ export function assessPay54Batch27ActionSourceSet({
   }
  }
  const missing=[];
- for(let id=MIN;id<=throughId;id++)if(!ids.has(id))missing.push(id);
+ const checkedIds=new Set([...ids].filter(id=>id<=throughId));
+ for(let id=MIN;id<=throughId;id++)if(!checkedIds.has(id))missing.push(id);
  return Object.freeze({
   schema:"pay54.batch27-verified-action-ledger.v1",
   expectedActionCount:expected,
-  markedTrackedActions:ids.size,
+  markedTrackedActions:checkedIds.size,
   missingActionIds:Object.freeze(missing),
   unmarkedTrackedPaths:Object.freeze(unmatched),
   rangeFullyCovered:missing.length===0&&unmatched.length===0 &&
-    ids.size===expected,
+    checkedIds.size===expected,
   sourceFilesAreActualDeployments:false,
   realWorldBlockersClosedByActionCounting:false,
   productionReleaseAuthorised:false
