@@ -9,7 +9,7 @@
  * The caller must still independently verify policies via tenant tests.
  */
 const ALLOWED = new Set([
-  "accounts", "account_memberships", "auth_sessions"
+  "account_contexts", "account_memberships", "auth_sessions"
 ]);
 const deny = () => { throw new Error("PAY54_PG_RLS_POSTURE_DENIED"); };
 
