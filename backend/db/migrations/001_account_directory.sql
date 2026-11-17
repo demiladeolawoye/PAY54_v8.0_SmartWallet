@@ -62,7 +62,8 @@ DROP POLICY IF EXISTS pay54_accounts_actor_read ON pay54.accounts;
 CREATE POLICY pay54_accounts_actor_read ON pay54.accounts
   FOR SELECT
   USING (
-    EXISTS (
+    account_status = 'ACTIVE' AND verification_status = 'VERIFIED'
+    AND EXISTS (
       SELECT 1
       FROM pay54.account_memberships m
       WHERE m.account_id = accounts.account_id
