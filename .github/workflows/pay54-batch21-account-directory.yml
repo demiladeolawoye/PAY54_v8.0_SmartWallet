@@ -9,6 +9,8 @@ on:
       - "backend/domain/account-context-directory.mjs"
       - "backend/domain/account-read-session.mjs"
       - "backend/domain/account-read-continuity.mjs"
+      - "backend/domain/account-active-read-scope.mjs"
+      - "backend/domain/account-wallet-read-admission.mjs"
       - "backend/src/account-scoped-directory-repository.mjs"
       - "backend/src/account-directory-composition.mjs"
       - "backend/src/account-directory-service.mjs"
@@ -47,6 +49,8 @@ jobs:
           node --check backend/domain/account-context-directory.mjs
           node --check backend/domain/account-read-session.mjs
           node --check backend/domain/account-read-continuity.mjs
+          node --check backend/domain/account-active-read-scope.mjs
+          node --check backend/domain/account-wallet-read-admission.mjs
           node --check backend/src/account-scoped-directory-repository.mjs
           node --check backend/src/account-directory-composition.mjs
           node --check backend/src/account-directory-service.mjs
