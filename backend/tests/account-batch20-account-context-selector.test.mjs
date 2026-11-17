@@ -91,13 +91,14 @@ test("737: Business never appears as authorised or actionable without server evi
   const business=descendants(view.selector).find(n=>n.textContent==="Business");
   assert.ok(business);
   assert.equal(business.parentNode.getAttribute("aria-disabled"),"true");
-  assert.ok(descendants(view.selector).some(n=>n.textContent==="Not connected"));
+  assert.ok(descendants(view.selector).some(n=>n.textContent==="Unavailable"));
   assert.equal(view.api.health().businessContextAvailable,false);
 });
 test("737: selector opens and closes on click, outside pointer and Escape without switching accounts",()=>{
   const view=fixture(true);
   const [button,menu]=view.selector.children;
   assert.equal(menu.hidden,true);
+  assert.equal(button.getAttribute("aria-controls"),"p54bAccountContextPanel");
   button.fire("click");
   assert.equal(menu.hidden,false);
   assert.equal(button.getAttribute("aria-expanded"),"true");
