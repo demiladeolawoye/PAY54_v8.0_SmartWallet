@@ -84,7 +84,13 @@ test("static profile navigation remains a non-activating blueprint contract", ()
   assert.equal(candidate.executed,false);
   assert.equal(getAccountSwitcherCandidate("not-an-id"),null);
   const shell=readFileSync(new URL("../../assets/js/dashboard-blueprint-shell.js",import.meta.url),"utf8");
-  assert.match(shell,/Personal account · Switch unavailable/);
-  assert.match(shell,/accountSwitcher\.disabled = true/);
+  const selector=readFileSync(new URL("../../assets/js/ui/account-context-selector.js",import.meta.url),"utf8");
+  assert.match(shell,/PAY54_ACCOUNT_CONTEXT_SELECTOR/);
+  assert.match(shell,/contextController\.mount/);
+  assert.match(selector,/Personal account/);
+  assert.match(selector,/aria-disabled/);
+  assert.match(selector,/businessContextAvailable: false/);
+  assert.match(selector,/accountSwitchExecuted: false/);
+  assert.doesNotMatch(shell,/accountSwitcher\.disabled = true/);
   assert.doesNotMatch(shell,/make\("div", "p54b-side-muted", "Switch Profile · Personal"\)/);
 });

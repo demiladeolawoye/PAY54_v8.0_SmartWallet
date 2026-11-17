@@ -93,6 +93,34 @@ export function createApp(config = loadConfig()) {
       return;
     }
 
+    /*
+     * CR-ACCOUNT-02: account discovery, selection and account-scoped refresh
+     * must be served only by an authenticated identity/tenant service.
+     * This foundational backend has no connected user directory, sessions,
+     * authoritative membership store, PostgreSQL RLS or CSRF enforcement.
+     * Return a predictable, non-cacheable denial for both reads and writes.
+     * Never echo a client-supplied account ID or make fake membership claims.
+     */
+    const path = req.url?.split("?")[0];
+    if (
+      path === "/v1/accounts" ||
+      path === "/v1/account-context" ||
+      path?.startsWith("/v1/account-context/")
+    ) {
+      writeJson(
+        res,
+        503,
+        problem(
+          503,
+          "ACCOUNT_CONTEXT_SERVICE_UNAVAILABLE",
+          "Authenticated account selection is not provisioned",
+          correlationId
+        )
+      );
+
+      return;
+    }
+
     if (
       req.url
         ?.split("?")[0]
