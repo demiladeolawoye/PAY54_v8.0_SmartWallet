@@ -4,7 +4,7 @@
 **Review PR:** #9 (draft; stacked on draft PR #8)
 **Starting source:** Batch 20 final verified SHA `713411976ae56a8e3d9f59f68609661d7f599991`
 **Scope:** 768–817, fifty auditable implementations.
-**Current status:** 12/50 committed as source-only changes; 38 pending.
+**Current status:** 18/50 committed as source-only changes; 32 pending.
 **Production:** NO-GO. No merge, deployment, active account switching or financial operation.
 
 | Number | Delivered | Acceptance and actual limitation |
@@ -23,9 +23,16 @@
 
 | 779 | Updated implementation progress register | Reconciled security additions and outstanding source scope |
 
-## Outstanding work 780–817
+| 780 | `backend/src/account-scoped-directory-repository.mjs` | Fail-closed read-only scoped repository contract (no live database) |
+| 781 | `backend/tests/account-batch21-scoped-directory-repository.test.mjs` | Negative actor, RLS, read-only, callback and dependency tests |
+| 782 | `backend/src/account-directory-composition.mjs` | Compose session authority, scoped repository and account projection without wiring an endpoint |
+| 783 | `backend/tests/account-batch21-directory-composition.test.mjs` | Cross-boundary happy-path, wrong actor, revoked session and missing dependency tests |
+| 784 | Expanded dedicated Batch 21 workflow | Syntax checks for repository and composition; test glob covers new adversarial tests |
+| 785 | Updated engineering register | Current committed count and remaining source work reconciled |
 
-Implementation is NOT claimed for this range. Prioritise server-owned account directory storage, authenticated session validation and RLS with negative test evidence, then concurrency/CSRF/replay-safe account rebinding, ten-domain cache isolation, transaction permission propagation, full device QA and independent deployment/rollback evidence. These tasks depend on provisioned trusted services and signed security/compliance decisions, not synthetic mocks alone.
+## Outstanding work 786–817
+
+Implementation is NOT claimed for this range. Prioritise real server-owned account directory storage, authenticated session persistence and independently verified PostgreSQL RLS with negative test evidence, then concurrency/CSRF/replay-safe account rebinding, ten-domain cache isolation, transaction permission propagation, full device QA and independent deployment/rollback evidence. These tasks depend on provisioned trusted services and signed security/compliance decisions, not synthetic mocks alone.
 
 ## Current P0 release gates
 
