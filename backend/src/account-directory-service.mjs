@@ -9,15 +9,18 @@
  */
 import { projectPay54AuthorisedAccountDirectory } from
   "../domain/account-context-directory.mjs";
+import { validatePay54AccountReadSession } from "../domain/account-read-session.mjs";
 
 const deny = () => { throw new Error("PAY54_ACCOUNT_DIRECTORY_SERVICE_UNAVAILABLE"); };
 
 export function createPay54AccountDirectoryService({
   resolveAuthenticatedSession,
-  loadPrincipalAccountDirectory
+  loadPrincipalAccountDirectory,
+  getTrustedServerTimeMs = Date.now
 } = {}) {
   if (typeof resolveAuthenticatedSession !== "function" ||
-      typeof loadPrincipalAccountDirectory !== "function") deny();
+      typeof loadPrincipalAccountDirectory !== "function" ||
+      typeof getTrustedServerTimeMs !== "function") deny();
 
   return Object.freeze({
     async listAuthorisedAccounts(requestContext) {
@@ -28,12 +31,19 @@ export function createPay54AccountDirectoryService({
       } catch {
         deny();
       }
-      if (!session || session.status !== "ACTIVE" ||
-          typeof session.principalId !== "string") deny();
+      let authorisedSession;
+      try {
+        authorisedSession = validatePay54AccountReadSession({
+          sessionFromTrustedAuthority: session,
+          serverTimeMs: getTrustedServerTimeMs()
+        });
+      } catch {
+        deny();
+      }
 
       let records;
       try {
-        records = await loadPrincipalAccountDirectory(session.principalId);
+        records = await loadPrincipalAccountDirectory(authorisedSession.principalId);
       } catch {
         deny();
       }
@@ -43,7 +53,7 @@ export function createPay54AccountDirectoryService({
       // enforce tenant RLS. The domain projection revalidates all rows.
       try {
         return projectPay54AuthorisedAccountDirectory({
-          authenticatedPrincipalId: session.principalId,
+          authenticatedPrincipalId: authorisedSession.principalId,
           accountsFromTrustedStore: records.accounts,
           membershipsFromTrustedStore: records.memberships
         });
