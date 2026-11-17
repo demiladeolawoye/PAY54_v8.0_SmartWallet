@@ -1,0 +1,94 @@
+name: PAY54 Batch 27 Operational Evidence Security
+on:
+  pull_request:
+    branches:
+      - cto/batch26-pages-proof-staging-readiness-1018-1067
+      - project-titan
+    paths:
+      - "backend/governance/pay54-batch27-*.mjs"
+      - "backend/tests/account-batch27-*.test.mjs"
+      - "backend/security/pay54-batch27-*.mjs"
+      - "backend/src/pay54-batch27-*.mjs"
+      - "docs/engineering/pay54-batch27-*.md"
+      - ".github/workflows/pay54-batch27-operational-evidence.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pay54-batch27-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  offline-evidence-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_STAGING_EXECUTION: DISABLED
+    steps:
+      - name: Checkout immutable review head
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pinned Node runtime
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Execute full Batch27 source regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          code=(backend/governance/pay54-batch27-*.mjs
+            backend/security/pay54-batch27-*.mjs
+            backend/src/pay54-batch27-*.mjs
+            backend/tests/account-batch27-*.test.mjs)
+          tests=(backend/tests/account-batch27-*.test.mjs)
+          test "${#code[@]}" -gt 2
+          test "${#tests[@]}" -gt 0
+          for path in "${code[@]}"; do node --check "$path"; done
+          node --test "${tests[@]}"
+      - name: Retain Batch26 and Batch25 negative path suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch26-*.test.mjs
+          node --test backend/tests/account-batch25-*.test.mjs
+          node --test backend/tests/account-batch24-pages-attestation.test.mjs 2>/dev/null || test ! -f backend/tests/account-batch24-pages-attestation.test.mjs
+      - name: Assert current source root and linked-card production blockers
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {reconcilePay54Batch26Checkout}
+            from "./backend/governance/pay54-batch26-release-blocker-merge.mjs";
+          const r=reconcilePay54Batch26Checkout();
+          if(r.sourceRootUnsafeForPublication!==true ||
+             r.developmentPaymentProviderMustNotFundCustomers!==true ||
+             r.productionReleaseAuthorised!==false ||
+             r.stagingActivationAuthorised!==false)process.exit(1);
+          console.log("Source risks still OPEN; no production approval");
+          NODE
+      - name: Protect immutable draft PR context
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          PAY54_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PAY54_HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PAY54_BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          PAY54_PR_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PAY54_HEAD_SHA"
+          test "$PAY54_HEAD_BRANCH" = "cto/batch27-operational-evidence-1068-1187"
+          test "$PAY54_BASE_BRANCH" = "cto/batch26-pages-proof-staging-readiness-1018-1067"
+          test "$PAY54_PR_DRAFT" = "true"
+      - name: No cloud or financial changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_STAGING_EXECUTION" = "DISABLED"
+          echo "Source review only; cloud, Pages, payments and customer login untouched"
