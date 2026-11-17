@@ -6,7 +6,7 @@ BEGIN;
 UPDATE pay54.auth_sessions
  SET session_status = 'REVOKED', revoked_at = clock_timestamp()
  WHERE session_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-SET ROLE pay54_ci_session_reader;
+SET ROLE pay54_session_read_role;
 SELECT set_config('pay54.session_digest',repeat('ab',32),true);
 SELECT 1/(CASE WHEN count(*)=0 THEN 1 ELSE 0 END) AS revoked_session_hidden
  FROM pay54.auth_sessions;
@@ -17,14 +17,14 @@ BEGIN;
 UPDATE pay54.auth_sessions
  SET expires_at = now() - interval '1 minute'
  WHERE session_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-SET ROLE pay54_ci_session_reader;
+SET ROLE pay54_session_read_role;
 SELECT set_config('pay54.session_digest',repeat('ab',32),true);
 SELECT 1/(CASE WHEN count(*)=0 THEN 1 ELSE 0 END) AS expired_session_hidden
  FROM pay54.auth_sessions;
 RESET ROLE;
 ROLLBACK;
 
-SET ROLE pay54_ci_session_reader;
+SET ROLE pay54_session_read_role;
 BEGIN READ ONLY;
 SELECT set_config('pay54.session_digest',repeat('ab',32),true);
 SELECT 1/(CASE WHEN count(*)=1 THEN 1 ELSE 0 END) AS rollback_restored_active
