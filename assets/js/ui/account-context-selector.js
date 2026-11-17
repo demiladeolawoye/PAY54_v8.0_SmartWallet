@@ -21,6 +21,10 @@
   let panel = null;
   let onDocumentPointer = null;
   let onDocumentKey = null;
+  let identityName = null;
+  let identityCaption = null;
+  let personalState = null;
+  let sidebarStatus = null;
 
   const make = (tag, className, text) => {
     const element = document.createElement(tag);
@@ -89,13 +93,13 @@
       "Business switching requires verified account ownership and a secure PAY54 service.");
     menu.append(heading, personal, business, notice);
     shell.append(button, menu);
-    return { shell, button, menu };
+    return { shell, button, menu, name, context, personalStateNode: personal.children[1] };
   }
 
   function mount({ headerActions, sidebarFooter } = {}) {
     if (state.mounted) return false;
     if (!(headerActions instanceof Element)) return false;
-    const { shell, button, menu } = build();
+    const { shell, button, menu, name, context, personalStateNode } = build();
     const profile = headerActions.querySelector(".profile-wrap");
     if (profile) headerActions.insertBefore(shell, profile);
     else headerActions.append(shell);
@@ -103,6 +107,9 @@
     root = shell;
     trigger = button;
     panel = menu;
+    identityName = name;
+    identityCaption = context;
+    personalState = personalStateNode;
 
     if (sidebarFooter instanceof Element) {
       const status = make("div", "p54b-account-sidebar-status");
@@ -110,6 +117,7 @@
         ? "◉ Personal account · Active"
         : "Account status unavailable";
       sidebarFooter.prepend(status);
+      sidebarStatus = status;
     }
 
     button.addEventListener("click", () => setOpen(!state.open));
@@ -121,7 +129,23 @@
     };
     document.addEventListener("pointerdown", onDocumentPointer);
     document.addEventListener("keydown", onDocumentKey);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener?.("pageshow", refresh);
     state.mounted = true;
+    return true;
+  }
+
+  function refresh() {
+    if (!state.mounted) return false;
+    const allowed = authenticated();
+    identityName.textContent = allowed ? "Personal account" : "Account unavailable";
+    identityCaption.textContent = allowed ? "Active account" : "Sign in required";
+    personalState.textContent = allowed ? "Current" : "Sign in required";
+    if (sidebarStatus) {
+      sidebarStatus.textContent = allowed
+        ? "◉ Personal account · Active" : "Account status unavailable";
+    }
+    if (!allowed) setOpen(false);
     return true;
   }
 
@@ -140,6 +164,6 @@
     configurable: false,
     enumerable: false,
     writable: false,
-    value: Object.freeze({ version: "1.0.0", mount, health })
+    value: Object.freeze({ version: "1.0.0", mount, refresh, health })
   });
 })();
