@@ -44,6 +44,15 @@ const ROTATE_SQL = `SELECT rotated_session_id::text AS "sessionId",
   $6::uuid,$7::bigint,$8::uuid,$9::uuid,$10::timestamptz
  )`;
 
+const BIND_ROLE_SQL = ROLE_SQL.replace(
+  "pay54.rotate_account_context_session(",
+  "pay54.bind_initial_account_session("
+);
+const BIND_SQL = ROTATE_SQL
+  .replace('rotated_session_id::text', 'bound_session_id::text')
+  .replace('rotated_session_version::text', 'bound_session_version::text')
+  .replace('pay54.rotate_account_context_session(', 'pay54.bind_initial_account_session(');
+
 function verifyOrigin(configured, presented) {
   if (typeof configured !== "string" || typeof presented !== "string") deny();
   let parsed;
@@ -60,7 +69,8 @@ function csrfFromRequest(ctx) {
   return raw;
 }
 
-export function createPay54PostgresSessionRotation({
+function createPay54PostgresAccountTransition({
+  initialBinding = false,
   writePool,
   resolveAuthenticatedSession,
   trustedApplicationOrigin,
@@ -69,6 +79,7 @@ export function createPay54PostgresSessionRotation({
   if (!writePool || typeof writePool.connect !== "function" ||
       typeof resolveAuthenticatedSession !== "function" ||
       typeof getTrustedServerTimeMs !== "function") deny();
+  if (typeof initialBinding !== 'boolean') deny();
   verifyOrigin(trustedApplicationOrigin, trustedApplicationOrigin);
 
   return async function rotateSession({ requestContext, requestPayload } = {}) {
@@ -84,8 +95,10 @@ export function createPay54PostgresSessionRotation({
         sessionFromTrustedAuthority: original,
         serverTimeMs: now
       });
-      if (typeof original.activeAccountId !== "string" ||
-          original.activeAccountId.toLowerCase() === target.requestedAccountId ||
+      if ((initialBinding
+            ? original.activeAccountId !== null
+            : typeof original.activeAccountId !== "string" ||
+              original.activeAccountId.toLowerCase() === target.requestedAccountId) ||
           session.sessionVersion >= Number.MAX_SAFE_INTEGER ||
           now + 5_000 >= session.expiresAtMs) deny();
     } catch {
@@ -110,7 +123,7 @@ export function createPay54PostgresSessionRotation({
       started = true;
       await client.query("SET LOCAL lock_timeout = '3s'");
       await client.query("SET LOCAL statement_timeout = '8s'");
-      const role = await client.query(ROLE_SQL);
+      const role = await client.query(initialBinding ? BIND_ROLE_SQL : ROLE_SQL);
       const posture = role?.rows?.[0];
       if (role?.rows?.length !== 1 ||
           posture.role_name !== "pay54_session_rotate_role" ||
@@ -132,7 +145,7 @@ export function createPay54PostgresSessionRotation({
         auditId,
         new Date(nextExpiryMs)
       ];
-      const result = await client.query(ROTATE_SQL, values);
+      const result = await client.query(initialBinding ? BIND_SQL : ROTATE_SQL, values);
       if (result?.rows?.length !== 1 ||
           result.rows[0].sessionId?.toLowerCase() !== newSessionId ||
           Number(result.rows[0].version) !== session.sessionVersion + 1) deny();
@@ -142,7 +155,9 @@ export function createPay54PostgresSessionRotation({
       await client.query("COMMIT");
       started = false;
       return Object.freeze({
-        schema: "pay54.account-session-rotation-committed.v1",
+        schema: initialBinding
+          ? "pay54.initial-account-binding-committed.v1"
+          : "pay54.account-session-rotation-committed.v1",
         sessionId: newSessionId,
         requestedAccountId: target.requestedAccountId,
         sessionVersion: session.sessionVersion + 1,
@@ -170,4 +185,12 @@ export function createPay54PostgresSessionRotation({
   };
 }
 
-export const PAY54_ROTATION_SQL = Object.freeze({ ROLE_SQL, ROTATE_SQL });
+export function createPay54PostgresSessionRotation(options = {}) {
+  return createPay54PostgresAccountTransition({ ...options, initialBinding: false });
+}
+export function createPay54PostgresInitialAccountBinding(options = {}) {
+  return createPay54PostgresAccountTransition({ ...options, initialBinding: true });
+}
+export const PAY54_ROTATION_SQL = Object.freeze({
+  ROLE_SQL, ROTATE_SQL, BIND_ROLE_SQL, BIND_SQL
+});
