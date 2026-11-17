@@ -49,7 +49,7 @@
     const shell = make("div", "p54b-account-context");
     const button = make("button", "p54b-account-context-trigger");
     button.type = "button";
-    button.setAttribute("aria-haspopup", "true");
+    button.setAttribute("aria-controls", "p54bAccountContextPanel");
     button.setAttribute("aria-expanded", "false");
 
     const glyph = make("span", "p54b-account-context-glyph", "◉");
@@ -66,7 +66,8 @@
 
     const menu = make("div", "p54b-account-context-menu");
     menu.hidden = true;
-    menu.setAttribute("role", "group");
+    menu.id = "p54bAccountContextPanel";
+    menu.setAttribute("role", "region");
     menu.setAttribute("aria-label", "PAY54 account contexts");
 
     const heading = make("p", "p54b-account-context-heading", "Your accounts");
@@ -81,11 +82,11 @@
     business.setAttribute("aria-disabled", "true");
     business.append(
       make("span", "p54b-account-context-choice-title", "Business"),
-      make("span", "p54b-account-context-state", "Not connected")
+      make("span", "p54b-account-context-state", "Unavailable")
     );
 
     const notice = make("p", "p54b-account-context-notice",
-      "Business switching becomes available only after verified account access is connected.");
+      "Business switching requires verified account ownership and a secure PAY54 service.");
     menu.append(heading, personal, business, notice);
     shell.append(button, menu);
     return { shell, button, menu };
