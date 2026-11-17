@@ -128,3 +128,19 @@ test("737: UI never changes tenant identifiers, financial data, storage or backe
   assert.match(source,/serverSwitchVerified: false/);
   assert.match(source,/accountSwitchExecuted: false/);
 });
+
+test("744: session invalidation immediately clears stale Personal account status",()=>{
+  const view=fixture(true);
+  const [button,menu]=view.selector.children;
+  button.fire("click");
+  assert.equal(menu.hidden,false);
+  view.window.PAY54_SECURITY.session.isAuthenticated=()=>false;
+  view.listeners.get("visibilitychange")();
+  assert.equal(menu.hidden,true);
+  assert.ok(descendants(view.selector).some(n=>n.textContent==="Account unavailable"));
+  assert.ok(descendants(view.sidebar).some(n=>n.textContent==="Account status unavailable"));
+  assert.equal(view.api.health().accountSwitchExecuted,false);
+  view.window.PAY54_SECURITY.session.isAuthenticated=()=>true;
+  assert.equal(view.api.refresh(),true);
+  assert.ok(descendants(view.selector).some(n=>n.textContent==="Personal account"));
+});
