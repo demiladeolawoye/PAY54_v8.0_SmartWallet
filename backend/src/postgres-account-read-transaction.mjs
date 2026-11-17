@@ -9,21 +9,21 @@ import { assertPay54PostgresReadRole } from "./postgres-rls-posture.mjs";
  * no HTTP account endpoint is enabled by importing this module.
  *
  * Runtime role must be non-owner/NOBYPASSRLS and have SELECT only on
- * pay54.accounts and pay54.account_memberships. SQL RLS is the enforcement
+ * pay54.account_contexts and pay54.account_memberships. SQL RLS is the enforcement
  * boundary, not the rlsEnforced metadata in the transaction callback.
  */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DENIED = "PAY54_PG_SCOPED_READ_UNAVAILABLE";
-const ACCOUNTS = `SELECT account_id::text AS "accountId",
-  legal_owner_id::text AS "legalOwnerId",
+const ACCOUNTS = `SELECT id::text AS "accountId",
+  legal_owner_subject::text AS "legalOwnerId",
   account_type AS "type", display_name AS "displayName",
-  account_status AS "status", verification_status AS "verificationStatus"
-  FROM pay54.accounts ORDER BY account_id LIMIT 1001`;
+  status AS "status", verification_status AS "verificationStatus"
+  FROM pay54.account_contexts ORDER BY id LIMIT 1001`;
 const MEMBERS = `SELECT account_id::text AS "accountId",
-  principal_id::text AS "principalId",
-  member_role AS "role", member_status AS "status"
+  principal_subject::text AS "principalId",
+  role AS "role", status AS "status"
   FROM pay54.account_memberships
-  WHERE principal_id = $1::uuid ORDER BY account_id LIMIT 1001`;
+  WHERE principal_subject = $1::uuid ORDER BY account_id LIMIT 1001`;
 const deny = () => { throw new Error(DENIED); };
 
 export function createPay54PostgresReadTransaction({ pool } = {}) {
@@ -43,7 +43,7 @@ export function createPay54PostgresReadTransaction({ pool } = {}) {
       await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
       started = true;
       await assertPay54PostgresReadRole({
-        client, tables: ["accounts", "account_memberships"]
+        client, tables: ["account_contexts", "account_memberships"]
       });
       await client.query(
         "SELECT set_config('pay54.actor_id', $1::text, true)",
