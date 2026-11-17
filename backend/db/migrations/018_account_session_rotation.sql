@@ -40,7 +40,7 @@ CREATE POLICY pay54_rotate_session_read ON pay54.auth_sessions
   USING (
     encode(token_digest,'hex') =
       NULLIF(current_setting('pay54.session_digest',true),'')
-    AND session_status='ACTIVE' AND expires_at > clock_timestamp()
+    AND session_status IN ('ACTIVE','REVOKED')
   );
 CREATE POLICY pay54_rotate_session_revoke ON pay54.auth_sessions
   FOR UPDATE TO pay54_session_rotate_role
