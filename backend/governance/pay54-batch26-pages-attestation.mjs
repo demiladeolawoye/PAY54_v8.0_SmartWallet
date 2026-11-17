@@ -29,11 +29,16 @@ export function verifyPay54PagesAttestation({statement,signature,
     (Buffer.isBuffer(trustedReviewerPublicKey) &&
      /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(
       trustedReviewerPublicKey.toString("utf8"))))deny();
+ const pem=typeof trustedReviewerPublicKey==="string"
+  ? trustedReviewerPublicKey
+  : Buffer.isBuffer(trustedReviewerPublicKey)
+    ? trustedReviewerPublicKey.toString("utf8") : null;
+ if(pem!==null && (!pem.startsWith("-----BEGIN PUBLIC KEY-----") ||
+    !pem.trimEnd().endsWith("-----END PUBLIC KEY-----")))deny();
+ if(pem===null && trustedReviewerPublicKey?.type!=="public")deny();
  let key;
  try{
-  key=trustedReviewerPublicKey?.type==="public"
-   ? trustedReviewerPublicKey
-   : createPublicKey(trustedReviewerPublicKey);
+  key=pem===null ? trustedReviewerPublicKey : createPublicKey(pem);
  }catch{deny();}
  if(key?.type!=="public" || key.asymmetricKeyType!=="ed25519")deny();
  const bytes=Buffer.from(signature,"base64url");
