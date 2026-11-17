@@ -61,3 +61,40 @@ test("781: transaction exceptions, bad result and malformed principal fail close
   const repository = createRepository({ withScopedReadTransaction: async () => ({ accounts: [], memberships: [] }) });
   await assert.rejects(repository.loadPrincipalAccountDirectory("from-browser"), /SCOPED_DIRECTORY_UNAVAILABLE/);
 });
+
+test("787: database rows are snapshotted and immutable after the transaction exits", async () => {
+  const row = { accountId: actor, displayName: "Trusted" };
+  const membership = { accountId: actor, principalId: actor };
+  const repository = createRepository({
+    withScopedReadTransaction: async (id, callback) => callback({
+      actorId: id, readOnly: true, rlsEnforced: true,
+      listAccounts: async () => [row],
+      listMemberships: async () => [membership]
+    })
+  });
+  const result = await repository.loadPrincipalAccountDirectory(actor);
+  row.displayName = "changed after commit";
+  membership.principalId = other;
+  assert.equal(result.accounts[0].displayName, "Trusted");
+  assert.equal(result.memberships[0].principalId, actor);
+  assert.ok(Object.isFrozen(result.accounts[0]));
+  assert.ok(Object.isFrozen(result.memberships[0]));
+});
+
+test("787: malicious row shapes and oversized results fail closed", async () => {
+  for (const rows of [
+    [null],
+    [["nested"]],
+    [{ accountId: actor, amount: 1000 }],
+    Array.from({ length: 1001 }, () => ({ accountId: actor }))
+  ]) {
+    const repository = createRepository({
+      withScopedReadTransaction: async (id, callback) => callback({
+        actorId: id, readOnly: true, rlsEnforced: true,
+        listAccounts: async () => rows,
+        listMemberships: async () => []
+      })
+    });
+    await assert.rejects(repository.loadPrincipalAccountDirectory(actor), /SCOPED_DIRECTORY_UNAVAILABLE/);
+  }
+});
