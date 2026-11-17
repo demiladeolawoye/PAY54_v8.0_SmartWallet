@@ -53,3 +53,19 @@ All **10 associated workflow runs completed SUCCESS**, recorded by read-only Git
 Founder recording shows successful **Unpublish site** action for the former `project-titan` → `/(root)` GitHub Pages publication. The repository itself remains PUBLIC, and historical source/secret exposure and Pages CDN propagation remain unverified. Never republish unsafe repository root. Review only the isolated two-file preview offline until separately approved.
 
 **Security verdict:** Ruleset saved with correct targets and restrictions but inactive. **PAY54 production NO-GO.**
+
+
+## Inspected workflow definitions — reason status checks are not ready
+
+Source inspection on the same Batch 28 branch confirms:
+
+| Workflow | Actual job context | Trigger limitation |
+| --- | --- | --- |
+| `pay54-account-security-integration.yml` | `integrated-account-security` | `pull_request` is filtered by selected backend paths; unrelated changes skip it |
+| `pay54-account-boundary-tests.yml` | `Account Authorization and Isolation` | `pull_request` is path-filtered; unrelated changes skip it |
+| `pay54-backend-tests.yml` | `Backend Foundation and Domain Tests` | `push` to `project-titan` or manual dispatch only; **no `pull_request` trigger** |
+| `pay54-batch28-integration-preview.yml` | `source-only-acceptance` | PR branches are restricted to Batch27 and `project-titan`, and paths are filtered; it is not generally available on `main` |
+
+**Decision:** None of these existing jobs is currently suitable as a universal required status check on *both* protected branches. Adding them now can produce permanently pending PR checks. A new branch-neutral, always-running security baseline should be designed, tested on `main` and `project-titan`, and merged under a reviewed non-deploying process before it is required in the ruleset. The workflow cannot be considered effective simply because a source file exists on an unmerged Draft PR branch.
+
+Do not activate the ruleset assuming the current status-check protection is operational. Activation of its present PR/deletion/force-push protections without a required check would provide some limited defence, but still would **not** satisfy PAY54's production release policy.
