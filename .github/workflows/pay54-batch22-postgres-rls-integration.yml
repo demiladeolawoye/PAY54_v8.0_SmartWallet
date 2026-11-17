@@ -49,7 +49,7 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$POSTGRES_CONTAINER"
-          for migration in backend/db/migrations/001_account_directory.sql backend/db/migrations/002_auth_sessions.sql; do
+          for migration in backend/db/migrations/00*.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "$migration"
           done
