@@ -38,6 +38,6 @@ test("1222: demo auth source never persists a new raw PIN",()=>{
  const js=readFileSync(new URL("../../assets/js/auth.js",import.meta.url),"utf8");
  assert.doesNotMatch(js,/localStorage\.setItem\s*\(\s*["']pay54_pin["']/);
  assert.match(js,/localStorage\.removeItem\(PAY54_LEGACY_PIN_KEY\)/);
- assert.match(js,/PAY54_DEV_PIN_ITERATIONS\s*=\s*310000/);
+ assert.match(js,/PAY54_DEMO_PIN_ITERATIONS\s*=\s*310000/);
  assert.match(js,/This is intentionally NOT an OTP verification/);
 });
