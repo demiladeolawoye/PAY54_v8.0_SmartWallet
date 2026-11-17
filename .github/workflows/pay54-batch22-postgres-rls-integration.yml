@@ -6,8 +6,9 @@ on:
       - cto/batch21-account-context-768-817
       - project-titan
     paths:
-      - "backend/db/migrations/00*.sql"
+      - "backend/db/migrations/0*.sql"
       - "backend/db/tests/*.sql"
+      - "docs/engineering/pay54-batch22-*.md"
       - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
   workflow_dispatch:
 
