@@ -136,12 +136,20 @@
     // account authorisation and RLS exist. Never copy wallet data between
     // accounts or treat browser-selected labels as trusted account context.
     const contextController = window.PAY54_ACCOUNT_CONTEXT_SELECTOR;
-    if (typeof contextController?.mount === "function") {
-      contextController.mount({
-        headerActions: find(".header-actions", header),
-        sidebarFooter: footer
-      });
-    } else {
+    let contextMounted = false;
+    try {
+      if (typeof contextController?.mount === "function") {
+        contextMounted = contextController.mount({
+          headerActions: find(".header-actions", header),
+          sidebarFooter: footer
+        }) === true;
+      }
+    } catch (error) {
+      // Account presentation must never break the canonical dashboard,
+      // authentication or money engines. No partial account switch can occur.
+      console.warn("[PAY54 BLUEPRINT] Account context presentation unavailable.", error);
+    }
+    if (!contextMounted) {
       const label = make("span", "p54b-account-sidebar-status",
         "Account switching unavailable");
       footer.prepend(label);
