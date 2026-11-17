@@ -20,6 +20,12 @@ export const PAY54_BATCH23_MIGRATION_ORDER = Object.freeze([
   "018_account_session_rotation.sql"
 ]);
 
+export const PAY54_BATCH25_FULL_MIGRATION_ORDER = Object.freeze([
+  ...PAY54_BATCH23_MIGRATION_ORDER,
+  "019_identity_assertion_bootstrap.sql",
+  "020_initial_account_binding.sql"
+]);
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)),
   "../db/migrations");
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -27,16 +33,20 @@ const deny = () => { throw new Error("PAY54_MIGRATION_DRIFT_DENIED"); };
 
 export function verifyPay54MigrationDrift({
   independentlyReviewedSha256,
-  getSource = filename => readFileSync(resolve(root, filename))
+  getSource = filename => readFileSync(resolve(root, filename)),
+  requiredMigrations = PAY54_BATCH23_MIGRATION_ORDER
 } = {}) {
+  const isLegacy = requiredMigrations === PAY54_BATCH23_MIGRATION_ORDER;
+  const isExtended = requiredMigrations === PAY54_BATCH25_FULL_MIGRATION_ORDER;
+  if (!isLegacy && !isExtended) deny();
   if (!independentlyReviewedSha256 ||
       typeof independentlyReviewedSha256 !== "object" ||
       Array.isArray(independentlyReviewedSha256) ||
       typeof getSource !== "function" ||
       Object.keys(independentlyReviewedSha256).length !==
-        PAY54_BATCH23_MIGRATION_ORDER.length) deny();
+        requiredMigrations.length) deny();
 
-  for (const filename of PAY54_BATCH23_MIGRATION_ORDER) {
+  for (const filename of requiredMigrations) {
     const expected = independentlyReviewedSha256[filename];
     if (!Object.hasOwn(independentlyReviewedSha256, filename) ||
         typeof expected !== "string" || !SHA256.test(expected)) deny();
@@ -49,8 +59,10 @@ export function verifyPay54MigrationDrift({
     if (!timingSafeEqual(actual, Buffer.from(expected, "hex"))) deny();
   }
   return Object.freeze({
-    schema: "pay54.migration-drift-review.v1",
-    matchingMigrationCount: PAY54_BATCH23_MIGRATION_ORDER.length,
+    schema: isExtended
+      ? "pay54.migration-drift-review.v2"
+      : "pay54.migration-drift-review.v1",
+    matchingMigrationCount: requiredMigrations.length,
     sourceHashesMatchReviewedValues: true,
     reviewedManifestSignatureNotVerifiedHere: true,
     databaseMigrationExecuted: false,
