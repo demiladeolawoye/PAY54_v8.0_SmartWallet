@@ -90,6 +90,12 @@ jobs:
             004_membership_integrity.sql
             005_session_account_integrity.sql
             006_append_only_account_audit.sql
+            007_legacy_account_denial_preserved.sql
+            008_inert_new_roles.sql
+            009_financial_privilege_separation.sql
+            010_actor_context_guc_reset.sql
+            011_session_digest_guc_reset.sql
+            012_malformed_actor_guc_denial.sql
           )
           for test_file in "${tests[@]}"; do
             test_sql="backend/db/tests/$test_file"
