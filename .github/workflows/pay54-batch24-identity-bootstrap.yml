@@ -1,0 +1,121 @@
+name: PAY54 Batch 24 Trusted Identity and Bootstrap Security
+
+on:
+  pull_request:
+    branches:
+      - cto/batch23-trusted-session-lifecycle-868-917
+      - project-titan
+    paths:
+      - "backend/db/migrations/019_identity_assertion_bootstrap.sql"
+      - "backend/db/tests/batch24/**"
+      - "backend/security/identity-*.mjs"
+      - "backend/src/postgres-bootstrap-*.mjs"
+      - "backend/tests/account-batch24-*.test.mjs"
+      - "backend/governance/pay54-batch24-*.mjs"
+      - "docs/engineering/pay54-batch24-*.md"
+      - ".github/workflows/pay54-batch24-identity-bootstrap.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch24-identity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trusted-identity-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16@sha256:dd2bf3ce2dc83a81674cf7f217fcfd8a5009a4b325dda5b843bfee82a06cff6f
+        env:
+          POSTGRES_DB: pay54_batch24_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pay54-batch24-disposable-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pay54_batch24_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout exact unmerged review SHA
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Setup pinned Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Validate source syntax and new assertion/security tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          scripts=(backend/security/identity-*.mjs
+            backend/src/postgres-bootstrap-*.mjs
+            backend/governance/pay54-batch24-*.mjs
+            backend/tests/account-batch24-*.test.mjs)
+          test "${#scripts[@]}" -gt 2
+          for file in "${scripts[@]}"; do node --check "$file"; done
+          node --test backend/tests/account-batch24-*.test.mjs
+          node --test backend/tests/account-batch23-*.test.mjs
+      - name: Apply complete canonical migrations and 019 only to disposable PostgreSQL
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          migrations=(
+            001_financial_ledger.sql
+            002_ledger_integrity_hardening.sql
+            003_wallet_reservation.sql
+            004_reservation_lifecycle.sql
+            005_operation_state_integrity.sql
+            006_database_role_isolation.sql
+            007_direct_ledger_access_boundary.sql
+            008_account_context_foundation.sql
+            009_personal_wallet_binding.sql
+            010_wallet_binding_lifecycle_guard.sql
+            011_wallet_eligibility_view.sql
+            012_account_read_role_baseline.sql
+            013_account_rls_denial.sql
+            014_auth_sessions.sql
+            015_account_context_audit.sql
+            016_session_account_integrity.sql
+            017_account_directory_read_role.sql
+            018_account_session_rotation.sql
+            019_identity_assertion_bootstrap.sql
+          )
+          for name in "${migrations[@]}"; do
+            path="backend/db/migrations/$name"
+            test -s "$path"
+            docker exec -i "$PG_CONTAINER" psql -X -U postgres -d pay54_batch24_ci \
+              -v ON_ERROR_STOP=1 < "$path"
+          done
+      - name: Verify identity proof and session issuance RLS in PostgreSQL
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(backend/db/tests/batch24/*.sql)
+          test "${#files[@]}" -gt 0
+          for file in "${files[@]}"; do
+            docker exec -i "$PG_CONTAINER" psql -X -U postgres -d pay54_batch24_ci \
+              -v ON_ERROR_STOP=1 < "$file"
+          done
+      - name: Preserve HTTP 503 and account security denial
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch21-http-no-switch.test.mjs
+          node --test backend/tests/account-batch21-no-money-side-effects.test.mjs
+          test "${PAY54_REAL_MONEY_MODE:-false}" = "false"
+          test "${TF_VAR_authorized_provisioning:-false}" = "false"
+          echo "No deployed identity provider, session issuer or payment rails"
