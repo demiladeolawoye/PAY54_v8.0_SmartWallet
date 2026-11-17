@@ -83,7 +83,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for test_sql in backend/db/tests/*.sql; do
+          tests=(
+            001_rls_tenant_isolation.sql
+            002_revoked_session_rls.sql
+            003_membership_account_lifecycle_rls.sql
+            004_membership_integrity.sql
+            005_session_account_integrity.sql
+            006_append_only_account_audit.sql
+          )
+          for test_file in "${tests[@]}"; do
+            test_sql="backend/db/tests/$test_file"
+            test -s "$test_sql"
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "$test_sql"
           done
