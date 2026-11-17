@@ -61,22 +61,25 @@ export async function collectPay54StackedPrEvidence({
    number:p.number,
    state:p.state,
    draft:p.draft,
-   merged:p.merged_at===null,
+   merged:p.merged_at!==null,
    headBranch:p.head?.ref,
    headSha:p.head?.sha,
    baseBranch:p.base?.ref
   };
- }).map(p=>({...p,merged:!p.merged}));
+ });
  // Reject incomplete result pagination rather than silently declaring safe.
  mapped.sort((a,b)=>a.number-b.number);
  const ours=mapped.filter(p=>p.number<=expectedEndNumber);
  if(ours.length!==expectedEndNumber ||
     ours[0].number!==1 ||
     ours.at(-1).number!==expectedEndNumber)deny();
- const result=inspectPay54StackedDraftPullRequests({
-  pullRequests:ours,
-  expectedFinalHead:ours.at(-1).headBranch
- });
+ let result;
+ try{
+  result=inspectPay54StackedDraftPullRequests({
+   pullRequests:ours,
+   expectedFinalHead:ours.at(-1).headBranch
+  });
+ }catch{deny();}
  return Object.freeze({
   schema:"pay54.github-pr-stack-collection.v1",
   auditedPrCount:ours.length,
