@@ -45,7 +45,7 @@ SELECT 1/(CASE WHEN count(*)=2 THEN 1 ELSE 0 END) AS actor_a_accounts
 SELECT 1/(CASE WHEN count(*)=2 THEN 1 ELSE 0 END) AS actor_a_memberships
  FROM pay54.account_memberships;
 SELECT 1/(CASE WHEN count(*)=0 THEN 1 ELSE 0 END) AS actor_a_must_not_see_b
- FROM pay54.account_contexts WHERE account_id='22222222-2222-4222-8222-222222222222';
+ FROM pay54.account_contexts WHERE id='22222222-2222-4222-8222-222222222222';
 COMMIT;
 
 BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;
@@ -54,7 +54,7 @@ SELECT set_config('pay54.actor_id','22222222-2222-4222-8222-222222222222',true);
 SELECT 1/(CASE WHEN count(*)=2 THEN 1 ELSE 0 END) AS actor_b_accounts
  FROM pay54.account_contexts;
 SELECT 1/(CASE WHEN count(*)=0 THEN 1 ELSE 0 END) AS actor_b_must_not_see_a
- FROM pay54.account_contexts WHERE account_id='11111111-1111-4111-8111-111111111111';
+ FROM pay54.account_contexts WHERE id='11111111-1111-4111-8111-111111111111';
 COMMIT;
 RESET ROLE;
 
