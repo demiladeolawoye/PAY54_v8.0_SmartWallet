@@ -43,7 +43,7 @@ test("820: scoped read uses parameterized actor binding and read-only transactio
   assert.equal(pool.calls[0].sql, "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
   assert.deepEqual(pool.calls[2].values, [actor]);
   assert.equal(pool.calls[2].sql, "SELECT set_config('pay54.actor_id', $1::text, true)");
-  assert.ok(pool.calls.some(x => x.sql.includes("FROM pay54.accounts")));
+  assert.ok(pool.calls.some(x => x.sql.includes("FROM pay54.account_contexts")));
   assert.ok(pool.calls.some(x => x.sql.includes("FROM pay54.account_memberships")));
   assert.equal(pool.calls.at(-1).sql, "COMMIT");
   assert.equal(pool.released, 1);
