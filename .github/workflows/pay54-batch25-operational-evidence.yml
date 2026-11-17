@@ -9,6 +9,9 @@ on:
       - "backend/governance/pay54-batch25-*.mjs"
       - "backend/tests/account-batch25-*.test.mjs"
       - "backend/security/pay54-batch25-*.mjs"
+      - "backend/src/postgres-staging-issuer-pool.mjs"
+      - "backend/src/postgres-staging-role-probe.mjs"
+      - "backend/governance/pay54-batch23-migration-drift.mjs"
       - "docs/engineering/pay54-batch25-*.md"
       - ".github/workflows/pay54-batch25-operational-evidence.yml"
   workflow_dispatch:
@@ -46,6 +49,9 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           modules=(backend/governance/pay54-batch25-*.mjs
+            backend/governance/pay54-batch23-migration-drift.mjs
+            backend/src/postgres-staging-issuer-pool.mjs
+            backend/src/postgres-staging-role-probe.mjs
             backend/security/pay54-batch25-*.mjs
             backend/tests/account-batch25-*.test.mjs)
           tests=(backend/tests/account-batch25-*.test.mjs)
@@ -70,6 +76,26 @@ jobs:
             sensitiveFileCount:risk.sensitiveFileCount,
             activePagesSourceVerified:risk.activePagesSourceVerified,
             stagingOrProductionDeployment:false
+          }));
+          NODE
+      - name: Generate immutable operational red-line register
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {assessPay54OperationalBlockersInCheckout}
+            from "./backend/governance/pay54-batch25-operational-blockers.mjs";
+          const report=assessPay54OperationalBlockersInCheckout();
+          if(report.productionReleaseAuthorised ||
+             report.stagingReleaseAuthorised ||
+             !report.sourceFindings.sourceRootPublicationBlocked ||
+             !report.sourceFindings.linkedCardDevelopmentScriptPresent ||
+             report.blockerCount<8) process.exit(1);
+          console.log(JSON.stringify({
+            blockerCount:report.blockerCount,
+            sourceRootPublicationBlocked:true,
+            developmentCardProviderPresent:true,
+            productionRelease:"NO-GO"
           }));
           NODE
       - name: Preserve previous trusted identity and session tests
