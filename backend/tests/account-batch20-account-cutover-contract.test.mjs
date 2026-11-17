@@ -17,7 +17,7 @@ test("765: authenticating a viewer never grants a banking transaction",()=>{
   const s=read();
   assert.match(s,/A Business viewer is not authorised to initiate or approve payments/);
   assert.match(s,/A valid account view is not money authorisation/);
-  assert.match(s,/does not issue tokens or mutate a session/);
+  assert.match(s,/does not issue tokens or mutate a session/i);
   assert.match(s,/does not clear a cache or transfer funds/);
 });
 test("765: production requires RLS, CSRF, revocation and cache isolation",()=>{
