@@ -1,0 +1,197 @@
+/* ==========================================================================
+   PAY54 Account Context Selector v1.0.0
+   Accessible desktop/mobile account identity without client-side switching.
+   Only a verified backend may authorise Personal/Business transitions.
+   ========================================================================== */
+
+body.p54-blueprint .p54b-account-context {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  z-index: 40;
+}
+
+body.p54-blueprint .p54b-account-context-trigger {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  min-height: 44px;
+  min-width: 0;
+  max-width: 224px;
+  border: 1px solid #d9e2f5;
+  border-radius: 12px;
+  color: #101b3e;
+  background: #f8faff;
+  font: 650 12px/1.2 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  cursor: pointer;
+}
+
+body.p54-blueprint .p54b-account-context-trigger:hover {
+  border-color: #7fa9ef;
+  background: #eef5ff;
+}
+
+body.p54-blueprint .p54b-account-context-trigger:focus-visible,
+body.p54-blueprint .p54b-account-context-menu :focus-visible {
+  outline: 3px solid #3478f6;
+  outline-offset: 2px;
+}
+
+body.p54-blueprint .p54b-account-context-glyph {
+  display: inline-grid;
+  place-items: center;
+  height: 28px;
+  width: 28px;
+  flex: 0 0 28px;
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(145deg, #1966ed, #7632d9);
+  font-size: 17px;
+}
+
+body.p54-blueprint .p54b-account-context-labels {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  text-align: left;
+}
+
+body.p54-blueprint .p54b-account-context-name,
+body.p54-blueprint .p54b-account-context-caption {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+body.p54-blueprint .p54b-account-context-name {
+  font-weight: 800;
+}
+
+body.p54-blueprint .p54b-account-context-caption {
+  font-size: 10px;
+  color: #64718e;
+}
+
+body.p54-blueprint .p54b-account-context-chevron {
+  font-size: 16px;
+  margin-left: 3px;
+}
+
+body.p54-blueprint .p54b-account-context-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(304px, calc(100vw - 24px));
+  z-index: 2000;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #dbe3f5;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(8 24 72 / 22%);
+  color: #152344;
+}
+
+body.p54-blueprint .p54b-account-context-menu[hidden] {
+  display: none !important;
+}
+
+body.p54-blueprint .p54b-account-context-heading {
+  margin: 0 0 9px;
+  color: #59647c;
+  font: 800 12px/1.2 system-ui, sans-serif;
+}
+
+body.p54-blueprint .p54b-account-context-choice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: #eff5ff;
+  color: #122650;
+  font-size: 12px;
+}
+
+body.p54-blueprint .p54b-account-context-choice + .p54b-account-context-choice {
+  margin-top: 5px;
+}
+
+body.p54-blueprint .p54b-account-context-choice.is-unavailable {
+  background: #f5f6fa;
+  color: #778099;
+}
+
+body.p54-blueprint .p54b-account-context-choice-title {
+  font-weight: 800;
+}
+
+body.p54-blueprint .p54b-account-context-state {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+body.p54-blueprint .p54b-account-context-notice {
+  margin: 11px 1px 2px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #61708c;
+}
+
+body.p54-blueprint .p54b-account-sidebar-status {
+  display: block;
+  border: 1px solid #394a7b;
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: #eaf1ff;
+  background: rgb(51 72 123 / 22%);
+  font: 700 12px/1.4 system-ui, sans-serif;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  body.p54-blueprint .p54b-account-context {
+    margin-left: auto;
+  }
+
+  body.p54-blueprint .p54b-account-context-trigger {
+    padding: 6px;
+    gap: 5px;
+    max-width: min(174px, 44vw);
+    min-height: 44px;
+  }
+
+  body.p54-blueprint .p54b-account-context-glyph {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+
+  body.p54-blueprint .p54b-account-context-name {
+    font-size: 11px;
+  }
+
+  body.p54-blueprint .p54b-account-context-caption {
+    font-size: 9px;
+  }
+
+  body.p54-blueprint .p54b-account-context-menu {
+    right: 0;
+    width: min(296px, calc(100vw - 24px));
+  }
+}
+
+@media (max-width: 375px) {
+  body.p54-blueprint .p54b-account-context-trigger {
+    max-width: 42vw;
+  }
+
+  body.p54-blueprint .p54b-account-context-glyph {
+    display: none;
+  }
+}
