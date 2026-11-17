@@ -72,28 +72,22 @@ export function createPay54PostgresSessionRotation({
     verifyOrigin(trustedApplicationOrigin, requestContext?.headers?.origin);
     const existingToken = extractPay54BearerCredential(requestContext);
     const existingCsrf = csrfFromRequest(requestContext);
-    let session, now;
+    let session, original, now;
     try {
       now = getTrustedServerTimeMs();
+      original = await resolveAuthenticatedSession(requestContext);
       session = validatePay54AccountReadSession({
-        sessionFromTrustedAuthority:
-          await resolveAuthenticatedSession(requestContext),
+        sessionFromTrustedAuthority: original,
         serverTimeMs: now
       });
-    } catch { deny(); }
-
-    const original = await resolveAuthenticatedSession(requestContext).catch(() => deny());
-    if (original.sessionId.toLowerCase() !== session.sessionId ||
-        original.version !== session.sessionVersion ||
-        original.activeAccountId == null ||
-        original.activeAccountId.toLowerCase() === target.requestedAccountId ||
-        original.principalId.toLowerCase() !== session.principalId ||
-        session.sessionVersion >= Number.MAX_SAFE_INTEGER ||
-        session.sessionVersion < 1 ||
-        session.sessionId === target.requestedAccountId ||
-        session.sessionVersion === undefined ||
-        session.principalId === target.requestedAccountId ||
-        now + 5_000 >= original.expiresAtMs) deny();
+      if (typeof original.activeAccountId !== "string" ||
+          original.activeAccountId.toLowerCase() === target.requestedAccountId ||
+          session.sessionVersion >= Number.MAX_SAFE_INTEGER ||
+          now + 5_000 >= session.expiresAtMs) deny();
+    } catch {
+      existingCsrf.fill(0);
+      deny();
+    }
 
     // Credential is generated locally and never included in logs or SQL text.
     const rawNewToken = randomBytes(32);
@@ -102,7 +96,7 @@ export function createPay54PostgresSessionRotation({
     const auditId = randomUUID();
     const correlationId = randomUUID();
     const nextExpiryMs = Math.min(original.expiresAtMs, now + 30 * 60 * 1000);
-    let client, started = false, discard = false;
+    let client, started = false, discard = false, commitAttempted = false;
 
     try {
       client = await writePool.connect();
@@ -138,6 +132,7 @@ export function createPay54PostgresSessionRotation({
           Number(result.rows[0].version) !== session.sessionVersion + 1) deny();
 
       // No response containing the new token is allowed until COMMIT succeeds.
+      commitAttempted = true;
       await client.query("COMMIT");
       started = false;
       return Object.freeze({
@@ -152,6 +147,8 @@ export function createPay54PostgresSessionRotation({
         productionHttpRouteActivated: false
       });
     } catch {
+      // An uncertain COMMIT must never return credentials or reuse the socket.
+      if (commitAttempted) discard = true;
       if (client && started) {
         try { await client.query("ROLLBACK"); } catch { discard = true; }
       }
