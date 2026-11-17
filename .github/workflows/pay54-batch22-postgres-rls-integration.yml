@@ -1,0 +1,67 @@
+name: PAY54 Batch 22 PostgreSQL RLS Integration (Disposable)
+
+on:
+  pull_request:
+    branches:
+      - cto/batch21-account-context-768-817
+      - project-titan
+    paths:
+      - "backend/db/migrations/00*.sql"
+      - "backend/db/tests/*.sql"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch22-postgres-rls-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres-rls-isolation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: pay54_disposable_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pay54-ci-only-not-production
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pay54_disposable_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout exact source SHA without retained credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Apply reviewed migrations in ephemeral PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POSTGRES_CONTAINER"
+          for migration in backend/db/migrations/001_account_directory.sql backend/db/migrations/002_auth_sessions.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "$migration"
+          done
+      - name: Verify forced RLS denies cross-actor account and credential reads
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/001_rls_tenant_isolation.sql
+      - name: Guarantee source-only database test conditions
+        run: |
+          test "${{ github.event_name }}" != "deployment"
+          echo "Disposable PostgreSQL only; no production database, IAM or payment rails"
