@@ -27,6 +27,13 @@ export function createPay54BalanceVisualFixture({sourceRoot=ROOT}={}){
   !html.includes("</body>")){
   throw new Error("PAY54_VISUAL_FIXTURE_SOURCE_INVALID");
  }
+ // The live dashboard starts with a deliberately hidden legacy first paint.
+ // Synthetic visuals omit the real boot controller, so clear ONLY the local
+ // fixture's initial loading class. Production HTML stays fail-closed.
+ html=html.replace(
+  '<html lang="en" class="p54b-boot-pending">',
+  '<html lang="en">'
+ );
  // This test fixture must NOT execute any original authentication, payment,
  // wallet, partner, scanner, account, storage or deployment bootstrap scripts.
  html=html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,"");
@@ -48,7 +55,9 @@ export function createPay54BalanceVisualFixture({sourceRoot=ROOT}={}){
   '</aside>';
  html=html.replace(/<body\b[^>]*>/i,match=>match+banner);
  html=html.replace("</body>",
-  '<script src="assets/js/dashboard-blueprint-shell.js"></script>\n</body>');
+  '<script>window.PAY54_SECURITY = {session: {isAuthenticated: () => true}}; window.PAY54_ACCOUNT_CONTEXT_TEST_ONLY = true;</script>\\n'+
+  '<script src="assets/js/ui/account-context-selector.js"></script>\\n'+
+  '<script src="assets/js/dashboard-blueprint-shell.js"></script>\\n</body>');
  writeFileSync(path,html,{flag:"wx",mode:0o644});
  return Object.freeze({
   fixtureFile:path,
