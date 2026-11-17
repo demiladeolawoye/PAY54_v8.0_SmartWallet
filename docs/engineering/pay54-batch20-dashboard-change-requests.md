@@ -1,6 +1,6 @@
 # PAY54 — Batch 20 dashboard review change requests
 
-**Status:** Founder feedback received, implementation decisions tracked.
+**Status:** Founder approval received for CR-UX-03 and CR-ACCOUNT-02. First-paint and account-context presentation code committed for review; secure backend Personal/Business cutover remains blocked until independently accepted.
 **Scope:** Presentation-only first-paint repair and a separately gated Personal/Business account selector.
 
 ## CR-UX-03: Legacy dashboard flashes for 1–2 seconds after successful login
@@ -19,14 +19,14 @@
 
 **Verified source cause:** `assets/js/dashboard-blueprint-shell.js` unconditionally constructs a **disabled** button labelled `Personal account · Switch unavailable` and sets `accountSwitcher.disabled = true`. This is an intentional presentation placeholder, **not proof** of a working authenticated account-switching service. An older version of the UI must not be resurrected with client-only account mutation.
 
-**CTO recommendation — pending founder approval:**
+**Founder-approved CTO architecture (17 November 2026):**
 1. Provide a clear, compact active-account selector beside the profile avatar on desktop, with a touch-accessible mobile variant and a desktop sidebar context label.
 2. Render only the authenticated user's authorised Personal and Business accounts; show only Personal if no eligible Business account is linked.
 3. On switching, require server-authorised account context, account/tenant ownership, permission/role checks, RLS, session integrity, account-scoped cache invalidation and independently confirmed wallet/transaction/card reload; never reuse balances across tenants.
 4. Until those backend contracts are independently verified, retain a truthful disabled/unavailable state **without** a fake switch or unverified Business context. Preserve the current wallet/cards/FX/ledger paths.
 5. Validate Personal→Business→Personal test sequences, direct deep links, suspended/missing accounts, network errors, accessibility, browser history, and no cross-account data leakage in production-equivalent sandbox.
 
-**Decision:** Not yet approved to change functional account switching. This change request is a proposal for founder review and security/API scope, not an implemented switch.
+**Implementation:** An accessible header Personal-account context control, Business unavailable state and sidebar status have been implemented in `assets/js/ui/account-context-selector.js`, integrated into the existing blueprint shell and styled for desktop/mobile. The account panel opens and closes with pointer/keyboard controls, and does not invent Business ownership, mutate account records, or execute client-only switching. Full authorised Personal↔Business switching is **not yet implemented** because the inspected `backend/src/server.mjs` has no authenticated account-enumeration/selection endpoint. Backend and RLS acceptance remain open.
 
 ## Operational release constraints
 
