@@ -1,5 +1,6 @@
 # PAY54 Batch 27 / 1076 — source-only security workflow
 # PAY54 Batch 27 / 1144 — enforce auditable implementation action provenance
+# PAY54 Batch 27 / 1184 — final 120/120 action gate bound to exact PR SHA
 name: PAY54 Batch 27 Operational Evidence Security
 on:
   pull_request:
@@ -86,6 +87,27 @@ jobs:
           test "$PAY54_HEAD_BRANCH" = "cto/batch27-operational-evidence-1068-1187"
           test "$PAY54_BASE_BRANCH" = "cto/batch26-pages-proof-staging-readiness-1018-1067"
           test "$PAY54_PR_DRAFT" = "true"
+      - name: Require all 120 distinct tracked Batch27 source actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {inspectPay54Batch27TrackedActionLedger}
+            from "./backend/governance/pay54-batch27-action-ledger.mjs";
+          const r=inspectPay54Batch27TrackedActionLedger({throughId:1187});
+          if(!r.rangeFullyCovered || r.markedTrackedActions!==120){
+            console.error(JSON.stringify({
+              expected:r.expectedActionCount,
+              matched:r.markedTrackedActions,
+              missing:r.missingActionIds,
+              unmarked:r.unmarkedTrackedPaths
+            }));
+            process.exit(1);
+          }
+          if(r.productionReleaseAuthorised!==false ||
+             r.realWorldBlockersClosedByActionCounting!==false)process.exit(1);
+          console.log("120 tracked engineering actions; no production deployment");
+          NODE
       - name: No cloud or financial changes
         shell: bash
         run: |
