@@ -19,6 +19,16 @@ export function verifyPay54PagesAttestation({statement,signature,
     statement.commitSha!==expectedCommitSha ||
     typeof signature!=="string" ||
     !/^[A-Za-z0-9_-]{86}$/.test(signature))deny();
+ // A private KeyObject or private-key PEM must never be accepted as a
+ // configured verification trust root, even though createPublicKey can
+ // derive a public key from private material.
+ if(trustedReviewerPublicKey?.type==="private" ||
+    trustedReviewerPublicKey?.type==="secret" ||
+    (typeof trustedReviewerPublicKey==="string" &&
+     /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(trustedReviewerPublicKey)) ||
+    (Buffer.isBuffer(trustedReviewerPublicKey) &&
+     /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(
+      trustedReviewerPublicKey.toString("utf8"))))deny();
  let key;
  try{
   key=trustedReviewerPublicKey?.type==="public"
