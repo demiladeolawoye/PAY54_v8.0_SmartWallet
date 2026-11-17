@@ -8,6 +8,7 @@ on:
     paths:
       - "backend/domain/account-context-directory.mjs"
       - "backend/domain/account-read-session.mjs"
+      - "backend/domain/account-read-continuity.mjs"
       - "backend/src/account-scoped-directory-repository.mjs"
       - "backend/src/account-directory-composition.mjs"
       - "backend/src/account-directory-service.mjs"
@@ -45,6 +46,7 @@ jobs:
           set -euo pipefail
           node --check backend/domain/account-context-directory.mjs
           node --check backend/domain/account-read-session.mjs
+          node --check backend/domain/account-read-continuity.mjs
           node --check backend/src/account-scoped-directory-repository.mjs
           node --check backend/src/account-directory-composition.mjs
           node --check backend/src/account-directory-service.mjs
