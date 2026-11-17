@@ -833,3 +833,33 @@ The founder approved continuing security-first release-readiness work without by
 **Founder decisions for next cycle:** CR-PAGES-01 active deployment evidence; CR-CARD-01 approved provider or independently approved server-gated public preview; CR-DEPLOY-01 restricted immutable artifact and protected deployer; CR-ROLLBACK-01 verified safe rollback; CR-UX-01 exact-commit mobile/desktop/accessibility; CR-AUTH-01 account isolation sandbox; CR-FINTECH-01 contracted UK–Nigeria rails and regulated controls.
 
 **Next approved batch?** Not yet. Batch 20 would be **718–767**, requiring fresh Founder approval. Any merger, actual GitHub Pages release and customer-financial activation require their own separately documented Security/Release/Founder sign-off. Maintain zero regressions and preserve functioning PAY54 modules.
+
+
+## Batch 20 founder-approved dashboard UX and account-context checkpoint — items 726–741
+
+**Date:** 17 November 2026. **Founder approval:** Stop the post-login legacy dashboard flash, and restore a secure Personal/Business account selector. This permits source and sandbox development, **not** bypassing an unauthenticated backend, exposing another tenant, merging draft PRs or deploying Pages.
+
+| Item | Review-branch deliverable | State |
+| --- | --- | --- |
+| 726 | Mark dashboard pending in HTML first paint, before scripts; accessible loading/error content | COMMITTED |
+| 727 | Early stylesheet hides legacy header/grid/FAB while preserving finance modules and recovery | COMMITTED |
+| 728 | First-paint controller requires verified new blueprint DOM; timeout fails closed rather than exposing legacy dashboard | COMMITTED |
+| 729 | Remove competing legacy CSS pseudo-loading overlay | COMMITTED |
+| 730 | VM regression tests for mount, forged ready, timeout, pageshow and accessible first paint | COMMITTED |
+| 731 | Style keyboard-accessible error recovery link | COMMITTED |
+| 732 | Founder change request register: CR-UX-03 and CR-ACCOUNT-02 | COMMITTED |
+| 733 | Build accessible authenticated Personal account context panel; Business remains unavailable without backend proof | COMMITTED |
+| 734 | Integrate account context presentation into existing dashboard shell; remove disabled invisible old placeholder | COMMITTED |
+| 735 | Desktop/mobile responsive account-context selector styles, 44px touch targets and focus states | COMMITTED |
+| 736 | Load account-context module before blueprint and cache-version CSS | COMMITTED |
+| 737 | DOM behavioural tests: open/close, keyboard Escape, outside click, zero tenant mutation | COMMITTED |
+| 738 | Fix dialog semantics and avoid falsely claiming no Business account exists | COMMITTED |
+| 739 | Align account-selector accessibility and entitlement regression assertions | COMMITTED |
+| 740 | HTML load order, preserved first-paint, mobile styling and missing-backend guard integration tests | COMMITTED |
+| 741 | Record approved selector presentation, **not yet functional authenticated backend switching** | COMMITTED |
+
+**Account-switcher evidence boundary:** The inspected `backend/src/server.mjs` currently provides readiness/liveness and intentionally refuses financial operations; it does not expose authorised Personal/Business account discovery, selection, session rebinding or tenant-scoped data refresh. No Personal↔Business server switch was executed and no customer balances/cards/transactions were touched. The selector shows Personal only after `PAY54_SECURITY.session.isAuthenticated() === true`; Business is unavailable rather than a fabricated success. Full switching requires new trusted backend authorisation, active account membership/RLS, session replay/CSRF defence, scoped cache invalidation and independently verified end-to-end journeys.
+
+**Release:** Draft PR #8 remains unmerged. Existing historic Pages overpublication P0 and development-only linked-card script dependency remain OPEN. The approved new dashboard is not live. Commit-specific CI must be reconciled; tests on older SHAs do not prove the latest revision.
+
+**Cycle:** Batch 20 spans 718–767 (50 planned source items). Items 718–741 correspond to 24 auditable implementations; 742–767 remain pending. Do not label 50/50 or production-ready until source work, review and final exact-SHA checks actually complete.
