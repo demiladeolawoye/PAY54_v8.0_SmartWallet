@@ -1,4 +1,5 @@
 "use strict";
+import { assertPay54PostgresReadRole } from "./postgres-rls-posture.mjs";
 
 /**
  * PAY54 Batch 22 / 822 — trusted PostgreSQL session reader.
@@ -55,6 +56,9 @@ export function createPay54PostgresSessionResolver({ pool, getTrustedServerTimeM
           typeof client.release !== "function") deny();
       await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
       started = true;
+      await assertPay54PostgresReadRole({
+        client, tables: ["auth_sessions"]
+      });
       await client.query(
         "SELECT set_config('pay54.session_digest', $1::text, true)",
         [digest]
