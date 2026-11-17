@@ -30,7 +30,7 @@ test("771: directory lookup runs only after trusted active session resolution", 
     }
   });
   const result = await service.listAuthorisedAccounts({ marker: "test-only" });
-  assert.deepEqual(calls, ["session:test-only", "db:" + actor]);
+  assert.deepEqual(calls, ["session:test-only", "db:" + actor, "session:test-only"]);
   assert.equal(result.accounts.length, 1);
   assert.equal(result.accounts[0].accountId, personal);
   assert.equal(result.productionReady, false);
@@ -72,6 +72,39 @@ test("771: missing trusted dependencies and session exceptions fail closed", asy
     getTrustedServerTimeMs: () => 1500,
     resolveAuthenticatedSession: async () => { throw new Error("no token"); },
     loadPrincipalAccountDirectory: async () => ({ accounts: [account], memberships: [member] })
+  });
+  await assert.rejects(service.listAuthorisedAccounts({}), /SERVICE_UNAVAILABLE/);
+});
+
+test("792: session revocation during repository read refuses previously authorised records", async () => {
+  let count = 0;
+  const service = createService({
+    getTrustedServerTimeMs: () => 1500,
+    resolveAuthenticatedSession: async () => {
+      count++;
+      return count === 1 ? trustedSession : { ...trustedSession, status: "REVOKED" };
+    },
+    loadPrincipalAccountDirectory: async () => ({
+      accounts: [account], memberships: [member]
+    })
+  });
+  await assert.rejects(service.listAuthorisedAccounts({}), /SERVICE_UNAVAILABLE/);
+  assert.equal(count, 2);
+});
+
+test("792: account switch during read refuses stale directory projection", async () => {
+  let count = 0;
+  const service = createService({
+    getTrustedServerTimeMs: () => 1500,
+    resolveAuthenticatedSession: async () => {
+      count++;
+      return count === 1
+        ? { ...trustedSession, activeAccountId: personal }
+        : { ...trustedSession, activeAccountId: "33333333-3333-4333-8333-333333333333" };
+    },
+    loadPrincipalAccountDirectory: async () => ({
+      accounts: [account], memberships: [member]
+    })
   });
   await assert.rejects(service.listAuthorisedAccounts({}), /SERVICE_UNAVAILABLE/);
 });
