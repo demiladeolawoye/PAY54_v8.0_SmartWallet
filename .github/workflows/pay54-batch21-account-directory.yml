@@ -10,6 +10,12 @@ on:
       - "backend/domain/account-read-session.mjs"
       - "backend/domain/account-read-continuity.mjs"
       - "backend/domain/account-active-read-scope.mjs"
+      - "backend/domain/account-switch-request.mjs"
+      - "backend/domain/account-switch-csrf.mjs"
+      - "backend/domain/account-switch-admission.mjs"
+      - "backend/domain/account-switch-audit-intent.mjs"
+      - "backend/domain/account-cache-refresh-evidence.mjs"
+      - "backend/governance/pay54-batch21-account-switch-cutover.mjs"
       - "backend/domain/account-wallet-read-admission.mjs"
       - "backend/src/account-scoped-directory-repository.mjs"
       - "backend/src/account-directory-composition.mjs"
@@ -50,6 +56,12 @@ jobs:
           node --check backend/domain/account-read-session.mjs
           node --check backend/domain/account-read-continuity.mjs
           node --check backend/domain/account-active-read-scope.mjs
+          node --check backend/domain/account-switch-request.mjs
+          node --check backend/domain/account-switch-csrf.mjs
+          node --check backend/domain/account-switch-admission.mjs
+          node --check backend/domain/account-switch-audit-intent.mjs
+          node --check backend/domain/account-cache-refresh-evidence.mjs
+          node --check backend/governance/pay54-batch21-account-switch-cutover.mjs
           node --check backend/domain/account-wallet-read-admission.mjs
           node --check backend/src/account-scoped-directory-repository.mjs
           node --check backend/src/account-directory-composition.mjs
