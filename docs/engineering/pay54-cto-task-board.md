@@ -863,3 +863,18 @@ The founder approved continuing security-first release-readiness work without by
 **Release:** Draft PR #8 remains unmerged. Existing historic Pages overpublication P0 and development-only linked-card script dependency remain OPEN. The approved new dashboard is not live. Commit-specific CI must be reconciled; tests on older SHAs do not prove the latest revision.
 
 **Cycle:** Batch 20 spans 718–767 (50 planned source items). Items 718–741 correspond to 24 auditable implementations; 742–767 remain pending. Do not label 50/50 or production-ready until source work, review and final exact-SHA checks actually complete.
+
+
+### Batch 20 CR-ACCOUNT-02 backend-boundary integration update — items 742–746
+
+| Item | Source work completed | Status |
+| --- | --- | --- |
+| 742 | Optional selector mounting is exception-isolated so account UI cannot break the canonical dashboard | COMMITTED |
+| 743 | Account context label refreshes on page visibility/pageshow and removes stale Personal status on unauthenticated session | COMMITTED |
+| 744 | Negative session-expiry regression: close account panel and never mutate tenant or wallet | COMMITTED |
+| 745 | Retained Batch12 preview-safety tests updated for approved visible selector with strict no-client-only-switching | COMMITTED |
+| 746 | Original account-context domain membership/RLS security tests preserved and updated for the new non-switching selector | COMMITTED |
+
+**Cumulative Batch 20 items completed:** 718–746 = **29/50 source deliverables**. Items 747–767 remain pending. The added account-context selector is visible and safe to inspect in the source review branch; it does **not** provide a working Business account transition. Actual authenticated multi-account switching cannot be accepted until trusted backend account discovery/change APIs, tenant RLS enforcement and exact-session rebind/cross-account cache safety are in place.
+
+**Regression note:** Three legacy security workflows initially failed because old assertions required the removed disabled sidebar label. Those checks have been upgraded to enforce the same no-client-only-switching policy against the new control; the full current-commit CI conclusions are separately reconciled before declaring success.
