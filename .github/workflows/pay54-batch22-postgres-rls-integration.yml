@@ -59,8 +59,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
-            -X -v ON_ERROR_STOP=1 < backend/db/tests/001_rls_tenant_isolation.sql
+          for test_sql in backend/db/tests/*.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "$test_sql"
+          done
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
