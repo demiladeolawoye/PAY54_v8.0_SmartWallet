@@ -36,7 +36,8 @@ function fixture({ wrongRole = false, failAt = "", returnBadVersion = false } = 
           if (sql.startsWith("SELECT current_user AS role_name")) {
             return { rows: [{
               role_name: wrongRole ? "postgres" : "pay54_session_rotate_role",
-              restricted: !wrongRole, may_rotate: true, may_write_ledger: false
+              restricted: !wrongRole, may_rotate: true, may_write_ledger: false,
+              may_write_sessions: false, may_append_audit: false
             }] };
           }
           if (sql.includes("FROM pay54.rotate_account_context_session")) {
@@ -131,5 +132,27 @@ test("875: untrusted origin, malformed CSRF, revoked session and forged actor fa
       })
     );
     assert.equal(fx.calls.length, 0);
+  }
+});
+
+test("896: direct session writes or audit inserts on caller role are rejected", async () => {
+  for (const privilege of ["may_write_sessions", "may_append_audit"]) {
+    const fx = fixture();
+    const connect = fx.pool.connect.bind(fx.pool);
+    fx.pool.connect = async () => {
+      const client = await connect();
+      const query = client.query.bind(client);
+      client.query = async (sql, params) => {
+        const result = await query(sql, params);
+        if (sql.startsWith("SELECT current_user AS role_name"))
+          return { rows: [{ ...result.rows[0], [privilege]: true }] };
+        return result;
+      };
+      return client;
+    };
+    await assert.rejects(service(fx)({ requestContext, requestPayload }),
+      /ACCOUNT_ROTATION_UNAVAILABLE/);
+    assert.equal(fx.calls.some(x => x.sql.includes(
+      "FROM pay54.rotate_account_context_session")), false);
   }
 });
