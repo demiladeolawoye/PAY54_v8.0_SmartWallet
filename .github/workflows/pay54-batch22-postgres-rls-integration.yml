@@ -7,7 +7,7 @@ on:
       - project-titan
     paths:
       - "backend/db/migrations/0*.sql"
-      - "backend/db/tests/*.sql"
+      - "backend/db/tests/batch22/*.sql"
       - "docs/engineering/pay54-batch22-*.md"
       - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
   workflow_dispatch:
@@ -99,7 +99,7 @@ jobs:
             012_malformed_actor_guc_denial.sql
           )
           for test_file in "${tests[@]}"; do
-            test_sql="backend/db/tests/$test_file"
+            test_sql="backend/db/tests/batch22/$test_file"
             test -s "$test_sql"
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "$test_sql"
