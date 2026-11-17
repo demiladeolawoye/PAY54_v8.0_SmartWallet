@@ -53,6 +53,60 @@ jobs:
           node --test backend/tests/account-batch20-*.test.mjs
           node --test backend/tests/account-batch19-html-attribute-boundary.test.mjs
           node --test backend/tests/account-batch18-html-dependency-audit.test.mjs
+      - name: Create isolated PAY54 account selector visual fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome
+          node --check backend/governance/pay54-balance-visual-fixture.mjs
+          node backend/governance/pay54-balance-visual-fixture.mjs
+          test -s .pay54-balance-visual-fixture.html
+      - name: Render desktop and mobile from isolated Chromium with no live backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pay54-account-visual"
+          fixture="file://$GITHUB_WORKSPACE/.pay54-balance-visual-fixture.html"
+          for target in desktop mobile; do
+            if test "$target" = desktop; then size="1440,900"; else size="390,844"; fi
+            profile="$RUNNER_TEMP/pay54-account-visual/chrome-$target"
+            mkdir -p "$profile"
+            google-chrome --headless --no-sandbox --disable-gpu --no-first-run \
+              --disable-extensions --disable-background-networking --disable-sync \
+              --no-proxy-server --host-resolver-rules="MAP * 0.0.0.0, EXCLUDE localhost" \
+              --user-data-dir="$profile" --window-size="$size" \
+              --virtual-time-budget=4000 \
+              --screenshot="$RUNNER_TEMP/pay54-account-visual/$target.png" \
+              "$fixture" >/dev/null 2>&1
+            google-chrome --headless --no-sandbox --disable-gpu --no-first-run \
+              --disable-extensions --disable-background-networking --disable-sync \
+              --no-proxy-server --host-resolver-rules="MAP * 0.0.0.0, EXCLUDE localhost" \
+              --user-data-dir="$profile" --virtual-time-budget=4000 \
+              --dump-dom "$fixture" > "$RUNNER_TEMP/pay54-account-visual/$target.html" 2>/dev/null
+          done
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            for(const size of ["desktop","mobile"]){
+              const html=readFileSync(process.env.RUNNER_TEMP+"/pay54-account-visual/"+size+".html","utf8");
+              for(const required of ["p54-blueprint","p54b-account-context","Personal account","Business","Unavailable"]){
+                if(!html.includes(required))throw new Error("PAY54_ACCOUNT_VISUAL_MOUNT_MISSING_"+size+"_"+required);
+              }
+              if(/<html[^>]*class="[^"]*p54b-boot-pending/i.test(html)){
+                throw new Error("PAY54_VISUAL_FIXTURE_OLD_DASHBOARD_HIDDEN_"+size);
+              }
+            }
+          '
+          rm -rf "$RUNNER_TEMP/pay54-account-visual/chrome-desktop" \
+            "$RUNNER_TEMP/pay54-account-visual/chrome-mobile"
+          rm -f "$RUNNER_TEMP/pay54-account-visual/"*.html .pay54-balance-visual-fixture.html
+      - name: Upload screenshot-only visual QA (never Pages)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-batch20-account-selector-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-account-visual/*.png
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
       - name: Enforce no cloud/financial permissions
         run: |
           test "$PAY54_REAL_MONEY_MODE" = "false"
