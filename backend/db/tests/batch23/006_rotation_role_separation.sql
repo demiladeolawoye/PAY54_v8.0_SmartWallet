@@ -56,8 +56,14 @@ SELECT 1/(CASE WHEN
       'pay54.auth_sessions','SELECT')
   AND has_table_privilege('pay54_session_rotate_executor_role',
       'pay54.auth_sessions','INSERT')
-  AND has_table_privilege('pay54_session_rotate_executor_role',
-      'pay54.auth_sessions','UPDATE')
+  AND has_column_privilege('pay54_session_rotate_executor_role',
+      'pay54.auth_sessions','session_status','UPDATE')
+  AND has_column_privilege('pay54_session_rotate_executor_role',
+      'pay54.auth_sessions','revoked_at','UPDATE')
+  AND NOT has_column_privilege('pay54_session_rotate_executor_role',
+      'pay54.auth_sessions','token_digest','UPDATE')
+  AND NOT has_column_privilege('pay54_session_rotate_executor_role',
+      'pay54.auth_sessions','principal_id','UPDATE')
   AND NOT has_table_privilege('pay54_session_rotate_executor_role',
       'pay54.auth_sessions','DELETE')
   AND has_table_privilege('pay54_session_rotate_executor_role',
