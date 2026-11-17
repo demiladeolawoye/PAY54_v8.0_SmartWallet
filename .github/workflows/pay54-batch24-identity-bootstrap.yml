@@ -7,6 +7,7 @@ on:
       - project-titan
     paths:
       - "backend/db/migrations/019_identity_assertion_bootstrap.sql"
+      - "backend/db/migrations/020_initial_account_binding.sql"
       - "backend/db/tests/batch24/**"
       - "backend/security/identity-*.mjs"
       - "backend/src/postgres-bootstrap-*.mjs"
@@ -90,6 +91,7 @@ jobs:
             017_account_directory_read_role.sql
             018_account_session_rotation.sql
             019_identity_assertion_bootstrap.sql
+            020_initial_account_binding.sql
           )
           for name in "${migrations[@]}"; do
             path="backend/db/migrations/$name"
@@ -97,6 +99,14 @@ jobs:
             docker exec -i "$PG_CONTAINER" psql -X -U postgres -d pay54_batch24_ci \
               -v ON_ERROR_STOP=1 < "$path"
           done
+      - name: Seed canonical synthetic accounts and memberships for initial binding
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$PG_CONTAINER" psql -X -U postgres -d pay54_batch24_ci \
+            -v ON_ERROR_STOP=1 < backend/db/tests/batch22/001_rls_tenant_isolation.sql
       - name: Verify identity proof and session issuance RLS in PostgreSQL
         env:
           PG_CONTAINER: ${{ job.services.postgres.id }}
