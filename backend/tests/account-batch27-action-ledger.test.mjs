@@ -4,11 +4,11 @@ import assert from "node:assert/strict";
 import {assessPay54Batch27ActionSourceSet as assess,
  inspectPay54Batch27TrackedActionLedger as inspect}
  from "../governance/pay54-batch27-action-ledger.mjs";
-test("1146: actual repository has unique tracked actions through checkpoint B",()=>{
- const r=inspect({throughId:1146});
- assert.equal(r.expectedActionCount,79);
- assert.equal(r.rangeFullyCovered,false);
- assert.ok(r.missingActionIds.includes(1147));
+test("1146: actual repository has 80 unique tracked actions through checkpoint B",()=>{
+ const r=inspect({throughId:1147});
+ assert.equal(r.expectedActionCount,80);
+ assert.equal(r.rangeFullyCovered,true);
+ assert.deepEqual(r.missingActionIds,[]);
  assert.equal(r.productionReleaseAuthorised,false);
 });
 test("1146: duplicate engineering IDs cannot inflate action count",()=>{
