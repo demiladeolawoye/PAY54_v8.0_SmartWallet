@@ -1,0 +1,79 @@
+name: PAY54 Batch 21 Account Directory Security Regression
+
+on:
+  pull_request:
+    branches:
+      - cto/batch20-pages-release-proof-718-767
+      - project-titan
+    paths:
+      - "backend/domain/account-context-directory.mjs"
+      - "backend/domain/account-read-session.mjs"
+      - "backend/domain/account-read-continuity.mjs"
+      - "backend/domain/account-active-read-scope.mjs"
+      - "backend/domain/account-switch-request.mjs"
+      - "backend/domain/account-switch-csrf.mjs"
+      - "backend/domain/account-switch-admission.mjs"
+      - "backend/domain/account-switch-audit-intent.mjs"
+      - "backend/domain/account-cache-refresh-evidence.mjs"
+      - "backend/governance/pay54-batch21-account-switch-cutover.mjs"
+      - "backend/domain/account-wallet-read-admission.mjs"
+      - "backend/src/account-scoped-directory-repository.mjs"
+      - "backend/src/account-directory-composition.mjs"
+      - "backend/src/account-directory-service.mjs"
+      - "backend/tests/account-batch21-*.test.mjs"
+      - ".github/workflows/pay54-batch21-account-directory.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch21-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  account-directory-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout exact review SHA without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install pinned Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Syntax-check new account directory boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check backend/domain/account-context-directory.mjs
+          node --check backend/domain/account-read-session.mjs
+          node --check backend/domain/account-read-continuity.mjs
+          node --check backend/domain/account-active-read-scope.mjs
+          node --check backend/domain/account-switch-request.mjs
+          node --check backend/domain/account-switch-csrf.mjs
+          node --check backend/domain/account-switch-admission.mjs
+          node --check backend/domain/account-switch-audit-intent.mjs
+          node --check backend/domain/account-cache-refresh-evidence.mjs
+          node --check backend/governance/pay54-batch21-account-switch-cutover.mjs
+          node --check backend/domain/account-wallet-read-admission.mjs
+          node --check backend/src/account-scoped-directory-repository.mjs
+          node --check backend/src/account-directory-composition.mjs
+          node --check backend/src/account-directory-service.mjs
+          for file in backend/tests/account-batch21-*.test.mjs; do node --check "$file"; done
+      - name: Execute directory and retained selection security tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch21-*.test.mjs
+          node --test backend/tests/account-batch20-context-selection.test.mjs
+          node --test backend/tests/account-batch20-context-rebind.test.mjs
+          node --test backend/tests/account-batch20-context-cache-plan.test.mjs
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
