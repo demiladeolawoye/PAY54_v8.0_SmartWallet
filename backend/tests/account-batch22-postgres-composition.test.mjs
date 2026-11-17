@@ -30,7 +30,7 @@ const makePool = ({ type, badRole = false, otherActor = false } = {}) => {
           activeAccountId: accountId, status: "ACTIVE",
           version: "2", issuedAtMs: "1000", expiresAtMs: "5000"
         }] };
-      if (sql.includes("FROM pay54.accounts")) return { rows: [{
+      if (sql.includes("FROM pay54.account_contexts")) return { rows: [{
         accountId, legalOwnerId: actor, type: "PERSONAL",
         displayName: "PAY54 Personal", status: "ACTIVE", verificationStatus: "VERIFIED"
       }] };
