@@ -79,6 +79,11 @@ jobs:
              r.stagingActivationAuthorised!==false ||
              r.productionReleaseAuthorised!==false)process.exit(1);
           NODE
+      - name: Reject legacy plaintext PIN and misleading demo security claims
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module -e 'import {inspectPay54DemoAuthCheckout} from "./backend/release/pay54-demo-auth-checkout-guard.mjs";const r=inspectPay54DemoAuthCheckout();if(r.checkedScreens!==6||r.financialServicesEnabled||r.productionReleaseAuthorised)process.exit(1);console.log("Legacy demo source controls PASS; real login remains disabled");'
       - name: Reject PR-head substitution and operational execution
         if: github.event_name == 'pull_request'
         shell: bash
