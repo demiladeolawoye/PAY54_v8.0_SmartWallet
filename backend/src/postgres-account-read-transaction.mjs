@@ -1,4 +1,5 @@
 "use strict";
+import { assertPay54PostgresReadRole } from "./postgres-rls-posture.mjs";
 
 /**
  * PAY54 Batch 22 / 819 — executable PostgreSQL read-only directory adapter.
@@ -41,6 +42,9 @@ export function createPay54PostgresReadTransaction({ pool } = {}) {
       // Restricted, consistent snapshot. No financial DML is permitted.
       await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
       started = true;
+      await assertPay54PostgresReadRole({
+        client, tables: ["accounts", "account_memberships"]
+      });
       await client.query(
         "SELECT set_config('pay54.actor_id', $1::text, true)",
         [actor]
