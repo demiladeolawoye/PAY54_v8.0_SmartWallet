@@ -4,7 +4,7 @@
 **Review PR:** #9 (draft; stacked on draft PR #8)
 **Starting source:** Batch 20 final verified SHA `713411976ae56a8e3d9f59f68609661d7f599991`
 **Scope:** 768–817, fifty auditable implementations.
-**Current status:** 21/50 committed as source-only changes; 29 pending.
+**Current status:** 32/50 committed as source-only changes; 18 pending.
 **Production:** NO-GO. No merge, deployment, active account switching or financial operation.
 
 | Number | Delivered | Acceptance and actual limitation |
@@ -34,7 +34,19 @@
 | 787 | Repository mutation and oversized-row tests | Verify detached copies, frozen records and fail-closed abnormal row shapes |
 | 788 | Reconciled CTO security register | Record remaining active backend/database and audit requirements |
 
-## Outstanding work 789–817
+| 789 | `backend/domain/account-read-continuity.mjs` | Immutable authority recheck fence: reject session rotation, revocation and active account change during read |
+| 790 | `backend/tests/account-batch21-read-continuity.test.mjs` | Session continuity adversarial regression |
+| 791 | Hardened `backend/src/account-directory-service.mjs` | Second trusted session lookup after async repository read; withhold stale output |
+| 792 | Updated directory service and composition tests | Read race/revocation regression and second trust check assertions |
+| 793 | Expanded read-only CI workflow | Syntax coverage of continuity fence |
+| 794 | `backend/domain/account-active-read-scope.mjs` | Session-selected active account and canonical membership view-only admission |
+| 795 | `backend/tests/account-batch21-active-read-scope.test.mjs` | Negative wrong-account/expired/revoked/session role checks |
+| 796 | `backend/domain/account-wallet-read-admission.mjs` | Reuses canonical ledger authorisation for account/wallet/journal read admission |
+| 797 | `backend/tests/account-batch21-wallet-read-admission.test.mjs` | Wrong-wallet and cross-account journal denial, zero financial execution |
+| 798 | Updated Batch 21 CI workflow | Syntax and test coverage of account/wallet read contracts |
+| 799 | Updated engineering progress register | Reconciled 32/50 and operational P0 dependencies |
+
+## Outstanding work 800–817
 
 Implementation is NOT claimed for this range. Prioritise real server-owned account directory storage, authenticated session persistence and independently verified PostgreSQL RLS with negative test evidence, then concurrency/CSRF/replay-safe account rebinding, ten-domain cache isolation, transaction permission propagation, full device QA and independent deployment/rollback evidence. These tasks depend on provisioned trusted services and signed security/compliance decisions, not synthetic mocks alone.
 
