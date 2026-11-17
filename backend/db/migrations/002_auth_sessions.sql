@@ -28,6 +28,8 @@ CREATE POLICY pay54_session_credential_read ON pay54.auth_sessions
   FOR SELECT USING (
     encode(token_digest, 'hex') =
       NULLIF(current_setting('pay54.session_digest', true), '')
+    AND session_status = 'ACTIVE'
+    AND expires_at > clock_timestamp()
   );
 -- Auth reader should be SELECT-only, NOBYPASSRLS, not object owner.
 -- A different privileged session writer with audited credentials is required
