@@ -33,6 +33,9 @@ test("740: account control has responsive touch targets and hidden menu semantic
  assert.match(css,/\.p54b-account-context-menu\[hidden\]/);
  assert.match(css,/@media \(max-width: 760px\)/);
  assert.match(css,/@media \(max-width: 375px\)/);
+ assert.match(css,/@media \(max-width: 600px\)/);
+ assert.match(css,/\.p54b-greeting \{/);
+ assert.match(css,/flex: 1 1 100%/);
  assert.match(css,/:focus-visible/);
 });
 
