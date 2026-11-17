@@ -10,6 +10,7 @@ on:
       - "backend/governance/pay54-batch22-migration-inventory.mjs"
       - "backend/src/postgres-*.mjs"
       - "backend/tests/account-batch22-*.test.mjs"
+      - "docs/engineering/pay54-batch22-*.md"
       - ".github/workflows/pay54-batch22-postgres-account.yml"
   workflow_dispatch:
 
