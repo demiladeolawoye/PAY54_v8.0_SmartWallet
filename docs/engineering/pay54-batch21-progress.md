@@ -4,7 +4,7 @@
 **Review PR:** #9 (draft; stacked on draft PR #8)
 **Starting source:** Batch 20 final verified SHA `713411976ae56a8e3d9f59f68609661d7f599991`
 **Scope:** 768–817, fifty auditable implementations.
-**Current status:** 32/50 committed as source-only changes; 18 pending.
+**Current status:** 50/50 source deliverables committed; operational cutover NOT complete.
 **Production:** NO-GO. No merge, deployment, active account switching or financial operation.
 
 | Number | Delivered | Acceptance and actual limitation |
@@ -46,9 +46,28 @@
 | 798 | Updated Batch 21 CI workflow | Syntax and test coverage of account/wallet read contracts |
 | 799 | Updated engineering progress register | Reconciled 32/50 and operational P0 dependencies |
 
-## Outstanding work 800–817
+| 800 | `backend/domain/account-switch-request.mjs` | Strict untrusted account selection ID parser with role/identity field refusal |
+| 801 | `backend/tests/account-batch21-switch-request.test.mjs` | Forged actor, role, balances and malformed request negatives |
+| 802 | `backend/domain/account-switch-csrf.mjs` | Strict same-origin + timing-safe 32-byte CSRF session preflight |
+| 803 | `backend/tests/account-batch21-switch-csrf.test.mjs` | Cross-origin and invalid token refusal |
+| 804 | `backend/domain/account-switch-admission.mjs` | Compose canonical request, session, membership, CSRF and rebind preflight; nonexecuting |
+| 805 | `backend/tests/account-batch21-switch-admission.test.mjs` | Stale version, revoked membership, same-account and CSRF denial |
+| 806 | `backend/domain/account-switch-audit-intent.mjs` | Redacted precommit audit record; never a success claim |
+| 807 | `backend/tests/account-batch21-switch-audit-intent.test.mjs` | Falsified audit/sensitive token negative cases |
+| 808 | `backend/domain/account-cache-refresh-evidence.mjs` | Ten-domain cache/refresh completeness evaluator; independent proof still required |
+| 809 | `backend/tests/account-batch21-cache-refresh-evidence.test.mjs` | Partial, duplicated or stale cache evidence refusal |
+| 810 | `backend/governance/pay54-batch21-account-switch-cutover.mjs` | Fail-closed operational cutover claims and independent approval requirement |
+| 811 | `backend/tests/account-batch21-switch-cutover.test.mjs` | Full self-reported claims never authorise a production release |
+| 812 | `backend/tests/account-batch21-http-no-switch.test.mjs` | Live loopback HTTP 503 denial of unprovisioned accounts/context methods |
+| 813 | `backend/tests/account-batch21-no-money-side-effects.test.mjs` | Nonexecuting session, wallet and admission regression |
+| 814 | Updated Batch 21 CI workflow | All new account/context domain modules and governance syntax checks, new tests |
+| 815 | `docs/engineering/pay54-batch21-change-request-register.md` | P0/P1 risk owner and operating decision register |
+| 816 | `docs/engineering/pay54-batch21-closure-report.md` | Founder source closure, explicit operational NO-GO |
+| 817 | Updated engineering progress register | Final 50/50 source-only traceability and production blockers |
 
-Implementation is NOT claimed for this range. Prioritise real server-owned account directory storage, authenticated session persistence and independently verified PostgreSQL RLS with negative test evidence, then concurrency/CSRF/replay-safe account rebinding, ten-domain cache isolation, transaction permission propagation, full device QA and independent deployment/rollback evidence. These tasks depend on provisioned trusted services and signed security/compliance decisions, not synthetic mocks alone.
+## Outstanding operational acceptance (not counted as implemented source items)
+
+Provision real server-owned account directory storage, session persistence and independently verified PostgreSQL RLS with live adversarial tests, then atomic and audited account rebinding, actual ten-domain cache isolation, production-permissioned transaction propagation, device QA, and protected deployment/rollback. Existing source modules are NOT equivalent to operational cutover. Independent Founder, Security and Release approval remains required.
 
 ## Current P0 release gates
 
