@@ -8,7 +8,7 @@
  * are ignored. This is intentionally source-only, not an HTML5 security
  * parser or a dynamic JavaScript/network execution validator.
  */
-const OPEN=/<(script|style)\\b/gi;
+const OPEN=/<(script|style)\b/gi;
 function openingTagEnd(source,begin){
  let quote=null;
  for(let i=begin;i<source.length;i++){
@@ -28,7 +28,7 @@ export function projectPay54HtmlResourceMarkup(html){
  if(typeof html!=="string"||Buffer.byteLength(html)>3_000_000){
   throw new TypeError("PAY54_HTML_RESOURCE_MARKUP_REQUIRED");
  }
- const clean=html.replace(/<!--[\\s\\S]*?-->/g,"");
+ const clean=html.replace(/<!--[\s\S]*?-->/g,"");
  let output="",cursor=0,count=0;
  OPEN.lastIndex=0;
  let m;
