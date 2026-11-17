@@ -57,6 +57,28 @@ jobs:
           node --test backend/tests/account-batch25-*.test.mjs
           node --test backend/tests/account-batch24-*.test.mjs
           node --test backend/tests/account-batch21-http-no-switch.test.mjs
+      - name: Enforce current PAY54 live-release blockers from checked-out source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {reconcilePay54Batch26Checkout}
+            from "./backend/governance/pay54-batch26-release-blocker-merge.mjs";
+          const report=reconcilePay54Batch26Checkout();
+          if(report.productionReleaseAuthorised ||
+             report.stagingActivationAuthorised ||
+             !report.sourceRootUnsafeForPublication ||
+             !report.developmentPaymentProviderMustNotFundCustomers ||
+             report.outstandingSourceIdentifiedRisks<8)process.exit(1);
+          console.log("Verified actual source risk and NO-GO; no release authorised");
+          NODE
+      - name: Preserve canonical full migration and current financial denial tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch25-full-migration-drift.test.mjs
+          node --test backend/tests/account-batch26-financial-route-denial.test.mjs
+          test "$PAY54_REAL_MONEY_MODE" = "false"
       - name: Confirm no provisioning or financial authorisation
         shell: bash
         run: |
