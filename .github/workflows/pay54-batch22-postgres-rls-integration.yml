@@ -49,7 +49,31 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$POSTGRES_CONTAINER"
-          for migration in backend/db/migrations/00*.sql; do
+          # Existing canonical migrations must execute in reviewed order.
+          # Never wildcard mixed-numbered migrations: 008 rejects overlapping
+          # account/membership tables by design.
+          migrations=(
+            001_financial_ledger.sql
+            002_ledger_integrity_hardening.sql
+            003_wallet_reservation.sql
+            004_reservation_lifecycle.sql
+            005_operation_state_integrity.sql
+            006_database_role_isolation.sql
+            007_direct_ledger_access_boundary.sql
+            008_account_context_foundation.sql
+            009_personal_wallet_binding.sql
+            010_wallet_binding_lifecycle_guard.sql
+            011_wallet_eligibility_view.sql
+            012_account_read_role_baseline.sql
+            013_account_rls_denial.sql
+            014_auth_sessions.sql
+            015_account_context_audit.sql
+            016_session_account_integrity.sql
+            017_account_directory_read_role.sql
+          )
+          for migration_file in "${migrations[@]}"; do
+            migration="backend/db/migrations/$migration_file"
+            test -s "$migration"
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "$migration"
           done
