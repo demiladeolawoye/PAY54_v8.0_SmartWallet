@@ -27,8 +27,8 @@ export function assessPay54DeployerGovernance({
     const kinds = rule.rules?.map(r => r.type);
     if (!Array.isArray(includes) || !Array.isArray(kinds)) continue;
     const defaultProtected = includes.includes("~DEFAULT_BRANCH");
-    const hasChecks = TYPES.size === TYPES.intersection
-      ? false : TYPES.size === new Set(kinds.filter(k => TYPES.has(k))).size;
+    const hasChecks = TYPES.size ===
+      new Set(kinds.filter(kind => TYPES.has(kind))).size;
     // Check both mandatory families, without treating arbitrary rules as proof.
     if (defaultProtected && hasChecks) {
       protectedDefaultBranch = true;
