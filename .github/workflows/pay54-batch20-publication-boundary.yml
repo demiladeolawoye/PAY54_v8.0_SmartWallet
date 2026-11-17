@@ -98,7 +98,7 @@ jobs:
           '
           rm -rf "$RUNNER_TEMP/pay54-account-visual/chrome-desktop" \
             "$RUNNER_TEMP/pay54-account-visual/chrome-mobile"
-          rm -f "$RUNNER_TEMP/pay54-account-visual/"*.html .pay54-balance-visual-fixture.html
+          rm -f "$RUNNER_TEMP/pay54-account-visual/"*.html .pay54-balance-visual-fixture.html .pay54-qa-auth-session.js
       - name: Upload screenshot-only visual QA (never Pages)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
