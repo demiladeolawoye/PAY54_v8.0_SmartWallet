@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>PAY54 — Create New PIN</title>
   <link rel="stylesheet" href="assets/css/auth.css">
+  <link rel="stylesheet" href="assets/css/deployment-boundary.css">
 </head>
 <body>
+<div class="pay54-preview-notice" role="status" aria-live="polite"><strong>Development preview only.</strong> Use made-up information and a demo PIN. No real identity check, bank account, card service or payment is available.</div>
 
 <div class="pay54-auth-brand">
   <img src="assets/img/pay54-logo.svg" alt="PAY54" />
@@ -14,12 +16,12 @@
 
 <div class="auth-wrapper">
 
-  <h1>Create new PIN</h1>
+  <h1>Create a new demo PIN</h1>
 
   <div class="info-box">
-    <p data-icon="🔐"> PINs are encrypted & secure</p>
-    <p data-icon="⚡"> Instant account recovery</p>
-    <p data-icon="🛡"> Bank-grade protection</p>
+    <p data-icon="🔐"> Demo PIN verifier is derived locally; never use your real banking PIN</p>
+    <p data-icon="⚡"> Local demo reset only</p>
+    <p data-icon="🛡"> No real customer authentication or bank account</p>
   </div>
 
   <div id="msg" class="message"></div>
