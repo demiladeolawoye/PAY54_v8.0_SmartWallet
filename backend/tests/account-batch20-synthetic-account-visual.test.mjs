@@ -18,7 +18,11 @@ test("748: synthetic browser fixture renders new dashboard and account selector 
   const html=readFileSync(report.fixtureFile,"utf8");
   assert.match(html,/<html lang="en">/);
   assert.doesNotMatch(html,/<html[^>]*class="p54b-boot-pending"/);
-  assert.match(html,/PAY54_ACCOUNT_CONTEXT_TEST_ONLY = true/);
+  assert.match(html,/src="\.pay54-qa-auth-session\.js"/);
+  assert.doesNotMatch(html,/PAY54_ACCOUNT_CONTEXT_TEST_ONLY = true/);
+  const authMock=readFileSync(join(folder,".pay54-qa-auth-session.js"),"utf8");
+  assert.match(authMock,/PAY54_ACCOUNT_CONTEXT_TEST_ONLY=true/);
+  assert.match(authMock,/isAuthenticated:\(\)=>true/);
   assert.match(html,/assets\/js\/ui\/account-context-selector\.js/);
   assert.match(html,/assets\/js\/dashboard-blueprint-shell\.js/);
   assert.doesNotMatch(html,/<script\b[^>]*src="assets\/js\/(?:ledger|transactions|security|services|engine|core)\b/i);
