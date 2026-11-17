@@ -33,7 +33,9 @@ async function probe(pool, expectedRole, tableNames) {
     if (result?.rows?.length !== 1 || row.role_name !== expectedRole) deny();
     if (!tableNames &&
         (row.restricted !== true || row.may_rotate !== true ||
-         row.may_write_ledger !== false)) deny();
+         row.may_write_ledger !== false ||
+         row.may_write_sessions !== false ||
+         row.may_append_audit !== false)) deny();
     await client.query("COMMIT");
     started = false;
     return Object.freeze({ expectedRole, roleVerifiedInDatabase: true });
