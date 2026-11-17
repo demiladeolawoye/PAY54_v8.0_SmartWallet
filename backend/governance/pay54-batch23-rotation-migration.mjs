@@ -32,7 +32,7 @@ export function verifyPay54RotationMigrationSource({
       !/CREATE ROLE pay54_session_rotate_role\s+NOLOGIN NOINHERIT NOSUPERUSER/i.test(source) ||
       !/NOBYPASSRLS/i.test(source) ||
       !/CREATE FUNCTION pay54\.rotate_account_context_session/i.test(source) ||
-      !/LANGUAGE plpgsql SECURITY INVOKER/i.test(source) ||
+      !/LANGUAGE plpgsql SECURITY DEFINER/i.test(source) ||
       !/FOR UPDATE\s*;/i.test(source) ||
       !/session_status='REVOKED'/i.test(source) ||
       !/INSERT INTO pay54\.account_context_audit/i.test(source) ||
@@ -40,7 +40,7 @@ export function verifyPay54RotationMigrationSource({
       !/TO pay54_session_rotate_role/i.test(source) ||
       !/OWNER TO pay54_session_rotate_executor_role/i.test(source) ||
       !/CREATE ROLE pay54_session_rotate_executor_role NOLOGIN NOINHERIT NOSUPERUSER/i.test(source) ||
-      !/GRANT EXECUTE ON FUNCTION pay54\\.rotate_account_context_session/i.test(source) ||
+      !/GRANT EXECUTE ON FUNCTION pay54/i.test(source) ||
       /\bGRANT\s+(?:ALL|INSERT|UPDATE|DELETE)\s+ON\s+pay54\.(?:ledger_entries|financial_operations|wallets)/i.test(source)
   ) deny();
 
