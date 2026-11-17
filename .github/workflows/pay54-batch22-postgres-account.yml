@@ -6,7 +6,8 @@ on:
       - cto/batch21-account-context-768-817
       - project-titan
     paths:
-      - "backend/db/migrations/00*.sql"
+      - "backend/db/migrations/0*.sql"
+      - "backend/governance/pay54-batch22-migration-inventory.mjs"
       - "backend/src/postgres-*.mjs"
       - "backend/tests/account-batch22-*.test.mjs"
       - ".github/workflows/pay54-batch22-postgres-account.yml"
@@ -40,7 +41,7 @@ jobs:
       - name: Run complete Batch 22 SQL-adapter syntax checks
         run: |
           set -euo pipefail
-          for file in backend/src/postgres-*.mjs backend/tests/account-batch22-*.test.mjs; do
+          for file in backend/src/postgres-*.mjs backend/tests/account-batch22-*.test.mjs backend/governance/pay54-batch22-migration-inventory.mjs; do
             node --check "$file"
           done
       - name: Run Batch 22 PostgreSQL security unit and failure-path tests
