@@ -66,4 +66,3 @@ GitHub ruleset **#27496881** remains **DISABLED** and no required-status-check c
 This risk is not a reason to falsely claim that actual private data was exposed; only confirmed root-source configuration and an unverified possible reactivation are established. Record the latest site status, deployment SHA and event before treating CR-PAGES-01 containment as closed.
 
 **Production decision remains NO-GO.** The two branches are now updated with CI-only source, but the ruleset and external staging/finance acceptance remain incomplete.
-
