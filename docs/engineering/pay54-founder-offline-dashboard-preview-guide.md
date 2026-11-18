@@ -1,6 +1,6 @@
 # PAY54 — Founder offline dashboard preview guide
 
-**Implementation:** 555  
+**Implementation:** 555
 **Purpose:** Review the current dashboard's visual layout without exposing live banking APIs or publishing internal application source.
 
 ## Review the dashboard
