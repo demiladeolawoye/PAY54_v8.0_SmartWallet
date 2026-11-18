@@ -20,6 +20,8 @@ import {inspectPay54StaticSiteSecrets}
  from "./pay54-static-site-secret-markers.mjs";
 import {auditPay54ExternalScripts}
  from "./pay54-external-script-source-review.mjs";
+import {inspectPay54PublicationTree}
+ from "./pay54-publication-tree-inspector.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const sha=bytes=>createHash("sha256").update(bytes).digest("hex");
@@ -72,6 +74,10 @@ export function stagePay54SiteCandidate(sourceRoot=ROOT,destinationRoot){
    if(sha(readFileSync(output))!==file.sha256){
     throw new Error("PAY54_STAGE_COPY_VERIFY_FAILED");
    }
+  }
+  const treeReview=inspectPay54PublicationTree(staging);
+  if(!treeReview.sourcePolicyPassed||treeReview.fileCount!==manifest.candidateCount){
+   throw new Error("PAY54_STAGE_PUBLICATION_BOUNDARY_DENIED");
   }
   renameSync(staging,join(target,"site"));
   return Object.freeze({
