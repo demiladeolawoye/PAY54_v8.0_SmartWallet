@@ -1,8 +1,8 @@
 # PAY54 — Balance Context Visibility Regression Fix
 
-**Batch 17:** Implementation 577  
-**Date:** 16 November 2026  
-**Affected screen:** Existing PAY54 wallet dashboard, blue Active Wallet Balance card  
+**Batch 17:** Implementation 577
+**Date:** 16 November 2026
+**Affected screen:** Existing PAY54 wallet dashboard, blue Active Wallet Balance card
 **State:** Implemented in source review branch, not merged, not deployed
 
 ## Reproduction and verified root cause
