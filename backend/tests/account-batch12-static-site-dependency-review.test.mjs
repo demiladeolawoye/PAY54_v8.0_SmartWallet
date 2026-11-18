@@ -18,12 +18,14 @@ function write(root,path,content){
  mkdirSync(join(root,...parts.slice(0,-1)),{recursive:true});
  writeFileSync(join(root,...parts),content);
 }
-test("369: PAY54 real repository candidate must retain HTML CSS and JS static dependencies",()=>{
+test("369: real PAY54 site must not claim readiness with linked-card infrastructure script outside candidate",()=>{
  const result=verifyPay54StaticSiteDependencies(ROOT);
  assert.ok(result.includedSourceFiles>30);
  assert.ok(result.localReferences>20);
- assert.equal(result.dependencyCheckPassed,true,JSON.stringify(result.issues.slice(0,20)));
- assert.deepEqual(result.issues,[]);
+ assert.equal(result.dependencyCheckPassed,false);
+ assert.ok(result.issues.some(x=>
+  x.target==="assets/js/infrastructure/payments/providers/linked-card-development.js"&&
+  x.reason==="MISSING_CANDIDATE_DEPENDENCY"));
  assert.equal(result.remoteScriptsIntegrityVerified,false);
  assert.equal(result.publicArtifactInspected,false);
  assert.equal(result.livePublicationAuthorised,false);
