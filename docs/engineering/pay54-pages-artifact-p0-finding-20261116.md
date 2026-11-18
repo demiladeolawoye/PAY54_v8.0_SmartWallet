@@ -1,8 +1,8 @@
 # PAY54 — Confirmed GitHub Pages artifact boundary failure
 
-**Finding ID:** PAY54-SEC-P0-PAGES-ARTIFACT-20261116  
-**Implementation:** 477 · **Severity:** P0 release blocker  
-**Evidence acquisition:** 2026-11-16, read-only GitHub Actions artifact retrieval  
+**Finding ID:** PAY54-SEC-P0-PAGES-ARTIFACT-20261116
+**Implementation:** 477 · **Severity:** P0 release blocker
+**Evidence acquisition:** 2026-11-16, read-only GitHub Actions artifact retrieval
 **Disposition:** Production release BLOCKED; live impact NOT YET CONFIRMED
 
 ## Evidence source
