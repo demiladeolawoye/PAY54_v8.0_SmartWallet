@@ -441,3 +441,97 @@ Pages build/deploy run 43917703697 also succeeded on the same source revision, b
 **Outstanding production-readiness P-01 — critical:** GitHub Pages settings/publishing source, deployed artifact inventory, sensitive-file public reachability, branch rulesets, external CDN attestation, full mobile/desktop/accessibility regression and rollback approval remain independently unverified. Current source-only diagnostics are not complete dynamic asset analysis, external incident investigation, or real deployment attestation. Source-only staging can never be considered public deployment proof.
 
 **Next batch:** 418–467 may be planned only after Founder approval of the 368–417 closure report. Do not recycle completed IDs or treat production workstreams P-01–P-14 as completed. Separately approval-gate any repository settings, identity/credentials, cloud/database privileges, real payment execution, live Pages remediation, or deployment modification. Proposed next focus: evidence-driven Pages containment, independent GitHub ruleset/deployer review, full static and dynamic dependency tests, branch release/rollback automation, PostgreSQL security gate verification, then authenticated Personal/Business account integration.
+
+
+## Batch 14 opening checkpoint — Implementations 418–427
+
+**Founder approval:** Source-only engineering batch 418–467 approved after completion of Batch 13. 50-item cycle and checkpoint remain mandatory, but implementation counts must reflect real commits, not proposals. This stacked draft PR builds on unmerged Batch 13 PR #1 and does not merge or change live PAY54 settings.
+
+| ID | Committed deliverable | State |
+| --- | --- | --- |
+| 418 | Nine-gate source-only release-evidence completeness evaluator with commit matching and independent review requirements | COMMITTED |
+| 419 | Negative tests for missing, duplicate, stale, future, forged or unreviewed release evidence | COMMITTED |
+| 420 | Dedicated Batch 14 read-only, pinned-action workflow with nonactivation assertions | COMMITTED |
+| 421 | Read-only GitHub branch-rules and OIDC/deployer evidence policy | COMMITTED |
+| 422 | Branch approval, rule bypass, credential and deployer negative regressions | COMMITTED |
+| 423 | Include independent GitHub release-controls regression in Batch 14 CI | COMMITTED |
+| 424 | Independent evidence-capture procedure, release acceptance and privacy rules | COMMITTED |
+| 425 | Operational runbook completeness, owner and privacy regression | COMMITTED |
+| 426 | Add runbook regression and relevant paths to Batch 14 CI | COMMITTED |
+| 427 | Source-only CTO checkpoint, evidence caveats and 50-item tracking | COMMITTED via this update |
+
+**Counts:** 10 of 50 source deliverables committed for Batch 14. Remaining numbered scope: 428–467 (40 genuine tasks, not artificially filled).
+
+**Latest executable checkpoint before this board change:** `18b45f19133b9345e9728eac5415f16bcc1be092`. Dedicated Batch 14 CI run `43935558075` and broader account/backend workflows had begun but their final results must be verified before describing this revision as CI passed.
+
+**Known safety limits:** The release-evidence evaluator checks the shape, freshness and consistency of owner-supplied records; it cannot verify authenticity of GitHub settings, signatures or approvals and always returns `releaseAuthorised:false`. The GitHub control evaluator checks a supplied snapshot only and does not read or change live rulesets, Pages, credentials or deployers. These controls do not independently attest legal, provider, tenant database or real-money production readiness.
+
+**Critical open work:** P-01 actual GitHub Pages settings/public artifact and evidence-based remediation; P-02 branch/environment/deployer verification; P-05 independent tenant PostgreSQL/RLS review; end-to-end customer journey and mobile QA; operational privacy and real partner authorisations. Do not activate, merge or deploy on the basis of 50-item source completion.
+
+
+## Batch 14 signed release evidence checkpoint — items 428–445
+
+| Item | Deliverable | Source state |
+| --- | --- | --- |
+| 428 | Canonical Ed25519 evidence receipt verifier using independently supplied public key | COMMITTED |
+| 429 | Signed receipt mutation, identity and key-substitution negative tests | COMMITTED |
+| 430 | Dedicated CI runs cryptographic receipt tests | COMMITTED |
+| 431 | Compose nine-gate receipt verification against trusted key registry | COMMITTED |
+| 432 | Missing/duplicate/forged receipt and unknown-key regressions | COMMITTED |
+| 433 | Integrate signed bundle tests into Batch 14 CI | COMMITTED |
+| 434 | Refuse reused evidence identifiers across distinct gates | COMMITTED |
+| 435 | Signed evidence ID replay regression | COMMITTED |
+| 436 | Operational signer key-custody, trust, revocation and separation runbook | COMMITTED |
+| 437 | Trust and custody policy negative-activation tests | COMMITTED |
+| 438 | CI enforces signing trust runbook invariants | COMMITTED |
+| 439 | Signed receipt expiry and future-date gate | COMMITTED |
+| 440 | Correct strict receipt review-time parser regex | COMMITTED |
+| 441 | Receipt time-window and required-clock tests | COMMITTED |
+| 442 | Composed metadata completeness and cryptographic signed receipt consistency report | COMMITTED |
+| 443 | Adversarial receipt/metadata divergence tests | COMMITTED |
+| 444 | Include cross-check suite in dedicated CI | COMMITTED |
+| 445 | CTO evidence checkpoint and truthful release-state reconciliation | COMMITTED via this update |
+
+**Count:** 418–445 = 28 source deliverables, 446–467 = 22 remaining. The previous exact CI run `43936277353` for code checkpoint `b2bc1d1e1bd992fedb42e87fa1cc1fc40aeaa753` was SUCCESS on the dedicated Batch 14 suite; following code revisions include new expiry and cross-check controls and require their own exact-run evidence. Last executable SHA before this board update: `8a2a36faa462b169c5142a2067a4e0c8b349730e`.
+
+**Signatures are not proof of release:** source-only signed evidence cannot verify key provenance, real signer identity, actual operational facts, live GitHub settings or regulatory/partner permissions, and always returns `releaseAuthorised:false`. No deployment, merge, Pages settings edit, branch rule change, key creation, customer database access, live financial execution or cloud provisioning has been authorised.
+
+**Review request state:** Batch 14 is a draft stacked PR against Batch 13, itself an unmerged draft. Release remains BLOCKED. Production workstreams P-01 through P-14 remain separately tracked.
+
+
+## Batch 14 final source-only closure — Implementations 446–467
+
+**Founder-approved cycle:** 418–467 = 50 numbered deliverables. Last source deliverable is this engineering-board closure. The Batch 14 PR remains DRAFT and stacked on unmerged Batch 13; source completion is NOT operational acceptance.
+
+| Item | Implementation | Status |
+| --- | --- | --- |
+| 446 | Correct missing clock error before combined evidence assessment | Committed; exact failing regressions corrected |
+| 447 | Compare externally provided Pages artifact manifest against selected source file digests | Committed |
+| 448 | Negative tests for unapproved backend files, missing files, digest changes and unsafe paths | Committed |
+| 449 | Integrate artifact integrity tests into CI | Committed |
+| 450 | Assess supplied Pages settings against restricted publication and protected environment policy | Committed |
+| 451 | Pages settings nonactivation, broad-source and insecure-setting negative tests | Committed |
+| 452 | Include Pages settings source evidence tests in CI | Committed |
+| 453 | Review literal JavaScript imports and static asset URLs in selected public files | Committed |
+| 454 | Literal module, missing dependency and dynamic-import uncertainty tests | Committed |
+| 455 | Correct source import scanner to include side-effect imports | Committed |
+| 456 | Integrate JS dependency review in Batch 14 CI | Committed |
+| 457 | Validate independently supplied rollback rehearsal, immutable archive and RTO metadata | Committed |
+| 458 | Rollback refusal, stale rehearsal and independent owner regression tests | Committed |
+| 459 | Run rollback evidence tests through CI | Committed |
+| 460 | Require exact-SHA mobile, desktop, accessibility, performance and wallet acceptance evidence | Committed |
+| 461 | Frontend evidence missing/failing/forged/expired negative tests | Committed |
+| 462 | Include frontend acceptance evidence tests in CI | Committed |
+| 463 | Enforce P0 non-waivable release-exception security policy | Committed |
+| 464 | Short-lived exception, regulatory/ledger non-bypass and separation regression | Committed |
+| 465 | Integrate risk exception tests into Batch 14 CI | Committed |
+| 466 | Source-only release readiness, operational owner and no-go closure report | Committed |
+| 467 | CTO board reconciliation and approval checkpoint | Committed via this update |
+
+**Count:** 50/50 source deliverables committed, with 0 outstanding numbered tasks in this source batch. This does **not** resolve open P0/P1 operational workstreams; implementation counts and production readiness are separate. Do not treat documentation alone as risk remediation.
+
+**Known regression and correction:** source revision `8a2a36faa462b169c5142a2067a4e0c8b349730e` failed Batch 14 run `43936702562` and Account Boundary run `43936702543` because omitted review time was rejected with a different error code than the combined packet test expected. Item 446 fixed the input validation order. Account Boundary passed on subsequent run `43936890375`. Confirm the complete final source branch CI on the final commit before claiming all workflows passed.
+
+**Security status:** GitHub Pages actual settings, deployed artifact, external public path reachability, branch protection, deployer/IAM trust, operational signing registry, dynamic website behaviour, tenant database security, production partners and financial/regulatory approvals remain independently UNVERIFIED. No Pages deployment, merge, secrets, customer data, production database privileges or real-money operations were changed. Production remains BLOCKED.
+
+**Next batch:** 468–517 only after the Founder approves this closure. Prioritise independently evidenced P-01 Pages publication containment and safe deployment change proposal, branch/deployer access review, full website/QA and PostgreSQL/account isolation gates. Do not automatically merge existing draft PRs or deploy source changes.
