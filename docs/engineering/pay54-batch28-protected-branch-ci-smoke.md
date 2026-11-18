@@ -66,3 +66,11 @@ GitHub ruleset **#27496881** remains **DISABLED** and no required-status-check c
 This risk is not a reason to falsely claim that actual private data was exposed; only confirmed root-source configuration and an unverified possible reactivation are established. Record the latest site status, deployment SHA and event before treating CR-PAGES-01 containment as closed.
 
 **Production decision remains NO-GO.** The two branches are now updated with CI-only source, but the ruleset and external staging/finance acceptance remain incomplete.
+
+## CR-PAGES-01 reactivation evidence — critical operational correction
+
+On 18 November 2026, after the authorised squash merge into project-titan, the authenticated GitHub Actions API showed **pages build and deployment** run **44273764346**, commit **aa2308a47562eacf6258a6037f66f9b0a3446904**, **completed/success** (created at 09:12:34 UTC). This verifies that the former root-source Pages build/deployment workflow ran successfully again. Public HTTP response and deployed bytes were not independently inspected.
+
+Administrator containment required immediately: open Settings → Pages, verify whether **Your site is live** is shown and unpublish again if so. Then change **Build and deployment → Source** from **Deploy from a branch** to **GitHub Actions**, save if required, and do not run a Pages deployment workflow. Independently confirm the resulting control and absence of live publication.
+
+Freeze further project-titan pushes and merges until the dangerous automatic project-titan / (root) publication source has been disconnected. Unpublication alone does not protect public repository history or past secrets. Ruleset activation, hosted financial products and real customer services remain NO-GO.
