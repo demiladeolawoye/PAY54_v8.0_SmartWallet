@@ -1,8 +1,8 @@
 # PAY54 — P0 GitHub Pages containment decision and verification playbook
 
-**Implementation:** 512  
-**Finding:** PAY54-SEC-P0-PAGES-ARTIFACT-20261116  
-**Scope:** Operational approval process only; not an executed production change  
+**Implementation:** 512
+**Finding:** PAY54-SEC-P0-PAGES-ARTIFACT-20261116
+**Scope:** Operational approval process only; not an executed production change
 **Current decision:** NO-GO / production release BLOCKED
 
 ## Direct evidence established
