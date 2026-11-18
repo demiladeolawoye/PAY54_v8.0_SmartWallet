@@ -1,7 +1,7 @@
 # PAY54 — Batch 17 Visual QA and Pages Release Boundary
 
-**Founder approval:** 2026-11-16  
-**Validation revision:** `3b4106cfd1539ae0c162d3c23ad522335d28099e`  
+**Founder approval:** 2026-11-16
+**Validation revision:** `3b4106cfd1539ae0c162d3c23ad522335d28099e`
 **Disposition:** Balance presentation visually ACCEPTED FOR REVIEW; **production release BLOCKED**
 
 ## Scope and observed root cause
