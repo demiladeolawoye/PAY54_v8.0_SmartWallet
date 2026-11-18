@@ -1,8 +1,8 @@
 # PAY54 — Batch 15 engineering closure and Founder approval packet
 
-**Implementation:** 515 · **Cycle:** 468–517 · **Date:** 16 November 2026  
-**Review branch:** `cto/batch15-publication-boundary-468-517`  
-**Merge position:** Draft PR stacked on unmerged Batch 14 and Batch 13  
+**Implementation:** 515 · **Cycle:** 468–517 · **Date:** 16 November 2026
+**Review branch:** `cto/batch15-publication-boundary-468-517`
+**Merge position:** Draft PR stacked on unmerged Batch 14 and Batch 13
 **Production release:** BLOCKED / NO-GO
 
 ## Executive position
