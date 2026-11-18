@@ -1,8 +1,8 @@
 # PAY54 — GitHub Pages publication containment and release acceptance
 
-**Implementation:** 415  
-**Accountable owners:** Founder, DevSecOps, Security, QA and Release Manager  
-**Decision:** Source-only operational runbook; NOT an instruction to change the live site  
+**Implementation:** 415
+**Accountable owners:** Founder, DevSecOps, Security, QA and Release Manager
+**Decision:** Source-only operational runbook; NOT an instruction to change the live site
 **Release status:** BLOCKED until independently evidenced acceptance
 
 ## Evidence and classification
