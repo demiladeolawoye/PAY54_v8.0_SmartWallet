@@ -1,0 +1,84 @@
+# PAY54 Batch 28 / 1237 — stable, non-deploying branch protection check.
+# Must be landed and checked on main and project-titan BEFORE required by ruleset.
+# The Batch27 branch is included solely to verify draft PR #16 in isolation.
+name: PAY54 Protected Branch Baseline
+on:
+  pull_request:
+    branches:
+      - main
+      - project-titan
+      - cto/batch27-operational-evidence-1068-1187
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-protected-branch-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  protected-branch-security:
+    name: PAY54 Protected Branch Security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_STAGING_EXECUTION: DISABLED
+      PR_BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+      TRIGGER_EVENT: ${{ github.event_name }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Verify exact source identity and deny release privileges
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_STAGING_EXECUTION" = "DISABLED"
+          node --input-type=module <<'NODE'
+          import {verifyPay54PrDiffIdentity} from "./backend/release/pay54-protected-branch-baseline.mjs";
+          const result=verifyPay54PrDiffIdentity({
+            eventName:process.env.TRIGGER_EVENT,
+            sourceSha:process.env.PR_HEAD_SHA,
+            baseSha:process.env.PR_BASE_SHA,
+            actualSha:process.env.GITHUB_SHA && process.env.TRIGGER_EVENT==="workflow_dispatch"
+              ? process.env.GITHUB_SHA
+              : (await import("node:child_process")).execFileSync("git",["rev-parse","HEAD"],{encoding:"utf8"}).trim()
+          });
+          if(result.productionReleaseAuthorised!==false)process.exit(1);
+          NODE
+      - name: Validate source security baseline and negative cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check backend/release/pay54-protected-branch-baseline.mjs
+          node --check backend/tests/account-batch28-protected-branch-baseline.test.mjs
+          node --test backend/tests/account-batch28-protected-branch-baseline.test.mjs
+      - name: Fail on new whitespace/conflict mistakes in PR diff
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PR_BASE_SHA"
+          test -n "$PR_HEAD_SHA"
+          git cat-file -e "$PR_BASE_SHA^{commit}"
+          git cat-file -e "$PR_HEAD_SHA^{commit}"
+          git diff --check "$PR_BASE_SHA...$PR_HEAD_SHA"
+      - name: No deployment or financial side effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_STAGING_EXECUTION" = "DISABLED"
+          echo "PAY54 security check only; no Pages, IAM, database, card, payout or FX operation"
