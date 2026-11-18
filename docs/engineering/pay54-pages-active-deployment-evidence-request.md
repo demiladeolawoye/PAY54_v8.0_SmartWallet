@@ -1,7 +1,7 @@
 # PAY54 — Active GitHub Pages P0 evidence request and containment decision
 
-**Implementation:** 562  
-**Status:** P0 OPEN; live exposure UNVERIFIED; source-only security review  
+**Implementation:** 562
+**Status:** P0 OPEN; live exposure UNVERIFIED; source-only security review
 **Accountable parties:** Founder, DevSecOps, Security and Release Manager
 
 ## Verified starting point
