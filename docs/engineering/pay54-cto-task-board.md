@@ -324,3 +324,120 @@ Item 372 adds a separately staged, never-deployed frontend snapshot that copies 
 Pages build/deploy run 43917703697 also succeeded on the same source revision, but this **does not verify publication safety**. The documentation-only follow-on commits are not part of that executable CI snapshot.
 
 **Open release gate:** actual owner-verified GitHub Settings > Pages/Rules/Branches/Environments; public file reachability; dynamic asset links and known CDN integrity; mobile/desktop full regression; approval of a restricted Pages Actions workflow, safely pinned actions and rollback. Do not claim an existing Pages root source has been replaced. Personal/Business account switching, customer DB SELECT and all money/crypto operations remain disabled.
+
+
+## Batch 13 security publication hardening — items 368–378 (draft PR, not deployed)
+
+**Approved cadence:** 50 genuine implementations, numbered 368–417; owner approval checkpoint after item 417. The branch and pull request remain isolated from the working `project-titan` branch. No automatic deployment, merge, live Pages setting, credentials, real financial execution, or cloud provisioning is authorised by this programme.
+
+| Item | Deliverable | Evidence / state |
+|---|---|---|
+| 368 | Read-only HTML-linked asset audit against existing candidate inventory | Committed |
+| 369 | HTML link negative tests: missing files, unsafe schemes, traversal | Committed |
+| 370 | Dedicated source-only Batch 13 GitHub Actions validation workflow with read-only token and pinned action revisions | CI verified |
+| 371 | CSS URL/import asset inventory with source-only policy | Committed |
+| 372 | CSS adversarial regression and safe image data URI coverage | Committed |
+| 373 | Execute HTML and CSS suites through dedicated CI | Committed; first run exposed two test failures |
+| 374 | Correct CSS-relative path resolution inside approved assets, deny escaped traversal | Dedicated CI verified; previously failing cases now pass |
+| 375 | Combined deterministic source publication report and SHA-256 manifest path digest | Committed |
+| 376 | Combined readiness success/failure and non-authorisation regression tests | Committed |
+| 377 | Expand CI to test combined publication report | Dedicated CI run 43929947182 SUCCESS |
+| 378 | CTO source-only checkpoint, implementation traceability and production gate reconciliation | Committed via this board update |
+
+**Latest checked Batch 13 code revision before this board update:** `d84a5745b155f56bcb50a2726dab17a6d080998a`.
+**Latest dedicated Batch 13 CI run:** `43929947182` — SUCCESS. Ten broader account and backend workflows were in progress when this checkpoint was prepared; previous revision `fecd4dc60e98f094967912c743fcf9ece56b18a2` passed all ten. Keep the current revision's broader-workflow results UNKNOWN until verified.
+
+**Intermediate failure evidence:** Batch 13 run `43929536467` failed two CSS-relative-path tests. The correct behaviour was implemented in item 374 and subsequently the dedicated CI passed. Do not erase this regression history.
+
+**Current source-only security interpretation:** Static HTML and CSS checks are useful but are not the complete runtime dependency graph, do not independently inspect Pages settings, do not inspect published artifacts, do not verify real public reachability, and do not prove that no secrets have been committed. Pages publication remediation and branch-protection verification remain **OPEN**. A GitHub Pages build success is never enough to close P-01. Production release remains **BLOCKED**.
+
+**Batch bookkeeping:** Items 368–378 = 11 source deliverables committed, 39 remaining in planned 50-item Batch 13. Do not count any unimplemented proposals as completed. Individual issues may remain blocked after the 50-item source batch; delivery counts do not imply market/operational launch readiness.
+
+
+## Batch 13 continuation checkpoint — items 379–384
+
+| Item | Verified source deliverable | Status |
+|---|---|---|
+| 379 | HTML gate rejects unsafe data/blob and root-relative URL forms | COMMITTED |
+| 380 | Negative tests for executable schemes, project-root paths and telephone/email exceptions | COMMITTED |
+| 381 | Restricted candidate content SHA-256 catalogue | COMMITTED |
+| 382 | Deterministic hash and excluded-backend source regression tests | COMMITTED |
+| 383 | Dedicated workflow adds source integrity checks and tests | CI VERIFIED: Batch 13 run 43930436612 SUCCESS on commit 9c37b355b777981314a97bc62d6dbe94fd62b24d |
+| 384 | Updated CTO Batch 13 progress, nonactivation and evidence register | COMMITTED via this update |
+
+**Status:** Items 368–384 = 17 committed source deliverables; items 385–417 = 33 remaining toward the agreed 50-item approval checkpoint. This count records source deliverables, not deployments or independent operational acceptance. At last CI check, the dedicated publication suite and Batch 11 publication suite had succeeded; remaining nine account/backend workflows on this revision were still running or pending and must not be declared passed without evidence.
+
+**P-01 remains P0 OPEN.** Only local publication-source candidates have been inspected, not actual production GitHub Pages settings, artifact bytes or real backend URL reachability. Public endpoint checks were inconclusive from the available browsing environment. Do not mark a confirmed data breach and do not mark the publication safe. No Pages settings, protected branch settings or credentials were changed.
+
+**Release:** Not authorised. Maintain immutable evidence and review boundary. The draft PR is for source-only review and must not be merged or deployed automatically.
+
+
+## Batch 13 publication staging checkpoint — items 385–388
+
+| Item | Actual deliverable | Status |
+|---|---|---|
+| 385 | Local offline, empty-target static site stage builder, copies only approved files and verifies bytes | COMMITTED; no Pages deployment |
+| 386 | Negative tests for source/target overlap, nonempty targets and missing asset safety | COMMITTED |
+| 387 | Integrate stage builder syntax checks and adversarial tests into the dedicated Batch 13 workflow | CI VERIFIED |
+| 388 | Update CTO task board with deployment boundary, exact test revision and outstanding work | COMMITTED via this update |
+
+**Exact dedicated CI evidence:** run `43930808124` on code commit `36044714af854cf36c185bd7dcc555c6b181447a` completed SUCCESS. Other account/security workflows on this revision were still running when checked, so do not infer 10/10 success for this exact commit.
+
+**Standing operational boundaries:** The staging builder is never invoked by GitHub Pages publishing; it only copies reviewed local source files into an explicitly supplied empty directory. It neither addresses the currently configured Pages workflow nor establishes public URL reachability. No website configuration or production release is activated.
+
+**Batch position:** 368–388 = 21 committed deliverables, 389–417 = 29 remaining before the agreed 50-item owner approval checkpoint. Do not artificially fill the 29 slots. Continue only with valuable source hardening and independently evidenced operational acceptance.
+
+
+## Batch 13 continuation — publication integrity and credential-source gates (389–404)
+
+| Item | Implementation | Evidence/status |
+|---|---|---|
+| 389 | Read-only staged-site verifier compares exact candidate paths, byte counts, SHA-256 digests and denies symlinks | Committed |
+| 390 | Offline mutation, hidden-file, missing-asset, symlink and nested-root regression tests | Committed |
+| 391 | Include stage-verification security checks in dedicated CI | Dedicated CI run 43931417364 SUCCESS |
+| 392 | Strict opt-in GitHub Pages header-only reachability probe (no body, no redirects, fixed origin) | Committed; never auto-invoked against live URL |
+| 393 | Offline HTTP classification, origin/path refusal and inconclusive-evidence tests | Committed |
+| 394 | Dedicated CI integration for header-probe regressions | Dedicated CI run 43931660116 SUCCESS |
+| 395 | Read-only high-confidence credential marker scanner over selected public-source text files | Committed |
+| 396 | Credential finding redaction, known marker and public-source scope tests | Committed |
+| 397 | Marker regression CI syntax/test integration | Committed |
+| 398 | Fail source-policy CI when actual selected site assets contain sensitive markers | Dedicated CI run 43932067473 SUCCESS |
+| 399 | Staging builder denies candidate construction on detected sensitive markers | Committed |
+| 400 | Adversarial stage-builder test requires no written output on secret marker detection | Dedicated CI run 43932226699 SUCCESS |
+| 401 | Third-party script origin, transport, SRI metadata inventory, source-only | Committed |
+| 402 | External script SRI, transport, comment and non-attestation tests | Committed |
+| 403 | Dedicated CI includes external-script source review | Dedicated CI run 43932449771 SUCCESS |
+| 404 | Reconcile code/test evidence, release denial and remaining Batch 13 tasks | Committed via this update |
+
+**Batch 13 count:** 368–404 = 37 source deliverables; 405–417 = 13 remaining. This is the preapproval progress record, not a request for early owner approval. Source-only releases are blocked pending actual Pages settings/public reachability, independent sensitive-source and CDN review, legal/provider verification, authenticated backend integration, device regression, and owner-approved publication/rollback decisions. Repo remains public, Pages source boundary remains unverified, and no live Pages configuration, deployments, financial operations, database privileges or cloud resources were changed.
+
+**CI accuracy:** The dedicated Batch 13 workflow ran successfully on `d695696f2b5a161bdc6cf7a6a14ac6dd0c121e58` (run `43932449771`). Account and backend suites on that revision were not yet all finished when this board was prepared. Earlier workflow cancellations from rapid PR commits are not test failures and are not clean-success evidence. Do not claim a full 11/11 result on any revision without independent confirmation.
+
+**P-01 remains OPEN:** direct public probing was attempted from both browsing and container environments but could not access the Pages host. No claim of verified public file reachability or absence of exposure is permitted. The opt-in HEAD-only probe is merely source code for a controlled later inspection.
+
+
+## Batch 13 closure — items 405–417 (50/50 source items committed)
+
+**Approval boundary:** Batch 13 source-only implementations 368–417 are recorded as committed. A completed source batch does not mean a production go-live or Pages release is authorised. Hold the PR as DRAFT and do not merge or deploy pending independent owner decision and evidence.
+
+| Item | Actual deliverable | State |
+| --- | --- | --- |
+| 405 | Audit unquoted HTML src/href references | COMMITTED |
+| 406 | Negative tests for unquoted local, missing and executable URLs | COMMITTED |
+| 407 | Include third-party script SRI exceptions in combined publication readiness | COMMITTED |
+| 408 | Combined readiness regression flags missing SRI without false release approval | COMMITTED |
+| 409 | CI rejects HTTP transport for externally referenced JavaScript | COMMITTED |
+| 410 | Candidate staging refuses unreviewed remote script source | COMMITTED |
+| 411 | Staging regressions deny missing SRI without copying any files | COMMITTED |
+| 412 | Source security CI triggered by top-level HTML and asset changes | COMMITTED |
+| 413 | Regression contract for workflow trigger and least privilege | COMMITTED |
+| 414 | Integrate workflow invariant tests into source-only CI | COMMITTED |
+| 415 | Pages evidence/containment and go-no-go owner runbook | COMMITTED |
+| 416 | Release-denial and independent acceptance contract tests | COMMITTED |
+| 417 | CI integration of runbook acceptance tests and this 50-item closure ledger | COMMITTED |
+
+**Current code checkpoint:** `142e841f2f6956f79a93acf1c2313c5344ec1d66` before this board update. The new runbook regression is wired to Batch 13 CI; final workflow results on this exact revision must be retrieved and recorded after Actions complete. Do not claim CI PASS for a revision until it is confirmed. Earlier run `43932776559` passed the Batch 13 suite on a previous revision, but is not evidence for today's closing changes.
+
+**Outstanding production-readiness P-01 — critical:** GitHub Pages settings/publishing source, deployed artifact inventory, sensitive-file public reachability, branch rulesets, external CDN attestation, full mobile/desktop/accessibility regression and rollback approval remain independently unverified. Current source-only diagnostics are not complete dynamic asset analysis, external incident investigation, or real deployment attestation. Source-only staging can never be considered public deployment proof.
+
+**Next batch:** 418–467 may be planned only after Founder approval of the 368–417 closure report. Do not recycle completed IDs or treat production workstreams P-01–P-14 as completed. Separately approval-gate any repository settings, identity/credentials, cloud/database privileges, real payment execution, live Pages remediation, or deployment modification. Proposed next focus: evidence-driven Pages containment, independent GitHub ruleset/deployer review, full static and dynamic dependency tests, branch release/rollback automation, PostgreSQL security gate verification, then authenticated Personal/Business account integration.
