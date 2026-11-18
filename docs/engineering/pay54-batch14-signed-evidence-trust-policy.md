@@ -1,7 +1,7 @@
 # PAY54 Batch 14 — Signed release evidence trust and custody policy
 
-**Implementation:** 436  
-**Scope:** Source-only security governance; no operational key registration, deployment or IAM change  
+**Implementation:** 436
+**Scope:** Source-only security governance; no operational key registration, deployment or IAM change
 **Release disposition:** BLOCKED
 
 ## Trust boundary
