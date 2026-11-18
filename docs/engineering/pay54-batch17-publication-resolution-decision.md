@@ -1,7 +1,7 @@
 # PAY54 — Batch 17 publication blocker resolution and operational decision
 
-**Implementation:** 614  
-**Source scope:** Items 568–617 (targeted dashboard repair plus publication controls)  
+**Implementation:** 614
+**Source scope:** Items 568–617 (targeted dashboard repair plus publication controls)
 **Status:** SOURCE IMPLEMENTATION IN REVIEW; LIVE RELEASE NO-GO
 
 ## Current findings, with evidence boundaries
