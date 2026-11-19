@@ -1,6 +1,6 @@
 # PAY54 Batch 18 — Active GitHub Pages Evidence Collection
 
-**Implementation 623** · **Owner:** Security + DevSecOps · **Status:** P0 OPEN  
+**Implementation 623** · **Owner:** Security + DevSecOps · **Status:** P0 OPEN
 **Purpose:** Establish current GitHub Pages facts before any restricted replacement or containment.
 
 ## Evidence already established
