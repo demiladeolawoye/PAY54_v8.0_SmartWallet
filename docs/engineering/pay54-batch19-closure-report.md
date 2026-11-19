@@ -1,8 +1,8 @@
 # PAY54 CTO — Batch 19 Closure and Founder Release Gate
 
-**Scope:** Implementations 668–717 (50 individually auditable source deliverables)  
-**Target branch:** `cto/batch19-public-preview-safety-668-717`  
-**Pull request:** Draft PR #7 stacked on draft PR #6, #5, #4, #3, #2, #1  
+**Scope:** Implementations 668–717 (50 individually auditable source deliverables)
+**Target branch:** `cto/batch19-public-preview-safety-668-717`
+**Pull request:** Draft PR #7 stacked on draft PR #6, #5, #4, #3, #2, #1
 **Current release decision:** **NO-GO for public deployment and real money**
 
 ## Delivered engineering capabilities
