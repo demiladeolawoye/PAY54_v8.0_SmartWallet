@@ -16,7 +16,8 @@ const SUPPORTED_NAME=".pay54-balance-visual-fixture.html";
 export function createPay54BalanceVisualFixture({sourceRoot=ROOT}={}){
  const root=resolve(sourceRoot);
  const path=join(root,SUPPORTED_NAME);
- if(existsSync(path))throw new Error("PAY54_VISUAL_FIXTURE_ALREADY_EXISTS");
+ const mockSessionFile=join(root,".pay54-qa-auth-session.js");
+ if(existsSync(path)||existsSync(mockSessionFile))throw new Error("PAY54_VISUAL_FIXTURE_ALREADY_EXISTS");
  let html=readFileSync(join(root,"dashboard.html"),"utf8");
  if(!html.includes('id="balanceCard"')||
   !html.includes('id="balanceAmount"')||
@@ -27,6 +28,13 @@ export function createPay54BalanceVisualFixture({sourceRoot=ROOT}={}){
   !html.includes("</body>")){
   throw new Error("PAY54_VISUAL_FIXTURE_SOURCE_INVALID");
  }
+ // The live dashboard starts with a deliberately hidden legacy first paint.
+ // Synthetic visuals omit the real boot controller, so clear ONLY the local
+ // fixture's initial loading class. Production HTML stays fail-closed.
+ html=html.replace(
+  '<html lang="en" class="p54b-boot-pending">',
+  '<html lang="en">'
+ );
  // This test fixture must NOT execute any original authentication, payment,
  // wallet, partner, scanner, account, storage or deployment bootstrap scripts.
  html=html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,"");
@@ -48,7 +56,17 @@ export function createPay54BalanceVisualFixture({sourceRoot=ROOT}={}){
   '</aside>';
  html=html.replace(/<body\b[^>]*>/i,match=>match+banner);
  html=html.replace("</body>",
+  '<script src=".pay54-qa-auth-session.js"></script>\n'+
+  '<script src="assets/js/ui/account-context-selector.js"></script>\n'+
   '<script src="assets/js/dashboard-blueprint-shell.js"></script>\n</body>');
+ // A generated, hidden, test-only CSP-compatible script; never referenced by
+ // the real dashboard, public artifact manifests or any production entrypoint.
+ writeFileSync(
+  mockSessionFile,
+  '"use strict";window.PAY54_ACCOUNT_CONTEXT_TEST_ONLY=true;'+
+   'window.PAY54_SECURITY={session:{isAuthenticated:()=>true}};\n',
+  {flag:"wx",mode:0o644}
+ );
  writeFileSync(path,html,{flag:"wx",mode:0o644});
  return Object.freeze({
   fixtureFile:path,

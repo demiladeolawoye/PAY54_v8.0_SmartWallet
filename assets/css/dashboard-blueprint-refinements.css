@@ -731,32 +731,8 @@ html.p54b-boot-pending body > main.dash-grid {
  * old-dashboard flash. It is removed when boot completes.
  */
 
-html.p54b-boot-pending body::after {
-  content: "Preparing your PAY54 dashboard…";
-  position: fixed;
-  z-index: 100;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: calc(100vw - 32px);
-  padding: 17px 24px;
-  border-radius: 14px;
-  background: #0b1544;
-  color: #ffffff;
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Arial,
-    sans-serif;
-  font-size: 14px;
-  font-weight: 750;
-  line-height: 1.4;
-  text-align: center;
-  box-shadow: 0 12px 34px rgba(5, 13, 49, 0.18);
-  pointer-events: none;
-}
+/* First paint is now governed by the earlier-loaded
+   dashboard-blueprint-first-paint.css and its accessible status node. */
 
 /*
  * The original 160px floating-action-button spacer

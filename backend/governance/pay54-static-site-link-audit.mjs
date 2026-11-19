@@ -9,15 +9,9 @@ import {resolve, posix} from "node:path";
 import {fileURLToPath} from "node:url";
 import {inspectPay54StaticSiteCandidate} from "./pay54-static-site-candidate-inventory.mjs";
 import {projectPay54HtmlResourceMarkup} from "./pay54-html-resource-markup.mjs";
+import {extractPay54HtmlStartTagAttributes} from "./pay54-batch20-html-attribute-extractor.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
-const ATTRIBUTE=/(?<![\w:-])(?:src|href)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
-const RESPONSIVE=/(?<![\w:-])srcset\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
-const ACTIVE_FORM=/(?<![\w:-])(?:action|formaction)\s*=\s*(?:(["'])(.*?)\1|([^\s>]+))/gi;
-const BASE_TAG=/<base\b[^>]*>/gi;
-const META_REFRESH=/<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["']?refresh\b)[^>]*>/gi;
-const EMBEDDED_OBJECT=/<(?:object|embed)\b[^>]*>/gi;
-const INLINE_EVENT=/(?<![\w:-])on(?:click|load|error|submit|change|input|focus|blur|mouseover|pointerdown|keydown)\s*=/gi;
 const PAGE=/^[^/]+\.html$/i;
 const EXTERNAL=/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|\/\/)/i;
 const SCHEME=/^[a-z][a-z\d+.-]*:/i;
@@ -31,46 +25,33 @@ export function auditPay54StaticSiteLinks(sourceRoot=ROOT){
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(resolve(sourceRoot,page),"utf8");
   const markup=projectPay54HtmlResourceMarkup(html);
-  // Inline event handler attributes execute browser JavaScript outside the
-  // ordinary referenced script graph and require a separate XSS review.
-  if(INLINE_EVENT.test(markup)){
-   rejected.push({page,reference:"inline-event",reason:"INLINE_EVENT_HANDLER_REQUIRES_REVIEW"});
+  const parsed=extractPay54HtmlStartTagAttributes(markup);
+  for(const issue of parsed.issues){
+   rejected.push({page,reference:issue.name??issue.tag,reason:"HTML_ATTRIBUTE_"+issue.kind});
   }
-  INLINE_EVENT.lastIndex=0;
-  // Active object/embed elements can load plugins and arbitrary framed
-  // resources that a src/href-only graph cannot safely attest.
-  if(EMBEDDED_OBJECT.test(markup)){
-   rejected.push({page,reference:"embedded-object",reason:"ACTIVE_EMBEDDED_OBJECT_REQUIRES_REVIEW"});
-  }
-  EMBEDDED_OBJECT.lastIndex=0;
-  // Base URL rewriting and refresh redirects are not part of the reviewed
-  // PAY54 static-site navigation graph. Refuse them until independently audited.
-  if(BASE_TAG.test(markup)){
-   rejected.push({page,reference:"base",reason:"DOCUMENT_BASE_URL_REQUIRES_REVIEW"});
-  }
-  BASE_TAG.lastIndex=0;
-  if(META_REFRESH.test(markup)){
-   rejected.push({page,reference:"meta-refresh",reason:"ACTIVE_REDIRECT_REQUIRES_REVIEW"});
-  }
-  META_REFRESH.lastIndex=0;
-  // HTML form action destinations may post customer data. Require a
-  // separately reviewed capability and server-side policy before publication.
-  for(const action of markup.matchAll(ACTIVE_FORM)){
-   const destination=(action[2]??action[3]??"").trim();
-   if(destination){
+  for(const item of parsed.attributes){
+   if(/^on[a-z]+$/.test(item.name)){
+    rejected.push({page,reference:"inline-event",reason:"INLINE_EVENT_HANDLER_REQUIRES_REVIEW"});
+   }
+   if(item.name==="srcset"&&item.value){
+    rejected.push({page,reference:"srcset",reason:"RESPONSIVE_SOURCE_SET_REQUIRES_REVIEW"});
+   }
+   if((item.name==="action"||item.name==="formaction")&&item.value){
     rejected.push({page,reference:"form-action",reason:"FORM_SUBMISSION_REQUIRES_REVIEW"});
    }
   }
-  // Responsive image candidate sets require dedicated parsing and byte-level
-  // review. Never silently certify them as a complete first-party graph.
-  for(const candidate of markup.matchAll(RESPONSIVE)){
-   const raw=(candidate[2]??candidate[3]??"").trim();
-   if(raw){
-    rejected.push({page,reference:"srcset",reason:"RESPONSIVE_SOURCE_SET_REQUIRES_REVIEW"});
-   }
+  if(parsed.attributes.some(x=>x.tag==="base")){
+   rejected.push({page,reference:"base",reason:"DOCUMENT_BASE_URL_REQUIRES_REVIEW"});
   }
-  for(const match of markup.matchAll(ATTRIBUTE)){
-   const raw=(match[2]??match[3]??"").trim();
+  if(parsed.attributes.some(x=>x.tag==="meta"&&x.name==="http-equiv"&&
+    x.value?.toLowerCase()==="refresh")){
+   rejected.push({page,reference:"meta-refresh",reason:"ACTIVE_REDIRECT_REQUIRES_REVIEW"});
+  }
+  if(parsed.attributes.some(x=>x.tag==="object"||x.tag==="embed")){
+   rejected.push({page,reference:"embedded-object",reason:"ACTIVE_EMBEDDED_OBJECT_REQUIRES_REVIEW"});
+  }
+  for(const item of parsed.attributes.filter(x=>x.name==="src"||x.name==="href")){
+   const raw=(item.value??"").trim();
    if(!raw||raw.startsWith("#"))continue;
    if(EXTERNAL.test(raw)){
     if(/^(?:javascript:|data:|blob:|\/\/)/i.test(raw)){
