@@ -20,20 +20,34 @@ function put(root,path,body){
  mkdirSync(join(root,...parts.slice(0,-1)),{recursive:true});
  writeFileSync(join(root,...parts),body);
 }
-test("373: real PAY54 frontend snapshot excludes backend, internal docs and backups",()=>{
+test("373: real PAY54 snapshot must fail closed with an excluded linked-card infrastructure reference",()=>{
  temp(reviewParent=>{
-  const staged=stagePay54StaticSiteReview({sourceRoot:ROOT,reviewParent});
-  assert.ok(staged.fileCount>30);
-  assert.equal(staged.hashes.length,staged.fileCount);
+  assert.throws(()=>stagePay54StaticSiteReview({
+   sourceRoot:ROOT,reviewParent
+  }),/PAY54_STATIC_REVIEW_DEPENDENCIES_BLOCKED/);
+  assert.deepEqual(readdirSync(reviewParent),[]);
+ });
+});
+test("373: clean synthetic frontend snapshot excludes internal paths and verifies copied bytes",()=>{
+ temp(root=>{
+  const source=join(root,"source"),reviewParent=join(root,"review");
+  mkdirSync(source);mkdirSync(reviewParent);
+  put(source,"index.html",
+   '<!doctype html><link rel="stylesheet" href="assets/css/app.css"><script src="assets/js/app.js"></script>');
+  put(source,"assets/css/app.css","body{font-family:system-ui}");
+  put(source,"assets/js/app.js","export const test=true;");
+  put(source,"assets/js/dashboard.backup.js","not for publication");
+  put(source,"backend/secret.js","not for publication");
+  put(source,"docs/internal.md","not for publication");
+  const staged=stagePay54StaticSiteReview({sourceRoot:source,reviewParent});
+  assert.equal(staged.fileCount,3);
+  assert.equal(staged.hashes.length,3);
   assert.equal(staged.livePagesArtifactReplaced,false);
   assert.equal(staged.githubPagesSettingsChanged,false);
   assert.equal(staged.productionRelease,"BLOCKED");
-  assert.ok(staged.hashes.some(x=>x.path==="assets/js/security/index.js"));
   assert.ok(staged.excludedSourcePaths.includes("assets/js/dashboard.backup.js"));
   for(const {path,sha256,bytes} of staged.hashes){
    assert.equal(path.startsWith("backend/"),false);
-   assert.equal(path.startsWith(".github/"),false);
-   assert.equal(path.startsWith("infrastructure/"),false);
    assert.equal(path.startsWith("docs/"),false);
    assert.equal(path.includes("backup"),false);
    const contents=readFileSync(join(staged.reviewDirectory,...path.split("/")));
@@ -44,6 +58,7 @@ test("373: real PAY54 frontend snapshot excludes backend, internal docs and back
   assert.equal(existsSync(join(staged.reviewDirectory,"docs")),false);
  });
 });
+
 test("373: missing dependencies refuse to create a staged package",()=>{
  temp(root=>{
   const source=join(root,"source"),parent=join(root,"review");

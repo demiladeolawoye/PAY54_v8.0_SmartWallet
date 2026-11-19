@@ -1,6 +1,6 @@
 
 
-/* PAY54 Approved Dashboard Blueprint Shell v1.2.1.
+/* PAY54 Approved Dashboard Blueprint Shell v1.2.4.
  * Presentation only. Reuses existing PAY54 nodes and delegated action handlers.
  * Does not change ledger, cards, transactions, capability policy or execution gates.
  */
@@ -197,10 +197,18 @@
     walletManage.addEventListener("click", toggleWallets);
     balance.append(mobileManage);
 
-    find(".balance-delta", balance)?.setAttribute("hidden", "");
-    for (const selector of [".balance-meta", ".identity", ".trust-chip", "#fxTicker"]) {
-      find(selector, balance)?.classList.add("p54b-conceal");
+    // Keep source dashboard account and status information visible.
+    // The public development preview claims guard supplies explicit
+    // demonstration-only language; this presentation layer must not hide it.
+    for (const selector of [".balance-meta", ".balance-delta", ".identity", ".trust-chip"]) {
+      const detail = find(selector, balance);
+      if (!detail) continue;
+      detail.removeAttribute("hidden");
+      detail.classList.remove("p54b-conceal");
+      detail.classList.add("p54b-balance-detail");
     }
+    // The optional FX ticker has its own data-readiness requirements.
+    find("#fxTicker", balance)?.classList.add("p54b-conceal");
     balance.classList.add("p54b-balance");
     const label = find(".label", balance);
     if (label) label.textContent = "ACTIVE WALLET BALANCE";
@@ -422,7 +430,7 @@
     find("#scanPayFab")?.classList.add("p54b-original-fab");
 
     document.body.classList.add("p54-blueprint");
-    document.documentElement.dataset.pay54Blueprint = "1.2.1";
+    document.documentElement.dataset.pay54Blueprint = "1.2.4";
 
     
     // Reveal the approved dashboard only after its DOM is mounted.
@@ -430,7 +438,7 @@
 
     console.info(
     
-"[PAY54 BLUEPRINT] v1.2.1 mounted; existing financial engines and preview gate preserved."
+"[PAY54 BLUEPRINT] v1.2.4 mounted; existing financial engines and preview gate preserved."
     );
   } catch (error) {
     console.error(

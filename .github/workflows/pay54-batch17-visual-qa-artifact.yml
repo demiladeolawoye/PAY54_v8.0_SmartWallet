@@ -1,0 +1,107 @@
+name: PAY54 Batch 17 Isolated Browser Visual QA
+
+on:
+  pull_request:
+    branches:
+      - cto/batch16-pages-remediation-518-567
+      - project-titan
+    paths:
+      - dashboard.html
+      - assets/css/**
+      - assets/js/**
+      - assets/img/**
+      - .github/workflows/pay54-batch17-visual-qa-artifact.yml
+      - backend/governance/pay54-balance-visual-fixture.mjs
+      - backend/governance/pay54-rendered-balance-review.mjs
+      - backend/tests/account-batch17-rendered-balance-review.test.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch17-visual-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual-qa:
+    name: local-dashboard-browser-screenshots-only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout exact review commit without persisted credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Confirm isolated browser and source under review
+        run: |
+          test -f dashboard.html
+          test -f assets/js/dashboard-blueprint-shell.js
+          test -f assets/js/core/preview-claims-guard.js
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          command -v google-chrome
+          google-chrome --version
+          node --check backend/governance/pay54-balance-visual-fixture.mjs
+          node backend/governance/pay54-balance-visual-fixture.mjs
+          test -s .pay54-balance-visual-fixture.html
+          mkdir -p "$RUNNER_TEMP/pay54-visual-qa"
+      - name: Render local dashboard only without outbound network
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="file://$GITHUB_WORKSPACE/.pay54-balance-visual-fixture.html"
+          for preset in "desktop:1440:1000" "tablet:768:1024" "mobile:390:844"; do
+            IFS=: read -r device width height <<< "$preset"
+            profile="$RUNNER_TEMP/pay54-visual-qa/browser-$device"
+            mkdir -p "$profile"
+            google-chrome --headless --no-sandbox --disable-gpu \
+              --disable-extensions --disable-background-networking \
+              --no-first-run --no-default-browser-check --disable-sync \
+              --no-proxy-server \
+              --host-resolver-rules="MAP * 0.0.0.0, EXCLUDE localhost" \
+              --user-data-dir="$profile" \
+              --window-size="$width,$height" \
+              --force-device-scale-factor=1 \
+              --virtual-time-budget=4500 \
+              --screenshot="$RUNNER_TEMP/pay54-visual-qa/$device.png" \
+              "$base" 2>"$RUNNER_TEMP/pay54-visual-qa/$device-browser.log"
+            test -s "$RUNNER_TEMP/pay54-visual-qa/$device.png"
+            echo "$device screenshot generated"
+          done
+          # The original protected dashboard is not used for the visual screenshot.\n          # The synthetic fixture excludes authentication and all financial engines.\n          # Browser logs may contain development-only identifiers; exclude from artifact.
+          rm -f "$RUNNER_TEMP"/pay54-visual-qa/*-browser.log
+          rm -rf "$RUNNER_TEMP"/pay54-visual-qa/browser-*
+      - name: Assert browser-mounted balance DOM still shows demo-safe details
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check backend/governance/pay54-rendered-balance-review.mjs
+          node --test backend/tests/account-batch17-rendered-balance-review.test.mjs
+          browser_profile="$RUNNER_TEMP/pay54-balance-dom-profile"
+          mkdir -p "$browser_profile"
+          google-chrome --headless --no-sandbox --disable-gpu \
+            --disable-extensions --disable-background-networking \
+            --no-first-run --no-default-browser-check --disable-sync \
+            --no-proxy-server \
+            --host-resolver-rules="MAP * 0.0.0.0, EXCLUDE localhost" \
+            --user-data-dir="$browser_profile" \
+            --virtual-time-budget=4500 \
+            --dump-dom "file://$GITHUB_WORKSPACE/.pay54-balance-visual-fixture.html" \
+            > "$RUNNER_TEMP/pay54-balance-dom.html" 2>/dev/null
+          node backend/governance/pay54-rendered-balance-review.mjs \
+            "$RUNNER_TEMP/pay54-balance-dom.html"
+          rm -rf "$browser_profile" "$RUNNER_TEMP/pay54-balance-dom.html"
+      - name: Upload screenshot-only artifact for QA review (NOT GitHub Pages)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-batch17-visual-screenshots-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-visual-qa/*.png
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false

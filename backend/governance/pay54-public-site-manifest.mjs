@@ -10,7 +10,7 @@
 const SAFE_EXT=/\.(?:html|css|js|mjs|svg|png|jpg|jpeg|webp|gif|ico|json|txt|webmanifest)$/i;
 const PATH=/^[a-zA-Z0-9][a-zA-Z0-9_.\/-]{0,239}$/;
 const DENY_SEGMENTS=new Set([
- "backend",".github","docs","security","secrets","private","internal",
+ "backend",".github","docs","infrastructure","infra","terraform","security","secrets","private","internal",
  "tests","test","node_modules",".git","credentials","config","keys"
 ]);
 const BROWSER_SECURITY_SCRIPTS=new Set([
