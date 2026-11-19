@@ -1,7 +1,7 @@
 # PAY54 Batch 19 — Public-site dependency scanner review and release contract
 
-**Implementation:** 713  
-**Status:** Source-only development review; no GitHub Pages deployment approval  
+**Implementation:** 713
+**Status:** Source-only development review; no GitHub Pages deployment approval
 **Owner:** Principal Security Engineer, Chief Enterprise Architect and Principal Release Manager
 
 ## Why the implementation exists
