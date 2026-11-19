@@ -23,6 +23,12 @@ export function inspectPay54FinalGoNoGo({
  const findings=[];
  if(source.blockedFirstPartyReferences>0)findings.push("PUBLICATION_DEPENDENCY_GRAPH_BLOCKED");
  if(source.developmentRuntimeScriptMentions>0)findings.push("DEVELOPMENT_RUNTIME_REQUIRES_REVIEW");
+ if(source.inlineScriptReviewRequired){
+  findings.push("INLINE_EXECUTABLE_SCRIPT_MANUAL_REVIEW_REQUIRED");
+ }
+ if(source.staticJsImportReviewFindings>0||source.dynamicJsImportExpressions>0){
+  findings.push("STATIC_JS_IMPORT_GRAPH_REVIEW_REQUIRED");
+ }
  if(!deployer.claimedConfigurationStructurallySafe)findings.push("DEPLOYER_PACKET_INCOMPLETE");
  if(!recovery.evidencePacketComplete)findings.push("ROLLBACK_PACKET_INCOMPLETE");
  if(!ux.reviewPacketComplete)findings.push("DASHBOARD_QA_EVIDENCE_INCOMPLETE");

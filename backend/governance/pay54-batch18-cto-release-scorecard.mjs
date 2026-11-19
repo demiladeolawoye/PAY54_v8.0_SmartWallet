@@ -15,11 +15,18 @@ import {inspectPay54DeclaredPagesWorkflows}
 import {assessPay54Batch18ReleaseMatrix}
  from "./pay54-batch18-release-matrix.mjs";
 
+import {inspectPay54InlineScripts}
+ from "./pay54-batch19-inline-script-inventory.mjs";
+import {inspectPay54StaticJsImports}
+ from "./pay54-batch19-static-js-import-review.mjs";
+
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 export function createPay54Batch18ReleaseScorecard(root=ROOT){
  const refs=inspectPay54FirstPartyHtmlDependencies(root);
  const dev=inventoryPay54BrowserDevelopmentScripts(root);
  const workflows=inspectPay54DeclaredPagesWorkflows(root);
+ const inlineScripts=inspectPay54InlineScripts(root);
+ const modules=inspectPay54StaticJsImports(root);
  const release=assessPay54Batch18ReleaseMatrix({sourceRoot:root});
  return Object.freeze({
   schema:"pay54.batch18-cto-release-scorecard.v1",
@@ -29,6 +36,11 @@ export function createPay54Batch18ReleaseScorecard(root=ROOT){
   developmentRuntimeScriptMentions:dev.matches.length,
   declaredPagesWorkflowMentions:workflows.candidateWorkflowMentions.length,
   repoWorkflowSourceChecked:workflows.scannedYamlFiles,
+  executableInlineScripts: inlineScripts.executableInlineScriptCount,
+  inlineScriptReviewRequired: inlineScripts.manualInlineScriptReviewRequired,
+  staticJsImportReviewFindings: modules.findings.length,
+  dynamicJsImportExpressions: modules.dynamicImportExpressions,
+  fullRuntimeDependencyGraphVerified: false,
   releaseSourceStatus:release.categories.restrictedSource,
   activePagesSettings:"NOT_INDEPENDENTLY_VERIFIED",
   publicContentReachability:"NOT_INDEPENDENTLY_VERIFIED",

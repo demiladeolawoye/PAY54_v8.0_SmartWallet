@@ -14,6 +14,8 @@ import {inspectPay54StaticSiteCandidate}
  from "./pay54-static-site-candidate-inventory.mjs";
 import {assessPay54PublicSiteManifest}
  from "./pay54-public-site-manifest.mjs";
+import {projectPay54HtmlResourceMarkup}
+ from "./pay54-html-resource-markup.mjs";
 
 const ROOT=fileURLToPath(new URL("../../",import.meta.url));
 const ATTRIBUTE=/<(?:script|link|img)\b[^>]*\b(?:src|href)\s*=\s*(["'])([^"'<>\r\n]{1,500})\1[^>]*>/gi;
@@ -52,7 +54,8 @@ export function inspectPay54FirstPartyHtmlDependencies(sourceRoot=ROOT){
   REJECTED_PATH:0,INVALID_ENCODING:0};
  for(const page of inventory.candidatePaths.filter(p=>PAGE.test(p))){
   const html=readFileSync(join(root,page),"utf8");
-  for(const match of html.matchAll(ATTRIBUTE)){
+  const markup=projectPay54HtmlResourceMarkup(html);
+  for(const match of markup.matchAll(ATTRIBUTE)){
    const raw=match[2].trim();
    if(/^(?:https?:|data:|mailto:|tel:|#|\/\/)/i.test(raw))continue;
    if(++count>MAX_REFS)throw new Error("PAY54_HTML_DEPENDENCIES_TOO_MANY");
