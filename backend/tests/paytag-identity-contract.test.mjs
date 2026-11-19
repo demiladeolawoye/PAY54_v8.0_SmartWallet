@@ -8,10 +8,10 @@ import {
 } from "../domain/paytag-identity-contract.mjs";
 
 test("PayTag normalisation is canonical and immutable, not an ownership lookup", () => {
-  for (const value of ["@Pay54-User", "PAY54-USER"]) {
+  for (const value of ["@Demi_User", "DEMI_USER"]) {
     const alias = normalisePay54PayTag(value);
-    assert.equal(alias.canonical, "pay54-user");
-    assert.equal(alias.display, "@pay54-user");
+    assert.equal(alias.canonical, "demi_user");
+    assert.equal(alias.display, "@demi_user");
     assert.equal(alias.ownershipVerified, false);
     assert.equal(alias.availableForClaim, null);
     assert.equal(alias.recipientVerified, false);
