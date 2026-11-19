@@ -1,0 +1,128 @@
+name: PAY54 Batch 18 Publication Dependency Security
+
+on:
+  pull_request:
+    branches:
+      - cto/batch17-balance-visibility-568-617
+      - project-titan
+    paths:
+      - "backend/governance/pay54-firstparty-html-dependency-audit.mjs"
+      - "backend/governance/pay54-batch18-*.mjs"
+      - "backend/tests/account-batch18-*.test.mjs"
+      - ".github/workflows/pay54-batch18-publication-dependency.yml"
+      - "docs/engineering/pay54-batch18-*.md"
+      - "dashboard.html"
+      - "assets/css/**"
+      - "assets/img/**"
+      - "backend/governance/pay54-create-founder-preview.mjs"
+      - "backend/governance/pay54-verify-founder-preview.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch18-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publication-security:
+    name: restricted-output-source-only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_PREVIEW_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout source without persisted credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Syntax validation
+        run: |
+          node --check backend/governance/pay54-firstparty-html-dependency-audit.mjs
+          for file in backend/governance/pay54-batch18-*.mjs backend/tests/account-batch18-*.test.mjs; do
+            if test -f "$file"; then node --check "$file"; fi
+          done
+      - name: Execute fail-closed source and release regression tests
+        run: node --test backend/tests/account-batch18-*.test.mjs
+      - name: Assert real PAY54 source is not yet a customer-facing production release
+        run: |
+          node --input-type=module -e '
+            import {assessPay54Batch18ReleaseMatrix} from "./backend/governance/pay54-batch18-release-matrix.mjs";
+            import {inventoryPay54BrowserDevelopmentScripts} from "./backend/governance/pay54-batch18-development-script-inventory.mjs";
+            const r=assessPay54Batch18ReleaseMatrix();
+            const d=inventoryPay54BrowserDevelopmentScripts();
+            if(r.releaseApproved||r.productionRelease!=="BLOCKED"||
+               r.categories.restrictedSource!=="BLOCKED"||
+               !d.matches.some(x=>x.releaseClassification==="DEVELOPMENT_PROVIDER_FORBIDDEN_IN_PUBLIC_RELEASE")){
+              throw new Error("PAY54_REAL_SITE_EXPECTED_NO_GO_DISAPPEARED_WITHOUT_REVIEW");
+            }
+            console.log("Real Pages customer release remains blocked pending development provider and P0 gates");
+          '
+      - name: Verify rollback, visual QA and Pages exposure do not self-authorise release
+        run: |
+          node --input-type=module -e '
+            import {reviewPay54RollbackEvidence} from "./backend/governance/pay54-batch18-rollback-evidence.mjs";
+            import {reviewPay54DashboardReleaseQA} from "./backend/governance/pay54-batch18-dashboard-release-qa.mjs";
+            import {planPay54PagesContainmentReview} from "./backend/governance/pay54-batch18-containment-review.mjs";
+            const rollback=reviewPay54RollbackEvidence({});
+            const qa=reviewPay54DashboardReleaseQA({});
+            const incident=planPay54PagesContainmentReview({historicalArtifactOverbroad:true});
+            if(rollback.deploymentAuthorised||qa.customerReleaseApproved||incident.liveSiteSuspended||
+               rollback.productionRelease!=="BLOCKED"||qa.productionRelease!=="BLOCKED"){
+              throw new Error("PAY54_REVIEW_ONLY_OPERATIONAL_GATE_ESCALATED");
+            }
+            console.log("Security and Founder operational approval remains independent");
+          '
+      - name: Verify final source-only CTO release disposition remains NO-GO
+        run: |
+          node --input-type=module -e '
+            import {inspectPay54FinalGoNoGo} from "./backend/governance/pay54-batch18-final-gonogo.mjs";
+            const r=inspectPay54FinalGoNoGo();
+            if(r.releaseDecision!=="NO_GO"||r.productionRelease!=="BLOCKED"||
+               r.pagesSettingsModified!==false||r.customerMoneyEnabled!==false){
+              throw new Error("PAY54_BATCH18_RELEASE_BOUNDARY_REGRESSION");
+            }
+            console.log("Source-only publication governance safe; production release remains blocked");
+          '
+      - name: Build a new inert PAY54 balance dashboard review package (not Pages)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pay54-batch18-founder-preview"
+          node backend/governance/pay54-create-founder-preview.mjs \
+            "$RUNNER_TEMP/pay54-batch18-founder-preview"
+          test -f "$RUNNER_TEMP/pay54-batch18-founder-preview/preview/index.html"
+          test ! -d "$RUNNER_TEMP/pay54-batch18-founder-preview/preview/assets/js"
+          test ! -d "$RUNNER_TEMP/pay54-batch18-founder-preview/preview/backend"
+          test ! -d "$RUNNER_TEMP/pay54-batch18-founder-preview/preview/infrastructure"
+      - name: Independently compare every preview file against its SHA256 manifest
+        run: |
+          PAY54_PREVIEW_DIR="$RUNNER_TEMP/pay54-batch18-founder-preview/preview" node --input-type=module -e '
+            import {verifyPay54OfflineFounderPreview} from "./backend/governance/pay54-verify-founder-preview.mjs";
+            const r=verifyPay54OfflineFounderPreview(process.env.PAY54_PREVIEW_DIR);
+            if(!r.localArtifactIntegrityPassed || r.sourceCommitSha!==process.env.PAY54_PREVIEW_SOURCE_SHA ||
+               r.realMoneyEnabled!==false || r.productionRelease!=="BLOCKED"){
+              throw new Error("PAY54_OFFLINE_PREVIEW_SHA_VERIFICATION_FAILED");
+            }
+            console.log("Verified offline source-only balance review:",r.sourceCommitSha);
+          '
+      - name: Publish seven-day offline HTML visual artifact for founder (not Pages)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-batch18-offline-visual-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-batch18-founder-preview/preview/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
+      - name: Verify no financial or cloud authority granted
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          echo "No Pages upload, deployment, provisioning, or financial operation."
