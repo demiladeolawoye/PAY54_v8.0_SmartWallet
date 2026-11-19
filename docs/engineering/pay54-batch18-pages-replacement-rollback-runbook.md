@@ -1,6 +1,6 @@
 # PAY54 — Protected GitHub Pages Replacement and Rollback Runbook
 
-**Batch 18 item 661** · **Operating status:** Planning only — P0 OPEN  
+**Batch 18 item 661** · **Operating status:** Planning only — P0 OPEN
 **Owners:** Founder, Principal DevSecOps Engineer, Principal Security Engineer, Principal Release Manager
 
 ## Precondition: independent current-site investigation
