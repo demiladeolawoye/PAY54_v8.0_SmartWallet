@@ -1,0 +1,110 @@
+name: PAY54 Batch 22 PostgreSQL RLS Integration (Disposable)
+
+on:
+  pull_request:
+    branches:
+      - cto/batch21-account-context-768-817
+      - project-titan
+    paths:
+      - "backend/db/migrations/0*.sql"
+      - "backend/db/tests/batch22/*.sql"
+      - "docs/engineering/pay54-batch22-*.md"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch22-postgres-rls-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres-rls-isolation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16@sha256:dd2bf3ce2dc83a81674cf7f217fcfd8a5009a4b325dda5b843bfee82a06cff6f
+        env:
+          POSTGRES_DB: pay54_disposable_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pay54-ci-only-not-production
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pay54_disposable_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout exact source SHA without retained credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Apply reviewed migrations in ephemeral PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POSTGRES_CONTAINER"
+          # Existing canonical migrations must execute in reviewed order.
+          # Never wildcard mixed-numbered migrations: 008 rejects overlapping
+          # account/membership tables by design.
+          migrations=(
+            001_financial_ledger.sql
+            002_ledger_integrity_hardening.sql
+            003_wallet_reservation.sql
+            004_reservation_lifecycle.sql
+            005_operation_state_integrity.sql
+            006_database_role_isolation.sql
+            007_direct_ledger_access_boundary.sql
+            008_account_context_foundation.sql
+            009_personal_wallet_binding.sql
+            010_wallet_binding_lifecycle_guard.sql
+            011_wallet_eligibility_view.sql
+            012_account_read_role_baseline.sql
+            013_account_rls_denial.sql
+            014_auth_sessions.sql
+            015_account_context_audit.sql
+            016_session_account_integrity.sql
+            017_account_directory_read_role.sql
+          )
+          for migration_file in "${migrations[@]}"; do
+            migration="backend/db/migrations/$migration_file"
+            test -s "$migration"
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "$migration"
+          done
+      - name: Verify forced RLS denies cross-actor account and credential reads
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tests=(
+            001_rls_tenant_isolation.sql
+            002_revoked_session_rls.sql
+            003_membership_account_lifecycle_rls.sql
+            004_membership_integrity.sql
+            005_session_account_integrity.sql
+            006_append_only_account_audit.sql
+            007_legacy_account_denial_preserved.sql
+            008_inert_new_roles.sql
+            009_financial_privilege_separation.sql
+            010_actor_context_guc_reset.sql
+            011_session_digest_guc_reset.sql
+            012_malformed_actor_guc_denial.sql
+          )
+          for test_file in "${tests[@]}"; do
+            test_sql="backend/db/tests/batch22/$test_file"
+            test -s "$test_sql"
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "$test_sql"
+          done
+      - name: Guarantee source-only database test conditions
+        run: |
+          test "${{ github.event_name }}" != "deployment"
+          echo "Disposable PostgreSQL only; no production database, IAM or payment rails"
