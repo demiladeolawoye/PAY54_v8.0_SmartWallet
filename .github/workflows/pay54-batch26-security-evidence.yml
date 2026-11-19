@@ -1,0 +1,89 @@
+name: PAY54 Batch 26 Pages and Staging Evidence Source Security
+on:
+  pull_request:
+    branches:
+      - cto/batch25-operational-release-gates-968-1017
+      - project-titan
+    paths:
+      - "backend/governance/pay54-batch26-*.mjs"
+      - "backend/tests/account-batch26-*.test.mjs"
+      - "backend/src/pay54-batch26-*.mjs"
+      - "backend/security/pay54-batch26-*.mjs"
+      - "docs/engineering/pay54-batch26-*.md"
+      - ".github/workflows/pay54-batch26-security-evidence.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pay54-batch26-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  immutable-source-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PAY54_ENV: test
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_STAGING_EXECUTION: DISABLED
+    steps:
+      - name: Checkout exact review head
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up pinned Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Check source syntax and Batch26 security tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(backend/governance/pay54-batch26-*.mjs
+            backend/src/pay54-batch26-*.mjs
+            backend/security/pay54-batch26-*.mjs
+            backend/tests/account-batch26-*.test.mjs)
+          tests=(backend/tests/account-batch26-*.test.mjs)
+          test "${#files[@]}" -gt 2
+          test "${#tests[@]}" -gt 0
+          for file in "${files[@]}";do node --check "$file";done
+          node --test "${tests[@]}"
+      - name: Retain account session and release-boundary regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch25-*.test.mjs
+          node --test backend/tests/account-batch24-*.test.mjs
+          node --test backend/tests/account-batch21-http-no-switch.test.mjs
+      - name: Enforce current PAY54 live-release blockers from checked-out source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {reconcilePay54Batch26Checkout}
+            from "./backend/governance/pay54-batch26-release-blocker-merge.mjs";
+          const report=reconcilePay54Batch26Checkout();
+          if(report.productionReleaseAuthorised ||
+             report.stagingActivationAuthorised ||
+             !report.sourceRootUnsafeForPublication ||
+             !report.developmentPaymentProviderMustNotFundCustomers ||
+             report.outstandingSourceIdentifiedRisks<8)process.exit(1);
+          console.log("Verified actual source risk and NO-GO; no release authorised");
+          NODE
+      - name: Preserve canonical full migration and current financial denial tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch25-full-migration-drift.test.mjs
+          node --test backend/tests/account-batch26-financial-route-denial.test.mjs
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+      - name: Confirm no provisioning or financial authorisation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          test "$PAY54_STAGING_EXECUTION" = "DISABLED"
+          echo "Read-only source tests: Pages deployment, cloud IAM and payments disabled"
