@@ -802,3 +802,34 @@ The founder approved continuing security-first release-readiness work without by
 **Open change requests/operational decisions:** CR-PAGES-01 live current settings and active artifact verification; CR-CARD-01 linked-card production provider or explicitly disabled preview with backend gating; CR-DEPLOYER-01 protected Pages identity/rulesets; CR-ROLLBACK-01 retained safe rollback and rehearsal; CR-UX-01 founder mobile/desktop visual review and source-specific QA; CR-AUTH-01 authenticated account/RLS sandbox E2E; CR-LAUNCH-01 UK–Nigeria partner/compliance and settlement readiness.
 
 **Next planned batch:** 668–717 (Batch 19) only after new founder approval. Site-settings changes, merges, credential actions or live release still require distinct Founder + Security + Release Manager operational approval. Maintain zero-regression policy and preserve all functioning dashboards, accounts, services and payment engines.
+
+
+## Batch 19 founder engineering checkpoint — 668–717 (50/50 source deliverables)
+
+**Founder authorisation:** Continue source-only implementation of secure Pages release preparation, balance dashboard review and linked-card provider boundaries. Batch 19 changes use DRAFT PR #7 stacked on unmerged PRs #6–#1. This is not permission to merge, deploy, rotate credentials, change GitHub Pages Settings or activate customer money.
+
+| ID range | Auditable engineering outcome | State |
+| --- | --- | --- |
+| 668–672 | Cross-release SHA identity, evidence tests, dedicated CI and bounded public path observations | COMMITTED |
+| 673–679 | Distinguish active resource URLs from data-* metadata; correct HTML regex; srcset safety and root-page regression | COMMITTED |
+| 680–687 | Review unapproved form targets, base/refresh redirects, double-encoded paths and active object/embed resources | COMMITTED |
+| 688–695 | Inline script hashes, CTO integration, CI triggers and executable event handler safety tests | COMMITTED |
+| 696–704 | Correct comment/inline script/style false positives using a shared resource-markup projector and tests | COMMITTED |
+| 705–712 | Static JS import/worker review, existing scorecard integration, SHA-bound inert founder preview and independent release NO-GO | COMMITTED |
+| 713–714 | Architectural scanner review, scope limitations and security/governance tests | COMMITTED |
+| 715–716 | Full CTO closure, open operational change requests and source evidence regression | COMMITTED |
+| 717 | Final 50-item CTO board reconciliation and founder approval checkpoint | COMMITTED via this change |
+
+**Batch 19 source progress: 50/50.** Numbered work items 668–717 are source delivery/audit entries, not independent certification of an operational system. GitHub source implementation, account/security CI and offline preview checks remain separate from live Pages exposure, production partner acceptance, customer identity or financial processing.
+
+**Known blockers remain P0 OPEN:**
+- Historical Pages artifact `14252395793` had 348 backend, 150 docs and one infrastructure source file. Actual present-day public retrieval and sensitive-data scope are **NOT VERIFIED**; archival packaging is not breach proof.
+- The real dashboard references forbidden `assets/js/infrastructure/payments/providers/linked-card-development.js`; no production provider contract or approved server-disabled preview implementation is accepted.
+- Actual `Settings → Pages`, `github-pages` environment, protected deployer, current deployed artifact and rollback rehearsal have not been independently evidenced.
+- Real authenticated consumer/business, PostgreSQL RLS, device accessibility, KYC/AML, ledger reconciliation and UK–Nigeria partner readiness remain operational launch gates.
+
+**Source QA:** A dedicated Batch 19 workflow and existing account, RLS, publication security workflows run on review commits. The exact final task-board SHA must be rechecked before claiming 11/11 green. A seven-day Actions artifact is inert HTML/CSS/images bound to exact PR-head SHA, with no application JavaScript or money execution and **no hosted site deployment**.
+
+**Founder decisions for next cycle:** CR-PAGES-01 active deployment evidence; CR-CARD-01 approved provider or independently approved server-gated public preview; CR-DEPLOY-01 restricted immutable artifact and protected deployer; CR-ROLLBACK-01 verified safe rollback; CR-UX-01 exact-commit mobile/desktop/accessibility; CR-AUTH-01 account isolation sandbox; CR-FINTECH-01 contracted UK–Nigeria rails and regulated controls.
+
+**Next approved batch?** Not yet. Batch 20 would be **718–767**, requiring fresh Founder approval. Any merger, actual GitHub Pages release and customer-financial activation require their own separately documented Security/Release/Founder sign-off. Maintain zero regressions and preserve functioning PAY54 modules.
