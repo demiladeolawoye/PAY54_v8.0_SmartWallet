@@ -12,10 +12,12 @@ import { assertPay54PostgresReadRole }
   from "./postgres-rls-posture.mjs";
 import { PAY54_ROTATION_SQL }
   from "./postgres-session-rotation.mjs";
+import { PAY54_BOOTSTRAP_SQL }
+  from "./postgres-bootstrap-issuer.mjs";
 
 const deny = () => { throw new Error("PAY54_STAGING_ROLE_PROBE_DENIED"); };
 
-async function probe(pool, expectedRole, tableNames) {
+async function probe(pool, expectedRole, tableNames, roleSql = null) {
   let client, started = false, discard = false;
   try {
     client = await pool.connect();
@@ -28,14 +30,19 @@ async function probe(pool, expectedRole, tableNames) {
     }
     const result = await client.query(tableNames
       ? "SELECT current_user AS role_name"
-      : PAY54_ROTATION_SQL.ROLE_SQL);
+      : roleSql ?? PAY54_ROTATION_SQL.ROLE_SQL);
     const row = result?.rows?.[0];
     if (result?.rows?.length !== 1 || row.role_name !== expectedRole) deny();
-    if (!tableNames &&
-        (row.restricted !== true || row.may_rotate !== true ||
-         row.may_write_ledger !== false ||
-         row.may_write_sessions !== false ||
-         row.may_append_audit !== false)) deny();
+    if (!tableNames) {
+      const isIssuer = expectedRole === "pay54_session_issue_role";
+      if (row.restricted !== true ||
+          row.may_write_ledger !== false ||
+          row.may_write_sessions !== false ||
+          (isIssuer
+            ? row.may_issue !== true || row.may_write_receipts !== false
+            : row.may_rotate !== true || row.may_append_audit !== false))
+        deny();
+    }
     await client.query("COMMIT");
     started = false;
     return Object.freeze({ expectedRole, roleVerifiedInDatabase: true });
@@ -80,6 +87,29 @@ export async function probePay54StagingDatabaseRoles({
     tenantDataRead: false,
     customerCredentialIssued: false,
     independentRlsPenetrationStillRequired: true,
+    productionReleaseAuthorised: false
+  });
+}
+
+/**
+ * PAY54 Batch 25 / 991 — fourth effective role verified separately.
+ * No new pool is connected here; the operator supplies a restricted
+ * existing staging pool and controls its IAM permissions independently.
+ */
+export async function probePay54StagingIdentityIssuerRole({
+  sessionIssuerPool
+} = {}) {
+  if (!sessionIssuerPool ||
+      typeof sessionIssuerPool.connect !== "function")
+    deny();
+  const role = await probe(sessionIssuerPool,
+    "pay54_session_issue_role",null,PAY54_BOOTSTRAP_SQL.ROLE_SQL);
+  return Object.freeze({
+    schema: "pay54.staging-identity-issuer-posture.v1",
+    verifiedRole: role.expectedRole,
+    effectiveFunctionOnlyRoleVerified: true,
+    accountSessionIssued: false,
+    realDatabaseStagingApproved: false,
     productionReleaseAuthorised: false
   });
 }
