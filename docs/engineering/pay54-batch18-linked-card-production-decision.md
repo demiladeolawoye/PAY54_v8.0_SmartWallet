@@ -1,6 +1,6 @@
 # PAY54 — Linked-Card Funding Production Boundary Decision
 
-**Batch 18 item 659** · **Decision state:** Provider/feature disposition OPEN · **Source-only**  
+**Batch 18 item 659** · **Decision state:** Provider/feature disposition OPEN · **Source-only**
 **Reviewed current branch:** `cto/batch18-linked-card-preview-boundary-618-667`
 
 ## Existing architecture and verified source dependency
