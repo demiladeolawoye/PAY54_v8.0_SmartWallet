@@ -11,7 +11,10 @@ INSERT INTO pay54.paytag_registration_requests (
  '11111111-1111-4111-8111-111111111111',
  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',1,
  decode(repeat('5a',32),'hex'),decode(repeat('6b',32),'hex'),
- 'p2b_race_guard','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2','PENDING'
+ 'p2b_race_guard',
+ (SELECT correlation_id FROM pay54.paytag_registry_audit
+  WHERE tag_id='cccccccc-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
+    AND event_kind='CLAIMED'),'PENDING'
 );
 DO $assert$
 DECLARE v text;
