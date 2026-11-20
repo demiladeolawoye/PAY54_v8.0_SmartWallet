@@ -32,7 +32,7 @@ UPDATE pay54.paytag_registration_requests
      registry_tag_id='cccccccc-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
      committed_at=clock_timestamp()
  WHERE request_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee5';
-SET CONSTRAINTS paytag_committed_must_match_exact_claim IMMEDIATE;
+SET CONSTRAINTS pay54.paytag_committed_must_match_exact_claim IMMEDIATE;
 DO $assert$
 BEGIN
  IF NOT EXISTS(
@@ -72,7 +72,7 @@ BEGIN
        registry_tag_id='cccccccc-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
        committed_at=clock_timestamp()
    WHERE request_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee6';
-  SET CONSTRAINTS paytag_committed_must_match_exact_claim IMMEDIATE;
+  SET CONSTRAINTS pay54.paytag_committed_must_match_exact_claim IMMEDIATE;
   RAISE EXCEPTION 'PAYTAG_FORGED_AUDIT_CORRELATION_ACCEPTED';
  EXCEPTION WHEN foreign_key_violation THEN NULL;
  END;
@@ -104,7 +104,7 @@ BEGIN
        registry_tag_id='cccccccc-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
        committed_at=clock_timestamp()
    WHERE request_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee7';
-  SET CONSTRAINTS paytag_committed_must_match_exact_claim IMMEDIATE;
+  SET CONSTRAINTS pay54.paytag_committed_must_match_exact_claim IMMEDIATE;
   RAISE EXCEPTION 'PAYTAG_FOREIGN_PRINCIPAL_AUDIT_ACCEPTED';
  EXCEPTION WHEN foreign_key_violation THEN NULL;
  END;
