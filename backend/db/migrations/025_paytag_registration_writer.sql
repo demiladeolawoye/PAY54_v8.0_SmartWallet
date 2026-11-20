@@ -77,7 +77,7 @@ BEGIN
        s.session_version=p_expected_version AND
        s.session_status='ACTIVE' AND
        s.revoked_at IS NULL AND
-       s.issued_at<=v_now AND s.expires_at>v_now
+       s.issued_at<=clock_timestamp() AND s.expires_at>clock_timestamp()
  FOR UPDATE;
  IF NOT FOUND THEN
    RAISE EXCEPTION 'PAY54_PAYTAG_REGISTRATION_DENIED' USING ERRCODE='P0001';
