@@ -1,36 +1,15 @@
-name: PAY54 PayTag P2A Registry Schema Source Gate
-on:
-  pull_request:
-    branches:
-      - project-titan
-    paths:
-      - "backend/db/migrations/021_paytag_registry_foundation.sql"
-      - "backend/tests/paytag-p2-schema-contract.test.mjs"
-      - "docs/architecture/CR-PAYTAG-01-p2-persistence-foundation.md"
-      - ".github/workflows/pay54-paytag-p2-foundation.yml"
-permissions:
-  contents: read
-concurrency:
-  group: pay54-paytag-p2a-${{ github.ref }}
-  cancel-in-progress: true
-jobs:
-  paytag-p2a-schema:
-    name: source-only-no-deploy-p2a-registry
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    env:
-      PAY54_REAL_MONEY_MODE: "false"
-      TF_VAR_authorized_provisioning: "false"
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
-        with:
-          persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha }}
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: "24"
-      - name: Static source / no authority tests
-        run: |
-          test "$PAY54_REAL_MONEY_MODE" = "false"
-          test "$TF_VAR_authorized_provisioning" = "false"
-          node --test backend/tests/paytag-p2-schema-contract.test.mjs
+# CR-PAYTAG-01 — P2A Registry Persistence Foundation
+Status: **Source-only implementation, not deployed or registration-enabled**
+
+## Purpose and boundaries
+Migration 021 adds a canonical globally unique alias inventory and immutable-identity audit schema that references the existing verified account model and personal wallet bindings. The lifetime unique alias constraint deliberately prevents recycling a retired tag into a different owner's identity.
+
+The schema has FORCE RLS and **no policies or runtime grants**. Even a user with an eligible Personal wallet cannot claim or resolve an alias through this migration alone. Static source verification is supplemented by the existing protected PostgreSQL integration workflow, which applies the migration in a disposable database and checks its permissions.
+
+## Mandatory separate work before permitting registry operations
+The next trusted claim service must use authenticated server-owned identity (never client-supplied actor GUC), atomic transaction-scoped uniqueness, current verified PERSONAL account/membership, matching wallet ownership, row locks, serialised claim/retire transitions and audit entries. Add explicit denial for competing claims, stale sessions, race conditions, suspended accounts, cross-tenant probes and impersonation. Implement private rate-limited recipient resolution binding the confirmed stable tag ID and version; never disclose account number or allow execution from a lookup.
+
+The source registry is **not** a replacement for trusted ledger transfer, KYC/AML, card/rail permissions or provider approvals.
+
+## Production gate
+No SQL applied to live databases, no production database roles granted, no PayTag claims/recipient search enabled, no Pages deployment or financial execution. Historical public Pages exposure P0 remains open. Require disposable PostgreSQL 16+ migrations and negative RLS tests, independent security/DB review and separate operations approval before any database migration or activation.
