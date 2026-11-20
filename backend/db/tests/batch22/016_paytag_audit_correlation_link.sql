@@ -79,6 +79,16 @@ BEGIN
 END
 $assert$;
 
+-- Separate, legitimate account-2 claim avoids the unique-correlation key of
+-- the committed account-1 request, and tests the exact owner/principal FK.
+INSERT INTO pay54.paytag_registry
+ (tag_id,canonical_alias,owner_account_id,wallet_id,owner_principal_id,registry_state)
+VALUES
+ ('dddddddd-aaaa-4aaa-8aaa-aaaaaaaaaaa2','p2b_audit_principal',
+  '22222222-2222-4222-8222-222222222222',
+  'dddddddd-2222-4222-8222-222222222222',
+  '22222222-2222-4222-8222-222222222222','RESERVED');
+
 -- Negative: a correct audit event must not be claimable with a different
 -- principal, even if the account, session, tag and correlation are correct.
 DO $assert$
@@ -91,17 +101,17 @@ BEGIN
    correlation_id,request_state)
   VALUES (
    'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee7',
-   '11111111-1111-4111-8111-111111111111',
    '22222222-2222-4222-8222-222222222222',
+   '11111111-1111-4111-8111-111111111111',
    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',1,
    decode(repeat('cd',32),'hex'),decode(repeat('de',32),'hex'),
-   'p2b_race_guard',
+   'p2b_audit_principal',
    (SELECT correlation_id FROM pay54.paytag_registry_audit
-    WHERE tag_id='cccccccc-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
+    WHERE tag_id='dddddddd-aaaa-4aaa-8aaa-aaaaaaaaaaa2'
       AND event_kind='CLAIMED'),'PENDING');
   UPDATE pay54.paytag_registration_requests
    SET request_state='COMMITTED',
-       registry_tag_id='cccccccc-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+       registry_tag_id='dddddddd-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
        committed_at=clock_timestamp()
    WHERE request_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee7';
   SET CONSTRAINTS pay54.paytag_committed_must_match_exact_claim IMMEDIATE;
