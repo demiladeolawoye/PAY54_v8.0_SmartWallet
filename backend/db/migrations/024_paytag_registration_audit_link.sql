@@ -51,6 +51,19 @@ ALTER TABLE pay54.paytag_registration_requests
   ON UPDATE RESTRICT ON DELETE RESTRICT
   DEFERRABLE INITIALLY DEFERRED;
 
+-- A committed registration must also describe the *actual immutable alias* of
+-- the registry tag, never merely a tag ID whose owner/audit match.
+ALTER TABLE pay54.paytag_registry
+  ADD CONSTRAINT paytag_registry_alias_owner_tuple_unique
+    UNIQUE (tag_id,canonical_alias,owner_account_id,owner_principal_id);
+ALTER TABLE pay54.paytag_registration_requests
+  ADD CONSTRAINT paytag_committed_must_match_registry_alias
+  FOREIGN KEY (registry_tag_id,canonical_alias,owner_account_id,owner_principal_id)
+  REFERENCES pay54.paytag_registry
+    (tag_id,canonical_alias,owner_account_id,owner_principal_id)
+  ON UPDATE RESTRICT ON DELETE RESTRICT
+  DEFERRABLE INITIALLY DEFERRED;
+
 -- Maintain the original no-policy, forced-RLS and no-direct-DML posture.
 ALTER TABLE pay54.paytag_registry_audit ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pay54.paytag_registry_audit FORCE ROW LEVEL SECURITY;
