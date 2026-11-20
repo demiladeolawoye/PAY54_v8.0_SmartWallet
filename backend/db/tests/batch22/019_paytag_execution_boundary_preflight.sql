@@ -34,7 +34,8 @@ BEGIN
   IF has_schema_privilege('pay54_paytag_register_role','pay54','USAGE')
      OR has_schema_privilege('pay54_paytag_register_role','pay54','CREATE')
      OR has_function_privilege('pay54_paytag_register_role',v_writer,'EXECUTE')
-     OR has_function_privilege('public',v_writer,'EXECUTE')
+     OR EXISTS (SELECT 1 FROM pg_proc p, LATERAL aclexplode(COALESCE(p.proacl,acldefault('f',p.proowner))) acl
+                WHERE p.oid=v_writer AND acl.grantee=0 AND acl.privilege_type='EXECUTE')
   THEN RAISE EXCEPTION 'PAY54_PAYTAG_EXECUTION_GRANT_PREMATURE'; END IF;
 
   -- Scan all tables, views, foreign tables and materialized views, not just
