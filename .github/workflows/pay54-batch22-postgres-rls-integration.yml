@@ -115,7 +115,8 @@ jobs:
             019_identity_assertion_bootstrap.sql \
             020_initial_account_binding.sql \
             021_paytag_registry_foundation.sql \
-            022_paytag_lifecycle_guard.sql; do
+            022_paytag_lifecycle_guard.sql \
+            023_paytag_registration_idempotency.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "backend/db/migrations/$migration_file"
           done
@@ -204,6 +205,35 @@ jobs:
         run: |
           set -euo pipefail
           bash backend/db/tests/batch22/014_paytag_concurrent_claim.sh
+      - name: Verify PayTag idempotency schema in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 <<'PAYTAG_IDEMPOTENCY_SCHEMA_GATE'
+          DO $paytag_idempotency$
+          DECLARE target oid;
+          BEGIN
+            target := 'pay54.paytag_registration_requests'::regclass;
+            IF NOT EXISTS(SELECT 1 FROM pg_class
+              WHERE oid=target AND relrowsecurity AND relforcerowsecurity)
+              OR EXISTS(SELECT 1 FROM pg_policy WHERE polrelid=target)
+              OR has_table_privilege('pay54_financial_app_role',target,'INSERT')
+              OR has_table_privilege('pay54_financial_app_role',target,'SELECT')
+              OR has_table_privilege('pay54_ledger_executor_role',target,'INSERT')
+            THEN RAISE EXCEPTION 'PAYTAG_IDEMPOTENCY_RLS_PRIVILEGE_FAILURE'; END IF;
+            IF NOT EXISTS(SELECT 1 FROM pg_constraint
+              WHERE conrelid=target AND conname='paytag_registration_one_key_per_account'
+                AND contype='u')
+              OR NOT EXISTS(SELECT 1 FROM pg_trigger
+                WHERE tgrelid=target AND tgname='paytag_registration_guard'
+                  AND NOT tgisinternal)
+            THEN RAISE EXCEPTION 'PAYTAG_IDEMPOTENCY_UNIQUE_IMMUTABLE_MISSING'; END IF;
+          END;
+          $paytag_idempotency$;
+          PAYTAG_IDEMPOTENCY_SCHEMA_GATE
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
