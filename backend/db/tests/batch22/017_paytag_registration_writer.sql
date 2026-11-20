@@ -155,6 +155,35 @@ BEGIN
 END
 $assert$;
 
+-- A second active currency wallet must never be chosen implicitly.
+-- The failed subtransaction rolls back the disposable wallet/binding fixture.
+DO $assert$
+DECLARE marker text;
+BEGIN
+ BEGIN
+  INSERT INTO pay54.wallets(id,owner_subject,market_code,status)
+  VALUES('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee9',
+         '22222222-2222-4222-8222-222222222222','GB','ACTIVE');
+  INSERT INTO pay54.personal_wallet_bindings(wallet_id,account_id)
+  VALUES('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee9',
+         '22222222-2222-4222-8222-222222222222');
+  PERFORM * FROM pay54.register_paytag_trusted(
+   decode(repeat('e1',32),'hex'),decode(repeat('e2',32),'hex'),
+   'eeeeeeee-1111-4111-8111-111111111111',1,
+   '22222222-2222-4222-8222-222222222222',
+   '22222222-2222-4222-8222-222222222222',
+   'paytag_writer_test',decode(repeat('e3',32),'hex'),
+   decode(repeat('e4',32),'hex'),
+   'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1',
+   'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2');
+  RAISE EXCEPTION 'WRITER_AMBIGUOUS_WALLET_ACCEPTED';
+ EXCEPTION WHEN raise_exception THEN
+  GET STACKED DIAGNOSTICS marker=MESSAGE_TEXT;
+  IF marker<>'PAY54_PAYTAG_AMBIGUOUS_WALLET_DENIED' THEN RAISE; END IF;
+ END;
+END
+$assert$;
+
 -- Session rotation invalidates replay even if the same idempotency key is used.
 UPDATE pay54.auth_sessions SET session_status='REVOKED',revoked_at=clock_timestamp()
 WHERE session_id='eeeeeeee-1111-4111-8111-111111111111';
