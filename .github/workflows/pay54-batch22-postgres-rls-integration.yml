@@ -116,7 +116,8 @@ jobs:
             020_initial_account_binding.sql \
             021_paytag_registry_foundation.sql \
             022_paytag_lifecycle_guard.sql \
-            023_paytag_registration_idempotency.sql; do
+            023_paytag_registration_idempotency.sql \
+            024_paytag_registration_audit_link.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "backend/db/migrations/$migration_file"
           done
@@ -242,6 +243,14 @@ jobs:
           set -euo pipefail
           docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
             -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/015_paytag_idempotency_negative.sql
+      - name: Verify PayTag committed request exact audit correlation in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/016_paytag_audit_correlation_link.sql
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
