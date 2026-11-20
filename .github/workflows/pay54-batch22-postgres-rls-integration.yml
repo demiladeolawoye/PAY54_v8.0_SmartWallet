@@ -114,7 +114,8 @@ jobs:
             018_account_session_rotation.sql \
             019_identity_assertion_bootstrap.sql \
             020_initial_account_binding.sql \
-            021_paytag_registry_foundation.sql; do
+            021_paytag_registry_foundation.sql \
+            022_paytag_lifecycle_guard.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "backend/db/migrations/$migration_file"
           done
@@ -154,6 +155,40 @@ jobs:
           END;
           $pay54_assert$;
           PAY54_P2A_POSTGRES_TEST
+      - name: Verify PayTag P2B-A lifecycle and audit triggers are inert and deny by default
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 <<'PAY54_P2B_POSTGRES_TEST'
+          DO $pay54_assert$
+          DECLARE registry_oid oid;
+          DECLARE audit_oid oid;
+          BEGIN
+            registry_oid := 'pay54.paytag_registry'::regclass;
+            audit_oid := 'pay54.paytag_registry_audit'::regclass;
+            IF (SELECT count(*) FROM pg_trigger
+                WHERE tgrelid=registry_oid AND NOT tgisinternal) <> 3
+              OR (SELECT count(*) FROM pg_trigger
+                WHERE tgrelid=audit_oid AND NOT tgisinternal) <> 1
+            THEN RAISE EXCEPTION 'PAYTAG_P2B_LIFECYCLE_TRIGGER_MISSING'; END IF;
+            IF EXISTS (SELECT 1 FROM pg_policy
+              WHERE polrelid IN (registry_oid,audit_oid))
+            THEN RAISE EXCEPTION 'PAYTAG_P2B_UNAUTHORISED_POLICY'; END IF;
+            IF EXISTS (SELECT 1 FROM pg_class
+              WHERE oid IN (registry_oid,audit_oid)
+                AND (NOT relrowsecurity OR NOT relforcerowsecurity))
+            THEN RAISE EXCEPTION 'PAYTAG_P2B_RLS_NOT_FORCED'; END IF;
+            IF has_table_privilege('pay54_financial_app_role',registry_oid,'INSERT')
+              OR has_table_privilege('pay54_financial_app_role',registry_oid,'UPDATE')
+              OR has_table_privilege('pay54_financial_app_role',registry_oid,'SELECT')
+              OR has_table_privilege('pay54_financial_app_role',audit_oid,'INSERT')
+            THEN RAISE EXCEPTION 'PAYTAG_P2B_APP_PRIVILEGE_LEAK'; END IF;
+          END;
+          $pay54_assert$;
+          PAY54_P2B_POSTGRES_TEST
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
