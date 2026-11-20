@@ -9,6 +9,7 @@ Migration 024 adds:
 - A globally unique audit correlation ID and at most one `CLAIMED` event per tag.
 - A composite exact-claim audit uniqueness constraint.
 - A generated `CLAIMED` discriminator and a deferred exact-claim foreign key from committed registration requests to the audit row, matched on correlation, registry tag, owner account, principal and event kind.
+- A second deferred registry foreign key requiring the committed request's canonical alias to equal the immutable alias on the referenced tag for the identical account and principal.
 - Preservation of forced RLS, absent policies and prohibited application/ledger role direct writes.
 
 `PENDING` idempotency records have no tag reference; their FK is intentionally incomplete. `COMMITTED` records require a non-null registry tag by the existing migration 023 state check, so their deferred FK must resolve before commit. A request cannot masquerade as an activation/retirement audit or claim another principal's event.
