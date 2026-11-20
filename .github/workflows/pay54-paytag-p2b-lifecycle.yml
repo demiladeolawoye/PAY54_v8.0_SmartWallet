@@ -1,0 +1,34 @@
+name: PAY54 PayTag P2B-A Lifecycle Source Gate
+on:
+  pull_request:
+    branches:
+      - project-titan
+    paths:
+      - "backend/db/migrations/022_paytag_lifecycle_guard.sql"
+      - "backend/tests/paytag-p2b-lifecycle-guard.test.mjs"
+      - "docs/architecture/CR-PAYTAG-01-p2b-trusted-lifecycle-boundary.md"
+      - ".github/workflows/pay54-paytag-p2b-lifecycle.yml"
+permissions:
+  contents: read
+jobs:
+  paytag-p2b-lifecycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Fail-closed source tests
+        env:
+          PAY54_REAL_MONEY_MODE: "false"
+          TF_VAR_authorized_provisioning: "false"
+        run: |
+          set -euo pipefail
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          node --check backend/tests/paytag-p2b-lifecycle-guard.test.mjs
+          node --test backend/tests/paytag-p2b-lifecycle-guard.test.mjs
