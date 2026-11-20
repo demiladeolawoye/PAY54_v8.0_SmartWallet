@@ -12,6 +12,37 @@ BEGIN
 END
 $assert$;
 
+-- Negative: correct tag + immutable audit correlation, but a different alias.
+-- Must fail the independent registry tuple FK before accepting a COMMITTED row.
+DO $assert$
+BEGIN
+ BEGIN
+  INSERT INTO pay54.paytag_registration_requests (
+    request_id,owner_account_id,owner_principal_id,session_id,session_version,
+    idempotency_key_digest,request_digest,canonical_alias,
+    correlation_id,request_state)
+  VALUES (
+    'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee8',
+    '11111111-1111-4111-8111-111111111111',
+    '11111111-1111-4111-8111-111111111111',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',1,
+    decode(repeat('ab',32),'hex'),decode(repeat('ac',32),'hex'),
+    'wrong_alias',
+    (SELECT correlation_id FROM pay54.paytag_registry_audit
+     WHERE tag_id='cccccccc-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
+       AND event_kind='CLAIMED'),'PENDING');
+  UPDATE pay54.paytag_registration_requests
+     SET request_state='COMMITTED',
+         registry_tag_id='cccccccc-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+         committed_at=clock_timestamp()
+   WHERE request_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee8';
+  SET CONSTRAINTS pay54.paytag_committed_must_match_registry_alias IMMEDIATE;
+  RAISE EXCEPTION 'PAYTAG_FOREIGN_ALIAS_ACCEPTED';
+ EXCEPTION WHEN foreign_key_violation THEN NULL;
+ END;
+END
+$assert$;
+
 INSERT INTO pay54.paytag_registration_requests (
  request_id,owner_account_id,owner_principal_id,session_id,session_version,
  idempotency_key_digest,request_digest,canonical_alias,correlation_id,request_state
