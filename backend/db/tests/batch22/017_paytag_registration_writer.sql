@@ -133,6 +133,28 @@ BEGIN
 END
 $assert$;
 
+-- A stale session version must be rejected before any replay or write.
+DO $assert$
+DECLARE marker text;
+BEGIN
+ BEGIN
+  PERFORM * FROM pay54.register_paytag_trusted(
+   decode(repeat('e1',32),'hex'),decode(repeat('e2',32),'hex'),
+   'eeeeeeee-1111-4111-8111-111111111111',2,
+   '22222222-2222-4222-8222-222222222222',
+   '22222222-2222-4222-8222-222222222222',
+   'paytag_writer_test',decode(repeat('e3',32),'hex'),
+   decode(repeat('e4',32),'hex'),
+   'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1',
+   'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2');
+  RAISE EXCEPTION 'WRITER_STALE_SESSION_VERSION_ALLOWED';
+ EXCEPTION WHEN raise_exception THEN
+  GET STACKED DIAGNOSTICS marker=MESSAGE_TEXT;
+  IF marker<>'PAY54_PAYTAG_REGISTRATION_DENIED' THEN RAISE; END IF;
+ END;
+END
+$assert$;
+
 -- Session rotation invalidates replay even if the same idempotency key is used.
 UPDATE pay54.auth_sessions SET session_status='REVOKED',revoked_at=clock_timestamp()
 WHERE session_id='eeeeeeee-1111-4111-8111-111111111111';
