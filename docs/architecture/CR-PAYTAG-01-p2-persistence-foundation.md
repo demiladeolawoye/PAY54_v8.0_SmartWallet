@@ -1,0 +1,36 @@
+name: PAY54 PayTag P2A Registry Schema Source Gate
+on:
+  pull_request:
+    branches:
+      - project-titan
+    paths:
+      - "backend/db/migrations/021_paytag_registry_foundation.sql"
+      - "backend/tests/paytag-p2-schema-contract.test.mjs"
+      - "docs/architecture/CR-PAYTAG-01-p2-persistence-foundation.md"
+      - ".github/workflows/pay54-paytag-p2-foundation.yml"
+permissions:
+  contents: read
+concurrency:
+  group: pay54-paytag-p2a-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  paytag-p2a-schema:
+    name: source-only-no-deploy-p2a-registry
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Static source / no authority tests
+        run: |
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          node --test backend/tests/paytag-p2-schema-contract.test.mjs
