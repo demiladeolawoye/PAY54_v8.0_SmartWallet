@@ -1,0 +1,33 @@
+name: PAY54 PayTag P2B-B2B1 Request Binding Gate
+on:
+  pull_request:
+    branches:
+      - project-titan
+    paths:
+      - "backend/src/paytag-registration-request-binding.mjs"
+      - "backend/tests/paytag-registration-request-binding.test.mjs"
+      - "docs/architecture/CR-PAYTAG-01-p2b-b2b-request-binding.md"
+      - ".github/workflows/pay54-paytag-p2b-b2b-request-binding.yml"
+permissions:
+  contents: read
+jobs:
+  p2b-b2b-request-binding:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_REAL_MONEY_MODE: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - run: |
+          set -euo pipefail
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
+          node --check backend/src/paytag-registration-request-binding.mjs
+          node --test backend/tests/paytag-registration-request-binding.test.mjs
