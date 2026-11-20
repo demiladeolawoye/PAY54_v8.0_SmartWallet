@@ -234,6 +234,14 @@ jobs:
           END;
           $paytag_idempotency$;
           PAYTAG_IDEMPOTENCY_SCHEMA_GATE
+      - name: Negative PayTag idempotency replay and immutable-result integration
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/015_paytag_idempotency_negative.sql
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
