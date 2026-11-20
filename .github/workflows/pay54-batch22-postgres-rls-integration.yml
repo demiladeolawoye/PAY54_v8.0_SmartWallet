@@ -189,6 +189,14 @@ jobs:
           END;
           $pay54_assert$;
           PAY54_P2B_POSTGRES_TEST
+      - name: Negative PayTag P2B-A state machine and audit database tests
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/013_paytag_lifecycle_negative.sql
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
