@@ -49,6 +49,11 @@ jobs:
         run: |
           set -euo pipefail
           node --test backend/tests/account-batch22-*.test.mjs
+      - name: Verify PayTag P2A canonical namespace and deny-by-default source
+        run: |
+          set -euo pipefail
+          node --check backend/tests/paytag-p2-schema-contract.test.mjs
+          node --test backend/tests/paytag-p2-schema-contract.test.mjs
       - name: Retain Batch 21 account boundary and HTTP-denial regression
         run: |
           set -euo pipefail
