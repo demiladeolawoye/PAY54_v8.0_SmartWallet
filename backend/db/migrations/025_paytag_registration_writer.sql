@@ -45,6 +45,7 @@ DECLARE
  v_session pay54.auth_sessions%ROWTYPE;
  v_account pay54.account_contexts%ROWTYPE;
  v_wallet uuid;
+ v_wallet_count bigint;
  v_prev pay54.paytag_registration_requests%ROWTYPE;
  v_tag uuid;
  v_audit_correlation uuid;
@@ -103,9 +104,18 @@ BEGIN
    RAISE EXCEPTION 'PAY54_PAYTAG_REGISTRATION_DENIED' USING ERRCODE='P0001';
  END IF;
 
- -- A Personal owner can have multiple currency wallets; registration
- -- chooses one canonical bound wallet deterministically, never arbitrarily
- -- from user-supplied data or a stale UI selection.
+ -- A Personal owner may have multiple currency wallets. The existing
+ -- adapter does not accept an explicit wallet choice; ambiguous bindings
+ -- must be denied, never silently routed to the first currency wallet.
+ SELECT count(*) INTO v_wallet_count
+ FROM pay54.personal_wallet_bindings b
+ JOIN pay54.wallets w ON w.id=b.wallet_id
+ WHERE b.account_id=p_account_id
+   AND w.owner_subject=p_principal_id AND w.status='ACTIVE';
+ IF v_wallet_count<>1 THEN
+   RAISE EXCEPTION 'PAY54_PAYTAG_AMBIGUOUS_WALLET_DENIED'
+     USING ERRCODE='P0001';
+ END IF;
  SELECT b.wallet_id INTO v_wallet
  FROM pay54.personal_wallet_bindings b
  JOIN pay54.wallets w ON w.id=b.wallet_id
