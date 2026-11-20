@@ -84,9 +84,16 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$PAY54_HEAD_SHA"
-          test "$PAY54_HEAD_BRANCH" = "cto/batch27-operational-evidence-1068-1187"
-          test "$PAY54_BASE_BRANCH" = "cto/batch26-pages-proof-staging-readiness-1018-1067"
-          test "$PAY54_PR_DRAFT" = "true"
+          case "$PAY54_HEAD_BRANCH:$PAY54_BASE_BRANCH:$PAY54_PR_DRAFT" in
+            "cto/batch27-operational-evidence-1068-1187:cto/batch26-pages-proof-staging-readiness-1018-1067:true")
+              ;; # Original source-review PR: draft only
+            "cto/integration-batch27-protected-20261120:project-titan:true" | "cto/integration-batch27-protected-20261120:project-titan:false")
+              ;; # Exact protected integration PR: draft or ready for review
+            *)
+              echo "PAY54_BATCH27_REVIEW_PROVENANCE_DENIED" >&2
+              exit 1
+              ;;
+          esac
       - name: Require all 120 distinct tracked Batch27 source actions
         shell: bash
         run: |
