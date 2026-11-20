@@ -10,7 +10,7 @@ test("P2A GitHub Actions workflow is executable YAML, never markdown",()=>{
   assert.match(workflow,/^name: PAY54 PayTag P2A Registry Schema Source Gate$/m);
   assert.match(workflow,/^on:\s*$/m);
   assert.match(workflow,/^\s+pull_request:\s*$/m);
-  assert.match(workflow,/^\s+permissions:\s*$/m);
+  assert.match(workflow,/^permissions:\s*$/m);
   assert.match(workflow,/^\s+contents: read\s*$/m);
   assert.match(workflow,/node --test backend\/tests\/paytag-p2-schema-contract\.test\.mjs/);
   assert.match(workflow,/backend\/tests\/paytag-p2-packaging\.test\.mjs/);
