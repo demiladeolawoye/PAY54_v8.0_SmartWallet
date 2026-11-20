@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>PAY54 — Reset PIN</title>
   <link rel="stylesheet" href="assets/css/auth.css">
+  <link rel="stylesheet" href="assets/css/deployment-boundary.css">
 </head>
 <body>
+<div class="pay54-preview-notice" role="status" aria-live="polite"><strong>Development preview only.</strong> Use made-up information and a demo PIN. No real identity check, bank account, card service or payment is available.</div>
 <!-- PAY54 AUTH BRAND (OUTSIDE BASELINE FLOW) -->
 <div class="pay54-auth-brand">
   <img src="assets/img/pay54-logo.svg" alt="PAY54" />
@@ -14,19 +16,19 @@
 
 <div class="auth-wrapper">
 
-  <h1>Reset PIN</h1>
+  <h1>Reset demo PIN</h1>
 
   <div class="info-box">
-    <p data-icon="🔐"> Your account remains fully protected</p>
-    <p data-icon="📩"> Recovery instructions sent securely</p>
-    <p data-icon="⏱"> Takes less than a minute</p>
+    <p data-icon="🔐"> Local demo recovery — not a real bank account</p>
+    <p data-icon="📩"> No real email recovery instruction is sent</p>
+    <p data-icon="⏱"> Use the demo email stored in this browser</p>
   </div>
 
   <div id="msg" class="message"></div>
 
   <form onsubmit="sendReset(event)" autocomplete="off">
   <input
-    id="forgot-email"
+    id="forgot-email" aria-label="Demo registered email address"
     type="email"
     placeholder="Registered email"
     required
@@ -45,7 +47,7 @@
   </div>
 
   <div class="security-banner">
-    🔐 Bank-grade protection
+    🔐 Demo flow only — no production identity verification
   </div>
 
 </div>

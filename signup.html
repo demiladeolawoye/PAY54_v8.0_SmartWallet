@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>PAY54 — Sign Up</title>
   <link rel="stylesheet" href="assets/css/auth.css">
+  <link rel="stylesheet" href="assets/css/deployment-boundary.css">
 </head>
 <body>
+<div class="pay54-preview-notice" role="status" aria-live="polite"><strong>Development preview only.</strong> Use made-up information and a demo PIN. No real identity check, bank account, card service or payment is available.</div>
 
 <!-- PAY54 AUTH BRAND -->
 <div class="pay54-auth-brand">
@@ -15,19 +17,19 @@
 
 <div class="auth-wrapper">
 
-  <h1>Create your account</h1>
+  <h1>Create a demo profile</h1>
 
   <div class="info-box">
-    <p>🌍 One wallet for Africa and global currencies</p>
-    <p>🚀 Fast, secure onboarding in minutes</p>
-    <p>🔐 Protected by PIN & session security</p>
+    <p>🌍 Explore a sample multi-currency wallet</p>
+    <p>🚀 Sample onboarding only — no real account is created</p>
+    <p>🔐 Use made-up contact details and a demo PIN only</p>
   </div>
 
   <div id="msg" class="message"></div>
 
  <form onsubmit="signup(event)" autocomplete="off">
   <input
-    id="signup-name"
+    id="signup-name" aria-label="Demo full name"
     type="text"
     placeholder="Full name"
     required
@@ -38,7 +40,7 @@
   >
 
   <input
-    id="signup-email"
+    id="signup-email" aria-label="Demo email address"
     type="email"
     placeholder="Email"
     required
@@ -49,7 +51,7 @@
   >
 <div class="phone-field">
 
-<select id="signup-country">
+<select id="signup-country" aria-label="Demo country calling code">
 <option value="+44">🇬🇧 +44</option>
 <option value="+234">🇳🇬 +234</option>
 <option value="+233">🇬🇭 +233</option>
@@ -58,7 +60,7 @@
 </select>
 
 <input
-id="signup-phone"
+id="signup-phone" aria-label="Demo telephone number"
 type="tel"
 placeholder="Telephone"
 required
@@ -67,7 +69,7 @@ required
 </div>
 
   <input
-    id="signup-pin"
+    id="signup-pin" aria-label="Create a four-digit demo PIN"
     type="password"
     placeholder="Create PIN"
     required
@@ -77,7 +79,7 @@ required
   >
 
   <input
-    id="signup-confirm-pin"
+    id="signup-confirm-pin" aria-label="Confirm demo PIN"
     type="password"
     placeholder="Confirm PIN"
     required
@@ -86,7 +88,7 @@ required
     autocomplete="new-password"
   >
 
-  <button type="submit">Create account</button>
+  <button type="submit">Create demo profile</button>
 </form>
 
 
@@ -95,7 +97,7 @@ required
   </div>
 
   <div class="security-banner">
-    🔐 Bank-grade security • Session & PIN protected • Built for Africa
+    🔐 Demo only • Contact details stay in this browser • No bank account is created
   </div>
 
 </div>

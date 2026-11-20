@@ -13,10 +13,15 @@
 <!-- CSS -->
 <link rel="stylesheet" href="assets/css/global.css">
 <link rel="stylesheet" href="assets/css/dashboard.css">
+<link rel="stylesheet" href="assets/css/deployment-boundary.css">
 
 </head>
 
 <body class="dark">
+<div class="pay54-preview-notice" role="status" aria-live="polite">
+  <strong>PAY54 development preview.</strong>
+  <span>All displayed balances, account numbers, KYC status and financial actions are demonstrations. No regulated financial services, real card funding, payments or transfers are available here.</span>
+</div>
 
 <!-- =========================
      SESSION GUARD
@@ -195,24 +200,24 @@ if(!window.PAY54Session || !PAY54Session.isAuthenticated()){
       <div class="identity">
 
         <div>
-          <strong>Acct:</strong>
+          <strong>Demo account:</strong>
           3001234567
         </div>
 
         <div>
-          <strong>Tag:</strong>
+          <strong>Demo tag:</strong>
           @pay54-user
         </div>
 
         <div>
           <strong>KYC:</strong>
-          Level 2
+          Not verified (demo)
         </div>
 
       </div>
 
       <div class="trust-chip">
-        🔒 Security & Financial compliance active
+        🔒 Development preview — security and financial compliance not independently verified
       </div>
 
       <!-- FX -->
