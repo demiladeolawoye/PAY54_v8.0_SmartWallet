@@ -104,6 +104,56 @@ jobs:
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "$test_sql"
           done
+      - name: Apply subsequent canonical migrations and PayTag 021 in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration_file in \
+            018_account_session_rotation.sql \
+            019_identity_assertion_bootstrap.sql \
+            020_initial_account_binding.sql \
+            021_paytag_registry_foundation.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "backend/db/migrations/$migration_file"
+          done
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 <<'PAY54_P2A_POSTGRES_TEST'
+          DO $pay54_assert$
+          DECLARE
+            registry_oid oid;
+            audit_oid oid;
+          BEGIN
+            registry_oid := to_regclass('pay54.paytag_registry');
+            audit_oid := to_regclass('pay54.paytag_registry_audit');
+            IF registry_oid IS NULL OR audit_oid IS NULL THEN
+              RAISE EXCEPTION 'PAYTAG_REGISTRY_MISSING';
+            END IF;
+            IF EXISTS(
+              SELECT 1 FROM pg_class
+              WHERE oid IN (registry_oid,audit_oid)
+                AND (NOT relrowsecurity OR NOT relforcerowsecurity)
+            ) THEN RAISE EXCEPTION 'PAYTAG_RLS_NOT_FORCED'; END IF;
+            IF EXISTS(
+              SELECT 1 FROM pg_policy WHERE polrelid IN (registry_oid,audit_oid)
+            ) THEN RAISE EXCEPTION 'PAYTAG_UNAUTHORISED_POLICY'; END IF;
+            IF has_table_privilege('pay54_financial_app_role',registry_oid,'SELECT')
+              OR has_table_privilege('pay54_financial_app_role',registry_oid,'INSERT')
+              OR has_table_privilege('pay54_financial_app_role',audit_oid,'SELECT')
+              OR has_table_privilege('pay54_financial_app_role',audit_oid,'INSERT')
+            THEN RAISE EXCEPTION 'PAYTAG_UNAUTHORISED_APP_PRIVILEGE'; END IF;
+            IF NOT EXISTS(
+              SELECT 1 FROM pg_index WHERE indrelid=registry_oid AND indisunique
+                AND indexrelid='pay54.paytag_registry_canonical_alias_key'::regclass
+            ) THEN RAISE EXCEPTION 'PAYTAG_ALIAS_GLOBAL_UNIQUE_MISSING'; END IF;
+            IF NOT EXISTS(
+              SELECT 1 FROM pg_index WHERE indrelid=registry_oid AND indisunique
+                AND indexrelid='pay54.paytag_one_current_tag_per_account'::regclass
+            ) THEN RAISE EXCEPTION 'PAYTAG_ACCOUNT_CURRENT_UNIQUE_MISSING'; END IF;
+          END;
+          $pay54_assert$;
+          PAY54_P2A_POSTGRES_TEST
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
