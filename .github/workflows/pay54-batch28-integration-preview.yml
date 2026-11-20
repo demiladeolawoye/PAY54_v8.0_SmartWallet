@@ -103,9 +103,16 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$REVIEW_SHA"
-          test "$REVIEW_HEAD" = "cto/batch28-integration-release-hardening-1188-1307"
-          test "$REVIEW_BASE" = "cto/batch27-operational-evidence-1068-1187"
-          test "$IS_DRAFT" = "true"
+          case "$REVIEW_HEAD:$REVIEW_BASE:$IS_DRAFT" in
+            "cto/batch28-integration-release-hardening-1188-1307:cto/batch27-operational-evidence-1068-1187:true")
+              ;; # Original source PR must remain in draft
+            "cto/integration-batch28-protected-20261120:project-titan:true" | "cto/integration-batch28-protected-20261120:project-titan:false")
+              ;; # Exact protected integration branch: draft or independent review
+            *)
+              echo "PAY54_BATCH28_REVIEW_PROVENANCE_DENIED" >&2
+              exit 1
+              ;;
+          esac
           test "$PAY54_REAL_MONEY_MODE" = "false"
           test "$PAY54_STAGING_EXECUTION" = "DISABLED"
           test "$TF_VAR_authorized_provisioning" = "false"
