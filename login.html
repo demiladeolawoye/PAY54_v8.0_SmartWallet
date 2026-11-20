@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 
   <title>PAY54 — Login</title>
   <link rel="stylesheet" href="assets/css/auth.css">
+  <link rel="stylesheet" href="assets/css/deployment-boundary.css">
 </head>
 
 <body>
+<div class="pay54-preview-notice" role="status" aria-live="polite"><strong>Development preview only.</strong> Use made-up information and a demo PIN. No real identity check, bank account, card service or payment is available.</div>
 
 <div class="pay54-auth-brand">
   <img src="assets/img/pay54-logo.svg" alt="PAY54" />
@@ -16,12 +18,12 @@
 
 <div class="auth-wrapper">
 
-  <h1>Welcome back</h1>
+  <h1>Explore the PAY54 demo</h1>
 
   <div class="info-box">
-    <p>🌍 One wallet for Africa and global currencies</p>
-    <p>⚡ Send, receive, and convert instantly</p>
-    <p>🔐 Secure by design with PIN protection</p>
+    <p>🌍 Explore a sample multi-currency wallet</p>
+    <p>⚡ Explore sample journeys — no money is moved</p>
+    <p>🔐 Use a made-up demo PIN, never a real banking PIN</p>
   </div>
 
   <div id="msg" class="message"></div>
@@ -29,7 +31,7 @@
   <form onsubmit="login(event)" autocomplete="off">
 
     <input
-      id="login-email"
+      id="login-email" aria-label="Demo email address"
       type="email"
       placeholder="Email"
       required
@@ -40,7 +42,7 @@
     >
 
     <input
-      id="login-pin"
+      id="login-pin" aria-label="Four-digit demo PIN"
       type="password"
       placeholder="PIN"
       required
@@ -55,11 +57,11 @@
 
   <div class="links">
     <a href="forgot-pin.html">Forgot PIN?</a>
-    <a href="signup.html">Create account</a>
+    <a href="signup.html">Create demo profile</a>
   </div>
 
   <div class="security-banner">
-    🔐 Bank-grade security • Session & PIN protected • Built for Africa
+    🔐 Demo only • No real customer authentication • No financial service
   </div>
 
 </div>

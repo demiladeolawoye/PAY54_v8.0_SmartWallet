@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>PAY54 — Verify OTP</title>
   <link rel="stylesheet" href="assets/css/auth.css">
+  <link rel="stylesheet" href="assets/css/deployment-boundary.css">
 </head>
 <body>
+<div class="pay54-preview-notice" role="status" aria-live="polite"><strong>Development preview only.</strong> Use made-up information and a demo PIN. No real identity check, bank account, card service or payment is available.</div>
 
 <!-- PAY54 AUTH BRAND -->
 <div class="pay54-auth-brand">
@@ -15,19 +17,19 @@
 
 <div class="auth-wrapper">
 
-  <h1>Verify your account</h1>
+  <h1>Complete demo verification</h1>
 
   <div class="info-box">
-  <p data-icon="📩">Enter the 6-digit code sent to your email</p>
-  <p data-icon="⏱">Code expires shortly</p>
-  <p data-icon="🔐">This keeps your account secure</p>
+  <p data-icon="📩">No email is sent. Enter any six-digit sample code.</p>
+  <p data-icon="⏱">This demonstration does not verify a real OTP</p>
+  <p data-icon="🔐">No real customer identity or account is verified</p>
   </div>
 
   <div id="msg" class="message"></div>
 
   <form onsubmit="verifyOtp(event)" autocomplete="off">
     <input
-      id="otp"
+      id="otp" aria-label="Six-digit sample verification code"
       type="text"
       placeholder="Enter 6-digit OTP"
       required
@@ -41,11 +43,11 @@
   </form>
 
   <div class="links">
-    <a href="#">Resend code</a>
+    <span>No code is sent in this demo</span>
   </div>
 
   <div class="security-banner">
-    🔐 Secure verification • One-time use code
+    🔐 Demo confirmation only — not identity verification
   </div>
 
 </div>

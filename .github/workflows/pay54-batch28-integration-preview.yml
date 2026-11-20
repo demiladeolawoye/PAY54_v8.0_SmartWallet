@@ -1,0 +1,118 @@
+# PAY54 Batch 28 / 1196 — Source-only integration/security gate
+name: PAY54 Batch 28 Integration and Safe Preview
+on:
+  pull_request:
+    branches:
+      - cto/batch27-operational-evidence-1068-1187
+      - project-titan
+    paths:
+      - "public-preview/**"
+      - "backend/release/pay54-*.mjs"
+      - "backend/tests/account-batch28-*.test.mjs"
+      - "docs/engineering/pay54-batch28-*.md"
+      - ".github/workflows/pay54-batch28-integration-preview.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pay54-batch28-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-only-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PAY54_REAL_MONEY_MODE: "false"
+      PAY54_STAGING_EXECUTION: DISABLED
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout review head without credential persistence
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install pinned Node runtime
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Validate new source modules and security tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          modules=(backend/release/pay54-*.mjs)
+          tests=(backend/tests/account-batch28-*.test.mjs)
+          test "${#modules[@]}" -gt 1
+          test "${#tests[@]}" -gt 1
+          for path in "${modules[@]}" "${tests[@]}"; do node --check "$path"; done
+          node --test "${tests[@]}"
+      - name: Build isolated NONFINANCIAL static preview offline
+        shell: bash
+        run: |
+          set -euo pipefail
+          dest="$RUNNER_TEMP/pay54-static-public-preview"
+          test ! -e "$dest"
+          node backend/release/pay54-public-preview-build.mjs "$dest"
+          test -f "$dest/index.html"
+          test -f "$dest/assets/css/preview.css"
+          test "$(find "$dest" -type f | wc -l)" = "2"
+          if grep -Eiq '<script|<form|linked-card-development|PAY54Session|Security & Financial compliance active' "$dest/index.html";then
+            echo "Unsafe financial or script content in public candidate"
+            exit 1
+          fi
+          test ! -e "$dest/backend"
+          test ! -e "$dest/infrastructure"
+          test ! -e "$dest/.github"
+          test ! -e "$dest/dashboard.html"
+          echo "Offline-only static candidate inspected; no artifact uploaded/deployed"
+      - name: Upload inert two-file preview for founder review (not GitHub Pages)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pay54-marketing-preview-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay54-static-public-preview/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
+      - name: Retain current financial denial and source root risk
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/account-batch27-*.test.mjs
+          node --test backend/tests/account-batch26-financial-route-denial.test.mjs
+          node --input-type=module <<'NODE'
+          import {reconcilePay54Batch26Checkout} from "./backend/governance/pay54-batch26-release-blocker-merge.mjs";
+          const r=reconcilePay54Batch26Checkout();
+          if(!r.sourceRootUnsafeForPublication||
+             !r.developmentPaymentProviderMustNotFundCustomers ||
+             r.stagingActivationAuthorised!==false ||
+             r.productionReleaseAuthorised!==false)process.exit(1);
+          NODE
+      - name: Reject legacy plaintext PIN and misleading demo security claims
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module -e 'import {inspectPay54DemoAuthCheckout} from "./backend/release/pay54-demo-auth-checkout-guard.mjs";const r=inspectPay54DemoAuthCheckout();if(r.checkedScreens!==6||r.financialServicesEnabled||r.productionReleaseAuthorised)process.exit(1);console.log("Legacy demo source controls PASS; real login remains disabled");'
+      - name: Reject PR-head substitution and operational execution
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          REVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+          REVIEW_HEAD: ${{ github.event.pull_request.head.ref }}
+          REVIEW_BASE: ${{ github.event.pull_request.base.ref }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$REVIEW_SHA"
+          case "$REVIEW_HEAD:$REVIEW_BASE:$IS_DRAFT" in
+            "cto/batch28-integration-release-hardening-1188-1307:cto/batch27-operational-evidence-1068-1187:true")
+              ;; # Original source PR must remain in draft
+            "cto/integration-batch28-protected-20261120:project-titan:true" | "cto/integration-batch28-protected-20261120:project-titan:false")
+              ;; # Exact protected integration branch: draft or independent review
+            *)
+              echo "PAY54_BATCH28_REVIEW_PROVENANCE_DENIED" >&2
+              exit 1
+              ;;
+          esac
+          test "$PAY54_REAL_MONEY_MODE" = "false"
+          test "$PAY54_STAGING_EXECUTION" = "DISABLED"
+          test "$TF_VAR_authorized_provisioning" = "false"
