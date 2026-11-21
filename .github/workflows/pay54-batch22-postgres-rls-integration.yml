@@ -294,6 +294,29 @@ jobs:
           set -euo pipefail
           docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
             -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/021_paytag_writer_negative_lifecycle.sql
+      - name: Apply restricted PayTag execution source only in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/migrations/028_paytag_restricted_execution.sql
+      - name: Verify actual restricted caller execution, RLS, replay and revocation
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/023_paytag_restricted_execution.sql
+      - name: Verify restricted caller cross-account alias and revocation races
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash backend/db/tests/batch22/024_paytag_restricted_races.sh
       - name: PayTag actual writer two-connection SERIALIZABLE claim race
         env:
           POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
