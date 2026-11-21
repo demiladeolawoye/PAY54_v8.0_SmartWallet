@@ -34,7 +34,11 @@ BEGIN
  IF NOT EXISTS (
    SELECT 1 FROM pg_proc
    WHERE oid=wrapper_oid AND proowner=owner_oid AND prosecdef
-     AND proconfig @> ARRAY['search_path=pg_catalog,pay54,pg_temp']::text[]
+     AND EXISTS (
+       SELECT 1 FROM unnest(proconfig) AS setting
+       WHERE regexp_replace(setting,'[[:space:]]+','','g') =
+         'search_path=pg_catalog,pay54,pg_temp'
+     )
  ) OR EXISTS (SELECT 1 FROM pg_proc WHERE oid=writer_oid AND prosecdef)
  OR NOT has_function_privilege('pay54_paytag_register_role',wrapper_oid,'EXECUTE')
  OR has_function_privilege('pay54_paytag_register_role',writer_oid,'EXECUTE')
