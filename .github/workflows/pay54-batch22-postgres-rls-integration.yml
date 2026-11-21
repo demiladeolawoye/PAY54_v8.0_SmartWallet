@@ -269,6 +269,14 @@ jobs:
           set -euo pipefail
           docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
             -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/018_paytag_inert_role.sql
+      - name: Verify PayTag execution authority stays denied across schema
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/019_paytag_execution_boundary_preflight.sql
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
