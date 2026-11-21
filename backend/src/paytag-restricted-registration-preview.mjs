@@ -143,6 +143,9 @@ export function createPay54RestrictedRegistrationPreview({
    // The wrapper can become eligible for persistent deployment ONLY in a
    // separately reviewed connector and route. Here no success is announced
    // until the ephemeral database acknowledges COMMIT.
+   // The connection may have been altered during execution; deny the
+   // commit if the effective database role no longer matches the contract.
+   if(!verifiedRole(await client.query(PAY54_PAYTAG_RESTRICTED_ROLE_SQL)))deny();
    commitAttempted=true;
    await client.query("COMMIT");
    committed=true;
@@ -169,6 +172,10 @@ export function createPay54RestrictedRegistrationPreview({
    if(client && active.has(client)){
     active.delete(client);
     // No physical session reuse: conservative even after success.
+    try{client.release(true);}catch{/* already quarantined */}
+   }else if(client && typeof client.release==="function" &&
+            typeof client.query!=="function"){
+    // An invalid fresh checkout is not an authorised shared connection.
     try{client.release(true);}catch{/* already quarantined */}
    }
   }
