@@ -36,7 +36,7 @@ SELECT * FROM pay54.register_paytag_trusted(
  decode(repeat('b4',32),'hex'),
  'f1590000-0000-4000-8000-000000000012',
  'f1590000-0000-4000-8000-000000000013');
-\\echo PR59_FIRST_CLAIM_READY
+\echo PR59_FIRST_CLAIM_READY
 SELECT pg_sleep(4);
 COMMIT;
 SQL
