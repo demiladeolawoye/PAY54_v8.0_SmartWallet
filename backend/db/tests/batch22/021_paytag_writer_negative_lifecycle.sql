@@ -14,7 +14,7 @@ VALUES
   'ACTIVE',1,clock_timestamp()-interval '1 minute',
   clock_timestamp()+interval '1 hour');
 
--- Each failure rolls back its own mutation subtransaction, preserving the
+-- No active eligible wallet and multiple active eligible wallets both reject as\n-- PAY54_PAYTAG_AMBIGUOUS_WALLET_DENIED; neither may claim a tag.\n-- Each failure rolls back its own mutation subtransaction, preserving the
 -- canonical fixture for the next negative case. No claim ever commits.
 DO $test$
 DECLARE
@@ -28,7 +28,7 @@ BEGIN
     'ambiguous_wallet'
   ] LOOP
     v_expected := CASE
-      WHEN v_case='ambiguous_wallet' THEN 'PAY54_PAYTAG_AMBIGUOUS_WALLET_DENIED'
+      WHEN v_case IN ('ambiguous_wallet','inactive_wallet') THEN 'PAY54_PAYTAG_AMBIGUOUS_WALLET_DENIED'
       ELSE 'PAY54_PAYTAG_REGISTRATION_DENIED'
     END;
     v_observed := NULL;
