@@ -324,6 +324,19 @@ jobs:
         run: |
           set -euo pipefail
           bash backend/db/tests/batch22/022_paytag_writer_concurrency.sh
+      - name: Validate PayTag runtime activation planning policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/paytag-runtime-activation-gate.test.mjs
+      - name: Verify PayTag restricted role catalogue post-migration
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/025_paytag_activation_catalogue_gate.sql
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
