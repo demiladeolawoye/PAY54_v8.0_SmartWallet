@@ -119,7 +119,8 @@ jobs:
             023_paytag_registration_idempotency.sql \
             024_paytag_registration_audit_link.sql \
             025_paytag_registration_writer.sql \
-            026_paytag_registration_role_foundation.sql; do
+            026_paytag_registration_role_foundation.sql \
+            027_paytag_function_owner_foundation.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
               -X -v ON_ERROR_STOP=1 < "backend/db/migrations/$migration_file"
           done
@@ -277,6 +278,14 @@ jobs:
           set -euo pipefail
           docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
             -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/019_paytag_execution_boundary_preflight.sql
+      - name: Verify isolated PayTag function-owner role denies all execution
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/020_paytag_function_owner_isolation.sql
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
