@@ -52,7 +52,7 @@ GRANT INSERT ON pay54.paytag_registry, pay54.paytag_registry_audit,
 GRANT UPDATE (request_state,registry_tag_id,committed_at)
  ON pay54.paytag_registration_requests TO pay54_paytag_function_owner_role;
 
--- Enforced RLS applies even though the table owner is the migration role.
+-- FORCE RLS is retained on existing identity and PayTag tables. Wallets are\n-- canonical ledger infrastructure with a different access contract; this\n-- migration does not alter wallet RLS or existing financial operations.\n-- Enforced RLS applies even though the table owner is the migration role.
 -- Status predicates provide defence in depth; precise owner-account locking,
 -- token/CSRF binding and alias integrity are enforced by the trusted writer.
 CREATE POLICY pay54_paytag_owner_session_read
@@ -169,7 +169,7 @@ BEGIN
  'pay54.ledger_entries','INSERT')
  OR EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
            WHERE n.nspname='pay54' AND c.relname IN (
-             'auth_sessions','account_contexts','account_memberships','wallets',
+             'auth_sessions','account_contexts','account_memberships',
              'personal_wallet_bindings','paytag_registry','paytag_registry_audit',
              'paytag_registration_requests')
            AND (NOT c.relrowsecurity OR NOT c.relforcerowsecurity))
