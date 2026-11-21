@@ -286,6 +286,21 @@ jobs:
           set -euo pipefail
           docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
             -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/020_paytag_function_owner_isolation.sql
+      - name: PayTag actual SQL writer negative session and account lifecycle tests
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/021_paytag_writer_negative_lifecycle.sql
+      - name: PayTag actual writer two-connection SERIALIZABLE claim race
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash backend/db/tests/batch22/022_paytag_writer_concurrency.sh
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
