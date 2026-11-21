@@ -35,7 +35,7 @@ const request=()=>({
   "x-pay54-csrf":token(2),
   "idempotency-key":token(3)
  }},
- requestPayload:{proposedTag:"@pay54_safe_test"}
+ requestPayload:{proposedTag:"@customer_safe_test"}
 });
 function setup({role=posture,rows=[{tagId:IDS[3],requestId:IDS[4],replayed:false}],
  failOn=null,commitFailure=false,rollbackFailure=false,
@@ -101,7 +101,7 @@ test("authenticated parameterised restricted registration, commit then discard",
  assert.equal(f.queries.at(-1).sql,"COMMIT");
  const q=f.queries.find(x=>x.sql===PAY54_PAYTAG_RESTRICTED_CALL_SQL);
  assert.equal(q.params.length,11);
- assert.equal(q.params[6],"pay54_safe_test");
+ assert.equal(q.params[6],"customer_safe_test");
  assert.equal(q.params[3],2);
  assert.ok(q.params.every((v,i)=>![0,1,7,8].includes(i)||Buffer.isBuffer(v)));
  // Values are disposed after query; never leak secrets to logging.
