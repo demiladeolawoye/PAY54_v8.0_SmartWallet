@@ -159,7 +159,33 @@ test("rollback failure still quarantines physical session",async()=>{
  await assert.rejects(()=>f.preview(request()),/PAY54_PAYTAG_RESTRICTED_PREVIEW_UNAVAILABLE/);
  assert.deepEqual(f.releases,[true]);
 });
-test("precheckout rejected connection fails closed",async()=>{
- const f=setup({clientOverride:{query:null,release:()=>{}}});
+test("precheckout rejected connection fails closed and discards malformed client",async()=>{
+ const discarded=[];
+ const f=setup({clientOverride:{query:null,release:value=>discarded.push(value)}});
  await assert.rejects(()=>f.preview(request()),/PAY54_PAYTAG_RESTRICTED_PREVIEW_UNAVAILABLE/);
+ assert.deepEqual(discarded,[true]);
+});
+test("database role changing after SQL call prevents commit and discards client",async()=>{
+ let checks=0;
+ const queries=[],releases=[];
+ const client={
+  async query(sql,params){
+   queries.push({sql,params});
+   if(sql===PAY54_PAYTAG_RESTRICTED_ROLE_SQL){
+    checks++;
+    return {rows:[checks===1?posture:{...posture,role_name:"postgres"}]};
+   }
+   if(sql===PAY54_PAYTAG_RESTRICTED_CALL_SQL)return {
+    rows:[{tagId:IDS[3],requestId:IDS[4],replayed:false}]
+   };
+   return {rows:[]};
+  },
+  release:value=>releases.push(value)
+ };
+ const f=setup({clientOverride:client});
+ await assert.rejects(()=>f.preview(request()),/PAY54_PAYTAG_RESTRICTED_PREVIEW_UNAVAILABLE/);
+ assert.equal(checks,2);
+ assert.equal(queries.some(q=>q.sql==="COMMIT"),false);
+ assert.equal(queries.at(-1).sql,"ROLLBACK");
+ assert.deepEqual(releases,[true]);
 });
