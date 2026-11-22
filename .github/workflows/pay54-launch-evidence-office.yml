@@ -1,0 +1,52 @@
+name: PAY54 Launch Blocker Evidence Office
+
+on:
+  pull_request:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/pay54-launch-evidence-office.mjs"
+      - "backend/tests/pay54-launch-evidence-office.test.mjs"
+      - "docs/architecture/PAY54-BATCH29-three-workstream-readiness.md"
+      - ".github/workflows/pay54-launch-evidence-office.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-evidence-office:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_FINANCIAL_EXECUTION: "false"
+      PAY54_STAGING_EXECUTION: DISABLED
+      PAY54_PUBLICATION: DISABLED
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout exact reviewed source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Configure pinned Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Verify launch evidence office and canonical blocker source
+        run: |
+          set -euo pipefail
+          node --check backend/governance/pay54-launch-evidence-office.mjs
+          node --test backend/tests/pay54-launch-evidence-office.test.mjs
+          node --test backend/tests/account-batch25-operational-blockers.test.mjs
+      - name: Generate fail-closed launch readiness report
+        run: |
+          set -euo pipefail
+          node backend/governance/pay54-launch-evidence-office.mjs > /tmp/pay54-launch-evidence.md
+          grep -q "PRODUCTION NO-GO" /tmp/pay54-launch-evidence.md
+          grep -q "CR-FINTECH-01" /tmp/pay54-launch-evidence.md
+          grep -q "CR-PAGES-01" /tmp/pay54-launch-evidence.md
+          test "$PAY54_FINANCIAL_EXECUTION" = false
+          test "$PAY54_STAGING_EXECUTION" = DISABLED
+          test "$PAY54_PUBLICATION" = DISABLED
+          test "$TF_VAR_authorized_provisioning" = false
