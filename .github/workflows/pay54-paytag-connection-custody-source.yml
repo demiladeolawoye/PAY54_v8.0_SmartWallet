@@ -1,0 +1,55 @@
+name: PAY54 PayTag Connection Custody Source Security
+
+on:
+  pull_request:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/paytag-connection-custody-review.mjs"
+      - "backend/tests/paytag-connection-custody-review.test.mjs"
+      - "docs/architecture/CR-PAYTAG-01-p2b-b2b13-connection-custody.md"
+      - ".github/workflows/pay54-paytag-connection-custody-source.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-paytag-connection-custody-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  custody-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_DATABASE_CONNECTIONS: "DISABLED"
+      PAY54_SECRET_PROVISIONING: "DISABLED"
+      PAY54_PAYTAG_RUNTIME: "DISABLED"
+      PAY54_FINANCIAL_EXECUTION: "false"
+      TF_VAR_authorized_provisioning: "false"
+    steps:
+      - name: Checkout exact head without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Configure pinned Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - name: Run source-only security policies and adversarial tests
+        run: |
+          set -euo pipefail
+          node --check backend/governance/paytag-connection-custody-review.mjs
+          node --test backend/tests/paytag-connection-custody-review.test.mjs
+          node --test backend/tests/paytag-credential-identity-review.test.mjs
+          node --test backend/tests/paytag-runtime-activation-gate.test.mjs
+      - name: Enforce no connection, credential or financial authority
+        run: |
+          set -euo pipefail
+          test "$PAY54_DATABASE_CONNECTIONS" = "DISABLED"
+          test "$PAY54_SECRET_PROVISIONING" = "DISABLED"
+          test "$PAY54_PAYTAG_RUNTIME" = "DISABLED"
+          test "$PAY54_FINANCIAL_EXECUTION" = "false"
+          test "$TF_VAR_authorized_provisioning" = "false"
