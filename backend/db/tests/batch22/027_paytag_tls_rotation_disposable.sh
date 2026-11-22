@@ -46,7 +46,10 @@ ALTER SYSTEM SET ssl_key_file = '$DIR/server.key';
 SQL
 HBA_FILE="$(su postgres -s /bin/sh -c "psql -X -At -U postgres -d pay54_disposable_ci -c 'SHOW hba_file'")"
 test -f "$HBA_FILE"
+# Default CI trust would bypass the password check; install an
+# explicit SCRAM requirement for our synthetic SSL-only login.
 sed -i '1ihostnossl all pay54_tls_ci_login 127.0.0.1/32 reject' "$HBA_FILE"
+sed -i '1ihostssl all pay54_tls_ci_login 127.0.0.1/32 scram-sha-256' "$HBA_FILE"
 su postgres -s /bin/sh -c "psql -X -At -U postgres -d pay54_disposable_ci -c 'SELECT pg_reload_conf()'" | grep -qx t
 sleep 1
 su postgres -s /bin/sh -c "psql -X -At -U postgres -d pay54_disposable_ci -c 'SHOW ssl'" | grep -qx on
