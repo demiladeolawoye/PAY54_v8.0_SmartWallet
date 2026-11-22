@@ -6,6 +6,9 @@ on:
       - project-titan
     paths:
       - "assets/js/dashboard/account-read-coordinator.mjs"
+      - "assets/js/dashboard-core.js"
+      - "backend/tests/dashboard-balance-integrity.test.mjs"
+      - "docs/architecture/PAY54-BATCH30-dashboard-balance-integrity.md"
       - "backend/tests/dashboard-account-read-coordinator.test.mjs"
       - "docs/architecture/CR-DASHBOARD-01-account-read-coordination.md"
       - ".github/workflows/pay54-dashboard-account-read-security.yml"
@@ -36,6 +39,8 @@ jobs:
         run: |
           set -euo pipefail
           node --check assets/js/dashboard/account-read-coordinator.mjs
+          node --check assets/js/dashboard-core.js
+          node --test backend/tests/dashboard-balance-integrity.test.mjs
           node --test backend/tests/dashboard-account-read-coordinator.test.mjs
           node --test backend/tests/account-batch21-wallet-read-admission.test.mjs
       - name: Reject financial activation
