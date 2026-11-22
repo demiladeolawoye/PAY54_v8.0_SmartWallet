@@ -278,9 +278,15 @@ function renderBalance(){
   try{
 
     const ledger = window.PAY54_LEDGER;
-    const balances = typeof ledger?.getBalances === "function"
-      ? ledger.getBalances()
-      : null;
+    let balances = null;
+    try {
+      balances = typeof ledger?.getBalances === "function"
+        ? ledger.getBalances()
+        : null;
+    } catch {
+      // Failed/expired demo ledger must not leave previously displayed funds.
+      balances = null;
+    }
     const validBalances = balances !== null &&
       typeof balances === "object" && !Array.isArray(balances);
     const active = window.PAY54_APP.activeCurrency || "NGN";
@@ -326,11 +332,19 @@ if(walletContainer){
       const value = typeof amt === "number" ? amt :
         typeof amt === "string" && /^-?\\d+(?:\\.\\d+)?$/.test(amt.trim())
           ? Number(amt.trim()) : NaN;
-      return Number.isFinite(value) && value > 0;
+      return typeof cur === "string" && /^[A-Z]{3}$/.test(cur) &&
+        Number.isFinite(value) && value > 0;
 
     })
 
     .map(([cur, amt]) => {
+
+      const escapedAmount = String(safeMoneyFmt(cur, amt))
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
 
       return `
 
@@ -341,7 +355,7 @@ if(walletContainer){
           </span>
 
           <span class="wallet-balance-amt">
-            ${safeMoneyFmt(cur, amt)}
+            ${escapedAmount}
           </span>
 
         </div>
