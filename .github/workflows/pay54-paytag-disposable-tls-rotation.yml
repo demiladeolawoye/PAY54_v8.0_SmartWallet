@@ -1,0 +1,70 @@
+name: PAY54 PayTag Disposable TLS and Rotation Integration
+
+on:
+  pull_request:
+    branches:
+      - project-titan
+    paths:
+      - "backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh"
+      - "docs/architecture/CR-PAYTAG-01-p2b-b2b14-tls-rotation-integration.md"
+      - ".github/workflows/pay54-paytag-disposable-tls-rotation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-disposable-tls-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  disposable-tls-rotation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PAY54_ENVIRONMENT: DISPOSABLE_CI
+      PAY54_FINANCIAL_EXECUTION: "false"
+      PAY54_PAYTAG_RUNTIME: DISABLED
+      PAY54_SECRET_PROVISIONING: DISABLED
+      TF_VAR_authorized_provisioning: "false"
+    services:
+      postgres:
+        image: postgres:16@sha256:dd2bf3ce2dc83a81674cf7f217fcfd8a5009a4b325dda5b843bfee82a06cff6f
+        env:
+          POSTGRES_DB: pay54_disposable_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pay54-ci-only-not-production
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pay54_disposable_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout PR head without persistent token
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Enforce disposable-only guardrails
+        run: |
+          set -euo pipefail
+          test "$PAY54_ENVIRONMENT" = DISPOSABLE_CI
+          test "$PAY54_FINANCIAL_EXECUTION" = false
+          test "$PAY54_PAYTAG_RUNTIME" = DISABLED
+          test "$PAY54_SECRET_PROVISIONING" = DISABLED
+          test "$TF_VAR_authorized_provisioning" = false
+      - name: Prove authenticated TLS and ephemeral credential rotation
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh
+          bash backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh
+      - name: Confirm no deployment or persistent authority
+        run: |
+          set -euo pipefail
+          test "$PAY54_ENVIRONMENT" = DISPOSABLE_CI
+          test "$PAY54_PAYTAG_RUNTIME" = DISABLED
+          test "$PAY54_FINANCIAL_EXECUTION" = false

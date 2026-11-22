@@ -347,6 +347,17 @@ jobs:
           set -euo pipefail
           bash -n backend/db/tests/batch22/026_paytag_disposable_login_role.sh
           bash backend/db/tests/batch22/026_paytag_disposable_login_role.sh
+      - name: Verify actual TLS and credential rotation only on disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+          PAY54_PAYTAG_RUNTIME: DISABLED
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh
+          bash backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
