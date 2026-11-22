@@ -296,7 +296,7 @@ function renderBalance(){
     const parsedAmount = typeof rawAmount === "number"
       ? rawAmount
       : typeof rawAmount === "string" &&
-        /^-?\\d+(?:\\.\\d+)?$/.test(rawAmount.trim())
+        /^-?\d+(?:\.\d+)?$/.test(rawAmount.trim())
         ? Number(rawAmount.trim()) : NaN;
     const amount = Number.isFinite(parsedAmount) ? parsedAmount : null;
     const balanceEl = qs("#balanceAmount");
@@ -306,8 +306,6 @@ function renderBalance(){
       balanceEl.textContent = amount === null
         ? "Balance unavailable"
         : safeMoneyFmt(active, amount);
-    }
-
     }
 
     /* =========================================
@@ -330,7 +328,7 @@ if(walletContainer){
     .filter(([cur, amt]) => {
 
       const value = typeof amt === "number" ? amt :
-        typeof amt === "string" && /^-?\\d+(?:\\.\\d+)?$/.test(amt.trim())
+        typeof amt === "string" && /^-?\d+(?:\.\d+)?$/.test(amt.trim())
           ? Number(amt.trim()) : NaN;
       return typeof cur === "string" && /^[A-Z]{3}$/.test(cur) &&
         Number.isFinite(value) && value > 0;
