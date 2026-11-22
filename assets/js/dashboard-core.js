@@ -278,28 +278,29 @@ function renderBalance(){
   try{
 
     const ledger = window.PAY54_LEDGER;
+    const balances = typeof ledger?.getBalances === "function"
+      ? ledger.getBalances()
+      : null;
+    const validBalances = balances !== null &&
+      typeof balances === "object" && !Array.isArray(balances);
+    const active = window.PAY54_APP.activeCurrency || "NGN";
+    const rawAmount = validBalances &&
+      Object.prototype.hasOwnProperty.call(balances, active)
+      ? balances[active] : null;
+    const parsedAmount = typeof rawAmount === "number"
+      ? rawAmount
+      : typeof rawAmount === "string" &&
+        /^-?\\d+(?:\\.\\d+)?$/.test(rawAmount.trim())
+        ? Number(rawAmount.trim()) : NaN;
+    const amount = Number.isFinite(parsedAmount) ? parsedAmount : null;
+    const balanceEl = qs("#balanceAmount");
 
-    if(!ledger) return;
-
-    const balances =
-      ledger.getBalances();
-
-    const active =
-      window.PAY54_APP.activeCurrency || "NGN";
-
-    const amount =
-      Number(balances[active] || 70284035);
-
-    const balanceEl =
-      qs("#balanceAmount");
-
-    if(balanceEl){
-
-      balanceEl.textContent =
-        safeMoneyFmt(
- active,
- amount
-);
+    if (balanceEl) {
+      // Never manufacture a customer balance. A genuine zero stays zero.
+      balanceEl.textContent = amount === null
+        ? "Balance unavailable"
+        : safeMoneyFmt(active, amount);
+    }
 
     }
 
@@ -318,11 +319,14 @@ if(walletContainer){
 
   let walletHTML =
 
-    Object.entries(balances)
+    Object.entries(validBalances ? balances : {})
 
     .filter(([cur, amt]) => {
 
-      return Number(amt) > 0;
+      const value = typeof amt === "number" ? amt :
+        typeof amt === "string" && /^-?\\d+(?:\\.\\d+)?$/.test(amt.trim())
+          ? Number(amt.trim()) : NaN;
+      return Number.isFinite(value) && value > 0;
 
     })
 
@@ -348,7 +352,10 @@ if(walletContainer){
 
     .join("");
 
-  walletHTML += `
+  if (!validBalances) {
+    walletHTML = '<div class="wallet-balance-unavailable" role="status">Wallet balances unavailable</div>';
+  } else {
+    walletHTML += `
 
     <div
       class="wallet-add-row"
@@ -360,6 +367,7 @@ if(walletContainer){
     </div>
 
   `;
+  }
 
   walletContainer.innerHTML =
     walletHTML;
