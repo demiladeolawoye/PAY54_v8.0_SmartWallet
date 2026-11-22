@@ -337,6 +337,16 @@ jobs:
           set -euo pipefail
           docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
             -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/025_paytag_activation_catalogue_gate.sql
+      - name: Verify disposable PostgreSQL login-to-PayTag role isolation and revoke
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/026_paytag_disposable_login_role.sh
+          bash backend/db/tests/batch22/026_paytag_disposable_login_role.sh
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
