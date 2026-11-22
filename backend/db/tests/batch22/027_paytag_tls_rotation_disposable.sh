@@ -101,8 +101,10 @@ if run_login "$old_password" -c 'SELECT 1' >/dev/null 2>&1; then
   echo "PAY54_ROTATED_CREDENTIAL_STILL_AUTHENTICATES" >&2
   exit 1
 fi
+# The isolated TLS test intentionally has no PAY54 migrations installed.
+# Assert the login is unprivileged without referencing a nonexistent schema.
 test "$(run_login "$new_password" -c \
-  "SELECT has_schema_privilege(current_user,'pay54','USAGE')")" = f
+  "SELECT NOT rolsuper AND NOT rolbypassrls AND NOT rolcreatedb AND NOT rolcreaterole FROM pg_roles WHERE rolname=current_user")" = t
 unset old_password new_password
 echo "PASS PAY54 disposable verify-full TLS, negative peers, transport enforcement and rotation"
 PAY54_EPHEMERAL_TLS
