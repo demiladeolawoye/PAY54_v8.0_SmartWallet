@@ -62,29 +62,29 @@ run_login(){
   local password="$1"
   shift
   PGPASSWORD="$password" PGSSLMODE=verify-full PGSSLROOTCERT="$DIR/ca.pem" \
-    psql -X -A -t -v ON_ERROR_STOP=1 -U "$role" -d pay54_disposable_ci \
-    "host=localhost hostaddr=127.0.0.1 port=5432" "$@"
+    psql -X -A -t -v ON_ERROR_STOP=1 -U "$role" \
+    -d "dbname=pay54_disposable_ci host=localhost hostaddr=127.0.0.1 port=5432" "$@"
 }
 test "$(run_login "$old_password" -c \
   'SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()')" = t
 
 if PGPASSWORD="$old_password" PGSSLMODE=verify-full PGSSLROOTCERT="$DIR/ca.pem" \
-  psql -X -q -v ON_ERROR_STOP=1 -U "$role" -d pay54_disposable_ci \
-  "host=incorrect.internal.example hostaddr=127.0.0.1 port=5432" \
+  psql -X -q -v ON_ERROR_STOP=1 -U "$role" \
+  -d "dbname=pay54_disposable_ci host=incorrect.internal.example hostaddr=127.0.0.1 port=5432" \
   -c 'SELECT 1' >/dev/null 2>&1; then
   echo "PAY54_TLS_HOSTNAME_NOT_VERIFIED" >&2
   exit 1
 fi
 if PGPASSWORD="$old_password" PGSSLMODE=verify-full PGSSLROOTCERT="$DIR/wrong.pem" \
-  psql -X -q -v ON_ERROR_STOP=1 -U "$role" -d pay54_disposable_ci \
-  "host=localhost hostaddr=127.0.0.1 port=5432" \
+  psql -X -q -v ON_ERROR_STOP=1 -U "$role" \
+  -d "dbname=pay54_disposable_ci host=localhost hostaddr=127.0.0.1 port=5432" \
   -c 'SELECT 1' >/dev/null 2>&1; then
   echo "PAY54_TLS_WRONG_CA_ACCEPTED" >&2
   exit 1
 fi
 if PGPASSWORD="$old_password" PGSSLMODE=disable \
-  psql -X -q -v ON_ERROR_STOP=1 -U "$role" -d pay54_disposable_ci \
-  "host=localhost hostaddr=127.0.0.1 port=5432" \
+  psql -X -q -v ON_ERROR_STOP=1 -U "$role" \
+  -d "dbname=pay54_disposable_ci host=localhost hostaddr=127.0.0.1 port=5432" \
   -c 'SELECT 1' >/dev/null 2>&1; then
   echo "PAY54_PLAINTEXT_DATABASE_CONNECTION_ACCEPTED" >&2
   exit 1
