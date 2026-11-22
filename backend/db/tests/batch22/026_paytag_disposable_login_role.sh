@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # PAY54 PR64 — DISPOSABLE CI ONLY. Does not attest TLS or real IAM.
-: "\${POSTGRES_CONTAINER:?Disposable PostgreSQL service container required}"
-if [[ "\${PAY54_ENVIRONMENT:-}" != "DISPOSABLE_CI" ||
-      "\${PAY54_FINANCIAL_EXECUTION:-}" != "false" ]]; then
+: "${POSTGRES_CONTAINER:?Disposable PostgreSQL service container required}"
+if [[ "${PAY54_ENVIRONMENT:-}" != "DISPOSABLE_CI" ||
+      "${PAY54_FINANCIAL_EXECUTION:-}" != "false" ]]; then
   echo PAY54_LOGIN_PROOF_ENVIRONMENT_DENIED >&2
   exit 1
 fi
@@ -14,7 +14,7 @@ trap 'rm -f "$error_log"' EXIT
 
 # Local-socket trust in the ephemeral official PostgreSQL image is NOT
 # representative of production credentials or network authentication.
-"\${admin[@]}" <<'SQL'
+"${admin[@]}" <<'SQL'
 DO $before$
 BEGIN
  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='pay54_paytag_ci_login')
@@ -43,7 +43,7 @@ END $assert$;
 SQL
 
 # An actual new PostgreSQL connection authenticated as the disposable login.
-"\${login[@]}" <<'SQL'
+"${login[@]}" <<'SQL'
 DO $assert$
 BEGIN
  IF session_user<>'pay54_paytag_ci_login' OR current_user<>session_user
@@ -92,15 +92,15 @@ BEGIN
 END $assert$;
 SQL
 
-"\${admin[@]}" <<'SQL'
+"${admin[@]}" <<'SQL'
 REVOKE pay54_paytag_register_role FROM pay54_paytag_ci_login;
 SQL
 # Revoked membership cannot SET ROLE in a new physical session.
-if "\${login[@]}" -c 'SET ROLE pay54_paytag_register_role;' >"$error_log" 2>&1; then
+if "${login[@]}" -c 'SET ROLE pay54_paytag_register_role;' >"$error_log" 2>&1; then
   echo PAY54_CI_REVOKED_MEMBERSHIP_STILL_WORKS >&2
   exit 1
 fi
-"\${admin[@]}" <<'SQL'
+"${admin[@]}" <<'SQL'
 DROP ROLE pay54_paytag_ci_login;
 DO $assert$
 BEGIN
