@@ -6,6 +6,11 @@ on:
       - project-titan
     paths:
       - "assets/js/dashboard/account-read-coordinator.mjs"
+      - "assets/js/dashboard/wallet-balance-presenter.mjs"
+      - "backend/src/authenticated-wallet-balance-read.mjs"
+      - "backend/tests/authenticated-wallet-balance-read.test.mjs"
+      - "backend/tests/dashboard-wallet-balance-presenter.test.mjs"
+      - "docs/architecture/PAY54-BATCH31-wallet-read-integration.md"
       - "assets/js/dashboard-core.js"
       - "backend/tests/dashboard-balance-integrity.test.mjs"
       - "docs/architecture/PAY54-BATCH30-dashboard-balance-integrity.md"
@@ -42,6 +47,10 @@ jobs:
           node --check assets/js/dashboard-core.js
           node --test backend/tests/dashboard-balance-integrity.test.mjs
           node --test backend/tests/dashboard-account-read-coordinator.test.mjs
+          node --check backend/src/authenticated-wallet-balance-read.mjs
+          node --check assets/js/dashboard/wallet-balance-presenter.mjs
+          node --test backend/tests/authenticated-wallet-balance-read.test.mjs
+          node --test backend/tests/dashboard-wallet-balance-presenter.test.mjs
           node --test backend/tests/account-batch21-wallet-read-admission.test.mjs
       - name: Reject financial activation
         run: |
