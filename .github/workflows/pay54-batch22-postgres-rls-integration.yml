@@ -412,7 +412,8 @@ jobs:
           set -euo pipefail
           docker cp backend/db/tests/007_capture_release_concurrency.sh \
             "$POSTGRES_CONTAINER:/tmp/pay54-batch34-lifecycle-races.sh"
-          docker exec -i "$POSTGRES_CONTAINER" bash \
+          docker exec -u postgres -e PGDATABASE=pay54_disposable_ci \
+            -e PGUSER=postgres -i "$POSTGRES_CONTAINER" bash \
             /tmp/pay54-batch34-lifecycle-races.sh
       - name: Guarantee source-only database test conditions
         run: |
