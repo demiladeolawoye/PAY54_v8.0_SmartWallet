@@ -197,8 +197,61 @@ FROM pay54.wallet_read_restricted_disposable(
  decode(repeat('35',32),'hex'),
  'b3500000-0000-4000-8000-000000000001',
  'b3500000-0000-4000-8000-000000000006','GBP');
--- Invalid digest can error; encapsulate negative with savepoint not DO catch
--- because EXECUTE privilege is tested outside the read path below.
+-- Negative executions must fail without leaking an account or balances.
+DO $denials$
+DECLARE denied boolean;
+BEGIN
+ denied:=false;
+ BEGIN
+  PERFORM * FROM pay54.auth_sessions LIMIT 1;
+ EXCEPTION WHEN insufficient_privilege THEN denied:=true;
+ END;
+ IF NOT denied THEN RAISE EXCEPTION 'PAY54_DIRECT_SESSION_SELECT_ALLOWED'; END IF;
+ denied:=false;
+ BEGIN
+  PERFORM * FROM pay54.ledger_entries LIMIT 1;
+ EXCEPTION WHEN insufficient_privilege THEN denied:=true;
+ END;
+ IF NOT denied THEN RAISE EXCEPTION 'PAY54_DIRECT_LEDGER_SELECT_ALLOWED'; END IF;
+ denied:=false;
+ BEGIN
+  PERFORM * FROM pay54.wallet_read_restricted_disposable(
+    decode(repeat('ee',32),'hex'),
+    'b3500000-0000-4000-8000-000000000001',
+    'b3500000-0000-4000-8000-000000000003','GBP');
+ EXCEPTION WHEN raise_exception THEN denied:=true;
+ END;
+ IF NOT denied THEN RAISE EXCEPTION 'PAY54_WRONG_DIGEST_ACCEPTED'; END IF;
+ denied:=false;
+ BEGIN
+  PERFORM * FROM pay54.wallet_read_restricted_disposable(
+    decode(repeat('35',32),'hex'),
+    'b3500000-0000-4000-8000-000000000002',
+    'b3500000-0000-4000-8000-000000000003','GBP');
+ EXCEPTION WHEN raise_exception THEN denied:=true;
+ END;
+ IF NOT denied THEN RAISE EXCEPTION 'PAY54_CROSS_ACCOUNT_ACCEPTED'; END IF;
+END $denials$;
+
+-- Revocation must deny a subsequent read. This deliberately tests
+-- consecutive statements, NOT a revocation that races mid-flight.
+RESET ROLE;
+UPDATE pay54.auth_sessions SET session_status='REVOKED',
+ revoked_at=clock_timestamp()
+ WHERE session_id='b3500000-0000-4000-8000-000000000005';
+SET LOCAL ROLE pay54_wallet_read_caller_role;
+DO $revoked$
+DECLARE denied boolean:=false;
+BEGIN
+ BEGIN
+  PERFORM * FROM pay54.wallet_read_restricted_disposable(
+    decode(repeat('35',32),'hex'),
+    'b3500000-0000-4000-8000-000000000001',
+    'b3500000-0000-4000-8000-000000000003','GBP');
+ EXCEPTION WHEN raise_exception THEN denied:=true;
+ END;
+ IF NOT denied THEN RAISE EXCEPTION 'PAY54_REVOKED_SESSION_ACCEPTED'; END IF;
+END $revoked$;
 RESET ROLE;
 ROLLBACK;
 
