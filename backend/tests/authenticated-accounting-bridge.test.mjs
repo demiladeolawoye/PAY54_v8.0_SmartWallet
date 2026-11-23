@@ -20,7 +20,7 @@ const accounting=()=>({schema:"pay54.wallet-restricted-accounting-proof.v1",
   heldMinor:"250",computedUnreservedMinor:"750",
   authorisedForCustomerDisplay:false,financialExecutionEnabled:false,
   productionReady:false,providerSettlementVerified:false});
-function fixture({nextSession,initialSession,scopeAfter,scopeBefore,read}={}){
+function fixture({nextSession,initialSession,scopeAfter,scopeBefore,read,fence}={}){
  let calls=0,scopes=0,reads=0;
  const bridge=make({
   resolveAuthenticatedSession:async ()=>{
@@ -31,7 +31,12 @@ function fixture({nextSession,initialSession,scopeAfter,scopeBefore,read}={}){
   },
   restrictedReader:{read:async input=>{
    reads++;return read?read(input):accounting();
-  }}
+  }},
+  freshSessionFence:{verify:async input=>fence
+   ?fence(input)
+   :{schema:"pay54.fresh-session-commit-fence.v1",
+     sessionVersion:input.expected.version,freshCommittedRead:true,
+     atomicRevocationBarrierProven:false,productionAuthorised:false}}
  });
  return {bridge,get calls(){return calls;},get scopes(){return scopes;},
   get reads(){return reads;}};
@@ -41,6 +46,8 @@ test("restricted accounting proof revalidates session and owner after read",asyn
  const r=await x.bridge.read({request:req,requestedAccountId:A});
  assert.equal(r.computedUnreservedMinor,"750");
  assert.equal(r.sessionRechecked,true);
+ assert.equal(r.freshCommittedSessionRechecked,true);
+ assert.equal(r.atomicRevocationBarrierProven,false);
  assert.equal(r.authorisedForCustomerDisplay,false);
  assert.equal(r.customerAvailableBalanceVerified,false);
  assert.equal(r.stagingDeploymentAuthorised,false);
@@ -59,7 +66,9 @@ for(const [name,options] of [
  ["owner unverified",{scopeBefore:{...scope(),verifiedPersonalOwner:false}}],
  ["wrong ledger account",{read:async()=>({...accounting(),accountId:B})}],
  ["live balance claimed",{read:async()=>({...accounting(),authorisedForCustomerDisplay:true})}],
- ["server failure",{read:async()=>{throw Error("PRIVATE_SESSION_TOKEN");}}]
+ ["server failure",{read:async()=>{throw Error("PRIVATE_SESSION_TOKEN");}}],
+ ["fresh revocation fence denies stale balance",{fence:async()=>{throw Error("REVOKED");}}],
+ ["false fresh snapshot claim",{fence:async()=>({schema:"pay54.fresh-session-commit-fence.v1",sessionVersion:2,freshCommittedRead:false,atomicRevocationBarrierProven:false,productionAuthorised:false})}]
 ]){
  test("rejects "+name+" with no accounting disclosure",async()=>{
   const x=fixture(options);

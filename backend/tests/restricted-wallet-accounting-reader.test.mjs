@@ -42,7 +42,7 @@ test("checks role and exact read-only query, returns unapproved accounting only"
  assert.deepEqual(f.discards,[true]);
  assert.equal(f.calls[0].sql,"BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
  assert.equal(f.calls.at(-1).sql,"ROLLBACK");
- const sql=f.calls.find(v=>v.sql.includes("wallet_read_restricted_disposable"));
+ const sql=f.calls.find(v=>v.sql.includes("wallet_read_restricted_v1"));
  assert.equal(sql.params.length,4);
  assert.deepEqual(sql.params[0],digest);
 });
@@ -59,7 +59,7 @@ for(const [name,config] of [
  ["untrusted auth",{authOverrides:{active:false}}],
  ["mismatched principal context",{authOverrides:{walletId:other}}],
  ["invalid digest length",{authOverrides:{tokenDigest:Buffer.alloc(10)}}],
- ["database failure",{failQuery:"wallet_read_restricted_disposable"}]
+ ["database failure",{failQuery:"wallet_read_restricted_v1"}]
 ]){
  test("fails closed for "+name,async()=>{
   const f=fixture(config);

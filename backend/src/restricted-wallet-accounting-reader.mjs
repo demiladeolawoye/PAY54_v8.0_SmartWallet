@@ -14,7 +14,7 @@ const MONEY=/^(0|[1-9][0-9]{0,37})$/;
 const SQL=`SELECT account_id::text AS "accountId",
  wallet_id::text AS "walletId", currency,
  posted_minor AS "postedMinor", held_minor AS "heldMinor"
- FROM pay54.wallet_read_restricted_disposable($1::bytea,$2::uuid,$3::uuid,$4::varchar(3))`;
+ FROM pay54.wallet_read_restricted_v1($1::bytea,$2::uuid,$3::uuid,$4::varchar(3))`;
 
 export function createPay54RestrictedWalletAccountingReader({
  pool,trustedAuth

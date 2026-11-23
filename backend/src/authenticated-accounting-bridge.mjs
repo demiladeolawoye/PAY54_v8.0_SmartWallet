@@ -35,11 +35,12 @@ function validScope(scope,session){
   scope.activeWalletBinding===true&&scope.rlsVerified===true;
 }
 export function createPay54AuthenticatedAccountingBridge({
- resolveAuthenticatedSession,resolveWalletScope,restrictedReader
+ resolveAuthenticatedSession,resolveWalletScope,restrictedReader,freshSessionFence
 }={}){
  if(typeof resolveAuthenticatedSession!=="function"||
     typeof resolveWalletScope!=="function"||
-    typeof restrictedReader?.read!=="function")reject();
+    typeof restrictedReader?.read!=="function"||
+    typeof freshSessionFence?.verify!=="function")reject();
 
  return Object.freeze({
   async read({request,requestedAccountId}={}){
@@ -75,6 +76,18 @@ export function createPay54AuthenticatedAccountingBridge({
     // and account context changes. It is not an atomic serialisation proof.
     const second=await resolveAuthenticatedSession(request);
     if(!validSession(second)||!equalSession(first,second))reject();
+    const committed=await freshSessionFence.verify({
+      request,
+      expected:Object.freeze({
+        sessionId:first.sessionId,principalId:first.principalId,
+        activeAccountId:first.activeAccountId,version:first.version
+      })
+    });
+    if(committed?.schema!=="pay54.fresh-session-commit-fence.v1"||
+       committed.sessionVersion!==first.version||
+       committed.freshCommittedRead!==true||
+       committed.atomicRevocationBarrierProven!==false||
+       committed.productionAuthorised!==false)reject();
     const afterScope=await resolveWalletScope(second);
     if(!validScope(afterScope,second)||
        afterScope.walletId!==beforeScope.walletId||
@@ -91,6 +104,8 @@ export function createPay54AuthenticatedAccountingBridge({
       heldMinor:result.heldMinor,
       computedUnreservedMinor:result.computedUnreservedMinor,
       sessionRechecked:true,
+      freshCommittedSessionRechecked:true,
+      atomicRevocationBarrierProven:false,
       customerAvailableBalanceVerified:false,
       authorisedForCustomerDisplay:false,
       stagingDeploymentAuthorised:false,
