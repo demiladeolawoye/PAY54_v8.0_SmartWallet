@@ -80,6 +80,7 @@ test("real-client protocol probe returns only bounded NO-GO identity evidence",a
  assert.equal(result.stagingDeploymentAuthorised,false);
  assert.deepEqual(f.released,[true]);
  assert.equal(f.queries[0],"BEGIN ISOLATION LEVEL READ COMMITTED READ ONLY");
+ assert.equal(f.queries[1],"SET LOCAL ROLE pay54_wallet_read_caller_role");
  assert.equal(f.queries.at(-1),"ROLLBACK");
 });
 for(const [name,part] of [
