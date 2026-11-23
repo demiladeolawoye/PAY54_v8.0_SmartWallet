@@ -80,6 +80,39 @@ test("raw thrown provider credentials never surface",async()=>{
   error=>error.message==="PAY54_WALLET_RESTRICTED_READ_UNAVAILABLE");
  assert.deepEqual(f.discards,[true]);
 });
+test("Batch36 linked credential and session version are independently verified",async()=>{
+ const f=fixture({authOverrides:{sessionId:"55555555-5555-4555-8555-555555555555",
+  sessionVersion:2}});
+ const expected={...request(),
+  expectedTokenDigest:Buffer.from(digest),
+  expectedSessionId:"55555555-5555-4555-8555-555555555555",
+  expectedSessionVersion:2};
+ assert.equal((await f.x.read(expected)).postedMinor,"1000");
+ assert.deepEqual(f.discards,[true]);
+});
+test("Batch36 rejects session-token digest mismatch without issuing a SQL query",async()=>{
+ const f=fixture({authOverrides:{sessionId:"55555555-5555-4555-8555-555555555555",
+  sessionVersion:2}});
+ await assert.rejects(f.x.read({...request(),
+  expectedTokenDigest:Buffer.alloc(32,99),
+  expectedSessionId:"55555555-5555-4555-8555-555555555555",
+  expectedSessionVersion:2}),/PAY54_WALLET_RESTRICTED_READ_UNAVAILABLE/);
+ assert.equal(f.calls.length,0);
+});
+test("Batch36 rejects stale session epoch and rejects partial binding",async()=>{
+ const f=fixture({authOverrides:{sessionId:"55555555-5555-4555-8555-555555555555",
+  sessionVersion:2}});
+ for(const x of [
+  {expectedTokenDigest:Buffer.from(digest),
+   expectedSessionId:"55555555-5555-4555-8555-555555555555",
+   expectedSessionVersion:3},
+  {expectedTokenDigest:Buffer.from(digest)}
+ ]){
+  await assert.rejects(f.x.read({...request(),...x}),
+    /PAY54_WALLET_RESTRICTED_READ_UNAVAILABLE/);
+ }
+ assert.equal(f.calls.length,0);
+});
 test("missing actual pool and trusted authority fails closed",()=>{
  assert.throws(()=>make(),/PAY54_WALLET_RESTRICTED_READ_UNAVAILABLE/);
 });
