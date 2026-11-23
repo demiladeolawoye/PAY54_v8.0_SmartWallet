@@ -86,7 +86,7 @@ grep -q revocation_updated "$b_log" || { cat "$b_log" >&2; exit 1; }
 
 # Independent third connection MUST see the committed state, not A's snapshot.
 "${PSQL[@]}" <<'SQL'
-BEGIN READ COMMITTED READ ONLY;
+BEGIN ISOLATION LEVEL READ COMMITTED READ ONLY;
 SELECT 1/(CASE WHEN COUNT(*)=0 THEN 1 ELSE 0 END)
  AS fresh_session_is_not_active
 FROM pay54.auth_sessions
