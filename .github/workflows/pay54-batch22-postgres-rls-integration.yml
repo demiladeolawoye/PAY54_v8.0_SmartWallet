@@ -8,6 +8,7 @@ on:
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
+      - "backend/db/queries/wallet-posted-net-disposable.sql"
       - "docs/engineering/pay54-batch22-*.md"
       - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
   workflow_dispatch:
@@ -358,6 +359,17 @@ jobs:
           set -euo pipefail
           bash -n backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh
           bash backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh
+      - name: Test SQL-bound wallet posted-net and session revocation in disposable PG16
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POSTGRES_CONTAINER"
+          cat backend/db/queries/wallet-posted-net-disposable.sql \
+              backend/db/tests/batch22/028_wallet_posted_net_disposable.sql |
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
