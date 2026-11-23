@@ -31,7 +31,7 @@ SELECT
  has_table_privilege(current_user,'pay54.balance_reservations','SELECT') AS holds_direct,
  has_table_privilege(current_user,'pay54.auth_sessions','SELECT') AS sessions_direct,
  has_table_privilege(current_user,'pay54.ledger_entries','INSERT,UPDATE,DELETE') AS ledger_write,
- (SELECT COALESCE(bool_and(relrowsecurity AND relforcerowsecurity),false)
+ (SELECT count(*)=9 AND COALESCE(bool_and(relrowsecurity AND relforcerowsecurity),false)
   FROM pg_class WHERE oid IN(
    'pay54.auth_sessions'::regclass,
    'pay54.account_contexts'::regclass,
@@ -43,8 +43,11 @@ SELECT
    'pay54.ledger_journals'::regclass,
    'pay54.balance_reservations'::regclass)) AS all_forced_rls`;
 
-export function createPay54WalletLiveIdentityProbe({pool}={}){
- if(typeof pool?.connect!=="function")fail();
+export function createPay54WalletLiveIdentityProbe({pool,expectedLogin}={}){
+ if(typeof pool?.connect!=="function"||
+    typeof expectedLogin!=="string"||
+    !/^[a-z_][a-z0-9_]{3,62}$/.test(expectedLogin)||
+    expectedLogin==="pay54_wallet_read_caller_role")fail();
  return Object.freeze({
   async inspect(){
    let c,started=false;
@@ -59,7 +62,7 @@ export function createPay54WalletLiveIdentityProbe({pool}={}){
     if(!Array.isArray(a)||a.length!==1)fail();
     const v=a[0];
     if(v.effective_role!=="pay54_wallet_read_caller_role"||
-       typeof v.login_role!=="string"||v.login_role===v.effective_role||
+       v.login_role!==expectedLogin||
        v.read_only!=="on"||v.isolation!=="read committed"||
        v.ssl_in_use!==true||
        !["TLSv1.2","TLSv1.3"].includes(v.tls_version)||
