@@ -1,0 +1,60 @@
+name: PAY54 Batch 40 — Read-only Staging Discovery (SOURCE ONLY)
+
+on:
+  pull_request:
+    branches:
+      - project-titan
+    paths:
+      - "backend/governance/pay54-batch40-staging-discovery.mjs"
+      - "backend/tests/pay54-batch40-staging-discovery.test.mjs"
+      - "docs/engineering/PAY54-BATCH40-staging-discovery-and-admission.md"
+      - "docs/engineering/PAY54-BATCH40-cloudsql-decision-cost-admission.md"
+      - ".github/workflows/pay54-batch40-source-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audited-source-discovery:
+    name: Offline cloud and PostgreSQL source evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PAY54_CLOUD_AUTH: disabled
+      PAY54_FINANCIAL_EXECUTION: "false"
+      TF_VAR_authorized_provisioning: "false"
+      PAY54_WALLET_API_ENABLED: "false"
+      PAY54_STAGING_RELEASE_APPROVED: "false"
+    steps:
+      - name: Checkout exact pull request head without persistent credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install pinned Node runtime
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Validate fail-closed discovery source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check backend/governance/pay54-batch40-staging-discovery.mjs
+          node --test backend/tests/pay54-batch40-staging-discovery.test.mjs
+          node --test backend/tests/staging-cloud-readiness.test.mjs
+      - name: Require no credential, cloud or financial execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PAY54_CLOUD_AUTH" = disabled
+          test "$PAY54_FINANCIAL_EXECUTION" = false
+          test "$TF_VAR_authorized_provisioning" = false
+          test "$PAY54_WALLET_API_ENABLED" = false
+          test "$PAY54_STAGING_RELEASE_APPROVED" = false
+      - name: Publish unprivileged source audit only
+        shell: bash
+        run: |
+          set -euo pipefail
+          node backend/governance/pay54-batch40-staging-discovery.mjs >> "$GITHUB_STEP_SUMMARY"
