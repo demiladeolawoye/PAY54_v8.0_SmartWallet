@@ -20,7 +20,7 @@ export function createPay54WalletBalanceHttpHandler({
  if(typeof authenticatedService?.read!=="function"||
     typeof trustedOrigin!=="string"||
     !/^https:\/\/[^\s/?#]+$/.test(trustedOrigin))deny();
- return async function handle({request,response}={}){
+ return async function handle(request,response){
   if(!request||!response||response.headersSent)deny();
   const fail=(status=403)=>{
    response.writeHead(status,{"Content-Type":"application/json; charset=utf-8",
