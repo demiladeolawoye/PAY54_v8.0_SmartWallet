@@ -415,6 +415,14 @@ jobs:
           docker exec -u postgres -e PGDATABASE=pay54_disposable_ci \
             -e PGUSER=postgres -i "$POSTGRES_CONTAINER" bash \
             /tmp/pay54-batch34-lifecycle-races.sh
+      - name: Prove restricted wallet-read function, actor-scoped RLS and zero persistence
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/031_restricted_wallet_read_disposable.sql
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
