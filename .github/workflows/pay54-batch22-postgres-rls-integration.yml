@@ -12,6 +12,8 @@ on:
       - "backend/db/queries/wallet-posted-net-disposable.sql"
       - "backend/db/queries/wallet-reservation-snapshot-disposable.sql"
       - "backend/db/release/wallet-read-staging-preflight.sql"
+      - "backend/db/release/wallet-read-v1-forward-review.sql"
+      - "backend/db/release/wallet-read-v1-rollback-review.sql"
       - "docs/engineering/pay54-batch22-*.md"
       - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
   workflow_dispatch:
@@ -443,6 +445,31 @@ jobs:
           set -euo pipefail
           bash -n backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
           bash backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
+      - name: Apply and reverse reviewed wallet-v1 SQL only in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POSTGRES_CONTAINER"
+          for file in \
+            backend/db/release/wallet-read-v1-forward-review.sql \
+            backend/db/tests/batch22/033_wallet_forward_rollback_disposable.sql \
+            backend/db/release/wallet-read-v1-rollback-review.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
+          done
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+            -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 <<'PAY54_B38_POSTROLLBACK'
+          SELECT 1/(CASE WHEN to_regprocedure(
+           'pay54.wallet_read_restricted_v1(bytea,uuid,uuid,character varying)'
+          ) IS NULL
+          AND NOT has_table_privilege('pay54_wallet_read_owner_role',
+            'pay54.ledger_entries','SELECT')
+          AND NOT has_table_privilege('pay54_wallet_read_caller_role',
+            'pay54.ledger_entries','SELECT')
+          THEN 1 ELSE 0 END) AS rollback_ledger_acl;
+          PAY54_B38_POSTROLLBACK
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
