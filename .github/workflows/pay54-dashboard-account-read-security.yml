@@ -8,6 +8,10 @@ on:
       - "assets/js/dashboard/account-read-coordinator.mjs"
       - "assets/js/dashboard/wallet-balance-presenter.mjs"
       - "backend/src/authenticated-wallet-balance-read.mjs"
+      - "backend/src/postgres-staging-wallet-reader-config.mjs"
+      - "backend/src/postgres-wallet-live-identity-probe.mjs"
+      - "backend/tests/wallet-staging-live-identity.test.mjs"
+      - "docs/architecture/PAY54-BATCH39-operational-staging-admission.md"
       - "backend/src/fresh-committed-session-fence.mjs"
       - "backend/tests/fresh-committed-session-fence.test.mjs"
       - "docs/architecture/PAY54-BATCH38-wallet-operational-gates.md"
@@ -68,6 +72,9 @@ jobs:
           node --check backend/src/authenticated-wallet-balance-read.mjs
           node --check assets/js/dashboard/wallet-balance-presenter.mjs
           node --test backend/tests/authenticated-wallet-balance-read.test.mjs
+          node --check backend/src/postgres-staging-wallet-reader-config.mjs
+          node --check backend/src/postgres-wallet-live-identity-probe.mjs
+          node --test backend/tests/wallet-staging-live-identity.test.mjs
           node --check backend/src/fresh-committed-session-fence.mjs
           node --test backend/tests/fresh-committed-session-fence.test.mjs
           node --check backend/src/authenticated-accounting-bridge.mjs
