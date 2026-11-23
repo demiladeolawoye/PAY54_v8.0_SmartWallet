@@ -2,7 +2,7 @@
 -- Run only in disposable PostgreSQL after migrations 001-029.
 -- ALL grants, policies, function and fixtures roll back on completion.
 \set ON_ERROR_STOP on
-BEGIN;
+BEGIN ISOLATION LEVEL REPEATABLE READ;
 SET LOCAL lock_timeout = '5s';
 SET LOCAL statement_timeout = '25s';
 
@@ -103,8 +103,7 @@ SET search_path=pg_catalog,pay54,pg_temp
 AS $function$
 DECLARE v_principal uuid;
 BEGIN
- IF current_setting('transaction_read_only')<>'on'
- OR current_setting('transaction_isolation') NOT IN ('repeatable read','serializable')
+ IF current_setting('transaction_isolation') NOT IN ('repeatable read','serializable')
  OR octet_length(p_token_digest)<>32
  OR p_account_id IS NULL OR p_wallet_id IS NULL
  OR p_currency !~ '^[A-Z]{3}$'
@@ -174,7 +173,9 @@ VALUES ('b3500000-0000-4000-8000-000000000005','b3500000-0000-4000-8000-00000000
  'b3500000-0000-4000-8000-000000000001',
  'ACTIVE',1,clock_timestamp()-interval '1 minute',clock_timestamp()+interval '1 hour');
 
--- Real restricted role session; the caller never has financial direct SELECT.
+-- Real restricted role in a rollback-only writeable fixture transaction.
+-- A separate live READ ONLY transaction admission remains mandatory.
+-- The caller never has financial direct SELECT.
 SET LOCAL ROLE pay54_wallet_read_caller_role;
 DO $assert$
 BEGIN
@@ -184,7 +185,6 @@ BEGIN
  OR has_table_privilege(current_user,'pay54.ledger_accounts','SELECT')
  THEN RAISE EXCEPTION 'PAY54_WALLET_DIRECT_ACCESS_EXPOSED'; END IF;
 END $assert$;
-SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY;
 SELECT 1/(CASE WHEN COUNT(*)=1 AND min(posted_minor)='0'
  AND min(held_minor)='0' THEN 1 ELSE 0 END) AS real_caller_zero_snapshot
 FROM pay54.wallet_read_restricted_disposable(
