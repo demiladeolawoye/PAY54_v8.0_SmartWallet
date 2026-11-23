@@ -22,8 +22,10 @@ export function reconcilePay54WalletBalanceSnapshot(snapshot){
     !UUID.test(snapshot.walletId??"")||
     typeof snapshot.currency!=="string"||
     !/^[A-Z]{3}$/.test(snapshot.currency)||
-    !DIGITS.test(snapshot.postedMinor??"")||
-    !DIGITS.test(snapshot.heldMinor??"")||
+    typeof snapshot.postedMinor!=="string"||
+    typeof snapshot.heldMinor!=="string"||
+    !DIGITS.test(snapshot.postedMinor)||
+    !DIGITS.test(snapshot.heldMinor)||
     !Number.isSafeInteger(snapshot.postedEntryCount)||
     snapshot.postedEntryCount<0||
     !Number.isSafeInteger(snapshot.heldReservationCount)||
