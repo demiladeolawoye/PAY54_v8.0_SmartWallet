@@ -3,8 +3,8 @@
 \echo PAY54_B38_START
 DO $pre$
 BEGIN
- IF to_regprocedure('pay54.wallet_read_restricted_v1(bytea,uuid,uuid,character varying)') IS NOT NULL
- THEN RAISE EXCEPTION 'PAY54_B38_REUSED_PREVIOUS_DEPLOYMENT'; END IF;
+ IF to_regprocedure('pay54.wallet_read_restricted_v1(bytea,uuid,uuid,character varying)') IS NULL
+ THEN RAISE EXCEPTION 'PAY54_B38_FORWARD_FUNCTION_MISSING'; END IF;
 END $pre$;
 CREATE ROLE pay54_wallet_b38_ci_login LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS
  NOCREATEDB NOCREATEROLE NOREPLICATION;
