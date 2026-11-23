@@ -70,7 +70,7 @@ function probe(row=verified(),errorAt){
   },
   release(discard){released.push(discard);}
  })};
- return {p:createProbe({pool:db}),queries,released};
+ return {p:createProbe({pool:db,expectedLogin:"pay54_wallet_reader"}),queries,released};
 }
 test("real-client protocol probe returns only bounded NO-GO identity evidence",async()=>{
  const f=probe(),result=await f.p.inspect();
