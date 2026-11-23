@@ -9,6 +9,7 @@ on:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
       - "backend/db/queries/wallet-posted-net-disposable.sql"
+      - "backend/db/queries/wallet-reservation-snapshot-disposable.sql"
       - "docs/engineering/pay54-batch22-*.md"
       - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
   workflow_dispatch:
@@ -368,6 +369,16 @@ jobs:
           test -n "$POSTGRES_CONTAINER"
           cat backend/db/queries/wallet-posted-net-disposable.sql \
               backend/db/tests/batch22/028_wallet_posted_net_disposable.sql |
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1
+      - name: Validate disposable posted-versus-HELD wallet snapshot and revocation
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat backend/db/queries/wallet-reservation-snapshot-disposable.sql \
+              backend/db/tests/batch22/029_wallet_reservation_snapshot_disposable.sql |
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
               -d pay54_disposable_ci -X -v ON_ERROR_STOP=1
       - name: Guarantee source-only database test conditions
