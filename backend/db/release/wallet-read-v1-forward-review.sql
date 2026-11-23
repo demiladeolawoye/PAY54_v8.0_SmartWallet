@@ -1,4 +1,7 @@
--- PAY54 Batch38 — REVIEW CANDIDATE ONLY; NO STAGING AUTHORIZATION.\n-- Deploy only by approved DBA with signed rollback and operational gates.\nBEGIN;\nSET LOCAL lock_timeout = '5s';
+-- PAY54 Batch38 — REVIEW CANDIDATE ONLY; NO STAGING AUTHORIZATION.
+-- Deploy only by approved DBA with signed rollback and operational gates.
+BEGIN;
+SET LOCAL lock_timeout = '5s';
 SET LOCAL statement_timeout = '25s';
 
 DO $preflight$
@@ -103,7 +106,8 @@ SET search_path=pg_catalog,pay54,pg_temp
 AS $function$
 DECLARE v_principal uuid;
 BEGIN
- IF current_setting('transaction_isolation') NOT IN ('repeatable read','serializable')
+ IF current_setting('transaction_read_only') <> 'on'
+ OR current_setting('transaction_isolation') NOT IN ('repeatable read','serializable')
  OR octet_length(p_token_digest)<>32
  OR p_account_id IS NULL OR p_wallet_id IS NULL
  OR p_currency !~ '^[A-Z]{3}$'
