@@ -65,7 +65,7 @@ function probe(row=verified(),errorAt){
  const db={connect:async()=>({
   async query(sql){queries.push(sql);
    if(errorAt&&sql.includes(errorAt))throw Error("PRIVATE_CLOUD_SECRET");
-   if(sql.startsWith("SELECT"))return {rows:[row]};
+   if(sql.trimStart().startsWith("SELECT"))return {rows:[row]};
    return {rows:[]};
   },
   release(discard){released.push(discard);}
