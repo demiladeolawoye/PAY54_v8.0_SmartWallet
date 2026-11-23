@@ -8,6 +8,9 @@ on:
       - "assets/js/dashboard/account-read-coordinator.mjs"
       - "assets/js/dashboard/wallet-balance-presenter.mjs"
       - "backend/src/authenticated-wallet-balance-read.mjs"
+      - "backend/domain/wallet-reservation-reconciliation.mjs"
+      - "backend/tests/wallet-reservation-reconciliation.test.mjs"
+      - "docs/architecture/PAY54-BATCH33-wallet-reservation-reconciliation.md"
       - "backend/src/wallet-balance-http-handler.mjs"
       - "backend/tests/wallet-balance-http-handler.test.mjs"
       - "docs/architecture/PAY54-BATCH32-wallet-api-sql-proof.md"
@@ -53,6 +56,8 @@ jobs:
           node --check backend/src/authenticated-wallet-balance-read.mjs
           node --check assets/js/dashboard/wallet-balance-presenter.mjs
           node --test backend/tests/authenticated-wallet-balance-read.test.mjs
+          node --check backend/domain/wallet-reservation-reconciliation.mjs
+          node --test backend/tests/wallet-reservation-reconciliation.test.mjs
           node --check backend/src/wallet-balance-http-handler.mjs
           node --test backend/tests/wallet-balance-http-handler.test.mjs
           node --test backend/tests/dashboard-wallet-balance-presenter.test.mjs
