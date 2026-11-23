@@ -8,6 +8,7 @@ on:
       - "backend/governance/pay54-batch40-staging-discovery.mjs"
       - "backend/tests/pay54-batch40-staging-discovery.test.mjs"
       - "docs/engineering/PAY54-BATCH40-staging-discovery-and-admission.md"
+      - "docs/engineering/PAY54-BATCH40-cloudsql-decision-cost-admission.md"
       - ".github/workflows/pay54-batch40-source-discovery.yml"
   workflow_dispatch:
 
