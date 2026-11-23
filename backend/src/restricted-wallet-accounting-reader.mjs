@@ -1,4 +1,5 @@
 "use strict";
+import {timingSafeEqual} from "node:crypto";
 
 /**
  * PAY54 Batch 35 - unmounted restricted accounting snapshot adapter.
@@ -21,7 +22,8 @@ export function createPay54RestrictedWalletAccountingReader({
  if(typeof pool?.connect!=="function"||
     typeof trustedAuth?.resolve!=="function")fail();
  return Object.freeze({
-  async read({request,requestedAccountId,requestedWalletId,currency}={}){
+  async read({request,requestedAccountId,requestedWalletId,currency,
+    expectedTokenDigest,expectedSessionId,expectedSessionVersion}={}){
    if(!UUID.test(requestedAccountId??"")||
       !UUID.test(requestedWalletId??"")||
       !/^[A-Z]{3}$/.test(currency??""))fail();
@@ -37,6 +39,20 @@ export function createPay54RestrictedWalletAccountingReader({
        auth.accountId.toLowerCase()!==requestedAccountId.toLowerCase()||
        auth.walletId.toLowerCase()!==requestedWalletId.toLowerCase()||
        auth.currency!==currency||auth.active!==true)fail();
+    // Batch36 bridge opt-in: prove the SQL reader resolved the exact
+    // authenticated token and session approved by the outer admission layer.
+    const bindingRequested=expectedTokenDigest!==undefined||
+      expectedSessionId!==undefined||expectedSessionVersion!==undefined;
+    if(bindingRequested){
+      if(!Buffer.isBuffer(expectedTokenDigest)||
+         expectedTokenDigest.length!==32||
+         !UUID.test(expectedSessionId??"")||
+         !Number.isSafeInteger(expectedSessionVersion)||
+         expectedSessionVersion<1||
+         !timingSafeEqual(auth.tokenDigest,expectedTokenDigest)||
+         auth.sessionId!==expectedSessionId||
+         auth.sessionVersion!==expectedSessionVersion)fail();
+    }
     client=await pool.connect();
     if(typeof client?.query!=="function"||
        typeof client?.release!=="function")fail();
