@@ -8,6 +8,9 @@ on:
       - "assets/js/dashboard/account-read-coordinator.mjs"
       - "assets/js/dashboard/wallet-balance-presenter.mjs"
       - "backend/src/authenticated-wallet-balance-read.mjs"
+      - "backend/src/restricted-wallet-accounting-reader.mjs"
+      - "backend/tests/restricted-wallet-accounting-reader.test.mjs"
+      - "docs/architecture/PAY54-BATCH35-restricted-wallet-read-proof.md"
       - "backend/db/wallet-read-transaction-attestor.mjs"
       - "backend/tests/wallet-read-transaction-attestor.test.mjs"
       - "docs/architecture/PAY54-BATCH34-restricted-read-authority.md"
@@ -59,6 +62,8 @@ jobs:
           node --check backend/src/authenticated-wallet-balance-read.mjs
           node --check assets/js/dashboard/wallet-balance-presenter.mjs
           node --test backend/tests/authenticated-wallet-balance-read.test.mjs
+          node --check backend/src/restricted-wallet-accounting-reader.mjs
+          node --test backend/tests/restricted-wallet-accounting-reader.test.mjs
           node --check backend/db/wallet-read-transaction-attestor.mjs
           node --test backend/tests/wallet-read-transaction-attestor.test.mjs
           node --check backend/domain/wallet-reservation-reconciliation.mjs
