@@ -39,19 +39,23 @@ SELECT 1/(CASE WHEN :'posted_net_minor'='0' AND :'currency'='GBP'
 
 -- Cross-account requested identity must not produce a row.
 \set account_id NO_MATCH
+\set ON_ERROR_STOP off
 EXECUTE pay54_wallet_posted_net_read(
  decode(repeat('b3',32),'hex'),
  'b3200000-0000-4000-8000-000000000002',
  'b3200000-0000-4000-8000-000000000003','GBP') \gset
+\set ON_ERROR_STOP on
 SELECT 1/(CASE WHEN :'account_id'='NO_MATCH' THEN 1 ELSE 0 END)
  AS different_account_denied;
 
 -- A stolen/unrelated token digest must never retrieve this ledger net.
 \set account_id NO_MATCH
+\set ON_ERROR_STOP off
 EXECUTE pay54_wallet_posted_net_read(
  decode(repeat('ee',32),'hex'),
  'b3200000-0000-4000-8000-000000000001',
  'b3200000-0000-4000-8000-000000000003','GBP') \gset
+\set ON_ERROR_STOP on
 SELECT 1/(CASE WHEN :'account_id'='NO_MATCH' THEN 1 ELSE 0 END)
  AS wrong_session_digest_denied;
 
@@ -59,10 +63,12 @@ SELECT 1/(CASE WHEN :'account_id'='NO_MATCH' THEN 1 ELSE 0 END)
 UPDATE pay54.account_memberships SET status='SUSPENDED'
  WHERE account_id='b3200000-0000-4000-8000-000000000001';
 \set account_id NO_MATCH
+\set ON_ERROR_STOP off
 EXECUTE pay54_wallet_posted_net_read(
  decode(repeat('b3',32),'hex'),
  'b3200000-0000-4000-8000-000000000001',
  'b3200000-0000-4000-8000-000000000003','GBP') \gset
+\set ON_ERROR_STOP on
 SELECT 1/(CASE WHEN :'account_id'='NO_MATCH' THEN 1 ELSE 0 END)
  AS suspended_membership_denied;
 UPDATE pay54.account_memberships SET status='ACTIVE'
@@ -72,10 +78,12 @@ UPDATE pay54.account_memberships SET status='ACTIVE'
 UPDATE pay54.auth_sessions SET session_status='REVOKED',revoked_at=clock_timestamp()
  WHERE session_id='b3200000-0000-4000-8000-000000000005';
 \set account_id NO_MATCH
+\set ON_ERROR_STOP off
 EXECUTE pay54_wallet_posted_net_read(
  decode(repeat('b3',32),'hex'),
  'b3200000-0000-4000-8000-000000000001',
  'b3200000-0000-4000-8000-000000000003','GBP') \gset
+\set ON_ERROR_STOP on
 SELECT 1/(CASE WHEN :'account_id'='NO_MATCH' THEN 1 ELSE 0 END)
  AS revoked_session_denied;
 
