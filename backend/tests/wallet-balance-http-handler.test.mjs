@@ -19,15 +19,9 @@ const envelope=(account=A)=>({
 });
 async function setup(service){
  let calls=0;
- const server=http.createServer(make({
-  trustedOrigin:"http://unreachable.invalid",
-  authenticatedService:{async read(input){
-   calls++;return service?service(input):envelope();
-  }}
- }));
- // This test server uses localhost transport, while the production policy
- // requires HTTPS. Make's origin is intentionally not used for any live host.
- server.removeAllListeners("request");
+ // Actual loopback HTTP transport is used only in disposable Node tests.
+ // Trusted deployment origin remains an HTTPS-only contract.
+ const server=http.createServer();
  const handler=make({trustedOrigin:"https://wallet.example.test",
   authenticatedService:{async read(input){
    calls++;return service?service(input):envelope();
