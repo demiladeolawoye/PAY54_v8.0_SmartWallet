@@ -6,7 +6,6 @@
  * connect to PostgreSQL, issue release approvals or activate wallet services.
  * No user-supplied or repository-declared identifier is runtime evidence.
  */
-import {readFileSync} from "node:fs";
 import {fileURLToPath} from "node:url";
 import {auditStagingCloudReadiness,loadStagingCloudReadinessSources}
  from "../security/staging-cloud-readiness.mjs";
@@ -39,8 +38,8 @@ export function inspectPay54StagingDiscoverySources({terraformSource,cloudReport
     !cloudReport.controls.every(c=>c&&
       ["PASS","FAIL","NOT_VERIFIED"].includes(c.result)))refuse();
 
- const declaredProjectId=/projectId:\s*"pay54-staging-uk-01"/.test(
-   JSON.stringify(cloudReport))?"pay54-staging-uk-01":null;
+ const declaredProjectId=cloudReport.projectId==="pay54-staging-uk-01"
+  ?cloudReport.projectId:null;
  const gcpDeclared=/provider\s+"google"\s*\{/.test(terraformSource);
  const disabled=/variable\s+"authorized_provisioning"\s*\{[\s\S]*?default\s*=\s*false/.test(terraformSource);
  const london=/region\s*=\s*"europe-west2"/.test(terraformSource);
