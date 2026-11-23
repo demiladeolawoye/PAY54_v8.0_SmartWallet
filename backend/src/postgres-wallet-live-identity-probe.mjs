@@ -57,6 +57,10 @@ export function createPay54WalletLiveIdentityProbe({pool,expectedLogin}={}){
        typeof c?.release!=="function")fail();
     await c.query("BEGIN ISOLATION LEVEL READ COMMITTED READ ONLY");
     started=true;
+    // The physical login must have an explicit grant to this fixed role.
+    // SET LOCAL reverts on ROLLBACK and cannot leak a privileged role to
+    // another request on the pooled connection.
+    await c.query("SET LOCAL ROLE pay54_wallet_read_caller_role");
     const result=await c.query(PAY54_WALLET_STAGE_IDENTITY_SQL);
     const a=result?.rows;
     if(!Array.isArray(a)||a.length!==1)fail();
