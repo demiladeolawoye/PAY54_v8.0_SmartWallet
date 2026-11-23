@@ -57,8 +57,11 @@ export function createPay54AuthenticatedAccountingBridge({
       requestedAccountId:first.activeAccountId,
       requestedWalletId:beforeScope.walletId,
       currency:beforeScope.currency,
-      // The restricted reader accepts no token override. It must independently
-      // resolve the same credential using a protected trustedAuth dependency.
+      expectedTokenDigest:digest,
+      expectedSessionId:first.sessionId,
+      expectedSessionVersion:first.version
+      // The restricted reader independently resolves the credential and must
+      // match this 256-bit digest and session version before querying.
     });
     if(result?.schema!=="pay54.wallet-restricted-accounting-proof.v1"||
        result.accountId!==first.activeAccountId||
