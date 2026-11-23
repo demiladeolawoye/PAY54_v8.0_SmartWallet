@@ -70,13 +70,7 @@ COMMIT;
 RESET ROLE;
 RESET SESSION AUTHORIZATION;
 
--- Remove all database test fixtures before the rollback proof.
-DELETE FROM pay54.auth_sessions WHERE session_id='b3800000-0000-4000-8000-000000000005';
-DELETE FROM pay54.ledger_accounts WHERE id='b3800000-0000-4000-8000-000000000004';
-DELETE FROM pay54.personal_wallet_bindings WHERE account_id='b3800000-0000-4000-8000-000000000001';
-DELETE FROM pay54.wallets WHERE id='b3800000-0000-4000-8000-000000000003';
-DELETE FROM pay54.account_memberships WHERE account_id='b3800000-0000-4000-8000-000000000001';
-DELETE FROM pay54.account_contexts WHERE id='b3800000-0000-4000-8000-000000000001';
+-- Synthetic fixtures remain solely inside the disposable DB discarded by CI.
 REVOKE pay54_wallet_read_caller_role FROM pay54_wallet_b38_ci_login;
 DROP ROLE pay54_wallet_b38_ci_login;
 \echo PAY54_B38_ROLE_ASSUMPTION_AND_SQL_PASS
