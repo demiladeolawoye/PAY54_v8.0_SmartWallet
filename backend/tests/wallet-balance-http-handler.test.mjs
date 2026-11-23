@@ -22,6 +22,9 @@ async function setup(service){
  // Actual loopback HTTP transport is used only in disposable Node tests.
  // Trusted deployment origin remains an HTTPS-only contract.
  const server=http.createServer();
+ server.keepAliveTimeout=100;
+ server.headersTimeout=5000;
+ server.requestTimeout=5000;
  const handler=make({trustedOrigin:"https://wallet.example.test",
   authenticatedService:{async read(input){
    calls++;return service?service(input):envelope();
@@ -47,6 +50,7 @@ async function setup(service){
      headers:res.headers,body:text}));
    });
    req.on("error",reject);
+   req.setTimeout(3000,()=>req.destroy(new Error("PAY54_DISPOSABLE_HTTP_TIMEOUT")));
    if(body!==undefined)req.write(body);
    req.end();
   });
@@ -54,20 +58,20 @@ async function setup(service){
  return {server,send,get calls(){return calls;}};
 }
 test("real loopback HTTP request returns bounded display-only envelope",async t=>{
- const x=await setup();t.after(()=>x.server.close());
+ const x=await setup();t.after(()=>{x.server.closeAllConnections();x.server.close();});
  const r=await x.send();
  assert.equal(r.status,200);assert.equal(r.headers["cache-control"],"no-store");
  assert.equal(JSON.parse(r.body).availableMinor,"0");
  assert.equal(x.calls,1);
 });
 test("cross-account path cannot obtain another customer's result",async t=>{
- const x=await setup();t.after(()=>x.server.close());
+ const x=await setup();t.after(()=>{x.server.closeAllConnections();x.server.close();});
  const r=await x.send({path:"/v1/accounts/"+B+"/wallet/balance"});
  assert.equal(r.status,403);assert.equal(x.calls,1);
  assert.doesNotMatch(r.body,/44444444/);
 });
 test("wrong method, missing or forged origin, cookie, unsafe framing and token denied before service",async t=>{
- const x=await setup();t.after(()=>x.server.close());
+ const x=await setup();t.after(()=>{x.server.closeAllConnections();x.server.close();});
  for(const q of [
   {method:"POST"},{path:"/v1/accounts/"+A+"/wallet/balance?currency=USD"},
   {headers:{origin:"https://attacker.invalid"}},
@@ -85,7 +89,7 @@ test("wrong method, missing or forged origin, cookie, unsafe framing and token d
 });
 test("revocation or backend failure returns generic no-store denial",async t=>{
  const x=await setup(async()=>{throw Error("private-credential-and-customer");});
- t.after(()=>x.server.close());
+ t.after(()=>{x.server.closeAllConnections();x.server.close();});
  const r=await x.send();
  assert.equal(r.status,403);
  assert.equal(r.headers["cache-control"],"no-store");
