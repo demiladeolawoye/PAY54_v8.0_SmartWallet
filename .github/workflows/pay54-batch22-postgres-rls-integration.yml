@@ -381,6 +381,39 @@ jobs:
               backend/db/tests/batch22/029_wallet_reservation_snapshot_disposable.sql |
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
               -d pay54_disposable_ci -X -v ON_ERROR_STOP=1
+      - name: Apply inert wallet-read roles and prove exact restricted DB denial
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/migrations/029_wallet_read_inert_role_foundation.sql
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/030_wallet_read_inert_authority.sql
+      - name: Revalidate real funded reservation, capture, release and reversal in PG16
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            backend/db/tests/003_wallet_reservation_integrity.sql \
+            backend/db/tests/004_reservation_lifecycle_integrity.sql \
+            backend/db/tests/002_ledger_reversal_integrity.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "$file"
+          done
+      - name: Confirm two-session capture-release races under real PostgreSQL row locks
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker cp backend/db/tests/007_capture_release_concurrency.sh \
+            "$POSTGRES_CONTAINER:/tmp/pay54-batch34-lifecycle-races.sh"
+          docker exec -i "$POSTGRES_CONTAINER" bash \
+            /tmp/pay54-batch34-lifecycle-races.sh
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
