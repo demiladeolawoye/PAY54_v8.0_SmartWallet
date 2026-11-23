@@ -43,7 +43,7 @@ BEGIN
  OR NOT has_table_privilege(owner_oid,'pay54.ledger_entries','SELECT')
  OR NOT has_table_privilege(owner_oid,'pay54.auth_sessions','SELECT')
  OR EXISTS (
-  SELECT 1 FROM pg_proc p,CROSS JOIN LATERAL aclexplode(
+  SELECT 1 FROM pg_proc p CROSS JOIN LATERAL aclexplode(
    COALESCE(p.proacl,acldefault('f',p.proowner))) x
   WHERE p.oid=function_oid AND x.grantee=0 AND x.privilege_type='EXECUTE')
  THEN RAISE EXCEPTION 'PAY54_B39_FINANCIAL_PRIVILEGE_GRAPH_DENIED';
