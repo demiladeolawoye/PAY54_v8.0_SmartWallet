@@ -21,6 +21,20 @@ test("changed function security is detected",()=>{
  const r=examine({...args,reserveSql:args.reserveSql.replace("SECURITY INVOKER","SECURITY DEFINER")});
  assert.ok(r.findings.includes("INVOKER_FUNCTION_NOT_PROVEN:reserve_wallet_transfer"));
 });
+test("every financial function must independently declare invoker security",()=>{
+ for(const functionName of FINANCIAL_FUNCTIONS){
+  const key="SECURITY INVOKER";
+  const altered=functionName==="reserve_wallet_transfer"
+   ? {...args,reserveSql:args.reserveSql.replace(key,"SECURITY DEFINER")}
+   : {...args,captureReleaseSql:args.captureReleaseSql.replace(
+     new RegExp("(CREATE FUNCTION pay54\\."+functionName+"\\([\\s\\S]*?)SECURITY INVOKER","i"),
+     "$1SECURITY DEFINER"
+    )};
+  const result=examine(altered);
+  assert.ok(result.findings.includes("INVOKER_FUNCTION_NOT_PROVEN:"+functionName));
+  assert.equal(result.financialExecutionAuthorized,false);
+ }
+});
 test("missing forced security is detected",()=>{
  const r=examine({...args,forwardSql:args.forwardSql.replace("ALTER TABLE pay54.ledger_entries FORCE ROW LEVEL SECURITY;","")});
  assert.ok(r.findings.includes("FORCE_RLS_NOT_EVIDENCED:ledger_entries"));
