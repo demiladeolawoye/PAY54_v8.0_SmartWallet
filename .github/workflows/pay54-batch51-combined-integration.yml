@@ -1,0 +1,498 @@
+name: PAY54 Batch51 Combined PostgreSQL Integration (NO DEPLOY)
+
+on:
+  pull_request:
+    branches: [project-titan]
+    paths:
+      - "backend/integration/batch51-reconcile-nine-prs.sh"
+      - "docs/engineering/PAY54-BATCH51-combined-regression.md"
+      - ".github/workflows/pay54-batch51-combined-integration.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pay54-batch51-combined-pg16-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres-rls-isolation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16@sha256:dd2bf3ce2dc83a81674cf7f217fcfd8a5009a4b325dda5b843bfee82a06cff6f
+        env:
+          POSTGRES_DB: pay54_disposable_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pay54-ci-only-not-production
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pay54_disposable_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout exact source SHA without retained credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Reconcile nine exact-head proposals in CI-only detached checkout
+        env:
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+          GITHUB_EVENT_NAME: pull_request
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/integration/batch51-reconcile-nine-prs.sh
+          bash backend/integration/batch51-reconcile-nine-prs.sh
+      - name: Apply reviewed migrations in ephemeral PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POSTGRES_CONTAINER"
+          # Existing canonical migrations must execute in reviewed order.
+          # Never wildcard mixed-numbered migrations: 008 rejects overlapping
+          # account/membership tables by design.
+          migrations=(
+            001_financial_ledger.sql
+            002_ledger_integrity_hardening.sql
+            003_wallet_reservation.sql
+            004_reservation_lifecycle.sql
+            005_operation_state_integrity.sql
+            006_database_role_isolation.sql
+            007_direct_ledger_access_boundary.sql
+            008_account_context_foundation.sql
+            009_personal_wallet_binding.sql
+            010_wallet_binding_lifecycle_guard.sql
+            011_wallet_eligibility_view.sql
+            012_account_read_role_baseline.sql
+            013_account_rls_denial.sql
+            014_auth_sessions.sql
+            015_account_context_audit.sql
+            016_session_account_integrity.sql
+            017_account_directory_read_role.sql
+          )
+          for migration_file in "${migrations[@]}"; do
+            migration="backend/db/migrations/$migration_file"
+            test -s "$migration"
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "$migration"
+          done
+      - name: Verify forced RLS denies cross-actor account and credential reads
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tests=(
+            001_rls_tenant_isolation.sql
+            002_revoked_session_rls.sql
+            003_membership_account_lifecycle_rls.sql
+            004_membership_integrity.sql
+            005_session_account_integrity.sql
+            006_append_only_account_audit.sql
+            007_legacy_account_denial_preserved.sql
+            008_inert_new_roles.sql
+            009_financial_privilege_separation.sql
+            010_actor_context_guc_reset.sql
+            011_session_digest_guc_reset.sql
+            012_malformed_actor_guc_denial.sql
+          )
+          for test_file in "${tests[@]}"; do
+            test_sql="backend/db/tests/batch22/$test_file"
+            test -s "$test_sql"
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "$test_sql"
+          done
+      - name: Apply subsequent canonical migrations and PayTag 021 in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration_file in \
+            018_account_session_rotation.sql \
+            019_identity_assertion_bootstrap.sql \
+            020_initial_account_binding.sql \
+            021_paytag_registry_foundation.sql \
+            022_paytag_lifecycle_guard.sql \
+            023_paytag_registration_idempotency.sql \
+            024_paytag_registration_audit_link.sql \
+            025_paytag_registration_writer.sql \
+            026_paytag_registration_role_foundation.sql \
+            027_paytag_function_owner_foundation.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "backend/db/migrations/$migration_file"
+          done
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 <<'PAY54_P2A_POSTGRES_TEST'
+          DO $pay54_assert$
+          DECLARE
+            registry_oid oid;
+            audit_oid oid;
+          BEGIN
+            registry_oid := to_regclass('pay54.paytag_registry');
+            audit_oid := to_regclass('pay54.paytag_registry_audit');
+            IF registry_oid IS NULL OR audit_oid IS NULL THEN
+              RAISE EXCEPTION 'PAYTAG_REGISTRY_MISSING';
+            END IF;
+            IF EXISTS(
+              SELECT 1 FROM pg_class
+              WHERE oid IN (registry_oid,audit_oid)
+                AND (NOT relrowsecurity OR NOT relforcerowsecurity)
+            ) THEN RAISE EXCEPTION 'PAYTAG_RLS_NOT_FORCED'; END IF;
+            IF EXISTS(
+              SELECT 1 FROM pg_policy WHERE polrelid IN (registry_oid,audit_oid)
+            ) THEN RAISE EXCEPTION 'PAYTAG_UNAUTHORISED_POLICY'; END IF;
+            IF has_table_privilege('pay54_financial_app_role',registry_oid,'SELECT')
+              OR has_table_privilege('pay54_financial_app_role',registry_oid,'INSERT')
+              OR has_table_privilege('pay54_financial_app_role',audit_oid,'SELECT')
+              OR has_table_privilege('pay54_financial_app_role',audit_oid,'INSERT')
+            THEN RAISE EXCEPTION 'PAYTAG_UNAUTHORISED_APP_PRIVILEGE'; END IF;
+            IF NOT EXISTS(
+              SELECT 1 FROM pg_index WHERE indrelid=registry_oid AND indisunique
+                AND indexrelid='pay54.paytag_registry_canonical_alias_key'::regclass
+            ) THEN RAISE EXCEPTION 'PAYTAG_ALIAS_GLOBAL_UNIQUE_MISSING'; END IF;
+            IF NOT EXISTS(
+              SELECT 1 FROM pg_index WHERE indrelid=registry_oid AND indisunique
+                AND indexrelid='pay54.paytag_one_current_tag_per_account'::regclass
+            ) THEN RAISE EXCEPTION 'PAYTAG_ACCOUNT_CURRENT_UNIQUE_MISSING'; END IF;
+          END;
+          $pay54_assert$;
+          PAY54_P2A_POSTGRES_TEST
+      - name: Verify PayTag P2B-A lifecycle and audit triggers are inert and deny by default
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 <<'PAY54_P2B_POSTGRES_TEST'
+          DO $pay54_assert$
+          DECLARE registry_oid oid;
+          DECLARE audit_oid oid;
+          BEGIN
+            registry_oid := 'pay54.paytag_registry'::regclass;
+            audit_oid := 'pay54.paytag_registry_audit'::regclass;
+            IF (SELECT count(*) FROM pg_trigger
+                WHERE tgrelid=registry_oid AND NOT tgisinternal) <> 3
+              OR (SELECT count(*) FROM pg_trigger
+                WHERE tgrelid=audit_oid AND NOT tgisinternal) <> 1
+            THEN RAISE EXCEPTION 'PAYTAG_P2B_LIFECYCLE_TRIGGER_MISSING'; END IF;
+            IF EXISTS (SELECT 1 FROM pg_policy
+              WHERE polrelid IN (registry_oid,audit_oid))
+            THEN RAISE EXCEPTION 'PAYTAG_P2B_UNAUTHORISED_POLICY'; END IF;
+            IF EXISTS (SELECT 1 FROM pg_class
+              WHERE oid IN (registry_oid,audit_oid)
+                AND (NOT relrowsecurity OR NOT relforcerowsecurity))
+            THEN RAISE EXCEPTION 'PAYTAG_P2B_RLS_NOT_FORCED'; END IF;
+            IF has_table_privilege('pay54_financial_app_role',registry_oid,'INSERT')
+              OR has_table_privilege('pay54_financial_app_role',registry_oid,'UPDATE')
+              OR has_table_privilege('pay54_financial_app_role',registry_oid,'SELECT')
+              OR has_table_privilege('pay54_financial_app_role',audit_oid,'INSERT')
+            THEN RAISE EXCEPTION 'PAYTAG_P2B_APP_PRIVILEGE_LEAK'; END IF;
+          END;
+          $pay54_assert$;
+          PAY54_P2B_POSTGRES_TEST
+      - name: Negative PayTag P2B-A state machine and audit database tests
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/013_paytag_lifecycle_negative.sql
+      - name: Verify concurrent PayTag claim resolves to exactly one owner
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash backend/db/tests/batch22/014_paytag_concurrent_claim.sh
+      - name: Verify PayTag idempotency schema in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 <<'PAYTAG_IDEMPOTENCY_SCHEMA_GATE'
+          DO $paytag_idempotency$
+          DECLARE target oid;
+          BEGIN
+            target := 'pay54.paytag_registration_requests'::regclass;
+            IF NOT EXISTS(SELECT 1 FROM pg_class
+              WHERE oid=target AND relrowsecurity AND relforcerowsecurity)
+              OR EXISTS(SELECT 1 FROM pg_policy WHERE polrelid=target)
+              OR has_table_privilege('pay54_financial_app_role',target,'INSERT')
+              OR has_table_privilege('pay54_financial_app_role',target,'SELECT')
+              OR has_table_privilege('pay54_ledger_executor_role',target,'INSERT')
+            THEN RAISE EXCEPTION 'PAYTAG_IDEMPOTENCY_RLS_PRIVILEGE_FAILURE'; END IF;
+            IF NOT EXISTS(SELECT 1 FROM pg_constraint
+              WHERE conrelid=target AND conname='paytag_registration_one_key_per_account'
+                AND contype='u')
+              OR NOT EXISTS(SELECT 1 FROM pg_trigger
+                WHERE tgrelid=target AND tgname='paytag_registration_guard'
+                  AND NOT tgisinternal)
+            THEN RAISE EXCEPTION 'PAYTAG_IDEMPOTENCY_UNIQUE_IMMUTABLE_MISSING'; END IF;
+          END;
+          $paytag_idempotency$;
+          PAYTAG_IDEMPOTENCY_SCHEMA_GATE
+      - name: Negative PayTag idempotency replay and immutable-result integration
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/015_paytag_idempotency_negative.sql
+      - name: Verify PayTag committed request exact audit correlation in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/016_paytag_audit_correlation_link.sql
+      - name: PayTag trusted SQL writer atomic replay and session negative integration
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/017_paytag_registration_writer.sql
+      - name: Verify inert PayTag registration role and forbidden execution
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/018_paytag_inert_role.sql
+      - name: Verify PayTag execution authority stays denied across schema
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/019_paytag_execution_boundary_preflight.sql
+      - name: Verify isolated PayTag function-owner role denies all execution
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/020_paytag_function_owner_isolation.sql
+      - name: PayTag actual SQL writer negative session and account lifecycle tests
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/021_paytag_writer_negative_lifecycle.sql
+      - name: Apply restricted PayTag execution source only in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/migrations/028_paytag_restricted_execution.sql
+      - name: Verify actual restricted caller execution, RLS, replay and revocation
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/023_paytag_restricted_execution.sql
+      - name: Verify restricted caller cross-account alias and revocation races
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash backend/db/tests/batch22/024_paytag_restricted_races.sh
+      - name: PayTag actual writer two-connection SERIALIZABLE claim race
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash backend/db/tests/batch22/022_paytag_writer_concurrency.sh
+      - name: Validate PayTag runtime activation planning policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/tests/paytag-runtime-activation-gate.test.mjs
+      - name: Verify PayTag restricted role catalogue post-migration
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/025_paytag_activation_catalogue_gate.sql
+      - name: Verify disposable PostgreSQL login-to-PayTag role isolation and revoke
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/026_paytag_disposable_login_role.sh
+          bash backend/db/tests/batch22/026_paytag_disposable_login_role.sh
+      - name: Verify actual TLS and credential rotation only on disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+          PAY54_PAYTAG_RUNTIME: DISABLED
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh
+          bash backend/db/tests/batch22/027_paytag_tls_rotation_disposable.sh
+      - name: Test SQL-bound wallet posted-net and session revocation in disposable PG16
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POSTGRES_CONTAINER"
+          cat backend/db/queries/wallet-posted-net-disposable.sql \
+              backend/db/tests/batch22/028_wallet_posted_net_disposable.sql |
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1
+      - name: Validate disposable posted-versus-HELD wallet snapshot and revocation
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat backend/db/queries/wallet-reservation-snapshot-disposable.sql \
+              backend/db/tests/batch22/029_wallet_reservation_snapshot_disposable.sql |
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1
+      - name: Apply inert wallet-read roles and prove exact restricted DB denial
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/migrations/029_wallet_read_inert_role_foundation.sql
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/030_wallet_read_inert_authority.sql
+      - name: Revalidate real funded reservation, capture, release and reversal in PG16
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            backend/db/tests/003_wallet_reservation_integrity.sql \
+            backend/db/tests/004_reservation_lifecycle_integrity.sql \
+            backend/db/tests/002_ledger_reversal_integrity.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+              -X -v ON_ERROR_STOP=1 < "$file"
+          done
+      - name: Confirm two-session capture-release races under real PostgreSQL row locks
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker cp backend/db/tests/007_capture_release_concurrency.sh \
+            "$POSTGRES_CONTAINER:/tmp/pay54-batch34-lifecycle-races.sh"
+          docker exec -u postgres -e PGDATABASE=pay54_disposable_ci \
+            -e PGUSER=postgres -i "$POSTGRES_CONTAINER" bash \
+            /tmp/pay54-batch34-lifecycle-races.sh
+      - name: Prove restricted wallet-read function, actor-scoped RLS and zero persistence
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch22/031_restricted_wallet_read_disposable.sql
+      - name: Check wallet-read staging preflight is read-only and release-blocked
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/release/wallet-read-staging-preflight.sql
+      - name: Demonstrate physical revocation-vs-read snapshot and fresh-session rejection
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
+          bash backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
+      - name: Prove two physical PostgreSQL session row-lock revocation races
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/039_session_revocation_rowlock_race.sh
+          bash backend/db/tests/batch22/039_session_revocation_rowlock_race.sh
+      - name: Apply and reverse reviewed wallet-v1 SQL only in disposable PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POSTGRES_CONTAINER"
+          for file in \
+            backend/db/release/wallet-read-v1-forward-review.sql \
+            backend/db/tests/batch22/033_wallet_forward_rollback_disposable.sql \
+            backend/db/tests/batch22/034_wallet_financial_privilege_graph.sql \
+            backend/db/tests/batch22/035_wallet_forward_executor_denial_disposable.sql \
+            backend/db/tests/batch22/037_financial_writer_identity_catalogue.sql \
+            backend/db/tests/batch22/038_financial_writer_invoker_contract.sql \
+            backend/db/tests/003_wallet_reservation_integrity.sql \
+            backend/db/tests/004_reservation_lifecycle_integrity.sql \
+            backend/db/tests/002_ledger_reversal_integrity.sql \
+            backend/db/release/wallet-read-v1-rollback-review.sql \
+            backend/db/tests/batch22/036_wallet_postrollback_denial_disposable.sql \
+            backend/db/tests/003_wallet_reservation_integrity.sql \
+            backend/db/tests/004_reservation_lifecycle_integrity.sql \
+            backend/db/tests/002_ledger_reversal_integrity.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
+          done
+          docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+            -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 <<'PAY54_B38_POSTROLLBACK'
+          SELECT 1/(CASE WHEN to_regprocedure(
+           'pay54.wallet_read_restricted_v1(bytea,uuid,uuid,character varying)'
+          ) IS NULL
+          AND NOT has_table_privilege('pay54_wallet_read_owner_role',
+            'pay54.ledger_entries','SELECT')
+          AND NOT has_table_privilege('pay54_wallet_read_caller_role',
+            'pay54.ledger_entries','SELECT')
+          THEN 1 ELSE 0 END) AS rollback_ledger_acl;
+          PAY54_B38_POSTROLLBACK
+      - name: Guarantee source-only database test conditions
+        run: |
+          test "${{ github.event_name }}" != "deployment"
+          echo "Disposable PostgreSQL only; no production database, IAM or payment rails"
