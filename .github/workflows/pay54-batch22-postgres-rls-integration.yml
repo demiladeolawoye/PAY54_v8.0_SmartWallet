@@ -456,6 +456,7 @@ jobs:
             backend/db/release/wallet-read-v1-forward-review.sql \
             backend/db/tests/batch22/033_wallet_forward_rollback_disposable.sql \
             backend/db/tests/batch22/034_wallet_financial_privilege_graph.sql \
+            backend/db/tests/batch22/037_financial_writer_identity_catalogue.sql \
             backend/db/tests/003_wallet_reservation_integrity.sql \
             backend/db/tests/004_reservation_lifecycle_integrity.sql \
             backend/db/tests/002_ledger_reversal_integrity.sql \
