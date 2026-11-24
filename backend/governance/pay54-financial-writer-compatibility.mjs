@@ -26,7 +26,7 @@ export function examineFinancialWriterCompatibility({reserveSql,captureReleaseSq
   );
   const declaration=declarationPattern.exec(sources);
   if(!declaration ||
-   !/\\bLANGUAGE\\s+plpgsql\\s+SECURITY\\s+INVOKER\\b/i.test(declaration[0])
+   !/\bLANGUAGE\s+plpgsql\s+SECURITY\s+INVOKER\b/i.test(declaration[0])
   ) findings.push("INVOKER_FUNCTION_NOT_PROVEN:"+functionName);
  }
  for(const relation of FINANCIAL_RELATIONS){
