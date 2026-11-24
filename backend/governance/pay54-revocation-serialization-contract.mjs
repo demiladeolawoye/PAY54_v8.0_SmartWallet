@@ -10,7 +10,6 @@ export function assessPay54SerializationTrace(evidence){
  if(evidence.environment!=="DISPOSABLE_PG16")findings.push("DISPOSABLE_PG16_NOT_PROVEN");
  if(!UUID.test(evidence.sessionId??""))findings.push("INVALID_SESSION_ID");
  if(!UUID.test(evidence.accountId??""))findings.push("INVALID_ACCOUNT_ID");
- if(!UUID.test(evidence.credentialDigest??""))findings.push("INVALID_CREDENTIAL_DIGEST");
  if(!HEX.test(evidence.credentialDigest??""))findings.push("INVALID_CREDENTIAL_DIGEST");
  if(!Number.isSafeInteger(evidence.sessionVersion)||evidence.sessionVersion<1)findings.push("INVALID_SESSION_VERSION");
  if(typeof evidence.transactionId!=="string"||!UUID.test(evidence.transactionId))findings.push("INVALID_TRANSACTION_ID");
