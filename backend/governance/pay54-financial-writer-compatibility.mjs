@@ -17,8 +17,17 @@ export function examineFinancialWriterCompatibility({reserveSql,captureReleaseSq
  const sources=reserveSql+"\n"+captureReleaseSql;
  const findings=[];
  for(const functionName of FINANCIAL_FUNCTIONS){
-  const pattern=new RegExp("CREATE\\s+(?:OR\\s+REPLACE\\s+)?FUNCTION\\s+pay54\\."+functionName+"\\s*\\([\\s\\S]*?LANGUAGE\\s+plpgsql\\s+SECURITY\\s+INVOKER\\b","i");
-  if(!pattern.test(sources))findings.push("INVOKER_FUNCTION_NOT_PROVEN:"+functionName);
+  // Read only the declaration preceding this function's first AS $$ delimiter.
+  // Never allow SECURITY INVOKER from another function to satisfy this check.
+  const declarationPattern=new RegExp(
+   "CREATE\\s+(?:OR\\s+REPLACE\\s+)?FUNCTION\\s+pay54\\."+
+   functionName+
+   "\\s*\\(([\\s\\S]*?)\\bAS\\s+\\$\\$","i"
+  );
+  const declaration=declarationPattern.exec(sources);
+  if(!declaration ||
+   !/\\bLANGUAGE\\s+plpgsql\\s+SECURITY\\s+INVOKER\\b/i.test(declaration[0])
+  ) findings.push("INVOKER_FUNCTION_NOT_PROVEN:"+functionName);
  }
  for(const relation of FINANCIAL_RELATIONS){
   const force=new RegExp("ALTER\\s+TABLE\\s+pay54\\."+relation+"\\s+FORCE\\s+ROW\\s+LEVEL\\s+SECURITY\\s*;","i");
