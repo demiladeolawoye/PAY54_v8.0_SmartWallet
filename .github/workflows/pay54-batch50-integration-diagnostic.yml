@@ -1,0 +1,49 @@
+name: PAY54 Batch50 Cross-PR Integration Diagnostic (NO MERGE)
+on:
+  pull_request:
+    branches: [project-titan]
+    paths:
+      - "backend/governance/pay54-batch50-manifest.json"
+      - "backend/governance/pay54-batch50-integration-audit.mjs"
+      - "backend/tests/pay54-batch50-integration-audit.test.mjs"
+      - "docs/engineering/PAY54-BATCH50-cross-pr-integration-audit.md"
+      - ".github/workflows/pay54-batch50-integration-diagnostic.yml"
+permissions:
+  contents: read
+jobs:
+  source-only-collision-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout all refs without retained credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Use pinned Node major
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Validate audit contract without cloud access
+        run: |
+          node --check backend/governance/pay54-batch50-integration-audit.mjs
+          node --test backend/tests/pay54-batch50-integration-audit.test.mjs
+      - name: Simulate integration in disposable local Git worktree
+        run: |
+          node backend/governance/pay54-batch50-integration-audit.mjs \
+            backend/governance/pay54-batch50-manifest.json \
+            pay54-batch50-audit.json
+          node --input-type=module -e "
+            import {readFileSync} from 'node:fs';
+            const report=JSON.parse(readFileSync('pay54-batch50-audit.json','utf8'));
+            if(report.sourceMergeAuthorized!==false ||
+               report.managedStagingAuthorized!==false ||
+               report.productionAuthorized!==false ||
+               report.financialExecutionAuthorized!==false)
+              process.exit(1);
+            console.log('AUDIT ONLY; integration admission remains NO-GO');
+            console.log('HEADS VERIFIED:',report.allHeadShasVerified);
+            console.log('MERGE CLEAN:',report.combinedMergeClean);
+            console.log('BLOCKERS:',report.blockers.join(', '));
+          "
