@@ -456,10 +456,15 @@ jobs:
             backend/db/release/wallet-read-v1-forward-review.sql \
             backend/db/tests/batch22/033_wallet_forward_rollback_disposable.sql \
             backend/db/tests/batch22/034_wallet_financial_privilege_graph.sql \
+            backend/db/tests/batch22/035_wallet_forward_executor_denial_disposable.sql \
             backend/db/tests/003_wallet_reservation_integrity.sql \
             backend/db/tests/004_reservation_lifecycle_integrity.sql \
             backend/db/tests/002_ledger_reversal_integrity.sql \
-            backend/db/release/wallet-read-v1-rollback-review.sql; do
+            backend/db/release/wallet-read-v1-rollback-review.sql \
+            backend/db/tests/batch22/036_wallet_postrollback_denial_disposable.sql \
+            backend/db/tests/003_wallet_reservation_integrity.sql \
+            backend/db/tests/004_reservation_lifecycle_integrity.sql \
+            backend/db/tests/002_ledger_reversal_integrity.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
               -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
           done
