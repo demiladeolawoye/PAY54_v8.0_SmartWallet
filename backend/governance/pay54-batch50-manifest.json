@@ -1,0 +1,63 @@
+{
+  "schema": "pay54.batch50.integration-manifest.v1",
+  "baseline": {
+    "branch": "project-titan",
+    "sha": "917404fdb83b4f208cd709c0c7fede832f4f0205"
+  },
+  "pullRequests": [
+    {
+      "number": 81,
+      "branch": "cto/batch41-cloudsql-cost-admission-20261124",
+      "sha": "deabe86dc967169cbf2168ca12caa6ea8f38c0d1"
+    },
+    {
+      "number": 82,
+      "branch": "cto/batch42-gbp-quote-evidence-gate-20261124",
+      "sha": "c3e52843e4712d0b1937279de94f67bfbc48d6ac"
+    },
+    {
+      "number": 83,
+      "branch": "cto/batch43-wallet-writer-rls-admission-20261124",
+      "sha": "a085c4891cfc78cdbc035246c36acb7fa52b83a8"
+    },
+    {
+      "number": 84,
+      "branch": "cto/batch44-disposable-writer-denial-rollback-20261124",
+      "sha": "204610e9e6f4efa5a838381427e2abadee07eb50"
+    },
+    {
+      "number": 85,
+      "branch": "cto/batch45-financial-writer-identity-preflight-20261124",
+      "sha": "332ca3bb2f095ed0863161986d725e0d1781f3af"
+    },
+    {
+      "number": 86,
+      "branch": "cto/batch46-financial-writer-compatibility-contract-20261124",
+      "sha": "3312283a10b6d0f8d1b5f52a666fae87a6984f93"
+    },
+    {
+      "number": 87,
+      "branch": "cto/batch47-authenticated-financial-command-gate-20261124",
+      "sha": "17c791c56ac705765246a311428d31a38c79a23f"
+    },
+    {
+      "number": 88,
+      "branch": "cto/batch48-revocation-serialization-contract-20261124",
+      "sha": "885de3e70431dc74c0e43b42186a8127ca480089"
+    },
+    {
+      "number": 89,
+      "branch": "cto/batch49-postgres-session-rowlock-races-20261124",
+      "sha": "22e7d22894d28dd6318710c42be3c0e196c2f596"
+    }
+  ],
+  "releaseGates": {
+    "sourceMergeApproved": false,
+    "cloudSpendingAuthorized": false,
+    "managedStagingAuthorized": false,
+    "productionAuthorized": false,
+    "realMoneyExecutionAuthorized": false,
+    "positiveFinancialWriterProven": false,
+    "realCombinedPostgresSuiteProven": false
+  }
+}
