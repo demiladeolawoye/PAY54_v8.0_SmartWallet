@@ -8,7 +8,7 @@ const session="b4700000-0000-4000-8000-000000000003";
 const sourceWallet="b4700000-0000-4000-8000-000000000004";
 const sourceAccount="b4700000-0000-4000-8000-000000000005";
 const destination="b4700000-0000-4000-8000-000000000006";
-const request={headers:{authorization:"Bearer "+"A".repeat(56)}};
+const request={headers:{authorization:"Bearer "+"A".repeat(43)}};
 const instruction=Object.freeze({
  kind:"WALLET_TRANSFER_RESERVATION",
  requestedAccountId:account,sourceAccountId:sourceAccount,
