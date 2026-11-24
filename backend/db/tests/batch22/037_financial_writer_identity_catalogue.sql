@@ -42,7 +42,15 @@ BEGIN
   OR has_function_privilege(financial_owner,function_oid,'EXECUTE')
   OR has_function_privilege(reader_owner,function_oid,'EXECUTE')
   OR has_function_privilege(reader_caller,function_oid,'EXECUTE')
-  OR has_function_privilege('public',function_oid,'EXECUTE')
+  OR EXISTS (
+    SELECT 1 FROM pg_proc p
+    CROSS JOIN LATERAL aclexplode(
+      COALESCE(p.proacl,acldefault('f',p.proowner))
+    ) acl
+    WHERE p.oid=function_oid
+      AND acl.grantee=0
+      AND acl.privilege_type='EXECUTE'
+  )
   THEN RAISE EXCEPTION 'PAY54_B45_FINANCIAL_FUNCTION_PRIVILEGE_LEAK: %',function_name;
   END IF;
  END LOOP;
