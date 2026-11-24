@@ -445,6 +445,16 @@ jobs:
           set -euo pipefail
           bash -n backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
           bash backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
+      - name: Prove two physical PostgreSQL session row-lock revocation races
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/039_session_revocation_rowlock_race.sh
+          bash backend/db/tests/batch22/039_session_revocation_rowlock_race.sh
       - name: Apply and reverse reviewed wallet-v1 SQL only in disposable PostgreSQL
         env:
           POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
