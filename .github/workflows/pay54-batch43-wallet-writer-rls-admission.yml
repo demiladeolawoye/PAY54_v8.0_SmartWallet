@@ -1,0 +1,29 @@
+name: PAY54 Batch43 Financial Writer RLS Source Admission
+on:
+  pull_request:
+    branches: [project-titan]
+    paths:
+      - "backend/governance/pay54-wallet-writer-rls-admission.mjs"
+      - "backend/tests/pay54-wallet-writer-rls-admission.test.mjs"
+      - "backend/db/release/wallet-read-v1-forward-review.sql"
+      - "backend/db/release/wallet-read-v1-rollback-review.sql"
+      - "docs/engineering/PAY54-BATCH43-financial-writer-rls-admission.md"
+      - ".github/workflows/pay54-batch43-wallet-writer-rls-admission.yml"
+permissions:
+  contents: read
+jobs:
+  source-only-writer-impact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Read-only migration impact tests
+        run: |
+          node --check backend/governance/pay54-wallet-writer-rls-admission.mjs
+          node --test backend/tests/pay54-wallet-writer-rls-admission.test.mjs
