@@ -1,0 +1,27 @@
+name: PAY54 Batch47 Financial Command Preflight (OFFLINE)
+on:
+  pull_request:
+    branches: [project-titan]
+    paths:
+      - "backend/src/financial-command-preflight.mjs"
+      - "backend/tests/financial-command-preflight.test.mjs"
+      - "docs/engineering/PAY54-BATCH47-financial-command-preflight.md"
+      - ".github/workflows/pay54-batch47-command-preflight.yml"
+permissions:
+  contents: read
+jobs:
+  source-only-command-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Validate source-only financial command gate
+        run: |
+          node --check backend/src/financial-command-preflight.mjs
+          node --test backend/tests/financial-command-preflight.test.mjs
