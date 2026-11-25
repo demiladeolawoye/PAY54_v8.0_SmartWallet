@@ -1,0 +1,28 @@
+name: PAY54 Batch45 Financial Writer Evidence Admission (SOURCE ONLY)
+on:
+  pull_request:
+    branches: [project-titan]
+    paths:
+      - "backend/governance/pay54-financial-writer-evidence-gate.mjs"
+      - "backend/tests/pay54-financial-writer-evidence-gate.test.mjs"
+      - "backend/db/tests/batch22/037_financial_writer_identity_catalogue.sql"
+      - "docs/engineering/PAY54-BATCH45-financial-writer-identity-admission.md"
+      - ".github/workflows/pay54-batch45-writer-admission.yml"
+permissions:
+  contents: read
+jobs:
+  offline-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Safe source-only validation
+        run: |
+          node --check backend/governance/pay54-financial-writer-evidence-gate.mjs
+          node --test backend/tests/pay54-financial-writer-evidence-gate.test.mjs
