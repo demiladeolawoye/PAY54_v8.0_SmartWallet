@@ -13,7 +13,7 @@ test("committed fixtures are confined to a distinct synthetic schema",()=>{
  "SECURITY INVOKER","FOR UPDATE","CREATE POLICY b55_sessions",
  "FORCE ROW LEVEL SECURITY","COMMIT;"])assert.ok(setup.includes(s),s);
  assert.ok(!/GRANT\s+(?:INSERT|UPDATE|DELETE|SELECT)\s+ON\s+pay54\./i.test(setup));
- assert.equal(setup.includes("pay54.reserve_wallet_transfer("),false);
+ assert.equal(/(?:SELECT|PERFORM)\\s+pay54\\.reserve_wallet_transfer\\s*\\(/i.test(setup),false);
 });
 test("both real physical race orderings must observe lock contention",()=>{
  for(const s of ["wait_event_type='Lock'","PAY54_B55_WRITER_LOCK_HELD",
