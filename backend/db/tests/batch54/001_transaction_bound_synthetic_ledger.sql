@@ -115,7 +115,10 @@ BEGIN
  PERFORM id FROM pay54_b54.accounts
  WHERE id IN(p_source,p_destination) ORDER BY id FOR UPDATE;
  SELECT id,digest INTO v_journal,v_digest FROM pay54_b54.journals
- WHERE owner=v_owner AND idempotency_key=p_idempotency FOR UPDATE;
+ WHERE owner=v_owner AND idempotency_key=p_idempotency;
+ -- Session and both financial account rows are already FOR UPDATE locked;
+ -- the unique (owner,key) constraint remains the final replay safeguard.
+ -- Avoid broadening journals UPDATE privilege just for replay lookup.
  IF FOUND THEN
   IF v_digest<>p_digest THEN
    RAISE EXCEPTION 'PAY54_B54_REPLAY_DIGEST_MISMATCH' USING ERRCODE='P5454'; END IF;
