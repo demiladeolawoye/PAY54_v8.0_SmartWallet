@@ -445,6 +445,16 @@ jobs:
           set -euo pipefail
           bash -n backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
           bash backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
+      - name: Prove two physical PostgreSQL session row-lock revocation races
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/039_session_revocation_rowlock_race.sh
+          bash backend/db/tests/batch22/039_session_revocation_rowlock_race.sh
       - name: Apply and reverse reviewed wallet-v1 SQL only in disposable PostgreSQL
         env:
           POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
@@ -456,10 +466,17 @@ jobs:
             backend/db/release/wallet-read-v1-forward-review.sql \
             backend/db/tests/batch22/033_wallet_forward_rollback_disposable.sql \
             backend/db/tests/batch22/034_wallet_financial_privilege_graph.sql \
+            backend/db/tests/batch22/035_wallet_forward_executor_denial_disposable.sql \
+            backend/db/tests/batch22/037_financial_writer_identity_catalogue.sql \
+            backend/db/tests/batch22/038_financial_writer_invoker_contract.sql \
             backend/db/tests/003_wallet_reservation_integrity.sql \
             backend/db/tests/004_reservation_lifecycle_integrity.sql \
             backend/db/tests/002_ledger_reversal_integrity.sql \
-            backend/db/release/wallet-read-v1-rollback-review.sql; do
+            backend/db/release/wallet-read-v1-rollback-review.sql \
+            backend/db/tests/batch22/036_wallet_postrollback_denial_disposable.sql \
+            backend/db/tests/003_wallet_reservation_integrity.sql \
+            backend/db/tests/004_reservation_lifecycle_integrity.sql \
+            backend/db/tests/002_ledger_reversal_integrity.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
               -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
           done
