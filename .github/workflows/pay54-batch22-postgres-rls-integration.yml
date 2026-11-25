@@ -8,12 +8,14 @@ on:
       - cto/batch52-permanent-integrated-candidate-20261125
       - cto/batch53-restricted-writer-disposable-canary-20261125
       - cto/batch54-transaction-bound-synthetic-ledger-20261125
+      - cto/batch55-physical-ledger-revocation-races-20261125
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
       - "backend/db/tests/batch53/*.sql"
       - "backend/db/tests/batch54/*.sql"
       - "backend/db/tests/batch55/*"
+      - "backend/db/tests/batch56/*.sql"
       - "backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh"
       - "backend/db/queries/wallet-posted-net-disposable.sql"
       - "backend/db/queries/wallet-reservation-snapshot-disposable.sql"
@@ -475,6 +477,7 @@ jobs:
             backend/db/tests/batch22/035_wallet_forward_executor_denial_disposable.sql \
             backend/db/tests/batch22/037_financial_writer_identity_catalogue.sql \
             backend/db/tests/batch22/038_financial_writer_invoker_contract.sql \
+            backend/db/tests/batch56/001_canonical_writer_admission_denial.sql \
             backend/db/tests/003_wallet_reservation_integrity.sql \
             backend/db/tests/004_reservation_lifecycle_integrity.sql \
             backend/db/tests/002_ledger_reversal_integrity.sql \
