@@ -7,11 +7,13 @@ on:
       - project-titan
       - cto/batch52-permanent-integrated-candidate-20261125
       - cto/batch53-restricted-writer-disposable-canary-20261125
+      - cto/batch54-transaction-bound-synthetic-ledger-20261125
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
       - "backend/db/tests/batch53/*.sql"
       - "backend/db/tests/batch54/*.sql"
+      - "backend/db/tests/batch55/*"
       - "backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh"
       - "backend/db/queries/wallet-posted-net-disposable.sql"
       - "backend/db/queries/wallet-reservation-snapshot-disposable.sql"
@@ -521,6 +523,17 @@ jobs:
           test -n "${POSTGRES_CONTAINER}"
           docker exec -i "${POSTGRES_CONTAINER}" psql -U postgres -d pay54_disposable_ci \
             -X -v ON_ERROR_STOP=1 < backend/db/tests/batch54/001_transaction_bound_synthetic_ledger.sql
+      - name: Prove physical restricted synthetic financial posting vs session revocation
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+          GITHUB_EVENT_NAME: pull_request
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch55/002_physical_financial_revocation_races.sh
+          bash backend/db/tests/batch55/002_physical_financial_revocation_races.sh
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
