@@ -491,6 +491,19 @@ jobs:
             'pay54.ledger_entries','SELECT')
           THEN 1 ELSE 0 END) AS rollback_ledger_acl;
           PAY54_B38_POSTROLLBACK
+      - name: Prove real restricted writer on isolated rollback-only PostgreSQL canary
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${PAY54_ENVIRONMENT}" = "DISPOSABLE_CI"
+          test "${PAY54_FINANCIAL_EXECUTION}" = "false"
+          test -n "${POSTGRES_CONTAINER}"
+          docker exec -i "${POSTGRES_CONTAINER}" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch53/001_restricted_writer_canary_disposable.sql
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
