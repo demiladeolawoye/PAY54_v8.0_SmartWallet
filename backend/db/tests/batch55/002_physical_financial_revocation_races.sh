@@ -19,6 +19,7 @@ DO $guard$ BEGIN
  IF current_database()<>'pay54_disposable_ci'
  THEN RAISE EXCEPTION 'PAY54_B55_TEARDOWN_REFUSED'; END IF;
 END $guard$;
+REVOKE USAGE ON SCHEMA pay54 FROM pay54_b55_writer;
 DROP SCHEMA IF EXISTS pay54_b55 CASCADE;
 DROP ROLE IF EXISTS pay54_b55_writer;
 SELECT 1/(CASE WHEN to_regnamespace('pay54_b55') IS NULL
