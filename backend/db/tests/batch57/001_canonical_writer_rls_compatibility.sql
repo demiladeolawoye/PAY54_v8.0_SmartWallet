@@ -1,7 +1,8 @@
 -- PAY54 Batch57 — actual FORCE RLS canonical schema, least-privilege read-only diagnostic.
 -- Real PostgreSQL catalog and restricted effective-role checks, NO grants or money DML.
 \set ON_ERROR_STOP on
-BEGIN READ ONLY ISOLATION LEVEL READ COMMITTED;
+BEGIN READ ONLY;
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 SET LOCAL statement_timeout='25s';
 DO $assert$
 DECLARE
