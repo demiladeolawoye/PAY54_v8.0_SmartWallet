@@ -34,6 +34,8 @@ CREATE POLICY pay54_b53_owner_canary ON pay54_b53_canary.scoped_command
  USING(owner_id='b5300000-0000-4000-8000-000000000011')
  WITH CHECK(owner_id='b5300000-0000-4000-8000-000000000011');
 GRANT USAGE ON SCHEMA pay54_b53_canary TO pay54_b53_canary_writer;
+-- Schema resolution only; no financial table access or function EXECUTE.
+GRANT USAGE ON SCHEMA pay54 TO pay54_b53_canary_writer;
 GRANT SELECT,UPDATE ON pay54_b53_canary.scoped_command TO pay54_b53_canary_writer;
 SET LOCAL ROLE pay54_b53_canary_writer;
 DO $verify$
