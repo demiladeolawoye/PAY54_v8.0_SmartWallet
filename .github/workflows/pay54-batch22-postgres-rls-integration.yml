@@ -5,9 +5,11 @@ on:
     branches:
       - cto/batch21-account-context-768-817
       - project-titan
+      - cto/batch52-permanent-integrated-candidate-20261125
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
+      - "backend/db/tests/batch53/*.sql"
       - "backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh"
       - "backend/db/queries/wallet-posted-net-disposable.sql"
       - "backend/db/queries/wallet-reservation-snapshot-disposable.sql"
