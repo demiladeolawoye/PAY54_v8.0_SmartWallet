@@ -1,0 +1,31 @@
+name: PAY54 Batch57 Canonical Writer RLS Design Admission (NO DEPLOY)
+on:
+  pull_request:
+    branches:
+      - cto/batch56-canonical-writer-admission-20261125
+      - project-titan
+    paths:
+      - "backend/db/tests/batch57/*.sql"
+      - "backend/governance/pay54-batch57-canonical-writer-design.json"
+      - "backend/tests/pay54-batch57-canonical-writer-rls.test.mjs"
+      - "docs/engineering/PAY54-BATCH57-canonical-writer-rls-design.md"
+      - ".github/workflows/pay54-batch57-canonical-writer.yml"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+permissions:
+  contents: read
+jobs:
+  source-no-grants:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Verify actual SQL names, no-grant boundaries and source test sequence
+        run: |
+          node --check backend/tests/pay54-batch57-canonical-writer-rls.test.mjs
+          node --test backend/tests/pay54-batch57-canonical-writer-rls.test.mjs
