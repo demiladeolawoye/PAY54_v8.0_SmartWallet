@@ -38,7 +38,7 @@ GRANT SELECT,UPDATE ON pay54_b53_canary.scoped_command TO pay54_b53_canary_write
 SET LOCAL ROLE pay54_b53_canary_writer;
 DO $verify$
 DECLARE affected integer;
-DECLARE denied boolean:=false;
+        denied boolean:=false;
 BEGIN
  IF current_user<>'pay54_b53_canary_writer'
  OR NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=current_user
