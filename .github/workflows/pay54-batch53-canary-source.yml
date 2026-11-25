@@ -1,0 +1,28 @@
+name: PAY54 Batch53 Restricted Writer Canary (SOURCE ONLY)
+on:
+  pull_request:
+    branches: [cto/batch52-permanent-integrated-candidate-20261125, project-titan]
+    paths:
+      - "backend/db/tests/batch53/001_restricted_writer_canary_disposable.sql"
+      - "backend/tests/batch53-restricted-writer-canary.test.mjs"
+      - "docs/engineering/PAY54-BATCH53-restricted-writer-canary.md"
+      - ".github/workflows/pay54-batch53-canary-source.yml"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+permissions:
+  contents: read
+jobs:
+  source-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Validate immutable canary boundaries
+        run: |
+          node --check backend/tests/batch53-restricted-writer-canary.test.mjs
+          node --test backend/tests/batch53-restricted-writer-canary.test.mjs
