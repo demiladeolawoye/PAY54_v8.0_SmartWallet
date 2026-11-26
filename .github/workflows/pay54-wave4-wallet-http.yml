@@ -1,0 +1,30 @@
+name: PAY54 Wave4 Real HTTP Wallet Integration (NO DEPLOY)
+on:
+  pull_request:
+    branches:
+      - cto/acceleration-wave3-authenticated-wallet-adapter-20261126
+      - project-titan
+    paths:
+      - "backend/src/wave2/wallet-http-listener.mjs"
+      - "backend/tests/pay54-wave4-http-wallet-integration.test.mjs"
+      - "docs/engineering/PAY54-ACCELERATION-WAVE4.md"
+      - ".github/workflows/pay54-wave4-wallet-http.yml"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+permissions:
+  contents: read
+jobs:
+  wallet-http-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Exercise real HTTP network listener and financial denial contracts
+        run: |
+          node --check backend/src/wave2/wallet-http-listener.mjs
+          node --test backend/tests/pay54-wave4-http-wallet-integration.test.mjs backend/tests/pay54-wave3-authenticated-wallet-reader.test.mjs backend/tests/pay54-wave3-wallet-read-handler.test.mjs
