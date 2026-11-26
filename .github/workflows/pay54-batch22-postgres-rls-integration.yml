@@ -10,6 +10,7 @@ on:
       - cto/batch54-transaction-bound-synthetic-ledger-20261125
       - cto/batch55-physical-ledger-revocation-races-20261125
       - cto/batch56-canonical-writer-admission-20261125
+      - cto/acceleration-wave1-integrated-readiness-20261126
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
@@ -18,6 +19,8 @@ on:
       - "backend/db/tests/batch55/*"
       - "backend/db/tests/batch56/*.sql"
       - "backend/db/tests/batch57/*.sql"
+      - "backend/src/wave2/*.mjs"
+      - "backend/tests/pay54-wave2-capability-contracts.test.mjs"
       - "backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh"
       - "backend/db/queries/wallet-posted-net-disposable.sql"
       - "backend/db/queries/wallet-reservation-snapshot-disposable.sql"
