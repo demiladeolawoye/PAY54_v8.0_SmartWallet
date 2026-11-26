@@ -1,0 +1,32 @@
+name: PAY54 Wave2 Capability Contract Regression (NO DEPLOY)
+on:
+  pull_request:
+    branches:
+      - cto/acceleration-wave1-integrated-readiness-20261126
+      - project-titan
+    paths:
+      - "backend/src/wave2/*.mjs"
+      - "backend/tests/pay54-wave2-capability-contracts.test.mjs"
+      - "docs/engineering/PAY54-ACCELERATION-WAVE2.md"
+      - ".github/workflows/pay54-wave2-capability-contracts.yml"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+permissions:
+  contents: read
+jobs:
+  cross-capability-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Test financial, wallet and staging execution boundaries
+        run: |
+          node --check backend/src/wave2/canonical-writer-admission.mjs
+          node --check backend/src/wave2/wallet-read-model.mjs
+          node --check backend/src/wave2/staging-admission.mjs
+          node --test backend/tests/pay54-wave2-capability-contracts.test.mjs
