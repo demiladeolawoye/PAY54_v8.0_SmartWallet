@@ -1,0 +1,50 @@
+name: PAY54 Acceleration Wave1 Integration Evidence (NO MERGE)
+on:
+  pull_request:
+    branches:
+      - cto/batch57-canonical-writer-rls-compatibility-20261125
+      - project-titan
+    paths:
+      - "backend/governance/pay54-acceleration-wave1.json"
+      - "backend/governance/pay54-acceleration-wave1-audit.mjs"
+      - "backend/tests/pay54-acceleration-wave1-audit.test.mjs"
+      - "docs/engineering/PAY54-ACCELERATION-WAVE1.md"
+      - ".github/workflows/pay54-acceleration-wave1.yml"
+permissions:
+  contents: read
+concurrency:
+  group: pay54-wave1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-only-readiness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout without retained credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Run fast gate regression tests
+        run: |
+          node --check backend/governance/pay54-acceleration-wave1-audit.mjs
+          node --test backend/tests/pay54-acceleration-wave1-audit.test.mjs
+      - name: Audit exact stack and protected base without changes
+        run: |
+          node backend/governance/pay54-acceleration-wave1-audit.mjs \
+            backend/governance/pay54-acceleration-wave1.json \
+            pay54-wave1-readiness.json
+          node --input-type=module -e "
+            import {readFileSync} from 'node:fs';
+            const r=JSON.parse(readFileSync('pay54-wave1-readiness.json','utf8'));
+            if(!r.sourceIntegrityValid || r.integrationReleaseApproved ||
+               r.customerMoneyEnabled || r.cloudSpendApproved ||
+               r.stagingApproved || r.productionApproved)
+              process.exit(1);
+            console.log('PINNED SOURCE INTEGRITY OK. ALL OPERATIONAL RELEASE GATES REMAIN CLOSED.');
+          "
