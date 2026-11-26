@@ -4,7 +4,7 @@
  * No balances are inferred, no pending funds become spendable.
  */
 const ISO=/^[A-Z]{3}$/;
-const MONEY=/^(0|[1-9][0-9]{0,17})$/;
+const MONEY=/^(0|[1-9][0-9]{0,18})$/;
 function record(x){return x!==null&&typeof x==="object"&&!Array.isArray(x);}
 export function buildWalletReadModel(payload){
  if(!record(payload)||payload.schema!=="pay54.wallet-read.v1"||
