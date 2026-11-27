@@ -1,0 +1,31 @@
+name: PAY54 Wave10 Tenant Scope Shadow & Integration Gate (NO DEPLOY)
+on:
+  pull_request:
+    branches:
+      - cto/acceleration-wave9-writer-rls-admission-20261127
+      - project-titan
+    paths:
+      - "backend/db/release/writer-rls-v2-tenant-shadow-*.sql"
+      - "backend/db/tests/batch63/*.sql"
+      - "backend/tests/pay54-wave10-*.test.mjs"
+      - "docs/engineering/PAY54-ACCELERATION-WAVE10.md"
+      - ".github/workflows/pay54-wave10-tenant-shadow.yml"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+permissions:
+  contents: read
+jobs:
+  scope-safety-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Verify tenant predicates cannot activate financial permissions
+        run: |
+          node --check backend/tests/pay54-wave10-tenant-shadow-policy.test.mjs
+          node --test backend/tests/pay54-wave10-tenant-shadow-policy.test.mjs
