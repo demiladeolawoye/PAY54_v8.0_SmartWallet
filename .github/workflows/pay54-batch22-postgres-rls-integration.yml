@@ -17,6 +17,7 @@ on:
       - cto/acceleration-wave5-wallet-dashboard-financial-boundary-20261126
       - cto/acceleration-wave6-financial-session-attestation-20261126
       - cto/acceleration-wave7-canonical-writer-disposable-20261127
+      - cto/acceleration-wave8-canonical-revocation-race-20261127
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
@@ -29,6 +30,9 @@ on:
       - "backend/db/tests/batch59/*.sql"
       - "backend/db/tests/batch60/*.sql"
       - "backend/db/tests/batch61/*"
+      - "backend/db/tests/batch62/*.sql"
+      - "backend/db/release/writer-rls-v1-*.sql"
+      - "backend/tests/pay54-wave9-*.test.mjs"
       - "backend/tests/pay54-wave8-*.test.mjs"
       - "backend/tests/pay54-wave7-restricted-writer.test.mjs"
       - "backend/tests/pay54-wave6-canonical-session-lock.test.mjs"
@@ -512,6 +516,13 @@ jobs:
           done
           test "${PAY54_ENVIRONMENT:-DISPOSABLE_CI}" = "DISPOSABLE_CI"
           python3 backend/db/tests/batch61/canonical_posting_revocation_race.py
+          for file in \
+            backend/db/release/writer-rls-v1-forward-review.sql \
+            backend/db/tests/batch62/001_writer_rls_candidate_denial.sql \
+            backend/db/release/writer-rls-v1-rollback-review.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
+          done
           for file in \
             backend/db/release/wallet-read-v1-rollback-review.sql \
             backend/db/tests/batch22/036_wallet_postrollback_denial_disposable.sql \
