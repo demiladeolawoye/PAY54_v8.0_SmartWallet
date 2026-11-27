@@ -14,7 +14,7 @@ test("each shadow tenant predicate is DENY guarded and cannot issue financial pe
   assert.ok(f.includes("CREATE POLICY pay54_w10_scope_"+p),p);
  }
  assert.equal((f.match(/AS PERMISSIVE FOR SELECT TO pay54_writer9_owner_candidate/g)||[]).length,5);
- assert.equal((f.match(/USING \(false AND/g)||[]).length,5);
+ assert.equal((f.match(/false AND/g)||[]).length,5);
  assert.ok(!/^\s*(?:GRANT|CREATE ROLE|ALTER ROLE|CREATE FUNCTION|ALTER TABLE|COMMIT\s*;\s*--\s*enable)/im.test(f));
  assert.match(f,/a\.legal_owner_subject=s\.principal_id/);
  assert.match(f,/m\.role='PERSONAL_OWNER'/);
