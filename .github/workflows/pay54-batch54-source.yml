@@ -1,0 +1,30 @@
+name: PAY54 Batch54 Synthetic Ledger Source Admission (NO DEPLOY)
+on:
+  pull_request:
+    branches:
+      - cto/batch53-restricted-writer-disposable-canary-20261125
+      - project-titan
+    paths:
+      - "backend/db/tests/batch54/*.sql"
+      - "backend/tests/batch54-transaction-bound-ledger.test.mjs"
+      - "docs/engineering/PAY54-BATCH54-transaction-bound-ledger-proof.md"
+      - ".github/workflows/pay54-batch54-source.yml"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+permissions:
+  contents: read
+jobs:
+  source-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Assert synthetic schema and disabled-money controls
+        run: |
+          node --check backend/tests/batch54-transaction-bound-ledger.test.mjs
+          node --test backend/tests/batch54-transaction-bound-ledger.test.mjs

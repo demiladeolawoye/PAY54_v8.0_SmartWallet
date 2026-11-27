@@ -1,0 +1,27 @@
+name: PAY54 Batch48 Revocation Serialization Contract (OFFLINE)
+on:
+  pull_request:
+    branches: [project-titan]
+    paths:
+      - "backend/governance/pay54-revocation-serialization-contract.mjs"
+      - "backend/tests/pay54-revocation-serialization-contract.test.mjs"
+      - "docs/engineering/PAY54-BATCH48-revocation-serialization-contract.md"
+      - ".github/workflows/pay54-batch48-revocation-contract.yml"
+permissions:
+  contents: read
+jobs:
+  offline-evidence-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Run strict offline evidence contract
+        run: |
+          node --check backend/governance/pay54-revocation-serialization-contract.mjs
+          node --test backend/tests/pay54-revocation-serialization-contract.test.mjs

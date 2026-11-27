@@ -1,0 +1,114 @@
+{
+  "schema": "pay54.acceleration.wave1.v1",
+  "capturedOn": "2026-11-26",
+  "protectedTarget": "project-titan",
+  "protectedBase": "917404fdb83b4f208cd709c0c7fede832f4f0205",
+  "stack": [
+    {
+      "pr": 92,
+      "sha": "60b45512805614b411e1e80685cf8d8394e263d4",
+      "branch": "cto/batch52-permanent-integrated-candidate-20261125",
+      "capability": "Consolidated Batches 41-49"
+    },
+    {
+      "pr": 93,
+      "sha": "68207bebc97ee16d17671a705e5c4c4932abcc33",
+      "branch": "cto/batch53-restricted-writer-disposable-canary-20261125",
+      "capability": "Restricted PG16 canary"
+    },
+    {
+      "pr": 94,
+      "sha": "75cbc1bfd7ee866f27807bd9e980e82416298f60",
+      "branch": "cto/batch54-transaction-bound-synthetic-ledger-20261125",
+      "capability": "Synthetic ledger"
+    },
+    {
+      "pr": 95,
+      "sha": "ee8ccf151ac0545b909b71fdf01f80734a20dc8d",
+      "branch": "cto/batch55-physical-ledger-revocation-races-20261125",
+      "capability": "Synthetic concurrency"
+    },
+    {
+      "pr": 96,
+      "sha": "a6000e25afd96b839ebd61d12efb7d163afc02e8",
+      "branch": "cto/batch56-canonical-writer-admission-20261125",
+      "capability": "Canonical no-go admission"
+    },
+    {
+      "pr": 97,
+      "sha": "a39ebe81ca7ad3e2d08ea4e6c30313fbd325c1cb",
+      "branch": "cto/batch57-canonical-writer-rls-compatibility-20261125",
+      "capability": "Canonical RLS design"
+    }
+  ],
+  "release": {
+    "sourceMergeApproved": false,
+    "cloudSpendApproved": false,
+    "managedStagingApproved": false,
+    "productionApproved": false,
+    "realMoneyApproved": false,
+    "canonicalWriterPositiveProven": false
+  },
+  "parallelStreams": [
+    {
+      "id": "FIN-CORE",
+      "owner": "Fintech Architect + Security + Backend",
+      "priority": "P0",
+      "scope": "transaction-bound canonical owner attestation, least-privilege writer design and disposable positive reserve/capture/release",
+      "dependsOn": [
+        "DBA_SECURITY_REVIEW"
+      ]
+    },
+    {
+      "id": "RELEASE-INTEGRATION",
+      "owner": "Release Manager + QA",
+      "priority": "P0",
+      "scope": "pin reviewed source, check cumulative diff, reconcile stacked branches, execute combined PostgreSQL CI",
+      "dependsOn": [
+        "INDEPENDENT_REVIEW"
+      ]
+    },
+    {
+      "id": "FRONTEND-API",
+      "owner": "Frontend + Mobile + Backend",
+      "priority": "P1",
+      "scope": "contract tests and customer-journey integration against safe mock adapters",
+      "dependsOn": [
+        "API_CONTRACTS"
+      ]
+    },
+    {
+      "id": "PLATFORM-SECURITY",
+      "owner": "DevSecOps + Security",
+      "priority": "P0",
+      "scope": "staging IAM/TLS/monitoring and rollback design, no provisioning",
+      "dependsOn": [
+        "GBP_QUOTE",
+        "SPEND_APPROVAL"
+      ]
+    },
+    {
+      "id": "PARTNER-RAILS",
+      "owner": "Fintech Architect + Compliance",
+      "priority": "P0",
+      "scope": "UK banking and Nigeria payout due diligence, adapters and reconciliation contracts",
+      "dependsOn": [
+        "COMMERCIAL_PARTNER_TERMS"
+      ]
+    },
+    {
+      "id": "RELEASE-ASSURANCE",
+      "owner": "QA + Performance + Release",
+      "priority": "P0",
+      "scope": "risk-based test matrix, regression, negative finance tests, evidence and release gates",
+      "dependsOn": [
+        "INTEGRATED_SOURCE"
+      ]
+    }
+  ],
+  "approvals": {
+    "pr97IndependentApprovalVerified": false,
+    "sourceMergeAuthorization": false,
+    "productionReleaseAuthorization": false
+  }
+}

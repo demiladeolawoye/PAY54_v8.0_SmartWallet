@@ -1,0 +1,117 @@
+{
+  "schema": "pay54.canonical-writer-minimum-privilege-design.v1",
+  "status": "DESIGN_ONLY_NOT_APPLIED",
+  "sourceFunctions": {
+    "reserve": "pay54.reserve_wallet_transfer(uuid,uuid,uuid,bigint,text,text,timestamp with time zone)",
+    "capture": "pay54.capture_reserved_wallet_transfer(uuid,uuid)",
+    "release": "pay54.release_reserved_wallet_transfer(uuid,uuid,text)"
+  },
+  "principalBoundary": {
+    "source": "server_attested_session_digest_and_version",
+    "rowLock": "pay54.auth_sessions.session_id SELECT FOR UPDATE",
+    "revokerSameLock": true,
+    "trustClientOwnerUuid": false,
+    "requireAtomicFinancialTransaction": true
+  },
+  "unapprovedCandidateOperations": {
+    "reserve": {
+      "select": [
+        "auth_sessions",
+        "account_contexts",
+        "account_memberships",
+        "personal_wallet_bindings",
+        "currencies",
+        "wallets",
+        "ledger_accounts",
+        "ledger_journals",
+        "ledger_entries",
+        "financial_operations",
+        "idempotency_records",
+        "balance_reservations"
+      ],
+      "insert": [
+        "financial_operations",
+        "idempotency_records",
+        "balance_reservations",
+        "outbox_events"
+      ],
+      "update": [
+        "financial_operations"
+      ]
+    },
+    "capture": {
+      "select": [
+        "auth_sessions",
+        "account_contexts",
+        "account_memberships",
+        "personal_wallet_bindings",
+        "currencies",
+        "wallets",
+        "ledger_accounts",
+        "financial_operations",
+        "idempotency_records",
+        "balance_reservations",
+        "provider_attempts",
+        "ledger_journals",
+        "ledger_entries"
+      ],
+      "insert": [
+        "ledger_journals",
+        "ledger_entries",
+        "outbox_events"
+      ],
+      "update": [
+        "financial_operations",
+        "balance_reservations",
+        "ledger_journals"
+      ]
+    },
+    "release": {
+      "select": [
+        "auth_sessions",
+        "account_contexts",
+        "account_memberships",
+        "personal_wallet_bindings",
+        "wallets",
+        "ledger_accounts",
+        "financial_operations",
+        "balance_reservations",
+        "provider_attempts",
+        "ledger_journals"
+      ],
+      "insert": [
+        "outbox_events"
+      ],
+      "update": [
+        "financial_operations",
+        "balance_reservations"
+      ]
+    }
+  },
+  "admissionRequirements": [
+    "replace_trusted_owner_uuid_with_database_attested_transaction_identity",
+    "review_RLS_USING_and_WITH_CHECK_per_operation",
+    "ensure_row_locks_for_financial_and_session_queries",
+    "restore_read_owner_policy_and_FORCE_RLS_on_rollback",
+    "prove_non_superuser_canonical_reserve_capture_release_positive_negative",
+    "test_physical_writer_vs_revocation_concurrency",
+    "review_ledger_trigger_and_deferred_constraint_privileges",
+    "validate_idempotency_outbox_durable_atomicity",
+    "review_B2B_future_business_owner_mapping_separately"
+  ],
+  "prohibitions": {
+    "publicExecute": false,
+    "grantToCurrentExecutor": false,
+    "productionDeployment": false,
+    "cloudSpending": false,
+    "createLoginCredentials": false,
+    "releaseApprovals": false
+  },
+  "evidenceStatus": {
+    "canonicalWriterPositiveExecutionProven": false,
+    "canonicalWriterRlsPolicyApproved": false,
+    "sessionBoundCanonicalMoneyProven": false,
+    "independentSecurityApproval": false,
+    "independentDBAApproval": false
+  }
+}

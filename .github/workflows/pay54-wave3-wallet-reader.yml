@@ -1,0 +1,31 @@
+name: PAY54 Wave3 Authenticated Wallet Read Integration (NO DEPLOY)
+on:
+  pull_request:
+    branches:
+      - cto/acceleration-wave2-integrated-contracts-20261126
+      - project-titan
+    paths:
+      - "backend/src/wave2/authenticated-wallet-reader.mjs"
+      - "backend/src/wave2/wallet-read-handler.mjs"
+      - "backend/tests/pay54-wave3-*.test.mjs"
+      - "docs/engineering/PAY54-ACCELERATION-WAVE3.md"
+      - ".github/workflows/pay54-wave3-wallet-reader.yml"
+permissions:
+  contents: read
+jobs:
+  authenticated-read:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Verify real token path and read-only integration
+        run: |
+          node --check backend/src/wave2/authenticated-wallet-reader.mjs
+          node --check backend/src/wave2/wallet-read-handler.mjs
+          node --test backend/tests/pay54-wave2-capability-contracts.test.mjs backend/tests/pay54-wave3-authenticated-wallet-reader.test.mjs backend/tests/pay54-wave3-wallet-read-handler.test.mjs

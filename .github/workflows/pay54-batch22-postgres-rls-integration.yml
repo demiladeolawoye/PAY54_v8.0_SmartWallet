@@ -5,9 +5,47 @@ on:
     branches:
       - cto/batch21-account-context-768-817
       - project-titan
+      - cto/batch52-permanent-integrated-candidate-20261125
+      - cto/batch53-restricted-writer-disposable-canary-20261125
+      - cto/batch54-transaction-bound-synthetic-ledger-20261125
+      - cto/batch55-physical-ledger-revocation-races-20261125
+      - cto/batch56-canonical-writer-admission-20261125
+      - cto/acceleration-wave1-integrated-readiness-20261126
+      - cto/acceleration-wave2-integrated-contracts-20261126
+      - cto/acceleration-wave3-authenticated-wallet-adapter-20261126
+      - cto/acceleration-wave4-wallet-http-integration-20261126
+      - cto/acceleration-wave5-wallet-dashboard-financial-boundary-20261126
+      - cto/acceleration-wave6-financial-session-attestation-20261126
+      - cto/acceleration-wave7-canonical-writer-disposable-20261127
+      - cto/acceleration-wave8-canonical-revocation-race-20261127
+      - cto/acceleration-wave9-writer-rls-admission-20261127
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
+      - "backend/db/tests/batch53/*.sql"
+      - "backend/db/tests/batch54/*.sql"
+      - "backend/db/tests/batch55/*"
+      - "backend/db/tests/batch56/*.sql"
+      - "backend/db/tests/batch57/*.sql"
+      - "backend/db/tests/batch58/*.sql"
+      - "backend/db/tests/batch59/*.sql"
+      - "backend/db/tests/batch60/*.sql"
+      - "backend/db/tests/batch61/*"
+      - "backend/db/tests/batch62/*.sql"
+      - "backend/db/tests/batch63/*.sql"
+      - "backend/db/release/writer-rls-v2-tenant-shadow-*.sql"
+      - "backend/tests/pay54-wave10-*.test.mjs"
+      - "backend/db/release/writer-rls-v1-*.sql"
+      - "backend/tests/pay54-wave9-*.test.mjs"
+      - "backend/tests/pay54-wave8-*.test.mjs"
+      - "backend/tests/pay54-wave7-restricted-writer.test.mjs"
+      - "backend/tests/pay54-wave6-canonical-session-lock.test.mjs"
+      - "backend/src/wave2/wallet-dashboard-controller.mjs"
+      - "backend/tests/pay54-wave5-wallet-dashboard.test.mjs"
+      - "backend/src/wave2/*.mjs"
+      - "backend/tests/pay54-wave3-*.test.mjs"
+      - "backend/tests/pay54-wave4-http-wallet-integration.test.mjs"
+      - "backend/tests/pay54-wave2-capability-contracts.test.mjs"
       - "backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh"
       - "backend/db/queries/wallet-posted-net-disposable.sql"
       - "backend/db/queries/wallet-reservation-snapshot-disposable.sql"
@@ -445,6 +483,16 @@ jobs:
           set -euo pipefail
           bash -n backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
           bash backend/db/tests/batch22/032_wallet_revocation_snapshot_race.sh
+      - name: Prove two physical PostgreSQL session row-lock revocation races
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch22/039_session_revocation_rowlock_race.sh
+          bash backend/db/tests/batch22/039_session_revocation_rowlock_race.sh
       - name: Apply and reverse reviewed wallet-v1 SQL only in disposable PostgreSQL
         env:
           POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
@@ -456,10 +504,38 @@ jobs:
             backend/db/release/wallet-read-v1-forward-review.sql \
             backend/db/tests/batch22/033_wallet_forward_rollback_disposable.sql \
             backend/db/tests/batch22/034_wallet_financial_privilege_graph.sql \
+            backend/db/tests/batch22/035_wallet_forward_executor_denial_disposable.sql \
+            backend/db/tests/batch22/037_financial_writer_identity_catalogue.sql \
+            backend/db/tests/batch22/038_financial_writer_invoker_contract.sql \
+            backend/db/tests/batch56/001_canonical_writer_admission_denial.sql \
+            backend/db/tests/batch57/001_canonical_writer_rls_compatibility.sql \
+            backend/db/tests/batch58/001_canonical_transaction_identity_blocker.sql \
+            backend/db/tests/batch59/001_canonical_session_locked_identity.sql \
+            backend/db/tests/batch60/001_disposable_restricted_canonical_writer.sql \
             backend/db/tests/003_wallet_reservation_integrity.sql \
             backend/db/tests/004_reservation_lifecycle_integrity.sql \
-            backend/db/tests/002_ledger_reversal_integrity.sql \
-            backend/db/release/wallet-read-v1-rollback-review.sql; do
+            backend/db/tests/002_ledger_reversal_integrity.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
+          done
+          test "${PAY54_ENVIRONMENT:-DISPOSABLE_CI}" = "DISPOSABLE_CI"
+          python3 backend/db/tests/batch61/canonical_posting_revocation_race.py
+          for file in \
+            backend/db/release/writer-rls-v1-forward-review.sql \
+            backend/db/tests/batch62/001_writer_rls_candidate_denial.sql \
+            backend/db/release/writer-rls-v2-tenant-shadow-forward.sql \
+            backend/db/tests/batch63/001_tenant_shadow_role_denial.sql \
+            backend/db/release/writer-rls-v2-tenant-shadow-rollback.sql \
+            backend/db/release/writer-rls-v1-rollback-review.sql; do
+            docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
+              -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
+          done
+          for file in \
+            backend/db/release/wallet-read-v1-rollback-review.sql \
+            backend/db/tests/batch22/036_wallet_postrollback_denial_disposable.sql \
+            backend/db/tests/003_wallet_reservation_integrity.sql \
+            backend/db/tests/004_reservation_lifecycle_integrity.sql \
+            backend/db/tests/002_ledger_reversal_integrity.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
               -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
           done
@@ -474,6 +550,43 @@ jobs:
             'pay54.ledger_entries','SELECT')
           THEN 1 ELSE 0 END) AS rollback_ledger_acl;
           PAY54_B38_POSTROLLBACK
+      - name: Prove real restricted writer on isolated rollback-only PostgreSQL canary
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${PAY54_ENVIRONMENT}" = "DISPOSABLE_CI"
+          test "${PAY54_FINANCIAL_EXECUTION}" = "false"
+          test -n "${POSTGRES_CONTAINER}"
+          docker exec -i "${POSTGRES_CONTAINER}" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch53/001_restricted_writer_canary_disposable.sql
+      - name: Verify transaction-bound synthetic ledger under non-superuser PostgreSQL identity
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${PAY54_ENVIRONMENT}" = "DISPOSABLE_CI"
+          test "${PAY54_FINANCIAL_EXECUTION}" = "false"
+          test -n "${POSTGRES_CONTAINER}"
+          docker exec -i "${POSTGRES_CONTAINER}" psql -U postgres -d pay54_disposable_ci \
+            -X -v ON_ERROR_STOP=1 < backend/db/tests/batch54/001_transaction_bound_synthetic_ledger.sql
+      - name: Prove physical restricted synthetic financial posting vs session revocation
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          PAY54_ENVIRONMENT: DISPOSABLE_CI
+          PAY54_FINANCIAL_EXECUTION: "false"
+          GITHUB_EVENT_NAME: pull_request
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n backend/db/tests/batch55/002_physical_financial_revocation_races.sh
+          bash backend/db/tests/batch55/002_physical_financial_revocation_races.sh
       - name: Guarantee source-only database test conditions
         run: |
           test "${{ github.event_name }}" != "deployment"
