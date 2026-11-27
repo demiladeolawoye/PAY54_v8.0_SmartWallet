@@ -95,6 +95,7 @@ DELETE FROM pay54.outbox_events WHERE aggregate_id IN
  (SELECT id FROM pay54.financial_operations WHERE owner_subject='a6700000-0000-4000-8000-000000000011');
 ALTER TABLE pay54.ledger_entries DISABLE TRIGGER USER;
 ALTER TABLE pay54.ledger_journals DISABLE TRIGGER USER;
+ALTER TABLE pay54.financial_operations DISABLE TRIGGER USER;
 DELETE FROM pay54.ledger_entries WHERE journal_id IN
  (SELECT id FROM pay54.ledger_journals
   WHERE operation_id IN (SELECT id FROM pay54.financial_operations
@@ -105,6 +106,7 @@ DELETE FROM pay54.ledger_journals WHERE operation_id IN
  OR id='a6700000-0000-4000-8000-000000000401';
 ALTER TABLE pay54.ledger_entries ENABLE TRIGGER USER;
 ALTER TABLE pay54.ledger_journals ENABLE TRIGGER USER;
+ALTER TABLE pay54.financial_operations ENABLE TRIGGER USER;
 DELETE FROM pay54.idempotency_records WHERE owner_subject='a6700000-0000-4000-8000-000000000011';
 DELETE FROM pay54.balance_reservations WHERE account_id='a6700000-0000-4000-8000-000000000301';
 DELETE FROM pay54.financial_operations WHERE owner_subject='a6700000-0000-4000-8000-000000000011';
