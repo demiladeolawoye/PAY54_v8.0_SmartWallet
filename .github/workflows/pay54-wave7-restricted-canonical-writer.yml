@@ -1,0 +1,30 @@
+name: PAY54 Wave7 Restricted Canonical Writer Positive Proof (DISPOSABLE)
+on:
+  pull_request:
+    branches:
+      - cto/acceleration-wave6-financial-session-attestation-20261126
+      - project-titan
+    paths:
+      - "backend/db/tests/batch60/*.sql"
+      - "backend/tests/pay54-wave7-restricted-writer.test.mjs"
+      - "docs/engineering/PAY54-ACCELERATION-WAVE7.md"
+      - ".github/workflows/pay54-wave7-restricted-canonical-writer.yml"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+permissions:
+  contents: read
+jobs:
+  source-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Verify test-only role restrictions and rollback
+        run: |
+          node --check backend/tests/pay54-wave7-restricted-writer.test.mjs
+          node --test backend/tests/pay54-wave7-restricted-writer.test.mjs
