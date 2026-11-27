@@ -15,6 +15,7 @@ on:
       - cto/acceleration-wave3-authenticated-wallet-adapter-20261126
       - cto/acceleration-wave4-wallet-http-integration-20261126
       - cto/acceleration-wave5-wallet-dashboard-financial-boundary-20261126
+      - cto/acceleration-wave6-financial-session-attestation-20261126
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
@@ -25,6 +26,8 @@ on:
       - "backend/db/tests/batch57/*.sql"
       - "backend/db/tests/batch58/*.sql"
       - "backend/db/tests/batch59/*.sql"
+      - "backend/db/tests/batch60/*.sql"
+      - "backend/tests/pay54-wave7-restricted-writer.test.mjs"
       - "backend/tests/pay54-wave6-canonical-session-lock.test.mjs"
       - "backend/src/wave2/wallet-dashboard-controller.mjs"
       - "backend/tests/pay54-wave5-wallet-dashboard.test.mjs"
@@ -497,6 +500,7 @@ jobs:
             backend/db/tests/batch57/001_canonical_writer_rls_compatibility.sql \
             backend/db/tests/batch58/001_canonical_transaction_identity_blocker.sql \
             backend/db/tests/batch59/001_canonical_session_locked_identity.sql \
+            backend/db/tests/batch60/001_disposable_restricted_canonical_writer.sql \
             backend/db/tests/003_wallet_reservation_integrity.sql \
             backend/db/tests/004_reservation_lifecycle_integrity.sql \
             backend/db/tests/002_ledger_reversal_integrity.sql \
