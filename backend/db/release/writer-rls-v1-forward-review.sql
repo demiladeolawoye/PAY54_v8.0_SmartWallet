@@ -69,7 +69,7 @@ BEGIN
   THEN RAISE EXCEPTION 'PAY54_W9_UNEXPECTED_ROLE_AUTHORITY: %',r.rolname; END IF;
  END LOOP;
  SELECT count(*) INTO n FROM pg_policies WHERE schemaname='pay54'
-  AND policyname LIKE 'pay54_w9_deny_%' AND NOT permissive
+  AND policyname LIKE 'pay54_w9_deny_%' AND permissive='RESTRICTIVE'
   AND cmd='ALL' AND roles=ARRAY['pay54_writer9_owner_candidate']::name[];
  IF n<>5 THEN RAISE EXCEPTION 'PAY54_W9_POLICY_MATRIX_MISMATCH: %',n; END IF;
  IF EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='pay54'
