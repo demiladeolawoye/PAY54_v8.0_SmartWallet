@@ -25,13 +25,13 @@ BEGIN
  EXCEPTION WHEN insufficient_privilege THEN denied:=true;
  END;
  IF NOT denied THEN RAISE EXCEPTION 'PAY54_W9_OPERATION_READ_EXPOSED'; END IF;
- IF has_function_privilege(current_user,
- 'pay54.reserve_wallet_transfer(uuid,uuid,uuid,bigint,text,text,timestamp with time zone)','EXECUTE')
- OR has_function_privilege(current_user,
- 'pay54.capture_reserved_wallet_transfer(uuid,uuid)','EXECUTE')
- OR has_function_privilege(current_user,
- 'pay54.release_reserved_wallet_transfer(uuid,uuid,text)','EXECUTE')
- THEN RAISE EXCEPTION 'PAY54_W9_CANONICAL_EXECUTE_EXPOSED'; END IF;
+ IF EXISTS(
+  SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+  WHERE n.nspname='pay54'
+  AND p.proname IN ('reserve_wallet_transfer',
+    'capture_reserved_wallet_transfer','release_reserved_wallet_transfer')
+  AND has_function_privilege(current_user,p.oid,'EXECUTE')
+ ) THEN RAISE EXCEPTION 'PAY54_W9_CANONICAL_EXECUTE_EXPOSED'; END IF;
 END $denial$;
 RESET ROLE;
 COMMIT;
