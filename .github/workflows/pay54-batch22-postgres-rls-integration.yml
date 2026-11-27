@@ -18,6 +18,7 @@ on:
       - cto/acceleration-wave6-financial-session-attestation-20261126
       - cto/acceleration-wave7-canonical-writer-disposable-20261127
       - cto/acceleration-wave8-canonical-revocation-race-20261127
+      - cto/acceleration-wave9-writer-rls-admission-20261127
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
@@ -31,6 +32,9 @@ on:
       - "backend/db/tests/batch60/*.sql"
       - "backend/db/tests/batch61/*"
       - "backend/db/tests/batch62/*.sql"
+      - "backend/db/tests/batch63/*.sql"
+      - "backend/db/release/writer-rls-v2-tenant-shadow-*.sql"
+      - "backend/tests/pay54-wave10-*.test.mjs"
       - "backend/db/release/writer-rls-v1-*.sql"
       - "backend/tests/pay54-wave9-*.test.mjs"
       - "backend/tests/pay54-wave8-*.test.mjs"
@@ -519,6 +523,9 @@ jobs:
           for file in \
             backend/db/release/writer-rls-v1-forward-review.sql \
             backend/db/tests/batch62/001_writer_rls_candidate_denial.sql \
+            backend/db/release/writer-rls-v2-tenant-shadow-forward.sql \
+            backend/db/tests/batch63/001_tenant_shadow_role_denial.sql \
+            backend/db/release/writer-rls-v2-tenant-shadow-rollback.sql \
             backend/db/release/writer-rls-v1-rollback-review.sql; do
             docker exec -i "$POSTGRES_CONTAINER" psql -U postgres \
               -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
