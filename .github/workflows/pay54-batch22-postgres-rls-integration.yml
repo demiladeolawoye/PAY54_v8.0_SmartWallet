@@ -19,6 +19,7 @@ on:
       - cto/acceleration-wave7-canonical-writer-disposable-20261127
       - cto/acceleration-wave8-canonical-revocation-race-20261127
       - cto/acceleration-wave9-writer-rls-admission-20261127
+      - cto/acceleration-wave10-tenant-policy-integration-20261127
     paths:
       - "backend/db/migrations/0*.sql"
       - "backend/db/tests/batch22/*.sql"
@@ -33,6 +34,9 @@ on:
       - "backend/db/tests/batch61/*"
       - "backend/db/tests/batch62/*.sql"
       - "backend/db/tests/batch63/*.sql"
+      - "backend/db/tests/batch64/*"
+      - "backend/src/wave2/disposable-financial-gateway.mjs"
+      - "backend/tests/pay54-wave11-*.test.mjs"
       - "backend/db/release/writer-rls-v2-tenant-shadow-*.sql"
       - "backend/tests/pay54-wave10-*.test.mjs"
       - "backend/db/release/writer-rls-v1-*.sql"
@@ -519,6 +523,7 @@ jobs:
               -d pay54_disposable_ci -X -v ON_ERROR_STOP=1 < "$file"
           done
           test "${PAY54_ENVIRONMENT:-DISPOSABLE_CI}" = "DISPOSABLE_CI"
+          python3 backend/db/tests/batch64/positive_tenant_denial.py
           python3 backend/db/tests/batch61/canonical_posting_revocation_race.py
           for file in \
             backend/db/release/writer-rls-v1-forward-review.sql \
