@@ -1,0 +1,32 @@
+name: PAY54 Wave11 Trusted Financial Identity & Tenant Denial (DISPOSABLE ONLY)
+on:
+  pull_request:
+    branches:
+      - cto/acceleration-wave10-tenant-policy-integration-20261127
+      - project-titan
+    paths:
+      - "backend/src/wave2/disposable-financial-gateway.mjs"
+      - "backend/tests/pay54-wave11-*.test.mjs"
+      - "backend/db/tests/batch64/*"
+      - "docs/engineering/PAY54-ACCELERATION-WAVE11.md"
+      - ".github/workflows/pay54-wave11-tenant-financial.yml"
+      - ".github/workflows/pay54-batch22-postgres-rls-integration.yml"
+permissions:
+  contents: read
+jobs:
+  financial-boundary-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Verify strict bearer handling, restricted role, rollback and fixture syntax
+        run: |
+          python3 -m py_compile backend/db/tests/batch64/positive_tenant_denial.py
+          node --check backend/src/wave2/disposable-financial-gateway.mjs
+          node --test backend/tests/pay54-wave11-financial-gateway.test.mjs
